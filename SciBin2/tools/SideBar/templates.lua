@@ -29,7 +29,7 @@ function listCalc_CompileSelectedTemplate()
 end
 
 local function SSCtrls()
-    if props["FileExt"]:lower() == 'xml' then btn_AddDoc.active='YES'
+    if props["FileExt"]:lower():sub(1,3) == 'xml' then btn_AddDoc.active='YES'
     else  btn_AddDoc.active='NO' end
 
     if tonumber(cmb_resent.count) ~= 0 then btn_FormRun.active = 'YES'
@@ -38,8 +38,7 @@ end
 
 local function OnSwitch()
     if TabBar_obj.handle ~= nil then TabBar_obj.handle.size = TabBar_obj.size end
-	local ext = props["FileExt"]:lower() -- a bit unsafe...
-    if ext == 'xml' or ext == 'inc' then
+    if editor.Lexer == SCLEX_FORMENJINE then
         TabBar_obj.Tabs.template.handle.state = 'OPEN'
     else
         TabBar_obj.Tabs.template.handle.state = 'CLOSE'

@@ -15,8 +15,7 @@ _G["SqlMap"] = nil
 
 local function RunBatch(filePath)
     if props["output.hook"] == 'Y' then return end
-	local ext = props["FileExt"]:lower()
-	if(ext == 'sql' or ext == 'm') then
+	if(editor.Lexer == SCLEX_MSSQL) then
 
 		local inc =props["sys.calcsybase.dir"].."\\BuildM4\\"..cmb_listCalc:get_item_text(-2)
         local vbRun = props["SciteDefaultHome"].."\\tools\\RunSql.vbs"
@@ -110,8 +109,7 @@ function listCalc_RunBatchWithSciTE()
 end
 function listCalc_RunBatchWithSciTESel()
     if props["output.hook"] == 'Y' then return end
-	local ext = props["FileExt"]:lower()
-	if(ext == 'sql' or ext == 'm') then
+	if(editor.Lexer == SCLEX_MSSQL) then
 
 		tmpName=props["backup.path"]:gsub('[^\\]*$', "").."tmpsel.m"
 		local strSel = editor:GetSelText():gsub(GetEOL(),"\n")
