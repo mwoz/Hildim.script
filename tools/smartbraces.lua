@@ -57,6 +57,7 @@ Authors: Dmitry Maslov, Julgo, TymurGubayev
 --]]--------------------------------------------------
 local prevBrClose = nil
 local prevFMDefault = 0
+local isformenjine = false
 -- Возвращает текущий символ перевода строки
 local function GetEOL()
 	local eol = "\r\n"
@@ -333,16 +334,18 @@ end
 
 
 function OnSwitchLocal()
+    isformenjine = false
     if editor.Lexer ~= SCLEX_FORMENJINE then
         props['braces.open.*'] = props['braces.open']
         props['braces.close.*'] = props['braces.close']
+        isformenjine = true
     end
 end
 
 AddEventHandler("OnSwitchFile", OnSwitchLocal)
 AddEventHandler("OnOpen", OnSwitchLocal)
 AddEventHandler("OnUpdateUI", function()
-	if editor.Lexer == SCLEX_FORMENJINE then
+    if isformenjine then
 		if cmpobj_GetFMDefault() ~= prevFMDefault then
             local sector =  cmpobj_GetFMDefault()
             if sector == SCE_FM_VB_DEFAULT then
