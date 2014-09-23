@@ -1,0 +1,46 @@
+# VB Script
+
+
+#Code Snippets
+dow=Do While |\r\nLoop
+dou=Do Until |\r\nLoop
+dolw=Do\r\nLoop While |
+dolu=Do\r\nLoop Until |
+for=For i = 0 To | \r\nNext\r\n
+each=For Each | In \r\nNext\r\n
+sel=Select Case |\r\nCase \r\nEnd Select\r\n
+if=If | Then \r\nEnd If\r\n
+ie=If | Then \r\nElse\r\nEnd If\r\n
+elseif=ElseIf | Then
+sub=Sub |()\r\nEnd Sub\r\n
+fun=Function |()\r\nEnd Function\r\n
+rep=Sub |_reply(handle, code, error, m)\n\tIf CHECK_DB_ERROR(error, m, Null, True, True, Null) = False Then Exit Sub\nEnd Sub
+mb=Form.MsgBox "|"
+'l='#DEBUG Form.SysLog |,true
+'p='#DEBUG dbg____Publish m, "|"
+#xml
+/d=<control name="btn%SEL%1" type="link" position="10;0;70;11" caption="%SEL%:" caption_ru="%SEL%:" tabstop="N"  forecolor="0000ff" hforecolor="ff0000"/>\r\n<control name="txt%SEL%_ShortName" type="textbox" position="80;0;90;11" maxlength="32"  font=";;Y" case="U" tag="ddx_Enabled=Y"/>\r\n<control name="txt%SEL%_Name" type="textbox" position="174;0;192;11" forecolor="#000000"   tag="ddx_Enabled=Y"/>\r\n<control name="btn%SEL%2" type="button" caption="" enabled="Y" position="369;0;11;11"/>\r\n<control name="btn%SEL%Info" type="link" position="380;0;26;11" alignment="R" caption="Info" tabstop="N"  forecolor="0000ff" hforecolor="ff0000"/>
+/f=<frame name="frm|" backcolor="#ffffff" height="12">\r\r\n</frame>
+/ft=<frame name="frmTab" backcolor="#ffffff" height="24" ><control name="tabCtrl" type="tabctrl" position="5;4;100;20" padleft="5" padright="5"/>\r\r\n</frame>
+/fc=<frame name="grid" height="120" backcolor="#ffffff"><control type="groupbox" position="5;0;484;115" caption="Dividends"/>\r\n<control name="grid" type="cube" position="10;12;474;96" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/></frame>
+/num=<control name="num|" caption="" position="10;0;180;11" captionwidth="90" type="numberbox"/>
+/txt=<control name="txt|" caption="" position="10;0;180;11" captionwidth="90" type="textbox"/>
+/lbl=<control caption="|" caption_ru="" position="10;0;70;11" type="label"/>
+/cmb=<control name="cmb|" caption="" position="10;0;180;11" captionwidth="90" type="combobox">\n\t<option code="" caption=""/>\n</control>
+/cub=<control name="grid" position="10;12;474;96" type="cube" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/>
+/dt=<control name="dt|" caption="" position="10;0;180;11" captionwidth="90" type="datebox"/>
+/tm=<control name="tm|" caption="" position="10;0;180;11" captionwidth="90" type="timebox"/>
+/grp=<control type="groupbox" caption="|" position="" />
+/lnk=<control name="|"  caption="" position="10;0;70;10" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>
+/btn=<control name="btn|" caption="" position="10;0;70;11"  type="button"/>
+/chk=<control name="chk|" caption="" position="10;0;70;11" type="checkbox"/>
+/sub=<control name="sub|" template="" position="0;0;0;0"  type="form" padleft="0" padright="0" padtop="0" padbottom="0">\n</control>
+/st=<stringtable>\n</stringtable>
+/s1=<string id="%SEL%">\n\t<value lang="en" text="%SEL%"/>\n\t<value lang="ru" text="|"/>\n</string>
+/ssql=<string id="SQL_|"><value><![CDATA[--]\n]]></value></string>
+/svbs=<string id="VBS_|"><value><![CDATA['']\n]]></value></string>
+/tem=<?xml version="1.0" encoding="Windows-1251" standalone="yes"?>\n<template name="%SEL%">\n<form backcolor="#ddffdd" font="Verdana;8;N" caption="" position="50;50;450" center="N">\n\n\t<script>\n<![CDATA['']\n\n]]>\n\t</script>\n</form>\n</template>
+
+
+
+
