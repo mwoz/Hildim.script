@@ -1,0 +1,28 @@
+# JScript
+
+1=// Script Name\n// Version: 1.0\n// Author: \n// ------------------------------------------------\n// Description: \n// ------------------------------------------------\nvar WshShell = new ActiveXObject("WScript.Shell");\nvar fso = new ActiveXObject("Scripting.FileSystemObject");\nvar ForReading = 1, ForWriting = 2, ForAppending = 8;\nvar SciTE=new ActiveXObject("SciTE.Helper");|
+
+#Object References
+wsh=var WshShell = new ActiveXObject("WScript.Shell");\n|
+fso=var fso = new ActiveXObject("Scripting.FileSystemObject");\nvar ForReading = 1, ForWriting = 2, ForAppending = 8;\n|
+net=var Network = new ActiveXObject("WScript.Network");\n|
+dic=var Dict = new ActiveXObject("Scripting.Dictionary");\n|
+shell=var Shell = new ActiveXObject("Shell.Application");\n|
+ie=var ie = new ActiveXObject("InternetExplorer.Application");\n|
+tla=var tla = new ActiveXObject("TLI.TLIApplication");\n|
+sc=var sc = new ActiveXObject("MSScriptControl.ScriptControl");\n|
+xml=var xml = new ActiveXObject("Microsoft.XMLHTTP");\n|
+
+#Code Snippets
+if=if (|i == 0) {\n\t\n} else {\n\t\n}\n
+do=do {\n\t|\n} while (true);\n
+for=for (i=0; i<i_max; i++) {\n\t\n}\n
+try=try {\n\t\n} catch(e) {\n\t\n}\n
+switch=switch(var){\n\tcase 1:\n\t\tbreak;\n\tcase 2:\n\t\tbreak;\n\tcase 3:\n\t\tbreak;\n\tdefault:\n\t\t\n};\n
+
+readfile=function readfile(filename) {\n\tvar ForReading = 1, ForWriting = 2, ForAppending = 8;\n\tvar TristateUseDefault = -2, TristateTrue = -1, TristateFalse = 0;\n\tvar CreateFile = true, DoNotCreateFile = false;\n\n\tvar fso = new ActiveXObject("Scripting.FileSystemObject");\n\tif (fso.FileExists(filename)) {\n\t\tif (fso.GetFile(filename).Size > 0) {\n\t\t\tvar file = fso.OpenTextFile(filename, ForReading, DoNotCreateFile, TristateUseDefault);\n\t\t\tvar text = file.ReadAll();\n\t\t\tfile.Close();\n\t\t\treturn text;\n\t\t}\n\t}\n}\n
+
+writefile=function writefile(text, filename) {\n\tvar ForReading = 1, ForWriting = 2, ForAppending = 8;\n\tvar TristateUseDefault = -2, TristateTrue = -1, TristateFalse = 0;\n\tvar CreateFile = true, DoNotCreateFile = false;\n\n\tvar fso = new ActiveXObject("Scripting.FileSystemObject");\n\tvar file = fso.OpenTextFile(filename, ForWriting, CreateFile);\n\tfile.Write(text);\n\tfile.Close();\n}\n
+
+#Get via XML
+GetXml=Function GetXml(url){\n\tvar req = new ActiveXObject("Microsoft.XMLHTTP");\n\ttry {\n\t\treq.open('POST',url,false);\n\t\treq.send(null);\n\t\tdo {\n\t\t\tif (req.status == 200) {\n\t\t\t\tvar page = req.responseText;\n\t\t\t\tWScript.Echo ("Page download!");\n\t\t\t\treturn page;\n\t\t\t} else {\n\t\t\t\tWScript.Echo ("There was a problem retrieving the XML data: " + req.statusText);\n\t\t\t}\n\t\t\tWScript.sleep (10);\n\t\t} while (req.readyState != 4);\n\t} catch(e) {\n\t\tWScript.Echo ('Error load! '+url);\n\t}\n}\n|

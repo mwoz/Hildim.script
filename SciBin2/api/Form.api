@@ -1,0 +1,978 @@
+
+application.Bonds object derived from Message; has extra methods: \n              BondName ( ShortName ) returns Null or string\n              Bond ( Index/ShortName ) - identical to Message ( Index/Name ) method\nbut is  a default method\n
+application.Equities object derived from Message; has extra methods: \n	EquityName ( ShortName ) returns Null or string\n	Equity ( Index/ShortName ) - identical to Message ( Index/Name ) method\nbut is  a default method\n
+application.PropertyBag read-only; represents Message object that can be used by any way\nStructure:\nSubmessage: SETTINGS - keeps forms settings stored on HDD\nSubmessage: SESSION - keeps session data\n//SESSION\nUSER = "KPLUS"\nUSERPARAMS = "PV"\nDEALINGCODE = " "\nDEALINGUSER = " "\nKPLUSUSER = "KPLUS"\nKPLUSUSERNAME = "KONDOR+ ADMINISTRATOR"\nKPLUSUSERID = 1\nKPLUSGROUP = "ADMIN"\nKPLUSGROUPNAME = "ADMINISTRATION GROUP"\nKPLUSGROUPID = 1\nREPORTS_ONLY_MODE = "N"\n//SESSION/UserParameters\n… ' no details specified in here\n//SESSION/RadiusSiteSettings\nRadius_DB_Build = 28\nKplus_Version = "2.6"\nKUSTOM_DB_NAME = "Kustom"\nKFS_Name = "OpenKFS"\nKRS_Name = "KRS"\nKBS_Name = "KBS"\nKVS_Name = "KVS"\nUniqueKplusUser = "Y"\nMarketQuotesCheckAccess = "N"\nKGRSupportEnabled = "N"\nKGR_Service = "KONDOR"\nKGR_TradekastClient = "KNET_AGENT"\nKIS_ExecuteCustomProcs = "N"\nIRPOS_HedgeColumns = 45\nKGR_Version = 30\nKplus_VersionDbl = 2.6\nRCSSupportEnabled = "Y" \n//SESSION/KplusSiteSettings\nInstitutionName = "KONDOR PLUS SITE NAME"\nDateFormat = "E"\nCurrencies_ShortName_Local = "EUR"\nDateFormatStr = "%d/%m/%Y"SubMsg:TerminalSettings\n//SESSION/TerminalSettings\nAUTOCLOSETCK = 0\nENABLEKCW = 1\nASKFORINSERTOVERDEAL = 0\nSHOWKISWARNINGS = 1\nSHOWKISCONFIRMS = 1\nSubmessage: DEALTYPES - keeps a set of fields - deal templates captions\nSubmessage: WORKDATA - run-time data\nSubmessage: LICENSES - keeps a list of licenses, Field name is the valid license name as defined in the license.txt file.\nSubmessage: REPORTS_RDL\nField Name = имя rdl файла с .rdl расширением.\nField Value = имя отчета взятое из RDL файла, из тега <Description>\n
+#$message=.*%.propertybag
+application.NlsLang get/set; defines locale of forms (eg: "ru", "en")
+application.Name Read-only. Возвращает полное имя приложения("Systematica Radius" или "Reuters FlexServer")
+application.ShortName Read-only. Возвращает имя приложения("Radius" или "FlexServer")
+application.StrToDate(String, [Format]) String: string representation of date\nFormat: string with specificators; "%d.%m.%Y" by default\n	supported: %d, %m, %y, %Y, %H, %M, %S\nreturns Null if String can't be converted into date
+application.DateToStr(Date, [Format]) Format: is identical to parameter in COleDateTime::Format method\n	"%d.%m.%Y" - by default
+application.NumberToStr(VARIANT, [Decimals],  [AutoDecimals], [Format]) Decimals: number of decimal digit {0, 1, 2, ...};  0 - by default\nAutoDecimals: if true - terminated decimal zeros are truncated up to Decimals digits\n	but nonzero decimals digits are always kept, \n	even number decimal digit exceeds Decimals parameter;\n	false - by default\nFormat: {true | false} (1'500 or 1500); false - by default
+application.DateToGMT(Date) converts local date to GMT date
+application.GMTToDate(Date) converts GMT date to local date
+application.ExportToWord(BSTR Template, VARIANT Message, VARIANT Method) export data to MS Word\nMethod: {"print", "edit" (by default), "test"}
+application.YearFraction(Basis, Date1, Date2) Basis: {"J", "X", "5", "6", "A", ...}
+application.YearFraction_Days(Basis, Date1, Date2) Basis: {"J", "X", "5", "6", "A", ...}
+application.LockMemory locks all heaps memory
+application.GetNlsString(Id, [p1], [p2], [p3], [p4], [p5]) returns localized text by string identifier; Id: string; pN: string parameters\nString Id is id from global namespace of string tables(all string tables from all reports, if two or more string tables have string with same name - last added will be returned).\nTo access local report string use "<report_name>$<StringID>" as string ID, or local Form method (see Form).
+application.FormatString(Template, [p1], [p2], [p3], [p4], [p5]) Template: string with %s specificators\npN: string parameter
+application.GetMD5(Data) returns MD5 (string representation) of Unicode string parameter
+application.PopupMsgBox(Prompt, Sender, [IsError]) shows popup message box (at system tray) and add it into Radius messenger
+application.CreateSSLAdapter(Form) Form: Form object (adapter consumer). NOT USED AND SHOULD BE REMOVED IN NEAR FUTURE
+application.IsKeyPressed(nVirtKey)  Returns current state (True=pressed, false=unpressed) of the key, specified by nVirtKey parameter (virtual key code)
+application.KplusFeedMsgConvert(strKplusFeedMsg)
+application.KplusFeedMsgRecordsetConvert(msgRecordSet, strKplusFeedFieldName, msgMappingStructure) msgRecordSet -  сообщение с подсообщениями,в котрые требуются добавить некоторые данные из strKplusFeedMsg, которые содержатся в этих подсообщениях в поле с именем strKplusFeedFieldName\nmsgMappingStructure задает правила маппинга для различных типов сделок\n{root}\n    DefaultDateFormat:\n    {ImportTableName}\n        {TargetColumnName}\n            SourcePath:   Table/Field | $DefaultTable$/$DefaultTable$PostFix\n            Type:    N-number | T-text(by default) | D-Date/datetime | C - choice\n            {MapValueTo}\n                Value1:    MapValue1\n                Value2:    MapValue2\n                ...\n        ...\n    {$DefaultTable$} // Если не найдена таблица для mapping, то берется эта\n    ...\n
+application.RML_MessageConvert(msgSource, strKeyLine_FieldNname,strColumn_FieldName,strValue_FieldName,strEventField,strEventFieldFireValue,strFireFmt,strNormalFmt) CMessage = application.RML_MessageConvert \n( \n  msgSource, \n  strKeyLine_FieldNname /* ='Lines_Id' */,  ' Lines_Id это int, нужно \n                                              преобразовать в строку без кавычек !!!\n  strColumn_FieldName /* ='Columns_Id'*/,  ' Columns_Id это int, нужно \n                                               преобразовать в строку (имя поля) без \n                                                                      ' кавычек (у декад) !!!\n  strValue_FieldName /* ='Value' */   ' Value это float; просто переприсвоить \n                                                                       variant  ->   *.Value = *.Value\nstrEventField /* =LimitExcess */\nstrEventFieldFireValue /* =Y */\nstrFireFmt /*  = BG=ff0000,FG=ffffff */       ' fmt = fmt(i) + <contents of Columns_Id>:BG=ff0000,FG=ffffff;\nstrNormalFmt  /* R */                                   '  если event = N то contents of <Columns_Id>:R;\n)\nMsg After Conversion (то, что получаем на выходе)\nmsg: 1 (Lines_Id)\n                1 (Columns_Id) = 16816.725 (Value)\n                2  = 0\n                 $ftm$ = …\nmsg: 2 \n                1 = 0 \n                 $ftm$ = …\n
+application.SetCustomMenu(msgMenu) Добавляет кастомные пункты меню в основное меню Radius.
+application.RenerReport(msgData, strReportName, strOutputFormat) Генерация отчета "PRINT" – печать отчета сразу на принтер без показа Viewer\n"Preview"  - preview отчета (case insensitive)\n"XML" – генерирует Xml файл с данными\n"PDF" – создает pdf файл на диске; система:\nзапрашивает имя файла (при этом добавлять YYYYMMDD_HHMMSS) \nзапоминает путь, \nвыгружает на диск и \nпоказывает Acrobat Reader если он установлен\n\nВ Radius при нажатии кнопки Export, показываем меню \nExport to MS Excel\nExport to PDF\nСоздание pdf файла производится ReportReader.exe при этом само приложение не видимо пользователю. Только диалог с выбором имени pdf файла. После генерации pdf приложение должно корректно закрытся\n
+application.CreateRDL(msgData, strReportName, bAskOutputDir) Создает общую структуру .RDL файла отчета с описанием датасетов по файлу с данными.
+application.CheckReport(strReportName) as int Проверяет, доступна ли система генерации отчетов и отчет strReportName в частности.
+application.TemplateExists(strTemplateName) as BOOL Проверяет наличие шаблона strTemplateName с учетом требуемых лицензий.
+application.LockUserInput(bool bLock) Блокирует работу всех пунктов меню, кроме пункта логаута. Используется, например, для блокировки радиуса чтобы принудить пользователя сменить пароль по истечению его срока действия.
+application.Logout(strLogoutMessage) Принудительно разлогинивает пользователя, показывая ему мессаджбокс с сообщением strLogoutMessage.
+application.RaiseGlobalEvent(strEvent, varParam) Вызывает метод Form_GlobalEvent_<strEvent>(varParam) у всех открытых форм(отрабатывает через PostMessage)
+application.TagToMsg(strTagData) Возвращает сообщение с распарсенными значениями строки тегов вида:\n"<ValueName1>=<Value1>;…;<ValueNameN>=<ValueN>"\nВ случае ошибки или пустой строки возвращает пустое сообщение.
+application.OpenUrl(Url) Opens web page in default Internet browser.
+application.StringToDBString(string, bAddQuotes) Converts string to string for SQL. Repalces single quotes with doble quotes ("'" -> "''"). If bAddQuotes = true - places result in single quotes (default = true)
+application.NumberToDBString(number) Converts number to string for SQL(using max presision and a '.' as delimiter)
+application.DateToDBString(date, bAddQuotes) Converts date to string for SQL. Uses "yyyymmdd" mask. If bAddQuotes = true - places result in single quotes (default = true)
+application.ConvertPt2PxX(longPt) as long.Converts PT to PX and back using X or Y scale (may be different)
+application.ConvertPt2PxY(longPt) as long.Converts PT to PX and back using X or Y scale (may be different)
+application.ConvertPx2PtX(longPx) as long.Converts PT to PX and back using X or Y scale (may be different)
+application.ConvertPx2PtY(longPx) as long.Converts PT to PX and back using X or Y scale (may be different)
+application.SelectFileDialog([InitialPath], [Filters], [OpenDialog], [FileName])Показывает стандартный диалог выбора файла "Открыть" или "Сохранить как".\nInitialPath: путь к папке для использования при открытии  диалога. Если не указан, используется папка, в которой производился выбор в последний раз.\nFilters: фильтры типов файлов. По умолчанию "All Files (*.*)|*.*||".\nOpenDialog: true - для диалога "Открыть" (по умолчанию), false - для диалога "Сохранить как".\nFileName: имя файла по умолчанию. Обычно используется для диалога "Сохранить как".\nЕсли пользователь выбрал файл, функция возвращает полный путь, иначе пустую строку.\n
+
+form.BackColor BackColors used in form.
+form.ForeColor ForeColors used in form.
+form.ReadOnlyColor ReadOnlyColor works as text color for read-only or disabled controls
+form.Name get/set; FormName used for child forms navigation\nset functionality is implemented for power using of Replace parameter in CreateForm and ChildForms.Add methods.\nBe careful with Name changing because it's a part of form event names!\n
+form.RunTimeId read-only; unique id allocated by the engine at run-time
+form.Caption Form caption
+form.Enabled disable/enable controls for input ???
+form.Visible
+form.Font Font object
+form.ScaleMode 0 - pixels, 1 - points (by default);
+form.Left Get\Set form size and position using pt scale
+form.Top Get\Set form size and position using pt scale
+form.Height Get\Set form size and position using pt scale
+form.Width Get\Set form size and position using pt scale
+form.MinWidth minimal form track width (used when Sizable = true, pt)
+form.LeftPX Get\Set form size and position using px scale
+form.TopPX Get\Set form size and position using px scale
+form.HeightPX Get\Set form size and position using px scale
+form.WidthPX Get\Set form size and position using px scale
+form.MinWidthPX minimal form track width (used when Sizable = true, px)
+form.Sizable true - form has sizable frame; false - dialog frame (by default)
+form.MousePointer 0 - arrow, 1 - hourglass
+form.WindowState 0 - normal, 1 - minimized, 2 - maximized
+form.Dockable true - form can be docked (by default)
+form.Docked read-only; true - form is docked, false - normal mode
+form.Template read-only; form template name
+form.Tag any string supplied by the user (get/set)
+form.Controls collection (DEFAULT PROPERTY)\nmethods: Add ( Name, Type, FrameName ); Remove ( Name ); \nCount; Item ( Name/Index ) - default method\nNote: Index corresponds to addition order\n
+#$controlscoll=form%.controls
+form.Frames Collection of form frames\nmethods: \n" Add ( Name, NameInsertAfter )\n" Remove ( Name )\n" Item (Name/Index ) - default\n" GetTags() - возвращает сообщение со вложенными ссылками на сообщения-теги всех фреймов, у которых теги заданы. Вложенные сообщения тегов имеют имена равные именам соответствующих фреймов.\nproperties:\n" Count\n
+#$framescollections=.*%.frames
+#$frame=.*%.frames(
+form.GetTags Возвращает сообщение с вложенными ссылками на сообщения-теги всех контролов, у которых теги заданы. Вложенные сообщения тегов имеют имена равные именам соответствующих контролов.
+#$message=.*%.gettags(
+form.RootForms Count, Item ( FormName / Index )
+#$rootforms=.*%.rootforms
+form.ChildForms methods: \n    Add ( FormName, Template, [Replace], [Message] ); // replace = true by default\n    Remove ( $strFormName );  // Unload is not invloked\n    Clear // clear drops all forms (RaiseEvent is not called) // Unload is not invloked\n    bool Exists ( FormName )\nproperties: Count; Item ( FormName / Index ) - default method\n
+#$childforms=.*%.childforms
+form.Menu read-only Menu object
+form.PropertyBag read-only; represents Message object that Form can use for data storage; \ninitiated by Message parameter of Add(...) method of ChildForms collection
+form.UIExtEventsEnabled true - enable Form CtrlEvent event
+form.TabVisible Read-only; Makes sense only if form I sdocked. Is True when form is docked to selected Radius tab.
+form.FocusedControl (String) Get/Set. Get focused control name or set focus to specified control. If no focused control on get - empty string is returned. If bad ctrl name on set - focus is unchanged.
+form.StartFramesResize This method should be used when several form layout changes (like frames or form size and frames visibility) are to be applied to form. After calling of this method all further changes are aggregated and applied on EndFramesResize call. EndFramesResize must be called to apply changes. Without this call no further changes would be applied to form.\nAll new sizes set after StartFramesResize call will be returned on Get calls even before  EndFramesResize except sizeable frame height if it's size wasn't specified (if it was - new size would be returned, if not - it's new size will be calculated only on EndFramesResize call).
+form.EndFramesResize Must be used in pair with StartFramesResize method. See it's description for details
+form.MoveFrame(strFrameToMove, strFrameInsertAfter) Moves frame after specifiedFrame. If strFrameInsertAfter is empty string - strFrameToMove becomes first frame.
+form.IsSubForm Read-only. Read-only; bool Возвращает true, если данная форма является вложенной в другую форму.
+form.MasterForm Read-only. Если данная форма явялется сабформой – возвращает объект мастер формы. Иначе вернет NULL.
+form.StartControlsReposition This method should be called before changing controls paddings, or changing of visibility, size or position of controls which are dependant or have dependancies to avoid several recalculations of new controls layout. \n\nControls layout will be updated only once and only after EndControlsReposition call. So before EndControlsReposition all size\position of controls may be invalid.
+form.EndControlsReposition Must be used in pair with StartControlsReposition method. See it’s description for details.
+form.DashboardSubscribe(strCube, strRow, strCell) Subscribes for dashboard data. Data is received via OnDashboardData callback
+form.DashboardUnsubscribe(strCube, strRow, strCell) Unsubscribes from dashboard data.
+#$form=form%.masterform
+#$form=.*%.childforms(
+#$form=.*%.rootforms(
+
+controlscoll.Add ( Name, Type, FrameName )
+controlscoll.AddForm (Name, FrameName, Template, msgPropertyBag)
+controlscoll.Remove ( Name )
+controlscoll.Item ( Name/Index ) - default method
+controlscoll.Count
+
+#$control=controlscoll%.item(
+#$control=form%.controls(
+#$control=controlscoll%.add(
+#$control=controlscoll%.addform(
+#$formbox=controlscoll%.addform(
+#$form=controlscoll%.addform(
+framescollections.Add ( Name, NameInsertAfter )
+#$frame=framescollections%.add(
+framescollections.Remove ( Name )
+framescollections.Item (Name/Index ) – default
+framescollections.GetTags()– возвращает сообщение со вложенными ссылками на сообщения-теги всех фреймов, у которых теги заданы. Вложенные сообщения тегов имеют имена равные именам соответствующих фреймов.
+framescollections.Count
+childforms.Count – default
+childforms.Item ( FormName / Index ) - default method
+childforms.Exists ( FormName )
+childforms.Clear() - clear drops all forms (RaiseEvent is not called) // Unload is not invloked
+childforms.Add ( FormName, Template, [Replace], [Message] ) - replace = true by default
+rootforms.Count – default
+rootforms.Item ( FormName / Index ) - default method
+
+#$menu=form%.menu
+menu.ItemCount
+menu.AddItem ( Caption, ItemData, [Default], [Checked], [Disabled] ) - if Caption = "-", separator is added; \nItemData is a string associated with item;\nDefault , Checked and Disabled are boolean
+menu.AddMenu ( Caption, [ItemData], [Disabled] ) - ItemData is not used now
+menu.Clear
+menu.Show
+
+frame.BackColor
+frame.ForeColor
+frame.Name
+frame.Enabled
+frame.Visible
+frame.Sizable
+frame.MinHeight
+frame.MinHeightPX
+frame.Left read-only
+frame.Top read-only
+frame.Height
+frame.Width read-only
+frame.LeftPX read-only
+frame.TopPX read-only
+frame.HeightPX
+frame.WidthPX read-only
+frame.GetTag()
+frame.SetTag(msgTag)
+
+Form_OnTabClick(bVisible) Вызывается у задоченных форм, если таб на который они задочены становится \n" Активным (bVisible =True) или \n" Неактивным (bVisible =False)\n
+Form_OnMBConnect(strConnected) Message Bus connected or disconnected event.\nstrConnected: 'C'( if connected) || 'D' (if disconnected)\n
+Form_SaveContext( &Cancel, PropertyBag ) called by framework to store necessary data to clone the form later;\nform may signal that context can't be stored assigning True value to Cancel parameter\nPropertyBag: Message object that will be assigned to PropertyBag property during form cloning. Перед началом вызова процедуры содержит копию текущего проперти-бэг формы.\nOptional event. If SaveContext is not defined, than all current property bag is stored\n
+Form_Dock() raised when form is being docked/undocked; check Docked property if necessary
+Form_ShowMenu() ?????
+Form_Resize() called when form is being resized by user\n!!!Внимание:  Внутри этого эвента нельзя применять ф-ции,приводящие к изменению размеров формы!!!
+Form_Accelerator( Char, Mask ) as Bool. raised when a user pressed potential accelerator (one of F1-F12 keys or any character key with CTRL button);\nChar: uppercase character or one of strings "F1"-"F12";\nMask: bit mask of pressed spec keys (0x01 - SHIFT, 0x02 - CTRL, 0x04 - ALT)\nReturn value: should return FALSE if key combo wasn't processed by form. TRUE - if something was done. (it's a must to return TRUE if any windows were created (i.e. msgBox(..)) otherwise applications behavior is unpredictable(debug version asserts))\n
+Form_CtrlEvent( CtrlName, EventName, msg ) raised if UIExtEventsEnabled = true; CtrlName: control name;\nEventName: event name (for ex.: "Change"); msg: reserved parameter\n
+Form_Timer( id ) timer tick
+Form_Destroy() raised just before window destruction (after Unload event if it hasn't cancelled closing of the form)
+Form_Create( NewForm, PropertyBag ) new form created or existent form activated by Form.CreateForm; invoked after Form_Load event; NewForm: true/false, PropertyBag: reference to Form.PropertyBag (if invoked after Form_Load) or to the message parameter of CreateForm method; is always not Nothing
+Form_Unload( &Cancel ) form is about to be closed (нажали на крестик)
+Form_Load() template has been loaded (all controls created) form is hidden
+
+Form( Name/Index ) Note: Index corresponds to addition order
+#$control=form(
+#$form=form("sub
+form.CreateForm(FormName, Template, [Replace], [Message], [bActivateTab])
+form.RaiseEvent(EventName, [Message]) call <$strFormName>_<EventName> function at parent form (if it exists) /nwith Message parameter  (Nothing by default); function is called asynchronously
+form.RaiseAsyncEvent(EventName, [Message]) call <$strFormName>_<EventName> function at parent form (if it exists) /nwith Message parameter  (Nothing by default); function is called asynchronously
+form.Invoke(Procedure, [P1], [P2], [P3], [P4], [P5]) invokes VB procedure of the form with specified parameter \n(used for forms interaction)\nProcedure: procedure name\nParameter: any parameter (including Message object)\n
+form.InvokeFunction(Procedure, [P1], [P2], [P3], [P4], [P5]) Аналог метода Invoke, только с return value
+form.MsgBox(Prompt, [Buttons], [Title], [SyncShow]) shows message box; \nButtons = VBScript constants (vbOkOnly, vbYesNo, vbCritical, vbExclamation)\nSyncShow = {true|false}; true by default (message box is modal by default, \n    else it returns vbOK immediatly and is shown asynchronously)\nreturns: vbOK, vbYes, vbNo\n
+form.MsgBoxEx(Prompt, [strBtn1], [strBtn2], [strBtn3], [Title], [DefaultBtn], [EscBtn]) Отображает модальный диалог с кастомными кнопками. Поддерживает максимально 3 кнопки. Минимально одну. Всегда модальный. Если необходим немодальный то используйте MsgBox.\n\nPrompt = Msg text\nstrBtn1-3 = Buttons text ( 2 & 3 may be empty)\nTitle = Msgbox title\nDefaultBtn = {1|2|3}; Кнопка на которую установлен фокус при открытии MsgBox(по умолчанию "1")\nEscBtn = {0|1|2|3..}; Номер кнопки возвращаемый при нажатии Esc; "0" - кнопка Esc не закрывает MsgBox(по умолчанию "0")\n\nReturns: Номер нажатой кнопки or EscBtn value {1|2|3| EscBtn}\n
+form.CalloutMsgBox(Prompt, [Buttons], [Title], [ShowPeriod]) shows callout message box; \nButtons = VBScript constants (vbCritical, vbExclamation)\nShowPeriod = number of seconds during which message box is visible \n    (-1 by default - infinite)\n
+form.CalloutMsgBoxHide
+form.SysLog(Message, [IsError])
+form.StartTimer(id, Interval)
+form.StopTimer(id)
+form.CreateMessage([MsgsHashSize], [FieldsHashSize])
+form.EnsureVisible([JustufyPosition]) Makes this form entirely visible.\nJustifyPosition: if true then form position must differ from other windows (they will be cascaded). False by default.
+form.Close Unload() event is not invoked; may be called from anywhere (including Form_Load)
+form.GetTextWidth(String, [Font], [ScaleMode]) //  interaction methods(TIBCO)
+form.TibCreateInbox
+form.TibRequest(msg, callback_name, [timeout], [request_code])
+form.TibPublish(msg)
+form.TibSubscribe(name, callback_name, [request_code])
+form.TibUnsubscribe(h) //  interaction methods(Message Bus)
+form.MbCreateInbox
+form.MbRequest(msg, callback_name, [timeout], [request_code])
+form.MbPublish(msg)
+form.MbSubscribe(name, callback_name, [request_code])
+form.MbUnsubscribe([h]) if h is not specified - does nothing
+form.MbUnsubscribeAll() Unsubscribes form from all subjects
+form.StartProgressBar(strBarString)
+form.StopProgressBar
+form.GetNlsString(Id, [p1], [p2], [p3], [p4], [p5])
+form.ParentName Read-only;\nReturns parent form name. If there is no parent form - returns empty string.
+form.hwGetRecord(strCode) Returns Highway record image. If no such record – returns empty msg.
+form.LicenseIsGranted(strRadiusLicenseKey)
+form.LicenseRequest(strRadiusLicenseKey)
+form.AddFramesXml(strXmlFrames, strInsertAfter) Добавляет новые фреймы на форму по их XML описанию.\nstrXmlFrames  - XML фреймов (теги <Frame> без внешнего обрамления)\nstrInsertAfter - имя фрейма, после которого будут вставлены фреймы("" - вставить последними)
+
+
+#$formctrl=form("sub
+formctrl.ContentName Имя вложенной формы
+formctrl.ContentTag Тег вложенной формы
+formctrl.ContentWidth Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+formctrl.ContentHeight Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+formctrl.ContentWidthPX Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+formctrl.ContentHeightPX Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+
+
+#$message=form%.createmessage(
+#$message=.*%.createmessage
+#$message=.*%.createmessage(
+#$message=m_msg[%w_]*
+#$message=msg[%w_]*
+#$message=mparams
+#$message=m
+
+message.Name read-only
+message.FieldCount Number of fields in the message. Use Field( pos ) to access the element
+message.MessageCount Number of messages in the message. Use Message( pos ) to access the element
+message.SendSubject
+message.ReplySubject
+
+message.Message(Index/Name) returns specified object or Nothing if the field doesn't exist
+#$message=.*%.message(
+message.MessageIndex(Name) as Int - Returns index of specified submessage. If submessage doesn't exist returns -1
+message.GetMessage(Path)as Message - returns existed message or create a new one; Path - path to the message in format "Message1\Message2\...\MessageN"
+#$message=.*%.getmessage(
+message.ExistsField(Name)  as BOOL
+message.ExistsMessage(Name)	as BOOL
+#$field=message%.field(
+message.Field( Index/Name ) returns specified object or Nothing if the field doesn't exist
+message.AddField(Name, VARIANT Value) as BOOL Name may be non-unique
+message.UpdateField(Name, VARIANT Value) as BOOL - update existing field with specified name or add new one
+message.InsertField(Name, VARIANT Value, Index) as BOOL - Inserts field at Index position
+#$field=message%.removefield(
+message.RemoveField(Index/Name) as Field - only one field is removed(even more than one field has specified name) result may be Nothing
+message.AddPathField(Path, VARIANT Value) - Path has format: "Message1\...\ MessageN\FieldName"
+message.UpdatePathField(Path, VARIANT Value) - updates existing field with specified path or add new one
+#$field=message%.removepathfield(
+message.RemovePathField(Path) - Field only one field is removed(even more than one field has specified name) result may be Nothing
+message.AddMessage(Name, Message)	BOOL	Name may be non-unique
+message.InsertMessage(Name, Message, Index) as BOOL inserts message at Index position
+message.UpdateMessage(Name, Message) as BOOL Replaces existing message (detaches old and attaches a new one) with specified name or adds a new message
+#$message=.*%.removemessage(
+message.RemoveMessage(Index/Name)	as Message - only one message is removed(even more than one msg has specified name)result may be Nothing
+message.AddHeadMessage(Name, Message) as BOOL - inserts a new submessage at the beginnig of the message
+message.AddTailMessage(Name, Message) as BOOL - inserts a new submessage at the end of the message
+#$message=.*%.removeheadmessage(
+#$message=.*%.removetailmessage(
+message.RemoveHeadMessage() as Message - removes first submessage
+message.RemoveTailMessage() as Message -  removes last submessage
+message.Reset() - clean up message, including Name and subject names
+message.CopyFrom(Message)  as BOOL -adds all content from Message parameter(creating independent data copy) including SendSubject and ReplySubject
+message.UpdateFrom(Message)	like CopyFrom method; difference - updates data
+message.AttachContents(Message) - attaches all submessages and fields of Message parameter
+message.FlatMessage() - makes message flat applying fields(do update) of submessages to the root and deleting submessages after
+message.ToString() as BSTR - returns string representation of message(for debug purposes)
+message.GetFieldValue(Index/Name, [DefaultValue])	returns original field value or DefaultValue if field is not found
+message.GetPathValue(Path, [DefaultValue]) as VARIANT - Path is like "Message1\Message2\Field1"
+message.GetFieldText(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found
+message.GetFieldNumber(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found or convertion to number is impossible
+message.GetFieldDate(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found
+message.Execute(Statement, [MsgParameters])	Statement: may has one of next formats:\n\n1) CALC SUM(<FieldName1>), SUM(<FieldNameN>), COUNT [WHERE <expr>]\n2) GET WHERE <expr>\n3) SORT <FieldName1> [ASC | DESC] [, ..., <FieldNameN> [ASC | DESC] ]\n	\n<expr> ::= <arg> <operator> <arg> | <arg> <operator> <expr> | <expr> <operator> <expr> | (<expr>)\n<arg> ::= <FieldName> | '<string>' | <number> | ? | NULL\n<operator> ::= OR | AND | > | < | = | >= | <= | <>\n\nComparison of any value with NULL always returns False except cases:\n1) <NULL value> = <NULL value>\n2) <non-NULL value> <> <NULL value>\n\nMsgParameters: used when "?" arguments present. \nIt should contain one field of appropriate type for each "?" argument \nCommands of types 1) and 2) return result as Message object. \nFor 1) command result contains field for each specified function.\n\nExample:\nset args = form.TibCreateMessage\nargs.AddField "arg1", DateSerial(2001, 1, 9)\nrs.Execute "SORT col3 DESC, col1 DESC"\nset m = rs.Execute("GET WHERE col1 > ? OR col2 > 1.25", args)\nset m = rs.Execute("CALC SUM(col2), SUM(col3), COUNT WHERE col1 > ? OR col3 = 'Some string' ", args)\n
+#$message=.*%.execute(
+
+field.Value VARIANT
+field.Name read-only
+field.ValueText()returns string - Value is converted into string
+control.BackColor
+control.ForeColor
+control.Enabled
+control.Visible
+control.Font
+#$fnt=.*%.font
+control.Left
+control.Top
+control.Height
+control.Width
+control.Left
+control.TopPX
+control.HeightPX
+control.WidthPX
+control.LeftPX
+control.PadLeft Specifies paddings (in Points) from other control(if specified\nin pad*Crtl property) or frame edge.\nIf property is set control is auto positioned by FormEngine\nwhen form size is changed or other controls position is changed.\nIf also PadRight are specified control is stretched unless\nFixedWidth property is set TRUE
+control.PadRight Specifies paddings (in Points) from other control(if specified\nin pad*Crtl property) or frame edge.\nIf property is set control is auto positioned by FormEngine\nwhen form size is changed or other controls position is changed.\nIf also PadLeft are specified control is stretched unless\nFixedWidth property is set TRUE
+control.PadTop Specifies paddings (in Points) from other control(if specified\nin pad*Crtl property) or frame edge.\nIf property is set control is auto positioned by FormEngine\nwhen form size is changed or other controls position is changed.\nIf also PadBottom are specified control is stretched unless\nFixedHeight property is set TRUE
+control.PadBottom Specifies paddings (in Points) from other control(if specified\nin pad*Crtl property) or frame edge.\nIf property is set control is auto positioned by FormEngine\nwhen form size is changed or other controls position is changed.\nIf also PadTop are specified control is stretched unless\nFixedHeight property is set TRUE
+control.PadLeftPX
+control.PadRightPX
+control.PadTopPX
+control.PadBottomPX
+control.PadLeftCtrl Property indicates control name to calculate padding from when\naccording padding is specified. If not specified frame edge is used\ninstead. If according direction padding is not specified - property\nvalue is ignored.\nIf specified padding control is not visible - it's padding and\npadding control property values are used instead of control own\nvalues (so control is placed on place of invisible control\n(recursively).
+control.PadRightCtrl Property indicates control name to calculate padding from when\naccording padding is specified. If not specified frame edge is used\ninstead. If according direction padding is not specified - property\nvalue is ignored.\nIf specified padding control is not visible - it's padding and\npadding control property values are used instead of control own\nvalues (so control is placed on place of invisible control\n(recursively).
+control.PadTopCtrl Property indicates control name to calculate padding from when\naccording padding is specified. If not specified frame edge is used\ninstead. If according direction padding is not specified - property\nvalue is ignored.\nIf specified padding control is not visible - it's padding and\npadding control property values are used instead of control own\nvalues (so control is placed on place of invisible control\n(recursively).
+control.PadBottomCtrl Property indicates control name to calculate padding from when\naccording padding is specified. If not specified frame edge is used\ninstead. If according direction padding is not specified - property\nvalue is ignored.\nIf specified padding control is not visible - it's padding and\npadding control property values are used instead of control own\nvalues (so control is placed on place of invisible control\n(recursively).
+control.FixedWidth Should be used with paddings properies set. When paddings are\nnot set - property is ignored.\nWhen both of dimensional paddings is specified (e.g. left and\nright at the same time) control is positioned between frame\nedges or specified padding controls PROPORTIONALLY TO OWN\nPADDINGS(if padding controls are invisible - proportion Is taken from own paddings).\nNote, that paddings are often specified in Points, while\nproportions are calculated in pixels, so proportion on SMALL\nNUMBERS WILL BE DIFFERENT.
+control.FixedHeight Should be used with paddings properies set. When paddings are\nnot set - property is ignored.\nWhen both of dimensional paddings is specified (e.g. left and\nright at the same time) control is positioned between frame\nedges or specified padding controls PROPORTIONALLY TO OWN\nPADDINGS(if padding controls are invisible - proportion Is taken from own paddings).\nNote, that paddings are often specified in Points, while\nproportions are calculated in pixels, so proportion on SMALL\nNUMBERS WILL BE DIFFERENT.
+control.Name
+control.TabStop
+control.TabIndex
+control.Type "CHECKBOX", "TEXTBOX",...
+control.Frame frame that contains control
+#$frame=.*%.frame
+control.SetFocus
+control.Move(left, top, width, height)
+control.GetTag () Возвращает ссылку на сообщение тега(Property Bag) контрола. \nЕсли тега не существовало, то он создается и возвращается пустое сообщение. \nSet msgTag = control.GetTag()\nЕсли производить манипуляции с полученным сообщением то поменяется TAG контрола, т.е. SetTag можно не иcпользовать\n
+#$message=.*%.gettag(
+control.SetTag(msgTag) Удаляет ссылку на существующий тэг (если он существовал) и устанавливает сообщение msgTag тегом (PropertyBag'ом) контрола.
+
+fnt.FontName
+fnt.FontSize
+fnt.FontBold
+fnt.FontItalic
+fnt.FontUnderline
+
+#$textbox=form("txt
+#$textbox=controlscoll%.add(.*"TEXTBOX
+textbox.Alignment 'L' - left, 'R' - right, 'C' - center
+textbox.Case 'N' - normal (default), 'U' - upper, 'L' - lower
+textbox.Locked property
+textbox.LockedMode Get/set property is used when control is Locked. 'N' - display only text. 'U' - display whole control (with underline)
+textbox.MaxLength
+textbox.PasswordChar
+textbox.Text "" - normal view (by default), else specify character-placeholder
+textbox.Value
+textbox.ToolTipText
+textbox.Caption
+textbox.CaptionWidth
+textbox.Multiline
+textbox.ShowPopupList(msgColumns, msgData, [anchorColumn], [highlightString]) Показывает всплывающий список под/над полем.\nmsgColumns - описание колонок в списке. Содержит набор сообщений с колонками:\nid - имя колонки для чтения данных.\nwidth - ширина колонки в текущих единицах контрола.\nalign - L/C/R. По умолчанию "L".\nhmode - режим поиска фрагментов для подсветки. Возможные значения:    "A" - подсвечивать все фрагменты в строке,  "B" - подсвечивать фрагмент в начале строки. Если не задано, подсветка в данной колонке не делается.\nhсase - "S" - поиск фрагментов для подсветки case-sensitive, "I" - case-insensitive. По умолчанию "I".\nmsgData - сообщение с данными. Каждое вложенное сообщение соответствует строке в списке, где имена полей совпадают с id колонок.\nanchorColumn - id колонки, по которой выравнивается выпадающий список (по оси X). Если не указан, выпадающий список начинается с той же X координаты, что и контрол.\nhighlightString - строковый фрагмент, который должен подсвечиваться. Если не указан или пустая строка, подсветка не используется.
+textbox.HidePopupList Скрывает всплывающий список.
+textbox.ChangingEventDelay Задержка генерации события Changing в миллисекундах. \nПо умолчанию -1 - событие не генерируется. \nЕсли 0, вызывается по каждому нажатию, которое приводит к изменению текста.\n
+textbox.PrevValue Returns previous value of ctrl(before user edit)
+
+#$numberbox=form("num
+#$numberbox=controlscoll%.add(.*"NUMBERBOX
+numberbox.Alignment 'L' - left, 'R' - right, 'C' - center
+numberbox.AutoPrecision if true - all nonzero decimal digits preserved; false by default
+numberbox.LargeNumber if false (default) - Value returns number converted to long (so max 2^32-1 is supported), if true - Value returns number converted to double\nthis option used only if AutoPrecision=false, otherwise always double is returned
+numberbox.RoundType 'R' - rounding (default), 'T' - truncating
+numberbox.Locked Get/set readonly property for control
+numberbox.LockedMode Get/set property is used when control is Locked. 'N' - display only text. 'U' - display whole control (with underline)
+numberbox.MaxLength
+numberbox.Text
+numberbox.Decimals 0 by default  (Устаревшее!!)
+numberbox.DecimalsMin Get\Set Minimum number precision. If number has fewer decimals than PrecisionMIn zeroes are added.
+numberbox.DecimalsMax Get\Set Maximum number precision. If number has more decimals than PrecisionMax, it is rounded.
+numberbox.PositiveOnly false by default
+numberbox.ShowPlus if true '+' sign with positive numbers is shown; false by default
+numberbox.Value = Variant: {long, double, string }
+numberbox.Formatting {true/false} show formatting for numbers example: 1'500 or 1500
+numberbox.ToolTipText
+numberbox.Caption
+numberbox.CaptionWidth
+numberbox.SupportNulls if true, controls could have null-values. In this case it displays empty string to user.\nIf false – null values are converted to 0 and displayed to user as 0. By default FALSE.
+numberbox.PrevValue Returns previous value of ctrl(before user edit)
+numberbox.MinValue Минимальное значение, которое может быть установлено. При вводе меньшего числа оно автоматически будет заменено на MinValue. (по умолчанию - не заданно(NULL))
+numberbox.MaxValue Максимальное значение, которое может быть установлено. При вводе большего числа оно автоматически будет заменено на MaxValue. (по умолчанию - не заданно(NULL))
+
+#$datebox=form("dt
+#$datebox=controlscoll%.add(.*"DATEBOX
+datebox.Text
+datebox.Value Date or Null (if control is empty); string can be assigned to the property\n(DD.MM.YYYY format)
+datebox.ToolTipText
+datebox.Caption
+datebox.CaptionWidth
+datebox.Locked
+datebox.LockedMode
+datebox.Style {‘D’|’F’} – Style of button if ‘F’ – flat style is used. Default – ‘D’.
+datebox.PrevValue Returns previous value of ctrl(before user edit)
+
+#$timebox=form("tm
+#$timebox=controlscoll%.add(.*"TIMEBOX
+timebox.Alignment 'L' - left, 'R' - right, 'C' - center
+timebox.MaxLength
+timebox.Text   'Больше не используем
+timebox.Value long - count of seconds since 00:00:00; string can be assigned to the property\n(should correspond to supported format)
+timebox.ShowSeconds
+timebox.ToolTipText
+timebox.Caption
+timebox.CaptionWidth
+timebox.Locked
+timebox.Style {‘D’|’F’} – Style of button if ‘F’ – flat style is used. Default – ‘D’.
+timebox.PrevValue Returns previous value of ctrl(before user edit)
+
+#$formbox=form("sub
+#$form=form("sub
+formbox.ContentName - Имя вложенной формы
+formbox.Caption
+formbox.CaptionWidth
+formbox.ContentTag - Тег вложенной формы
+formbox.ContentWidth - Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+formbox.ContentHeight - Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+formbox.ContentWidthPX - Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+formbox.ContentHeightPX - Размеры вложенной формы( могут быть больше или меньше форм-контрола)
+formbox.Value - Get\set property\nВызывает у вложенной формы методы:\nSub FormControl_SetValue(variant)\nFunction FormControl_GetValue()
+
+#$logbox=form("lo
+#$logbox=form("lg
+#$logbox=controlscoll%.add(.*"LOGBOX
+logbox.MessageCount
+logbox.ShowTime if true - time is shown before each message (false by default)
+logbox.TimeForeColor text color of time label
+logbox.Orientation 0 - add message to top, 1 - to bottom (0 by default)
+logbox.Clear
+logbox.AddMessage ( Message, [MessageColor], [Prefix], [PrefixColor] ) Message and Prefix are strings
+
+#$groupbox=form("grp
+#$groupbox=controlscoll%.add(.*"GROUPBOX
+groupbox.BorderColor
+groupbox.OuterColor
+groupbox.Style = {"[B][F][R]"} B - block, F - flat, R - round corners
+
+#$tabctrl=form("tab
+#$tabctrl=form("tb
+tabctrl.SelectedIndex get/set currently selected item or -1
+tabctrl.FaceColor selected tab color
+tabctrl.FaceForeColor selected tab text color
+tabctrl.BackColor unselected tabs color
+tabctrl.BackForeColor unselected tabs text color
+tabctrl.HBackForeColor highlight text color (used when the mouse is over a tab)
+tabctrl.ItemCount Returns number of tabs in control
+tabctrl.ItemData collection of item data (strings)
+tabctrl.ItemCaption Collection of item captions(strings),
+tabctrl.AddItem ( index, string, [item data] ) [item data] - optional string parameter that could be associated with item
+tabctrl.RemoveItem ( Index )
+tabctrl.RemoveAllItems Removes all tabs from control
+tabctrl.StringToValue(lpszString, lpszLang = "") Returns value by it’s string(caption). If language isn’t specified or not found – uses default language when searching for value.
+tabctrl.ValueToString(lpszValue, lpszLang = "") Returns string(caption) by it’s value in specified language (en, ru,..). If language isn’t specified or not found – returns string in default language.
+
+#$checkbox=form("chk
+#$checkbox=controlscoll%.add(.*"CHECKBOX
+checkbox.OuterColor for stick button mode
+checkbox.Caption
+checkbox.Locked
+checkbox.Mode Gets/Sets CheckBox control mode:\n"C" - Checkbox\n"R" - Radiobutton\n"B" - Pushlike\n"T" - ThreeState mode \n"P" - Plus-Minus mode (with third state(shown as dot icon) enabled)\n"S" - small Plus-Minus mode (with third state(shown as dot icon) enabled)\n
+checkbox.Value = Variant: {boolean}
+checkbox.ToolTipText
+checkbox.AutoWidth
+checkbox.ThreeState Boolean. Is valid only in ThreeState mode. On get Is true if control is in “third” state, False otherwise. On Set false value sets checked mode(value = true), true value – sets “third” state.
+
+#$combobox=form("cmb
+#$combobox=controlscoll%.add(.*"COMBOBOX
+combobox.ItemData collection of item data (strings)
+combobox.List collection of strings; sample: Form("list1").List(5) = "element"
+combobox.ListCount
+combobox.ListIndex get/set currently selected item
+combobox.Value data of selected item or Null; get/set property
+combobox.DroppedSize number of items in dropped list box (5 by default)
+combobox.ToolTipText
+combobox.Caption
+combobox.CaptionWidth
+combobox.Locked Get/set readonly property for control
+combobox.LockedMode Get/set property is used when control is Locked. 'N' - display only text. 'U' - display whole control (with underline and button)
+combobox.SupportNulls
+combobox.AddItem ( index, string, [item data] )	[item data] - optional string parameter that could be associated with item
+combobox.RemoveItem ( Index )
+combobox.Clear
+combobox.ValueToString(lpszValue, lpszLang = "")	Returns string(caption) by it's value in specified language (en, ru,..). If language isn't specified or not found - returns string in default language.
+combobox.StringToValue(lpszString, lpszLang = "")	Returns value by it's string(caption). If language isn't specified or not found - uses default language when searching for value.
+combobox.Style {‘D’|’F’} – Style of button if ‘F’ – flat style is used. Default – ‘D’.
+combobox.Sorted Читает/устанавливает сортировку элементов. Если true, метод AddItem игнорирует параметр index и вставляет строку согласно алфавитному порядку независимо от регистра. В момент установки значения в true, список элементов также сортируется. По умолчанию false.
+combobox.AutoComplete Get/set property (true/false). Enabled\Disables editing; default = false
+combobox.NewValueAllowed Get/set property (true/false). If true (by default) – a new value is allowed to enter into the combobox.
+combobox.Case 'N' - normal (default), 'U' - upper, 'L' - lower
+combobox.MaxLength The maximum number of characters that could be entered into the combobox if it is editable.
+combobox.EditEnabled Get/set property (true/false). Enabled\Disables editing; default = false
+
+#$checklistbox=form("clb
+#$checklistbox=controlscoll%.add(.*"CHECKLISTBOX
+checklistbox.ItemData collection of item data (strings)
+checklistbox.List collection of strings; sample: Form("list1").List(5) = "element"
+checklistbox.ItemChecked collection of Booleans - indicate whether item is checked; sample: Form("list1"). ItemChecked(5) = true
+checklistbox.ItemEnabled collection of Booleans - indicate whether item is enabled; sample: Form("list1"). ItemEnabled(5) = true
+checklistbox.Item3State collection of Booleans - indicate whether item is indeterminate; sample: Form("list1"). Item3State(5) = true
+checklistbox.ListCount
+checklistbox.ListIndex = {-1, n } get/set currently selected item
+checklistbox.Value = { Null, String } data of selected item or Null; get/set property
+checklistbox.Clear
+checklistbox.SystemStyle Get/set If true system theme checkboxes are used. Default = false
+checklistbox.ItemHeightPX Read-only. Returns height of single item in px
+checklistbox.AddItem ( index, string, [item data] )	[item data] - optional string parameter that could be associated with item
+
+#$label=form("lbl
+#$label=controlscoll%.add(.*"LABEL
+label.Alignment 'L' - left, 'R' - right, 'C' - center
+label.AutoWidth If true control width is calculated automatically. Must\nbe used with at least one of vertical paddings set. \nOtherwise property is ignored.
+label.Caption
+label.Value
+label.ToolTipText
+
+#$button=form("btn
+#$button=form("lnk
+#$button=controlscoll%.add(.*"BUTTON
+#$button=controlscoll%.add(.*"LINK
+button.Alignment 'L' - left, 'R' - right, 'C' - center
+button.HForeColor highlight color when mouse cursor is over the link
+button.ForeDisabledColor
+button.Caption
+button.ToolTipText
+button.Default {true|false}; default button is clicked when <ENTER> key pressed in the form
+button.OuterColor
+button.BorderColor
+button.BackDisabledColor
+button.HForeColor
+button.Style {'D'|'F'} - Style of button if 'F' - flat style is used. Default - 'D'.
+button.AutoWidth If true control width is calculated automatically. Must\nbe used with at least one of vertical paddings set. \nOtherwise property is ignored.
+
+#$colorpicker=form("clr
+#$colorpicker=controlscoll%.add(.*"COLORPICKER
+colorpicker.valuestr Значение цвета (HEX строка вида "#RRGGBB" или "RRGGBB")
+colorpicker.defaultvaluestr Значение цвета по умолчанию (HEX строка вида "#RRGGBB" или "RRGGBB")
+colorpicker.defaulttext Текст, отображаемый для значения по умолчанию в pop-up окне
+colorpicker.style 'D' - Default 3d Button 'F' - Flat button
+
+#$control=cube
+#$control=m_cube
+#$cubectrl=cube
+#$cubectrl=m_cube
+cubectrl.Columns CubeColumn objects collection;
+#$cubecolumncoll=.*%.columns
+#$cubeclmn=.*%.columns(
+cubectrl.Groups get/set property; Message object - contains names of group columns (in field values)
+#$message=cubectrl.Groups
+cubectrl.GroupAllowed true by default - user can group/ungroup rows by menu commands
+cubectrl.Triggers collection of CubeTrigger objects
+#$cubetrgr=.*%.triggers(
+#$cubetrgrcoll=cubectrl%.triggers
+cubectrl.TriggersEnabled true - cube monitors triggers; false - not; true by default\nIf monitoring is enabled and trigger changes the state (see Signaled property of CubeTrigger)\nTrigger event raises (see below)\nIf the property becomes true current state is compared with one at previous enabled period
+cubectrl.FixedOrder([Group]) get/set property; Message object - column values (or row keys) according to fixed order; \nGroup: name of group column for which fixed order is specified, if Group not provided - order is specified for data rows and Message object contains row keys instead of column values
+cubectrl.FixedOrderAllowed([Mask]) true/false; Mask: set of letters ("G" - group, "R" - row), "GR" by default; initially true for groups
+cubectrl.AutoExpand true/false; false by default
+cubectrl.MultiSelect true/false; false by default
+cubectrl.SelectedRow currently selected row (CubeRow object or Null)
+#$cubectrl=form("grid
+#$cuberow=.*%.selectedrow
+cubectrl.SelectedKeys read-only; Message object - contains keys of selected rows (in field values); \nFieldCount = 0 if no selected rows; only data rows (leaves) keys are returned
+#$message=.*%.selectedkeys
+cubectrl.Rows CubeRow objects collection; even if the row doesn't exist Nothing returned
+#$cuberow=cubectrl%.rows(
+cubectrl.RowCount data rows (leaves) count (rows which passed filters only)
+cubectrl.RowCountAll Total rows(leaves count (including filtered out rows)
+cubectrl.RootRow CubeRow object for the root row
+cubectrl.Settings([Mask]) get/set property; Message object; stores/restores Cube settings \n Mask: specify what settings should be stored. One or more letters:\n   'G' - general (columns order, widths and colors, groups, sorting, formulas); default value;\n   'R' - open/closed groups\n   'S' - scroll (vertical and horizontal)\n   'F' - fixed order\n
+#$message=cubectrl%.selectedkeys
+cubectrl.Levels CubeLevel objects collection; used for group rows visualization;
+#$cubelvlcollections=cubectrl%.levels
+#$cubelvl=cubectrl%.levels(
+cubectrl.DataLevel CubeLevel object; defines view attributes of data rows (leaves)
+#$cubelvl=.*%.datalevel
+cubectrl.GroupLevel CubeLevel object; defines default view attributes of group rows (parents)
+#$cubelvl=.*%.grouplevel
+cubectrl.RootLevel CubeLevel object;	 defines view attributes of root row (within a header)
+#$cubelvl=.*%.rootlevel
+cubectrl.Lines bit 0 - horizontal grid line, bit 1 - vertical grid line (examle: 3 - both lines are visible)
+cubectrl.Sorting true (enabled)/false (disabled);
+cubectrl.SortColumn sort column id
+cubectrl.SortOrder 0 - ascending, 1 - descending
+cubectrl.Striped true/false
+cubectrl.OddRowBackColor color used for odd rows back color (if Striped = true)
+cubectrl.EvenRowBackColor color used for even rows back color (if Striped = true)
+cubectrl.FrozenColumnCount count of frozen columns
+cubectrl.ColumnAtMouse read-only; CubeColumn object (or Nothing) at mouse position
+#$cubeclmn=.*%.columnatmouse
+cubectrl.RowAtMouse read-only; CubeRow object (or Nothing) at mouse position
+#$cuberow=.*%.rowatmouse
+cubectrl.ReportName get/set property; string object; get/set report name that is represented by cube
+cubectrl.ReportParams get/set property; string object; get/set report parameters
+cubectrl.LayoutsEnabled get/set property; bool object; Enable or Disable layouts functionality. By default is disabled
+cubectrl.SelectedLayout get/set property; string object; get/set selected layout GUID
+cubectrl.HeaderBackColor Get/set property; color object; get/set Header Color
+cubectrl.ShowGroupLabel Get/set property; show column names when you group by columns
+cubectrl.NoDataLabel write-only; string object; sets text label to be displayed if cube has no data
+cubectrl.ColumnChartForRow Read-only; Returns true, if exists column which is set to be Data Provider(data source for per-row chart).
+cubectrl.EnableFilters Write-only property; bool object; Enables or disables filtering.
+cubectrl.GetLevelData(Level, [RowKey], [Columns]) Level: level number (zero-based);\n RowKey: string identifier of group row (if ommited all groups considered)\n Columns: Message object, specifies columns (in field values) to return \n (if ommited all columns are returned)\n Returns Message object with data submessages \n each of which contains fields corresponding to Columns parameter\n
+cubectrl.Lib_UpdateHedges(Futures, Factor, Column_HedgeInstr, Column_HEC, Column_BPV, Column_Hedge)
+cubectrl.Lib_PosUpdate_DE(strOpaque, Message) strOpaque = CustomValues || Hedges || OptGreeks || EQP_Hedges_1 || EQP_Hedges_2 || EQPGreeks
+cubectrl.Lib_OnBPVUpdate_DE(strPosKey, numBPV)
+cubectrl.Lib_OnDeltaUpdate_DE(strPosKey, numDeltaPos)
+cubectrl.Lib_EQP_PL_Recalc_DE(Ccy)
+cubectrl.LayoutsList() Return layouts list of the cube.\nMessage Format:\n{root}\n	{GUID}					- Layout's id\nName:	Layout_Name_1		- Layout name\nSelected:		Y/N		- Is Layout Selected\n	{GUID}\nName:	Layout_Name_2\nSelected:		Y/N\n
+#$message=.*%.layoutslist(
+cubectrl.SetLayoutsDatabase(Message msgLayouts,string strGUID = "",string strApplyFlags) Cube loads Layouts Database and automatically applies layout with GUID = strGUID (see description of strGUID param). Layout is applied with flags strApplyFlags.\nIf strGUID is not empty or Layout with GUID = strGUID is not found Cube configures itself with the first layout if it exists. If it doesn't exist we automatically add Default Layout. Cube saves Layouts to the m_msgLayouts.\nmsgLayouts - layouts database. If this message is empty or incorrect formatted cube creates only one Default Layout.\nstrGUID - which layouts is selected\nstrApplyFlags - how to configure cube. If it's empty don't configure cube.
+cubectrl.UpdateLayoutsDatabase(Message msgLayouts,string strFlags = "") Updates layouts database.  And configure current layout (if it exists in the db msgLayouts) with flags strFlags.
+cubectrl.GetLayoutsDatabase(string strFlags) Saves current layout. And returns layouts database filtered by strFlags.
+#$message=.*%.getlayoutsdatabase
+cubectrl.CreateLayout () Creates new layout with name <New>.
+cubectrl.ShowLayoutsSettingsDlg () Shows dialog with layouts settings
+cubectrl.ShowLayoutsMenu () Shows layouts menu
+cubectrl.SmartColorMode(string strColumn,string strMode,string strParam)  At present we use only strColumn and strParam\nUse gray color to display value of column strColumn if  it equals to value of column strParam
+cubectrl.SetHashSize(Count) Count: hash size of underlying row map; should be called just after creation
+cubectrl.FitColumns([MinWidth], [MaxWidth]) fits columns according to text using allowed min and max widths
+cubectrl.UpdateRow(message, [key], [BackColor], [ForeColor], [Highlight], [UpdateData]) Insert/Update; all keys are strings\nkey: Boolean  identifies each row; if ommited generated automatically\nUpdateData: Boolean; if true - underlying fields updated, else new fields are attached (by default)\nAttention! Control stores references to data fields of the Message parameter, so fields updating applies cube data
+cubectrl.RemoveRow(key)
+cubectrl.UpdateRowsWithCalc(RateField, RefField, msgRefToRate, msgValueFields) updates every row which has reference field value in msgRefToRate map\n RateField: rate field name (e.g. "CrossRate")\n RefField: reference field name (e.g. "Ccy")\n msgRefToRate: Message object; reference rate map (e.g. "USD" -> 30.45)\n msgValueFields: Message object; source-target fields map (e.g. "OpenValue" -> "OpenValue2")
+cubectrl.SelectRow(key) if row with specified key is not collapsed select it and scroll items to show the row. If key parameter is null - current selection will be deselected.
+cubectrl.RowKey(i) Returns row key of a row. i - number of a row.
+cubectrl.Clear() clear all rows (columns aren't deleted)
+cubectrl.SetHighlightParams([Timeout], [BackColor], [ForeColor]) Timeout - highlighting timeout in seconds (default timeout used if not specified)\nBackColor - highlighting back color (default row back color used if not specified)\nForeColor - highlighting fore color (default highlight color used if not specified)
+cubectrl.ExpandToLevel(Level) expands rows up to Level (zero-based)
+cubectrl.ProcessDataList(msg, [UseMsgName], [UseFieldName], [CleanUp], [strApplyFlags]) batch update to add all rows; does not clear rows\n UseMsgName: if true - submessage names are used for appropriate row keys \n	 (Attention! Names of submessages must be unique.)\n	false by default - keys are generated automatically\nUseFieldName: if true then field names are used for data mapping into \n	columns with identical names, else all fields are inserted by index\n	true by default\nCleanUp: if true - all items are deleted before\n	true by default\nstrApplyFlags: how we should configure cube after applying data. If it is not empty we apply current layout with flags strApplyFlags.\nColumns must be created before calling ProcessDataList
+cubectrl.ExportToExcel([VisibleOnly], [Level]) exports contents to Microsoft Excel asynchronously; \nreturns True if export has been started and False if export task can't be \nexecuted at the moment (previous export is not finished)\nVisibleOnly: True - export visible rows only (False by default)\nLevel: level number (zero-based) to export only
+cubectrl.PrintAll() Prints all cube data (raw)
+cubectrl.GetExcelExportMessage() Returns message with all cube data prepared for export to MS Excel via ExportToExcelMessage  method. See ExportToExcelMessage for details.
+cubectrl.ExportToExcelMessage(msg) Exports contents of message to Microsoft Excel asynchronously; Method should be used to export several recordsets to a single Excel file (each recordset is exported to different sheets).\nreturns True if export has been started and False if export task can't be \nexecuted at the moment (previous export is not finished)\n\nMessage Format:\n{root}\n      {Info}\n            Name: Name of report (used in result file name)\n      {Reports}\n            {subMsg1}  - report msg returned by GetExcelExportMessage func\n                …\n            {subMsgN}  - report msg returned by GetExcelExportMessage func\n
+cubectrl.SetDashboardKeyColumns() Sets dashboard Key columns. msgColumns must contain key columns names as datums with ids equal to column ids
+cubectrl.SetScript() Sets Cube custom columns script;
+cubectrl.DashboardName() get/set property; string; Gets\Sets cube name for Dashboard data providing. Must be unique(Attempt to set duplicate name doesn't change cube dashboard name).All of DashboardName, DashboardKeyColumns and DashboardEnabled flag must be set for cube to publish data to dashboard
+cubectrl.DashboardEnabled() get/set property; bool; Gets\Sets dashboard enabled flag.
+cubectrl.Pivot_GetMasterKeys(strRowKey, strCellId)Pivot cube method.Returns msg with keys of rows of master report which formed specified cell of specified pivot cube row.
+cubectrl.GetDataSnapshot(msgKeys) Returns all cells data for rows specifed in msgKeys message. Format of returned message is same as ProcessDataList msg.
+cubectrl.SetRowTextColor(strRow, strColumn, color) Sets specified color as text color for specified row/column. If strColumn is empty - color is set for whole row.
+cubectrl.SetRowBackColor(strRow, strColumn, color) Sets specified color as back color for specified row/column. If strColumn is empty - color is set for whole row.
+cubectrl.SetRowBoldFont(strRow, strColumn, bBold) Sets bold font flag for specified row/column. If strColumn is empty - bold font flag is set for whole row.
+cubectrl.Locked Get/Set property. Disables cube but without changing colors.
+cubectrl.CellPadding Set only property. Specifies top\bottom cell padding(px).
+cubectrl.ShowHeader Set only property. Show\Hide cube header.
+cubectrl.ExtendRows Set only properties. If = true – rows are drawn to the end of cube window instead of end of last cell(last cell color for each row is used for drawing).
+cubectrl.SetRowTextColor(strRow, strColumn, color) Sets specified color as text color for specified row/column. If strColumn is empty - color is set for whole row.
+cubectrl.SetRowBackColor(strRow, strColumn, color) Sets specified color as back color for specified row/column. If strColumn is empty - color is set for whole row.
+cubectrl.SetRowBoldFont(strRow, strColumn, bBold) Sets bold font flag for specified row/column. If strColumn is empty - bold font flag is set for whole row.
+cubectrl.SetFormulasParams(msgParams) Sets params that can be used in custom columns formulas.
+cubectrl.SuperCubeRegister(msgSettings)
+cubectrl.SuperCubeUnregister()
+cubectrl.SuperCubeSetupDlg()
+cubectrl.SuperCubeGetSourcesForms()
+
+cuberow.BackColor
+cuberow.ForeColor
+cuberow.Key read-only; Null for root row
+cuberow.Level level number (zero-based); -1 for root row
+cuberow.Cell text in the particular cell; read-only
+cuberow.Data data (Variant) in the particular cell; read-only
+cuberow.Selected true/false
+cuberow.Valid true if the row exists in the grid
+cuberow.IsLeaf true if the row is a data row (not a group row)
+cuberow.ParentRow CubeRow object for the parent row or Nothing
+#$cuberow=.*%.parentrow
+cuberow.NextRow CubeRow object for the next row according current sorting or Nothing
+#$cuberow=.*%.nextrow
+cuberow.PrevRow CubeRow object for the previous row according current sorting or Nothing
+#$cuberow=.*%.prevrow
+cuberow.Tag opaque string
+
+cubecolumncoll.Add(id, caption, width, [align], [format], [visible], [sortcolumn] ) - align:  { "L" | "R" | "C" }\nformat: { "number:<decimals>[:<mode>]" | "date:<strftime specificators>" }\n    <mode>: 'A' - auto precision, 'E' - exact precision\nvisible: true - visible column (by default), false - hidden column\nsortcolumn: column id for sorting (may be not added yet)\nExpample: Add "id1", "Column 1", 100, "R", "number:2:E"\n
+cubecolumncoll.Clear
+cubecolumncoll.Index(Index/Id)
+#$cubeclmn=.cubecolumncoll%.index(
+cubecolumncoll.Count
+
+cubeclmn.Align read-only; {"L", "C", "R"}
+cubeclmn.Id read-only; short name of the column
+cubeclmn.Caption read-only; column title
+cubeclmn.Width width in form units (px, pt)
+cubeclmn.Index Read-only; current order number in control or -1 if the column is invisible
+cubeclmn.Decimals read-only;
+cubeclmn.AutoDecimals read-only; 'A'(Auto) | 'E'(Exact)
+cubeclmn.BackColor column background color (is laid on row background according to Transparency factor)
+cubeclmn.ForeNegativeColor if not -1 all negative numbers in the column are highlighted with the color
+cubeclmn.Transparency real number from 0 to 1; determines real background color together with BackColor; 1 by default
+cubeclmn.ToolTipText column tooltip; appears when user moves mouse over column caption
+cubeclmn.Formula "NONE", "SUM", "AVG"
+cubeclmn.GroupColumnID group column id for formula (Null for global formula)
+cubeclmn.WeightColumnID weight column id or Null
+cubeclmn.SignColumnID sign column id or Null
+cubeclmn.SignPositiveValue string value for "+" sign
+cubeclmn.SetFormula( Formula, [GroupColumnID], [WeightColumnID], [SignColumnID], [SignPositiveValue] ) see formula properties for parameters description
+cubeclmn.ClearFormula
+
+cubelvlcollections.Add(Index, BackColor, ForeColor, [Style])
+cubelvlcollections.Clear
+cubelvlcollections.Index(Index)
+cubelvlcollections.Count
+
+
+cubelvl.BackColor
+cubelvl.ForeColor
+cubelvl.Style
+cubelvl.Index
+
+cubetrgr.Id
+cubetrgr.RowKey
+cubetrgr.ColumnId
+cubetrgr.MinValue
+cubetrgr.MinStrict
+cubetrgr.MaxValue
+cubetrgr.MaxStrict
+cubetrgr.Tag
+cubetrgr.Signaled
+
+cubetrgrcoll.Add
+cubetrgrcoll.Clear
+cubetrgrcoll.Remove
+cubetrgrcoll.Count
+
+#$xml=createobject("Microsoft.XMLDOM
+xml.async Specifies if asynchronous download is permitted. Read/write.
+xml.attributes Contains the list of attributes for this node. Read-only.
+xml.baseName Returns the base name for the name qualified with the namespace. Read-only.
+xml.childNodes Contains a node list containing the children nodes. Read-only.
+xml.dataType Specifies the data type for this node. Read/write.
+xml.definition Returns the definition of the node in the document type definition (DTD) or schema. Read-only.
+xml.doctype  Contains the document type node that specifies the DTD for this document. Read-only.
+xml.documentElement  Contains the root element of the document. Read/write.
+xml.firstChild  Contains the first child of this node. Read-only.
+xml.implementation  Contains the IXMLDOMImplementation object for the document. Read-only.
+xml.lastChild  Returns the last child node. Read-only.
+xml.namespaceURI Returns the Uniform Resource Identifier (URI) for the namespace. Read-only.
+xml.nextSibling  Contains the next sibling of the node in the parent's child list. Read-only.
+xml.nodeName  Returns the qualified name for attribute, document type, element, entity, or notation nodes. Returns a fixed string for all other node types. Read-only.
+xml.nodeType  Specifies the XML Document Object Model (DOM) node type, which determines valid values and whether the node can have child nodes. Read-only.
+xml.nodeTypedValue Contains this node's value expressed in its defined data type. Read/write.
+xml.nodeTypeString Returns the node type in string form. Read-only.
+xml.nodeValue  Contains the text associated with the node. Read/write.
+xml.ondataavailable Specifies the event handler for the ondataavailable event. Write-only.
+xml.onreadystatechange Specifies the event handler to be called when the readyState property changes. Write-only.
+xml.ontransformnode Specifies the event handler for the ontransformnode event. Write-only.
+xml.ownerDocument  Returns the root of the document that contains this node. Read-only.
+xml.parentNode  Contains the parent node. Read-only.
+xml.parsed Indicates the parsed status of the node and child nodes. Read-only.
+xml.parseError Returns an IXMLDOMParseError object that contains information about the last parsing error. Read-only.
+xml.prefix Returns the namespace prefix. Read-only.
+xml.preserveWhiteSpace Specifies the default white space handling. Read/write.
+xml.previousSibling  Contains the previous sibling of the node in the parent's child list. Read-only.
+xml.readyState Indicates the current state of the XML document. Read-only.
+xml.resolveExternals Indicates whether external definitions (resolvable namespaces, DTD external subsets, and external entity references) are to be resolved at parse time, independent of validation. Read/write.
+xml.specified Indicates whether the node (usually an attribute) is explicitly specified or derived from a default value in the DTD or schema. Read-only.
+xml.text Represents the text content of the node or the concatenated text representing the node and its descendants. Read/write.
+xml.url Returns the URL for the last loaded XML document. Read-only.
+xml.validateOnParse Indicates whether the parser should validate this document. Read/write.
+xml.xml Contains the XML representation of the node and all its descendants. Read-only.
+xml.abort Aborts an asynchronous download in progress.
+xml.appendChild  Appends a new child as the last child of this node.
+xml.cloneNode  Clones a new node.
+xml.createAttribute  Creates a new attribute with the specified name.
+xml.createCDATASection  Creates a CDATA section node that contains the supplied data.
+xml.createComment  Creates a comment node that contains the supplied data.
+xml.createDocumentFragment  Creates an empty IXMLDOMDocumentFragment object.
+xml.createElement  Creates an element node using the specified name.
+xml.createEntityReference  Creates a new EntityReference object.
+xml.createNode Creates a node using the supplied type, name, and namespace.
+xml.createProcessingInstruction  Creates a processing instruction node that contains the supplied target and data.
+xml.createTextNode  Creates a text node that contains the supplied data.
+xml.getElementsByTagName  Returns a collection of elements that have the specified name.
+xml.hasChildNodes  Provides a fast way to determine whether a node has children.
+xml.insertBefore  Inserts a child node to the left of the specified node or at the end of the list.
+xml.load Loads an XML document from the specified location.
+xml.loadXML Loads an XML document using the supplied string.
+xml.nodeFromID Returns the node that matches the ID attribute.
+xml.removeChild  Removes the specified child node from the list of children and returns it.
+xml.replaceChild  Replaces the specified old child node with the supplied new child node.
+xml.save Saves an XML document to the specified location.
+xml.selectNodes Applies the specified pattern-matching operation to this node's context and returns the list of matching nodes as IXMLDOMNodeList.
+xml.selectSingleNode Applies the specified pattern-matching operation to this node's context and returns the first matching node.
+xml.transformNode Processes this node and its children using the supplied XSLT style sheet and returns the resulting transformation.
+xml.transformNodeToObject Processes this node and its children using the supplied XSLT style sheet and returns the resulting transformation in the supplied object.
+
+### Источник: Справочник "Некоторые объекты Automation" <http://www.script-coding.info/wsh_chm.zip>
+
+# Строковые функции
+Asc(str)  Возвращает ASCII-код первого символа в строке str.
+Chr(code)  Возвращает символ с ASCII-кодом code.
+InStr([start,] str1, str2[, compare])  Возвращает индекс символа, с которого начинается первое вхождение подстроки str2 в строку str1.\nПараметр start задаёт номер символа, с которого следует начинать поиск (если не задан, то с начала строки).\nПоиск производится слева направо.\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+InStrRev(str1, str2[, start[, compare]])  То же самое, что InStr, но поиск производится справа налево, т.е возвращается номер последнего символа, с которого начинается вхождение подстроки str2 в строку str1.
+Join(list[, delim])  Возвращает строку, полученную в результате конкатенации подстрок, содержащихся в массиве list.\nПараметр delim задаёт символ разделителя (по умолчанию - пробел).
+Split(expr[, delim[, count[, compare]]])  Возвращает массив строк, полученных в результате разбиения строки expr на подстроки.\nПараметр delim задаёт символ разделителя (по умолчанию - пробел).\nПараметр count определяет число подстрок (по умолчанию - все).\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+LCase(str)  Возвращает строку, в которой все символы преобразованы к нижнему регистру.
+UCase(str)  Возвращает строку, в которой все символы преобразованы к верхнему регистру.
+Left(str, len)  Возвращает len символов с начала строки str.
+Right(str, len)  Возвращает len символов с конца строки str.
+Mid(str, start[, len]))  Возвращает из строки str подстроку, которая начинается с позиции start и имеет длину len.\nЕсли параметр len не указан, возвращаются все символы до конца строки.
+Len(str)  Возвращает число символов в строке str.
+LTrim(str)  Возвращает строку, в которой удалены все начальные пробелы.
+RTrim(str)  Возвращает строку, в которой удалены все конечные пробелы.
+Trim(str)  Возвращает строку, в которой удалены все начальные и конечные пробелы.
+Replace(expr, find, replacewith[, start[, count[, compare]]])  Возвращает строку, которая получается из строки expr путём замен входящих в неё подстрок find на подстроки replacewith.\nПараметр start определяет начальную позицию поиска.\nПараметр count определяет число замен (по умолчанию - все).\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+Space(x)  Возвращает строку, состоящую из х пробелов.
+String(number, char)  Возвращает строку, состоящую из number символов char.
+StrComp(str1, str2[, compare])  Сравнивает строки.\nЕсли str1<str2, возвращается -1, если str1=str2, возвращается 0, если str1>str2, возвращается 1.\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+StrReverse(str)  Возвращает строку, полученную из строки str путём изменения порядка символов в строке на обратный.
+FormatCurrency(expr[, numDigitsAfterDecimal[, includeLeadDigit[, useParens[, groupDigits]]]])  Возвращает строку, отформатированную в денежном формате.\nПараметр expr задаёт значение для форматирования.\nЕсли необязательные параметры не заданы, значения берутся из региональных настроек.\nПараметр numDigitsAfterDecimal задаёт количество десятичных разрядов справа от точки.\nПараметр includeLeadDigit задаёт отображение лидирующих нулей для дробных значений (true или false).\nПараметр useParens задаёт отображение скобок для отрицательных значений (true или false).\nПараметр groupDigits задаёт группировку разрядов с использованием разделителя из региональных настроек (true или false).
+FormatDateTime(date[, namedFormat])  Возвращает строку, отформатированную в формате даты-времени.\nПараметр date задаёт значение для форматирования.\nПараметр namedFormat задаёт способ форматирования (см. описание констант форматов даты и времени в разделе "Константы даты и времени").
+FormatNumber(expr[, numDigitsAfterDecimal[, includeLeadDigit[, useParens[, groupDigits]]]])  Возвращает строку, отформатированную в числовом формате.\nПараметр expr задаёт значение для форматирования.\nЕсли необязательные параметры не заданы, значения берутся из региональных настроек.\nПараметр numDigitsAfterDecimal задаёт количество десятичных разрядов справа от точки.\nПараметр includeLeadDigit задаёт отображение лидирующих нулей для дробных значений (true или false).\nПараметр useParens задаёт отображение скобок для отрицательных значений (true или false).\nПараметр groupDigits задаёт группировку разрядов с использованием разделителя из региональных настроек (true или false).
+FormatPercent(expr[, numDigitsAfterDecimal[, includeLeadDigit[, useParens[, groupDigits]]]])  Возвращает строку, отформатированную в процентном формате (аргумент умножается на 100).\nПараметр expr задаёт значение для форматирования.\nЕсли необязательные параметры не заданы, значения берутся из региональных настроек.\nПараметр numDigitsAfterDecimal задаёт количество десятичных разрядов справа от точки.\nПараметр includeLeadDigit задаёт отображение лидирующих нулей для дробных значений (true или false).\nПараметр useParens задаёт отображение скобок для отрицательных значений (true или false).\nПараметр groupDigits задаёт группировку разрядов с использованием разделителя из региональных настроек (true или false).
+
+# Математические функции
+Abs(x)  Возвращает абсолютное значение числа x.
+Int(x)  Возвращает целую часть числа x.\nЕсли х - отрицательное число, функция вернёт ближайшее целое число, меньшее, чем х.
+Fix(x)  Возвращает целую часть числа x.\nЕсли х - отрицательное число, функция вернёт ближайшее целое число, большее, чем х.
+Sgn(x)  Знаковая функция числа x.\nВозвращает 1 для чисел больше нуля, 0 для нуля и -1 для чисел меньше нуля.
+Round(x, [numdecimal])  Возвращает результат округления числа x с точностью до numdecimal знаков после запятой.
+Rnd([x])  Возвращает случайное число от 0 до 1.\nНеобязательный аргумент является начальным значением для генерации случайных чисел.
+Sqr(x)  Возвращает квадратный корень числа x.
+Sin(x)  Возвращает синус числа x.
+Cos(x)  Возвращает косинус числа x.
+Tan(x)  Возвращает тангенс числа x.
+Atn(x)  Возвращает арктангенс числа x.
+Exp(x)  Экспоненциальная функция, возвращает число е в степени x.
+Log(x)  Возвращает натуральный логарифм числа x.
+
+# Функции для работы с датой и временем
+Date Возвращает текущую системную дату.
+Now Возвращает текущие системные дату и время в виде, соответствующем региональным настройкам Windows.
+Time Возвращает текущее системное время.
+Timer Возвращает количество секунд, прошедших с полуночи.
+IsDate(expr)  Возвращает true, если параметр expr задаёт корректную дату, и false в противном случае.
+Year(date)  Выделяет год из даты, заданной параметром date, и возвращает это целое число.
+Month(date)  Выделяет номер месяца из даты, заданной параметром date, и возвращает целое число от 1 до 12.
+Day(date)  Выделяет номер дня месяца из даты, заданной параметром date, и возвращает целое число от 1 до 31.
+Weekday(date[, firstdayofweek])  Возвращает целое число - день недели для даты, заданной параметром date.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.
+Hour(time)  Выделяет номер часа из даты или момента времени, заданных параметром time, и возвращает целое число от 0 до 23.
+Minute(time)  Выделяет количество минут из даты или момента времени, заданных параметром time, и возвращает целое число от 0 до 59.
+Second(time)  Выделяет количество секунд из даты или момента времени, заданных параметром time, и возвращает целое число от 0 до 59.
+DateValue(date)  Возвращает переменную подтипа Date, которая соответствует дате, заданной символьным параметром date.
+TimeValue(time)  Возвращает переменную подтипа Date, которая соответствует времени, заданному символьным параметром time.
+DateSerial(year, month, day)  Возвращает переменную подтипа Date, которая соответствует указанным году (параметр year), месяцу (параметр month) и дню (параметр day).
+TimeSerial(hour, minute, second)  Возвращает переменную подтипа Date, которая соответствует указанным часу (параметр hour), минуте (параметр minute) и секунде (параметр second).
+MonthName(month[, abbr])  Возвращает наименование для месяца с номером month.\nЕсли параметр abbr равен true, наименование месяца представляется в виде аббревиатуры, если false - в полном виде.
+WeekdayName(weekday[, abbr[, firstdayofweek]])  Возвращает наименование дня недели с порядковым номером weekday.\nЕсли параметр abbr равен true, наименование дня недели представляется в виде аббревиатуры, если false - в полном виде.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.
+DateAdd(interval, number, date)  Возвращает дату, отстоящую от даты date на number интервалов, заданных параметром interval, который может принимать значения: \n"yyyy" - год \n"q" - квартал \n"m" - месяц \n"y" - день года \n"d" - день \n"w" - день недели \n"ww" - неделя года \n"h" - час \n"n" - минута \n"s" - секунда
+DateDiff(interval, date1, date2[, firstdayofweek[, firstweekofyear]])  Возвращает количество интервалов interval между датами date1 и date2.\nВозможные значения параметра interval - те же, что и в функции DateAdd.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.\nПараметр firstweekofyear - константа, показывающая, какую неделю считать первой в году.
+DatePart(interval, date[, firstdayofweek[, firstweekofyear]])  Возвращает ту часть даты, которая соответствует параметру interval.\nВозможные значения параметра interval - те же, что и в функции DateAdd.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.\nПараметр firstweekofyear - константа, показывающая, какую неделю считать первой в году.
+
+# Прочие функции
+Array(arglist)  Возвращает массив, составленный из элементов списка arglist.\nЭлементы в списке arglist должны быть отделены друг от друга запятыми.
+LBound(arrayname[, dimension])  Возвращает наименьшее значение, которое которое может принимать индекс в массиве arrayname в размерности dimension (по умолчанию параметр dimension равен 1).
+UBound(arrayname[, dimension])  Возвращает наибольшее значение, которое которое может принимать индекс в массиве arrayname в размерности dimension (по умолчанию параметр dimension равен 1).
+Filter(inputStrings, value[, include[, compare]])  Возвращает массив, созданный путём фильтрации переданного массива по заданным критериям.\nПараметр inputStrings - исходный одномерный массив строк.\nПараметр value - строка, критерий отбора.\nПараметр include - если задано true, в результат попадут только строки, которые содержат подстроку value, если задано false - в результат попадут только строки, которые не содержат подстроку value.\nПараметр compare - тип сравнения (0 - двоичный, 1 - текстовый).
+IsArray(varname)  Возвращает true, если параметр varname является массивом, и false в противном случае.
+IsDate(varname)  Возвращает true, если параметр varname задаёт корректную дату, и false в противном случае.
+IsEmpty(varname)  Возвращает true, если переменная varname объявлена, но не инициализирована, и false в противном случае.
+IsNull(varname)  Возвращает true, если переменная varname не содеоржит никаких корректных данных, и false в противном случае.
+IsNumeric(varname)  Возвращает true, если переменная varname может быть рассмотрена в качестве числа, и false в противном случае.
+IsObject(varname)  Возвращает true, если переменная varname является указателем на внешний объект, и false в противном случае.
+VarType(varname)  Возвращает числовое значение, соответствующее подтипу переменной varname (см. описание констант подтипов данных в разделе "Прочие константы").
+TypeName(varname)  Возвращает строку, содержащую тип переменной varname.
+Hex(number)  Возвращает шестнадцатеричное представление (в символьном виде) числа number.
+Oct(number)  Возвращает восьмеричное представление (в символьном виде) числа number.
+MsgBox(prompt[, buttons][, title][, helpfile, context])  Выводит на экран диалоговое окно с сообщением и различными кнопками и возвращает результат нажатия на одну из кнопок.\nВозможные варианты возврата - см. описание констант нажатий на кнопки в разделе "Константы для диалоговых окон".\nПараметр prompt задаёт текст сообщения.\nЧисловой параметр buttons определяет состав кнопок, значок, кнопку по умолчанию и режим модальности окна - \nсм. описание констант в разделе "Константы для диалоговых окон" (значения необходимых констант для передачи в параметр buttons нужно просто сложить).\nПараметр title задаёт текст заголовка диалогового окна.\nПараметр helpfile задаёт путь к файлу помощи.\nПараметр context задаёт идентификатор содержания помощи.
+InputBox(prompt[, title][, default][, xpos][, ypos][, helpfile, context])  Выводит на экран диалоговое окно со полем ввода и кнопками ОК, Отмена и возвращает введённую в этом окне символьную строку.\nПараметр prompt задаёт текст сообщения, которое выводится рядом с полем ввода.\nПараметр title задаёт текст заголовка диалогового окна.\nПараметр default задаёт значение по умолчанию для поля ввода.\nПараметры xpos и ypos определяют координаты левого верхнего угла окна.\nПараметр helpfile задаёт путь к файлу помощи.\nПараметр context задаёт идентификатор содержания помощи.
+CreateObject(servername.typename[, location])  Создаёт экземпляр объекта автоматизации и возвращает ссылку на него.\nЗдесь servername - имя приложения, являющегося сервером автоматизации, typename - тип или класс создаваемого объекта, location - сетевое имя компьютера, на котором будет создан объект.
+GetObject([pathname][, classname])  Возвращает ссылку на объект класса classname, который хранится в отдельном файле, путь к которому задаётся параметром pathname.
+CBool(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных boolean (true или false).\nНапример, CBool(3=2) или CBool("-1").
+CByte(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных byte (целое число от 0 до 255).\nНапример, CByte(256) вызовет ошибку переполнения.
+CCur(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных currency (специальный числовой формат для денежных величин).
+CDate(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных date/time (даты от 1 января 100 года до 31 декабря 9999 года).
+CDbl(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных double (числа с плавающей точкой двойной точности).
+CInt(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных integer (целые числа в диапазоне от -32768 до 32768).
+CLng(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных long (целые числа в диапазоне от -2 147 483 648 до 2 147 483 647).
+CSng(expr) Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных single (числа с плавающей точкой одинарной точности).
+CStr(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных string.
+Eval(expr)  Вычисляет выражение и возвращает результат.\nНапример, Eval(3=2).
+GetLocale Возвращает текущее значение (ID) настроек локализации (набор установок языка, региона, раскладки клавиатуры и т.д.).\nВозможные значения - см. MSDN статью "Locale ID (LCID) Chart".
+SetLocale(lcid)  Возвращает текущее значение (ID) настроек локализации (набор установок языка, региона, раскладки клавиатуры и т.д.) и устанавливает новое.\nВозможные значения - см. MSDN статью "Locale ID (LCID) Chart".
+ScriptEngine Возвращает название текущего языка, например, "VBScript".
+ScriptEngineBuildVersion Возвращает номер сборки текущей среды исполнения скриптов.
+ScriptEngineMajorVersion Возвращает номер версии текущей среды исполнения скриптов.
+ScriptEngineMinorVersion Возвращает номер подверсии текущей среды исполнения скриптов.
+RGB(red, green, blue)  Возвращает целочисленное значение, соответствующее цвету RGB, заданному с помощью трёх составляющих - красного, зелёного и синего цветов числами от 0 до 255.
+
+# Константы для диалоговых окон
+vbOKOnly 0 Выводится кнопка ОК.
+vbOKCancel 1 Выводятся кнопки ОК и Отмена (Cancel).
+vbAbortRetryIgnore 2 Выводятся кнопки Стоп (Abort), Повтор (Retry) и Пропустить (Ignore).
+vbYesNoCancel 3 Выводятся кнопки Да (Yes), Нет (No) и Отмена (Cancel).
+vbYesNo 4 Выводятся кнопки Да (Yes) и Нет (No).
+vbRetryCancel 5 Выводятся кнопки Повтор (Retry) и Отмена (Cancel).
+vbCritical 16 Выводится значок Stop Mark.
+vbQuestion 32 Выводится значок Question Mark.
+vbExclamation 48 Выводится значок Exclamation Mark.
+vbInformation 64 Выводится значок Information Mark.
+vbDefaultButton1 0 По умолчанию в окне выбирается первая кнопка.
+vbDefaultButton2 256 По умолчанию в окне выбирается вторая кнопка.
+vbDefaultButton3 512 По умолчанию в окне выбирается третья кнопка.
+vbDefaultButton4 768 По умолчанию в окне выбирается четвёртая кнопка.
+vbApplicationModal 0 Диалоговое окно выводится в модальном режиме.
+vbSystemModal 4096 Диалоговое окно выводится в модальном режиме и располагается сверху всех запускаемых приложений.
+vbOK 1 Нажата кнопка ОК.
+vbCancel 2 Нажата кнопка Отмена (Cancel).
+vbAbort 3 Нажата кнопка Стоп (Abort).
+vbRetry 4 Нажата кнопка Повтор (Retry).
+vbIgnore 5 Нажата кнопка Пропустить (Ignore).
+vbYes 6 Нажата кнопка Да (Yes).
+vbNo 7 Нажата кнопка Нет (No).
+
+# Строковые константы
+vbCr Chr(13) Возврат каретки.
+VbCrLf Chr(13) & Chr(10) Возврат каретки и перевод строки.
+vbFormFeed Chr(12) Перевод страницы.
+vbLf Chr(10) Перевод строки.
+vbNewLine Chr(13) & Chr(10) or Chr(10) Определяемый платформой (подходящий) символ новой строки.
+vbNullChar Chr(0) Символ с нулевым кодом.
+vbNullString Нулевая строка Не тоже самое, что строка нулевой длины ("").
+vbTab Chr(9) Символ табуляции.
+vbVerticalTab Chr(11) Символ вертикальной табуляции
+
+# Константы даты и времени
+vbSunday 1 Воскресенье
+vbMonday 2 Понедельник
+vbTuesday 3 Вторник
+vbWednesday 4 Среда
+vbThursday 5 Четверг
+vbFriday 6 Пятница
+vbSaturday 7 Суббота
+vbUseSystemDayOfWeek 0 Использовать для определения первого дня недели региональные настройки системы.
+vbFirstJan1 1 Первой неделей в году считается та, в которой было 1 января.
+vbFirstFourDays 2 Первой неделей в году считается та, в которой было по крайней мере четыре дня нового года.
+vbFirstFullWeek 3 Первой неделей в году считается первая полная неделя.
+vbGeneralDate 0 Дата и время выводятся в формате, определяемом региональными настройками системы.
+vbLongDate 1 Выводить дату, используя полный формат.
+vbShortDate 2 Выводить дату, используя краткий формат.
+vbLongTime 3 Выводить время, используя полный формат.
+vbShortTime 4 Выводить время, используя краткий формат.
+
+# Прочие константы
+vbBlack &h00 Чёрный цвет
+vbRed &hFF Красный цвет
+vbGreen &hFF00 Зелёный цвет
+vbYellow &hFFFF Жёлтый цвет
+vbBlue &hFF0000 Синий цвет
+vbMagenta &hFF00FF Фиолетовый цвет
+vbCyan &hFFFF00 Бирюзовый (голубой) цвет
+vbWhite &hFFFFFF Белый цвет
+vbBinaryCompare 0 Определяет двоичное сравнение.
+vbTextCompare 1 Определяет текстовое сравнение.
+vbObjectError -2147221504 Определяет минимальное значение для номеров ошибок, задаваемых пользователем.
+vbUseDefault -2 Использовать значения по умолчанию из региональных настроек системы.
+vbTrue -1 Логическое значение "Истина".
+vbFalse 0 Логическое значение "Ложь".
+vbEmpty 0 Переменная не инициализирована.
+vbNull 1 Переменная не содержит корректных данных.
+vbInteger 2 Переменная имеет подтип Integer.
+vbLong 3 Переменная имеет подтип Long.
+vbSingle 4 Переменная имеет подтип Single.
+vbDouble 5 Переменная имеет подтип Double.
+vbCurrency 6 Переменная имеет подтип Currency.
+vbDate 7 Переменная имеет подтип Date.
+vbString 8 Переменная имеет подтип String.
+vbObject 9 Переменная имеет подтип Object.
+vbError 10 Переменная имеет подтип Error.
+vbBoolean 11 Переменная имеет подтип Boolean.
+vbVariant 12 Переменная имеет подтип Variant (только для массивов переменных типа Variant).
+vbDataObject 13 Объект доступа к данным.
+vbDecimal 14 Переменная имеет подтип Decimal.
+vbByte 17 Переменная имеет подтип Byte.
+vbArray 8192 Переменная является массивом.
+
+#$regex=new regexp
+regex.Pattern Sets or returns the regular expression pattern being searched for.
+regex.Global Sets or returns a Boolean value that indicates if a pattern should match all occurrences in an entire search string or just the first one.
+regex.IgnoreCase  True | False - Sets or returns a Boolean value that indicates if a pattern search is case-sensitive or not.
+regex.Execute(string) Executes a regular expression search against a specified string.
+regex.Test Executes a regular expression search against a specified string and returns a Boolean value that indicates if a pattern match was found.
+regex.Replace(string1, string2)  Replaces text found in a regular expression search. string1 \nRequired. String1 is the text string in which the text replacement is to occur. \nstring2 \nRequired. String2 is the replacement text string.
+
+#$matches=regex.Execute(
+matches.count
+match.Length
+match.FirstIndex
+match.Value
+
+err.Description
+err.HelpContext
+err.HelpFile
+err.Number
+err.Source
+err.Raise(number, source, description, helpfile, helpcontext)
+err.Clear()
+

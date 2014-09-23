@@ -1,0 +1,214 @@
+control.type
+control.name
+control.backcolor
+control.forecolor
+control.font "name;size;bold;italic;underline"\nfor example: "Tahoma;8;N;Y;N"
+control.position "left;top;width;height"
+control.padright
+control.padtop
+control.padbottom
+control.padbottompx
+control.padleft
+control.padleftpx
+control.padrightpx
+control.padtoppx
+control.padleftctrl
+control.padrightctrl
+control.padtopctrl
+control.padbottomctrl
+control.fixedwidth {"Y", "N"}
+control.fixedheight {"Y", "N"}
+control.tabstop {"Y", "N"}
+control.visible {"Y", "N"}
+control.enabled {"Y", "N"}
+control.tag
+
+formbox.contentname
+formbox.contenttag
+formbox.contentwidth
+formbox.contentheight
+formbox.contentwidthpx
+formbox.contentheightpx
+formbox.value
+formbox.caption
+formbox.caption_ru
+formbox.template
+
+link.default {"Y", "N"}
+link.hforecolor
+link.foredisabledcolor
+link.tooltiptext
+link.supportnulls {"Y", "N"}
+link.autowidth {"Y", "N"}
+link.caption
+link.caption_ru
+link.alignment {"L", "R", "C"}
+
+button.default {"Y", "N"}
+button.outercolor
+button.tooltiptext
+button.style = {"D", "F"}
+button.caption
+button.caption_ru
+
+numberbox.autoprecision {"Y", "N"} | {"A", "E", "L", "H"}
+numberbox.largenumber {"Y", "N"}
+numberbox.decimals { 0, 1, 2, Е }
+numberbox.roundtype {"R", "T"}
+numberbox.formatting
+numberbox.caption
+numberbox.caption_ru
+numberbox.captionwidth
+numberbox.showplus {"Y", "N"}
+numberbox.positiveonly {"Y", "N"}
+numberbox.alignment {"L", "R", "C"}
+numberbox.maxlength
+numberbox.locked {"Y", "N"}
+numberbox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \nСNТ Ц display only text. СUТ - display whole control (with underline and button)
+numberbox.text
+numberbox.tooltiptext
+numberbox.supportnulls {"Y", "N"}
+numberbox.format
+numberbox.minvalue
+numberbox.maxvalue
+
+checkbox.mode {"C", "R", "B", "T", "P", "S"}  Gets/Sets CheckBox control mode:\n"C" - Checkbox\n"R" - Radiobutton\n"B" - Pushlike\n"T" - ThreeState mode \n"P" - Plus-Minus mode (with third state(shown as dot icon) enabled)\n"S" - small Plus-Minus mode (with third state(shown as dot icon) enabled)\n
+checkbox.outercolor
+checkbox.caption
+checkbox.caption_ru
+checkbox.tooltiptext
+checkbox.locked {"Y", "N"}
+checkbox.autowidth {"Y", "N"}
+
+groupbox.outercolor
+groupbox.bordercolor
+groupbox.style "[B][F][R]"
+
+textbox.case
+textbox.caption
+textbox.caption_ru
+textbox.captionwidth
+textbox.alignment {"L", "R", "C"}
+textbox.maxlength
+textbox.locked {"Y", "N"}
+textbox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \nСNТ Ц display only text. СUТ - display whole control (with underline and button)
+textbox.text
+textbox.multiline {"Y", "N"}
+textbox.tooltiptext
+textbox.wordwrap {"Y", "N"}
+textbox.passwordchar
+
+datebox.format
+datebox.caption
+datebox.caption_ru
+datebox.captionwidth
+datebox.style = {"D", "F"}
+datebox.locked {"Y", "N"}
+datebox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \nСNТ Ц display only text. СUТ - display whole control (with underline and button)
+
+timebox.alignment {"L", "R", "C"}
+timebox.maxlength
+timebox.caption
+timebox.caption_ru
+timebox.captionwidth
+timebox.locked {"Y", "N"}
+timebox.text
+timebox.showseconds {"Y", "N"}
+timebox.tooltiptext
+timebox.supportnulls {"Y", "N"}
+timebox.style = {"D", "F"}
+timebox.alignment {"L", "R", "C"}
+
+label.caption
+label.caption_ru
+label.alignment {"L", "R", "C"}
+label.autowidth {"Y", "N"}
+
+logbox.showtime  {"Y", "N"}
+
+combobox.droppedsize number of items in dropped list box (5 by default)
+combobox.tooltiptext
+combobox.caption
+combobox.caption_ru
+combobox.captionwidth
+combobox.locked  {"Y", "N"}
+combobox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \nСNТ Ц display only text. СUТ - display whole control (with underline and button)
+combobox.supportnulls  {"Y", "N"}
+combobox.editenabled  {"Y", "N"}
+combobox.sorted  {"Y", "N"}
+combobox.style = {"D", "F"}
+
+checklistbox.tag
+
+colorpicker.style
+
+grid.title
+grid.style "hline;vline;openlevel;striped;oddrowcolor;evenrowcolor"\nfor example: "n,y,3,y,#ffffff,#dddddd"
+
+cube.title
+cube.style "hline,vline,openlevel,striped,oddrowcolor,evenrowcolor"	\n for example: "n,y,3,y,#ffffff,#dddddd"
+cube.groups "ColumnId1,ColumnId2"\ncolumn IDs
+cube.sorting "ColumnId,Ascending"\nfor example: "Time,Y"
+cube.datastyle "backcolor,forecolor,style"\nfor example: "#ffffff,#dddddd,N"; style: {"N", "B", "I"}
+cube.groupstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {"N", "B", "I"}
+cube.rootstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {"N", "B", "I"}
+cube.multiselect {"Y", "N"}
+
+column.caption
+column.caption_ru
+column.id
+column.tooltiptext
+column.width
+column.align
+column.format
+column.visible
+column.sortcolumn
+
+option.code
+option.caption
+option.caption_ru
+
+frame.backcolor
+frame.name
+frame.visible
+frame.enabled
+frame.height
+frame.sizable
+frame.minheight
+frame.tag
+
+tabctrl.facecolor
+tabctrl.faceforecolor
+tabctrl.backforecolor
+tabctrl.hbackforecolor
+
+webbrowser.browser
+
+form.caption
+form.backcolor
+form.font "name;size;italic;bold;underline"\nfor example: "Tahoma;8;N;Y;N"
+form.position "left;top;width "\nheight is determined by visible frames
+form.center {"Y", "N"}\n"Y" - center form relative to it's parent
+form.scalemode  {"0", "1"}\n"0" - pixels; "1" - points (by default)
+form.sizable Sizable = {"Y", "N"}\n"Y" - form should have sizable frame
+form.minwidth
+
+template.name
+template.type {"report", "utility", "deal"} (в Arena не анализируетс€)
+template.license выражение дл€ проверки лицензии (в Arena не используетс€)
+template.access выражение дл€ проверки прав
+template.minkplusversion минимальна€ верси€ Kondor дл€ данной формы.maxkplusversion = УФ
+template.maxkplusversion макимальна€ верси€ Kondor дл€ данной формы.maxkplusversion = УФ
+template.style {"dropdown"}
+template.minterminalbuild
+template.minterminalversion
+template.version
+template.released
+
+string.id
+value.lang
+value.text
+
+menu.instance
+menu.recreate {"Y", "N"}
+
