@@ -51,7 +51,7 @@ end
 local sql_objects={}
 local function sql_FillMapFile_tread()
 --—читываем мессадж с объектами из сорсов и сохран€ем его в файле
-
+    if props['script.restarted']== 'Y' then return end
     print("Start reload sql object map")
 
     local cmd =
@@ -154,8 +154,9 @@ local function local_OnOpen()
                 io.close(file)
                 msg_SqlObjectMap = mblua.RestoreMessage(msgPath)
             end
-            if not reloaded then
+            if not reloaded and props['sqlobject.mapreloadtime'] ~= os.date():sub(0,8) then
                 reloaded = true
+                props['sqlobject.mapreloadtime'] = os.date():sub(0,8)
                 if props['sidebar.pan'] ~= '1' then sql_FillMapFile_tread() end
             end
         end

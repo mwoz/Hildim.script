@@ -93,6 +93,7 @@ local function SaveSettings()
 	SaveKey('view.indentation.guides')
 	SaveKey('view.whitespace')
 	SaveKey('wrap')
+	SaveKey('sqlobject.mapreloadtime')
 
 	if pcall(io.output, file) then
 		io.write(text)

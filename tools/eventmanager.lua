@@ -31,9 +31,14 @@ History:
 			Use this value to remove handler added with RunOnce option.
 --]]-----------------------------------------------------------------
 
-
+require 'shell'
 local events  = {}
 local _remove = {}
+
+function RestartStartupScript()
+    props['script.restarted']= 'Y'
+    scite.ReloadStartupScript()
+end
 
 --- Удаляет обработчики, намеченные для удаления
 -- В конце обнуляет список "к удалению"

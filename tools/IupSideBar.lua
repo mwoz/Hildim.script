@@ -29,7 +29,7 @@ local function  CreateTab()
                             TabBar_obj.Tabs.m4.handle,
                             TabBar_obj.Tabs.template.handle,
                             TabBar_obj.Tabs.livesearch.handle,
-                            gap='3'
+                            gap='3',margin='3x0'
                         }
     return tolsp1
 end
@@ -81,6 +81,7 @@ local function  CreateBox()
     vbox = iup.vbox{tabs}       --SideBar_obj.Tabs.livesearch.handle,
     return vbox
 end
+local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse"}
 
 local function InitSideBar()
 --SideBar_obj._DEBUG = true --включает вывод отладочной информации
@@ -92,7 +93,6 @@ local function InitSideBar()
     SideBar_obj.Active = true
 
     local dlg
-    local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse"}
     local tDlg = {CreateBox(); title="SideBar", maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="100x100"}
     tDlg.show_cb=(function(h,state)
         if state == 0 then
@@ -133,8 +133,9 @@ local function InitSideBar()
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
+end
 
-
+local function InitToolBar()
     TabBar_obj.Tabs = {}
                      --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
     local tTlb = {CreateTab();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
@@ -204,9 +205,10 @@ function SideBar_ShowHide(mode)
         props['sidebar.pan']=1
     end
     DestroyDialogs()
-    scite.ReloadStartupScript()
+    if props['script.restarted'] ~= 'Y' then RestartStartupScript() end
+    --scite.ReloadStartupScript()
 
 end
 
 InitSideBar()
-
+InitToolBar()
