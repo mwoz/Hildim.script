@@ -64,6 +64,7 @@ local function sql_FillMapFile_tread()
     cmd = cmd..file:read('*a')
     file:close()
 
+    props['script.blockrestart'] = 'Y'
     scite.RunLuaThread(cmd,"resetmap.lua+3 strings in header|:::LUA::: sql_ResetMap()")
 
 end
@@ -144,7 +145,6 @@ AddEventHandler("GoToObjectDefenition", function(txt)
 end)
 
 local function local_OnOpen()
-
     local ext = props["FileExt"]:lower()
     props["output.hook"] = 'N'
     if ext == "m" or ext == "sql" or ext == "inc" or ext == "xml" then
@@ -156,8 +156,8 @@ local function local_OnOpen()
             end
             if not reloaded and props['sqlobject.mapreloadtime'] ~= os.date():sub(0,8) then
                 reloaded = true
-                props['sqlobject.mapreloadtime'] = os.date():sub(0,8)
-                if props['sidebar.pan'] ~= '1' then sql_FillMapFile_tread() end
+                sql_FillMapFile_tread ()
+                -- if props['sidebar.pan'] ~= '1' then  end
             end
         end
     else
@@ -178,6 +178,8 @@ function sql_ResetMap()
         io.close(file)
         msg_SqlObjectMap = mblua.RestoreMessage(msgPath)
     end
+    props['script.blockrestart'] = ''
+    props['sqlobject.mapreloadtime'] = os.date():sub(0,8)
 end
 
 local function local_OnSave()

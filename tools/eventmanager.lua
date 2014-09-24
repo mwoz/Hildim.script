@@ -31,11 +31,12 @@ History:
 			Use this value to remove handler added with RunOnce option.
 --]]-----------------------------------------------------------------
 
-require 'shell'
+
 local events  = {}
 local _remove = {}
 
 function RestartStartupScript()
+    if props['script.restarted']== 'Y' or props['script.blockrestart'] == 'Y' then return end
     props['script.restarted']= 'Y'
     scite.ReloadStartupScript()
 end
@@ -166,7 +167,7 @@ function DestroyDialogs()
     iup.ShowSideBar(-1)
 end
 AddEventHandler("OnMenuCommand", function(cmd, source)
-    if (cmd == IDM_QUIT or cmd == 9117) and _G.dialogs then DestroyDialogs() end
+    if (cmd == IDM_QUIT or (cmd == 9117 and props['script.restarted']~= 'Y' and props['script.blockrestart'] ~='Y')) and _G.dialogs then DestroyDialogs() end
 end)
 
 --–асширение iup.TreeAddNodes - позвол€ет в табличном представлении дерева задавать свойство userdata
