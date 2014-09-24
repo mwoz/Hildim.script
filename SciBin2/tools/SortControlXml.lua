@@ -79,20 +79,16 @@ local alltags = {
 
 
 function SortFormXML()
-    local tblIndex = {} --таблицу с индексами в качестве знпчений и именами в качестве имен полей
+    local tblIndex = {} --таблицу с индексами в качестве значений и именами в качестве имен полей
 	for i = 1, table.maxn(alltags) do
 		tblIndex[alltags[i]] = i
 	end
 
     local sText = editor:GetSelText()--  props['CurrentSelection']
-    local strtempl = '<control ([^<]*)(>)'
+    local strtempl = '<control ([^<]-)(%/?>)' --первый подшаблон - нежадный, дабы '/' по возможности попала во второй
     local wrdtempl = '([%w_]*)="([^"]*)"'
     local strout = sText:gsub(strtempl,function(s1,s2)
-            --нашли ноду контрола. разберемся с символом / в конце строки перед >
-            if string.sub(s1,string.len(s1)) == '/' then
-                s1 = string.sub(s1,1,string.len(s1)-1)
-                s2 = '/>'
-            end
+
             local tblTags = {}   --сложим сюда имена тегов в том порядке, в котором они лежат в ноде
             local tblMaps = {}   --смепируем значения тэгов с именами
             s1:gsub(wrdtempl,function(w1,w2)

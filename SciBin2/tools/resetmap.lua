@@ -60,3 +60,4 @@ end
 msg_SqlObjectMap:Store(strOut)
 print("Sql object map reloaded")
 
+
