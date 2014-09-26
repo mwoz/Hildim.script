@@ -43,7 +43,7 @@ local wrdMidleInent =  {
                         {"^(%s*)Case%W",3}}
 local strTab = string.rep(' ',props['tabsize'])
 
-local keywords = {"If","Then","For","To","Each","In","Select","Case","Sub","Function","Do","While","Until","With","Set",
+local keywords = {"If","Then","For","To","Each","In","Select","Case","Sub","Function","Do","While","Until","With","Set",  "Let", "Get", "Default", "Private", "Public", "Property", "Class",
                   "End","Next","Loop","Else","ElseIf","Or ","And ","Not ","True","False","IsNull","Is","Nothing","Exit","Wend","ExecuteGlobal"}
 local keywordsUp = {}
 local lk = table.maxn(keywords)

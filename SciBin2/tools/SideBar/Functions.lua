@@ -241,39 +241,50 @@ do
 			local let = AnyCase"let"
 			local get = AnyCase"get"
 			local set = AnyCase"set"
+			local public = AnyCase"public"
+			local private = AnyCase"private"
 		local s = AnyCase"sub"
         local fr=Cmt(AnyCase"<frame name=",(function(s,i) if _group_by_flags then return i else return nil end end))
         local str=Cmt(AnyCase"<string id=",(function(s,i) if _group_by_flags then return i else return nil end end))
 		local con=Cmt(AnyCase"const",(function(s,i) if _group_by_flags then return i else return nil end end))
 		local dim=Cmt(AnyCase"dim",(function(s,i) if _group_by_flags then return i else return nil end end))
+		local class=Cmt(AnyCase"class",(function(s,i) if _group_by_flags then return i else return nil end end))
 
 		--local scr=P("<script>")
 		--local stt=P("<stringtable>")
 
 		local restype = (P"As"+P"as")*SPACE*Cg(C(AZ^1),'')
-		let = Cg(let*Cc(true),'pl')
-		get = Cg(get*Cc(true),'pg')
-		set = Cg(set*Cc(true),'ps')
-		p = NL*p*SC^1*(let+get+set)
+		let = Cg(let*Cc(true),'Property Let')
+		get = Cg(get*Cc(true),'Property Get')
+		set = Cg(set*Cc(true),'Property Set')
+		private = Cg(private*Cc(true),' Private')
+		public = Cg(public*Cc(true),' Public')
+		p = NL*(private+public)*SC^1*p*SC^1*(let+get+set)
+		local ps = NL*(private+public)*SC^1*Cg(s*Cc(true),'Sub')
 		s = NL*Cg(s*Cc(true),'Sub')
+		local pf = NL*(private+public)*SC^1*Cg(f*Cc(true),'Function')
 		f = NL*Cg(f*Cc(true),'Function')
 		dim = NL*Cg(dim*Cc(true),"Dim")
 		con = NL*Cg(con*Cc(true),"Constant")
 		fr = NL*Cg(fr*Cc(true),"Frame")
 		str = NL*Cg(str*Cc(true),"String")
+		class = NL*Cg(class*Cc(true),"Class")
 
 		local e = NL*AnyCase"end"*SC^1*(AnyCase"sub"+AnyCase"function"+AnyCase"property")
-		local body = (IGNORED^1 + IDENTIFIER + 1 - f - s - p - e)^0*e
+		local body = (IGNORED^1 + IDENTIFIER + 1 - f - s - p - ps - pf - e)^0*e
 
 		-- definitions to capture:
 		f = f*SC^1*I*SC^0*par
 		p = p*SC^1*I*SC^0*par
 		s = s*SC^1*I*SC^0*par
+		ps = ps*SC^1*I*SC^0*par
+		pf = pf*SC^1*I*SC^0*par
 		con = con*SC^1*I
 		dim = dim*SC^1*I
 		fr = fr*BR^1*I
 		str = str*BR^1*I
-		local def = Ct((f + s + p)*(SPACE*restype)^-1)*body + Ct(dim+con+fr+str)
+		class = class*SC^1*I
+		local def = Ct((f + s + p + ps + pf)*(SPACE*restype)^-1)*body + Ct(dim+con+fr+str+class)
 		-- resulting pattern, which does the work
 
 		local patt = (def + IGNORED^1 + IDENTIFIER + (1-NL)^1 + NL)^0 * EOF

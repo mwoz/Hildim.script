@@ -167,7 +167,7 @@ end
 local function FindTab_Init()
     cmb_listMbTrancport = iup.list{dropdown="YES",visible_items="15", expand='NO',size='70x0', action=listMbTrancport_DoLua, tip='Список доступных мессаджбасов. файлы с их описанием в\nScite\\data\\UserData\\connectmb' }
     cmb_listMbTrancport.map_cb=(function(h) h.value=tonumber(props["sidebar.mb.transport.value"]); end)
-    cmb_Subjects = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Db-subject. Используется для посылки запросов при показе списков полей таблиц и пр.\n(Modullar - кастомная база,Radius  - основная)'}
+    cmb_Subjects = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Mb-префикс Db Adapter-а, используемого для посылки запросов при показе списков полей таблиц и пр.\n(Modullar - кастомная база,Radius  - основная)'}
     iup.SetAttribute(cmb_Subjects, 1, "ATRIUM")
     iup.SetAttribute(cmb_Subjects, 2, "RADIUS.KPLUS")
     iup.SetAttribute(cmb_Subjects, 3, "MODULLAR.KPLUS")
@@ -180,7 +180,7 @@ local function FindTab_Init()
         handle = iup.hbox{  iup.label{title = "Mb:"},
                             cmb_listMbTrancport,
                             chk_RunConnect,
-                            iup.label{title = "Db Subj.:"},
+                            iup.label{title = "Adapter:"},
                             cmb_Subjects,
                             btn_Open_Exec,
                             alignment="ACENTER"};

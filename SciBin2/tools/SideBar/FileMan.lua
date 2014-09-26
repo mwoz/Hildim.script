@@ -251,6 +251,7 @@ local function Favorites_ListFILL()
         list_favorites:setcell(i, 2, s[1])
     end
     list_favorites.redraw = "ALL"
+
 end
 
 function Favorites_OpenList()
@@ -265,7 +266,7 @@ function Favorites_OpenList()
 		end
 		favorites_file:close()
 	end
-	Favorites_ListFILL()
+	--Favorites_ListFILL()
 end
 
 
@@ -343,8 +344,8 @@ local function Favorites_ShowFilePath()
 	editor:CallTipShow(editor.CurrentPos, expansion)
 end
 
-local function OnSwitch()
-    if SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id then
+local function OnSwitch(bForse)
+    if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
         local path = props['FileDir']
         if path == '' then return end
 		current_path = path:gsub('\\$','')..'\\'
@@ -473,12 +474,12 @@ local function FileManTab_Init()
                    iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,expand="HORIZONTAL", alignment="ACENTER"},
                    split_s
                  };
-        OnSwitchFile = OnSwitch;
-        OnSave = OnSwitch;
-        OnOpen = OnSwitch;
+        OnSwitchFile = function()OnSwitch(false) end;
+        OnSave = function()OnSwitch(false) end;
+        OnOpen = function()OnSwitch(false) end;
         OnFinalise = Favorites_SaveList;
         OnSideBarClouse = OnMyClouse;
-        tabs_OnSelect = OnSwitch;
+        tabs_OnSelect = function()OnSwitch(true) end;
     }
 end
 
