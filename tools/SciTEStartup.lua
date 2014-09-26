@@ -123,9 +123,6 @@ dofile (props["SciteDefaultHome"].."\\tools\\CopyPathToClipboard.lua")
 
 ----[[ Д О П О Л Н И Т Е Л Ь Н Ы Е  М Е Н Ю ]]--------------------------------
 
--- После выполнения команды "Найти в файлах..." создает пункт в контекстном меню консоли - "Открыть найденные файлы"
---dofile (props["SciteDefaultHome"].."\\tools\\OpenFindFiles.lua")
-
 -- Создает в контекстном меню таба (вкладки) подменю для команд SVN
 dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
 
@@ -135,7 +132,6 @@ dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
 ----[[ У Т И Л И Т Ы  И  И Н С Т Р У М Е Н Т Ы ]]-----------------------------
 
 -- SideBar: Многофункциональная боковая панель
---dofile (props["SciteDefaultHome"].."\\tools\\SideBar.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
 
 -- Color Image Viewer: Предпросмотр цвета и изображений

@@ -540,6 +540,7 @@ AddEventHandler("OnMenuCommand", function(msg, source)
         if 1 == curLine:find(">??Internal search for", 1, true) then
             local _,_,_,dir = curLine:find('"([^"]*)" in "([^"\*]*)')
             local prevFile = ''
+            local files = {}
             while true do
                 local fline = output:GetLine(lineNum)
                 if fline == '' or fline == nil then break end
@@ -549,10 +550,12 @@ AddEventHandler("OnMenuCommand", function(msg, source)
                 newFile = dir..newFile
                 if newFile ~= prevFile then
                     prevFile = newFile
-                    --print(newFile)
-                    scite.Open(newFile)
+                    table.insert(files, prevFile)
                 end
                 lineNum = lineNum + 1
+            end
+            for _,s in pairs(files) do
+                scite.Open(s)
             end
         end
         return true

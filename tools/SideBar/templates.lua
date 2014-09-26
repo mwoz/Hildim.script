@@ -62,7 +62,7 @@ local function FindTab_Init()
     cmb_resent = iup.list{dropdown="YES",visible_items="15", expand='NO', size='150x0',
             action=(function(h, text, item, state) props['precompiller.xmlname'] = text end), tip='Файл для компиляции.\n(Выбор из последних скомпилированных файлов)'}
 
-    btn_AddDoc = iup.button{image = 'IMAGE_AddDocument',bgcolor={0,0,0}, action=(function() iup.PassFocus();precomp_PreCompileTemplate();SSCtrls() end), tip='Проверить текущий шаблон XML на наличие\nошибок и добавить его в список(F7)'}
+    btn_AddDoc = iup.button{image = 'IMAGE_AddDocument',bgcolor={0,0,0}, action=(function() iup.PassFocus();precomp_PreCompileTemplate();SSCtrls() end), tip='Проверить текущий шаблон XML на наличие\nошибок и добавить его в данный список(F7)\nдля возможной последующей сборки'}
     btn_FormRun = iup.button{image = 'IMAGE_FormRun', action=listCalc_CompileSelectedTemplate, tip='Собрать выбранный шаблон и отправить\nего по мессаджбасу в Radius'}
     TabBar_obj.Tabs.template =  {
         handle =iup.expander{iup.hbox{   iup.label{title = "User:"},
