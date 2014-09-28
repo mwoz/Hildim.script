@@ -338,6 +338,7 @@ function OnSwitchLocal()
     if editor.Lexer ~= SCLEX_FORMENJINE then
         props['braces.open.*'] = props['braces.open']
         props['braces.close.*'] = props['braces.close']
+    else
         isformenjine = true
     end
 end

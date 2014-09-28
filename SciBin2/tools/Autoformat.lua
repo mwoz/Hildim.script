@@ -350,6 +350,7 @@ local function doAutoformat(current_pos)
 end
 
 local function OnChar_local(char)
+    if not editor.Focus then return end
     if string.byte(char) == 13 then
         if props["autoformat.line"]=="1" then doAutoformat(editor.CurrentPos - 1) end
         editor:ReplaceSel(nextIndent)
@@ -373,6 +374,7 @@ local function OnChar_local(char)
 end
 
 local function OnUpdateUI_local()
+    if not editor.Focus then return end
     local s = editor.SelectionStart
     local e = editor.SelectionEnd
     if iChangedLine > -1 and s == e and props["autoformat.line"]=="1" then
