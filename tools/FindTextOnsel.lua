@@ -243,15 +243,15 @@ function FindSelToConcole()
     if string.len(sText) > 0 then
 
         for line = 0, output.LineCount do
-            local level = scite.SendOutput(SCI_GETFOLDLEVEL, line)
+            local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
             if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-                scite.SendOutput(SCI_SETFOLDEXPANDED, line)
-                local lineMaxSubord = scite.SendOutput(SCI_GETLASTCHILD, line,-1)
-                if line < lineMaxSubord then scite.SendOutput(SCI_HIDELINES, line + 1, lineMaxSubord) end
+                scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
+                local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
+                if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
             end
         end
 
-        scite.SendOutput(SCI_SETSEL,0,0)
+        scite.SendFindRez(SCI_SETSEL,0,0)
 
         local count,lCount,line = 0,0,0
         local s,e = 0,-1
@@ -264,15 +264,15 @@ function FindSelToConcole()
                 lCount = lCount + 1
                 line = l
                 local str = editor:GetLine(l)
-                scite.SendOutput(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
+                scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
             end
         end
 
-        scite.SendOutput(SCI_REPLACESEL, '>!!    Occurrences: '..count..' in '..lCount..' lines\n' )
-        scite.SendOutput(SCI_SETSEL,0,0)
-        scite.SendOutput(SCI_REPLACESEL, '>??Internal search for "'..sText..'" in "'..props["FileNameExt"]..'" (Current)\n' )
+        scite.SendFindRez(SCI_REPLACESEL, '>!!    Occurrences: '..count..' in '..lCount..' lines\n' )
+        scite.SendFindRez(SCI_SETSEL,0,0)
+        scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..sText..'" in "'..props["FileNameExt"]..'" (Current)\n' )
 
-        if scite.SendOutput(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+        if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
     end
 end
 
@@ -525,9 +525,9 @@ AddEventHandler("OnClick", function(shift, ctrl, alt)
 
 end)
 AddEventHandler("OnContextMenu", function(lp, wp, source)       --סרטבךא err
-    if source ~= "OUTPUT" then return end
-    local lineNum = output:LineFromPosition(output.CurrentPos) + 1
-    local curLine = output:GetCurLine()
+    if source ~= "FINDREZ" then return end
+    local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
+    local curLine = findrez:GetCurLine()
     if 1 == curLine:find(">??Internal search for", 1, true) then
         return 'Open Files|60000|||[MAIN]'
     end
@@ -535,14 +535,14 @@ AddEventHandler("OnContextMenu", function(lp, wp, source)       --סרטבךא err
 end)
 AddEventHandler("OnMenuCommand", function(msg, source)
     if msg == 60000 then
-        local lineNum = output:LineFromPosition(output.CurrentPos) + 1
-        local curLine = output:GetCurLine()
+        local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
+        local curLine = findrez:GetCurLine()
         if 1 == curLine:find(">??Internal search for", 1, true) then
             local _,_,_,dir = curLine:find('"([^"]*)" in "([^"\*]*)')
             local prevFile = ''
             local files = {}
             while true do
-                local fline = output:GetLine(lineNum)
+                local fline = findrez:GetLine(lineNum)
                 if fline == '' or fline == nil then break end
                 if fline:find('>!!') == 1 then break end
                 local _,_,newFile = fline:find('([^:]*)',3)

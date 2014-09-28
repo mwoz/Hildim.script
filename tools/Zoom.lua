@@ -17,6 +17,8 @@ Authors: mozers™, Дмитрий Маслов
 local function ChangeFontSize(zoom)
 	if output.Focus then
 		props["output.magnification"] = output.Zoom
+	elseif findrez.Focus then
+		props["findrez.magnification"] = findrez.Zoom
 	else
 		props["magnification"] = zoom
 		props["print.magnification"] = zoom
