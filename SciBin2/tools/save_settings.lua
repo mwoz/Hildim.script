@@ -29,9 +29,9 @@ local function SaveKey(key)
 end
 
 local function SaveSettings()
-    local vs = output.LinesOnScreen*output:TextHeight(1)
+--[[    local vs = output.LinesOnScreen*output:TextHeight(1)
     if vs < 200 then vs = 200 end
-    props['output.vertical.size']=vs
+    props['output.vertical.size']=vs]]
 	local file = props["scite.userhome"]..'\\SciTEEx.session'
     text = ''
 	if pcall(io.input, file) then
@@ -53,9 +53,12 @@ local function SaveSettings()
 	SaveKey('magnification') -- параметр измен€етс€ в Zoom.lua
 
     SaveKey('mbTrancport.file')
+	SaveKey('findrez.magnification') -- параметр измен€етс€ в Zoom.lua
 	SaveKey('output.magnification') -- параметр измен€етс€ в Zoom.lua
 	SaveKey('output.vertical.size')
+	SaveKey('findrez.width')
 	SaveKey('output.wrap')
+	SaveKey('findrez.wrap')
 	SaveKey('precompiller.debugmode') -- включение дебагмоды радиуса
 	SaveKey('precompiller.radiususername') -- им€ пользовател€ радиус
 	SaveKey('print.magnification') -- параметр измен€етс€ в Zoom.lua
@@ -102,6 +105,7 @@ local function SaveSettings()
 end
 
 local function ToggleProp(prop_name)
+    if props[prop_name] == '' then props[prop_name] = '0' end
 	local prop_value = tonumber(props[prop_name])
 	if prop_value==0 then
 		props[prop_name] = '1'
@@ -134,6 +138,8 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
 		ToggleProp('wrap')
 	elseif cmd == IDM_WRAPOUTPUT then
 		ToggleProp('output.wrap')
+	elseif cmd == IDM_WRAPFINDRES then
+		ToggleProp('findrez.wrap')
 	elseif cmd == IDM_QUIT and tonumber(props['save.settings']) == 1 then
 		SaveSettings()  --ѕоскольку закрытие окна мы в любом случае выполн€ем  через IDM_QUIT
 	end

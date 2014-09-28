@@ -7,14 +7,14 @@ end
 
 local function Find_onKey(key)
     if key == 40 then  --down
-        local line = output:LineFromPosition(output.CurrentPos) + 1
-        output:SetSel(output:PositionFromLine(line), output.LineEndPosition[line])
+        local line = findrez:LineFromPosition(findrez.CurrentPos) + 1
+        findrez:SetSel(findrez:PositionFromLine(line), findrez.LineEndPosition[line])
     elseif key == 38 then
-        local line = output:LineFromPosition(output.CurrentPos) - 1
-        output:SetSel(output:PositionFromLine(line), output.LineEndPosition[line])
+        local line = findrez:LineFromPosition(findrez.CurrentPos) - 1
+        findrez:SetSel(findrez:PositionFromLine(line), findrez.LineEndPosition[line])
 
     elseif key == 13 then  --enter
-        local _,_, n = string.find(output:GetSelText(), ':(%d+):')
+        local _,_, n = string.find(findrez:GetSelText(), ':(%d+):')
         if n==nil then
             Find_onChange()
             return
@@ -28,11 +28,11 @@ end
 
 local function Find_onFocus(setfocus)
     if not setfocus then
-        local a = output:findtext('^>!!/\\', SCFIND_REGEXP, 0)
+        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
         if a then
-            output.TargetStart = a
-            output.TargetEnd = a+5
-            output:ReplaceTarget('>!!  ')
+            findrez.TargetStart = a
+            findrez.TargetEnd = a+5
+            findrez:ReplaceTarget('>!!  ')
         end
     end
 end
@@ -44,11 +44,11 @@ local function FindTab_Init()
     txt_search = iup.text{expand='YES', tip='"Живой" поиск(Alt+S)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onChange(c)
         local sText = c.value
-        local a = output:findtext('^>!!/\\', SCFIND_REGEXP, 0)
+        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
         if a then
-            output.TargetStart = 0
-            output.TargetEnd = output.LineEndPosition[output:LineFromPosition(a)]+1
-            output:ReplaceTarget('')
+            findrez.TargetStart = 0
+            findrez.TargetEnd = findrez.LineEndPosition[findrez:LineFromPosition(a)]+1
+            findrez:ReplaceTarget('')
         end
         if #sText == 0 then
             btn_search.active = 'NO'
@@ -66,15 +66,15 @@ local function FindTab_Init()
         if string.len(sText) > 0 then
 
             for line = 0, editor.LineCount do
-                local level = scite.SendOutput(SCI_GETFOLDLEVEL, line)
+                local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
                 if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-                    scite.SendOutput(SCI_SETFOLDEXPANDED, line)
-                    local lineMaxSubord = scite.SendOutput(SCI_GETLASTCHILD, line,-1)
-                    if line < lineMaxSubord then scite.SendOutput(SCI_HIDELINES, line + 1, lineMaxSubord) end
+                    scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
+                    local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
+                    if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
                 end
             end
 
-            scite.SendOutput(SCI_SETSEL,0,0)
+            scite.SendFindRez(SCI_SETSEL,0,0)
 
             local count,lCount,line = 0,0,0
             local s,e = 0,-1
@@ -87,42 +87,42 @@ local function FindTab_Init()
                     lCount = lCount + 1
                     line = l
                     if lCount == 50 then
-                        scite.SendOutput(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': ...\n')
+                        scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': ...\n')
                         break;
                     end
                     local str = editor:GetLine(l)
-                    scite.SendOutput(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
+                    scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
                 end
             end
 
-            scite.SendOutput(SCI_REPLACESEL, '>!!/\\  Occurrences: '..count..' in '..lCount..' lines\n' )
-            scite.SendOutput(SCI_SETSEL,0,0)
-            scite.SendOutput(SCI_REPLACESEL, '>??Internal search for "'..sText..'" in "'..props["FileNameExt"]..'" (Current)\n' )
-            output.CurrentPos = 1
-            if scite.SendOutput(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+            scite.SendFindRez(SCI_REPLACESEL, '>!!/\\  Occurrences: '..count..' in '..lCount..' lines\n' )
+            scite.SendFindRez(SCI_SETSEL,0,0)
+            scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..sText..'" in "'..props["FileNameExt"]..'" (Current)\n' )
+            findrez.CurrentPos = 1
+            if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
         end
     end
 
 
     txt_search.valuechanged_cb = (Find_onChange)
     txt_search.killfocus_cb = (function(h)
-        local a = output:findtext('^>!!/\\', SCFIND_REGEXP, 0)
+        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
         if a then
-            output.TargetStart = a
-            output.TargetEnd = a+5
-            output:ReplaceTarget('>!!  ')
+            findrez.TargetStart = a
+            findrez.TargetEnd = a+5
+            findrez:ReplaceTarget('>!!  ')
         end
     end)
     txt_search.k_any = (function(c, key)
         if key == 65364 then  --down
-            local line = output:LineFromPosition(output.CurrentPos) + 1
-            output:SetSel(output:PositionFromLine(line), output.LineEndPosition[line])
+            local line = findrez:LineFromPosition(findrez.CurrentPos) + 1
+            findrez:SetSel(findrez:PositionFromLine(line), findrez.LineEndPosition[line])
         elseif key == 65362 then --up
-            local line = output:LineFromPosition(output.CurrentPos) - 1
-            output:SetSel(output:PositionFromLine(line), output.LineEndPosition[line])
+            local line = findrez:LineFromPosition(findrez.CurrentPos) - 1
+            findrez:SetSel(findrez:PositionFromLine(line), findrez.LineEndPosition[line])
 
         elseif key == 13 then  --enter
-            local _,_, n = string.find(output:GetSelText(), ':(%d+):')
+            local _,_, n = string.find(findrez:GetSelText(), ':(%d+):')
             if n==nil then
                 Find_onChange(c)
                 return

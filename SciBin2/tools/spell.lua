@@ -350,19 +350,19 @@ function spell_ErrorList()
     out = out..'>!!    Errors: '..count..' in '..lCount..' lines\n'
 
     for line = 0, editor.LineCount do
-        local level = scite.SendOutput(SCI_GETFOLDLEVEL, line)
+        local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
         if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-            scite.SendOutput(SCI_SETFOLDEXPANDED, line)
-            local lineMaxSubord = scite.SendOutput(SCI_GETLASTCHILD, line,-1)
-            if line < lineMaxSubord then scite.SendOutput(SCI_HIDELINES, line + 1, lineMaxSubord) end
+            scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
+            local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
+            if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
         end
     end
 
-    scite.SendOutput(SCI_SETSEL,0,0)
-    scite.SendOutput(SCI_REPLACESEL, out)
-    if scite.SendOutput(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
-    scite.SendOutput(SCI_SETSEL,0,0)
-    scite.SendOutput(SCI_REPLACESEL, '>??Spell in "'..props["FileNameExt"]..'"\n')
+    scite.SendFindRez(SCI_SETSEL,0,0)
+    scite.SendFindRez(SCI_REPLACESEL, out)
+    if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+    scite.SendFindRez(SCI_SETSEL,0,0)
+    scite.SendFindRez(SCI_REPLACESEL, '>??Spell in "'..props["FileNameExt"]..'"\n')
 end
 
 local function OnContextMenu_local(lp, wp, source)       --ашибка eror  дочеринм
