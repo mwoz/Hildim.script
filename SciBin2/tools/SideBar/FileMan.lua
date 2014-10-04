@@ -351,7 +351,10 @@ local function OnSwitch(bForse)
 		current_path = path:gsub('\\$','')..'\\'
         -- if bClearMask then memo_mask:set_text = "" end
 		FileMan_ListFILL()
+    end
+    if not bForse then
         Favorites_OpenList()
+        Favorites_ListFILL()
     end
 end
 
