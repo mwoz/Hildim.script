@@ -250,8 +250,8 @@ function SideBar_ShowHide(mode)
         props['sidebar.pan']=1
     end
     DestroyDialogs()
-    if props['script.restarted'] ~= 'Y' then RestartStartupScript() end
-    --scite.ReloadStartupScript()
+    --if props['script.restarted'] ~= 'Y' then RestartStartupScript() end
+    scite.ReloadStartupScript()
 
 end
 

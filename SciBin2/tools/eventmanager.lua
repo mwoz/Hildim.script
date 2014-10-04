@@ -35,12 +35,6 @@ History:
 local events  = {}
 local _remove = {}
 
-function RestartStartupScript()
-    if props['script.restarted']== 'Y' or props['script.blockrestart'] == 'Y' then return end
-    props['script.restarted']= 'Y'
-    scite.ReloadStartupScript()
-end
-
 --- Удаляет обработчики, намеченные для удаления
 -- В конце обнуляет список "к удалению"
 local function RemoveAllOutstandingEventHandlers()
@@ -138,7 +132,7 @@ iup.scitedialog = function(t)
         if t.sciteparent == "IUPTOOLBAR" then
             dlg:showxy(0,0)
         elseif t.sciteparent == "IUPSTATUSBAR" then
-            dlg:showxy(0,0) 
+            dlg:showxy(0,0)
         elseif t.sciteparent == "SCITE" then
             dlg:showxy(tonumber(props['dialogs.'..t.sciteid..'.x']),tonumber(props['dialogs.'..t.sciteid..'.y']))
         else
@@ -166,10 +160,28 @@ function DestroyDialogs()
             _G.dialogs[sciteid] = nil
         end
     end
+    _G.dialogs = nil
     iup.ShowSideBar(-1)
 end
 AddEventHandler("OnMenuCommand", function(cmd, source)
-    if (cmd == IDM_QUIT or (cmd == 9117 and props['script.restarted']~= 'Y' and props['script.blockrestart'] ~='Y')) and _G.dialogs then DestroyDialogs() end
+    -- if (cmd == IDM_QUIT or cmd == 9117) and _G.dialogs then DestroyDialogs() end
+    if cmd == IDM_QUIT and _G.dialogs then DestroyDialogs()
+    elseif cmd == 9117 then
+        if _G.dialogs then DestroyDialogs() end
+        scite.PostCommand(1,0)
+        return true
+    end
+end)
+
+AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
+    if id_msg == SCN_NOTYFY_ONPOST then
+        if wp == 1 then
+            print("Reload...")
+            scite.ReloadStartupScript()
+            OnSwitchFile("")
+            print("...Ok")
+        end
+    end
 end)
 
 --Расширение iup.TreeAddNodes - позволяет в табличном представлении дерева задавать свойство userdata

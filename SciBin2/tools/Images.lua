@@ -529,7 +529,7 @@ function load_image_CheckSpelling2()
 "156 156 156",
 "165 165 165",
 "173 173 173",
-"255 255 255"
+"240 240 240"
     }
   }
   return CheckSpelling2
@@ -574,7 +574,7 @@ function load_image_CheckSpelling()
 "214 222 239",
 "222 222 222",
 "222 231 239",
-"255 255 255"
+"240 240 240"
     }
   }
   return CheckSpelling

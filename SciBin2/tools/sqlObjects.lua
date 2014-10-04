@@ -51,7 +51,6 @@ end
 local sql_objects={}
 local function sql_FillMapFile_tread()
 --—читываем мессадж с объектами из сорсов и сохран€ем его в файле
-    if props['script.restarted']== 'Y' then return end
     print("Start reload sql object map")
 
     local cmd =
