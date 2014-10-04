@@ -93,8 +93,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\FoldText.lua")
 --Обработка шаблонов форм
 
 dofile (props["SciteDefaultHome"].."\\tools\\precompiller.lua")
--- Автодополнение объектов их методами и свойствами
-dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
+
 dofile (props["SciteDefaultHome"].."\\tools\\sqlObjects.lua")
 
 -- Вывод списка расшифровок (по Ctrl+B или автоматически) при неточном соответствии аббревиатуры
@@ -133,7 +132,8 @@ dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
 
 -- SideBar: Многофункциональная боковая панель
 dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
-
+-- Автодополнение объектов их методами и свойствами
+dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
 -- Color Image Viewer: Предпросмотр цвета и изображений
 dofile (props["SciteDefaultHome"].."\\tools\\CIViewer\\CIViewer.lua")
 

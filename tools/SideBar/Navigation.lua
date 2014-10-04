@@ -66,10 +66,10 @@ end
 local function Navigation_OnKey(key, shift, ctrl, alt, char)
 	if editor.Focus and alt then
         local newItem
-		if key == 188 then -- '<'
+		if key == 188 or key == 37 then -- '<'
 			if currentItem >= tonumber(list_navigation.numlin) then return end
 			newItem = currentItem + 1
-		elseif key == 190 then -- '>'
+		elseif key == 190 or key == 39 then -- '>'
 			if currentItem == 1 then return end
 			newItem = currentItem - 1
 		else
