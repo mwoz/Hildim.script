@@ -177,8 +177,3 @@ dofile (props["SciteDefaultHome"].."\\tools\\save_settings.lua")
 --Загрузка имэджей
 dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 
-if props['script.restarted']== 'Y' then
-    _G["OnSwitchFile"]()
-    print("Restarted...")
-end
-    props['script.restarted']= ''
