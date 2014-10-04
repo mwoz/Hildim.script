@@ -137,6 +137,8 @@ iup.scitedialog = function(t)
         dlg.rastersize = props['dialogs.'..t.sciteid..'.rastersize']
         if t.sciteparent == "IUPTOOLBAR" then
             dlg:showxy(0,0)
+        elseif t.sciteparent == "IUPSTATUSBAR" then
+            dlg:showxy(0,0) 
         elseif t.sciteparent == "SCITE" then
             dlg:showxy(tonumber(props['dialogs.'..t.sciteid..'.x']),tonumber(props['dialogs.'..t.sciteid..'.y']))
         else
@@ -145,7 +147,7 @@ iup.scitedialog = function(t)
             dlg:showxy(0,0)
             iup.ShowSideBar(tonumber(w))
         end
-        dlg.rastersize = "NULL"
+        --dlg.rastersize = "NULL"
     else
         dlg:show()
     end

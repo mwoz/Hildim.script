@@ -1,6 +1,7 @@
 require "gui"
 SideBar_obj = {}
 TabBar_obj = {}
+StatusBar_obj = {}
 local win_parent --создаем основное окно
 local tbs
 local vbox
@@ -18,7 +19,7 @@ end
 function sidebar_Focus()
     iup.SetFocus(SideBar_obj.TabCtrl)
 end
-local function  CreateTab()
+local function  CreateToolBar()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\LiveSearch.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\m4.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\mb.lua")
@@ -29,6 +30,14 @@ local function  CreateTab()
                             TabBar_obj.Tabs.m4.handle,
                             TabBar_obj.Tabs.template.handle,
                             TabBar_obj.Tabs.livesearch.handle,
+                            gap='3',margin='3x0'
+                        }
+    return tolsp1
+end
+local function  CreateStatusBar()
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Status.lua")
+    local tolsp1=iup.hbox{
+                            StatusBar_obj.Tabs.statusbar.handle,
                             gap='3',margin='3x0'
                         }
     return tolsp1
@@ -138,7 +147,7 @@ end
 local function InitToolBar()
     TabBar_obj.Tabs = {}
                      --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
-    local tTlb = {CreateTab();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
+    local tTlb = {CreateToolBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
     tTlb.sciteparent="IUPTOOLBAR"
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
@@ -166,6 +175,42 @@ local function InitToolBar()
         end
     end
     TabBar_obj.size = TabBar_obj.handle.size
+    iup.PassFocus()
+end
+
+
+local function InitStatusBar()
+    StatusBar_obj.Tabs = {}
+                     --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
+    local tTlb = {CreateStatusBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
+    tTlb.sciteparent="IUPSTATUSBAR"
+    tTlb.control = "YES"
+    tTlb.sciteid="iupstatusbar"
+    tTlb.show_cb=(function(h,state)
+
+        if state == 0 and props['iuptoolbar.visible'] == '1' and props['iuptoolbar.restarted'] ~= '1' then
+           -- scite.MenuCommand(IDM_VIEWTLBARIUP)
+        elseif state == 4 then
+            for _,tbs in pairs(StatusBar_obj.Tabs) do
+                if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
+            end
+            for i = 1, #tEvents do
+                for _,tbs in pairs(StatusBar_obj.Tabs) do
+                   if tbs[tEvents[i]] then RemoveEventHandler(tEvents[i],tbs[tEvents[i]]) end
+                end
+            end
+            -- props['iuptoolbar.restarted'] = '1'
+        end
+    end)
+    tTlb.resize_cb=(function(_,x,y) if StatusBar_obj.handle ~= nil then  StatusBar_obj.size = StatusBar_obj.handle.size end end)
+    StatusBar_obj.handle = iup.scitedialog(tTlb)
+    for i = 1, #tEvents do
+        for _,tbs in pairs(StatusBar_obj.Tabs) do
+            if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
+        end
+    end
+    StatusBar_obj.handle.size = TabBar_obj.handle.size
+    StatusBar_obj.size = StatusBar_obj.handle.size
     iup.PassFocus()
 end
 
@@ -212,3 +257,4 @@ end
 
 InitSideBar()
 InitToolBar()
+InitStatusBar()
