@@ -234,6 +234,7 @@ function FindMarkCurrentSelection()
 end
 
 function FindSelToConcole()
+    needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
     local sText = editor:GetSelText()
     if (sText == '') then sText = GetCurrentWord() end
 
@@ -267,10 +268,11 @@ function FindSelToConcole()
                 lCount = lCount + 1
                 line = l
                 local str = editor:GetLine(l)
+                if needCoding then str = str:from_utf8(1251) end
                 scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
             end
         end
-
+        if needCoding then sText = sText:from_utf8(1251) end
         scite.SendFindRez(SCI_REPLACESEL, '>!!    Occurrences: '..count..' in '..lCount..' lines\n' )
         scite.SendFindRez(SCI_SETSEL,0,0)
         scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..sText..'" in "'..props["FileNameExt"]..'" (Current)\n' )
@@ -499,6 +501,7 @@ function template_MoveControls()
         dlg2:show()
     end
 end
+
 
 AddEventHandler("OnClick", function(shift, ctrl, alt)
     if not shift and ctrl and alt then

@@ -1,5 +1,6 @@
 local txtCol, txtSel, lblSel, txtLine
 local isColor = false
+local needCoding = false
 local function ShowCurrentColour(pos, word)
 	if pos ~= 0 then
 		if word:match('%x%x%x%x%x%x') then
@@ -31,6 +32,7 @@ local function OnSwitch()
     end
     iup.GetGlobal('DLGBGCOLOR')
     scite.SendEditor(SCI_SETMOUSEDWELLTIME, t)
+    needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
 end
 
 local function _OnUpdateUI()
@@ -86,9 +88,11 @@ local function FindTab_Init()
         OnOpen=OnSwitch;
         OnSwitchFile=OnSwitch;
         SetFindRes = (function(what,count)
-                            if count > 0 then lblSel.value=what..'   :'..count..' entry'
-                                else lblSel.value=''
-                                end end)
+                            if count > 0 then
+                                if needCoding then what = what:from_utf8(1251) end
+                                lblSel.value=what..'   :'..count..' entry'
+                            else lblSel.value=''
+                    end end)
         }
 
 end
