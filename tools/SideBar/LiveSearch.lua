@@ -4,7 +4,7 @@ function sidebar_Find()
     iup.SetFocus(txt_search)
     txt_search.selection = '1:100'
 end
-
+local needCoding = false
 local function Find_onKey(key)
     if key == 40 then  --down
         local line = findrez:LineFromPosition(findrez.CurrentPos) + 1
@@ -37,13 +37,16 @@ local function Find_onFocus(setfocus)
     end
 end
 
-
+local function OnSwitch()
+    needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
+end
 
 local function FindTab_Init()
 
     txt_search = iup.text{expand='YES', tip='"Живой" поиск(Alt+S)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onChange(c)
         local sText = c.value
+        if needCoding then sText = sText:to_utf8(1251) end
         local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
         if a then
             findrez.TargetStart = 0
@@ -91,13 +94,14 @@ local function FindTab_Init()
                         break;
                     end
                     local str = editor:GetLine(l)
+                    if needCoding then str = str:from_utf8(1251) end
                     scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
                 end
             end
 
             scite.SendFindRez(SCI_REPLACESEL, '>!!/\\  Occurrences: '..count..' in '..lCount..' lines\n' )
             scite.SendFindRez(SCI_SETSEL,0,0)
-            scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..sText..'" in "'..props["FileNameExt"]..'" (Current)\n' )
+            scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..c.value..'" in "'..props["FileNameExt"]..'" (Current)\n' )
             findrez.CurrentPos = 1
             if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
         end
@@ -143,6 +147,8 @@ local function FindTab_Init()
         };
         tab = tab3;
 		OnSave = OnSwitch;
+        OnSwitchFile = OnSwitch;
+        OnOpen = OnSwitch;
         OnKey = _OnKey;
 		tabs_OnSelect = OnSwitch;
         on_SelectMe = function() cmb_listCalc:set_focus() end
