@@ -11,7 +11,7 @@ local list_dir
 local split_s
 local bymemokey=0
 
-props["dwell.period"] = 50
+
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
 	local i, j = 1

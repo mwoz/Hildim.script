@@ -56,8 +56,11 @@ function SelectMethod()
 			EditorMarkText(m.pos, m.len, current_mark_number)
 			iFind = iFind + 1
 		end
+    else
+        sText = ''
 	end
     iMark = props["findtextsimple.count"]
+    StatusBar_obj.Tabs.statusbar.SetFindRes(sText, iFind)
     if iFind > 0 then strStatus='Sel+{'..tostring(iFind-1)..'}' else strStatus='NoSel'  end
     if iMark ~= '0' then strStatus = strStatus..' | Mark{'..iMark..'}' end
 	props['findtext.status'] = strStatus

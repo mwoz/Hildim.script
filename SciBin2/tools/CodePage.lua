@@ -77,7 +77,6 @@ local function UpdateStatusCodePage(mode)
 
 	props["editor.code.page"]=editor:codepage()
 	scite.CheckMenus()
-	scite.UpdateStatusBar()
 end
 
 local function CharsetDetect()

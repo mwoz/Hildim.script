@@ -44,8 +44,6 @@ local function SetReadOnly(ro)
 
 		props["scite.readonly"] = "EDIT"
 	end
-
-	scite.UpdateStatusBar()
 end
 
 -- Добавляем свой обработчик события OnSwitchFile

@@ -25,7 +25,6 @@ local function ChangeFontSize(zoom)
 		editor.PrintMagnification = zoom
 		local font_current_size = props["style.*.32"]:match("size:(%d+)")
 		props["font.current.size"] = font_current_size + zoom -- Used in statusbar
-		scite.UpdateStatusBar()
 	end
 end
 

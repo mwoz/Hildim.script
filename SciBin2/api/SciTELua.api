@@ -397,8 +397,11 @@ scite.SendEditor
 scite.SendOutput
 scite.ShowParametersDialog
 scite.Perform
-scite.UpdateStatusBar
 scite.ReloadStartupScript
+scite.SetSideBarWidth
+scite.RunLuaThread
+scite.GetTranslation
+scite.InsertAbbreviation
 
 Open(filename)\n opens a file in a new buffer
 ConstantName(number)\n returns the symbolic name of a Scintilla / SciTE constant
@@ -407,7 +410,6 @@ SendEditor(SCI_constant, ...)\n sends a message to the editor pane
 SendOutput(SCI_constant, ...)\n sends a message to the output pane
 ShowParametersDialog(text)\n show parametrs dialog with message (txt) and return result action (only SciTE-Ru)
 Perform("action")\n execute commands of SciTE Director Interface (only SciTE-Ru)
-UpdateStatusBar([bUpdateSlowData])\n perform update status bar
 ReloadStartupScript()\n reload startup script
 
 props[string] = text_value
