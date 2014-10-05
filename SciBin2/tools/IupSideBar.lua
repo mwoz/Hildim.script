@@ -9,6 +9,8 @@ local vFuncNav
 local vAbbrev
 local vSys
 local vFileMan
+local oDeatt
+local WinDrop
 
 function sidebar_Switch(n)
     SideBar_obj.TabCtrl.valuepos = n -1
@@ -88,7 +90,45 @@ local function  CreateBox()
     SideBar_obj.TabCtrl = tabs
 
     vbox = iup.vbox{tabs}       --SideBar_obj.Tabs.livesearch.handle,
-    return vbox
+    oDeatt = iup.detachbox{
+        vbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";
+        detached_cb=(function(h, hNew, x, y)
+            hNew.maxbox="NO"
+            hNew.minbox ="NO"
+            hNew.resize ="YES"
+            hNew.minsize="100x100"
+            hNew.x=10
+            hNew.y=10
+            x=10;y=10
+            hNew.rastersize = props['dialogs.sidebar.rastersize']
+            props['sidebar.win']=1
+            props['dialogs.sidebarp.rastersize'] = h.rastersize
+
+            hNew.close_cb =(function(h)
+                if _G.dialogs['sidebar'] ~= nil then
+
+                    props['sidebar.win']=0
+                    local w = props['dialogs.sidebarp.rastersize']:gsub('x%d*', '')
+                    iup.ShowSideBar(tonumber(w))
+                    oDeatt.restore = 1
+                    _G.dialogs['sidebar'] = nul
+                    return -1
+                end
+            end)
+            hNew.show_cb=(function(h,state)
+                if state == 0 then
+                    _G.dialogs['sidebar'] = oDeatt
+                elseif state == 4 then
+                    props["dialogs.sidebar.x"]= h.x
+                    props["dialogs.sidebar.y"]= h.y
+                    props['dialogs.sidebar.rastersize'] = h.rastersize
+                end
+            end)
+            iup.ShowSideBar(-1)
+            return tonumber(props["dialogs.sidebar.x"])*2^16+tonumber(props["dialogs.sidebar.y"])
+        end)
+        }
+    return oDeatt
 end
 local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse"}
 
@@ -127,15 +167,12 @@ local function InitSideBar()
         if key == 65307 then iup.PassFocus() end
     end)
 
-    if SideBar_obj.win then
-        tDlg.sciteparent="SCITE"
-        tDlg.sciteid="sidebar"
-    else
         tDlg.sciteparent="SIDEBAR"
         tDlg.control = "YES"
         tDlg.sciteid="sidebarp"
-    end
+    -- end
     dlg = iup.scitedialog(tDlg)
+    if SideBar_obj.win then oDeatt.detach = 1 end
 
     for i = 1, #tEvents do
         for _,tbs in pairs(SideBar_obj.Tabs) do
@@ -235,24 +272,55 @@ function FillCombo(cmb,pathmask, strSel)
 	end
 end
 
-function SideBar_ShowHide(mode)
-    if mode=="hide" then
-        props['sidebar.hide']=1
-        props['sidebar.win']=0
-        props['sidebar.pan']=0
-    elseif mode=="win" then
-        props['sidebar.hide']=0
-        props['sidebar.win']=1
-        props['sidebar.pan']=0
+---Расширение iup
+_G.dialogs = {}
+iup.scitedialog = function(t)
+    local dlg = _G.dialogs[t.sciteid]
+    if dlg == nil then
+        dlg = iup.dialog(t)
+        iup.SetNativeparent(dlg, t.sciteparent)
+        _G.dialogs[t.sciteid] = dlg
+        dlg.rastersize = props['dialogs.'..t.sciteid..'.rastersize']
+        if t.sciteparent == "IUPTOOLBAR" then
+            dlg:showxy(0,0)
+        elseif t.sciteparent == "IUPSTATUSBAR" then
+            dlg:showxy(0,0)
+        elseif t.sciteparent == "SCITE" then
+            dlg:showxy(tonumber(props['dialogs.'..t.sciteid..'.x']),tonumber(props['dialogs.'..t.sciteid..'.y']))
+        else
+            local w = props['dialogs.'..t.sciteid..'.rastersize']:gsub('x%d*', '')
+            if w=='' then w='300' end
+            dlg:showxy(0,0)
+            iup.ShowSideBar(tonumber(w))
+        end
+        --dlg.rastersize = "NULL"
     else
-        props['sidebar.hide']=0
-        props['sidebar.win']=0
-        props['sidebar.pan']=1
+        dlg:show()
     end
-    DestroyDialogs()
-    --if props['script.restarted'] ~= 'Y' then RestartStartupScript() end
-    scite.ReloadStartupScript()
+    return dlg
+end
 
+--Уничтожение диалогов при выключении или перезагрузке
+iup.DestroyDialogs = function()
+    if _G.dialogs == nil then return end
+    if _G.dialogs['sidebar'] ~= nil then
+        _G.dialogs['sidebar'].restore = 1
+        _G.dialogs['sidebar'] = nul
+    end
+    for sciteid, dlg in pairs(_G.dialogs) do
+        if dlg ~= nil then
+            if sciteid ~= 'sidebarp' or props['sidebar.win'] == '0' then
+                props['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
+                props['dialogs.'..sciteid..'.x'] = dlg.x
+                props['dialogs.'..sciteid..'.y'] = dlg.y
+            end
+            _G.dialogs[sciteid] = nil
+            dlg:hide()
+            dlg:destroy()
+        end
+    end
+    _G.dialogs = nil
+    iup.ShowSideBar(-1)
 end
 
 InitSideBar()
