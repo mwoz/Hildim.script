@@ -309,7 +309,7 @@ function load_image_FormRun()
     "99 206 57" ,
     "107 214 57",
     "115 214 57",
-    "255 255 255"
+    "BGCOLOR"
     }
   }
   return FormRun2
@@ -425,7 +425,7 @@ local function load_image_AddDocument()
 "0 0 255",
 "0 132 0",
 "132 132 132",
-"255 255 255"
+"BGCOLOR"
     }
   }
   return AddDocument
@@ -455,7 +455,7 @@ function load_image_FormatBasic()
       15, 15, 15, 15, 15, 15, 8, 8, 8, 8, 8, 8, 8, 1, 1, 9,
     },
     colors = {
-    },bgcolor=0
+    }
   }
   return FormatBasic
 end
@@ -491,7 +491,7 @@ function load_image_search()
 "107 107 107",
 "181 181 181",
 "198 198 198",
-"255 255 255"
+"BGCOLOR"
     }
   }
   return search
@@ -529,7 +529,7 @@ function load_image_CheckSpelling2()
 "156 156 156",
 "165 165 165",
 "173 173 173",
-"240 240 240"
+"BGCOLOR"
     }
   }
   return CheckSpelling2
@@ -574,7 +574,7 @@ function load_image_CheckSpelling()
 "214 222 239",
 "222 222 222",
 "222 231 239",
-"240 240 240"
+"BGCOLOR"
     }
   }
   return CheckSpelling
