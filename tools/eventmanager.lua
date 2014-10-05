@@ -119,55 +119,11 @@ function RemoveEventHandler(EventName, Handler)
 	_remove[#_remove+1]={[EventName]=Handler}
 end
 
-
----Расширение iup
-_G.dialogs = {}
-iup.scitedialog = function(t)
-    local dlg = _G.dialogs[t.sciteid]
-    if dlg == nil then
-        dlg = iup.dialog(t)
-        iup.SetNativeparent(dlg, t.sciteparent)
-        _G.dialogs[t.sciteid] = dlg
-        dlg.rastersize = props['dialogs.'..t.sciteid..'.rastersize']
-        if t.sciteparent == "IUPTOOLBAR" then
-            dlg:showxy(0,0)
-        elseif t.sciteparent == "IUPSTATUSBAR" then
-            dlg:showxy(0,0)
-        elseif t.sciteparent == "SCITE" then
-            dlg:showxy(tonumber(props['dialogs.'..t.sciteid..'.x']),tonumber(props['dialogs.'..t.sciteid..'.y']))
-        else
-            local w = props['dialogs.'..t.sciteid..'.rastersize']:gsub('x%d*', '')
-            if w=='' then w='300' end
-            dlg:showxy(0,0)
-            iup.ShowSideBar(tonumber(w))
-        end
-        --dlg.rastersize = "NULL"
-    else
-        dlg:show()
-    end
-    return dlg
-end
-
---Уничтожение диалогов при выключении или перезагрузке
-function DestroyDialogs()
-    for sciteid, dlg in pairs(_G.dialogs) do
-        if dlg ~= nil then
-            props['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
-            props['dialogs.'..sciteid..'.x'] = dlg.x
-            props['dialogs.'..sciteid..'.y'] = dlg.y
-            dlg:hide()
-            dlg:destroy()
-            _G.dialogs[sciteid] = nil
-        end
-    end
-    _G.dialogs = nil
-    iup.ShowSideBar(-1)
-end
 AddEventHandler("OnMenuCommand", function(cmd, source)
     -- if (cmd == IDM_QUIT or cmd == 9117) and _G.dialogs then DestroyDialogs() end
-    if cmd == IDM_QUIT and _G.dialogs then DestroyDialogs()
+    if cmd == IDM_QUIT then iup.DestroyDialogs()
     elseif cmd == 9117 then
-        if _G.dialogs then DestroyDialogs() end
+        iup.DestroyDialogs()
         scite.PostCommand(1,0)
         return true
     end
