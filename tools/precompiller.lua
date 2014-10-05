@@ -174,7 +174,7 @@ local function OnSave_local()
                     strOut = strOut..strSource:sub(prevE)
                 else
                     allRight = false
-                    print("Not open "..strPath..props["precompiller.xmlname"])
+                    print("Not open "..precomp_strRootDir..strFull.." ("..props["precompiller.xmlname"]..")")
                 end
             end
         else

@@ -87,6 +87,15 @@ local function  CreateBox()
         end
     end)
 
+    tabs.rightclick_cb=(function()
+        if props['sidebar.win'] == '0' then
+            local mnu = iup.menu
+            {iup.item{title="Deattach Sidebar",action=(function()
+                oDeatt.detach = 1
+            end)}}:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+        end
+    end)
+
     SideBar_obj.TabCtrl = tabs
 
     vbox = iup.vbox{tabs}       --SideBar_obj.Tabs.livesearch.handle,
@@ -97,6 +106,7 @@ local function  CreateBox()
             hNew.minbox ="NO"
             hNew.resize ="YES"
             hNew.minsize="100x100"
+            hNew.title="SideBar /Close For Attach/"
             hNew.x=10
             hNew.y=10
             x=10;y=10
