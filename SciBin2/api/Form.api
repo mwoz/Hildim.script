@@ -633,6 +633,7 @@ cubectrl.SuperCubeRegister(msgSettings)
 cubectrl.SuperCubeUnregister()
 cubectrl.SuperCubeSetupDlg()
 cubectrl.SuperCubeGetSourcesForms()
+cubectrl.CheckedKeys() read-only; \nchkColumnId - Id ofcheckbox column (CheckBox format).\nReturns Message - contains keys(in field values) of checked rows.\nFieldCount = 0 if no cheked rows; \nOnly data rows (child) are returned(both visible and filtered out).
 
 cuberow.BackColor
 cuberow.ForeColor

@@ -140,7 +140,7 @@ local function  CreateBox()
         }
     return oDeatt
 end
-local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse"}
+local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand"}
 
 local function InitSideBar()
 --SideBar_obj._DEBUG = true --включает вывод отладочной информации

@@ -2,12 +2,49 @@ local myId = "Abbrev/Bmk"
 local list_abbrev
 
 local list_bookmarks
-local tab2
 local Abbreviations_USECALLTIPS = tonumber(props['sidebar.abbrev.calltip']) == 1
 local isEditor = false
+local prevLexer = -1
+local abbr_table
+
+local function InsAbbrev()
+    local curSel = editor:GetSelText()
+    local pos = editor.SelectionStart
+    local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)
+	for i,v in ipairs(abbr_table) do
+        if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
+            editor.SelectionStart = editor.SelectionStart - v.abbr:len()
+            local findSt = editor.SelectionStart
+            --Меняем: вставляем наш селекшн, коммент в начале убираем,\r убираем, вставляем табы, вставляем новые строки
+            local s =(v.exp:gsub('%%SEL%%', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'))
+
+
+            editor:BeginUndoAction()
+            editor:ReplaceSel(s)
+            local findEnd = editor.CurrentPos
+            local l1,l2 = editor:LineFromPosition(findSt),editor:LineFromPosition(findEnd)
+
+            for i = l1 + 1,l2  do
+                local ind = scite.SendEditor(SCI_GETLINEINDENTATION,i) +lBegin:len() - v.abbr:len()
+                scite.SendEditor(SCI_SETLINEINDENTATION,i, 0)  --чтобы избавиться от табов сначала сбрасываем отступ в 0 а потом выставляем нужный
+                --если просто выставить нужный, и он при этом не изменится, табы могут остаться
+                scite.SendEditor(SCI_SETLINEINDENTATION,i, ind)
+            end
+
+            local pos = editor:findtext('|', 0, findSt, findEnd)
+            if pos~=nil then
+                editor:SetSel(pos, pos+1)
+                editor:ReplaceSel('')
+            end
+            editor:EndUndoAction()
+            return
+        end
+	end
+    print("Error Abbrev not found in: '"..lBegin.."'")
+end
 
 ----------------------------------------------------------
--- tab1:list_bookmarks   Bookmarks
+-- list_bookmarks   Bookmarks
 ----------------------------------------------------------
 local table_bookmarks = {}
 
@@ -19,13 +56,14 @@ end
 
 
 ----------------------------------------------------------
--- tab2:list_abbrev   Abbreviations
+--list_abbrev   Abbreviations
 ----------------------------------------------------------
 local function Abbreviations_ListFILL()
+    if editor.Lexer == prevLexer then return end
 
 	iup.SetAttribute(list_abbrev, "DELLIN", "1-"..list_abbrev.numlin)
 	local abbrev_filename = props['AbbrevPath']
-	local abbr_table = ReadAbbrevFile(abbrev_filename)
+    abbr_table = ReadAbbrevFile(abbrev_filename)
 	if not abbr_table then return end
     iup.SetAttribute(list_abbrev, "ADDLIN", "1-"..#abbr_table)
 	for i,v in ipairs(abbr_table) do
@@ -33,6 +71,12 @@ local function Abbreviations_ListFILL()
         list_abbrev:setcell(i, 2, v.exp:gsub('\t','\\t'))
         list_abbrev:setcell(i, 3, v.exp)
 	end
+    table.sort(abbr_table, function(a, b)
+        if a.abbr:len() == b.abbr:len() then return a.abbr < b.abbr end
+        return a.abbr:len() > b.abbr:len()
+    end)
+    list_abbrev.redraw = 'ALL'
+    prevLexer = editor.Lexer
 end
 
 --local Abbreviations_HideExpansion
@@ -76,7 +120,6 @@ end
 
 local function Abbreviations_Init()
     --События списка функций
-
     list_abbrev = iup.matrix{
     numcol=3, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
@@ -91,10 +134,14 @@ local function Abbreviations_Init()
             Abbreviations_InsertExpansion()
         end
     end)
-
-	list_abbrev.enteritem_cb = (function(_, lin, col)
-        Abbreviations_ShowExpansion()
+	list_abbrev.tips_cb = (function(h, x, y)
+        local s = iup.GetAttribute(h, iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))..':2')
+        h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n')
     end)
+
+	--list_abbrev.enteritem_cb = (function(_, lin, col)
+        --Abbreviations_ShowExpansion()
+    --end)
 
 	list_abbrev.keypress_cb = (function(_, key, press)
         if press == 0 then return end
@@ -110,6 +157,7 @@ local function Abbreviations_Init()
         OnSwitchFile = Abbreviations_ListFILL;
         OnSave = Abbreviations_ListFILL;
         OnOpen = Abbreviations_ListFILL;
+        OnMenuCommand = (function(msg) if msg == IDM_ABBREV then InsAbbrev() return true;end end);
         on_SelectMe = (function()  Abbreviations_ListFILL();end)
         }
 end
