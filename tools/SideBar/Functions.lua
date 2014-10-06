@@ -259,7 +259,7 @@ do
 		set = Cg(set*Cc(true),'Property Set')
 		private = Cg(private*Cc(true),' Private')
 		public = Cg(public*Cc(true),' Public')
-		p = NL*(private+public)*SC^1*p*SC^1*(let+get+set)
+		p = NL*((private+public)*SC^1)^0*p*SC^1*(let+get+set)
 		local ps = NL*(private+public)*SC^1*Cg(s*Cc(true),'Sub')
 		s = NL*Cg(s*Cc(true),'Sub')
 		local pf = NL*(private+public)*SC^1*Cg(f*Cc(true),'Function')
