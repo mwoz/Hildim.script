@@ -7,31 +7,12 @@
 -- Подключение файла с общими функциями, использующимися во многих скриптах
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 
--- Поддержка записи и воспроизведения макросов
-dofile (props["SciteDefaultHome"].."\\tools\\macro_support.lua")
-
-----[[ К О Д И Р О В К А ]]-------------------------------------------------
-
--- Смена кодировки Win1251/DOS866 и индикация текущей кодировки в строке состояния
---dofile (props["SciteDefaultHome"].."\\tools\\CodePage.lua")
-
-----[[ С Т А Т У С Н А Я   С Т Р О К А ]]-----------------------------------
-
--- Показ имени текущего лексера в статусной строке
-dofile (props["SciteDefaultHome"].."\\tools\\lexer_name.lua")
-
 ----[[ Ш Р И Ф Т Ы ]]-------------------------------------------------------
-
--- Смена текущих шрифтов (Ctrl+F11)
-dofile (props["SciteDefaultHome"].."\\tools\\FontChanger.lua")
 
 -- При изменении текущего размера шрифта (Ctrl+-), масштабируется и выводимый на принтер шрифт и показатель в строке состояния
 dofile (props["SciteDefaultHome"].."\\tools\\Zoom.lua")
 
 ----[[ С О Х Р А Н Е Н И Е ]]--------------------------------------------------
-
--- Автоматическое создание резервных копий редактируемых файлов
---dofile (props["SciteDefaultHome"].."\\tools\\auto_backup.lua")
 
 -- Показ модифицированного диалога сохранения текущей сессии при закрытии SciTE
 -- (если в SciTEGlobal.properties установлены параметры session.manager=1 и save.session.manager.on.quit=1)
@@ -96,20 +77,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\precompiller.lua")
 
 dofile (props["SciteDefaultHome"].."\\tools\\sqlObjects.lua")
 
--- Вывод списка расшифровок (по Ctrl+B или автоматически) при неточном соответствии аббревиатуры
---dofile (props["SciteDefaultHome"].."\\tools\\abbrevlist.lua")
-
--- Выводит всплывающую подсказку (Ctrl+Shift+Space) по текущему слову
---dofile (props["SciteDefaultHome"].."\\tools\\ShowCalltip.lua")
-
--- Авто подсветка текста, который совпадает с текущим словом или выделением
---dofile (props["SciteDefaultHome"].."\\tools\\highlighting_identical_text.lua")
-
--- Подсветка, копирование, вставка, удаление парных тегов в HTML
-dofile (props["SciteDefaultHome"].."\\tools\\paired_tags.lua")
-
--- Подсветка линков в тексте и открытие их в браузере при клике с зажатым Ctrl
---dofile (props["SciteDefaultHome"].."\\tools\\HighlightLinks.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\InsertSpecialChar.lua")
 
 -- Подставляет адекватный символ комментария для ini, inf, reg и php файлов
 dofile (props["SciteDefaultHome"].."\\tools\\ChangeCommentChar.lua")

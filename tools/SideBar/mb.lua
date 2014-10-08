@@ -185,7 +185,7 @@ local function FindTab_Init()
             minsize='200x', OnSideBarClouse=(function() props["sidebar.mb.transport.value"]=cmb_listMbTrancport.value;props["sidebar.mb.subject.value"]=cmb_Subjects.value; end)
 
     }
-    FillCombo(cmb_listMbTrancport,"\\connectmb\\*.lua", props['mbTrancport.file'])
+    cmb_listMbTrancport:FillByDir("\\connectmb\\*.lua", props['mbTrancport.file'])
 end
 
 FindTab_Init()

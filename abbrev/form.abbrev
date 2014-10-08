@@ -23,18 +23,18 @@ mb=Form.MsgBox "|"
 /f=<frame name="frm|" backcolor="#ffffff" height="12">\r\r\n</frame>
 /ft=<frame name="frmTab" backcolor="#ffffff" height="24" ><control name="tabCtrl" type="tabctrl" position="5;4;100;20" padleft="5" padright="5"/>\r\r\n</frame>
 /fc=<frame name="grid" height="120" backcolor="#ffffff"><control type="groupbox" position="5;0;484;115" caption="Dividends"/>\r\n<control name="grid" type="cube" position="10;12;474;96" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/></frame>
-/num=<control name="num|" caption="" position="10;0;180;11" captionwidth="90" type="numberbox"/>
-/txt=<control name="txt|" caption="" position="10;0;180;11" captionwidth="90" type="textbox"/>
-/lbl=<control caption="|" caption_ru="" position="10;0;70;11" type="label"/>
-/cmb=<control name="cmb|" caption="" position="10;0;180;11" captionwidth="90" type="combobox">\n\t<option code="" caption=""/>\n</control>
-/cub=<control name="grid" position="10;12;474;96" type="cube" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/>
-/dt=<control name="dt|" caption="" position="10;0;180;11" captionwidth="90" type="datebox"/>
-/tm=<control name="tm|" caption="" position="10;0;180;11" captionwidth="90" type="timebox"/>
-/grp=<control type="groupbox" caption="|" position="" />
-/lnk=<control name="|"  caption="" position="10;0;70;10" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>
-/btn=<control name="btn|" caption="" position="10;0;70;11"  type="button"/>
-/chk=<control name="chk|" caption="" position="10;0;70;11" type="checkbox"/>
-/sub=<control name="sub|" template="" position="0;0;0;0"  type="form" padleft="0" padright="0" padtop="0" padbottom="0">\n</control>
+/num=<control name="num|" caption="" position="10;0;180;11" captionwidth="90" type="numberbox"/>‹FMCTL›
+/txt=<control name="txt|" caption="" position="10;0;180;11" captionwidth="90" type="textbox"/>‹FMCTL›
+/lbl=<control caption="|" caption_ru="" position="10;0;70;11" type="label"/>‹FMCTL›
+/cmb=<control name="cmb|" caption="" position="10;0;180;11" captionwidth="90" type="combobox">\n\t<option code="" caption=""/>\n</control>‹FMCTL›
+/cub=<control name="grid" position="10;12;474;96" type="cube" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/>‹FMCTL›
+/dt=<control name="dt|" caption="" position="10;0;180;11" captionwidth="90" type="datebox"/>‹FMCTL›
+/tm=<control name="tm|" caption="" position="10;0;180;11" captionwidth="90" type="timebox"/>‹FMCTL›
+/grp=<control type="groupbox" caption="|" position=""/>‹FMCTL›
+/lnk=<control name="|"  caption="" position="10;0;70;10" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>‹FMCTL›
+/btn=<control name="btn|" caption="" position="10;0;70;11"  type="button"/>‹FMCTL›
+/chk=<control name="chk|" caption="" position="10;0;70;11" type="checkbox"/>‹FMCTL›
+/sub=<control name="sub|" template="" position="0;0;0;0"  type="form" padleft="0" padright="0" padtop="0" padbottom="0">\n</control>‹FMCTL›
 /st=<stringtable>\n</stringtable>
 /s1=<string id="%SEL%">\n\t<value lang="en" text="%SEL%"/>\n\t<value lang="ru" text="|"/>\n</string>
 /ssql=<string id="SQL_|"><value><![CDATA[--]\n]]></value></string>

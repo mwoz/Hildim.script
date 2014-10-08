@@ -10,7 +10,6 @@ local vAbbrev
 local vSys
 local vFileMan
 local oDeatt
-local WinDrop
 
 function sidebar_Switch(n)
     SideBar_obj.TabCtrl.valuepos = n -1
@@ -261,25 +260,30 @@ local function InitStatusBar()
     iup.PassFocus()
 end
 
-function FillCombo(cmb,pathmask, strSel)
-    local current_path = props["sys.calcsybase.dir"]..pathmask
+local old_iup_list = iup.list
+iup.list = function(t)
+    local cmb = old_iup_list(t)
+    function cmb:FillByDir(pathmask, strSel)
+        local current_path = props["sys.calcsybase.dir"]..pathmask
 
-	local files = gui.files(current_path)
-	local table_files = {}
-	if files then
-        local i, filename
-		for i, filename in ipairs(files) do
-			table_files[i] = {filename, {filename}}
-		end
-	end
-	table.sort(table_files, function(a, b) return a[1]:lower() < b[1]:lower() end)
+        local files = gui.files(current_path)
+        local table_files = {}
+        if files then
+            local i, filename
+            for i, filename in ipairs(files) do
+                table_files[i] = {filename, {filename}}
+            end
+        end
+        table.sort(table_files, function(a, b) return a[1]:lower() < b[1]:lower() end)
 
-    local itSel = 0
-	for i = 1, #table_files do
-        local strIt = table_files[i][1]
-        iup.SetAttribute(cmb, i, strIt)
-        if strIt == strSel then cmb.value = i end
-	end
+        local itSel = 0
+        for i = 1, #table_files do
+            local strIt = table_files[i][1]
+            iup.SetAttribute(cmb, i, strIt)
+            if strIt == strSel then cmb.value = i end
+        end
+    end
+    return cmb
 end
 
 ---Расширение iup
@@ -290,7 +294,7 @@ iup.scitedialog = function(t)
         dlg = iup.dialog(t)
         iup.SetNativeparent(dlg, t.sciteparent)
         _G.dialogs[t.sciteid] = dlg
-        dlg.rastersize = props['dialogs.'..t.sciteid..'.rastersize']
+        if dlg.resize == 'YES' then dlg.rastersize = props['dialogs.'..t.sciteid..'.rastersize'] end
         if t.sciteparent == "IUPTOOLBAR" then
             dlg:showxy(0,0)
         elseif t.sciteparent == "IUPSTATUSBAR" then
@@ -303,12 +307,39 @@ iup.scitedialog = function(t)
             dlg:showxy(0,0)
             iup.ShowSideBar(tonumber(w))
         end
+        function dlg:postdestroy()
+            --вызывать destroy из обработчиков событий в диалоге нельзя - развязываемся через пост
+            if _G.deletedDialogs == nil then _G.deletedDialogs = {} end
+            table.insert(_G.deletedDialogs, t.sciteid)
+            scite.PostCommand(2,0)
+        end
         --dlg.rastersize = "NULL"
     else
         dlg:show()
     end
     return dlg
 end
+
+AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
+    if id_msg == SCN_NOTYFY_ONPOST then
+        if wp == 2 then
+            while table.maxn(_G.deletedDialogs) > 0 do
+                sciteid = table.remove(_G.deletedDialogs)
+                local dlg = _G.dialogs[sciteid]
+                if dlg ~= nil then
+                    if sciteid ~= 'sidebarp' or props['sidebar.win'] == '0' then
+                        props['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
+                        props['dialogs.'..sciteid..'.x'] = dlg.x
+                        props['dialogs.'..sciteid..'.y'] = dlg.y
+                    end
+                    _G.dialogs[sciteid] = nil
+                    dlg:hide()
+                    dlg:destroy()
+                end
+            end
+        end
+    end
+end)
 
 --Уничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
@@ -332,6 +363,8 @@ iup.DestroyDialogs = function()
     _G.dialogs = nil
     iup.ShowSideBar(-1)
 end
+
+
 
 InitSideBar()
 InitToolBar()
