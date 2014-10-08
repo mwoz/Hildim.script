@@ -143,7 +143,7 @@ local function FindTab_Init()
             OnOpen = OnSwitch;
             OnSideBarClouse=(function() props["sidebar.m4.value"]=cmb_listCalc.value; end)
         }
-    FillCombo(cmb_listCalc,"\\buildm4\\*.vbs", props['sql.compile.file'])
+    cmb_listCalc:FillByDir("\\buildm4\\*.vbs", props['sql.compile.file'])
 end
 
 FindTab_Init()

@@ -7,36 +7,229 @@ local isEditor = false
 local prevLexer = -1
 local abbr_table
 
+local function replAbbr(findSt, findEnd, s, dInd)
+    editor:BeginUndoAction()
+    editor:SetSel(findSt, findEnd)
+    editor:ReplaceSel(s)
+    local findEnd = editor.CurrentPos
+    local l1,l2 = editor:LineFromPosition(findSt),editor:LineFromPosition(findEnd)
+
+    for i = l1 + 1,l2  do
+        local ind = scite.SendEditor(SCI_GETLINEINDENTATION,i) + dInd
+        scite.SendEditor(SCI_SETLINEINDENTATION,i, 0)  --чтобы избавиться от табов сначала сбрасываем отступ в 0 а потом выставляем нужный
+        --если просто выставить нужный, и он при этом не изменится, табы могут остаться
+        scite.SendEditor(SCI_SETLINEINDENTATION,i, ind)
+        findEnd = findEnd + dInd
+    end
+
+    local pos = editor:findtext('|', 0, findSt, findEnd)
+
+    editor:SetSel(findSt, findEnd)
+    if pos~=nil then
+        editor:SetSel(pos, pos+1)
+        editor:ReplaceSel('')
+    end
+    editor:EndUndoAction()
+end
+
+local function frmControlPos(findSt, findEnd, s, dInd)
+    --показываем диалог позиционирования контролов
+    local dlg2 = _G.dialogs["ctrlgreator"]
+    if dlg2 ~= nil then return end --один экземпляр уже показан
+    local tX, tW, tCpt, tA = {},{},{},{}
+    local tX1, tW1, tCpt1, tA1 = {},{},{}, {}
+    --создаем контролы
+    local txtX2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
+    local txtY2 = iup.text{size='60x0',mask="/d+"}
+    local txtH2 = iup.text{size='60x0',mask="/d+"}
+    local txtW2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
+
+    local txtCp = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
+    local function onCmbAll(h)
+        if tAl == nil then return end
+        txtX2.value = tA1[tonumber(h.value)][2][1]
+        txtW2.value = tA1[tonumber(h.value)][2][2]
+        txtCp.value = tA1[tonumber(h.value)][2][3]
+    end
+    local cmbAll = iup.list{size='60x0',dropdown="YES",visible_items="15",valuechanged_cb = onCmbAll}
+    local function onTxtX2(h,text, item, state)
+            local n = tonumber(text)
+            for i, s in pairs(tA1) do if tonumber(s[2][1]) >= n then cmbAll.value=i;break;end end
+        end
+    txtX2.action = onTxtX2
+
+    --найдем в тексте все контролы и извлечем из них все горизонтальные координаты - для выбора
+    local b,e = 0,-1
+    local body
+    while true do
+        b,e,body = editor:findtext('<control \\(.+?\\)>', SCFIND_REGEXP, e + 1)
+        if not b then break end
+        body = editor:textrange(b,e)
+        local xI, wI, cI = 0,0,0
+        --сначала пишем в имена - для избежания дублирования
+        body:gsub('position="(%d+);%d+;(%d+);%d+"', function(x,w) xI=x; wI=w; tX[x] = tonumber(x); tW[w] = tonumber(w) end)
+        body:gsub('captionwidth="(%d+)"', function(cp)
+            cI = cp
+            tCpt[cp] = tonumber(cp)
+            local l = tonumber(cp) + tonumber(xI)
+            tX[''..l] = l
+            l = tonumber(wI) - tonumber(cp)
+            tW[''..l] = l
+        end)
+        if tonumber(xI) > 0 and tonumber(wI) > 0 then tA[xI..','..wI..','..cI] = {xI, wI, cI} end
+    end
+    --перепишем все таблицы по индексам и отсортируем
+    for s, i in pairs(tX) do table.insert(tX1,i) end
+    for s, i in pairs(tW) do table.insert(tW1,i) end
+    for s, i in pairs(tCpt) do table.insert(tCpt1,i) end
+    for i, t in pairs(tA) do table.insert(tA1,{i,t}) end
+
+    table.sort(tX1)
+    table.sort(tW1)
+    table.sort(tCpt1)
+    table.sort(tA1,function(a,b)
+        local ta,tb = a[2], b[2]
+        if ta[1] == tb[1] then
+            if ta[2] == tb[2] then
+                return tonumber(ta[3])<tonumber(tb[3])
+            else
+                return tonumber(ta[2])<tonumber(tb[2])
+            end
+        else
+            return tonumber(ta[1])<tonumber(tb[1])
+        end
+    end)
+
+    --заполним списки комбобоксов
+    local l = 0
+    for i, s in pairs(tX1) do if tonumber(s) > 0 then iup.SetAttribute(txtX2, l, s);l=l+1 end end
+    l = 0
+    for i, s in pairs(tW1) do if tonumber(s) > 0 then iup.SetAttribute(txtW2, l, s);l=l+1 end end
+    l = 0
+    for i, s in pairs(tCpt1) do if tonumber(s) > 0 then iup.SetAttribute(txtCp, l, s);l=l+1 end end
+    for i, s in pairs(tA1) do iup.SetAttribute(cmbAll, i, s[1]) end
+    txtX2.value=1;txtW2.value=1;txtCp.value=1;cmbAll.value=1
+
+
+    local i,str
+    i,i,txtX2.value,txtY2.value,txtW2.value,txtH2.value=s:find('position="(%d+);(%d+);(%d+);(%d+)"')
+    i,i,str=s:find('captionwidth="(%d+)"')
+    if i == nil then
+        txtCp.value=''
+        txtCp.active='NO'
+    else
+        txtCp.active='YES'
+        txtCp.value=str
+    end
+
+    --найдем предыдущий контрол и по нему выставим координаты в нашем
+    local icL = editor:LineFromPosition(editor.CurrentPos)
+
+    local onSameLine = true
+    for i = icL - 1, 1, -1 do
+        local x,y,w
+        local sl = editor:GetLine(i)
+        if sl:find('^%s+$') then
+            onSameLine = false --считаем, что если предыдущая строка пуста, то контрол на новой строке
+        elseif sl:find('<frame ') then
+            break
+        elseif sl:find('<control ') then
+            local _,_,x,y,w = sl:find('position="(%d+);(%d+);(%d+);%d+"')
+            if onSameLine then
+                txtY2.value = y
+                txtX2.value = ''..(tonumber(x) + tonumber(w))
+            else
+                txtY2.value = '' ..(tonumber(y) + 12)
+            end
+            break
+        end
+    end
+    onTxtX2(txtX2,txtX2.value, nil, nil)
+    onCmbAll(cmbAll)
+    ---
+
+    local btn_ok = iup.button  {title="OK"}
+    iup.SetHandle("MOVE_BTN_OK",btn_ok)
+    local btn_esc = iup.button  {title="Cancel"}
+    iup.SetHandle("MOVE_BTN_ESC",btn_esc)
+    local btn_clear = iup.button  {title="Clear"}
+    iup.SetHandle("MOVE_BTN_CLEAR",btn_clear)
+
+    local vbox = iup.vbox{
+        iup.hbox{iup.label{size='60x0'},cmbAll,gap=20};
+        iup.hbox{gap=20, alignment='ACENTER',
+            iup.label{title="Left",size='60x0'},
+            iup.label{title="Top",size='60x0'},
+            iup.label{title="Width",size='60x0'},
+            iup.label{title="Height",size='60x0'},
+            iup.label{title="CptWidth",size='60x0'}
+        };
+        iup.hbox{txtX2,txtY2,txtW2,txtH2,txtCp,gap=20, alignment='ACENTER'};
+        iup.hbox{btn_ok,iup.fill{},btn_clear,btn_esc},gap=2,margin="4x4" }
+
+    dlg2 = iup.scitedialog{vbox; title="Контрол Гритер",defaultenter="MOVE_BTN_OK",defaultesc="MOVE_BTN_ESC",maxbox="NO",minbox ="NO",resize ="NO",
+    sciteparent="SCITE", sciteid="ctrlgreator"}
+    dlg2.show_cb=(function(h,state)
+        if state == 4 then
+            dlg2:postdestroy()
+        end
+    end)
+    function btn_clear:action()
+            txtX2.value = ''
+            txtY2.value = ''
+            txtH2.value = ''
+            txtW2.value = ''
+            txtCp.value = ''
+    end
+
+    function btn_ok:action()
+
+        s = s:gsub('position="%d+;%d+;%d+;%d+"', 'position="'..txtX2.value..';'..txtY2.value..';'..txtW2.value..';'..txtH2.value ..'"'):gsub('‹FMCTL›', '')
+        local bNoCapt = false
+        if txtCp.active=='YES' then s = s:gsub('captionwidth="%d+"',
+        function()
+            if txtCp.value == '0' then
+                txtCp.value = true
+                return ''
+            end
+            return 'captionwidth="'..txtCp.value..'"'
+        end) end
+        if txtCp.value then
+            s = s:gsub('caption=".-"', ''):gsub('caption_ru=".-"', '')
+        end
+
+        replAbbr(findSt, findEnd, s, dInd)
+        dlg2:postdestroy()
+    end
+
+    function btn_esc:action()
+        dlg2:postdestroy()
+    end
+end
+
+
 local function InsAbbrev()
     local curSel = editor:GetSelText()
-    local pos = editor.SelectionStart
+    pos = editor.SelectionStart
     local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)
 	for i,v in ipairs(abbr_table) do
         if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
+            if curSel ~= "" then editor:ReplaceSel() end
             editor.SelectionStart = editor.SelectionStart - v.abbr:len()
             local findSt = editor.SelectionStart
             --Меняем: вставляем наш селекшн, коммент в начале убираем,\r убираем, вставляем табы, вставляем новые строки
             local s =(v.exp:gsub('%%SEL%%', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'))
-
-
-            editor:BeginUndoAction()
-            editor:ReplaceSel(s)
-            local findEnd = editor.CurrentPos
-            local l1,l2 = editor:LineFromPosition(findSt),editor:LineFromPosition(findEnd)
-
-            for i = l1 + 1,l2  do
-                local ind = scite.SendEditor(SCI_GETLINEINDENTATION,i) +lBegin:len() - v.abbr:len()
-                scite.SendEditor(SCI_SETLINEINDENTATION,i, 0)  --чтобы избавиться от табов сначала сбрасываем отступ в 0 а потом выставляем нужный
-                --если просто выставить нужный, и он при этом не изменится, табы могут остаться
-                scite.SendEditor(SCI_SETLINEINDENTATION,i, ind)
-            end
-
-            local pos = editor:findtext('|', 0, findSt, findEnd)
-            if pos~=nil then
-                editor:SetSel(pos, pos+1)
-                editor:ReplaceSel('')
-            end
-            editor:EndUndoAction()
+            local dInd = lBegin:len() - v.abbr:len()
+            local isForm
+            s, isForm = s:gsub('‹(%w+)›',   function(frm)
+                                                if frm == 'FMCTL' then
+                                                    frmControlPos(findSt, editor.SelectionEnd, s, dInd)
+                                                else
+                                                    print('Error: unknown abbrev form: '..frm)
+                                                end
+                                            end)
+            if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста
+            replAbbr(findSt, editor.SelectionEnd, s, dInd)
             return
         end
 	end
