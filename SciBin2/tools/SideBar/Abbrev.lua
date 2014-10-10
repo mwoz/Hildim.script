@@ -7,6 +7,54 @@ local isEditor = false
 local prevLexer = -1
 local abbr_table
 
+local function EditAbbrev()
+
+    local abb,expan
+    local l = list_getvaluenum(list_abbrev)
+	if idx == -1 then
+        abb,expan = 0,0
+    end
+	abb,expan = list_abbrev:getcell(l, 1), list_abbrev:getcell(l,2)
+
+
+
+    local btn_ok = iup.button  {title="OK"}
+    iup.SetHandle("MOVE_BTN_OK",btn_ok)
+    local btn_esc = iup.button  {title="Cancel"}
+    iup.SetHandle("MOVE_BTN_ESC",btn_esc)
+    local btn_clear = iup.button  {title="Clear"}
+    iup.SetHandle("MOVE_BTN_CLEAR",btn_clear)
+
+    local txt_exp = iup.text{multiline='YES',wordwrap='YES', expand='YES', fontsize='12',value = expan:gsub('\\n', '\n'):gsub('\\r',''):gsub('\\t','\t')}
+    local txt_abr = iup.text{expand='NO', fontsize='12',value =abb, size = '50x0'}
+
+    local vbox = iup.vbox{
+        iup.hbox{txt_abr};
+        iup.hbox{iup.vbox{txt_exp}};
+
+        iup.hbox{btn_ok,iup.fill{},btn_clear,btn_esc, expand='HORIZONTAL'},
+        expandchildren ='YES',gap=2,margin="4x4"}
+    dlg = iup.scitedialog{vbox; title=" онтрол √ритер",defaultenter="MOVE_BTN_OK",defaultesc="MOVE_BTN_ESC",tabsize=editor.TabWidth,
+        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="abbreveditor"}
+
+    dlg.show_cb=(function(h,state)
+        if state == 4 then
+            dlg:postdestroy()
+        end
+    end)
+    function btn_clear:action()
+
+    end
+
+    function btn_ok:action()
+
+        dlg:postdestroy()
+    end
+
+    function btn_esc:action()
+        dlg:postdestroy()
+    end
+end
 local function replAbbr(findSt, findEnd, s, dInd)
     editor:BeginUndoAction()
     editor:SetSel(findSt, findEnd)
@@ -24,8 +72,8 @@ local function replAbbr(findSt, findEnd, s, dInd)
 
     local pos = editor:findtext('|', 0, findSt, findEnd)
 
-    editor:SetSel(findSt, findEnd)
     if pos~=nil then
+        editor:SetSel(findSt, findEnd)
         editor:SetSel(pos, pos+1)
         editor:ReplaceSel('')
     end
@@ -207,8 +255,24 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     end
 end
 
+local function InsertAbbreviation(expan,dInd,curSel)
+    local findSt = editor.SelectionStart
+    --ћен€ем: вставл€ем наш селекшн, коммент в начале убираем,\r убираем, вставл€ем табы, вставл€ем новые строки
+    local s =(expan:gsub('%%SEL%%', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'))
+    local isForm
+    s, isForm = s:gsub('Л(%w+)Ы',
+    function(frm)
+        if frm == 'FMCTL' then
+            frmControlPos(findSt, editor.SelectionEnd, s, dInd)
+        else
+            print('Error: unknown abbrev form: '..frm)
+        end
+    end)
+    if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста
+    replAbbr(findSt, editor.SelectionEnd, s, dInd)
+end
 
-local function InsAbbrev()
+local function TryInsAbbrev()
     local curSel = editor:GetSelText()
     pos = editor.SelectionStart
     local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)
@@ -216,20 +280,8 @@ local function InsAbbrev()
         if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
             if curSel ~= "" then editor:ReplaceSel() end
             editor.SelectionStart = editor.SelectionStart - v.abbr:len()
-            local findSt = editor.SelectionStart
-            --ћен€ем: вставл€ем наш селекшн, коммент в начале убираем,\r убираем, вставл€ем табы, вставл€ем новые строки
-            local s =(v.exp:gsub('%%SEL%%', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'))
             local dInd = lBegin:len() - v.abbr:len()
-            local isForm
-            s, isForm = s:gsub('Л(%w+)Ы',   function(frm)
-                                                if frm == 'FMCTL' then
-                                                    frmControlPos(findSt, editor.SelectionEnd, s, dInd)
-                                                else
-                                                    print('Error: unknown abbrev form: '..frm)
-                                                end
-                                            end)
-            if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста
-            replAbbr(findSt, editor.SelectionEnd, s, dInd)
+            InsertAbbreviation(v.exp,dInd, curSel)
             return
         end
 	end
@@ -262,7 +314,6 @@ local function Abbreviations_ListFILL()
 	for i,v in ipairs(abbr_table) do
         list_abbrev:setcell(i, 1, v.abbr)         -- ,size="400x400"
         list_abbrev:setcell(i, 2, v.exp:gsub('\t','\\t'))
-        list_abbrev:setcell(i, 3, v.exp)
 	end
     table.sort(abbr_table, function(a, b)
         if a.abbr:len() == b.abbr:len() then return a.abbr < b.abbr end
@@ -272,59 +323,56 @@ local function Abbreviations_ListFILL()
     prevLexer = editor.Lexer
 end
 
---local Abbreviations_HideExpansion
-if Abbreviations_USECALLTIPS then
-	Abbreviations_HideExpansion = function ()
-		editor:CallTipCancel()
-	end
-else
-	Abbreviations_HideExpansion = function ()
-		editor:AnnotationClearAll()
-	end
-end
-
-local scite_InsertAbbreviation = scite_InsertAbbreviation or scite.InsertAbbreviation
 local function Abbreviations_InsertExpansion()
-	local expansion = iup.GetAttribute(list_abbrev, list_abbrev.focus_cell:gsub(':.*', ':3'))
-	scite_InsertAbbreviation(expansion)
+	local expansion = iup.GetAttribute(list_abbrev, list_abbrev.focus_cell:gsub(':.*', ':2'))
+	InsertAbbreviation(expansion, 0,'')
     iup.PassFocus()
 end
-
-local function Abbreviations_ShowExpansion()
-	local expansion = iup.GetAttribute(list_abbrev, list_abbrev.focus_cell:gsub(':.*', ':3'))
-    if expansion == nill then return end
-	expansion = expansion:gsub('\\\\','\4'):gsub('\\r','\r'):gsub('(\\n','\n'):gsub('\\t','\t'):gsub('\4','\\')
-	local cp = editor:codepage()
-	if cp ~= 65001 then expansion = expansion:from_utf8(cp) end
-
-	local cur_pos = editor.CurrentPos
-	if Abbreviations_USECALLTIPS then
-		editor:CallTipCancel()
-		editor:CallTipShow(cur_pos, expansion)
-	else
-		editor:AnnotationClearAll()
-		editor.AnnotationVisible = ANNOTATION_BOXED
-		local linenr = editor:LineFromPosition(cur_pos)
-		editor.AnnotationStyle[linenr] = 255 -- номер стил€, в котором вы задали параметры дл€ аннотаций
-		editor:AnnotationSetText(linenr, expansion:gsub('\t', '    '))
-	end
-end
-
 
 local function Abbreviations_Init()
     --—обыти€ списка функций
     list_abbrev = iup.matrix{
-    numcol=3, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    rasterwidth0 = 0 ,rasterwidth1 = 60 ,rasterwidth2 = 600 ,rasterwidth3 = 0,
+    rasterwidth0 = 0 ,rasterwidth1 = 60 ,rasterwidth2 = 600 ,
     tip='¬ главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
 
 	list_abbrev:setcell(0, 1, "Abbrev")         -- ,size="400x400"
 	list_abbrev:setcell(0, 2, "Expansion")
 
-	list_abbrev.click_cb = (function(_, lin, col, status)
+	list_abbrev.click_cb = (function(h, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Abbreviations_InsertExpansion()
+        elseif iup.isbutton3(status) then
+            h.focus_cell = lin..':'..col
+            local mnu = iup.menu{
+                iup.item{title="Edit",action=EditAbbrev},
+                iup.item{title="Delete",action=(function()
+                    local msb = iup.messagedlg{buttons='YESNO', value='Delete?'}
+                    msb.popup(msb)
+                    if msb.buttonresponse == '1' then
+                        local l = list_getvaluenum(list_abbrev)
+                        list_abbrev.dellin = ''..l
+                    end
+                    msb:destroy(msb)
+                end)},
+                iup.item{title="Move Up",active=Iif(list_getvaluenum(list_abbrev)<2, 'NO', 'YES'),action=(function()
+                    local msb = iup.messagedlg{buttons='YESNO', value='Delete?'}
+
+                    local l = list_getvaluenum(list_abbrev)
+                    local abb,expan = list_abbrev:getcell(l, 1), list_abbrev:getcell(l,2)
+
+                    --
+                    list_abbrev.addlin = ''..(l-2)
+                    --iup.SetAttribute(list_abbrev, "COPYLIN"..(l+1), ''..(l-1))
+                    list_abbrev:setcell(l-1, 1, abb)
+                    list_abbrev:setcell(l-1, 2, expan)
+                    list_abbrev.dellin = ''..(l+1)
+                    list_abbrev.redraw = (l-1)..'-'..l
+                    --[[--iup.SetAttributeId(list_abbrev, "MOVELIN", l, (l-1))]]
+                    msb:destroy(msb)
+                end)},
+            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
 	list_abbrev.tips_cb = (function(h, x, y)
@@ -332,16 +380,11 @@ local function Abbreviations_Init()
         h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n')
     end)
 
-	--list_abbrev.enteritem_cb = (function(_, lin, col)
-        --Abbreviations_ShowExpansion()
-    --end)
 
 	list_abbrev.keypress_cb = (function(_, key, press)
         if press == 0 then return end
         if key == 13 then  --enter
             Abbreviations_InsertExpansion()
-        elseif key == 65307 then
-            Abbreviations_HideExpansion()
         end
 	end)
 
@@ -350,7 +393,7 @@ local function Abbreviations_Init()
         OnSwitchFile = Abbreviations_ListFILL;
         OnSave = Abbreviations_ListFILL;
         OnOpen = Abbreviations_ListFILL;
-        OnMenuCommand = (function(msg) if msg == IDM_ABBREV then InsAbbrev() return true;end end);
+        OnMenuCommand = (function(msg) if msg == IDM_ABBREV then TryInsAbbrev() return true;end end);
         on_SelectMe = (function()  Abbreviations_ListFILL();end)
         }
 end
