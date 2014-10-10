@@ -104,6 +104,7 @@ local function  CreateBox()
             hNew.maxbox="NO"
             hNew.minbox ="NO"
             hNew.resize ="YES"
+            hNew.shrink ="YES"
             hNew.minsize="100x100"
             hNew.title="SideBar /Close For Attach/"
             hNew.x=10
@@ -124,6 +125,7 @@ local function  CreateBox()
                     return -1
                 end
             end)
+
             hNew.show_cb=(function(h,state)
                 if state == 0 then
                     _G.dialogs['sidebar'] = oDeatt
@@ -134,6 +136,7 @@ local function  CreateBox()
                 end
             end)
             iup.ShowSideBar(-1)
+            if tonumber(props["dialogs.sidebar.x"])== nil or tonumber(props["dialogs.sidebar.y"]) == nil then props["dialogs.sidebar.x"]=0;props["dialogs.sidebar.y"]=0 end
             return tonumber(props["dialogs.sidebar.x"])*2^16+tonumber(props["dialogs.sidebar.y"])
         end)
         }

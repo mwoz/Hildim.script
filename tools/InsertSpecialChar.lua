@@ -56,7 +56,7 @@ end
 
 local function InsertSpecialChar(sel_value)
 	local pos = editor.CurrentPos
-	if editor.Lexer == SCLEX_HTML then
+	if editor.Lexer == SCLEX_HTML or cmpobj_GetFMDefault() == SCE_FM_X_DEFAULT then
 		sel_value = f_char2html(sel_value)
 	end
 	editor:InsertText(pos, sel_value)
@@ -77,8 +77,9 @@ function SpecialChar()
 		user_list = user_list..char2html[i]..sep
 	end
 	user_list = user_list..char2html[n-3+cp]
+    scite.SendEditor(SCI_AUTOCSETMAXHEIGHT,16)
 	editor.AutoCSeparator = string.byte(sep)
-	editor:UserListShow(12,user_list)
+	editor:UserListShow(900,user_list)
 	editor.AutoCSeparator = string.byte(' ')
 end
 
@@ -86,5 +87,6 @@ end
 AddEventHandler("OnUserListSelection", function(tp, sel_value)
 	if tp == 12 then
 		InsertSpecialChar(sel_value)
+        return true
 	end
 end)

@@ -261,34 +261,7 @@ local function OnUserListSelection_local(tp,str)
         end
         return true
     end
-end
-
-local function OnClick_Local(shift, ctrl, alt)
-	if scite.SendEditor(SCI_INDICATORVALUEAT, mark, editor.CurrentPos) == 1 and alt then
-        local word = editor:textrange(scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos), scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos))
-        local s
-        if word:byte() >=192 then
-            s = sRu
-        else
-            s = sEn
-        end
-        local t = s:suggest(word)
-        local found = false
-        local str = ''
-        for _,v in ipairs(t) do
-            str = str..v..'•'
-        end
-        str = str..cADDYODIC..'•'..cADDBYZXAMPLE
-        editor.AutoCSeparator = string.byte('•')
-        scite.SendEditor(SCI_AUTOCSETMAXHEIGHT,16)
-
-        editor:UserListShow(800, str)
-
-        bIsListVisible = true
-        current_poslst = editor.CurrentPos
-        return true
-    end
-end
+end                                      --fghgfhgtgh
 
 local function OnColorise_local(s,e)
 --print(props["spell.autospell"])
@@ -401,7 +374,6 @@ local function OnMenuCommand_local(msg, source)
     OnUserListSelection_local(800,str)
 end
 
-AddEventHandler("OnClick",OnClick_Local)
 AddEventHandler("OnUserListSelection", OnUserListSelection_local)
 AddEventHandler("OnColorized", OnColorise_local)
 AddEventHandler("OnOpen", OnSwitch_local)

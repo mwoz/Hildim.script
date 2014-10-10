@@ -157,6 +157,7 @@ local function _OnKey(key, shift, ctrl, alt, char)
 end
 
 local function SetSubjProps(h)
+    if h.value == '0' then  h.value = '1' end
     str = iup.GetAttribute(h, h.value)
     props['sql.dbcmdsubj'] = str
     if str:find("%.KPLUS") ~= nil then props['sql.type'] = "SYBASE" else props['sql.type'] = "MSSQL" end
