@@ -148,7 +148,10 @@ iup.TreeSetNodeAttrib = function (handle, tnode, id)
   if tnode.imageid then iup.SetAttribute(handle, "IMAGE"..(id), tnode.imageid) end
 
 end
-
+--Переопределяем iup сообщение об ошибке - чтобы не было их всплывающего окна, печатаем все к нам в output
+iup._ERRORMESSAGE = function(msg,traceback)
+    print(msg..(traceback or ""))
+end
 function list_getvaluenum(h)
     local l = h.focus_cell:gsub(':.*','')
     return tonumber(l)

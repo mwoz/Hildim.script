@@ -6,6 +6,13 @@ local Abbreviations_USECALLTIPS = tonumber(props['sidebar.abbrev.calltip']) == 1
 local isEditor = false
 local prevLexer = -1
 local abbr_table
+local bListModified = false
+
+local function SetModif()
+    bListModified = true
+    list_abbrev:setcell(0, 1, 'Abbrev*')
+    list_abbrev.redraw = 0
+end
 
 local function EditAbbrev()
 
@@ -16,38 +23,44 @@ local function EditAbbrev()
     end
 	abb,expan = list_abbrev:getcell(l, 1), list_abbrev:getcell(l,2)
 
-
-
-    local btn_ok = iup.button  {title="OK"}
-    iup.SetHandle("MOVE_BTN_OK",btn_ok)
+    local btn_upd = iup.button  {title="Save"}
+    iup.SetHandle("EDIT_BTN_UPD",btn_upd)
     local btn_esc = iup.button  {title="Cancel"}
-    iup.SetHandle("MOVE_BTN_ESC",btn_esc)
-    local btn_clear = iup.button  {title="Clear"}
-    iup.SetHandle("MOVE_BTN_CLEAR",btn_clear)
+    iup.SetHandle("EDIT_BTN_ESC",btn_esc)
+    local btn_insert = iup.button  {title="Insert"}
+    iup.SetHandle("EDIT_BTN_INS",btn_insert)
 
     local txt_exp = iup.text{multiline='YES',wordwrap='YES', expand='YES', fontsize='12',value = expan:gsub('\\n', '\n'):gsub('\\r',''):gsub('\\t','\t')}
-    local txt_abr = iup.text{expand='NO', fontsize='12',value =abb, size = '50x0'}
+    local txt_abr = iup.text{expand='NO', fontsize='12',value =abb, size = '90x0'}
 
     local vbox = iup.vbox{
         iup.hbox{txt_abr};
         iup.hbox{iup.vbox{txt_exp}};
 
-        iup.hbox{btn_ok,iup.fill{},btn_clear,btn_esc, expand='HORIZONTAL'},
+        iup.hbox{btn_upd,btn_insert,iup.fill{},btn_esc, expand='HORIZONTAL'},
         expandchildren ='YES',gap=2,margin="4x4"}
     dlg = iup.scitedialog{vbox; title="Контрол Гритер",defaultenter="MOVE_BTN_OK",defaultesc="MOVE_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="abbreveditor"}
+        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="abbreveditor", minsize='600x300'}
 
     dlg.show_cb=(function(h,state)
         if state == 4 then
             dlg:postdestroy()
         end
     end)
-    function btn_clear:action()
-
+    function btn_insert:action()
+        list_abbrev.addlin = ''..l
+        list_abbrev:setcell(l + 1, 1, txt_abr.value)
+        list_abbrev:setcell(l + 1, 2, txt_exp.value:gsub('\r','\\r'):gsub('\n','\\n'):gsub('\t','\\t'))
+        list_abbrev.redraw = l + 1
+        SetModif()
+        dlg:postdestroy()
     end
 
-    function btn_ok:action()
-
+    function btn_upd:action()
+        list_abbrev:setcell(l, 1, txt_abr.value)
+        list_abbrev:setcell(l, 2, txt_exp.value:gsub('\r','\\r'):gsub('\n','\\n'):gsub('\t','\\t'))
+        list_abbrev.redraw = l
+        SetModif()
         dlg:postdestroy()
     end
 
@@ -197,11 +210,11 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     ---
 
     local btn_ok = iup.button  {title="OK"}
-    iup.SetHandle("MOVE_BTN_OK",btn_ok)
+    iup.SetHandle("CREATE_BTN_OK",btn_ok)
     local btn_esc = iup.button  {title="Cancel"}
-    iup.SetHandle("MOVE_BTN_ESC",btn_esc)
+    iup.SetHandle("CREATE_BTN_ESC",btn_esc)
     local btn_clear = iup.button  {title="Clear"}
-    iup.SetHandle("MOVE_BTN_CLEAR",btn_clear)
+    iup.SetHandle("CREATE_BTN_CLEAR",btn_clear)
 
     local vbox = iup.vbox{
         iup.hbox{iup.label{size='60x0'},cmbAll,gap=20};
@@ -319,6 +332,8 @@ local function Abbreviations_ListFILL()
         if a.abbr:len() == b.abbr:len() then return a.abbr < b.abbr end
         return a.abbr:len() > b.abbr:len()
     end)
+    bListModified = false
+    list_abbrev:setcell(0, 1, 'Abbrev')
     list_abbrev.redraw = 'ALL'
     prevLexer = editor.Lexer
 end
@@ -357,8 +372,7 @@ local function Abbreviations_Init()
                     msb:destroy(msb)
                 end)},
                 iup.item{title="Move Up",active=Iif(list_getvaluenum(list_abbrev)<2, 'NO', 'YES'),action=(function()
-                    local msb = iup.messagedlg{buttons='YESNO', value='Delete?'}
-
+                    list_abbrev:hhhh(99)
                     local l = list_getvaluenum(list_abbrev)
                     local abb,expan = list_abbrev:getcell(l, 1), list_abbrev:getcell(l,2)
 
@@ -369,8 +383,22 @@ local function Abbreviations_Init()
                     list_abbrev:setcell(l-1, 2, expan)
                     list_abbrev.dellin = ''..(l+1)
                     list_abbrev.redraw = (l-1)..'-'..l
-                    --[[--iup.SetAttributeId(list_abbrev, "MOVELIN", l, (l-1))]]
-                    msb:destroy(msb)
+                    SetModif()
+
+                end)},
+                iup.separator{},
+                iup.item{title="Save all",active=Iif(bListModified, 'YES', 'NO'),action=(function()
+                    local maxN = tonumber(list_abbrev.numlin)
+                    local strOut = ''
+                    for i = 1, maxN do
+                        strOut = strOut..list_abbrev:getcell(i, 1)..'='..list_abbrev:getcell(i,2)..'\n'
+                    end
+                    local file = io.open(props["AbbrevPath"], "w")
+                    file:write(strOut)
+                    file:close()
+                    bListModified = false
+                    list_abbrev:setcell(0, 1, 'Abbrev')
+                    list_abbrev.redraw = 0
                 end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
