@@ -140,7 +140,7 @@ local function FindTab_Init()
     txtSel = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR')}
     txtLine = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR')}
     lblSel = iup.text{size = '200x0'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR'),
-        tip='Число вхождений выделенного слова'..Iif(editor.Lexer == SCLEX_FORMENJINE,'\nПоказ цвета под курсором', ''),
+        tip='Число вхождений выделенного слова',
         tips_cb=(function(h,x,y)
             h.tip='Число вхождений выделенного слова'..Iif(editor.Lexer == SCLEX_FORMENJINE,'\nПоказ цвета под курсором', '')
         end);
