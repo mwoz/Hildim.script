@@ -300,7 +300,7 @@ local function load_image_LocaleFun()
 end
 
 local function load_image_View()
-  local View = iup.imagergb
+  local View = iup.image
   {
     width = 16,
     height = 16,
