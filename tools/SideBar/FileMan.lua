@@ -26,7 +26,16 @@ end
 local function OnMyClouse()
 	props["sidebar.fileman.split.value"]=split_s.value
 end
-
+local function GetExtImage(strName)
+    local _, _, ext = strName:find('%.([^%.]+)$')
+    if ext=='inc' then return 'IMAGE_Library'
+    elseif ext=='xml' then return 'IMAGE_Frame'
+    elseif ext=='m' then return 'IMAGE_Sub'
+    elseif ext=='sql' then return 'IMAGE_String'
+    elseif ext=='lua' then return 'IMGLEAF'
+    else return 'IMGPAPER'
+    end
+end
 ----------------------------------------------------------
 -- tab0:list_dir   File Manager
 ----------------------------------------------------------
@@ -58,18 +67,21 @@ function FileMan_ListFILL()
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_folders + #table_files + 1))
-	list_dir:setcell(1, 1, '[..]')
-	list_dir:setcell(1, 2,'..')
-	list_dir:setcell(1, 3, 'd')
+	list_dir:setcell(1, 1, 'IMAGE_UpFolder')
+	list_dir:setcell(1, 2, '..')
+	list_dir:setcell(1, 3,'..')
+	list_dir:setcell(1, 4, 'd')
 	for i = 1, #table_folders do
-        list_dir:setcell(i + 1, 1, '['..table_folders[i]..']')
+        list_dir:setcell(i + 1, 1, 'IMAGE_Folder')
         list_dir:setcell(i + 1, 2, table_folders[i])
-        list_dir:setcell(i + 1, 3, 'd')
+        list_dir:setcell(i + 1, 3, table_folders[i])
+        list_dir:setcell(i + 1, 4, 'd')
 	end
 	for i = 1, #table_files do
-        list_dir:setcell(i + #table_folders + 1, 1, table_files[i])
+        list_dir:setcell(i + #table_folders + 1, 1,  GetExtImage(table_files[i]))
         list_dir:setcell(i + #table_folders + 1, 2, table_files[i])
-        list_dir:setcell(i + #table_folders + 1, 3, '')
+        list_dir:setcell(i + #table_folders + 1, 3, table_files[i])
+        list_dir:setcell(i + #table_folders + 1, 4, '')
 	end
 	list_dir.focus_cell = "1:1"
     iup.SetAttribute(list_dir, 'MARK1:0', 1)
@@ -91,9 +103,9 @@ function FileMan_ListFillDir(strPath)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..#table_folders)
 
     for i = 1, #table_folders do
-        list_dir:setcell(i, 1, '['..table_folders[i]..']')
-        list_dir:setcell(i, 2, table_folders[i])
-        list_dir:setcell(i, 3, 'd')
+        list_dir:setcell(i, 2, '['..table_folders[i]..']')
+        list_dir:setcell(i, 3, table_folders[i])
+        list_dir:setcell(i, 4, 'd')
     end
     iup.SetAttribute(list_dir, 'MARK1:0', 1)
     list_dir.focus_cell = "1:1"
@@ -104,7 +116,7 @@ local function FileMan_GetSelectedItem(idx)
     local l = list_getvaluenum(list_dir)
     if idx == nil then idx = l end
 	if idx == -1 then return '' end
-	return list_dir:getcell(idx, 2), list_dir:getcell(idx, 3)
+	return list_dir:getcell(idx, 3), list_dir:getcell(idx, 4)
 end
 
 function FileMan_ChangeDir()
@@ -229,6 +241,13 @@ local function Favorites_ListFILL()
 		if fname == '' then fname = s[1]:gsub('.+\\(.-)\\','[%1]') end
         return fname
     end
+    local function getIcon(s)
+		local fname = s:gsub('.+\\','')
+		if fname == '' then
+            return 'IMAGE_Folder'
+        end
+        return GetExtImage(s)
+    end
 
     iup.SetAttribute(list_favorites, "DELLIN", "1-"..list_favorites.numlin)
 	table.sort(list_fav_table,
@@ -245,10 +264,9 @@ local function Favorites_ListFILL()
 	)
     iup.SetAttribute(list_favorites, "ADDLIN", "1-"..#list_fav_table)
 	for i, s in ipairs(list_fav_table) do
-		local st = ''
-        if s[2] then st = 'X' end
-        list_favorites:setcell(i, 1, getName(s))
-        list_favorites:setcell(i, 2, s[1])
+        list_favorites:setcell(i, 1, getIcon(s[1]))
+        list_favorites:setcell(i, 2, getName(s))
+        list_favorites:setcell(i, 3, s[1])
     end
     list_favorites.redraw = "ALL"
 
@@ -326,7 +344,7 @@ end
 local function Favorites_OpenFile()
 	local idx = list_getvaluenum(list_favorites)
 	if idx == null then return end
-	local fname = list_favorites:getcell(idx,2)
+	local fname = list_favorites:getcell(idx,3)
 	if fname:match('\\$') then
 		gui.chdir(fname)
 		current_path = fname
@@ -339,7 +357,7 @@ end
 local function Favorites_ShowFilePath()
 	local sel = list_getvaluenum(list_favorites)
 	if sel == nil then return end
-	local expansion = list_favorites:getcell(sel,2)
+	local expansion = list_favorites:getcell(sel,3)
 	editor:CallTipCancel()
 	editor:CallTipShow(editor.CurrentPos, expansion)
 end
@@ -393,11 +411,11 @@ end
 local function FileManTab_Init()
 
     list_dir = iup.matrix{
-    numcol=3, numcol_visible=1,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 450,rasterwidth2= 0,rasterwidth3= 0 }
+    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0,rasterwidth3= 0 }
 
-	list_dir:setcell(0, 1, "Name")
+	list_dir:setcell(0, 2, "Name")
   	list_dir.click_cb = (function(h, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             FileMan_OpenItem()
@@ -416,15 +434,17 @@ local function FileManTab_Init()
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
+    iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')
 
     list_favorites = iup.matrix{
-    numcol=2, numcol_visible=1,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 250 ,rasterwidth2= 450,
+    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 250 ,rasterwidth3= 450,
     tip= 'Избранное - файлы и директории'   }
 
-    list_favorites:setcell(0, 1, "Name")
-    list_favorites:setcell(0, 2, "Path")
+    iup.SetAttribute(list_favorites, 'TYPE*:1', 'IMAGE')
+    list_favorites:setcell(0, 2, "Name")
+    list_favorites:setcell(0, 3, "Path")
   	list_favorites.click_cb = (function(h, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Favorites_OpenFile()

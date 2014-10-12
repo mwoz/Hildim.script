@@ -102,8 +102,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
 -- Автодополнение объектов их методами и свойствами
 dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
--- Color Image Viewer: Предпросмотр цвета и изображений
-dofile (props["SciteDefaultHome"].."\\tools\\CIViewer\\CIViewer.lua")
+
 
 -- SciTE_HexEdit: A Self-Contained Primitive Hex Editor for SciTE
 --dofile (props["SciteDefaultHome"].."\\tools\\HexEdit\\SciTEHexEdit.lua")
