@@ -9,6 +9,7 @@ local vFuncNav
 local vAbbrev
 local vSys
 local vFileMan
+local vFindRepl
 local oDeatt
 
 function sidebar_Switch(n)
@@ -50,6 +51,7 @@ local function  CreateBox()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FileMan.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Functions.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Navigation.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
 
     -- Creates boxes
     vFuncNav = iup.split{SideBar_obj.Tabs.functions.handle, SideBar_obj.Tabs.navigation.handle, orientation="HORIZONTAL", value=props["sidebar.funcnav.split.value"]}
@@ -70,8 +72,12 @@ local function  CreateBox()
     vFileMan.tabtitle = "FileMan"
     SideBar_obj.Tabs.fileman.id = vFileMan.tabtitle
 
+    vFindRepl = SideBar_obj.Tabs.findrepl.handle
+    vFindRepl.tabtitle = "Find"
+    SideBar_obj.Tabs.findrepl.id = vFindRepl.tabtitle
+
     -- Creates tabs
-    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan}
+    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan,vFindRepl}
     tabs.map_cb = (function(_) tabs.valuepos = props["sidebar.tabctrl.value"] end)
 
     tabs.tabchange_cb = (function(_,new_tab, old_tab)
@@ -89,9 +95,30 @@ local function  CreateBox()
     tabs.rightclick_cb=(function()
         if props['sidebar.win'] == '0' then
             local mnu = iup.menu
-            {iup.item{title="Deattach Sidebar",action=(function()
-                oDeatt.detach = 1
-            end)}}:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+            {
+              iup.item{title="Deattach Sidebar",action=(function()
+                  oDeatt.detach = 1
+              end)};
+              iup.item{title="LayOut Dialog",action=(function()
+                local f = iup.filedlg{}
+                iup.SetNativeparent(f, "SCITE")
+                f:popup()
+                local path = f.value
+                f:destroy()
+                 testHandle = nil
+                if path ~= nil then
+                    local l = io.open(path)
+                    local strLua = l:read('*a')
+                    l:close()
+                    local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
+                    strLua = strLua..'\n testHandle = '..fName..'()'
+                    dostring(strLua)
+                end
+                local dlg = iup.LayoutDialog(testHandle)
+                iup.Show(dlg)
+              end)};
+
+            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
 
@@ -101,11 +128,10 @@ local function  CreateBox()
     oDeatt = iup.detachbox{
         vbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";
         detached_cb=(function(h, hNew, x, y)
-            hNew.maxbox="NO"
-            hNew.minbox ="NO"
             hNew.resize ="YES"
             hNew.shrink ="YES"
             hNew.minsize="100x100"
+            hNew.toolbox="YES"
             hNew.title="SideBar /Close For Attach/"
             hNew.x=10
             hNew.y=10
@@ -262,112 +288,6 @@ local function InitStatusBar()
     StatusBar_obj.size = StatusBar_obj.handle.size
     iup.PassFocus()
 end
-
-local old_iup_list = iup.list
-iup.list = function(t)
-    local cmb = old_iup_list(t)
-    function cmb:FillByDir(pathmask, strSel)
-        local current_path = props["sys.calcsybase.dir"]..pathmask
-
-        local files = gui.files(current_path)
-        local table_files = {}
-        if files then
-            local i, filename
-            for i, filename in ipairs(files) do
-                table_files[i] = {filename, {filename}}
-            end
-        end
-        table.sort(table_files, function(a, b) return a[1]:lower() < b[1]:lower() end)
-
-        local itSel = 0
-        for i = 1, #table_files do
-            local strIt = table_files[i][1]
-            iup.SetAttribute(cmb, i, strIt)
-            if strIt == strSel then cmb.value = i end
-        end
-    end
-    return cmb
-end
-
----Расширение iup
-_G.dialogs = {}
-iup.scitedialog = function(t)
-    local dlg = _G.dialogs[t.sciteid]
-    if dlg == nil then
-        dlg = iup.dialog(t)
-        iup.SetNativeparent(dlg, t.sciteparent)
-        _G.dialogs[t.sciteid] = dlg
-        if dlg.resize == 'YES' then dlg.rastersize = props['dialogs.'..t.sciteid..'.rastersize'] end
-        if t.sciteparent == "IUPTOOLBAR" then
-            dlg:showxy(0,0)
-        elseif t.sciteparent == "IUPSTATUSBAR" then
-            dlg:showxy(0,0)
-        elseif t.sciteparent == "SCITE" then
-            dlg:showxy(tonumber(props['dialogs.'..t.sciteid..'.x']),tonumber(props['dialogs.'..t.sciteid..'.y']))
-        else
-            local w = props['dialogs.'..t.sciteid..'.rastersize']:gsub('x%d*', '')
-            if w=='' then w='300' end
-            dlg:showxy(0,0)
-            iup.ShowSideBar(tonumber(w))
-        end
-        function dlg:postdestroy()
-            --вызывать destroy из обработчиков событий в диалоге нельзя - развязываемся через пост
-            if _G.deletedDialogs == nil then _G.deletedDialogs = {} end
-            table.insert(_G.deletedDialogs, t.sciteid)
-            scite.PostCommand(2,0)
-        end
-        --dlg.rastersize = "NULL"
-    else
-        dlg:show()
-    end
-    return dlg
-end
-
-AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
-    if id_msg == SCN_NOTYFY_ONPOST then
-        if wp == 2 then
-            while table.maxn(_G.deletedDialogs) > 0 do
-                sciteid = table.remove(_G.deletedDialogs)
-                local dlg = _G.dialogs[sciteid]
-                if dlg ~= nil then
-                    if sciteid ~= 'sidebarp' or props['sidebar.win'] == '0' then
-                        props['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
-                        props['dialogs.'..sciteid..'.x'] = dlg.x
-                        props['dialogs.'..sciteid..'.y'] = dlg.y
-                    end
-                    _G.dialogs[sciteid] = nil
-                    dlg:hide()
-                    dlg:destroy()
-                end
-            end
-        end
-    end
-end)
-
---Уничтожение диалогов при выключении или перезагрузке
-iup.DestroyDialogs = function()
-    if _G.dialogs == nil then return end
-    if _G.dialogs['sidebar'] ~= nil then
-        _G.dialogs['sidebar'].restore = 1
-        _G.dialogs['sidebar'] = nul
-    end
-    for sciteid, dlg in pairs(_G.dialogs) do
-        if dlg ~= nil then
-            if sciteid ~= 'sidebarp' or props['sidebar.win'] == '0' then
-                props['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
-                props['dialogs.'..sciteid..'.x'] = dlg.x
-                props['dialogs.'..sciteid..'.y'] = dlg.y
-            end
-            _G.dialogs[sciteid] = nil
-            dlg:hide()
-            dlg:destroy()
-        end
-    end
-    _G.dialogs = nil
-    iup.ShowSideBar(-1)
-end
-
-
 
 InitSideBar()
 InitToolBar()

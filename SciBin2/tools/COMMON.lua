@@ -14,6 +14,7 @@ dofile(props["SciteDefaultHome"]..'\\tools\\eventmanager.lua')
 
 -- Функция распознавания URL
 dofile (props["SciteDefaultHome"].."\\tools\\URL_detect.lua")
+
 --------------------------------------------------------
 -- Замена порой неработающего props['CurrentWord']
 function GetCurrentWord()
@@ -46,6 +47,8 @@ local function StringLower(s, cp)
 end
 
 local function StringUpper(s, cp)
+    if s == nil then return s end
+    s = tostring(s)
 	if not cp then cp = props["editor.code.page"] end
 	if cp ~= 65001 then s = s:to_utf8(cp) end
 	s = s:utf8upper()
@@ -324,3 +327,6 @@ AddEventHandler("OnOpen", function()
 	EditorInitMarkStyles()
 	SetMarginTypeN()
 end, 'RunOnce')
+
+-- Расширение IUP
+dofile (props["SciteDefaultHome"].."\\tools\\iupCommon.lua")
