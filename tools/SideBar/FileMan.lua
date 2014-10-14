@@ -320,7 +320,6 @@ function Favorites_AddCurrentBuffer()
 end
 
 function Favorites_AddFileName(fName) --для добавления из других библиотек
-	if SideBar_obj.Active  ~= true then return end
     list_fav_table[#list_fav_table+1] = {fName, true}
 	Favorites_ListFILL()
 end
@@ -362,7 +361,7 @@ local function Favorites_ShowFilePath()
 	editor:CallTipShow(editor.CurrentPos, expansion)
 end
 
-local function OnSwitch(bForse)
+local function OnSwitch(bForse, bRelist)
     if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
         local path = props['FileDir']
         if path == '' then return end
@@ -370,7 +369,7 @@ local function OnSwitch(bForse)
         -- if bClearMask then memo_mask:set_text = "" end
 		FileMan_ListFILL()
     end
-    if not bForse then
+    if bRelist then
         Favorites_OpenList()
         Favorites_ListFILL()
     end
@@ -378,8 +377,8 @@ end
 
 function memoNav(key)
     if key == 65364 then  --down
-        local sel = list_dir.marked:find('1')
-        if sel == nil then sel = 1 end
+        local sel = 1
+        if list_dir.marked then sel = list_dir.marked:find('1') end
         sel = sel - 1
         if sel < list_dir.count - 1 then
             iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 0)
@@ -413,7 +412,7 @@ local function FileManTab_Init()
     list_dir = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0,rasterwidth3= 0 }
+    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0,rasterwidth3= 0 ,rasterwidth4= 0 }
 
 	list_dir:setcell(0, 2, "Name")
   	list_dir.click_cb = (function(h, lin, col, status)
@@ -497,12 +496,12 @@ local function FileManTab_Init()
                    iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,expand="HORIZONTAL", alignment="ACENTER"},
                    split_s
                  };
-        OnSwitchFile = function()OnSwitch(false) end;
-        OnSave = function()OnSwitch(false) end;
-        OnOpen = function()OnSwitch(false) end;
+        OnSwitchFile = function()OnSwitch(false,true) end;
+        OnSave = function()OnSwitch(false,false) end;
+        OnOpen = function()OnSwitch(false,true) end;
         OnFinalise = Favorites_SaveList;
         OnSideBarClouse = OnMyClouse;
-        tabs_OnSelect = function()OnSwitch(true) end;
+        tabs_OnSelect = function()OnSwitch(true,false) end;
     }
 end
 
