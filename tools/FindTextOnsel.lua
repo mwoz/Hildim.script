@@ -245,7 +245,7 @@ function FindSelToConcole()
     if props['findtext.wholeword'] == '1' then flag0 = SCFIND_WHOLEWORD end
 
     if string.len(sText) > 0 then
-
+        scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
         for line = 0, output.LineCount do
             local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
             if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then

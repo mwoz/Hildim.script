@@ -85,7 +85,7 @@ end
 
 -- Добавляем свой обработчик события OnUserListSelection
 AddEventHandler("OnUserListSelection", function(tp, sel_value)
-	if tp == 12 then
+	if tp == 900 then
 		InsertSpecialChar(sel_value)
         return true
 	end

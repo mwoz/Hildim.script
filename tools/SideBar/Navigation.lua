@@ -108,6 +108,7 @@ local function FuncBmkTab_Init()
         id = myId;
         tab = tab1;
         OnKey = Navigation_OnKey;
+       OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
 		OnNavigation = OnNavigate;
         }
 end

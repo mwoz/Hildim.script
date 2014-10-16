@@ -3,27 +3,39 @@ local containers
 local function create_dialog_FindReplace()
   containers = {}
 
-  containers[3] = iup.hbox{
+  containers[4] = iup.hbox{
     iup.label{
       title = "Найти:",
     },
     iup.list{
+      name = "cmbFind",
       expand = "HORIZONTAL",
+      rastersize = "1x0",
       editbox = "YES",
       dropdown = "YES",
+      visible_items = "15",
+      map_cb = (function(h) h:FillByHist("find.what.history","find.what") end),
     },
     iup.toggle{
       impress = "IMAGE_PinPush",
-      tip = "fdgdf",
       image = "IMAGE_Pin",
     },
+    margin = "0x00",
     expand = "HORIZONTAL",
     alignment = "ACENTER",
   }
 
-  containers[6] = iup.hbox{
+  containers[3] = iup.frame{
+    containers[4],
+    expand = "HORIZONTAL",
+    rastersize = "372x29",
+  }
+
+  containers[7] = iup.hbox{
     iup.button{
-      title = "Найти далее",
+      image = "IMAGE_search",
+      title = " далее",
+      name = "btnFind",
     },
     iup.button{
       title = "Найти все",
@@ -39,7 +51,7 @@ local function create_dialog_FindReplace()
     alignment = "ABOTTOM",
   }
 
-  containers[9] = iup.hbox{
+  containers[10] = iup.hbox{
     iup.toggle{
       title = "Вверх",
     },
@@ -49,26 +61,26 @@ local function create_dialog_FindReplace()
     },
   }
 
-  containers[8] = iup.radio{
-    containers[9],
+  containers[9] = iup.radio{
+    containers[10],
   }
 
-  containers[7] = iup.hbox{
+  containers[8] = iup.hbox{
     iup.label{
       title = "Направление поиска(эамены)",
     },
-    containers[8],
+    containers[9],
     alignment = "ACENTER",
   }
 
-  containers[5] = iup.vbox{
-    containers[6],
+  containers[6] = iup.vbox{
     containers[7],
+    containers[8],
     expandchildren = "YES",
     gap = "4",
   }
 
-  containers[12] = iup.vbox{
+  containers[13] = iup.vbox{
     iup.button{
       title = "Заменить на:",
     },
@@ -78,7 +90,7 @@ local function create_dialog_FindReplace()
     normalizesize = "HORIZONTAL",
   }
 
-  containers[14] = iup.hbox{
+  containers[15] = iup.hbox{
     iup.button{
       title = "Заменить все",
     },
@@ -91,37 +103,45 @@ local function create_dialog_FindReplace()
     margin = "0x00",
   }
 
-  containers[13] = iup.vbox{
+  containers[14] = iup.vbox{
     iup.list{
+      name = "cmbReplace",
       expand = "HORIZONTAL",
+      rastersize = "1x0",
       editbox = "YES",
       dropdown = "YES",
+      visible_items = "15",
+      map_cb = (function(h) h:FillByHist("find.replasewith.history",nil) end),
     },
-    containers[14],
+    containers[15],
     alignment = "ARIGHT",
   }
 
-  containers[11] = iup.hbox{
-    containers[12],
+  containers[12] = iup.hbox{
     containers[13],
+    containers[14],
     normalizesize = "VERTICAL",
     gap = "3",
     alignment = "ACENTER",
   }
 
-  containers[10] = iup.vbox{
-    containers[11],
+  containers[11] = iup.vbox{
+    containers[12],
     gap = "4",
   }
 
-  containers[16] = iup.hbox{
+  containers[17] = iup.hbox{
     iup.label{
       title = "В папках:",
     },
     iup.list{
+      name = "cmbFolders",
       expand = "HORIZONTAL",
+      rastersize = "1x0",
       editbox = "YES",
       dropdown = "YES",
+      visible_items = "15",
+      map_cb = (function(h) h:FillByHist("find.directory.history","find.directory.history") end),
     },
     iup.button{
       title = "^^",
@@ -133,18 +153,24 @@ local function create_dialog_FindReplace()
     alignment = "ACENTER",
   }
 
-  containers[17] = iup.hbox{
+  containers[18] = iup.hbox{
     iup.label{
       size = "31x8",
       title = "Фильтр:",
     },
     iup.list{
+      name = "cmbFilter",
       expand = "HORIZONTAL",
+      rastersize = "1x0",
       editbox = "YES",
       dropdown = "YES",
+      visible_items = "15",
+      map_cb = (function(h) h:FillByHist("find.files.history",nil) end),
     },
     iup.toggle{
+      name = "chkSubFolders",
       title = "В подпапках",
+      map_cb = (function(h) h.value = Iif(props['find.in.subfolders'] == '1', 'ON', 'OFF') end),
     },
     iup.button{
       title = "Искать",
@@ -152,13 +178,13 @@ local function create_dialog_FindReplace()
     alignment = "ACENTER",
   }
 
-  containers[15] = iup.vbox{
-    containers[16],
+  containers[16] = iup.vbox{
     containers[17],
+    containers[18],
     gap = "4",
   }
 
-  containers[20] = iup.hbox{
+  containers[21] = iup.hbox{
     iup.button{
       title = "Пометить",
     },
@@ -172,7 +198,7 @@ local function create_dialog_FindReplace()
     normalizesize = "HORIZONTAL",
   }
 
-  containers[19] = iup.hbox{
+  containers[20] = iup.hbox{
     iup.label{
       title = "Метка:",
     },
@@ -180,12 +206,12 @@ local function create_dialog_FindReplace()
       size = "37x12",
       dropdown = "YES",
     },
-    containers[20],
+    containers[21],
     gap = "4",
     alignment = "ACENTER",
   }
 
-  containers[21] = iup.hbox{
+  containers[22] = iup.hbox{
     iup.fill{
     },
     iup.button{
@@ -194,16 +220,16 @@ local function create_dialog_FindReplace()
     },
   }
 
-  containers[18] = iup.vbox{
-    containers[19],
-    containers[21],
+  containers[19] = iup.vbox{
+    containers[20],
+    containers[22],
   }
 
-  containers[4] = iup.tabs{
-    containers[5],
-    containers[10],
-    containers[15],
-    containers[18],
+  containers[5] = iup.tabs{
+    containers[6],
+    containers[11],
+    containers[16],
+    containers[19],
     ["tabvisible0"] = "YES",
     ["tabvisible1"] = "YES",
     ["tabvisible2"] = "YES",
@@ -214,7 +240,7 @@ local function create_dialog_FindReplace()
     ["tabtitle3"] = "Метки",
   }
 
-  containers[25] = iup.vbox{
+  containers[26] = iup.vbox{
     iup.toggle{
       title = "Слово целиком",
     },
@@ -226,7 +252,7 @@ local function create_dialog_FindReplace()
     },
   }
 
-  containers[27] = iup.hbox{
+  containers[28] = iup.hbox{
     iup.toggle{
       title = "Только в стиле:",
     },
@@ -236,35 +262,35 @@ local function create_dialog_FindReplace()
     margin = "0x00",
   }
 
-  containers[26] = iup.vbox{
+  containers[27] = iup.vbox{
     iup.toggle{
       title = "Backslash-выражения(\\n,\\r,\\t...)",
     },
     iup.toggle{
       title = "Регулярные выражения",
     },
+    containers[28],
+  }
+
+  containers[25] = iup.hbox{
+    containers[26],
     containers[27],
   }
 
-  containers[24] = iup.hbox{
+  containers[24] = iup.frame{
     containers[25],
-    containers[26],
-  }
-
-  containers[23] = iup.frame{
-    containers[24],
     title = "Режим поиска",
     size = "241x49",
   }
 
-  containers[22] = iup.hbox{
-    containers[23],
+  containers[23] = iup.hbox{
+    containers[24],
   }
 
   containers[2] = iup.vbox{
     containers[3],
-    containers[4],
-    containers[22],
+    containers[5],
+    containers[23],
     margin = "3x3",
     expandchildren = "YES",
     gap = "3",
@@ -316,6 +342,11 @@ local function FuncBmkTab_Init()
                     props['dialogs.findrepl.rastersize'] = h.rastersize
                 end
             end)
+--[[            hNew.map_cb = (function(h)
+                print(chk_Pin.image)
+                chk_Pin.impress = "IMAGE_PinPush"
+                chk_Pin.image = "IMAGE_Pin"
+            end)]]
             if tonumber(props["dialogs.findrepl.x"])== nil or tonumber(props["dialogs.findrepl.y"]) == nil then props["dialogs.findrepl.x"]=0;props["dialogs.findrepl.y"]=0 end
             return tonumber(props["dialogs.findrepl.x"])*2^16+tonumber(props["dialogs.findrepl.y"])
         end)
