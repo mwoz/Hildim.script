@@ -131,6 +131,8 @@ local function  CreateBox()
             hNew.resize ="YES"
             hNew.shrink ="YES"
             hNew.minsize="100x100"
+            hNew.maxbox="NO"
+            hNew.minbox="NO"
             hNew.toolbox="YES"
             hNew.title="SideBar /Close For Attach/"
             hNew.x=10
