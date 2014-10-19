@@ -54,12 +54,12 @@ local function  CreateBox()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
 
     -- Creates boxes
-    vFuncNav = iup.split{SideBar_obj.Tabs.functions.handle, SideBar_obj.Tabs.navigation.handle, orientation="HORIZONTAL", value=props["sidebar.funcnav.split.value"]}
+    vFuncNav = iup.split{SideBar_obj.Tabs.functions.handle, SideBar_obj.Tabs.navigation.handle, orientation="HORIZONTAL", name="splitFuncNav"}
     vFuncNav.tabtitle = "Func/Nav"
     SideBar_obj.Tabs.functions.id = vFuncNav.tabtitle
     SideBar_obj.Tabs.navigation.id = vFuncNav.tabtitle
 
-    vAbbrev = iup.split{SideBar_obj.Tabs.abbreviations.handle, SideBar_obj.Tabs.bookmark.handle, orientation="HORIZONTAL", value=props["sidebar.abbrevbmk.split.value"]}
+    vAbbrev = iup.split{SideBar_obj.Tabs.abbreviations.handle, SideBar_obj.Tabs.bookmark.handle, orientation="HORIZONTAL", name="splitAbbrev"}
 
     -- Sets titles of the vboxes Navigation
     vAbbrev.tabtitle = "Abbrev/Bmk"
@@ -77,12 +77,10 @@ local function  CreateBox()
     SideBar_obj.Tabs.findrepl.id = vFindRepl.tabtitle
 
     -- Creates tabs
-    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan,vFindRepl}
-    tabs.map_cb = (function(_) tabs.valuepos = props["sidebar.tabctrl.value"] end)
+    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain"}
 
     tabs.tabchange_cb = (function(_,new_tab, old_tab)
         --сначала найдем активный таб и установим его в SideBar_obj
-        props["sidebar.activetab"] = tabs.valuepos
 
         for _,tbs in pairs(SideBar_obj.Tabs) do
             if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
@@ -93,7 +91,7 @@ local function  CreateBox()
     end)
 
     tabs.rightclick_cb=(function()
-        if props['sidebar.win'] == '0' then
+        if _G.iuprops['sidebar.win'] == '0' then
             local mnu = iup.menu
             {
               iup.item{title="Deattach Sidebar",action=(function()
@@ -138,15 +136,15 @@ local function  CreateBox()
             hNew.x=10
             hNew.y=10
             x=10;y=10
-            hNew.rastersize = props['dialogs.sidebar.rastersize']
-            props['sidebar.win']=1
-            props['dialogs.sidebarp.rastersize'] = h.rastersize
+            hNew.rastersize = _G.iuprops['dialogs.sidebar.rastersize']
+            _G.iuprops['sidebar.win']=1
+            _G.iuprops['dialogs.sidebarp.rastersize'] = h.rastersize
 
             hNew.close_cb =(function(h)
                 if _G.dialogs['sidebar'] ~= nil then
 
-                    props['sidebar.win']=0
-                    local w = props['dialogs.sidebarp.rastersize']:gsub('x%d*', '')
+                    _G.iuprops['sidebar.win']=0
+                    local w = _G.iuprops['dialogs.sidebarp.rastersize']:gsub('x%d*', '')
                     iup.ShowSideBar(tonumber(w))
                     oDeatt.restore = 1
                     _G.dialogs['sidebar'] = nul
@@ -158,14 +156,14 @@ local function  CreateBox()
                 if state == 0 then
                     _G.dialogs['sidebar'] = oDeatt
                 elseif state == 4 then
-                    props["dialogs.sidebar.x"]= h.x
-                    props["dialogs.sidebar.y"]= h.y
-                    props['dialogs.sidebar.rastersize'] = h.rastersize
+                    _G.iuprops["dialogs.sidebar.x"]= h.x
+                    _G.iuprops["dialogs.sidebar.y"]= h.y
+                    _G.iuprops['dialogs.sidebar.rastersize'] = h.rastersize
                 end
             end)
             iup.ShowSideBar(-1)
-            if tonumber(props["dialogs.sidebar.x"])== nil or tonumber(props["dialogs.sidebar.y"]) == nil then props["dialogs.sidebar.x"]=0;props["dialogs.sidebar.y"]=0 end
-            return tonumber(props["dialogs.sidebar.x"])*2^16+tonumber(props["dialogs.sidebar.y"])
+            if tonumber(_G.iuprops["dialogs.sidebar.x"])== nil or tonumber(_G.iuprops["dialogs.sidebar.y"]) == nil then _G.iuprops["dialogs.sidebar.x"]=0;_G.iuprops["dialogs.sidebar.y"]=0 end
+            return tonumber(_G.iuprops["dialogs.sidebar.x"])*2^16+tonumber(_G.iuprops["dialogs.sidebar.y"])
         end)
         }
     return oDeatt
@@ -177,7 +175,7 @@ local function InitSideBar()
 -- отображение флагов/параметров по умолчанию:
     if tonumber(props['sidebar.hide']) == 1 then return end
     -- SideBar_obj.win = false --если установить true - панель будет показана отдельным окном
-    SideBar_obj.win = (props['sidebar.win']=='1') --если установить true - панель будет показана отдельным окном
+    SideBar_obj.win = (_G.iuprops['sidebar.win']=='1') --если установить true - панель будет показана отдельным окном
     SideBar_obj.Tabs = {}
     SideBar_obj.Active = true
 
@@ -189,9 +187,6 @@ local function InitSideBar()
            iup.Refresh(h)
            h.size = '1x1'
         elseif state == 4 then
-            props["sidebar.funcnav.split.value"] = vFuncNav.value
-            props["sidebar.abbrevbmk.split.value"] = vAbbrev.value
-            props["sidebar.tabctrl.value"] = SideBar_obj.TabCtrl.valuepos
             for _,tbs in pairs(SideBar_obj.Tabs) do
                 if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
             end
@@ -207,8 +202,62 @@ local function InitSideBar()
         if key == 65307 then iup.PassFocus() end
     end)
 
+    local function SaveNamedValues(h)
+        if not h then return end
+        local child = nil
+        repeat
+            child = iup.GetNextChild(h, child)
+            if child then
+                if (child.value or child.valuepos) and child.name then
+                    local _,_,cType = tostring(child):find('IUP%((%w+)')
+
+                    local val = child.value
+                    if cType == 'list' and child.dropdown == "YES" then
+                        local hist = {}
+                        for i = 1, child.count do
+                            table.insert(hist,iup.GetAttributeId(child, '', i))
+                        end
+                        _G.iuprops['sidebarctrl.'..child.name..'.hist'] = table.concat(hist,'¤')
+                    elseif cType == 'zbox' or cType == 'tabs' then
+                        val = child.valuepos
+                    end
+                    _G.iuprops['sidebarctrl.'..child.name..'.value'] = val
+                end
+                SaveNamedValues(child)
+            end
+        until not child
+    end
+
+    local function RestoreNamedValues(h)
+        if not h then return end
+        local child = nil
+        repeat
+            child = iup.GetNextChild(h, child)
+            if child then
+                if child.name then
+                    local _,_,cType = tostring(child):find('IUP%((%w+)')
+                    local val = _G.iuprops['sidebarctrl.'..child.name..'.value']
+                    if cType == 'list' and child.dropdown == "YES" then
+                        local s = _G.iuprops['sidebarctrl.'..child.name..'.hist']
+                        if s then
+                            for w in s:gmatch('([^¤]+)') do
+                                iup.SetAttributeId(child, 'INSERTITEM', 1, w)
+                            end
+                        end
+                        if val then child.value = val end
+                    elseif cType == 'zbox' or cType == 'tabs' then
+                        if val then child.valuepos = val end
+                    else
+                        if val then child.value = val end
+                    end
+                end
+                RestoreNamedValues(child)
+            end
+        until not child
+    end
+
     tDlg.SaveValues = (function()
-        print("SaveValues")
+        SaveNamedValues(tDlg[1])
     end)
 
     tDlg.sciteparent="SIDEBAR"
@@ -216,6 +265,7 @@ local function InitSideBar()
     tDlg.sciteid="sidebarp"
     -- end
     dlg = iup.scitedialog(tDlg)
+    RestoreNamedValues(tDlg[1])
     if SideBar_obj.win then oDeatt.detach = 1 end
 
     for i = 1, #tEvents do
@@ -280,7 +330,6 @@ local function InitStatusBar()
                    if tbs[tEvents[i]] then RemoveEventHandler(tEvents[i],tbs[tEvents[i]]) end
                 end
             end
-            -- props['iuptoolbar.restarted'] = '1'
         end
     end)
     tTlb.resize_cb=(function(_,x,y) if StatusBar_obj.handle ~= nil then  StatusBar_obj.size = StatusBar_obj.handle.size end end)

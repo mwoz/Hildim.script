@@ -4,6 +4,10 @@ local oDeatt
 
 local findSettings = seacher{}
 
+local function Ctrl(s)
+    return iup.GetDialogChild(containers[2],s)
+end
+
 local function ReadSettings()
     local cv = (function(s) return iup.GetDialogChild(containers[2],s).value end)
     findSettings:Reset{
@@ -22,18 +26,23 @@ end
 local function ReplaceAll(h)
     ReadSettings()
     findSettings:ReplaceAll(false)
+    Ctrl("cmbFindWhat"):SaveHist()
+    Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
 end
 
 local function ReplaceSel(h)
     ReadSettings()
     findSettings:ReplaceAll(true)
+    Ctrl("cmbFindWhat"):SaveHist()
+    Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
 end
 
 local function FindAll(h)
     ReadSettings()
     findSettings:FindAll(500)
+    Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
 end
 
@@ -41,38 +50,43 @@ local function GetCount(h)
     ReadSettings()
     local count = findSettings:Count()
     print(count)
+    Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
 end
 
 local function FindNext(h)
     ReadSettings()
     local pos = findSettings:FindNext(true)
+    Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
 end
 
 local function ReplaceOnce(h)
     ReadSettings()
     local pos = findSettings:ReplaceOnce()
+    Ctrl("cmbFindWhat"):SaveHist()
+    Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
 end
 
 local function create_dialog_FindReplace()
   containers = {}
-  containers["Pin"] = iup.zbox{
+  containers["zPin"] = iup.zbox{
     iup.button{
       impress = "IMAGE_Pin",
       visible = "NO",
       image = "IMAGE_PinPush",
       size = "11x9",
-      action = (function(h) containers["Pin"].valuepos = "1" end),
+      action = (function(h) containers["zPin"].valuepos = "1" end),
     },
     iup.button{
       impress = "IMAGE_PinPush",
       visible = "NO",
       image = "IMAGE_Pin",
       size = "11x9",
-      action = (function(h) containers["Pin"].valuepos = "0" end),
+      action = (function(h) containers["zPin"].valuepos = "0" end),
     },
+    name = "zPin",
     valuepos = "1",
   }
   containers[4] = iup.hbox{
@@ -86,9 +100,9 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      map_cb = (function(h) h:FillByHist("find.what.history","find.what") end),
+      -- map_cb = (function(h) h:FillByHist("find.what.history","find.what") end),
     },
-    containers["Pin"],
+    containers["zPin"],
     margin = "0x00",
     expand = "HORIZONTAL",
     alignment = "ACENTER",
@@ -165,7 +179,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      map_cb = (function(h) h:FillByHist("find.replasewith.history",nil) end),
+      -- map_cb = (function(h) h:FillByHist("find.replasewith.history",nil) end),
     },
     containers[15],
     alignment = "ARIGHT",
@@ -195,7 +209,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      map_cb = (function(h) h:FillByHist("find.directory.history","find.directory.history") end),
+      -- map_cb = (function(h) h:FillByHist("find.directory.history","find.directory.history") end),
     },
     iup.button{
       title = "^^",
@@ -219,7 +233,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      map_cb = (function(h) h:FillByHist("find.files.history",nil) end),
+      -- map_cb = (function(h) h:FillByHist("find.files.history",nil) end),
     },
     iup.toggle{
       name = "chkSubFolders",
@@ -292,6 +306,7 @@ local function create_dialog_FindReplace()
     ["tabtitle1"] = "Заменить",
     ["tabtitle2"] = "Найти в файлах",
     ["tabtitle3"] = "Метки",
+    name = "tabFinrRepl"
   }
 
   containers["zUpDown"] = iup.zbox{
@@ -309,6 +324,7 @@ local function create_dialog_FindReplace()
       size = "11x9",
       action = (function(h) containers["zUpDown"].valuepos = "0" end),
     },
+    name = "zUpDown",
     valuepos = "1",
   }
 

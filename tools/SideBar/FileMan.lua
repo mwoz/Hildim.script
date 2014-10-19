@@ -23,9 +23,7 @@ local function ReplaceWithoutCase(text, s_find, s_rep)
 		replaced = true
 	until false
 end
-local function OnMyClouse()
-	props["sidebar.fileman.split.value"]=split_s.value
-end
+
 local function GetExtImage(strName)
     local _, _, ext = strName:find('%.([^%.]+)$')
     if ext=='inc' then return 'IMAGE_Library'
@@ -459,7 +457,7 @@ local function FileManTab_Init()
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
-    split_s = iup.split{list_dir, list_favorites, orientation="HORIZONTAL", value=props["sidebar.fileman.split.value"]}
+    split_s = iup.split{list_dir, list_favorites, orientation="HORIZONTAL", name='splitFileMan'}
     memo_path = iup.text{expand='YES'}
     memo_path.action = (function(h,s,new_value)
         FileMan_ListFillDir(new_value)
@@ -500,7 +498,6 @@ local function FileManTab_Init()
         OnSave = function()OnSwitch(false,false) end;
         OnOpen = function()OnSwitch(false,true) end;
         OnFinalise = Favorites_SaveList;
-        OnSideBarClouse = OnMyClouse;
         tabs_OnSelect = function()OnSwitch(true,false) end;
     }
 end

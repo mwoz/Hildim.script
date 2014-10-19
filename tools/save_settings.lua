@@ -114,6 +114,19 @@ local function ToggleProp(prop_name)
 	end
 end
 
+--[[local function SaveIup()
+	local file = props["scite.userhome"]..'\\SciTEIUP.session'
+    local t = {}
+    for n,v in pairs(_G.props) do
+        table.insert(t, n..'='..v)
+    end
+ print(123)
+	if pcall(io.output, file) then
+		io.write(table.concat(t,'\r\n'))
+ 	end
+	io.close()
+end]]
+
 -- ƒобавл€ем свой обработчик событи€ OnMenuCommand
 -- ѕри изменении параметров через меню, мен€ютс€ и соответствующие значени€ props[]
 AddEventHandler("OnMenuCommand", function(cmd, source)
@@ -140,8 +153,11 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
 		ToggleProp('output.wrap')
 	elseif cmd == IDM_WRAPFINDRES then
 		ToggleProp('findrez.wrap')
+	elseif cmd == 9117 then
+		--SaveIup()
 	elseif cmd == IDM_QUIT and tonumber(props['save.settings']) == 1 then
 		SaveSettings()  --ѕоскольку закрытие окна мы в любом случае выполн€ем  через IDM_QUIT
+        --SaveIup()
 	end
 end)
 
