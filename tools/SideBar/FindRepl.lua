@@ -39,17 +39,74 @@ local function GetSelection()
     return t
 end
 
-function replaceOne(fs)
+local function replaceOne(fs)
     local replaceTarget, replaceLen = fs:UnSlashAsNeeded(fs.replaceWhat)
-
-    return (function()
+    return (function(lenTarget)
         local lenReplaced = replaceLen
-        if fs.regExp then
-            lenReplaced = editor:ReplaceTargetRE(replaceTarget);
+        if lenTarget then
+            if fs.regExp then
+                lenReplaced = editor:ReplaceTargetRE(replaceTarget);
+            else
+                editor:ReplaceTarget(replaceTarget)
+            end
+            return lenReplaced, true
         else
-            editor:ReplaceTarget(replaceTarget)
+            return true
         end
-        return lenReplaced
+    end)
+end
+
+local function onFindAll(fs, maxlines)
+    scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
+    for line = 0, findrez.LineCount do
+        local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
+        if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
+            scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
+            local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
+            if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
+        end
+    end
+
+    scite.SendFindRez(SCI_SETSEL,0,0)
+    local line, wCount, lCount = -1, 0, 0
+    return (function(lenTarget)
+        if lenTarget then
+            wCount = wCount + 1
+            local l = editor:LineFromPosition(editor.TargetStart)
+            if l~=line then
+                lCount = lCount + 1
+                line = l
+                if lCount == maxlines then
+                    scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': ...\n')
+                    return lenTarget, true
+                end
+                local str = editor:GetLine(l):gsub('^[ \t]+', '')
+                if needCoding then str = str:from_utf8(1251) end
+                scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
+            end
+            return lenTarget, true
+        else
+            scite.SendFindRez(SCI_REPLACESEL, '>!!/\\  Occurrences: '..wCount..' in '..lCount..' lines\n' )
+            scite.SendFindRez(SCI_SETSEL,0,0)
+            scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..fs.findWhat..'" in "'..props["FileNameExt"]..'" (Current)\n' )
+            findrez.CurrentPos = 1
+            if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+
+            return true
+        end
+    end)
+end
+
+local function onCount(fs)
+    local wCount = 0
+    return (function(lenTarget)
+        wCount = wCount + 1
+        if lenTarget then
+            return lenTarget, true
+        else
+            print(wCount)
+            return true
+        end
     end)
 end
 
@@ -59,8 +116,7 @@ local function FindInTarget(findWhat, lenFind, startPosition, endPosition, fs)
     scite.SendEditor(SCI_SETTARGETEND, endPosition)
 
     local posFind = editor:SearchInTarget(findWhat)
-
-	while (fs.findInStyle and posFind ~= -1 and fs.findStyle ~= scite.SendEditor(SCI_GETSTYLEAT, posFind)) do
+	while (fs.style ~= nil and posFind ~= -1 and fs.style ~= scite.SendEditor(SCI_GETSTYLEAT, posFind)) do
 		if startPosition < endPosition then
 			scite.SendEditor(SCI_SETTARGETSTART, posFind + 1)
 			scite.SendEditor(SCI_SETTARGETEND, endPosition)
@@ -73,6 +129,87 @@ local function FindInTarget(findWhat, lenFind, startPosition, endPosition, fs)
 	return posFind;
 end
 
+local function doFindNext(fireEvent, fs)
+
+    if fs.findWhat == nil or fs.findWhat:len() == 0 then
+        return -1
+		-- Find();
+	end
+
+	local findTarget, lenFind = fs:UnSlashAsNeeded(fs.findWhat)
+	if (lenFind == 0) then return -1 end
+
+	local startPosition = Iif(fs.searchUp, editor.SelectionStart, editor.SelectionEnd)
+	local endPosition = Iif(fs.searchUp, 0, editor.Length)
+
+	local flags = Iif(fs.wholeWord, SCFIND_WHOLEWORD, 0) +
+	        Iif(fs.matchCase, SCFIND_MATCHCASE, 0) +
+	        Iif(fs.regExp, SCFIND_REGEXP, 0) +
+	        Iif(props["find.replace.regexp.posix"]=='1', SCFIND_POSIX, 0)
+
+	scite.SendEditor(SCI_SETSEARCHFLAGS, flags)
+	local posFind = FindInTarget(findTarget, findLen, startPosition, endPosition, fs)
+
+	if posFind == -1 and  fs.wrapFind then
+		-- // Failed to find in indicated direction
+		-- // so search from the beginning (forward) or from the end (reverse)
+		-- // unless wrapFind is false
+
+        startPosition = Iif(fs.searchUp, editor.Length, 0)
+        endPosition = Iif(fs.searchUp, 0, editor.Length)
+
+		posFind = FindInTarget(findTarget, findLen, startPosition, endPosition, fs)
+		-- WarnUser(warnFindWrapped);
+	end
+	if posFind ~= -1 then
+
+		-- //Вызовем нотификацию в скрипте
+		if fireEvent then OnNavigation("Find") end
+
+		local start = editor.TargetStart
+		local fin = editor.TargetEnd
+        editor:EnsureVisible(start, fin)
+		-- EnsureRangeVisible;
+
+        editor:SetSel(start, fin)
+
+        if fireEvent then OnNavigation("Find-") end
+	end
+	return posFind;
+end
+
+local function doReplaceOnce(fs)
+--[[	if (!FindHasText())
+		return;]]
+    if fs.searchUp then
+        editor:SetSel(editor.SelectionEnd, editor.SelectionEnd)
+    else
+        editor:SetSel(editor.SelectionStart, editor.SelectionStart)
+    end
+	local pos = doFindNext(true, fs);
+
+
+	if pos > -1 then
+        local replaceTarget, replaceLen = fs:UnSlashAsNeeded(fs.replaceWhat)
+
+		local lenReplaced = replaceLen;
+		if fs.regExp then
+			lenReplaced = editor:ReplaceTargetRE(replaceTarget);
+		else
+			editor:ReplaceTarget(replaceTarget)
+        end
+        if fs.searchUp then
+            editor:SetSel(pos, pos)
+        else
+            editor:SetSel(pos + lenReplaced, pos + lenReplaced)
+        end
+
+		doFindNext(true, fs);
+	end
+
+end
+
+
 function findWalk(inSelection, fs, funcOnFind)
     local findTarget, findLen = fs:UnSlashAsNeeded(fs.findWhat)
 
@@ -81,13 +218,13 @@ function findWalk(inSelection, fs, funcOnFind)
 	local endPosition = editor.SelectionEnd;
 	local countSelections = scite.SendEditor(SCI_GETSELECTIONS)
     if inSelection then
-        if scite.SendEditor(SCI_GETSELECTIONS) == SC_SEL_LINES then
+        if scite.SendEditor(SCI_GETSELECTIONMODE) == SC_SEL_LINES then
             startPosition = editor:PositionFromLine(editor:LineFromPosition(startPosition))
             endPosition = editor:PositionFromLine(editor:LineFromPosition(endPosition) + 1)
         else
-            for i = 0, countSelections do
+            for i = 0, countSelections - 1 do
                 startPosition = Min(startPosition, scite.SendEditor(SCI_GETSELECTIONNSTART, i))
-                startPosition = Max(startPosition, scite.SendEditor(SCI_GETSELECTIONNEND, i))
+                endPosition = Max(endPosition, scite.SendEditor(SCI_GETSELECTIONNEND, i))
             end
         end
         if startPosition == endPosition then return -2 end
@@ -116,6 +253,7 @@ function findWalk(inSelection, fs, funcOnFind)
         editor:BeginUndoAction()
 		-- // Replacement loop
 		while posFind ~= -1 do
+            local bContinue = true
             repeat  --фейковый цикл, чтобы брек сработал как continue
                 local lenTarget = scite.SendEditor(SCI_GETTARGETEND) - scite.SendEditor(SCI_GETTARGETSTART)
                 local insideASelection = true
@@ -147,8 +285,8 @@ function findWalk(inSelection, fs, funcOnFind)
                     local chNext = scite.SendEditor(SCI_GETCHARAT, wEditor.Call(SCI_GETTARGETEND))
                     if chNext == '\r' or chNext == '\n' then movepastEOL = 1 end
                 end
-
-                local lenReplaced = funcOnFind();
+                local lenReplaced
+                lenReplaced, bContinue = funcOnFind(lenTarget);
 
                 -- // Modify for change caused by replacement
                 endPosition = endPosition + lenReplaced - lenTarget;
@@ -164,21 +302,55 @@ function findWalk(inSelection, fs, funcOnFind)
                 end
                 replacements = replacements + 1
 		    until true
+            if not bContinue then break end
         end
+        funcOnFind(nil)
         if inSelection then
-			if countSelections == 1 then scite.SendEditor(SCI_SETSEL, startPosition, endPosition) end
-		else
-			if props["find.replace.return.to.start"] ~= '1' then editor:SetSel(lastMatch, lastMatch) end
-		end
+            if countSelections == 1 then scite.SendEditor(SCI_SETSEL, startPosition, endPosition) end
+        else
+            if props["find.replace.return.to.start"] ~= '1' then editor:SetSel(lastMatch, lastMatch) end
+        end
+
         editor:EndUndoAction()
 		return replacements
 	end
 	return 0;
 end
 
-local function RaplaceAll(h)
+local function ReplaceAll(h)
     findSettings:readSettings()
     findWalk(false, findSettings, replaceOne(findSettings))
+    iup.PassFocus()
+end
+
+local function ReplaceSel(h)
+    findSettings:readSettings()
+    findWalk(true, findSettings, replaceOne(findSettings))
+    iup.PassFocus()
+end
+
+local function FindAll(h)
+    findSettings:readSettings()
+    findWalk(false, findSettings, onFindAll(findSettings, 500))
+    iup.PassFocus()
+end
+
+local function GetCount(h)
+    findSettings:readSettings()
+    findWalk(false, findSettings, onCount(findSettings))
+    iup.PassFocus()
+end
+
+local function FindNext(h)
+    findSettings:readSettings()
+    local pos = doFindNext(true, findSettings)
+    iup.PassFocus()
+end
+
+local function ReplaceOnce(h)
+    findSettings:readSettings()
+    local pos = doReplaceOnce(findSettings)
+    iup.PassFocus()
 end
 
 local function create_dialog_FindReplace()
@@ -230,15 +402,18 @@ local function create_dialog_FindReplace()
       image = "IMAGE_search",
       title = " далее",
       name = "btnFind",
+      action = FindNext,
     },
     iup.button{
       title = "Найти все",
+      action = FindAll,
     },
     iup.button{
       title = "На вкладках",
     },
     iup.button{
       title = "Подсчитать",
+      action = GetCount,
     },
     normalizesize = "HORIZONTAL",
     gap = "3",
@@ -254,9 +429,12 @@ local function create_dialog_FindReplace()
   containers[13] = iup.vbox{
     iup.button{
       title = "Заменить на:",
+      action = ReplaceOnce,
     },
     iup.button{
-      title = "Найти далее",
+      image = "IMAGE_search",
+      title = " далее",
+      action = FindNext,
     },
     normalizesize = "HORIZONTAL",
   }
@@ -264,10 +442,11 @@ local function create_dialog_FindReplace()
   containers[15] = iup.hbox{
     iup.button{
       title = "Заменить все",
-      action = RaplaceAll
+      action = ReplaceAll,
     },
     iup.button{
       title = "В выделенном",
+      action = ReplaceSel,
     },
     iup.button{
       title = "На вкладках",
@@ -434,6 +613,11 @@ local function create_dialog_FindReplace()
     containers["zUpDown"],
     iup.label{
       title = "Направление",
+      button_cb = (function(_,but, pressed, x, y, status)
+        if iup.isbutton1(status) and pressed == 0 then
+            containers["zUpDown"].valuepos = Iif(containers["zUpDown"].valuepos == '0', '1', '0')
+        end
+      end),
     },
     margin = "0x00",
     gap = "00",
