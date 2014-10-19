@@ -207,9 +207,13 @@ local function InitSideBar()
         if key == 65307 then iup.PassFocus() end
     end)
 
-        tDlg.sciteparent="SIDEBAR"
-        tDlg.control = "YES"
-        tDlg.sciteid="sidebarp"
+    tDlg.SaveValues = (function()
+        print("SaveValues")
+    end)
+
+    tDlg.sciteparent="SIDEBAR"
+    tDlg.control = "YES"
+    tDlg.sciteid="sidebarp"
     -- end
     dlg = iup.scitedialog(tDlg)
     if SideBar_obj.win then oDeatt.detach = 1 end
