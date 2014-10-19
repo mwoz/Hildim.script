@@ -1,37 +1,15 @@
-
---[[--------------------------------------------------
-FindText v6.7
-Авторы: mozers™, mimir, Алексей, codewarlock1101
-
-* Если текст выделен - ищется выделенная подстрока
-* Если текст не выделен - ищется текущее слово
-* Поиск возможен как в окне редактирования, так и в окне консоли
-* Строки, содержащие результаты поиска, выводятся в консоль
-* Перемещение по вхождениям - F3 (вперед), Shift+F3 (назад)
-* Каждый новый поиск оставляет маркеры своего цвета
-* Очистка от маркеров поиска - Ctrl+Alt+C
-
-Внимание:
-В скрипте используются функции из COMMON.lua (EditorMarkText, EditorClearMarks)
------------------------------------------------
-Для подключения добавьте в свой файл .properties следующие строки:
-    command.name.130.*=Find String/Word
-    command.130.*=dofile $(SciteDefaultHome)\tools\FindText.lua
-    command.mode.130.*=subsystem:lua,savebefore:no
-    command.shortcut.130.*=Ctrl+Alt+F
-
-    command.name.131.*=Clear All Marks
-    command.131.*=dostring EditorClearMarks() scite.SendEditor(SCI_SETINDICATORCURRENT, 27)
-    command.mode.131.*=subsystem:lua,savebefore:no
-    command.shortcut.131.*=Ctrl+Alt+C
-
-Дополнительно необходимо задать в файле настроек стили используемых маркеров (в этом скрипте используется 5 маркеров):
-    find.mark.27=#CC00FF
-    find.mark.28=#0000FF
-    find.mark.29=#00CC66
-    find.mark.30=#CCCC00h
-    find.mark.31=#336600
---]]----------------------------------------------------
+require "seacher"
+local findSettings = seacher{
+wholeWord = false
+,matchCase = false
+,wrapFind = true
+,backslash = false
+,regExp = false
+,style = nil
+,searchUp = false
+,replaceWhat = ''
+}
+-----------------------------------
 
 local old_OnUpdateUI = OnUpdateUI
 function OnUpdateUI()
@@ -236,49 +214,15 @@ end
 function FindSelToConcole()
     needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
     local sText = editor:GetSelText()
-    if (sText == '') then sText = GetCurrentWord() end
-
-    local flag0,flag1 = 0,0
-
-    if props['findtext.matchcase'] == '1' then flag1 = SCFIND_MATCHCASE end
-    local bookmark = props['findtext.bookmarks'] == '1'
-    if props['findtext.wholeword'] == '1' then flag0 = SCFIND_WHOLEWORD end
-
-    if string.len(sText) > 0 then
-        scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
-        for line = 0, output.LineCount do
-            local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
-            if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-                scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
-                local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
-                if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
-            end
-        end
-
-        scite.SendFindRez(SCI_SETSEL,0,0)
-
-        local count,lCount,line = 0,0,0
-        local s,e = 0,-1
-        while true do
-            s,e = editor:findtext(sText, flag0 + flag1, e + 1)
-            if not s then break end
-            count = count + 1
-            local l = editor:LineFromPosition(s)
-            if l~=line then
-                lCount = lCount + 1
-                line = l
-                local str = editor:GetLine(l)
-                if needCoding then str = str:from_utf8(1251) end
-                scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
-            end
-        end
-        if needCoding then sText = sText:from_utf8(1251) end
-        scite.SendFindRez(SCI_REPLACESEL, '>!!    Occurrences: '..count..' in '..lCount..' lines\n' )
-        scite.SendFindRez(SCI_SETSEL,0,0)
-        scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..sText..'" in "'..props["FileNameExt"]..'" (Current)\n' )
-
-        if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+    findSettings.wholeWord = false
+    if (sText == '') then
+        sText = GetCurrentWord()
+        findSettings.wholeWord= true
     end
+
+    findSettings.findWhat = sText
+
+    findSettings:FindAll(100)
 end
 
 function FindMarkNext()

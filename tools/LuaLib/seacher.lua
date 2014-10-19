@@ -203,7 +203,7 @@ function s:onFindAll(maxlines)
                 line = l
                 if lCount == maxlines then
                     scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': ...\n')
-                    return lenTarget, true
+                    return lenTarget, false
                 end
                 local str = editor:GetLine(l):gsub('^[ \t]+', '')
                 if needCoding then str = str:from_utf8(1251) end
@@ -245,7 +245,7 @@ function s:findWalk(inSelection, funcOnFind)
         if (not self.searchUp) or self.wrapFind then endPosition = editor.Length end
     end
 
-    local replaceTarget, replaceLen = s:UnSlashAsNeeded(self.replaceWhat)
+    --local replaceTarget, replaceLen = s:UnSlashAsNeeded(self.replaceWhat)
 	local flags = Iif(self.wholeWord, SCFIND_WHOLEWORD, 0) +
 	        Iif(self.matchCase, SCFIND_MATCHCASE, 0) +
 	        Iif(self.regExp, SCFIND_REGEXP, 0) +

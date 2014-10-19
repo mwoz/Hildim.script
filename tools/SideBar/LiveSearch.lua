@@ -1,3 +1,15 @@
+require "seacher"
+local findSettings = seacher{
+wholeWord = false
+,matchCase = false
+,wrapFind = true
+,backslash = false
+,regExp = false
+,style = nil
+,searchUp = false
+,replaceWhat = ''
+}
+
 local txt_search
 local btn_search
 function sidebar_Find()
@@ -45,66 +57,8 @@ local function FindTab_Init()
 
     txt_search = iup.text{expand='YES', tip='"Живой" поиск(Alt+S)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onChange(c)
-        local sText = c.value
-        if needCoding then sText = sText:to_utf8(1251) end
-        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
-        if a then
-            findrez.TargetStart = 0
-            findrez.TargetEnd = findrez.LineEndPosition[findrez:LineFromPosition(a)]+1
-            findrez:ReplaceTarget('')
-        end
-        if #sText == 0 then
-            btn_search.active = 'NO'
-            return
-        else
-            btn_search.active = 'YES'
-        end
-
-        local flag0,flag1 = 0,0
-
-        if props['findtext.matchcase'] == '1' then flag1 = SCFIND_MATCHCASE end
-        local bookmark = props['findtext.bookmarks'] == '1'
-        if props['findtext.wholeword'] == '1' then flag0 = SCFIND_WHOLEWORD end
-
-        if string.len(sText) > 0 then
-            scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
-            for line = 0, editor.LineCount do
-                local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
-                if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-                    scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
-                    local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
-                    if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
-                end
-            end
-
-            scite.SendFindRez(SCI_SETSEL,0,0)
-
-            local count,lCount,line = 0,0,0
-            local s,e = 0,-1
-            while true do
-                s,e = editor:findtext(sText, flag0 + flag1, e + 1)
-                if not s then break end
-                count = count + 1
-                local l = editor:LineFromPosition(s)
-                if l~=line then
-                    lCount = lCount + 1
-                    line = l
-                    if lCount == 50 then
-                        scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': ...\n')
-                        break;
-                    end
-                    local str = editor:GetLine(l)
-                    if needCoding then str = str:from_utf8(1251) end
-                    scite.SendFindRez(SCI_REPLACESEL, '.\\'..props["FileNameExt"]..':'..(l+1)..': '..str )
-                end
-            end
-
-            scite.SendFindRez(SCI_REPLACESEL, '>!!/\\  Occurrences: '..count..' in '..lCount..' lines\n' )
-            scite.SendFindRez(SCI_SETSEL,0,0)
-            scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..c.value..'" in "'..props["FileNameExt"]..'" (Current)\n' )
-            findrez.CurrentPos = 1
-            if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
-        end
+        findSettings.findWhat = c.value
+        findSettings:FindAll(50)
     end
 
 
