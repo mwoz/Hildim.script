@@ -145,10 +145,15 @@ end)
 --”ничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
     if _G.dialogs == nil then return end
+    if _G.dialogs['findrepl'] ~= nil then
+        _G.dialogs['findrepl'].restore = 1
+        _G.dialogs['findrepl'] = nul
+    end
     if _G.dialogs['sidebar'] ~= nil then
         _G.dialogs['sidebar'].restore = 1
         _G.dialogs['sidebar'] = nul
     end
+    _G.dialogs['sidebarp'].SaveValues()
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
             if sciteid ~= 'sidebarp' or props['sidebar.win'] == '0' then
