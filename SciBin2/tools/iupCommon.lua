@@ -1,10 +1,35 @@
+--if not _G.iuprops then
+    _G.iuprops = {}
+	local file = props["scite.userhome"]..'\\SciTEIUP.session'
+    text = ''
+	if pcall(io.input, file) then
+        text = io.read('*a')
+    end
+    for st in text:gmatch('[^\r\n]+')do
+
+        local _,_,s,v = st:find('([^=]+)=(.*)')
+        if s then _G.iuprops[s] = v end
+    end
+--end
 
 
+local function SaveIup()
+
+	local file = props["scite.userhome"]..'\\SciTEIUP.session'
+    local t = {}
+    for n,v in pairs(_G.iuprops) do
+        table.insert(t, n..'='..v)
+    end
+ 	if pcall(io.output, file) then
+		io.write(table.concat(t,'\n'))
+ 	end
+	io.close()
+end
 AddEventHandler("OnMenuCommand", function(cmd, source)
     -- if (cmd == IDM_QUIT or cmd == 9117) and _G.dialogs then DestroyDialogs() end
-    if cmd == IDM_QUIT then iup.DestroyDialogs()
+    if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup()
     elseif cmd == 9117 then
-        iup.DestroyDialogs()
+        iup.DestroyDialogs();SaveIup()
         scite.PostCommand(1,0)
         return true
     end
@@ -76,6 +101,7 @@ iup.list = function(t)
         end
     end
     function cmb:FillByHist(sHist,sLast)
+        if true then return cmb end
         sHist = props[sHist]:gsub('||', '‡')..'‡'
         i = 1
         for elem in sHist:gmatch('([^|]+)|') do
@@ -83,6 +109,20 @@ iup.list = function(t)
             i = i + 1
         end
         if sLast then self.value = props[sLast] end
+    end
+    function cmb:SaveHist()
+        local s = self.value
+        self.insertitem1 = s
+
+        local i = tonumber(self.count)
+        local mn = tonumber(self.visible_items)
+        while(i > 1) do
+            if i> mn + 1 or (iup.GetAttribute(self,i) == s) then
+                self.removeitem = i
+            end
+            i = i - 1
+        end
+        self.value = s
     end
     return cmb
 end
@@ -128,10 +168,10 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                 sciteid = table.remove(_G.deletedDialogs)
                 local dlg = _G.dialogs[sciteid]
                 if dlg ~= nil then
-                    if sciteid ~= 'sidebarp' or props['sidebar.win'] == '0' then
-                        props['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
-                        props['dialogs.'..sciteid..'.x'] = dlg.x
-                        props['dialogs.'..sciteid..'.y'] = dlg.y
+                    if sciteid ~= 'sidebarp' or _G.iuprops['sidebar.win'] == '0' then
+                        _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
+                        _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
+                        _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
                     end
                     _G.dialogs[sciteid] = nil
                     dlg:hide()
@@ -153,13 +193,13 @@ iup.DestroyDialogs = function()
         _G.dialogs['sidebar'].restore = 1
         _G.dialogs['sidebar'] = nul
     end
-    _G.dialogs['sidebarp'].SaveValues()
+    if _G.dialogs['sidebarp'] then _G.dialogs['sidebarp'].SaveValues() end
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
-            if sciteid ~= 'sidebarp' or props['sidebar.win'] == '0' then
-                props['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
-                props['dialogs.'..sciteid..'.x'] = dlg.x
-                props['dialogs.'..sciteid..'.y'] = dlg.y
+            if sciteid ~= 'sidebarp' or _G.iuprops['sidebar.win'] == '0' then
+                _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
+                _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
+                _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
             end
             _G.dialogs[sciteid] = nil
             dlg:hide()
