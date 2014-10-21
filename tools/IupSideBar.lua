@@ -208,7 +208,7 @@ local function InitSideBar()
         repeat
             child = iup.GetNextChild(h, child)
             if child then
-                if (child.value or child.valuepos) and child.name then
+                if (child.value or child.valuepos or child.focusitem) and child.name then
                     local _,_,cType = tostring(child):find('IUP%((%w+)')
 
                     local val = child.value
@@ -220,6 +220,8 @@ local function InitSideBar()
                         _G.iuprops['sidebarctrl.'..child.name..'.hist'] = table.concat(hist,'¤')
                     elseif cType == 'zbox' or cType == 'tabs' then
                         val = child.valuepos
+                    elseif cType == 'matrixlist' then
+                        val = child.focusitem
                     end
                     _G.iuprops['sidebarctrl.'..child.name..'.value'] = val
                 end
@@ -247,6 +249,12 @@ local function InitSideBar()
                         if val then child.value = val end
                     elseif cType == 'zbox' or cType == 'tabs' then
                         if val then child.valuepos = val end
+                    elseif cType == 'matrixlist' then
+                        if val then
+                            child.focusitem = val
+                            child["show"] = val..":*"
+                            child.redraw = 1
+                        end
                     else
                         if val then child.value = val end
                     end

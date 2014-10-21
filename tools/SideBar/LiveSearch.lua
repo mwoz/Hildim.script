@@ -57,6 +57,7 @@ local function FindTab_Init()
 
     txt_search = iup.text{expand='YES', tip='"Живой" поиск(Alt+S)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onChange(c)
+        btn_search.active = Iif(#c.value == 0, 'NO', 'YES')
         findSettings.findWhat = c.value
         findSettings:FindAll(50)
     end

@@ -1,6 +1,7 @@
 require "seacher"
 local containers
 local oDeatt
+local firstMark = tonumber(props["findtext.first.mark"])
 
 local findSettings = seacher{}
 
@@ -40,6 +41,7 @@ local function ReplaceSel(h)
 end
 
 local function FindAll(h)
+print(Ctrl("matrixlistColor"))
     ReadSettings()
     findSettings:FindAll(500)
     Ctrl("cmbFindWhat"):SaveHist()
@@ -67,6 +69,36 @@ local function ReplaceOnce(h)
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
+end
+
+local function MarkAll(h)
+    ReadSettings()
+    local pos = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
+    Ctrl("cmbFindWhat"):SaveHist()
+    iup.PassFocus()
+end
+
+local function ClearMark(h)
+    EditorClearMarks(firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
+end
+local function ClearMarkAll(h)
+    for i = 0,4 do
+        EditorClearMarks(firstMark + i)
+    end
+end
+local function BookmarkAll(h)
+    ReadSettings()
+    local pos = findSettings:BookmarkAll(Ctrl("chkMarkInSelection").value == "ON")
+    Ctrl("cmbFindWhat"):SaveHist()
+    iup.PassFocus()
+end
+
+local function onMapMColorList(h)
+    for i = 0, 5 do
+        local _,_,r,g,b = props["indic.style."..(i + firstMark - 1)]:find('#(%x%x)(%x%x)(%x%x)')
+        local strClr = ((('0x'..r)+0)..' '..(('0x'..g)+0)..' ' ..(('0x'..b)+0))
+        h["color"..i] = strClr
+    end
 end
 
 local function create_dialog_FindReplace()
@@ -114,43 +146,67 @@ local function create_dialog_FindReplace()
     rastersize = "372x29",
   }
 
-  containers[7] = iup.hbox{
+  containers[32] = iup.vbox{
     iup.button{
       image = "IMAGE_search",
       title = " далее",
       name = "btnFind",
       action = FindNext,
+      padding = "5x0"
     },
     iup.button{
       title = "Найти все",
       action = FindAll,
     },
-    iup.button{
-      title = "На вкладках",
-    },
-    iup.button{
-      title = "Подсчитать",
-      action = GetCount,
-    },
+    margin = "6x6",
     normalizesize = "HORIZONTAL",
-    gap = "3",
-    alignment = "ABOTTOM",
   }
 
-  containers[6]= iup.vbox{
+  containers[7] = iup.vbox{
+    iup.hbox{
+        margin = "0x0",
+    },
+    iup.hbox{
+      iup.button{
+        title = "В выделенном",
+        action = FindSel,
+      },
+      iup.button{
+        title = "На вкладках",
+      },
+      iup.button{
+        title = "Подсчитать",
+        action = GetCount,
+      },
+      normalizesize = "HORIZONTAL",
+      gap = "3",
+      alignment = "ABOTTOM",
+      margin = "0x2",
+      expand = "VERTICAL",
+       margin = "0x0",
+    },
+      gap = "4",
+      margin = "0x6",
+      normalizesize = "VERTICAL",
+  }
+
+  containers[6]= iup.hbox{
+    containers[32],
     containers[7],
     expandchildren = "YES",
-    gap = "4",
+
   }
 
   containers[13] = iup.vbox{
     iup.button{
-      title = "Заменить на:",
+      title = " на:",
+      image = "IMAGE_Replace",
       action = ReplaceOnce,
     },
     iup.button{
       image = "IMAGE_search",
       title = " далее",
+      padding = "5x0",
       action = FindNext,
     },
     normalizesize = "HORIZONTAL",
@@ -212,13 +268,14 @@ local function create_dialog_FindReplace()
       -- map_cb = (function(h) h:FillByHist("find.directory.history","find.directory.history") end),
     },
     iup.button{
-      title = "^^",
+      image = "IMAGE_ArrowUp",
     },
     iup.button{
-      title = "...",
+      image = "IMAGE_Folder",
     },
     gap = "3",
     alignment = "ACENTER",
+    margin = "0x2",
   }
 
   containers[18] = iup.hbox{
@@ -241,9 +298,11 @@ local function create_dialog_FindReplace()
       map_cb = (function(h) h.value = Iif(props['find.in.subfolders'] == '1', 'ON', 'OFF') end),
     },
     iup.button{
-      title = "Искать",
+      image = "IMAGE_search",
+      padding = "14x0",
     },
     alignment = "ACENTER",
+    margin = "0x00",
   }
 
   containers[16] = iup.vbox{
@@ -255,42 +314,81 @@ local function create_dialog_FindReplace()
   containers[21] = iup.hbox{
     iup.button{
       title = "Пометить",
+      action = MarkAll,
     },
     iup.button{
-      title = "Очистить",
+      title = "Удалить",
+      action = ClearMark,
     },
     iup.button{
-      title = "Очистить все",
+      title = "Удалить все",
+      action = ClearMarkAll,
+      padding = "2",
     },
-    margin = "0x00",
     normalizesize = "HORIZONTAL",
+    margin = "0x00",
   }
-
-  containers[20] = iup.hbox{
-    iup.label{
-      title = "Метка:",
+  containers[22] = iup.hbox{
+    iup.toggle{
+      title = "В выделенном",
+      name = "chkMarkInSelection",
     },
-    iup.list{
-      size = "37x12",
-      dropdown = "YES",
+    iup.button{
+      title = "Пометить закладками",
+      action = BookmarkAll,
     },
-    containers[21],
     gap = "4",
     alignment = "ACENTER",
+    margin = "0x00",
   }
 
-  containers[22] = iup.hbox{
-    iup.fill{
+  containers[33] = iup.vbox{
+    iup.button{
+      image = "IMAGE_ArrowUp",
     },
     iup.button{
-      size = "86x12",
-      title = "Пометить закладками",
+      image = "IMAGE_ArrowDown",
     },
+    margin = "0x3",
   }
-
-  containers[19] = iup.vbox{
-    containers[20],
+  containers[31] = iup.vbox{
+    containers[21],
     containers[22],
+    margin = "0x3",
+  }
+  containers[30] = iup.vbox{
+    iup.matrixlist{
+      size = "53x0",
+      expand = "NO",
+      columnorder = "COLOR",
+      frametitlehighlight = "No",
+      ["rasterheight0"] = "0",
+      ["rasterwidth0"] = "0",
+      ["rasterwidth1"] = "40",
+      hidefocus = "YES",
+      numcol = "1",
+      ["height0"] = "0",
+      numlin = "5",
+      heightdef = "5",
+      scrollbar = "VERTICAL",
+      count = "5",
+      ["width0"] = "0",
+      ["width1"] = "34",
+      numlin_visible = "3",
+      name="matrixlistColor",
+      map_cb = onMapMColorList
+    },
+
+  }
+  containers[29] = iup.hbox{
+    containers[30],
+    containers[31],
+    containers[33],
+    margin = "3x3",
+  }
+  containers[19] = iup.vbox{
+    containers[29],
+    margin = "0x00",
   }
 
   containers[5] = iup.tabs{
