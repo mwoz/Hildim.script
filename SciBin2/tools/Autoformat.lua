@@ -357,7 +357,11 @@ local function OnChar_local(char)
         return
     end
     nextIndent = ''
-    if mark ~= nil then EditorClearMarks(mark) end
+    if mark ~= nil then
+        EditorClearMarks(goodmark)
+        EditorClearMarks(errmark)
+        mark = nil
+    end
 
     if cmpobj_GetFMDefault()  ~= SCE_FM_VB_DEFAULT then return end
 

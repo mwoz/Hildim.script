@@ -164,6 +164,18 @@ function s:ReplaceOnce()
 	end
 end
 
+function s:onMarkOne(iMark)
+    EditorClearMarks(iMark)
+    return (function(lenTarget)
+        if lenTarget then
+            EditorMarkText(editor.TargetStart, lenTarget, iMark)
+            return lenTarget, true
+        else
+            return true
+        end
+    end)
+end
+
 function s:replaceOne()
     local replaceTarget, replaceLen = s:UnSlashAsNeeded(self.replaceWhat)
     return (function(lenTarget)
@@ -338,6 +350,11 @@ end
 function s:Count()
     return self:findWalk(false, (function(lenTarget) return lenTarget, true; end))
 end
-
+function s:MarkAll(bInSel, iMark)
+    return self:findWalk(bInSel, self:onMarkOne(iMark))
+end
+function s:BookmarkAll(bInSel)
+    return self:findWalk(bInSel, (function(lenTarget) editor:MarkerAdd(editor:LineFromPosition(editor.TargetStart),1); return lenTarget, true; end))
+end
 _G.seacher = s
 
