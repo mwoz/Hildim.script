@@ -126,6 +126,7 @@ rootforms.Count Ц default
 rootforms.Item ( FormName / Index ) - default method
 
 #$menu=form%.menu
+#$menu=.*%.AddMenu()
 menu.ItemCount
 menu.AddItem ( Caption, ItemData, [Default], [Checked], [Disabled] ) - if Caption = "-", separator is added; \nItemData is a string associated with item;\nDefault , Checked and Disabled are boolean
 menu.AddMenu ( Caption, [ItemData], [Disabled] ) - ItemData is not used now
@@ -581,6 +582,7 @@ cubectrl.ShowGroupLabel Get/set property; show column names when you group by co
 cubectrl.NoDataLabel write-only; string object; sets text label to be displayed if cube has no data
 cubectrl.ColumnChartForRow Read-only; Returns true, if exists column which is set to be Data Provider(data source for per-row chart).
 cubectrl.EnableFilters Write-only property; bool object; Enables or disables filtering.
+cubectrl.CheckboxSelectionMode Get/Set property (bool). ”правл€ет режимом выбора строк при помощи чекбоксов,\nотображаемых в первой видимой колонке куба.\n—писок строк с выставленным чекбоксом(как видимые, так и не прошедшие фильтр)\nпри включеном режиме можно получить методом CheckedKeys("")\nпередав пустую строку в качестве Id колонки.
 cubectrl.GetLevelData(Level, [RowKey], [Columns]) Level: level number (zero-based);\n RowKey: string identifier of group row (if ommited all groups considered)\n Columns: Message object, specifies columns (in field values) to return \n (if ommited all columns are returned)\n Returns Message object with data submessages \n each of which contains fields corresponding to Columns parameter\n
 cubectrl.Lib_UpdateHedges(Futures, Factor, Column_HedgeInstr, Column_HEC, Column_BPV, Column_Hedge)
 cubectrl.Lib_PosUpdate_DE(strOpaque, Message) strOpaque = CustomValues || Hedges || OptGreeks || EQP_Hedges_1 || EQP_Hedges_2 || EQPGreeks

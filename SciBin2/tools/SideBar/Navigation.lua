@@ -48,6 +48,7 @@ end
 
 local function Navigation_Go(item)
 	local path = list_navigation:getcell(item,5)
+    if not path then return end
     local lin = tonumber(list_navigation:getcell(item,4))
 
 	blockUpdate = true
