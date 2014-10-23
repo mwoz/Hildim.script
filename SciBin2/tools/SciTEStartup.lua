@@ -144,3 +144,4 @@ dofile (props["SciteDefaultHome"].."\\tools\\save_settings.lua")
 --Загрузка имэджей
 dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 
+scite.PostCommand(3,0)

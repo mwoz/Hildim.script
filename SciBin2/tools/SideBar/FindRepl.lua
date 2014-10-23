@@ -64,7 +64,7 @@ end
 
 local function FindAll(h)
     ReadSettings()
-    local count = findSettings:FindAll(500)
+    local count = findSettings:FindAll(500, false)
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()

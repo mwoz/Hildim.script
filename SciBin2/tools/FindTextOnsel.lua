@@ -222,7 +222,7 @@ function FindSelToConcole()
 
     findSettings.findWhat = sText
 
-    findSettings:FindAll(100)
+    findSettings:FindAll(100, false)
 end
 
 function FindMarkNext()

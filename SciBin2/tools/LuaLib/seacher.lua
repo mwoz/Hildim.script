@@ -194,7 +194,7 @@ function s:replaceOne()
     end)
 end
 
-function s:onFindAll(maxlines)
+function s:onFindAll(maxlines, bLive)
     scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
     for line = 0, findrez.LineCount do
         local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
@@ -204,6 +204,7 @@ function s:onFindAll(maxlines)
             if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
         end
     end
+    local strLive = Iif(bLive, "/\\", "")
     local needCoding = (editor.CodePage ~= 0)
     scite.SendFindRez(SCI_SETSEL,0,0)
     local line, wCount, lCount = -1, 0, 0
@@ -224,7 +225,7 @@ function s:onFindAll(maxlines)
             end
             return lenTarget, true
         else
-            scite.SendFindRez(SCI_REPLACESEL, '>!!/\\  Occurrences: '..wCount..' in '..lCount..' lines\n' )
+            scite.SendFindRez(SCI_REPLACESEL, '>!!'..strLive..'  Occurrences: '..wCount..' in '..lCount..' lines\n' )
             scite.SendFindRez(SCI_SETSEL,0,0)
             scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..self.findWhat..'" in "'..props["FileNameExt"]..'" (Current)\n' )
             findrez.CurrentPos = 1
@@ -345,8 +346,8 @@ function s:ReplaceAll(inSel)
     return self:findWalk(inSel, self:replaceOne())
 end
 
-function s:FindAll(maxlines)
-    return self:findWalk(false, self:onFindAll(maxlines))
+function s:FindAll(maxlines, bLive)
+    return self:findWalk(false, self:onFindAll(maxlines, bLive))
 end
 function s:Count()
     return self:findWalk(false, (function(lenTarget) return lenTarget, true; end))
