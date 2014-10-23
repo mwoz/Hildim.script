@@ -2,11 +2,21 @@ require "seacher"
 local containers
 local oDeatt
 local firstMark = tonumber(props["findtext.first.mark"])
+local popUpFind
 
 local findSettings = seacher{}
 
 local function Ctrl(s)
     return iup.GetDialogChild(containers[2],s)
+end
+
+local function SetInfo(msg, chColor)
+    local strColor
+    if chColor == 'E' then strColor = "255 0 0"
+    elseif chColor == 'W' then strColor = "255 0 0"
+    else strColor = "0 0 0" end
+    Ctrl('lblInfo').title = msg
+    Ctrl('lblInfo').fgcolor = strColor
 end
 
 local function ReadSettings()
@@ -24,34 +34,47 @@ local function ReadSettings()
     }
 end
 
+--Хендлеры контролов диалога
+local function PostAction()
+    if _G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1' then
+        popUpFind.show_cb(popUpFind,4)
+        popUpFind.close_cb(popUpFind)
+    end
+end
+
 local function ReplaceAll(h)
     ReadSettings()
-    findSettings:ReplaceAll(false)
+    local count = findSettings:ReplaceAll(false)
+    SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
+    PostAction()
 end
 
 local function ReplaceSel(h)
     ReadSettings()
-    findSettings:ReplaceAll(true)
+    local count = findSettings:ReplaceAll(true)
+    SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
+    PostAction()
 end
 
 local function FindAll(h)
-print(Ctrl("matrixlistColor"))
     ReadSettings()
-    findSettings:FindAll(500)
+    local count = findSettings:FindAll(500)
+    SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
+    PostAction()
 end
 
 local function GetCount(h)
     ReadSettings()
     local count = findSettings:Count()
-    print(count)
+    SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
 end
@@ -59,38 +82,72 @@ end
 local function FindNext(h)
     ReadSettings()
     local pos = findSettings:FindNext(true)
+    if pos < 0 then SetInfo('Ничего не найдено', 'E')
+    else SetInfo('', '') end
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
+    if Ctrl('tabFinrRepl') then PostAction() end
 end
 
 local function ReplaceOnce(h)
     ReadSettings()
     local pos = findSettings:ReplaceOnce()
+    if pos < 0 then SetInfo('Ничего не найдено', 'E')
+    else SetInfo('', '') end
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
+    PostAction()
 end
 
 local function MarkAll(h)
     ReadSettings()
-    local pos = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
+    local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
+    SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
+    PostAction()
 end
 
 local function ClearMark(h)
     EditorClearMarks(firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
 end
+
 local function ClearMarkAll(h)
     for i = 0,4 do
         EditorClearMarks(firstMark + i)
     end
 end
+
 local function BookmarkAll(h)
     ReadSettings()
-    local pos = findSettings:BookmarkAll(Ctrl("chkMarkInSelection").value == "ON")
+    local count = findSettings:BookmarkAll(Ctrl("chkMarkInSelection").value == "ON")
+    SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
+    PostAction()
+end
+
+local function FindInFiles()
+    ReadSettings()
+
+    if Ctrl("cmbFindWhat").value == '' then return end
+    if Ctrl("cmbFilter").value == '' then Ctrl("cmbFilter").value = '*.*' end
+    if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir'] end
+    local fWhat = Ctrl("cmbFindWhat").value
+    local fFilter = Ctrl("cmbFilter").value
+    local fDir = Ctrl("cmbFolders").value
+    local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
+                   Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
+                   Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
+                   Iif(Ctrl("chkSubFolders").value=='ON', 's','~')
+    scite.PerformGrepEx(params,fWhat,fDir,fFilter)
+
+    Ctrl("cmbFindWhat"):SaveHist()
+    Ctrl("cmbFolders"):SaveHist()
+    Ctrl("cmbFilter"):SaveHist()
+    iup.PassFocus()
+    PostAction()
 end
 
 local function onMapMColorList(h)
@@ -101,6 +158,65 @@ local function onMapMColorList(h)
     end
 end
 
+local function DefaultAction()
+    local nT = Ctrl("tabFinrRepl").valuepos
+    if nT == '0' then FindNext()
+    elseif nT == '1' then ReplaceOnce()
+    elseif nT == '2' then  FindInFiles()
+    elseif nT == '3' then  MarkAll()
+    end
+end
+
+local function SetFolder()
+    local d = iup.filedlg{dialogtype='DIR', parentdialog='SCITE',directory=Ctrl("cmbFolders").value}
+    d:popup()
+    if d.status ~= '-1' then Ctrl("cmbFolders").value = d.value end
+    d:destroy()
+end
+local function FolderUp()
+    Ctrl("cmbFolders").value = Ctrl("cmbFolders").value:gsub('^(.*)\\[^\\]+\\?$','%1')
+end
+
+--перехватчики команд меню
+local function ActivateFind(nTab)
+    Ctrl("tabFinrRepl").valuepos = nTab
+
+    local s
+    if editor.SelectionStart == editor.SelectionEnd then s = GetCurrentWord()
+    else s = editor:GetSelText() end
+
+    if s ~= '' then Ctrl("cmbFindWhat").value = s end
+
+    if _G.dialogs['findrepl'] then
+    else
+        if Ctrl("zPin").valuepos == '0' then SideBar_obj.TabCtrl.valuepos = 3
+        elseif SideBar_obj.TabCtrl.valuepos ~= 3 then oDeatt.detach = 1 end
+    end
+
+    if nTab ~= 2 then Ctrl("numStyle").value = scite.SendEditor(SCI_GETSTYLEAT, editor.SelectionStart) end
+
+    if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
+    else iup.SetFocus(Ctrl('cmbFindWhat')) end
+
+    if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir'] end
+    return true
+end
+
+local function FindNextBack(bUp)
+    if not findSettings.findWhat then ReadSettings() end
+    if findSettings.findWhat == '' then return true end
+    iup.PassFocus()
+    local prevUp = findSettings.searchUp
+    findSettings.searchUp = bUp
+    local pos = findSettings:FindNext(true)
+    if pos < 0 then print("Error: '"..findSettings.findWhat.."' not found") end
+    findSettings.searchUp = prevUp
+    return true
+end
+
+
+--создание диалога
+
 local function create_dialog_FindReplace()
   containers = {}
   containers["zPin"] = iup.zbox{
@@ -109,17 +225,22 @@ local function create_dialog_FindReplace()
       visible = "NO",
       image = "IMAGE_PinPush",
       size = "11x9",
+      canfocus  = "NO",
       action = (function(h) containers["zPin"].valuepos = "1" end),
     },
     iup.button{
       impress = "IMAGE_PinPush",
       visible = "NO",
       image = "IMAGE_Pin",
+      canfocus  = "NO",
       size = "11x9",
       action = (function(h) containers["zPin"].valuepos = "0" end),
+      },
+    iup.button{           ------------
+      name = "BtnOK",
+      action = DefAction,
     },
     name = "zPin",
-    valuepos = "1",
   }
   containers[4] = iup.hbox{
     iup.label{
@@ -132,12 +253,12 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      -- map_cb = (function(h) h:FillByHist("find.what.history","find.what") end),
     },
     containers["zPin"],
     margin = "0x00",
     expand = "HORIZONTAL",
     alignment = "ACENTER",
+
   }
 
   containers[3] = iup.frame{
@@ -202,12 +323,14 @@ local function create_dialog_FindReplace()
       title = " на:",
       image = "IMAGE_Replace",
       action = ReplaceOnce,
+      canfocus  = "NO",
     },
     iup.button{
       image = "IMAGE_search",
       title = " далее",
       padding = "5x0",
       action = FindNext,
+      canfocus  = "NO",
     },
     normalizesize = "HORIZONTAL",
   }
@@ -269,9 +392,11 @@ local function create_dialog_FindReplace()
     },
     iup.button{
       image = "IMAGE_ArrowUp",
+      action = FolderUp,
     },
     iup.button{
       image = "IMAGE_Folder",
+      action = SetFolder,
     },
     gap = "3",
     alignment = "ACENTER",
@@ -295,11 +420,11 @@ local function create_dialog_FindReplace()
     iup.toggle{
       name = "chkSubFolders",
       title = "В подпапках",
-      map_cb = (function(h) h.value = Iif(props['find.in.subfolders'] == '1', 'ON', 'OFF') end),
     },
     iup.button{
       image = "IMAGE_search",
       padding = "14x0",
+      action = FindInFiles,
     },
     alignment = "ACENTER",
     margin = "0x00",
@@ -396,15 +521,13 @@ local function create_dialog_FindReplace()
     containers[11],
     containers[16],
     containers[19],
-    ["tabvisible0"] = "YES",
-    ["tabvisible1"] = "YES",
-    ["tabvisible2"] = "YES",
-    ["tabvisible3"] = "YES",
     ["tabtitle0"] = "Найти",
     ["tabtitle1"] = "Заменить",
     ["tabtitle2"] = "Найти в файлах",
     ["tabtitle3"] = "Метки",
-    name = "tabFinrRepl"
+    canfocus  = "NO",
+    name = "tabFinrRepl",
+
   }
 
   containers["zUpDown"] = iup.zbox{
@@ -485,7 +608,7 @@ local function create_dialog_FindReplace()
     containers[28],
     iup.label{
       name = "lblInfo",
-      title = "Info"
+      expand = "HORIZONTAL",
     },
   }
 
@@ -528,6 +651,7 @@ local function FuncBmkTab_Init()
     oDeatt = iup.detachbox{
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";
+        k_any= (function(h,c) if c == 13 then DefaultAction() end end),
         detached_cb=(function(h, hNew, x, y)
             hNew.resize ="YES"
             hNew.shrink ="YES"
@@ -539,26 +663,30 @@ local function FuncBmkTab_Init()
             hNew.x=10
             hNew.y=10
             x=10;y=10
-            hNew.rastersize = props['dialogs.findrepl.rastersize']
-            props['findrepl.win']=1
-            props['dialogs.sidebarp.rastersize'] = h.rastersize
+            hNew.rastersize = _G.iuprops['dialogs.findrepl.rastersize']
+            _G.iuprops['findrepl.win']=1
+            _G.iuprops['dialogs.sidebarp.rastersize'] = h.rastersize
+            _G.iuprops["sidebarctrl.zPin.pinned.value"] = Ctrl("zPin").valuepos
+            if _G.iuprops["sidebarctrl.zPin.unpinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.unpinned.value"] end
 
             hNew.close_cb =(function(h)
                 if _G.dialogs['findrepl'] ~= nil then
-                    props['findrepl.win']=0
-                    local w = props['dialogs.sidebarp.rastersize']:gsub('x%d*', '')
+                    _G.iuprops['findrepl.win']=0
                     oDeatt.restore = 1
-                    _G.dialogs['findrepl'] = nul
+                    _G.iuprops["sidebarctrl.zPin.unpinned.value"] = Ctrl("zPin").valuepos
+                    if _G.iuprops["sidebarctrl.zPin.pinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.pinned.value"] end
+                    _G.dialogs['findrepl'] = nil
                     return -1
                 end
             end)
             hNew.show_cb=(function(h,state)
                 if state == 0 then
                     _G.dialogs['findrepl'] = oDeatt
+                    popUpFind = h
                 elseif state == 4 then
-                    props["dialogs.findrepl.x"]= h.x
-                    props["dialogs.findrepl.y"]= h.y
-                    props['dialogs.findrepl.rastersize'] = h.rastersize
+                    _G.iuprops["dialogs.findrepl.x"]= h.x
+                    _G.iuprops["dialogs.findrepl.y"]= h.y
+                    _G.iuprops['dialogs.findrepl.rastersize'] = h.rastersize
                 end
             end)
 
@@ -569,6 +697,14 @@ local function FuncBmkTab_Init()
 
     SideBar_obj.Tabs.findrepl = {
         handle = iup.vbox{oDeatt};
+        OnMenuCommand = (function(msg)
+            if msg == IDM_FIND then return ActivateFind(0)
+            elseif msg == IDM_REPLACE then return ActivateFind(1)
+            elseif msg == IDM_FINDINFILES then return ActivateFind(2)
+            elseif msg == IDM_FINDNEXT then return FindNextBack(false)
+            elseif msg == IDM_FINDNEXTBACK then return FindNextBack(true)
+            end
+        end);
 --[[		OnSave = OnSwitch;
         OnSwitchFile = OnSwitch;
         OnOpen = OnSwitch;]]

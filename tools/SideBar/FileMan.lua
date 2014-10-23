@@ -351,14 +351,6 @@ local function Favorites_OpenFile()
 	end
 end
 
-local function Favorites_ShowFilePath()
-	local sel = list_getvaluenum(list_favorites)
-	if sel == nil then return end
-	local expansion = list_favorites:getcell(sel,3)
-	editor:CallTipCancel()
-	editor:CallTipShow(editor.CurrentPos, expansion)
-end
-
 local function OnSwitch(bForse, bRelist)
     if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
         local path = props['FileDir']
@@ -436,8 +428,14 @@ local function FileManTab_Init()
     list_favorites = iup.matrix{
     numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 250 ,rasterwidth3= 450,
-    tip= 'Избранное - файлы и директории'   }
+    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 250 ,rasterwidth3= 450, tip ='jj'}
+
+    list_favorites.tips_cb = (function(h, x, y)
+        local l = iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))
+        if l == 0 then h.tip = 'Избранное - файлы и директории'
+        else h.tip = iup.GetAttributeId2(h, '', l, 3)
+        end
+    end)
 
     iup.SetAttribute(list_favorites, 'TYPE*:1', 'IMAGE')
     list_favorites:setcell(0, 2, "Name")
@@ -445,8 +443,6 @@ local function FileManTab_Init()
   	list_favorites.click_cb = (function(h, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Favorites_OpenFile()
-        elseif iup.isbutton1(status) then
-            Favorites_ShowFilePath()
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
             iup.SetAttribute(list_dir, 'MARK'..col..':0', 1)

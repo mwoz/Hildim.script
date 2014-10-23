@@ -162,6 +162,7 @@ function s:ReplaceOnce()
 
 		self:FindNext(true);
 	end
+    return pos
 end
 
 function s:onMarkOne(iMark)

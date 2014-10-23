@@ -77,7 +77,7 @@ local function  CreateBox()
     SideBar_obj.Tabs.findrepl.id = vFindRepl.tabtitle
 
     -- Creates tabs
-    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain"}
+    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain",  }
 
     tabs.tabchange_cb = (function(_,new_tab, old_tab)
         --сначала найдем активный таб и установим его в SideBar_obj
