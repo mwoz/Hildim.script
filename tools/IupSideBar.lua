@@ -131,19 +131,19 @@ local function  CreateBox()
             hNew.minsize="100x100"
             hNew.maxbox="NO"
             hNew.minbox="NO"
-            hNew.toolbox="YES"
+            --hNew.toolbox="YES"
             hNew.title="SideBar /Close For Attach/"
             hNew.x=10
             hNew.y=10
             x=10;y=10
             hNew.rastersize = _G.iuprops['dialogs.sidebar.rastersize']
-            _G.iuprops['sidebar.win']=1
+            _G.iuprops['sidebar.win']='1'
             _G.iuprops['dialogs.sidebarp.rastersize'] = h.rastersize
 
             hNew.close_cb =(function(h)
                 if _G.dialogs['sidebar'] ~= nil then
 
-                    _G.iuprops['sidebar.win']=0
+                    _G.iuprops['sidebar.win']='0'
                     local w = _G.iuprops['dialogs.sidebarp.rastersize']:gsub('x%d*', '')
                     iup.ShowSideBar(tonumber(w))
                     oDeatt.restore = 1
@@ -274,7 +274,7 @@ local function InitSideBar()
     -- end
     dlg = iup.scitedialog(tDlg)
     RestoreNamedValues(tDlg[1])
-    if SideBar_obj.win then oDeatt.detach = 1 end
+    --if SideBar_obj.win then oDeatt.detach = 1 end
 
     for i = 1, #tEvents do
         for _,tbs in pairs(SideBar_obj.Tabs) do
@@ -355,3 +355,10 @@ end
 InitSideBar()
 InitToolBar()
 InitStatusBar()
+AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
+    if id_msg == SCN_NOTYFY_ONPOST then
+        if wp == 3 then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
+            if SideBar_obj.win then oDeatt.detach = 1 end
+        end
+    end
+end)

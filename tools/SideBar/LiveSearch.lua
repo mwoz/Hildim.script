@@ -58,8 +58,14 @@ local function FindTab_Init()
     txt_search = iup.text{expand='YES', tip='"Живой" поиск(Alt+S)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onChange(c)
         btn_search.active = Iif(#c.value == 0, 'NO', 'YES')
+        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
+        if a then
+            findrez.TargetStart = 0
+            findrez.TargetEnd = findrez.LineEndPosition[findrez:LineFromPosition(a)]+1
+            findrez:ReplaceTarget('')
+        end
         findSettings.findWhat = c.value
-        findSettings:FindAll(50)
+        findSettings:FindAll(50,true)
     end
 
 
