@@ -1,4 +1,4 @@
-312
+317
 Альфабанк/IIIhIiIk
 БД
 ВТБ
@@ -63,6 +63,8 @@
 залоченный/CCSaXX
 залочить/BBLLNN
 запиненный/CCSaXX
+заселекченный/CCSaXX
+застартовать/BbLLNn
 инвест
 инсерт/IIIhIiIk
 инсертить/BBLLNN
@@ -254,6 +256,7 @@
 схлопнуть/BbLLNN
 схлопывание/IIIw
 схлопывать/BBLLNN
+сэмулирвать/BbLLNnSNSOSPSQSXShSkSmSrSwSxsAsPsUsY
 т
 таб/IIIhIiIk
 табконтрол/IIIhIiIk
@@ -286,6 +289,7 @@
 фрейм/IIIhIiIk
 фреймворк/IIIhIiIk
 фьючерс/IIIhIiIk
+харбит/IIIhIiIk
 хелп
 хелпер/IIIhIiIk
 хелпкод/IIIhIiIk
@@ -311,3 +315,4 @@
 эксесайз/IIIhIiIk
 эмаунт/IIIhIiIk
 эмулировать/BbLLNn
+энэйблить/BBLLNN

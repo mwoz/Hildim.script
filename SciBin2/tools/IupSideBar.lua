@@ -168,7 +168,7 @@ local function  CreateBox()
         }
     return oDeatt
 end
-local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand"}
+local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
 local function InitSideBar()
 --SideBar_obj._DEBUG = true --включает вывод отладочной информации
@@ -201,7 +201,7 @@ local function InitSideBar()
     tDlg.k_any=(function(_,key)
         if key == 65307 then iup.PassFocus() end
     end)
-
+    --OnCreate()
     local function SaveNamedValues(h)
         if not h then return end
         local child = nil
@@ -281,6 +281,7 @@ local function InitSideBar()
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
+    SideBar_obj.OnCreate()
 end
 
 local function InitToolBar()

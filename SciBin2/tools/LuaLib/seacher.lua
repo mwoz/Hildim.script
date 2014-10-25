@@ -21,9 +21,9 @@ end
 
 local s = class()
 
-function s:__tostring()
+--[[function s:__tostring()
     return "Lua module: simple [" .. self.name .. "]"
-end
+end]]
 function s:destroy()
     print("simple:destroy()")
 end
@@ -194,14 +194,16 @@ function s:replaceOne()
     end)
 end
 
-function s:onFindAll(maxlines, bLive)
-    scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
-    for line = 0, findrez.LineCount do
-        local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
-        if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-            scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
-            local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
-            if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
+function s:onFindAll(maxlines, bLive, bColapsPrev, strIn)
+    if bColapsPrev then
+        scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
+        for line = 0, findrez.LineCount do
+            local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
+            if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
+                scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
+                local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
+                if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
+            end
         end
     end
     local strLive = Iif(bLive, "/\\", "")
@@ -227,7 +229,7 @@ function s:onFindAll(maxlines, bLive)
         else
             scite.SendFindRez(SCI_REPLACESEL, '>!!'..strLive..'  Occurrences: '..wCount..' in '..lCount..' lines\n' )
             scite.SendFindRez(SCI_SETSEL,0,0)
-            scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..self.findWhat..'" in "'..props["FileNameExt"]..'" (Current)\n' )
+            scite.SendFindRez(SCI_REPLACESEL, '>??Internal search for "'..self.findWhat..'" in "'..props["FileNameExt"]..'" ('..strIn..')\n' )
             findrez.CurrentPos = 1
             if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
 
@@ -347,8 +349,26 @@ function s:ReplaceAll(inSel)
 end
 
 function s:FindAll(maxlines, bLive)
-    return self:findWalk(false, self:onFindAll(maxlines, bLive))
+    return self:findWalk(false, self:onFindAll(maxlines, bLive, true, 'Current'))
 end
+
+function s:FindInBufer()
+    local cnt = 0
+    return (function(nBuff, maxlines)
+        if nBuff then cnt = cnt + self:findWalk(false, self:onFindAll(maxlines, false, nBuff == 0,'Buffer '..(nBuff + 1)))
+        else return cnt
+        end
+    end)
+end
+function s:ReplaceInBufer()
+    local cnt = 0
+    return (function(nBuff)
+        if nBuff then cnt = cnt + self:findWalk(inSel, self:replaceOne())
+        else return cnt
+        end
+    end)
+end
+
 function s:Count()
     return self:findWalk(false, (function(lenTarget) return lenTarget, true; end))
 end
