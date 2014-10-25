@@ -137,6 +137,10 @@ local function FindInFiles()
     local fWhat = Ctrl("cmbFindWhat").value
     local fFilter = Ctrl("cmbFilter").value
     local fDir = Ctrl("cmbFolders").value
+    if Ctrl("chkRegExp").value =='ON' then
+        fWhat = fWhat:gsub('\\([^abfnrtv\\]?)','%%%1')
+        print(fWhat)
+    end
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
@@ -148,6 +152,35 @@ local function FindInFiles()
     Ctrl("cmbFilter"):SaveHist()
     iup.PassFocus()
     PostAction()
+end
+
+local function ReplaceInBuffers()
+    ReadSettings()
+    local count = DoForBuffers(findSettings:ReplaceInBufer())
+    SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
+    Ctrl("cmbReplaceWhat"):SaveHist()
+    Ctrl("cmbFindWhat"):SaveHist()
+    iup.PassFocus()
+    PostAction()
+end
+
+local function FindInBuffers()
+    ReadSettings()
+    local count = DoForBuffers(findSettings:FindInBufer(), 100)
+    SetInfo('Всего найдено: '..count, Iif(count == 0, 'E', ''))
+    Ctrl("cmbFindWhat"):SaveHist()
+    iup.PassFocus()
+    PostAction()
+end
+
+local function SetStaticControls()
+    local notInFiles = (Ctrl("tabFinrRepl").valuepos ~= '2')
+    Ctrl("numStyle").active = Iif(Ctrl("chkInStyle").value == 'ON' and notInFiles, 'YES', 'NO')
+    Ctrl("chkInStyle").active = Iif(notInFiles, 'YES', 'NO')
+    Ctrl("chkWrapFind").active = Iif(notInFiles, 'YES', 'NO')
+    Ctrl("chkBackslash").active = Iif(notInFiles, 'YES', 'NO')
+    Ctrl("btnArrowUp").active = Iif(notInFiles, 'YES', 'NO')
+    Ctrl("btnArrowDown").active = Iif(notInFiles, 'YES', 'NO')
 end
 
 local function onMapMColorList(h)
@@ -294,6 +327,7 @@ local function create_dialog_FindReplace()
       },
       iup.button{
         title = "На вкладках",
+        action = FindInBuffers,
       },
       iup.button{
         title = "Подсчитать",
@@ -346,6 +380,7 @@ local function create_dialog_FindReplace()
     },
     iup.button{
       title = "На вкладках",
+      action = ReplaceInBuffers,
     },
     margin = "0x00",
   }
@@ -393,10 +428,12 @@ local function create_dialog_FindReplace()
     iup.button{
       image = "IMAGE_ArrowUp",
       action = FolderUp,
+      tip = "На уровень вверх",
     },
     iup.button{
       image = "IMAGE_Folder",
       action = SetFolder,
+      tip = "Выбор папки",
     },
     gap = "3",
     alignment = "ACENTER",
@@ -425,6 +462,7 @@ local function create_dialog_FindReplace()
       image = "IMAGE_search",
       padding = "14x0",
       action = FindInFiles,
+      tip = "Искать в файлах",
     },
     alignment = "ACENTER",
     margin = "0x00",
@@ -527,6 +565,7 @@ local function create_dialog_FindReplace()
     ["tabtitle3"] = "Метки",
     canfocus  = "NO",
     name = "tabFinrRepl",
+    tabchange_cb = SetStaticControls,
 
   }
 
@@ -537,6 +576,7 @@ local function create_dialog_FindReplace()
       image = "IMAGE_ArrowUp",
       size = "11x9",
       action = (function(h) containers["zUpDown"].valuepos = "1" end),
+      name = "btnArrowDown",
     },
     iup.button{
       impress = "IMAGE_ArrowUp",
@@ -544,6 +584,7 @@ local function create_dialog_FindReplace()
       image = "IMAGE_ArrowDown",
       size = "11x9",
       action = (function(h) containers["zUpDown"].valuepos = "0" end),
+      name = "btnArrowUp",
     },
     name = "zUpDown",
     valuepos = "1",
@@ -554,7 +595,7 @@ local function create_dialog_FindReplace()
     iup.label{
       title = "Направление",
       button_cb = (function(_,but, pressed, x, y, status)
-        if iup.isbutton1(status) and pressed == 0 then
+        if iup.isbutton1(status) and pressed == 0 and Ctrl('btnArrowUp').active == "YES" then
             containers["zUpDown"].valuepos = Iif(containers["zUpDown"].valuepos == '0', '1', '0')
         end
       end),
@@ -586,6 +627,7 @@ local function create_dialog_FindReplace()
     iup.toggle{
       title = "Только в стиле:",
       name = "chkInStyle",
+      action = SetStaticControls,
     },
     iup.text{
       mask = "[0-9]+",
@@ -709,6 +751,7 @@ local function FuncBmkTab_Init()
         OnSwitchFile = OnSwitch;
         OnOpen = OnSwitch;]]
         }
+    SideBar_obj.OnCreate = SetStaticControls;
 end
 
 FuncBmkTab_Init()

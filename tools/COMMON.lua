@@ -315,6 +315,19 @@ function ReadAbbrevFile(file, abbr_table)
 	abbrev_file:close()
 	return abbr_table
 end
+--Выполнение действия для всех документов
+function DoForBuffers(func, ...)
+    BlockEventHandler"OnSwitchFile"
+    local curBuf = scite.buffers.GetCurrent()
+    local maxN = scite.buffers.GetMaxN()
+    for i = 0,maxN do
+        scite.buffers.SetDocumentAt(i)
+        func(i, ...)
+    end
+    scite.buffers.SetDocumentAt(curBuf)
+    UnBlockEventHandler"OnSwitchFile"
+    return func(nil)
+end
 
 -- ==============================================================
 -- Функции, выполняющиеся только один раз, при открытии первого файла

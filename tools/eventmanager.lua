@@ -34,6 +34,7 @@ History:
 
 local events  = {}
 local _remove = {}
+local _blocked = {}
 
 --- Удаляет обработчики, намеченные для удаления
 -- В конце обнуляет список "к удалению"
@@ -117,4 +118,17 @@ end -- AddEventHandler
 -- Если один обработчик подключён к одному событию дважды, то и удалять его надо дважды
 function RemoveEventHandler(EventName, Handler)
 	_remove[#_remove+1]={[EventName]=Handler}
+end
+
+function BlockEventHandler(EventName)
+    if events[EventName] then
+        _blocked[EventName]=events[EventName]
+        events[EventName] = {}
+    end
+end
+function UnBlockEventHandler(EventName)
+    if _blocked[EventName] then
+        events[EventName]=_blocked[EventName]
+        _blocked[EventName] = nil
+    end
 end
