@@ -145,7 +145,7 @@ local function OnSave_local()
                         table.insert(precomp_Map,{-getLineCount(string.sub(strSource,1,startXml)),strFull,0})
                     end
                     templFile:close()
-                    if props['precompiller.debugmode'] == '1' then
+                    if _G.iuprops['precompiller.debugmode'] == '1' then
                         strSource = strSource:gsub("'#DEBUG ", ' ')
                     end
                     local d = strSource
@@ -210,8 +210,8 @@ local function OnSave_local()
                 print(">>>"..props["precompiller.xmlname"].." Build")
                 local msg = mblua.CreateMessage()
                 strSubj = 'SYSM.SAVETEMPLATE'
-                if props["precompiller.radiususername"] ~= '' then
-                    strSubj = strSubj..'.'..props["precompiller.radiususername"]
+                if _G.iuprops["precompiller.radiususername"] ~= '' then
+                    strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
                 end
                 msg:Subjects(strSubj)
                 -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")

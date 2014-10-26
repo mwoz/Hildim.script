@@ -89,7 +89,6 @@ local function ColorDlg()
             dlg:postdestroy()
         end
     end)
-    print()
 end
 
 
@@ -169,12 +168,12 @@ local function FindTab_Init()
     local sTip='Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
     zbox_s = iup.zbox{
         iup.button{image='IMAGE_CheckSpelling2';impress='IMAGE_CheckSpelling'; tip=sTip;
-            map_cb=(function(_) if props["spell.autospell"] == "1" then zbox_s.valuepos=1 else zbox_s.valuepos=0 end end);
-            action=(function(_) props["spell.autospell"] = "1"; zbox_s.valuepos=1 end);
+            map_cb=(function(_) if _G.iuprops["spell.autospell"] == "1" then zbox_s.valuepos=1 else zbox_s.valuepos=0 end end);
+            action=(function(_) _G.iuprops["spell.autospell"] = "1"; zbox_s.valuepos=1 end);
             button_cb=onSpellContext;
         };
         iup.button{image='IMAGE_CheckSpelling';impress='IMAGE_CheckSpelling2'; tip=sTip;
-            action=(function(_) props["spell.autospell"] = "0"; zbox_s.valuepos=0 end);
+            action=(function(_) _G.iuprops["spell.autospell"] = "0"; zbox_s.valuepos=0 end);
             button_cb=onSpellContext;
         };
     }

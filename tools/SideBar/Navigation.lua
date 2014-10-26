@@ -9,9 +9,10 @@ local function OnNavigate(item)
 		list_navigation.dellin = 0
 		currentItem = currentItem - 1
 	end
-
-	local line_ = editor:LineFromPosition((editor.CurrentPos))
 	local path_ = props['FilePath']
+
+    if path_=='' then return end
+	local line_ = editor:LineFromPosition((editor.CurrentPos))
 
 	local _,_,fName = path_:find('([^\\]*)$')
 

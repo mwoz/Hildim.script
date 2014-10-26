@@ -7,17 +7,6 @@
 -- Подключение файла с общими функциями, использующимися во многих скриптах
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 
-----[[ Ш Р И Ф Т Ы ]]-------------------------------------------------------
-
--- При изменении текущего размера шрифта (Ctrl+-), масштабируется и выводимый на принтер шрифт и показатель в строке состояния
-dofile (props["SciteDefaultHome"].."\\tools\\Zoom.lua")
-
-----[[ С О Х Р А Н Е Н И Е ]]--------------------------------------------------
-
--- Показ модифицированного диалога сохранения текущей сессии при закрытии SciTE
--- (если в SciTEGlobal.properties установлены параметры session.manager=1 и save.session.manager.on.quit=1)
-dofile (props["SciteDefaultHome"].."\\tools\\SessionManager\\SessionManager.lua")
-
 ----[[ R E A D   O N L Y ]]-------------------------------------------------
 
 -- Замена стандартной команды "Read-Only"
@@ -137,9 +126,6 @@ end
 
 -- Лексер для текстовых файлов
 --dofile (props["SciteDefaultHome"].."\\languages\\text.lua")
-
--- Сохранение параметров настройки SciTE, измененных через меню
-dofile (props["SciteDefaultHome"].."\\tools\\save_settings.lua")
 
 --Загрузка имэджей
 dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")

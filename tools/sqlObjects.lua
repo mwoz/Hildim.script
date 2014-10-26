@@ -153,7 +153,7 @@ local function local_OnOpen()
                 io.close(file)
                 msg_SqlObjectMap = mblua.RestoreMessage(msgPath)
             end
-            if not reloaded and props['sqlobject.mapreloadtime'] ~= os.date():sub(0,8) then
+            if not reloaded and _G.iuprops['sqlobject.mapreloadtime'] ~= os.date():sub(0,8) then
                 reloaded = true
                 sql_FillMapFile_tread ()
                 -- if props['sidebar.pan'] ~= '1' then  end
@@ -178,7 +178,7 @@ function sql_ResetMap()
         msg_SqlObjectMap = mblua.RestoreMessage(msgPath)
     end
     props['script.blockrestart'] = ''
-    props['sqlobject.mapreloadtime'] = os.date():sub(0,8)
+    _G.iuprops['sqlobject.mapreloadtime'] = os.date():sub(0,8)
 end
 
 local function local_OnSave()
@@ -314,7 +314,7 @@ function sql_ExecCmd()
                 strKustomSelect = strKustomSelect:format(strTbl,strTbl,strTbl,txt_search.value)
             end
             local msg = mblua.CreateMessage()
-            local strSub=props['sql.dbcmdsubj']..".EXEC_CMD"
+            local strSub=_G.iuprops['sql.dbcmdsubj']..".EXEC_CMD"
             msg:Subjects(strSub)
             msg:SetPathValue("type","text")
             msg:SetPathValue("sql",strKustomSelect)
@@ -407,7 +407,7 @@ function sql_ExecCmd()
 end
 
 local function GetObjects(strscheme, strBase)
-    local strSub = props['sql.dbcmdsubj']..".EXEC_CMD"
+    local strSub = _G.iuprops['sql.dbcmdsubj']..".EXEC_CMD"
     local strKustomSelect
     if  props['sql.type'] == 'MSSQL' then
         strKustomSelect="select 'S' as '__DATA_MODEL_MODE', '0' as '__INDEX_AUTO_OFF'\n"..
@@ -467,7 +467,7 @@ local function GetObjects(strscheme, strBase)
 end
 
 local function GetObjInfo(strObj,strTbl,strOwner,strObject)
-    local strSub=props['sql.dbcmdsubj']..".EXEC_CMD"
+    local strSub=_G.iuprops['sql.dbcmdsubj']..".EXEC_CMD"
     local strKustomSelect="select 'S' as '__DATA_MODEL_MODE', '0' as '__INDEX_AUTO_OFF'\n"..
                           "select convert(varchar,c.colid) as '__DATA_PATH',convert(varchar,c.name) as Fields_Name\n"..
                           "from %s..sysobjects o, %s..syscolumns c\n"..

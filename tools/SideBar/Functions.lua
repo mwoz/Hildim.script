@@ -1,9 +1,9 @@
 
-local _show_flags = tonumber(props['sidebar.functions.flags']) == 1
-local _show_params = tonumber(props['sidebar.functions.params']) == 1
+local _show_flags = tonumber(_G.iuprops['sidebar.functions.flags']) == 1
+local _show_params = tonumber(_G.iuprops['sidebar.functions.params']) == 1
 
-local _group_by_flags = tonumber(props['sidebar.functions.group']) == 1
-local _sort = props['sidebar.functions.sort']
+local _group_by_flags = tonumber(_G.iuprops['sidebar.functions.group']) == 1
+local _sort = _G.iuprops['sidebar.functions.sort']
 if _sort == '' then _sort = 'name' end
 local  i
 
@@ -840,15 +840,15 @@ end
 
 ------+++++++
 local function OnMyClouse()
-    props["sidebar.functions.tree_func.size"]=tree_func.size
+    _G.iuprops["sidebar.functions.tree_func.size"]=tree_func.size
     local p
     if _show_flags then p=1 else p=0 end
-    props['sidebar.functions.flags'] = p
+    _G.iuprops['sidebar.functions.flags'] = p
     if _show_params then p=1 else p=0 end
-    props['sidebar.functions.params'] = p
+    _G.iuprops['sidebar.functions.params'] = p
     if _group_by_flags then p=1 else p=0 end
-    props['sidebar.functions.group'] = p
-    props['sidebar.functions.sort'] = _sort
+    _G.iuprops['sidebar.functions.group'] = p
+    _G.iuprops['sidebar.functions.sort'] = _sort
 end
 
 local function SaveLayoutToProp()
@@ -857,17 +857,17 @@ local function SaveLayoutToProp()
     for i,s in pairs(layout) do
         if s == 'COLLAPSED' then prp = prp..'|'..i  end
     end
-    props['sidebar.functions.layout'] = prp
+    _G.iuprops['sidebar.functions.layout'] = prp
 end
 
 local function Finc_Init()
-    local prp = props['sidebar.functions.layout']
+    local prp = _G.iuprops['sidebar.functions.layout'] or ""
     local w
     for w in string.gmatch(prp, "[^|]+") do
        layout[w] = 'COLLAPSED'
     end
     local line = nil
-    tree_func = iup.tree{minsize = '0x5', size=props["sidebar.functions.tree_func.size"]}
+    tree_func = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_func.size"]}
         --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
         tree_func.size = nil
 

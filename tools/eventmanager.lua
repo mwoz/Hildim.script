@@ -61,7 +61,7 @@ local function Dispatch (name, ...)
 	for i = 1, #event do
 		local h = event[i]
 		if h then --@ this is a workaround for eventhandler-disappear bug (see v.1.0.3)
-			res = { h(...) } -- store whole handler return in a table
+            res = { h(...) } -- store whole handler return in a table
 			if res[1] then -- first returned value is a interruption flag
 				return unpack(res)
 			end

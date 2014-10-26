@@ -441,7 +441,7 @@ local function ReCreateStructures(strText,tblFiles)
                 local fName2 = get_precomp_tblFiles(string.lower(fName))
                 if fName2 ~= nil then
                     incPath = props["precomp_strRootDir"]..'\\'..fName2
-                    if Favorites_AddFileName ~=nil then
+                    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
                         Favorites_AddFileName(incPath)
                     end
                     if shell.fileexists(incPath) then
@@ -945,12 +945,12 @@ AddEventHandler("OnUserListSelection", function(tp,sel_value)
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
 end)
 AddEventHandler("OnSwitchFile", function(file)
-    local pr = props["spell.autospell"]
-    props["spell.autospell"] = 0
+    local pr = _G.iuprops["spell.autospell"]
+    _G.iuprops["spell.autospell"] = 0
 	get_api = true
     ReCreateStructures()
     m_ext = editor.Lexer
-    props["spell.autospell"] = pr
+    _G.iuprops["spell.autospell"] = pr
 end)
 AddEventHandler("OnOpen", function(file)
 	get_api = true

@@ -81,7 +81,9 @@ end
 
 local function FindNext(h)
     ReadSettings()
+    OnNavigation("Find")
     local pos = findSettings:FindNext(true)
+    OnNavigation("Find-")
     if pos < 0 then SetInfo('Ничего не найдено', 'E')
     else SetInfo('', '') end
     Ctrl("cmbFindWhat"):SaveHist()
@@ -91,7 +93,9 @@ end
 
 local function ReplaceOnce(h)
     ReadSettings()
+    OnNavigation("Repl")
     local pos = findSettings:ReplaceOnce()
+    OnNavigation("Repl-")
     if pos < 0 then SetInfo('Ничего не найдено', 'E')
     else SetInfo('', '') end
     Ctrl("cmbFindWhat"):SaveHist()
@@ -139,7 +143,6 @@ local function FindInFiles()
     local fDir = Ctrl("cmbFolders").value
     if Ctrl("chkRegExp").value =='ON' then
         fWhat = fWhat:gsub('\\([^abfnrtv\\]?)','%%%1')
-        print(fWhat)
     end
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
@@ -171,6 +174,53 @@ local function FindInBuffers()
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
     PostAction()
+end
+
+function GoToMarkDown()
+    local iPos = editor.SelectionStart
+    local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
+    local nextStart = iPos
+    local bMark = false
+    iPos = scite.SendEditor(SCI_INDICATOREND, mark, nextStart)
+    if iPos >= editor.TextLength then iPos = scite.SendEditor(SCI_INDICATOREND, mark, 0) end
+    if iPos < editor.TextLength and iPos ~= nextStart then
+        nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
+        if nextStart > 0 then
+            OnNavigation("Mark")
+            editor:SetSel(nextStart, nextStart+1)
+            OnNavigation("Mark-")
+            bMark = true
+        end
+    end
+    SetInfo(Iif(bMark, '', 'Меток не обнаружено'), Iif(bMark, '', 'E'))
+end
+function GoToMarkUp()
+    local curPos = editor.SelectionStart
+    local iPos = 0
+    local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
+    local nextStart = iPos
+    local bMark = false
+    iPos = scite.SendEditor(SCI_INDICATOREND, mark, nextStart)
+    if iPos >= curPos then
+        iPos = scite.SendEditor(SCI_INDICATOREND, mark, curPos)
+        curPos = editor.TextLength
+    end
+    if iPos < editor.TextLength and iPos ~= nextStart then
+        nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
+        local prevPos = iPos
+        while iPos < curPos do
+            prevPos = iPos
+            iPos = scite.SendEditor(SCI_INDICATOREND, mark, nextStart)
+            if iPos >= editor.TextLength or iPos == nextStart then break end
+
+            nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
+        end
+        OnNavigation("Mark")
+        editor:SetSel(prevPos - 1, prevPos)
+        OnNavigation("Mark-")
+        bMark = true
+    end
+    SetInfo(Iif(bMark, '', 'Меток не обнаружено'), Iif(bMark, '', 'E'))
 end
 
 local function SetStaticControls()
@@ -211,7 +261,7 @@ local function FolderUp()
 end
 
 --перехватчики команд меню
-local function ActivateFind(nTab)
+function ActivateFind(nTab)
     Ctrl("tabFinrRepl").valuepos = nTab
 
     local s
@@ -241,7 +291,9 @@ local function FindNextBack(bUp)
     iup.PassFocus()
     local prevUp = findSettings.searchUp
     findSettings.searchUp = bUp
+    OnNavigation("Find")
     local pos = findSettings:FindNext(true)
+    OnNavigation("Find-")
     if pos < 0 then print("Error: '"..findSettings.findWhat.."' not found") end
     findSettings.searchUp = prevUp
     return true
@@ -286,6 +338,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
+      k_any = (function(_,c) if c..'' == iup.K_cUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then iup.PassFocus() end; end),
     },
     containers["zPin"],
     margin = "0x00",
@@ -428,7 +481,7 @@ local function create_dialog_FindReplace()
     iup.button{
       image = "IMAGE_ArrowUp",
       action = FolderUp,
-      tip = "На уровень вверх",
+      tip = "На уровень вверх\nCtrl+Up в строке поиска",
     },
     iup.button{
       image = "IMAGE_Folder",
@@ -508,9 +561,13 @@ local function create_dialog_FindReplace()
   containers[33] = iup.vbox{
     iup.button{
       image = "IMAGE_ArrowUp",
+      action = GoToMarkUp,
+      tip = "Предыдущая метка Alt+Shift+F3",
     },
     iup.button{
       image = "IMAGE_ArrowDown",
+      action = GoToMarkDown,
+      tip = "Следующая метка Alt+F3",
     },
     margin = "0x3",
   }
@@ -693,7 +750,7 @@ local function FuncBmkTab_Init()
     oDeatt = iup.detachbox{
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";
-        k_any= (function(h,c) if c == 13 then DefaultAction() end end),
+        k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then iup.PassFocus() end end),
         detached_cb=(function(h, hNew, x, y)
             hNew.resize ="YES"
             hNew.shrink ="YES"
@@ -732,8 +789,8 @@ local function FuncBmkTab_Init()
                 end
             end)
 
-            if tonumber(props["dialogs.findrepl.x"])== nil or tonumber(props["dialogs.findrepl.y"]) == nil then props["dialogs.findrepl.x"]=0;props["dialogs.findrepl.y"]=0 end
-            return tonumber(props["dialogs.findrepl.x"])*2^16+tonumber(props["dialogs.findrepl.y"])
+            if tonumber(_G.iuprops["dialogs.findrepl.x"])== nil or tonumber(_G.iuprops["dialogs.findrepl.y"]) == nil then _G.iuprops["dialogs.findrepl.x"]=0;_G.iuprops["dialogs.findrepl.y"]=0 end
+            return tonumber(_G.iuprops["dialogs.findrepl.x"])*2^16+tonumber(_G.iuprops["dialogs.findrepl.y"])
         end)
         }
 
@@ -747,6 +804,11 @@ local function FuncBmkTab_Init()
             elseif msg == IDM_FINDNEXTBACK then return FindNextBack(true)
             end
         end);
+        tabs_OnSelect = (function()
+            if SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.findrepl.id and not _G.dialogs['findrepl'] then
+                iup.SetFocus(Ctrl("cmbFindWhat"))
+            end
+        end)
 --[[		OnSave = OnSwitch;
         OnSwitchFile = OnSwitch;
         OnOpen = OnSwitch;]]
