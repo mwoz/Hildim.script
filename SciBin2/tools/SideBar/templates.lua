@@ -48,15 +48,14 @@ end
 
 local function FindTab_Init()
 
-	if props['precompiller.radiususername'] == nil then props['precompiller.radiususername'] = '' end
+	if _G.iuprops['precompiller.radiususername'] == nil then _G.iuprops['precompiller.radiususername'] = '' end
 	txt_RadiusUserName = iup.text{expand='NO',size='70x0', tip='Имя пользователя Radius\nЕсли у пользователя открыта форма DebugTools,\nто собранный шаблон перезарузится'}
-	txt_RadiusUserName.map_cb=(function(h)h.value = props['precompiller.radiususername'] end)
-    txt_RadiusUserName.valuechanged_cb=(function(h) props['precompiller.radiususername'] = h.value end)
+	txt_RadiusUserName.map_cb=(function(h)h.value = _G.iuprops['precompiller.radiususername'] end)
+    txt_RadiusUserName.valuechanged_cb=(function(h) _G.iuprops['precompiller.radiususername'] = h.value end)
 
     chk_DebugMode = iup.toggle{title = "Dbg Mode",
-                        action=(function(h) if h.value == 'ON' then props['precompiller.debugmode'] = 1
-                                            else props['precompiller.debugmode'] = 0 end end), tip="Если включено, то в собранном шаблоне будут раскоментированы\nстроки, начинающиеся с '#DEBUG\n(может использоваться для вывода отладочной трассировки)"}
-    chk_DebugMode.map_cb=(function(h) if props['precompiller.debugmode'] == '1' then h.value = 'ON' end end)
+                        action=(function(h) _G.iuprops['precompiller.debugmode'] = Iif(h.value == 'ON', 1, 0); props['precompiller.debugmode'] = _G.iuprops['precompiller.debugmode'] end), tip="Если включено, то в собранном шаблоне будут раскоментированы\nстроки, начинающиеся с '#DEBUG\n(может использоваться для вывода отладочной трассировки)"}
+    chk_DebugMode.map_cb=(function(h) if _G.iuprops['precompiller.debugmode'] == '1' then h.value = 'ON' end; props['precompiller.debugmode'] = _G.iuprops['precompiller.debugmode'] end)
 
     cmb_resent = iup.list{dropdown="YES",visible_items="15", expand='NO', size='150x0',
             action=(function(h, text, item, state) props['precompiller.xmlname'] = text end), tip='Файл для компиляции.\n(Выбор из последних скомпилированных файлов)'}

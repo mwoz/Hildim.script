@@ -1,7 +1,7 @@
 require "gui"
 SideBar_obj = {}
 TabBar_obj = {}
-StatusBar_obj = {}
+
 local win_parent --создаем основное окно
 local tbs
 local vbox
@@ -14,9 +14,11 @@ local oDeatt
 
 function sidebar_Switch(n)
     SideBar_obj.TabCtrl.valuepos = n -1
-    if SideBar_obj.TabCtrl.value.tabs_OnSelect ~= nil --[[and props["FilePath"] ~= '']] then
-        SideBar_obj.TabCtrl.value.tabs_OnSelect()
+    local v
+    for _,tbs in pairs(SideBar_obj.Tabs) do
+        if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
     end
+
 end
 function sidebar_Focus()
     iup.SetFocus(SideBar_obj.TabCtrl)
@@ -77,7 +79,7 @@ local function  CreateBox()
     SideBar_obj.Tabs.findrepl.id = vFindRepl.tabtitle
 
     -- Creates tabs
-    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain",  }
+    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain", tip= 'Ctrl+1,2,3'  }
 
     tabs.tabchange_cb = (function(_,new_tab, old_tab)
         --сначала найдем активный таб и установим его в SideBar_obj
@@ -89,6 +91,7 @@ local function  CreateBox()
             end
         end
     end)
+    tabs.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
 
     tabs.rightclick_cb=(function()
         if _G.iuprops['sidebar.win'] == '0' then
@@ -292,7 +295,6 @@ local function InitToolBar()
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
     tTlb.show_cb=(function(h,state)
-
         if state == 0 and props['iuptoolbar.visible'] == '1' and props['iuptoolbar.restarted'] ~= '1' then
            scite.MenuCommand(IDM_VIEWTLBARIUP)
         elseif state == 4 then
@@ -320,6 +322,7 @@ end
 
 
 local function InitStatusBar()
+    StatusBar_obj = {}
     StatusBar_obj.Tabs = {}
                      --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
     local tTlb = {CreateStatusBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}

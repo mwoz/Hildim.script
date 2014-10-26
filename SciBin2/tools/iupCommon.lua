@@ -1,48 +1,79 @@
---if not _G.iuprops then
-    _G.iuprops = {}
-	local file = props["scite.userhome"]..'\\SciTEIUP.session'
-    text = ''
-	if pcall(io.input, file) then
-        text = io.read('*a')
-    end
-    for st in text:gmatch('[^\r\n]+')do
+_G.iuprops = {}
 
-        local _,_,s,v = st:find('([^=]+)=(.*)')
-        if s then _G.iuprops[s] = v end
-    end
---end
+local file = props["scite.userhome"]..'\\settings.lua'
+local text = ''
+if pcall(io.input, file) then
+    text = io.read('*a')
+end
+io.close()
+dostring(text)
 
+
+props['autoformat.line'] = _G.iuprops['autoformat.line']
+props['spell.autospell'] = _G.iuprops['spell.autospell']
 
 local function SaveIup()
 
-	local file = props["scite.userhome"]..'\\SciTEIUP.session'
     local t = {}
     for n,v in pairs(_G.iuprops) do
-        table.insert(t, n..'='..v)
+        local tp = type(v)
+        if tp == 'nil' then v = 'nil'
+        elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
+        elseif tp == 'string' then
+            v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
+        else
+            iup.Message('Error', "Type "..tp.." can't be saved")
+        end
+        table.insert(t, '["'..n..'"] = '..v..",")
     end
+    local file = props["scite.userhome"]..'\\settings.lua'
  	if pcall(io.output, file) then
-		io.write(table.concat(t,'\n'))
+		io.write('_G.iuprops = {\n'..table.concat(t,'\n')..'\n}')
  	end
 	io.close()
+
 end
 AddEventHandler("OnMenuCommand", function(cmd, source)
-    -- if (cmd == IDM_QUIT or cmd == 9117) and _G.dialogs then DestroyDialogs() end
-    if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup()
-    elseif cmd == 9117 then
+
+    if cmd == 9132 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
+        local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
+        if cmd ==  9132 then cur = scite.buffers.GetCurrent() end
+
+        local msg = ''
+        local notSaved = {}
+        DoForBuffers(function(i)
+            if i then
+                if editor.Modify and i ~= cur then
+                    msg = msg..'  '..props['FilePath']..'\n'
+                    table.insert(notSaved, i)
+                end
+            else
+                return msg
+            end
+        end)
+        local result = 7
+        if msg ~= '' then
+            msg = 'Некоторые файлы не сохранены:\n'..msg..'Сохранить все?'
+            result = shell.msgbox(msg, "Close", 3) --YESNOCANCEL Yes - 6, NO - 7 CANCEL - 2
+            if result == 2 then return true end
+            if result == 6 then
+                for _,j in ipairs(notSaved) do
+                    scite.buffers.SetDocumentAt(j)
+                    scite.MenuCommand(IDM_SAVE)
+                end
+            end
+        end
+        DoForBuffers(function(i)
+            if i and i ~= cur then
+                scite.SendEditor(SCI_SETSAVEPOINT)
+                scite.MenuCommand(IDM_CLOSE)
+            end
+        end)
+        if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup() end
+    elseif cmd == 9117 then  --перезагрузка скрипта
         iup.DestroyDialogs();SaveIup()
         scite.PostCommand(1,0)
         return true
-    end
-end)
-
-AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
-    if id_msg == SCN_NOTYFY_ONPOST then
-        if wp == 1 then
-            print("Reload...")
-            scite.ReloadStartupScript()
-            OnSwitchFile("")
-            print("...Ok")
-        end
     end
 end)
 
@@ -141,9 +172,9 @@ iup.scitedialog = function(t)
         elseif t.sciteparent == "IUPSTATUSBAR" then
             dlg:showxy(0,0)
         elseif t.sciteparent == "SCITE" then
-            dlg:showxy(tonumber(props['dialogs.'..t.sciteid..'.x']),tonumber(props['dialogs.'..t.sciteid..'.y']))
+            dlg:showxy(tonumber(_G.iuprops['dialogs.'..t.sciteid..'.x']),tonumber(_G.iuprops['dialogs.'..t.sciteid..'.y']))
         else
-            local w = props['dialogs.'..t.sciteid..'.rastersize']:gsub('x%d*', '')
+            local w = (_G.iuprops['dialogs.'..t.sciteid..'.rastersize'] or ''):gsub('x%d*', '')
             if w=='' then w='300' end
             dlg:showxy(0,0)
             iup.ShowSideBar(tonumber(w))
@@ -163,7 +194,7 @@ end
 
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
-        if wp == 2 then
+        if wp == 2 then --закрытие диалога (отложенное)
             while table.maxn(_G.deletedDialogs) > 0 do
                 sciteid = table.remove(_G.deletedDialogs)
                 local dlg = _G.dialogs[sciteid]
@@ -178,6 +209,11 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     dlg:destroy()
                 end
             end
+        elseif wp == 1 then   --перезагрузка скрипта
+            print("Reload...")
+            scite.ReloadStartupScript()
+            OnSwitchFile("")
+            print("...Ok")
         end
     end
 end)

@@ -11,14 +11,7 @@ wholeWord = false
 }
 -----------------------------------
 
-local old_OnUpdateUI = OnUpdateUI
-function OnUpdateUI()
-	local result
-	result =  true
-	if old_OnUpdateUI then result = old_OnUpdateUI() end
-    SelectMethod()
-	return result
-end
+
 function SelectMethod()
 	local current_mark_number = tonumber(props['findsel.mark'])
 	EditorClearMarks(current_mark_number)
@@ -38,11 +31,13 @@ function SelectMethod()
         sText = ''
 	end
     iMark = props["findtextsimple.count"]
-    StatusBar_obj.Tabs.statusbar.SetFindRes(sText, iFind)
+    if StatusBar_obj then StatusBar_obj.Tabs.statusbar.SetFindRes(sText, iFind) end
     if iFind > 0 then strStatus='Sel+{'..tostring(iFind-1)..'}' else strStatus='NoSel'  end
     if iMark ~= '0' then strStatus = strStatus..' | Mark{'..iMark..'}' end
 	props['findtext.status'] = strStatus
 end
+
+AddEventHandler("OnUpdateUI", SelectMethod)
 
 
 function GoToIncludeDef(strSelText)

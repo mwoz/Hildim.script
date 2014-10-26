@@ -128,15 +128,15 @@ end
 local function listMbTrancport_DoLua()
 	if chk_RunConnect.value == "ON" then
 		dofile(props["sys.calcsybase.dir"].."\\connectmb\\"..iup.GetAttribute(cmb_listMbTrancport, cmb_listMbTrancport.value))
-        if props['precompiller.radiususername'] ~= '' then
-            handle = mblua.Subscribe(TerminalErrorHandler,("RADIUS.SYS.VBERROR."..props['precompiller.radiususername'] ),nil)
+        if _G.iuprops['precompiller.radiususername'] ~= '' then
+            handle = mblua.Subscribe(TerminalErrorHandler,("RADIUS.SYS.VBERROR.".._G.iuprops['precompiller.radiususername'] ),nil)
         end
         btn_Open_Exec.active='YES'
 	else
         btn_Open_Exec.active='NO'
 		mblua.Destroy()
 	end
-    props['mbTrancport.file'] = iup.GetAttribute(cmb_listMbTrancport, cmb_listMbTrancport.value)
+    _G.iuprops['mbTrancport.file'] = iup.GetAttribute(cmb_listMbTrancport, cmb_listMbTrancport.value)
 end
 
 
@@ -159,19 +159,19 @@ end
 local function SetSubjProps(h)
     if h.value == '0' then  h.value = '1' end
     str = iup.GetAttribute(h, h.value)
-    props['sql.dbcmdsubj'] = str
+    _G.iuprops['sql.dbcmdsubj'] = str
     if str:find("%.KPLUS") ~= nil then props['sql.type'] = "SYBASE" else props['sql.type'] = "MSSQL" end
 end
 
 local function FindTab_Init()
     cmb_listMbTrancport = iup.list{dropdown="YES",visible_items="15", expand='NO',size='70x0', action=listMbTrancport_DoLua, tip='Список доступных мессаджбасов. файлы с их описанием в\nScite\\data\\UserData\\connectmb' }
-    cmb_listMbTrancport.map_cb=(function(h) h.value=tonumber(props["sidebar.mb.transport.value"]); end)
+    cmb_listMbTrancport.map_cb=(function(h) h.value=tonumber(_G.iuprops["sidebar.mb.transport.value"]); if h.value=='0' then h.value='1' ;end; end)
     cmb_Subjects = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Mb-префикс Db Adapter-а, используемого для посылки запросов при показе списков полей таблиц и пр.\n(Modullar - кастомная база,Radius  - основная)'}
     iup.SetAttribute(cmb_Subjects, 1, "ATRIUM")
     iup.SetAttribute(cmb_Subjects, 2, "RADIUS.KPLUS")
     iup.SetAttribute(cmb_Subjects, 3, "MODULLAR.KPLUS")
 
-    cmb_Subjects.map_cb=(function(h) h.value=tonumber(props["sidebar.mb.subject.value"]); SetSubjProps(h);end)
+    cmb_Subjects.map_cb=(function(h) h.value=tonumber(_G.iuprops["sidebar.mb.subject.value"]); SetSubjProps(h);end)
     cmb_Subjects.action = SetSubjProps
     chk_RunConnect = iup.toggle{title = "Connect",action=listMbTrancport_DoLua, tip='Соединение с мессаджбасом'}
     btn_Open_Exec = iup.button{image = 'IMAGE_Sub',active='NO', action=(function() sql_ExecCmd() end), tip='Диалог генерации кода запуска\nSQL процедуры(Alt+Shift+E)'}
@@ -183,10 +183,10 @@ local function FindTab_Init()
                             cmb_Subjects,
                             btn_Open_Exec,
                             alignment="ACENTER"};
-            minsize='200x', OnSideBarClouse=(function() props["sidebar.mb.transport.value"]=cmb_listMbTrancport.value;props["sidebar.mb.subject.value"]=cmb_Subjects.value; end)
+            minsize='200x', OnSideBarClouse=(function() _G.iuprops["sidebar.mb.transport.value"]=cmb_listMbTrancport.value;_G.iuprops["sidebar.mb.subject.value"]=cmb_Subjects.value; end)
 
     }
-    cmb_listMbTrancport:FillByDir("\\connectmb\\*.lua", props['mbTrancport.file'])
+    cmb_listMbTrancport:FillByDir("\\connectmb\\*.lua", _G.iuprops['mbTrancport.file'])
 end
 
 FindTab_Init()

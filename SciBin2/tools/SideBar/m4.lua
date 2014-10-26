@@ -125,7 +125,7 @@ end
 
 local function FindTab_Init()
     cmb_listCalc = iup.list{dropdown="YES",visible_items="15", expand='NO',size='120x0', tip='—писок доступных вариантов дл€ исполнени€ в базе (build)\nи компил€ции в SQL (compile). \n‘айлы нахлд€тс€ в директории Scite\\data\\UserData\\BuildM4'  }
-    cmb_listCalc.map_cb = (function(h) h.value=tonumber(props["sidebar.m4.value"]); end)
+    cmb_listCalc.map_cb = (function(h) h.value=tonumber(_G.iuprops["sidebar.m4.value"]); end)
     TabBar_obj.Tabs.m4 = {
 
         handle = iup.expander{iup.hbox{
@@ -141,9 +141,9 @@ local function FindTab_Init()
             };
             OnSwitchFile = OnSwitch;
             OnOpen = OnSwitch;
-            OnSideBarClouse=(function() props["sidebar.m4.value"]=cmb_listCalc.value; end)
+            OnSideBarClouse=(function() _G.iuprops["sidebar.m4.value"]=cmb_listCalc.value; end)
         }
-    cmb_listCalc:FillByDir("\\buildm4\\*.vbs", props['sql.compile.file'])
+    cmb_listCalc:FillByDir("\\buildm4\\*.vbs", _G.iuprops['sql.compile.file'])
 end
 
 FindTab_Init()

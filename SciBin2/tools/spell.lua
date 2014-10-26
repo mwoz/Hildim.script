@@ -264,8 +264,7 @@ local function OnUserListSelection_local(tp,str)
 end                                      --fghgfhgtgh
 
 local function OnColorise_local(s,e)
---print(props["spell.autospell"])
-    if tonumber(props["spell.autospell"]) == 1 and editor.Lexer ~= SCLEX_ERRORLIST then
+    if tonumber(_G.iuprops["spell.autospell"]) == 1 and editor.Lexer ~= SCLEX_ERRORLIST then
         SpellLexer(s, e)
     end
 end
@@ -279,9 +278,9 @@ end
 function spell_ByLex()
     local s,e = editor.SelectionStart,editor.SelectionEnd
     if s==e then s,e = 0,editor.TextLength end
-    props["spell.autospell"] = 0
+    _G.iuprops["spell.autospell"] = 0
     editor:Colourise(s,e)
-    props["spell.autospell"] = 1
+    _G.iuprops["spell.autospell"] = 1
     SpellLexer(s,e)
 end
 

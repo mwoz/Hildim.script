@@ -38,65 +38,10 @@ local function SaveSettings()
         text = io.read('*a')
     end
 	SaveKey('autoformat.line') -- Автоформатирование в лексере формэнджина
-	SaveKey('find.directory')
-	SaveKey('find.directory.history')
-	SaveKey('find.files.history')
-	SaveKey('find.in.subfolders')
-	SaveKey('find.what')
-	SaveKey('find.what.history')
-	SaveKey('find.replasewith.history')
-	SaveKey('findtext.bookmarks')
-	SaveKey('findtext.matchcase')
-	SaveKey('findtext.wholeword')
-	SaveKey('highlighting.identical.text') -- параметр изменяется в highlighting_identical_text.lua
-	SaveKey('line.margin.visible')
-	SaveKey('magnification') -- параметр изменяется в Zoom.lua
 
-    SaveKey('mbTrancport.file')
-	SaveKey('findrez.magnification') -- параметр изменяется в Zoom.lua
-	SaveKey('output.magnification') -- параметр изменяется в Zoom.lua
-	SaveKey('output.vertical.size')
-	SaveKey('findrez.width')
-	SaveKey('output.wrap')
-	SaveKey('findrez.wrap')
-	SaveKey('precompiller.debugmode') -- включение дебагмоды радиуса
-	SaveKey('precompiller.radiususername') -- имя пользователя радиус
-	SaveKey('print.magnification') -- параметр изменяется в Zoom.lua
-	SaveKey('sidebar.abbrevbmk.split.value')
-	SaveKey('sidebar.tabctrl.value')
-	SaveKey('sidebar.funcnav.split.value')
-	SaveKey('sidebar.fileman.split.value')
-	SaveKey('sidebar.functions.group')
-	SaveKey('sidebar.functions.sort')
-	SaveKey('sidebar.functions.layout')
-	SaveKey('sidebar.fileman.split.value')
-
-	SaveKey('sidebar.hide') -- параметр изменяется в SideBar.lua
-	SaveKey('sidebar.pan') -- параметр изменяется в SideBar.lua
-	SaveKey('sidebar.win') -- параметр изменяется в SideBar.lua
-	SaveKey('dialogs.sidebarp.rastersize')
-	SaveKey('dialogs.sidebar.rastersize')
-	SaveKey('dialogs.sidebar.x')
-	SaveKey('dialogs.sidebar.y')
-
-    SaveKey('sidebar.mb.transport.value')
-	SaveKey('sidebar.mb.subject.value')
-	SaveKey('sidebar.m4.value')
 
 	SaveKey('spell.autospell')
-	SaveKey('split.vertical')
-	SaveKey('sql.compile.file')  --имя выделенного файла для компиляции
-	SaveKey('sql.dbcmdsubj')  --выделенный дбСабджект
 
-    SaveKey('statusbar.visible')
-	SaveKey('tabbar.visible')
-	SaveKey('iuptoolbar.visible')
-    SaveKey('toolbar.visible')
-	SaveKey('view.eol')
-	SaveKey('view.indentation.guides')
-	SaveKey('view.whitespace')
-	SaveKey('wrap')
-	SaveKey('sqlobject.mapreloadtime')
 
 	if pcall(io.output, file) then
 		io.write(text)
@@ -131,31 +76,7 @@ end]]
 -- При изменении параметров через меню, меняются и соответствующие значения props[]
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
-    if cmd == IDM_VIEWTOOLBAR then
-		ToggleProp('toolbar.visible')
-	elseif cmd == IDM_VIEWTABBAR then
-		ToggleProp('tabbar.visible')
-	elseif cmd == IDM_VIEWSTATUSBAR then
-		ToggleProp('statusbar.visible')
-	elseif cmd == IDM_VIEWSPACE then
-		ToggleProp('view.whitespace')
-	elseif cmd == IDM_VIEWEOL then
-		ToggleProp('view.eol')
-	elseif cmd == IDM_VIEWGUIDES then
-		ToggleProp('view.indentation.guides')
-	elseif cmd == IDM_LINENUMBERMARGIN then
-		ToggleProp('line.margin.visible')
-	elseif cmd == IDM_SPLITVERTICAL then
-		ToggleProp('split.vertical')
-	elseif cmd == IDM_WRAP then
-		ToggleProp('wrap')
-	elseif cmd == IDM_WRAPOUTPUT then
-		ToggleProp('output.wrap')
-	elseif cmd == IDM_WRAPFINDRES then
-		ToggleProp('findrez.wrap')
-	elseif cmd == 9117 then
-		--SaveIup()
-	elseif cmd == IDM_QUIT and tonumber(props['save.settings']) == 1 then
+if cmd == IDM_QUIT and tonumber(props['save.settings']) == 1 then
 		SaveSettings()  --Поскольку закрытие окна мы в любом случае выполняем  через IDM_QUIT
         --SaveIup()
 	end

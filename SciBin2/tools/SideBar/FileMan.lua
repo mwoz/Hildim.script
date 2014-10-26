@@ -101,7 +101,8 @@ function FileMan_ListFillDir(strPath)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..#table_folders)
 
     for i = 1, #table_folders do
-        list_dir:setcell(i, 2, '['..table_folders[i]..']')
+        list_dir:setcell(i, 1, 'IMAGE_Folder')
+        list_dir:setcell(i, 2, table_folders[i])
         list_dir:setcell(i, 3, table_folders[i])
         list_dir:setcell(i, 4, 'd')
     end
@@ -353,6 +354,7 @@ end
 
 local function OnSwitch(bForse, bRelist)
     if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
+        iup.SetFocus(memo_mask)
         local path = props['FileDir']
         if path == '' then return end
 		current_path = path:gsub('\\$','')..'\\'

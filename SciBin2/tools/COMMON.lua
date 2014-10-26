@@ -232,9 +232,12 @@ end
 
 ----------------------------------------------------------------------------
 -- »нвертирование состо€ни€ заданного параметра (используетс€ дл€ сн€ти€/установки "галок" в меню)
-function CheckChange(prop_name)
+function CheckChange(prop_name, withIup)
 	local cur_prop = ifnil(tonumber(props[prop_name]), 0)
 	props[prop_name] = 1 - cur_prop
+    if withIup then  _G.iuprops[prop_name] = props[prop_name] end
+
+
 end
 
 -- ==============================================================
