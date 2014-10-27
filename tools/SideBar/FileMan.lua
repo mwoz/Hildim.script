@@ -234,7 +234,7 @@ end
 local favorites_filename = props['SciteUserHome']..'\\favorites.lst'
 local list_fav_table = {}
 
-local function Favorites_ListFILL()
+function Favorites_ListFILL()
     local function getName(s)
 		local fname = s[1]:gsub('.+\\','')
 		if fname == '' then fname = s[1]:gsub('.+\\(.-)\\','[%1]') end
@@ -320,7 +320,6 @@ end
 
 function Favorites_AddFileName(fName) --для добавления из других библиотек
     list_fav_table[#list_fav_table+1] = {fName, true}
-	Favorites_ListFILL()
 end
 
 function Favorites_Clear()
@@ -356,10 +355,12 @@ local function OnSwitch(bForse, bRelist)
     if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
         iup.SetFocus(memo_mask)
         local path = props['FileDir']
-        if path == '' then return end
-		current_path = path:gsub('\\$','')..'\\'
-        -- if bClearMask then memo_mask:set_text = "" end
-		FileMan_ListFILL()
+        if path == '' then path = _G.iuprops['FileMan.Dir'] end
+        if path ~= '' then
+            current_path = path:gsub('\\$','')..'\\'
+            -- if bClearMask then memo_mask:set_text = "" end
+            FileMan_ListFILL()
+        end
     end
     if bRelist then
         Favorites_OpenList()
@@ -424,7 +425,10 @@ local function FileManTab_Init()
               iup.item{title="Add to Favorites",action=Favorites_AddFile},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
+        iup.SetAttribute(list_dir, 'MARK'..lin..':0', 1)
+        list_dir.redraw = lin..'*'
     end)
+    list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(key) end)
     iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')
 
     list_favorites = iup.matrix{
@@ -495,7 +499,7 @@ local function FileManTab_Init()
         OnSwitchFile = function()OnSwitch(false,true) end;
         OnSave = function()OnSwitch(false,false) end;
         OnOpen = function()OnSwitch(false,true) end;
-        OnFinalise = Favorites_SaveList;
+        OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir']=memo_path.value end);
         tabs_OnSelect = function()OnSwitch(true,false) end;
     }
 end

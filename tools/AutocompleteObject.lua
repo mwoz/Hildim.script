@@ -435,7 +435,9 @@ local function ReCreateStructures(strText,tblFiles)
         FillTableFromText(strTxt,patterns, tbl_fList)
         while true do     --получим список всех доступных функций
             _start, _end, fName = string.find(strTxt,"\n%'?#INCLUDE.([%w%.%_]+)",_start)
-            if _start == nil then return end
+            if _start == nil then
+                return
+            end
             if tblFiles[string.lower(fName)] == nil then
                 tblFiles[string.lower(fName)] = 1
                 local fName2 = get_precomp_tblFiles(string.lower(fName))
@@ -458,6 +460,7 @@ local function ReCreateStructures(strText,tblFiles)
             end
             _start = _end + 1
         end
+
     end
 
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
@@ -949,12 +952,18 @@ AddEventHandler("OnSwitchFile", function(file)
     _G.iuprops["spell.autospell"] = 0
 	get_api = true
     ReCreateStructures()
+    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
+        Favorites_ListFILL()
+    end
     m_ext = editor.Lexer
     _G.iuprops["spell.autospell"] = pr
 end)
 AddEventHandler("OnOpen", function(file)
 	get_api = true
     ReCreateStructures()
+    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
+        Favorites_ListFILL()
+    end
     m_ext = editor.Lexer
 end)
 AddEventHandler("OnBeforeSave", function() get_api = true end)

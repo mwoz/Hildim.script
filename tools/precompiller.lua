@@ -145,7 +145,7 @@ local function OnSave_local()
                         table.insert(precomp_Map,{-getLineCount(string.sub(strSource,1,startXml)),strFull,0})
                     end
                     templFile:close()
-                    if _G.iuprops['precompiller.debugmode'] == '1' then
+                    if _G.iuprops['precompiller.debugmode'] == 1 then
                         strSource = strSource:gsub("'#DEBUG ", ' ')
                     end
                     local d = strSource

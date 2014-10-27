@@ -321,6 +321,9 @@ end
 --¬ыполнение действи€ дл€ всех документов
 function DoForBuffers(func, ...)
     BlockEventHandler"OnSwitchFile"
+    BlockEventHandler"OnClose"
+    BlockEventHandler"OnNavigation"
+    BlockEventHandler"OnUpdateUI"
     local curBuf = scite.buffers.GetCurrent()
     local maxN = scite.buffers.GetMaxN()
     for i = 0,maxN do
@@ -328,6 +331,9 @@ function DoForBuffers(func, ...)
         func(i, ...)
     end
     scite.buffers.SetDocumentAt(curBuf)
+    UnBlockEventHandler"OnUpdateUI"
+    UnBlockEventHandler"OnNavigation"
+    UnBlockEventHandler"OnClose"
     UnBlockEventHandler"OnSwitchFile"
     return func(nil)
 end

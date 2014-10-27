@@ -268,6 +268,9 @@ local function InitSideBar()
     end
 
     tDlg.SaveValues = (function()
+        for _,tbs in pairs(SideBar_obj.Tabs) do
+            if tbs.OnSaveValues then tbs.OnSaveValues() end
+        end
         SaveNamedValues(tDlg[1])
     end)
 

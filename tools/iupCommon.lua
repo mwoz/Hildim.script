@@ -6,7 +6,9 @@ if pcall(io.input, file) then
     text = io.read('*a')
 end
 io.close()
-dostring(text)
+
+local bSuc, tMsg = pcall(dostring,text)
+if not bSuc then print('Îרטבךא ג פאיכו settings.lua:', tMsg) end
 
 
 props['autoformat.line'] = _G.iuprops['autoformat.line']
@@ -63,6 +65,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
                 end
             end
         end
+        if cmd == IDM_QUIT then ClearAllEventHandler() end
         DoForBuffers(function(i)
             if i and i ~= cur then
                 scite.SendEditor(SCI_SETSAVEPOINT)

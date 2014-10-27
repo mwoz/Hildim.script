@@ -122,13 +122,20 @@ end
 
 function BlockEventHandler(EventName)
     if events[EventName] then
-        _blocked[EventName]=events[EventName]
-        events[EventName] = {}
+        -- _blocked[EventName]=events[EventName]
+        -- events[EventName] = {}
+        _blocked[EventName]=_G[EventName]
+        _G[EventName] = (function(...) end)
     end
 end
 function UnBlockEventHandler(EventName)
     if _blocked[EventName] then
-        events[EventName]=_blocked[EventName]
+        _G[EventName]=_blocked[EventName]
         _blocked[EventName] = nil
+    end
+end
+function ClearAllEventHandler()
+    for s,f in pairs(events) do
+        _G[s] = (function(...) end)
     end
 end
