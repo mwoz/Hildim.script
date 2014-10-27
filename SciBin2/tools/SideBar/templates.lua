@@ -55,7 +55,7 @@ local function FindTab_Init()
 
     chk_DebugMode = iup.toggle{title = "Dbg Mode",
                         action=(function(h) _G.iuprops['precompiller.debugmode'] = Iif(h.value == 'ON', 1, 0); props['precompiller.debugmode'] = _G.iuprops['precompiller.debugmode'] end), tip="Если включено, то в собранном шаблоне будут раскоментированы\nстроки, начинающиеся с '#DEBUG\n(может использоваться для вывода отладочной трассировки)"}
-    chk_DebugMode.map_cb=(function(h) if _G.iuprops['precompiller.debugmode'] == '1' then h.value = 'ON' end; props['precompiller.debugmode'] = _G.iuprops['precompiller.debugmode'] end)
+    chk_DebugMode.map_cb=(function(h) if _G.iuprops['precompiller.debugmode'] == 1 then h.value = 'ON' end; props['precompiller.debugmode'] = _G.iuprops['precompiller.debugmode'] end)
 
     cmb_resent = iup.list{dropdown="YES",visible_items="15", expand='NO', size='150x0',
             action=(function(h, text, item, state) props['precompiller.xmlname'] = text end), tip='Файл для компиляции.\n(Выбор из последних скомпилированных файлов)'}
