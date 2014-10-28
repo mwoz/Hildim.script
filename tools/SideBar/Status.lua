@@ -134,7 +134,7 @@ local function _OnUpdateUI()
     txtLine.value = editor:LineFromPosition(editor.CurrentPos) + 1
 end
 local function GoToPos()
-print(123)
+    OnNavigation("Go")
     local line = tonumber(txtLine.value) - 1
     local col = tonumber(txtCol.value) - 1
     local lineStart = editor:PositionFromLine(line)
@@ -147,6 +147,7 @@ print(123)
         scite.SendEditor(SCI_SETSELECTIONNANCHORVIRTUALSPACE, 0, col-ln)
         scite.SendEditor(SCI_SETSELECTIONNCARETVIRTUALSPACE, 0, col-ln)
     end
+    OnNavigation("Go-")
     iup.PassFocus()
 end
 local zbox_s;
@@ -155,7 +156,7 @@ local function FindTab_Init()
     txtCol = iup.text{size='25x'; mask='[0-9]*', tip=sTip,
              k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
     txtLine = iup.text{size='25x'; mask='[0-9]*', tip=sTip,
-                       k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
+             k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
     txtSel = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR'), canfocus  = "NO"}
     lblSel = iup.text{size = '200x0'; readonly='YES',canfocus="NO", bgcolor=iup.GetGlobal('DLGBGCOLOR'),
         tip='Число вхождений выделенного слова',

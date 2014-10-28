@@ -72,7 +72,8 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
                 scite.MenuCommand(IDM_CLOSE)
             end
         end)
-        if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup() end
+        if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup()
+        else return true end
     elseif cmd == 9117 then  --перезагрузка скрипта
         iup.DestroyDialogs();SaveIup()
         scite.PostCommand(1,0)
