@@ -79,6 +79,11 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         return true
     end
 end)
+AddEventHandler("OnSave", function(cmd, source)
+    if props["ext.lua.startup.script"] == props["FilePath"] then
+        scite.PostCommand(4,0)
+    end
+end)
 
 --Расширение iup.TreeAddNodes - позволяет в табличном представлении дерева задавать свойство userdata
 local old_TreeSetNodeAttrib = iup.TreeSetNodeAttrib
@@ -217,6 +222,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             scite.ReloadStartupScript()
             OnSwitchFile("")
             print("...Ok")
+        elseif wp == 4 then   --перезагрузка скрипта
+            scite.MenuCommand(9117)
         end
     end
 end)

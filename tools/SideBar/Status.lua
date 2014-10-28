@@ -133,12 +133,31 @@ local function _OnUpdateUI()
     txtSel.value = editor.SelectionEnd - editor.SelectionStart
     txtLine.value = editor:LineFromPosition(editor.CurrentPos) + 1
 end
+local function GoToPos()
+print(123)
+    local line = tonumber(txtLine.value) - 1
+    local col = tonumber(txtCol.value) - 1
+    local lineStart = editor:PositionFromLine(line)
+    local ln = editor:PositionFromLine(line + 1) - 2 - lineStart
+    print(ln,col)
+    if ln > col then
+        editor:SetSel(lineStart + col, lineStart + col )
+    else
+        editor:SetSel(lineStart + ln, lineStart + ln)
+        scite.SendEditor(SCI_SETSELECTIONNANCHORVIRTUALSPACE, 0, col-ln)
+        scite.SendEditor(SCI_SETSELECTIONNCARETVIRTUALSPACE, 0, col-ln)
+    end
+    iup.PassFocus()
+end
 local zbox_s;
 local function FindTab_Init()
-    txtCol = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR')}
-    txtSel = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR')}
-    txtLine = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR')}
-    lblSel = iup.text{size = '200x0'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR'),
+    local sTip = '(Ctrl+G) Нажмите Enter для перехода на позицию'
+    txtCol = iup.text{size='25x'; mask='[0-9]*', tip=sTip,
+             k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
+    txtLine = iup.text{size='25x'; mask='[0-9]*', tip=sTip,
+                       k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
+    txtSel = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR'), canfocus  = "NO"}
+    lblSel = iup.text{size = '200x0'; readonly='YES',canfocus="NO", bgcolor=iup.GetGlobal('DLGBGCOLOR'),
         tip='Число вхождений выделенного слова',
         tips_cb=(function(h,x,y)
             h.tip='Число вхождений выделенного слова'..Iif(editor.Lexer == SCLEX_FORMENJINE,'\nПоказ цвета под курсором', '')
@@ -167,12 +186,12 @@ local function FindTab_Init()
     end
     local sTip='Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
     zbox_s = iup.zbox{
-        iup.button{image='IMAGE_CheckSpelling2';impress='IMAGE_CheckSpelling'; tip=sTip;
+        iup.button{image='IMAGE_CheckSpelling2';impress='IMAGE_CheckSpelling'; tip=sTip;canfocus="NO";
             map_cb=(function(_) if _G.iuprops["spell.autospell"] == "1" then zbox_s.valuepos=1 else zbox_s.valuepos=0 end end);
             action=(function(_) _G.iuprops["spell.autospell"] = "1"; zbox_s.valuepos=1 end);
             button_cb=onSpellContext;
         };
-        iup.button{image='IMAGE_CheckSpelling';impress='IMAGE_CheckSpelling2'; tip=sTip;
+        iup.button{image='IMAGE_CheckSpelling';impress='IMAGE_CheckSpelling2'; tip=sTip;canfocus="NO";
             action=(function(_) _G.iuprops["spell.autospell"] = "0"; zbox_s.valuepos=0 end);
             button_cb=onSpellContext;
         };
@@ -193,6 +212,7 @@ local function FindTab_Init()
         OnDwellStart = ShowCurrentColour;
         OnOpen=OnSwitch;
         OnSwitchFile=OnSwitch;
+        OnMenuCommand=(function(cmd, source) if cmd == IDM_GOTO then iup.SetFocus(txtLine) return true end end);
         SetFindRes = (function(what,count)
                             if count > 0 then
                                 if needCoding then what = what:from_utf8(1251) end
