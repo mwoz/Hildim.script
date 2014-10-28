@@ -245,8 +245,10 @@ local function InitSideBar()
                     if cType == 'list' and child.dropdown == "YES" then
                         local s = _G.iuprops['sidebarctrl.'..child.name..'.hist']
                         if s then
+                            local i = 1
                             for w in s:gmatch('([^¤]+)') do
-                                iup.SetAttributeId(child, 'INSERTITEM', 1, w)
+                                iup.SetAttributeId(child, 'INSERTITEM', i, w)
+                                i = i + 1
                             end
                         end
                         if val then child.value = val end

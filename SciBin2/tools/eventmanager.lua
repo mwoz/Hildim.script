@@ -121,21 +121,23 @@ function RemoveEventHandler(EventName, Handler)
 end
 
 function BlockEventHandler(EventName)
+--Блокировка (временная) обработки эвента конкретного
     if events[EventName] then
-        -- _blocked[EventName]=events[EventName]
-        -- events[EventName] = {}
-        _blocked[EventName]=_G[EventName]
-        _G[EventName] = (function(...) end)
+        _blocked[EventName]=events[EventName]
+        events[EventName] = {}
     end
 end
 function UnBlockEventHandler(EventName)
+--Разблокировка обработки эвента конкретного
     if _blocked[EventName] then
-        _G[EventName]=_blocked[EventName]
+        events[EventName]=_blocked[EventName]
         _blocked[EventName] = nil
     end
 end
 function ClearAllEventHandler()
+--Отключение всех эвентов. вызывается перед закрытием программы
     for s,f in pairs(events) do
-        _G[s] = (function(...) end)
+        events[s] = {}
+        _G[s] = nil --(function(...) end)
     end
 end
