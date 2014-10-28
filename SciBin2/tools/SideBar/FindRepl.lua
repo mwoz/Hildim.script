@@ -138,7 +138,7 @@ local function FindInFiles()
     if Ctrl("cmbFindWhat").value == '' then return end
     if Ctrl("cmbFilter").value == '' then Ctrl("cmbFilter").value = '*.*' end
     if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir'] end
-    local fWhat = Ctrl("cmbFindWhat").value
+    local fWhat = Ctrl("cmbFindWhat").value:to_utf8(1251)
     local fFilter = Ctrl("cmbFilter").value
     local fDir = Ctrl("cmbFolders").value
     if Ctrl("chkRegExp").value =='ON' then
@@ -338,7 +338,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      k_any = (function(_,c) if c..'' == iup.K_cUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then iup.PassFocus() end; end),
+      k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then iup.PassFocus() end; end),
     },
     containers["zPin"],
     margin = "0x00",
@@ -481,7 +481,7 @@ local function create_dialog_FindReplace()
     iup.button{
       image = "IMAGE_ArrowUp",
       action = FolderUp,
-      tip = "На уровень вверх\nCtrl+Up в строке поиска",
+      tip = "На уровень вверх\n(PgUp в строке поиска)",
     },
     iup.button{
       image = "IMAGE_Folder",
