@@ -30,7 +30,7 @@ local function ColorDlg()
         txtOutB.value = string.format('RGB(%i, %i, %i)    #%02x%02x%02x',r,g,b,r,g,b)
         local c = Iif(nTip==-1,prim,sec)
     end
-    local function ByTxt()
+    local function ByTxt(h)
         local rgb=((('0x'..txtR.Value)+0)..' '..(('0x'..txtG.Value)+0)..' ' ..(('0x'..txtB.Value)+0))
         clb.rgb= rgb
         iup.SetAttributeId(clp,'CELL', nCel,rgb )
@@ -42,9 +42,9 @@ local function ColorDlg()
     txtSample = iup.text{readonly='YES',value='some text some text some text ';expand='HORIZONTAL';maxsize=clb.rastersize;}
     txtOutF = iup.text{readonly='YES';expand='HORIZONTAL'}
     txtOutB = iup.text{readonly='YES';expand='HORIZONTAL'}
-    txtR = iup.text{mask='[abcdef0-9][abcdef0-9]?';expand='NO';size='40x0';action=ByTxt}
-    txtG = iup.text{mask='[abcdef0-9][abcdef0-9]?';expand='NO';size='40x0';action=ByTxt}
-    txtB = iup.text{mask='[abcdef0-9][abcdef0-9]?';expand='NO';size='40x0';action=ByTxt}
+    txtR = iup.text{mask='[abcdef0-9][abcdef0-9]?';expand='NO';size='40x0', value='ff';action=ByTxt,valuechanged_cb=(function(h) if h.value=='' then h.value=0 end; end),}
+    txtG = iup.text{mask='[abcdef0-9][abcdef0-9]?';expand='NO';size='40x0', value='00';action=ByTxt,valuechanged_cb=(function(h) if h.value=='' then h.value=0 end; end),}
+    txtB = iup.text{mask='[abcdef0-9][abcdef0-9]?';expand='NO';size='40x0', value='00';action=ByTxt,valuechanged_cb=(function(h) if h.value=='' then h.value=0 end; end),}
 
     clp=iup.colorbar{num_parts=math.floor((#tc2)^0.5);num_cells=#tc2;show_secondary='YES';expand='NO';rastersize='260x200';
         select_cb = (function(h,cell,tp)
