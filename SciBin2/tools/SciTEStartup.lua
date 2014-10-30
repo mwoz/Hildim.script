@@ -91,18 +91,13 @@ dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
 -- Автодополнение объектов их методами и свойствами
 dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
-
-
--- SciTE_HexEdit: A Self-Contained Primitive Hex Editor for SciTE
---dofile (props["SciteDefaultHome"].."\\tools\\HexEdit\\SciTEHexEdit.lua")
-
--- SciTE Calculator
---dofile (props["SciteDefaultHome"].."\\tools\\Calculator\\SciTECalculatorPD.lua")
+-- Автодополнение объектов их методами и свойствами
+dofile (props["SciteDefaultHome"].."\\tools\\ColorSettings.lua")
 
 -- Вставка спецсимволов (©,®,§,±,…) из раскрывающегося списка (для HTML вставляются их обозначения)
 dofile (props["SciteDefaultHome"].."\\tools\\InsertSpecialChar.lua")
 
--- Поиск и подсветка всех вжождений выделенного слова
+-- Поиск и подсветка всех вхождений выделенного слова
 dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\SortControlXml.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\Align.lua")
