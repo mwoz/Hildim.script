@@ -5,7 +5,7 @@ local needCoding = false
 local function ColorDlg()
     local t = editor:GetText()
     local tc={};tc['0 0 0']=true;tc['255 255 255']=true
-    for r,g,b in t:gmatch('"#?(%x%x)(%x%x)(%x%x)"') do
+    for r,g,b in t:gmatch('["#](%x%x)(%x%x)(%x%x)[%W]') do
         tc[((('0x'..r)+0)..' '..(('0x'..g)+0)..' ' ..(('0x'..b)+0))] = true
     end
     for r,g,b in t:gmatch('RGB%( *&H(%x%x)[, ]+&H(%x%x)[, ]+&H(%x%x)') do
@@ -118,7 +118,7 @@ end
 
 local function OnSwitch()
     local t = 1000000
-    if editor.Lexer == SCLEX_FORMENJINE then
+    if editor.Lexer ~= SCLEX_MSSQL then
         t = 200
     end
     iup.GetGlobal('DLGBGCOLOR')
