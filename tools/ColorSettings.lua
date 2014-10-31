@@ -7,9 +7,9 @@ end
 
 local function SetStaticControls()
     local _,_,r,g,b = Ctrl("colorBr").rgb:find('([0-9]+) ([0-9]+) ([0-9]+)')
-    Ctrl('txtR').value = string.format('%02x',r)
-    Ctrl('txtG').value = string.format('%02x',g)
-    Ctrl('txtB').value = string.format('%02x',b)
+    Ctrl('txtRGB').value = string.format('%02x',r)..string.format('%02x',g)..string.format('%02x',b)
+--[[    Ctrl('txtG').value =
+    Ctrl('txtB').value = ]]
 end
 
 local function _OnClrChange(h)
@@ -44,7 +44,7 @@ local function ByTxt(h)
     _OnClrChange(Ctrl("colorBr"))
 end
 
-local function OnSaveClr()
+local function OnSaveClr(bClouse)
     local mLst = Ctrl("matrixList")
     local strOut = '\n'
 
@@ -58,10 +58,10 @@ local function OnSaveClr()
     local i = 1
     while i <= tonumber(mLst.count) do
 
-        strOut = strOut..'#'..tblColours[i].comment..'\n'..tblColours[i].name..'='
+        strOut = strOut..'# '..tblColours[i].comment..'\n'..tblColours[i].name..'='
         if tblColours[i].typ == 'b' then
             local j = i
-            if tblColours[i + 1] and tblColours[i].typ == tblColours[i + 1].typ then
+            if tblColours[i + 1] and tblColours[i].lId == tblColours[i + 1].lId then
                 i = i + 1
                 strOut = strOut..'fore:'..GetRgb(i)..','
             end
@@ -72,56 +72,62 @@ local function OnSaveClr()
         strOut = strOut..'\n\n'
         i = i + 1
     end
+    --[[print(strOut)]]
     local tmpF = io.output(props["SciteDefaultHome"]..'\\data\\home\\SciTEColors.properties')
     tmpF:write(strOut)
     tmpF:close()
-    dlg:postdestroy()
+    scite.Perform("reloadproperties:")
+    if bClouse then dlg:postdestroy() end
 end
 
 function create_dialog_clr()
 
-  containers[4] = iup.hbox{
-    iup.text{
-      size = "40x0",
-      mask = "[abcdef0-9][abcdef0-9]?",
-      value='ff',
-      action = ByTxt,
-      valuechanged_cb=(function(h) if h.value=='' then h.value=0 end; end),
-      name = 'txtR',
-    },
-    iup.text{
-      size = "40x0",
-      mask = "[abcdef0-9][abcdef0-9]?",
-      value='00',
-      action = ByTxt,
-      valuechanged_cb=(function(h) if h.value=='' then h.value=0 end; end),
-      name = 'txtG',
-    },
-    iup.text{
-      size = "40x0",
-      mask = "[abcdef0-9][abcdef0-9]?",
-      value='00',
-      action = ByTxt,
-      valuechanged_cb=(function(h) if h.value=='' then h.value=0 end; end),
-      name = 'txtB',
-    },
-    expand = "NO",
-  }
   containers[6] = iup.hbox{
+    iup.label{
+      size = "40x0",
+      title = "Color:"
+    },
+    iup.text{
+      size = "40x0",
+      mask = "[A-Fa-f0-9]*",
+      value='ff0000',
+      valuechanged_cb=(function(h)
+        local c = h.caret
+        if h.value:len()<6 then
+            h.value=h.value..string.rep('0', 6 - h.value:len())
+        elseif h.value:len()>6 then
+            h.value = h.value:gsub('(......).*', '%1')
+        end;
+        h.caret = c
+        local _,_,r,g,b = h.value:find('(..)(..)(..)')
+        local rgb=((('0x'..r)+0)..' '..(('0x'..g)+0)..' ' ..(('0x'..b)+0))
+        Ctrl("colorBr").rgb= rgb
+        _OnClrChange(Ctrl("colorBr"))
+      end),
+      name = 'txtRGB',
+    },
+  }
+  containers[7] = iup.hbox{
+
+    iup.button{
+      size = "40x0",
+      title = "Apply",
+      name = 'LCOLOR_BTN_OK',
+      action = (function() OnSaveClr(false) end),
+    },
     iup.button{
       size = "40x0",
       title = "Save",
       name = 'LCOLOR_BTN_OK',
-      action = OnSaveClr,
+      action = (function() OnSaveClr(true) end),
     },
-    iup.fill{},
     iup.button{
       size = "40x0",
       title = "Cancel",
       name = "LCOLOR_BTN_ESC",
       action = (function() dlg:postdestroy() end)
     },
-    expand = "YES",
+    expand = "NO",
   }
 
   containers[3] = iup.vbox{
@@ -136,8 +142,9 @@ function create_dialog_clr()
       name = "colorBr",
       valuechanged_cb = OnClrChange,
     },
-    containers[4],
     containers[6],
+    iup.fill{},
+    containers[7],
     expand = "YES",
   }
 
@@ -177,7 +184,7 @@ local function LexerColors()
     tmpF:close()
     tblColours = {}
     local i = 0
-    strText = strText:gsub('\n#([^\n]*)\n(colour%.[^=]+)=([^\n]+)',
+    strText = strText:gsub('\n#%s*([^\n]*)\n(colour%.[^=]+)=([^\n]+)',
                 (function(cmnt, prp, val)
                     _,_,r,g,b = val:find('back:#(%x%x)(%x%x)(%x%x)')
                     if r then
@@ -204,14 +211,16 @@ local function LexerColors()
         iup.SetAttributeId(mLst, "COLOR", i, tblColours[i].colour)
         iup.SetAttributeId(mLst, "", i, tblColours[i].name.." #"..tblColours[i].comment)
         if tblColours[i].typ == "b" then
+            if i < #tblColours and tblColours[i].lId == tblColours[i+1].lId then iup.SetAttribute(mLst, "ITEMFGCOLOR"..i, tblColours[i+1].colour) end
             iup.SetAttribute(mLst, "ITEMBGCOLOR"..i, tblColours[i].colour)
             prevBackInd = tblColours[i].lId
             prevBack = tblColours[i].colour
         else
-            if prevBackInd == tblColours[i].lId then iup.SetAttribute(mLst, "BGCOLOR"..i..":*", prevBack) end
             iup.SetAttribute(mLst, "ITEMFGCOLOR"..i, tblColours[i].colour)
+            if prevBackInd == tblColours[i].lId then iup.SetAttribute(mLst, "ITEMBGCOLOR"..i, prevBack) end
         end
     end
+    mLst.listclick_cb(mLst,1)
 
     dlg = iup.scitedialog{cont,
         maxbox = "NO",
@@ -225,7 +234,7 @@ local function LexerColors()
         sciteparent="SCITE",
         sciteid="lexerColors",
         gap = '3',
-        margin = '3',
+        margin = '3x3',
         }
     dlg.show_cb=(function(h,state)
         if state == 4 then
