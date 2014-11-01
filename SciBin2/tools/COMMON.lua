@@ -325,7 +325,7 @@ function DoForBuffers(func, ...)
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
     local curBuf = scite.buffers.GetCurrent()
-    local maxN = scite.buffers.GetMaxN()
+    local maxN = scite.buffers.GetCount() - 1
     for i = 0,maxN do
         scite.buffers.SetDocumentAt(i)
         func(i, ...)
