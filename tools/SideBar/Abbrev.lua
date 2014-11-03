@@ -118,6 +118,8 @@ local function frmControlPos(findSt, findEnd, s, dInd)
             for i, s in pairs(tA1) do if tonumber(s[2][1]) >= n then cmbAll.value=i;break;end end
         end
     txtX2.action = onTxtX2
+    local bDdx = s:find('tag="ddx_Enabled=Y"')
+    local chkDdx = iup.toggle{title='Ddx Enabled', active=Iif(bDdx, 'YES', 'NO'), value=Iif(bDdx, _G.iuprops['abbrev.ctrldlg.ddx'] or 'NO', 'NO')}
 
     --найдем в тексте все контролы и извлечем из них все горизонтальные координаты - для выбора
     local b,e = 0,-1
@@ -217,7 +219,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     iup.SetHandle("CREATE_BTN_CLEAR",btn_clear)
 
     local vbox = iup.vbox{
-        iup.hbox{iup.label{size='60x0'},cmbAll,gap=20};
+        iup.hbox{iup.label{size='60x0'},cmbAll,iup.fill{}, chkDdx,gap=20};
         iup.hbox{gap=20, alignment='ACENTER',
             iup.label{title="Left",size='60x0'},
             iup.label{title="Top",size='60x0'},
@@ -257,6 +259,10 @@ local function frmControlPos(findSt, findEnd, s, dInd)
         end) end
         if txtCp.value then
             s = s:gsub('caption=".-"', ''):gsub('caption_ru=".-"', '')
+        end
+        if bDdx then
+            if chkDdx.value == 'OFF' then s = s:gsub('tag="ddx_Enabled=Y"', '') end
+            _G.iuprops['abbrev.ctrldlg.ddx'] = chkDdx.value
         end
 
         replAbbr(findSt, findEnd, s, dInd)
