@@ -143,7 +143,7 @@ Sub Main()
                 Exit Do  'Завершение независшего процесса
             End If
             iCount = iCount + 1    'Всего получается 30 секунд на ожидание после последнего вывода программы
-            WScript.Sleep 100
+            WScript.Sleep 200
         Loop
     End If
 End Sub
