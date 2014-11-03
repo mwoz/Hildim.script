@@ -12,7 +12,7 @@ _G["SqlMap"] = nil
 local function RunBatch(filePath)
     if props["output.hook"] == 'Y' then return end
 	if editor.Lexer == SCLEX_MSSQL then
-
+     print(cmb_listCalc.value)
 		local inc =props["sys.calcsybase.dir"].."\\BuildM4\\"..iup.GetAttribute(cmb_listCalc, cmb_listCalc.value)
         local vbRun = props["SciteDefaultHome"].."\\tools\\RunSql.vbs"
         --local vbRun = props["sys.calcsybase.dir"].."\\RunSql.vbs"
@@ -125,7 +125,7 @@ end
 
 local function FindTab_Init()
     cmb_listCalc = iup.list{dropdown="YES",visible_items="15", expand='NO',size='120x0', tip='—писок доступных вариантов дл€ исполнени€ в базе (build)\nи компил€ции в SQL (compile). \n‘айлы нахлд€тс€ в директории Scite\\data\\UserData\\BuildM4'  }
-    cmb_listCalc.map_cb = (function(h) h.value=tonumber(_G.iuprops["sidebar.m4.value"]); end)
+    cmb_listCalc.map_cb = (function(h) h.value=tonumber(_G.iuprops["sidebar.m4.value"] or '1'); end)
     TabBar_obj.Tabs.m4 = {
 
         handle = iup.expander{iup.hbox{

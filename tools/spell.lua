@@ -263,9 +263,21 @@ local function OnUserListSelection_local(tp,str)
     end
 end                                      --fghgfhgtgh
 
+local spellStart, spellEnd
 local function OnColorise_local(s,e)
     if tonumber(_G.iuprops["spell.autospell"]) == 1 and editor.Lexer ~= SCLEX_ERRORLIST then
-        SpellLexer(s, e)
+        if spellEnd and spellStart then
+            spellStart = math.min(spellStart, s)
+            spellEnd = math.max(spellEnd, e)
+        else spellStart, spellEnd = s, e end
+        --SpellLexer(s, e)
+    end
+end
+
+local function OnIdle_local()
+    if spellEnd then
+        SpellLexer(spellStart, spellEnd)
+        spellStart, spellEnd = nil, nil
     end
 end
 
@@ -379,5 +391,6 @@ AddEventHandler("OnOpen", OnSwitch_local)
 AddEventHandler("OnSwitchFile", OnSwitch_local)
 AddEventHandler("OnContextMenu", OnContextMenu_local)
 AddEventHandler("OnMenuCommand", OnMenuCommand_local)
+AddEventHandler("OnIdle", OnIdle_local)
 
 
