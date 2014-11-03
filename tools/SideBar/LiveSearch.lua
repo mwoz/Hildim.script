@@ -40,11 +40,11 @@ end
 
 local function Find_onFocus(setfocus)
     if not setfocus then
-        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
+        local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
             findrez.TargetStart = a
-            findrez.TargetEnd = a+5
-            findrez:ReplaceTarget('>!!  ')
+            findrez.TargetEnd = a+3
+            findrez:ReplaceTarget('<')
         end
     end
 end
@@ -58,7 +58,7 @@ local function FindTab_Init()
     txt_search = iup.text{expand='YES', tip='"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onChange(c)
         btn_search.active = Iif(#c.value == 0, 'NO', 'YES')
-        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
+        local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
             findrez.TargetStart = 0
             findrez.TargetEnd = findrez.LineEndPosition[findrez:LineFromPosition(a)]+1
@@ -71,11 +71,11 @@ local function FindTab_Init()
 
     txt_search.valuechanged_cb = (Find_onChange)
     txt_search.killfocus_cb = (function(h)
-        local a = findrez:findtext('^>!!/\\', SCFIND_REGEXP, 0)
+        local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
             findrez.TargetStart = a
-            findrez.TargetEnd = a+5
-            findrez:ReplaceTarget('>!!  ')
+            findrez.TargetEnd = a+3
+            findrez:ReplaceTarget('<')
         end
     end)
     txt_search.k_any = (function(c, key)

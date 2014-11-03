@@ -1,8 +1,9 @@
-local txtCol, txtSel, lblSel, txtLine
+--local txtCol, txtSel, lblSel, txtLine
 local isColor = false
 local needCoding = false
 
 local function ColorDlg()
+    local txtCol, txtSel, lblSel, txtLine
     local t = editor:GetText()
     local tc={};tc['0 0 0']=true;tc['255 255 255']=true
     for r,g,b in t:gmatch('["#](%x%x)(%x%x)(%x%x)[%W]') do

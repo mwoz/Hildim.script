@@ -311,7 +311,7 @@ function spell_ErrorList()
             if lineErrors ~= "" then
                 out = out..lineErrors..':'..editor:GetLine(line)
             end
-            lineErrors = '.\\'..props['FileNameExt']..':'..(l + 1)..':'..word
+            lineErrors = '\t'..(l + 1)..':'..word
             line = l
             lCount = lCount + 1
         end
@@ -319,7 +319,7 @@ function spell_ErrorList()
     if lineErrors ~= "" then
         out = out..lineErrors..':'..editor:GetLine(line)
     end
-    out = out..'>!!    Errors: '..count..' in '..lCount..' lines\n'
+    out = out..'<'
 
     for line = 0, editor.LineCount do
         local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
@@ -334,7 +334,7 @@ function spell_ErrorList()
     scite.SendFindRez(SCI_REPLACESEL, out)
     if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
     scite.SendFindRez(SCI_SETSEL,0,0)
-    scite.SendFindRez(SCI_REPLACESEL, '>??Spell in "'..props["FileNameExt"]..'"\n')
+    scite.SendFindRez(SCI_REPLACESEL, '>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]..'\n')
 end
 
 local function OnContextMenu_local(lp, wp, source)       --ашибка eror  дочеринм
