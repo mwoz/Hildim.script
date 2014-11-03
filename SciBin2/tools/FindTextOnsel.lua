@@ -448,7 +448,7 @@ AddEventHandler("OnClick", function(shift, ctrl, alt)
     elseif output.Focus and alt then
         local lineNum = output:LineFromPosition(output.CurrentPos) + 1
         local curLine = output:GetCurLine()
-        if 1 == curLine:find(">??Internal search for", 1, true) then
+        if 1 == curLine:find(">Search for", 1, true) then
             local _,_,_,dir = curLine:find('"([^"]*)" in "([^"\*]*)')
             local prevFile = ''
             while true do
@@ -471,38 +471,82 @@ AddEventHandler("OnClick", function(shift, ctrl, alt)
 end)
 AddEventHandler("OnContextMenu", function(lp, wp, source)       --сшибка err
     if source ~= "FINDREZ" then return end
-    local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
-    local curLine = findrez:GetCurLine()
-    if 1 == curLine:find(">??Internal search for", 1, true) then
-        return 'Open Files|60000|||[MAIN]'
+    local mnu = ''
+    if scite.SendFindRez(SCI_GETSTYLEAT, findrez.CurrentPos) == SCE_SEARCHRESULT_SEARCH_HEADER then
+        mnu = mnu..'Открыть файлы|60000|||'
     end
-
+    mnu = mnu..'[MAIN]||'..Iif(_G.iuprops['findrez.clickonlynumber'], '^', '')..'DblClick только по номеру|60001|'
+    return mnu:to_utf8(1251)
 end)
 AddEventHandler("OnMenuCommand", function(msg, source)
     if msg == 60000 then
-        local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
-        local curLine = findrez:GetCurLine()
-        if 1 == curLine:find(">??Internal search for", 1, true) then
-            local _,_,_,dir = curLine:find('"([^"]*)" in "([^"\*]*)')
-            local prevFile = ''
-            local files = {}
+        if scite.SendFindRez(SCI_GETSTYLEAT, findrez.CurrentPos) == SCE_SEARCHRESULT_SEARCH_HEADER then
+            local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
             while true do
-                local fline = findrez:GetLine(lineNum)
-                if fline == '' or fline == nil then break end
-                if fline:find('>!!') == 1 then break end
-                local _,_,newFile = fline:find('([^:]*)',3)
-                if newFile == nil then break end
-                newFile = dir..newFile
-                if newFile ~= prevFile then
-                    prevFile = newFile
-                    table.insert(files, prevFile)
+                local style = scite.SendFindRez(SCI_GETSTYLEAT, findrez:PositionFromLine(lineNum) + 1)
+                if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
+                elseif style == SCE_SEARCHRESULT_FILE_HEADER then
+                    local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
+                    scite.Open(s)
                 end
                 lineNum = lineNum + 1
             end
-            for _,s in pairs(files) do
-                scite.Open(s)
-            end
         end
         return true
+    elseif msg == 60001 then
+        _G.iuprops['findrez.clickonlynumber'] = not _G.iuprops['findrez.clickonlynumber']
+        return true
+    end
+end)
+
+AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
+    if not findrez.Focus then return end
+    local style = scite.SendFindRez(SCI_GETSTYLEAT, findrez.CurrentPos)
+    local lineNum = findrez:LineFromPosition(findrez.CurrentPos)
+    if style == SCE_SEARCHRESULT_FILE_HEADER then
+        local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
+        if s ~= props['FilePath'] then
+            OnNavigation("Go")
+            scite.Open(s)
+            OnNavigation("Go-")
+        end
+    elseif style == SCE_SEARCHRESULT_LINE_NUMBER or
+           (not _G.iuprops['findrez.clickonlynumber'] and style == SCE_SEARCHRESULT_CURRENT_LINE) then
+        local lS, lE = findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1
+        local s = findrez:textrange(lS, lE)
+        local _,_,p = s:find('^%s*(%d*)')
+        p = tonumber(p) - 1
+
+        for i = lineNum, 0, -1 do
+            style = scite.SendFindRez(SCI_GETSTYLEAT, findrez:PositionFromLine(i) + 2)
+            if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
+            elseif style == SCE_SEARCHRESULT_FILE_HEADER then
+                OnNavigation("Go")
+                local sInd = scite.SendFindRez(SCI_INDICATOREND, 31, lS)
+                local strI
+                if lE >= sInd and sInd >= lS then
+                    local eInd = scite.SendFindRez(SCI_INDICATOREND, 31, sInd)
+                    strI = findrez:textrange(sInd, eInd)
+                end
+                local s = findrez:textrange(findrez:PositionFromLine(i) + 1, findrez:PositionFromLine(i + 1) -1)
+                if s ~= props['FilePath'] then scite.Open(s) end
+                if strI and strI:len() > 0 then
+                    editor.TargetStart = editor:PositionFromLine(p)
+                    editor.TargetEnd = editor:PositionFromLine(p + 1)
+                    local posFind = editor:SearchInTarget(strI)
+                    if posFind and posFind >= p then
+                        editor:SetSel(posFind, posFind + strI:len())
+                        editor.Focus = true
+                        OnNavigation("Go-")
+                        return
+                    end
+                end
+                p = editor:PositionFromLine(p)
+                editor:SetSel(p, p)
+                editor.Focus = true
+                OnNavigation("Go-")
+                break
+            end
+        end
     end
 end)

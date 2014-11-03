@@ -19,8 +19,9 @@ local function SetInfo(msg, chColor)
     Ctrl('lblInfo').fgcolor = strColor
 end
 
+local cv = (function(s) return iup.GetDialogChild(containers[2],s).value end)
+
 local function ReadSettings()
-    local cv = (function(s) return iup.GetDialogChild(containers[2],s).value end)
     findSettings:Reset{
         wholeWord = (cv("chkWholeWord") == "ON")
         ,matchCase = (cv("chkMatchCase") == "ON")
@@ -282,6 +283,7 @@ function ActivateFind(nTab)
     else iup.SetFocus(Ctrl('cmbFindWhat')) end
 
     if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir'] end
+    SetStaticControls()
     return true
 end
 
@@ -817,3 +819,7 @@ local function FuncBmkTab_Init()
 end
 
 FuncBmkTab_Init()
+
+AddEventHandler("OnFindCompleted", (function()
+    findSettings:MarkResult()
+end))
