@@ -237,7 +237,7 @@ local list_fav_table = {}
 function Favorites_ListFILL()
     local function getName(s)
 		local fname = s[1]:gsub('.+\\','')
-		if fname == '' then fname = s[1]:gsub('.+\\(.-)\\','[%1]') end
+		if fname == '' then fname = s[1]:gsub('.+\\(.-)\\','%1') end
         return fname
     end
     local function getIcon(s)
