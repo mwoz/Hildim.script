@@ -52,7 +52,7 @@ local m_ext = ""
 ------------------------------------------------------
 function cmpobj_GetFMDefault()
     if(editor.Lexer  ~= SCLEX_FORMENJINE) then return -1 end
-    local style = scite.SendEditor(SCI_GETSTYLEAT, editor.SelectionStart)
+    local style = editor.StyleAt[editor.SelectionStart]
     if(style>=SCE_FM_SQL_DEFAULT) then return SCE_FM_SQL_DEFAULT end
     if(style>=SCE_FM_X_DEFAULT) then return SCE_FM_X_DEFAULT end
     if(style>=SCE_FM_VB_DEFAULT) then return SCE_FM_VB_DEFAULT end
@@ -341,10 +341,10 @@ local function FindDeclaration()
     declarations = {}
 	local text_all = GetActualText()
 
-    local pattern = props["autocomplete."..editor:GetLexerLanguage()..".setobj.pattern"]
+    local pattern = props["autocomplete."..editor.LexerLanguage..".setobj.pattern"]
 	if pattern == nil or pattern == '' then pattern = '([%w%.%_]+)%s*=%s*([^%c]+)' end
     FindDeclarationByPattern(text_all, pattern)
-    pattern = props["autocomplete."..editor:GetLexerLanguage()..".setobj.pattern2"]
+    pattern = props["autocomplete."..editor.LexerLanguage..".setobj.pattern2"]
 	if pattern ~= nil and pattern ~= '' then FindDeclarationByPattern(text_all, pattern) end
 end
 
@@ -476,8 +476,8 @@ local function ReCreateStructures(strText,tblFiles)
         alias_table = {}
         objects_table = {}
         objectsX_table = {}
-        fillup_chars = fPattern(props["autocomplete."..editor:GetLexerLanguage()..".fillup.characters"])
-        autocom_chars = fPattern(props["autocomplete."..editor:GetLexerLanguage()..".start.characters"])
+        fillup_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".fillup.characters"])
+        autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
         str_vbkwrd = CreateTablesForFile(objects_table,alias_table,props["apii.*."..props["FileExt"]], str_vbkwrd ~= nil)
     end
 
@@ -833,8 +833,8 @@ local function OnChar_local(char)
     local result = false
 
     local bResetCallTip = true
-	local autocomplete_start_characters = props["autocomplete."..editor:GetLexerLanguage()..".start.characters"]
-	local calltip_start_characters = props["calltipex."..editor:GetLexerLanguage()..".parameters.start"]
+	local autocomplete_start_characters = props["autocomplete."..editor.LexerLanguage..".start.characters"]
+	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
 	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
 	if not (autocomplete_start_characters == '' and calltip_start_characters == '') then
               -- if get_api then autocom_chars = fPattern(autocomplete_start_characters) end
@@ -873,7 +873,7 @@ local function OnChar_local(char)
 end
 ------------------------------------------------------
 function ShowTipManualy()
-	local calltip_start_characters = props["calltipex."..editor:GetLexerLanguage()..".parameters.start"]
+	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
 	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
     if calltip_start_characters == '' then return end
     current_pos = editor.CurrentPos

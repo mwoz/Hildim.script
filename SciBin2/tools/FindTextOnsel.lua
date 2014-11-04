@@ -472,7 +472,7 @@ end)
 AddEventHandler("OnContextMenu", function(lp, wp, source)       --сшибка err
     if source ~= "FINDREZ" then return end
     local mnu = ''
-    if scite.SendFindRez(SCI_GETSTYLEAT, findrez.CurrentPos) == SCE_SEARCHRESULT_SEARCH_HEADER then
+    if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
         mnu = mnu..'Открыть файлы|60000|||'
     end
     mnu = mnu..'[MAIN]||'..Iif(_G.iuprops['findrez.clickonlynumber'], '^', '')..'DblClick только по номеру|60001|'
@@ -480,10 +480,10 @@ AddEventHandler("OnContextMenu", function(lp, wp, source)       --сшибка err
 end)
 AddEventHandler("OnMenuCommand", function(msg, source)
     if msg == 60000 then
-        if scite.SendFindRez(SCI_GETSTYLEAT, findrez.CurrentPos) == SCE_SEARCHRESULT_SEARCH_HEADER then
+        if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
             local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
             while true do
-                local style = scite.SendFindRez(SCI_GETSTYLEAT, findrez:PositionFromLine(lineNum) + 1)
+                local style = findrez.StyleAt[findrez:PositionFromLine(lineNum) + 1]
                 if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
                 elseif style == SCE_SEARCHRESULT_FILE_HEADER then
                     local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
@@ -501,7 +501,7 @@ end)
 
 AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
     if not findrez.Focus then return end
-    local style = scite.SendFindRez(SCI_GETSTYLEAT, findrez.CurrentPos)
+    local style = findrez.StyleAt[findrez.CurrentPos]
     local lineNum = findrez:LineFromPosition(findrez.CurrentPos)
     if style == SCE_SEARCHRESULT_FILE_HEADER then
         local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
@@ -518,7 +518,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         p = tonumber(p) - 1
 
         for i = lineNum, 0, -1 do
-            style = scite.SendFindRez(SCI_GETSTYLEAT, findrez:PositionFromLine(i) + 2)
+            style = findrez.StyleAt[findrez:PositionFromLine(i) + 2]
             if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
             elseif style == SCE_SEARCHRESULT_FILE_HEADER then
                 OnNavigation("Go")
@@ -536,14 +536,14 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
                     local posFind = editor:SearchInTarget(strI)
                     if posFind and posFind >= p then
                         editor:SetSel(posFind, posFind + strI:len())
-                        editor.Focus = true
+                        iup.PassFocus()
                         OnNavigation("Go-")
                         return
                     end
                 end
                 p = editor:PositionFromLine(p)
                 editor:SetSel(p, p)
-                editor.Focus = true
+                iup.PassFocus()
                 OnNavigation("Go-")
                 break
             end

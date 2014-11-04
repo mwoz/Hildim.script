@@ -375,6 +375,7 @@ trace(s)\n in SciTE, writes s to the output pane (no prefix, no newlines)
 dostring(s)\n executes s as a Lua string, like Lua 4's dostring
 
 #editor=output
+#editor=findrez
 
 editor:textrange
 editor:findtext

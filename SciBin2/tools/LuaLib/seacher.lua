@@ -130,7 +130,7 @@ function s:FindNext(fireEvent)
 		-- Find();
 	end
 
-	local findTarget, lenFind = s:UnSlashAsNeeded(self.findWhat)
+	local findTarget, lenFind = self:UnSlashAsNeeded(self.findWhat)
 	if (lenFind == 0) then return -1 end
 
 	local startPosition = Iif(self.searchUp, self.e.SelectionStart, self.e.SelectionEnd)
@@ -183,7 +183,7 @@ function s:ReplaceOnce()
 	local pos = self:FindNext(true);
 
 	if pos > -1 then
-        local replaceTarget, replaceLen = s:UnSlashAsNeeded(self.replaceWhat)
+        local replaceTarget, replaceLen = self:UnSlashAsNeeded(self.replaceWhat)
 
 		local lenReplaced = replaceLen;
 		if self.regExp then
@@ -215,7 +215,7 @@ function s:onMarkOne(iMark, bClear)
 end
 
 function s:replaceOne()
-    local replaceTarget, replaceLen = s:UnSlashAsNeeded(self.replaceWhat)
+    local replaceTarget, replaceLen = self:UnSlashAsNeeded(self.replaceWhat)
     return (function(lenTarget)
         local lenReplaced = replaceLen
         if lenTarget then
@@ -281,7 +281,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
 end
 
 function s:findWalk(inSelection, funcOnFind)
-    local findTarget, findLen = s:UnSlashAsNeeded(self.findWhat)
+    local findTarget, findLen = self:UnSlashAsNeeded(self.findWhat)
 
     if findLen == 0 then return -1 end
 	local startPosition = self.e.SelectionStart;
@@ -303,7 +303,7 @@ function s:findWalk(inSelection, funcOnFind)
         if (not self.searchUp) or self.wrapFind then endPosition = self.e.Length end
     end
 
-    --local replaceTarget, replaceLen = s:UnSlashAsNeeded(self.replaceWhat)
+    --local replaceTarget, replaceLen = self:UnSlashAsNeeded(self.replaceWhat)
 	local flags = Iif(self.wholeWord, SCFIND_WHOLEWORD, 0) +
 	        Iif(self.matchCase, SCFIND_MATCHCASE, 0) +
 	        Iif(self.regExp, SCFIND_REGEXP, 0) +
@@ -398,7 +398,7 @@ function s:MarkResult()
 
     for i = 1, findrez.LineCount - 1 do
         p = findrez:PositionFromLine(i)
-        if scite.SendFindRez(SCI_GETSTYLEAT, p + 1) == SCE_SEARCHRESULT_SEARCH_HEADER then break end
+        if findrez.StyleAt[p + 1] == SCE_SEARCHRESULT_SEARCH_HEADER then break end
     end
     if p > 0 then
         findrez:SetSel(0,p)

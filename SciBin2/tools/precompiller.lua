@@ -276,7 +276,7 @@ function precomp_PreCompileTemplate()
     isText = false
     if props['FileExt'] == 'inc' then
         for i = 0, editor.LineCount - 1 do
-            style = scite.SendEditor(SCI_GETSTYLEAT, editor.LineIndentPosition[i] + 1)
+            style = editor.StyleAt[editor.LineIndentPosition[i] + 1]
             if style >= SCE_FM_VB_DEFAULT then
                 isText = style < SCE_FM_X_DEFAULT
                 break;
