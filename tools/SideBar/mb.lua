@@ -66,7 +66,7 @@ function listCalc_SmartErrorMapping()
         local strRep = string.rep(' ', ml - j)..'--&&'..(i+1)..'  '
 
         j = j + editor:PositionFromLine(i) - 2
-        local st = scite.SendEditor(SCI_GETSTYLEAT, j )
+        local st = editor.StyleAt[j]
         if st~= 4 and st ~= 8 and st~=16 then
             scite.SendEditor(SCI_SETTARGETSTART, j)
             scite.SendEditor(SCI_SETTARGETEND, j)

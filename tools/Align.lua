@@ -80,6 +80,7 @@ local function TRyAlignByString()
                 local n = nm
                 local pos = 1
                 while n > 0 do
+                    if not str then break end
                     pos = str:find(val, pos, 1, true)
                     n = n - 1
                     if pos==nil then break end

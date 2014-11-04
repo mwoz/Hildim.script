@@ -172,7 +172,7 @@ function NormaliseKeyWordsCase()
         fCase = fCaseSQL
     end
     if fComp==nil then
-        print(editor:GetLexerLanguage()..' not supported')
+        print(editor.LexerLanguage..' not supported')
         return
     end
     local ss = editor.SelectionStart
@@ -185,7 +185,7 @@ function NormaliseKeyWordsCase()
     while ss < es do
         wrdStart, ss = editor:findtext(strTemplate,strFlag,ss,es)
         if wrdStart ~= nil then
-            if fComp(scite.SendEditor(SCI_GETSTYLEAT, wrdStart + 1)) then
+            if fComp(editor.StyleAt[wrdStart + 1]) then
                 editor:SetSel(wrdStart, ss)
                 editor:ReplaceSel(fCase(editor:GetSelText()))
             end

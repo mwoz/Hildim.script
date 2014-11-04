@@ -268,6 +268,7 @@ function ActivateFind(nTab)
     local s
     if editor.SelectionStart == editor.SelectionEnd then s = GetCurrentWord()
     else s = editor:GetSelText() end
+    if s:find('[\n\r]') then s = '' end
 
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
@@ -277,7 +278,7 @@ function ActivateFind(nTab)
         elseif SideBar_obj.TabCtrl.valuepos ~= 3 then oDeatt.detach = 1 end
     end
 
-    if nTab ~= 2 then Ctrl("numStyle").value = scite.SendEditor(SCI_GETSTYLEAT, editor.SelectionStart) end
+    if nTab ~= 2 then Ctrl("numStyle").value = editor.StyleAt[editor.SelectionStart] end
 
     if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
     else iup.SetFocus(Ctrl('cmbFindWhat')) end
@@ -340,6 +341,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
+      edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then return -1 end end),
       k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then iup.PassFocus() end; end),
     },
     containers["zPin"],
@@ -447,6 +449,7 @@ local function create_dialog_FindReplace()
       rastersize = "1x0",
       editbox = "YES",
       dropdown = "YES",
+      edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then return -1 end end),
       visible_items = "15",
       -- map_cb = (function(h) h:FillByHist("find.replasewith.history",nil) end),
     },
