@@ -468,12 +468,9 @@ local function FileManTab_Init()
         iup.SetAttribute(list_dir, 'MARK1:0', 1)
         list_dir.redraw = "1:1"
     end)
-    memo_path.killfocus_cb = (function(h)
+--[[    memo_path.killfocus_cb = (function(h)
         FileMan_ListFILLByMask(memo_mask.value)
-    end)
-    memo_path.killfocus_cb = (function(h)
-        FileMan_ListFILLByMask(memo_mask.value)
-    end)
+    end)]]
 
     memo_path.k_any=(function(h,k)
         return memoNav(k)

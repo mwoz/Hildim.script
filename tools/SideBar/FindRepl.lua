@@ -148,7 +148,8 @@ local function FindInFiles()
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
-                   Iif(Ctrl("chkSubFolders").value=='ON', 's','~')
+                   Iif(Ctrl("chkSubFolders").value=='ON', 's','~')..
+                   Iif(_G.iuprops['findrez.groupbyfile'], 'g', '~')
     scite.PerformGrepEx(params,fWhat,fDir,fFilter)
 
     Ctrl("cmbFindWhat"):SaveHist()

@@ -475,7 +475,8 @@ AddEventHandler("OnContextMenu", function(lp, wp, source)       --сшибка err
     if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
         mnu = mnu..'Открыть файлы|60000|||'
     end
-    mnu = mnu..'[MAIN]||'..Iif(_G.iuprops['findrez.clickonlynumber'], '^', '')..'DblClick только по номеру|60001|'
+    mnu = mnu..'[MAIN]||'..Iif(_G.iuprops['findrez.clickonlynumber'], '^', '')..'DblClick только по номеру|60001|'..
+                           Iif(_G.iuprops['findrez.groupbyfile'], '^', '')..'Группировать по имени файла|60002|'
     return mnu:to_utf8(1251)
 end)
 AddEventHandler("OnMenuCommand", function(msg, source)
@@ -496,6 +497,9 @@ AddEventHandler("OnMenuCommand", function(msg, source)
     elseif msg == 60001 then
         _G.iuprops['findrez.clickonlynumber'] = not _G.iuprops['findrez.clickonlynumber']
         return true
+    elseif msg == 60002 then
+        _G.iuprops['findrez.groupbyfile'] = not _G.iuprops['findrez.groupbyfile']
+        return true
     end
 end)
 
@@ -503,6 +507,25 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
     if not findrez.Focus then return end
     local style = findrez.StyleAt[findrez.CurrentPos]
     local lineNum = findrez:LineFromPosition(findrez.CurrentPos)
+    local function perfGo(s, p)
+        OnNavigation("Go")
+        if s ~= props['FilePath'] then scite.Open(s) end
+        if strI and strI:len() > 0 then
+            editor.TargetStart = editor:PositionFromLine(p)
+            editor.TargetEnd = editor:PositionFromLine(p + 1)
+            local posFind = editor:SearchInTarget(strI)
+            if posFind and posFind >= p then
+                editor:SetSel(posFind, posFind + strI:len())
+                iup.PassFocus()
+                OnNavigation("Go-")
+                return
+            end
+        end
+        p = editor:PositionFromLine(p)
+        editor:SetSel(p, p)
+        iup.PassFocus()
+        OnNavigation("Go-")
+    end
     if style == SCE_SEARCHRESULT_FILE_HEADER then
         local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
         if s ~= props['FilePath'] then
@@ -512,16 +535,28 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         end
     elseif style == SCE_SEARCHRESULT_LINE_NUMBER or
            (not _G.iuprops['findrez.clickonlynumber'] and style == SCE_SEARCHRESULT_CURRENT_LINE) then
-        local lS, lE = findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1
+        local lS, lE = findrez:PositionFromLine(lineNum), findrez:PositionFromLine(lineNum + 1) -1
         local s = findrez:textrange(lS, lE)
-        local _,_,p = s:find('^%s*(%d*)')
-        p = tonumber(p) - 1
+        local exPath, lHeadPath
+        local _,_,p = s:find('^%s+(%d*)')
+        if not p then _,_,exPath,p = s:find('^%.\\([^:]*):(%d+)') end
+        if not p then _,_,lHeadPath,exPath,p = s:find('^([A-Z]:([^:]*)):(%d*)') end
 
+        if not p then return end
+        p = tonumber(p) - 1
         for i = lineNum, 0, -1 do
             style = findrez.StyleAt[findrez:PositionFromLine(i) + 2]
-            if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
+            if style == SCE_SEARCHRESULT_SEARCH_HEADER then
+                if not exPath then break end
+                if not lHeadPath then
+                    lHeadPath = findrez:textrange(findrez:PositionFromLine(i), findrez:PositionFromLine(i +1) -2)
+                    _,_,lHeadPath = lHeadPath:find(' in "([^"]+)')
+                    if exPath ~= '' then _,_,lHeadPath = lHeadPath:find('(.-)[^\\]+$') end
+                    lHeadPath = lHeadPath..exPath
+                end
+                perfGo(lHeadPath, p)
+                break
             elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                OnNavigation("Go")
                 local sInd = scite.SendFindRez(SCI_INDICATOREND, 31, lS)
                 local strI
                 if lE >= sInd and sInd >= lS then
@@ -529,22 +564,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
                     strI = findrez:textrange(sInd, eInd)
                 end
                 local s = findrez:textrange(findrez:PositionFromLine(i) + 1, findrez:PositionFromLine(i + 1) -1)
-                if s ~= props['FilePath'] then scite.Open(s) end
-                if strI and strI:len() > 0 then
-                    editor.TargetStart = editor:PositionFromLine(p)
-                    editor.TargetEnd = editor:PositionFromLine(p + 1)
-                    local posFind = editor:SearchInTarget(strI)
-                    if posFind and posFind >= p then
-                        editor:SetSel(posFind, posFind + strI:len())
-                        iup.PassFocus()
-                        OnNavigation("Go-")
-                        return
-                    end
-                end
-                p = editor:PositionFromLine(p)
-                editor:SetSel(p, p)
-                iup.PassFocus()
-                OnNavigation("Go-")
+                perfGo(s, p)
                 break
             end
         end
