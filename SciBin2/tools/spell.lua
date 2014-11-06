@@ -321,7 +321,7 @@ function spell_ErrorList()
             lineErrors = lineErrors..':'..word
         else
             if lineErrors ~= "" then
-                out = out..lineErrors..':'..editor:GetLine(line)
+                out = out..lineErrors..': '..editor:GetLine(line):gsub('^ *','')
             end
             lineErrors = '\t'..(l + 1)..':'..word
             line = l
@@ -329,7 +329,7 @@ function spell_ErrorList()
         end
     end
     if lineErrors ~= "" then
-        out = out..lineErrors..':'..editor:GetLine(line)
+        out = out..lineErrors..': '..editor:GetLine(line)
     end
     out = out..'<'
 

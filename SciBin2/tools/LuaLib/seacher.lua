@@ -254,22 +254,30 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
             if l~=line then
                 lCount = lCount + 1
                 line = l
+                local lNum
+                if not _G.iuprops['findrez.groupbyfile'] then
+                    if bSearchCapt then lNum = '.\\:'..(l+1)..': '
+                    else lNum = props["FilePath"]..':'..(l+1)..': ' end
+                else
+                    lNum = '\t'..(l+1)..': '
+                end
                 if lCount == maxlines then
-                    scite.SendFindRez(SCI_REPLACESEL, '\t'..(l+1)..': ...\n')
+                    scite.SendFindRez(SCI_REPLACESEL, lNum..'...\n')
                     return lenTarget, false
                 end
                 local str = self.e:GetLine(l):gsub('^[ \t]+', '')
                 if needCoding then str = str:from_utf8(1251) end
-                scite.SendFindRez(SCI_REPLACESEL, '\t'..(l+1)..': '..str )
+                scite.SendFindRez(SCI_REPLACESEL, lNum..str )
             end
             return lenTarget, true
         else
             if bSearchCapt then scite.SendFindRez(SCI_REPLACESEL, '<'..strLive..'\n' ) end
             scite.SendFindRez(SCI_SETSEL,0,0)
             local strCapt = ''
-            if bSearchCapt then strCapt = strCapt..'>Search for "'..self.findWhat..'" in "'..props["FileNameExt"]..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
-            strCapt = strCapt..' '..props["FilePath"]..'\n'
-            if bSearchCapt or wCount > 0 then scite.SendFindRez(SCI_REPLACESEL, strCapt) end
+            if bSearchCapt then strCapt = strCapt..'>Search for "'..self.findWhat..'" in "'..props[Iif(_G.iuprops['findrez.groupbyfile'], "FileNameExt", "FilePath")]..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
+
+            if _G.iuprops['findrez.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]..'\n' end
+            if bSearchCapt or wCount > 0 then  scite.SendFindRez(SCI_REPLACESEL, strCapt) end
 
             scite.SendFindRez(SCI_SETSEL,0,0)
             findrez.CurrentPos = 1
