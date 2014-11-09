@@ -28,11 +28,13 @@ local function  CreateToolBar()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\m4.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\mb.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\templates.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\sysxml.lua")
     --local tolsp2=iup.split{TabBar_obj.Tabs.m4.handle, TabBar_obj.Tabs.mb.handle, orientation="VERTICAL",minmax="300:700"}
     local tolsp1=iup.hbox{
                             TabBar_obj.Tabs.mb.handle,
                             TabBar_obj.Tabs.m4.handle,
                             TabBar_obj.Tabs.template.handle,
+                            TabBar_obj.Tabs.sysxml.handle,
                             TabBar_obj.Tabs.livesearch.handle,
                             gap='3',margin='3x0'
                         }

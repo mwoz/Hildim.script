@@ -270,7 +270,7 @@ function ActivateFind(nTab)
     if editor.SelectionStart == editor.SelectionEnd then s = GetCurrentWord()
     else s = editor:GetSelText() end
     if s:find('[\n\r]') then s = '' end
-
+    if editor.CodePage ~= 0 then s = s:from_utf8(1251) end
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
     if _G.dialogs['findrepl'] then
@@ -452,7 +452,6 @@ local function create_dialog_FindReplace()
       dropdown = "YES",
       edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then return -1 end end),
       visible_items = "15",
-      -- map_cb = (function(h) h:FillByHist("find.replasewith.history",nil) end),
     },
     containers[15],
     alignment = "ARIGHT",
@@ -482,7 +481,6 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      -- map_cb = (function(h) h:FillByHist("find.directory.history","find.directory.history") end),
     },
     iup.button{
       image = "IMAGE_ArrowUp",
@@ -511,7 +509,6 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "15",
-      -- map_cb = (function(h) h:FillByHist("find.files.history",nil) end),
     },
     iup.toggle{
       name = "chkSubFolders",

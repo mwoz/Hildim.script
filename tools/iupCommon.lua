@@ -141,7 +141,6 @@ iup.list = function(t)
         end
     end
     function cmb:FillByHist(sHist,sLast)
-        if true then return cmb end
         sHist = props[sHist]:gsub('||', '‡')..'‡'
         i = 1
         for elem in sHist:gmatch('([^|]+)|') do
