@@ -75,7 +75,8 @@ local function FindTab_Init()
                             alignment="ACENTER"
                         };
                         barposition='LEFT',
-                        barsize='0'
+                        barsize='0',
+                        state='CLOSE'
                     };
                     OnSwitchFile = OnSwitch;
                     OnOpen = OnSwitch;

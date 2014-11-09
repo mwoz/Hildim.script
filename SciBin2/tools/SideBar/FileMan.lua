@@ -483,9 +483,9 @@ local function FileManTab_Init()
     memo_mask.k_any=(function(h,k)
         return memoNav(k)
     end)
-    memo_mask.killfocus_cb = (function(h)
-        FileMan_ListFILLByMask(memo_mask.value)
-    end)
+    -- memo_mask.killfocus_cb = (function(h)
+        -- FileMan_ListFILLByMask(memo_mask.value)
+    -- end)
 
     SideBar_obj.Tabs.fileman =  {
         handle = iup.vbox{

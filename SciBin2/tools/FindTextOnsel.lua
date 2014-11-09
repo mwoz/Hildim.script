@@ -507,7 +507,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
     if not findrez.Focus then return end
     local style = findrez.StyleAt[findrez.CurrentPos]
     local lineNum = findrez:LineFromPosition(findrez.CurrentPos)
-    local function perfGo(s, p)
+    local function perfGo(s, p, strI)
         OnNavigation("Go")
         if s ~= props['FilePath'] then scite.Open(s) end
         if strI and strI:len() > 0 then
@@ -526,6 +526,15 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         iup.PassFocus()
         OnNavigation("Go-")
     end
+
+    local function GetFindTxt(lS, lE)
+        local sInd = scite.SendFindRez(SCI_INDICATOREND, 31, lS)
+        if lE >= sInd and sInd >= lS then
+            local eInd = scite.SendFindRez(SCI_INDICATOREND, 31, sInd)
+            return findrez:textrange(sInd, eInd)
+        end
+    end
+
     if style == SCE_SEARCHRESULT_FILE_HEADER then
         local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
         if s ~= props['FilePath'] then
@@ -554,17 +563,11 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
                     if exPath ~= '' then _,_,lHeadPath = lHeadPath:find('(.-)[^\\]+$') end
                     lHeadPath = lHeadPath..exPath
                 end
-                perfGo(lHeadPath, p)
+                perfGo(lHeadPath, p, GetFindTxt(lS, lE))
                 break
             elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                local sInd = scite.SendFindRez(SCI_INDICATOREND, 31, lS)
-                local strI
-                if lE >= sInd and sInd >= lS then
-                    local eInd = scite.SendFindRez(SCI_INDICATOREND, 31, sInd)
-                    strI = findrez:textrange(sInd, eInd)
-                end
                 local s = findrez:textrange(findrez:PositionFromLine(i) + 1, findrez:PositionFromLine(i + 1) -1)
-                perfGo(s, p)
+                perfGo(s, p, GetFindTxt(lS, lE))
                 break
             end
         end
