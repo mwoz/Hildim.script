@@ -98,7 +98,7 @@ local function FindTab_Init()
             iup.PassFocus()
         end
     end)
-    btn_search = iup.button{image = 'IMAGE_search',active='NO', action=(function() Find_onChange(txt_search) end), tip='Повторить поиск по введенному слову'}
+    btn_search = iup.button{image = 'IMAGE_search',active='NO', action=(function() Find_onChange(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
     TabBar_obj.Tabs.livesearch = {
         handle = iup.hbox{
                 iup.button{image = 'IMAGE_AlignObjectsLeft', action=(function() iup.PassFocus();do_Align() end), tip='Диалог выравнивания кода(Alt+A)'};

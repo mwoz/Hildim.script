@@ -409,11 +409,15 @@ local function FileManTab_Init()
 
 	list_dir:setcell(0, 2, "Name")
   	list_dir.click_cb = (function(h, lin, col, status)
+        local sel = 0
+        if h.marked then sel = h.marked:find('1') - 1 end
+        iup.SetAttribute(h,  'MARK'..sel..':0', 0)
+        iup.SetAttribute(h, 'MARK'..lin..':0', 1)
+        h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
             FileMan_OpenItem()
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
-            iup.SetAttribute(list_dir, 'MARK'..col..':0', 1)
             local mnu = iup.menu
             {
               iup.item{title="Change Dir",action=FileMan_ChangeDir},
@@ -425,8 +429,6 @@ local function FileManTab_Init()
               iup.item{title="Add to Favorites",action=Favorites_AddFile},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
-        iup.SetAttribute(list_dir, 'MARK'..lin..':0', 1)
-        list_dir.redraw = lin..'*'
     end)
     list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(key) end)
     iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')

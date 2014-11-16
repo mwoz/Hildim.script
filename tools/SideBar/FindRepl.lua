@@ -275,8 +275,8 @@ function ActivateFind(nTab)
 
     if _G.dialogs['findrepl'] then
     else
-        if Ctrl("zPin").valuepos == '0' then SideBar_obj.TabCtrl.valuepos = 3
-        elseif SideBar_obj.TabCtrl.valuepos ~= 3 then oDeatt.detach = 1 end
+        if Ctrl("zPin").valuepos == '0' then SideBar_obj.TabCtrl.valuepos = 0; SideBar_obj.Tabs.functions.OnSwitchFile()
+        elseif SideBar_obj.TabCtrl.valuepos ~= 0 then oDeatt.detach = 1 end
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = editor.StyleAt[editor.SelectionStart] end

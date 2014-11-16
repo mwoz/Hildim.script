@@ -239,8 +239,6 @@ function CheckChange(prop_name, withIup)
 	local cur_prop = ifnil(tonumber(props[prop_name]), 0)
 	props[prop_name] = 1 - cur_prop
     if withIup then  _G.iuprops[prop_name] = props[prop_name] end
-
-
 end
 
 -- ==============================================================
@@ -329,7 +327,7 @@ function DoForBuffers(func, ...)
     BlockEventHandler"OnUpdateUI"
     local curBuf = scite.buffers.GetCurrent()
     local maxN = scite.buffers.GetCount() - 1
-    for i = 0,maxN do
+    for i = maxN,0,-1 do
         scite.buffers.SetDocumentAt(i)
         func(i, ...)
     end
