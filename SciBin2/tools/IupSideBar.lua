@@ -28,13 +28,11 @@ local function  CreateToolBar()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\m4.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\mb.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\templates.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\sysxml.lua")
     --local tolsp2=iup.split{TabBar_obj.Tabs.m4.handle, TabBar_obj.Tabs.mb.handle, orientation="VERTICAL",minmax="300:700"}
     local tolsp1=iup.hbox{
                             TabBar_obj.Tabs.mb.handle,
                             TabBar_obj.Tabs.m4.handle,
                             TabBar_obj.Tabs.template.handle,
-                            TabBar_obj.Tabs.sysxml.handle,
                             TabBar_obj.Tabs.livesearch.handle,
                             gap='3',margin='3x0'
                         }
@@ -56,14 +54,15 @@ local function  CreateBox()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Functions.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Navigation.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
-
+    if _G.iuprops['sidebar.useatriumpane'] == '1' then dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua") end
+    props['sidebar.useatriumpane'] = _G.iuprops['sidebar.useatriumpane']
     -- Creates boxes
-    vFuncNav = iup.split{SideBar_obj.Tabs.functions.handle, SideBar_obj.Tabs.navigation.handle, orientation="HORIZONTAL", name="splitFuncNav"}
+    vFuncNav = iup.vbox{SideBar_obj.Tabs.functions.handle, SideBar_obj.Tabs.findrepl.handle}
     vFuncNav.tabtitle = "Func/Nav"
     SideBar_obj.Tabs.functions.id = vFuncNav.tabtitle
     SideBar_obj.Tabs.navigation.id = vFuncNav.tabtitle
 
-    vAbbrev = iup.split{SideBar_obj.Tabs.abbreviations.handle, SideBar_obj.Tabs.bookmark.handle, orientation="HORIZONTAL", name="splitAbbrev"}
+    vAbbrev = iup.split{SideBar_obj.Tabs.abbreviations.handle, iup.split{SideBar_obj.Tabs.bookmark.handle, SideBar_obj.Tabs.navigation.handle, orientation="HORIZONTAL", name="splitFuncNav"}, orientation="HORIZONTAL", name="splitAbbrev"}
 
     -- Sets titles of the vboxes Navigation
     vAbbrev.tabtitle = "Abbrev/Bmk"
@@ -76,9 +75,11 @@ local function  CreateBox()
     vFileMan.tabtitle = "FileMan"
     SideBar_obj.Tabs.fileman.id = vFileMan.tabtitle
 
-    vFindRepl = SideBar_obj.Tabs.findrepl.handle
-    vFindRepl.tabtitle = "Find"
-    SideBar_obj.Tabs.findrepl.id = vFindRepl.tabtitle
+    if _G.iuprops['sidebar.useatriumpane'] == '1' then
+        vFindRepl = iup.vbox{SideBar_obj.Tabs.atrium.handle}
+        vFindRepl.tabtitle = "Atrium"
+        SideBar_obj.Tabs.findrepl.id = vFindRepl.tabtitle
+    end
 
     -- Creates tabs
     local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain", tip= 'Ctrl+1,2,3'  }
