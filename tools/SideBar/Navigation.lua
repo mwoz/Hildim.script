@@ -15,6 +15,7 @@ local function OnNavigate(item)
 	local line_ = editor:LineFromPosition((editor.CurrentPos))
 
 	local _,_,fName = path_:find('([^\\]*)$')
+    fName = fName:from_utf8(1251)
 
     if tonumber(list_navigation.numlin) > 1 then
 		if path_:lower() == list_navigation:getcell(1,5):lower() and math.abs(line_ - tonumber(list_navigation:getcell(1,4) - 1)) < 1 then return end  -- то есть не вносим метки с одинаковыми позициями

@@ -46,7 +46,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         DoForBuffers(function(i)
             if i then
                 if editor.Modify and i ~= cur then
-                    msg = msg..'  '..props['FilePath']..'\n'
+                    msg = msg..'  '..props['FilePath']:from_utf8(1251)..'\n'
                     table.insert(notSaved, i)
                 end
             else

@@ -582,7 +582,7 @@ local function Functions_ListFILL()
     local tbBranches = {}
 
     tree_func.delnode0 = "CHILDREN"
-    tree_func.title0 = props['FileName']
+    tree_func.title0 = props['FileName']:from_utf8(1251)
     local rootCount = 0
 	for i, a in ipairs(table_functions) do
 		local t,f = fixname(a)

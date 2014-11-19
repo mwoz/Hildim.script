@@ -57,15 +57,15 @@ local function  CreateBox()
     if _G.iuprops['sidebar.useatriumpane'] == '1' then dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua") end
     props['sidebar.useatriumpane'] = _G.iuprops['sidebar.useatriumpane']
     -- Creates boxes
-    vFuncNav = iup.vbox{SideBar_obj.Tabs.functions.handle, SideBar_obj.Tabs.findrepl.handle}
-    vFuncNav.tabtitle = "Func/Nav"
+    vFuncNav = iup.vbox{SideBar_obj.Tabs.findrepl.handle, SideBar_obj.Tabs.functions.handle }
+    vFuncNav.tabtitle = "Func/Find"
     SideBar_obj.Tabs.functions.id = vFuncNav.tabtitle
     SideBar_obj.Tabs.navigation.id = vFuncNav.tabtitle
 
     vAbbrev = iup.split{SideBar_obj.Tabs.abbreviations.handle, iup.split{SideBar_obj.Tabs.bookmark.handle, SideBar_obj.Tabs.navigation.handle, orientation="HORIZONTAL", name="splitFuncNav"}, orientation="HORIZONTAL", name="splitAbbrev"}
 
     -- Sets titles of the vboxes Navigation
-    vAbbrev.tabtitle = "Abbrev/Bmk"
+    vAbbrev.tabtitle = "Abbrev/Bmk/Nav"
     SideBar_obj.Tabs.abbreviations.id = vAbbrev.tabtitle
 
     -- vSys = iup.vbox{SideBar_obj.Tabs.m4.handle, SideBar_obj.Tabs.mb.handle , SideBar_obj.Tabs.template.handle }
@@ -82,7 +82,7 @@ local function  CreateBox()
     end
 
     -- Creates tabs
-    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain", tip= 'Ctrl+1,2,3'  }
+    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain", tip= 'Ctrl+1,2,3,4'  }
 
     tabs.tabchange_cb = (function(_,new_tab, old_tab)
         --сначала найдем активный таб и установим его в SideBar_obj

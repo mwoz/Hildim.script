@@ -324,6 +324,7 @@ end
 ----------------------------------------------------------
 local function Abbreviations_ListFILL()
     if editor.Lexer == prevLexer then return end
+    prevLexer = editor.Lexer
 
 	iup.SetAttribute(list_abbrev, "DELLIN", "1-"..list_abbrev.numlin)
 	local abbrev_filename = props['AbbrevPath']
@@ -341,7 +342,6 @@ local function Abbreviations_ListFILL()
     bListModified = false
     list_abbrev:setcell(0, 1, 'Abbrev')
     list_abbrev.redraw = 'ALL'
-    prevLexer = editor.Lexer
 end
 
 local function Abbreviations_InsertExpansion()

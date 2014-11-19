@@ -14,7 +14,7 @@ local AD_ParamInputOutput = 3    --Indicates that the parameter represents both 
 local AD_ParamOutput = 2         --Indicates that the parameter represents an output parameter."
 local AD_ParamReturnValue = 4    --Indicates that the parameter represents a return value.
 local AD_ParamUnknown = 0        --Indicates that the parameter direction is unknown
-
+local XMLCAPT = '<?xml version="1.0" encoding="Windows-1251" standalone="yes"?>\n'
 
 local cmb_Action, chk_ign, cmb_syscust, txt_objmask, txt_datamask, list_obj, list_data, cmb_mask, btnRun
 
@@ -48,21 +48,17 @@ end
 
 local function dbCheckError(iError, msgReplay)
     if iError ~= 0 then
-        print("Get Object Info Error: "..iError)
+        print("Error: "..iError)
         return true
     end
     if msgReplay:GetPathValue("ErrorMessage") ~= nil and msgReplay:GetPathValue("ErrorMessage") ~='' then
-        print(msgReplay:GetPathValue("ErrorMessage"))
+        print("Error: "..msgReplay:GetPathValue("ErrorMessage"))
         return true
     end
 end
 
 local function OnSwitch()
-    local bEn = false
-    if props['FileExt'] == 'xml' then
-        local t_xml = xml.eval(editor:GetText())
-        if t_xml then if t_xml[0] ~= 'template' then bEn = true end end
-    end
+    local bEn = (editor.Lexer == SCLEX_XML)
     btnRun.active = Iif(bEn, 'YES', 'NO')
 end
 
@@ -72,7 +68,6 @@ end
 
 local function SetReply(handle,Opaque,iError,msgReplay)
     if dbCheckError(iError, msgReplay) then return end
-    print(msgReplay:ToString())
 end
 
 local function PutData(t_xml,strObjType)
@@ -94,7 +89,6 @@ local function PutData(t_xml,strObjType)
     dbAddProcParam(msgParams, "Object_Id"        , objId, AD_Double, AD_ParamOutput, 4)
     dbAddProcParam(msgParams, "IgnoreIdentifiers", IgnId, AD_VarChar, AD_ParamInput, 1)
     dbAddProcParam(msgParams, "IgnoreRevision"   , "Y", AD_VarChar, AD_ParamInput, 1)
-  print(msgParams:ToString())
     dbRunProc(obj..'_IUD', msgParams, SetReply, 10, nil)
 
 end
@@ -109,7 +103,6 @@ local function ApplyMetadata(t_xml)
     dbAddProcParam(msgParams, "ExecMode", 'R', AD_VarChar, AD_ParamInput, 1)
     dbAddProcParam(msgParams, "ObjectMask", iup.GetAttribute(cmb_mask, cmb_mask.value), AD_VarChar, AD_ParamInput, 3)
 
-  print(msgParams:ToString())
     dbRunProc('mpGenerateSql', msgParams, SetReply, 10, nil)
 end
 
@@ -139,7 +132,7 @@ local function SelectData()
     if not sel then return end
     sel = sel - 1
     local tbl = iup.GetAttributeId2(list_obj, '', sel, 3)
-    local nm = iup.GetAttributeId2(list_obj, '', sel, 1):gsub('.*%.(.*)', '%1')
+    local nm = iup.GetAttributeId2(list_obj, '', sel, 3):gsub('^.-([%w_]+)$', '%1')
     local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..nm.."_Code from "..tbl.." where "..nm.."_Code like ('"..txt_datamask.value.."%')"
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
@@ -178,7 +171,7 @@ local function Data_OpenNew()
     dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str())
+        editor:SetText(XMLCAPT..xml.eval(msgReplay:GetPathValue('xml')):str())
         scite.MenuCommand(1468)
     end,10,nil)
 end
@@ -191,7 +184,7 @@ local function Data_Unload()
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
         local f = io.open(strPath, "w")
-        f:write(xml.eval(msgReplay:GetPathValue('xml')):str())
+        f:write(XMLCAPT..xml.eval(msgReplay:GetPathValue('xml')):str())
         f:close()
         scite.Open(strPath)
         scite.MenuCommand(1468)
@@ -204,7 +197,7 @@ local function Metadata_OpenNew()
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(xml.eval(msgReplay:GetPathValue('Metadata')):str())
+        editor:SetText(XMLCAPT..xml.eval(msgReplay:GetPathValue('Metadata')):str())
         scite.MenuCommand(1468)
     end,10,nil)
 end
@@ -218,7 +211,7 @@ local function Metadata_Unload()
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
         local f = io.open(strPath, "w")
-        f:write(xml.eval(msgReplay:GetPathValue('Metadata')):str())
+        f:write(XMLCAPT..xml.eval(msgReplay:GetPathValue('Metadata')):str())
         f:close()
         scite.Open(strPath)
         scite.MenuCommand(1468)

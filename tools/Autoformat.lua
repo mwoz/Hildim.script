@@ -26,10 +26,14 @@ local wrdBeginIndent = {
                         {"^(%s*)For%s.+%sTo%W",2},
                         {"^(%s*)For Each%s.+%sIn%W",2},
                         {"^(%s*)Select Case%W",3},
-                        {"^(%s*)Sub%W",4},{"^(%s*)Function%W",5},
-                        {"^(%s*)Do%W%s*(%'?)(.*)$",6}, {"^(%s*)Do While%W",7}, {"^(%s*)Do Until%W",7},
+                        {"^(%s*)Sub%W",4},{"^(%s*)Private Sub%W",4},
+                        {"^(%s*)Function%W",5},{"^(%s*)Private Function%W",5},
+                        {"^(%s*)Do%W%s*(%'?)(.*)$",6},
+                        {"^(%s*)Do While%W",7}, {"^(%s*)Do Until%W",7},
                         {"^(%s*)With%W",8},
-                        {"^(%s*)While%W",9}}
+                        {"^(%s*)While%W",9},
+                        {"^(%s*)Class%W",10},
+                        {"^(%s*)Property%W",11},{"^(%s*)Private Property%W",11}}
 local wrdEndIndent   = {
                         {"^(%s*)End If%W%s*(%'?)(.*)$",1},
                         {"^(%s*)Next%W%s*(%'?)(.*)$",2},
@@ -37,7 +41,9 @@ local wrdEndIndent   = {
                         {"^(%s*)End Sub%W%s*(%'?)(.*)$",4},{"^(%s*)End Function%W%s*(%'?)(.*)$",5},
                         {"^(%s*)Loop%W%s*(%'?)(.*)$",7}, {"^(%s*)Loop While%W",6}, {"^(%s*)Loop Until%W",6},
                         {"^(%s*)End With%W%s*(%'?)(.*)$",8},
-                        {"^(%s*)Wend%W%s*(%'?)(.*)$",9}}
+                        {"^(%s*)Wend%W%s*(%'?)(.*)$",9},
+                        {"^(%s*)End Class%W%s*(%'?)(.*)$",10},
+                        {"^(%s*)End Property%W%s*(%'?)(.*)$",11}}
 local wrdMidleInent =  {
                         {"^(%s*)Else%W%s*(%'?)(.*)$",1},{"^(%s*)ElseIf%s.+%sThen%W%s*(%'?)(.*)$",1},
                         {"^(%s*)Case%W",3}}
