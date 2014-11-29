@@ -77,17 +77,15 @@ local alltags = {
 '$$$$'}
 
 
-
-function SortFormXML()
+function SortXML(tags, fld, sText)
     local tblIndex = {} --таблицу с индексами в качестве значений и именами в качестве имен полей
-	for i = 1, table.maxn(alltags) do
-		tblIndex[alltags[i]] = i
+	for i = 1, table.maxn(tags) do
+		tblIndex[tags[i]] = i
 	end
 
-    local sText = editor:GetSelText()--  props['CurrentSelection']
-    local strtempl = '<control ([^<]-)(%/?>)' --первый подшаблон - нежадный, дабы '/' по возможности попала во второй
+    local strtempl = '<('..fld..') ([^<]-)(%/?>)' --первый подшаблон - нежадный, дабы '/' по возможности попала во второй
     local wrdtempl = '([%w_]*)="([^"]*)"'
-    local strout = sText:gsub(strtempl,function(s1,s2)
+    local strout = sText:gsub(strtempl,function(s0,s1,s2)
 
             local tblTags = {}   --сложим сюда имена тегов в том порядке, в котором они лежат в ноде
             local tblMaps = {}   --смепируем значения тэгов с именами
@@ -104,7 +102,7 @@ function SortFormXML()
                     return n1 < n2
                 end
             )
-            local strOut = "<control"
+            local strOut = "<"..s0
             for j = 1,table.maxn(tblTags) do   --запишем в строку отсортированные теги
                 local o1 = tblTags[j]
                 local o2 = tblMaps[o1]
@@ -113,7 +111,11 @@ function SortFormXML()
             return strOut..s2
         end
     )
-    editor:ReplaceSel(strout)
+    return strout
+end
+
+function SortFormXML()
+    editor:ReplaceSel(SortXML(alltags, 'control', editor:GetSelText()))
 end
 
 function For2ThreeTabIndent()

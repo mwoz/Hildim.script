@@ -107,7 +107,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
 
     local txtCp = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
     local function onCmbAll(h)
-        if tAl == nil then return end
+        if tA1 == nil then return end
         txtX2.value = tA1[tonumber(h.value)][2][1]
         txtW2.value = tA1[tonumber(h.value)][2][2]
         txtCp.value = tA1[tonumber(h.value)][2][3]
@@ -293,7 +293,7 @@ end
 
 local function TryInsAbbrev()
     local curSel = editor:GetSelText()
-    pos = editor.SelectionStart
+    local pos = editor.SelectionStart
     local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)
 	for i,v in ipairs(abbr_table) do
         if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
@@ -346,7 +346,11 @@ end
 
 local function Abbreviations_InsertExpansion()
 	local expansion = iup.GetAttribute(list_abbrev, list_abbrev.focus_cell:gsub(':.*', ':2'))
-	InsertAbbreviation(expansion, 0,'')
+    local sel = editor:GetSelText()
+    editor:ReplaceSel('')
+    local pos = editor.SelectionStart
+    local dInd = (editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)):len()
+	InsertAbbreviation(expansion, dInd,sel)
     iup.PassFocus()
 end
 
