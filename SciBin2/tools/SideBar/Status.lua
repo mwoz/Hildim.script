@@ -140,7 +140,6 @@ local function GoToPos()
     local col = tonumber(txtCol.value) - 1
     local lineStart = editor:PositionFromLine(line)
     local ln = editor:PositionFromLine(line + 1) - 2 - lineStart
-    print(ln,col)
     if ln > col then
         editor:SetSel(lineStart + col, lineStart + col )
     else

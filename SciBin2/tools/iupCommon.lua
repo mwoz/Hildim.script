@@ -184,6 +184,7 @@ iup.scitedialog = function(t)
         else
             local w = (_G.iuprops['dialogs.'..t.sciteid..'.rastersize'] or ''):gsub('x%d*', '')
             if w=='' then w='300' end
+            if tonumber(w) < 10 then w = '300' end
             dlg:showxy(0,0)
             iup.ShowSideBar(tonumber(w))
         end

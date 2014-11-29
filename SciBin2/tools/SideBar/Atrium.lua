@@ -8,6 +8,13 @@ local AD_Double = 5
 local AD_DBTimeStamp = 135
 local AD_LongVarBinary = 205
 
+local alltagsmeta = {
+'name',
+'type',
+'length',
+'mandatory',
+'$$$$'}
+
 --направление для параметров процедур (по adodb::ParameterDirectionEnum)
 local AD_ParamInput = 1          --Default. Indicates that the parameter represents an input parameter.
 local AD_ParamInputOutput = 3    --Indicates that the parameter represents both an input and output parameter.
@@ -33,7 +40,7 @@ local function dbRunProc(strProc, msgParams, funCallback, timeout, opaque)
     msg:SetPathValue("sql", strProc)
     if msgParams ~= nil then msg:AttachMessage("params", msgParams) end
 
-    mblua.Request(funCallback,msg,10,msgOpaq)
+    mblua.Request(funCallback,msg,10,opaque)
     msg:Destroy()
 end
 
@@ -66,8 +73,30 @@ local function OnOpenLocal()
 
 end
 
-local function SetReply(handle,Opaque,iError,msgReplay)
+local function Data_GetSql(strProc, id)
+    if not strProc then
+        local sel = list_obj.marked:find('1') - 1
+        strProc = iup.GetAttributeId2(list_obj, '', sel, 3)..'_Get'
+    end
+    if not id then
+        local sel = list_data.marked:find('1') - 1
+        id = tonumber(iup.GetAttributeId2(list_data, '', sel, 1))
+    end
+    return "declare @XmlData tLongText\n"..
+    "exec "..strProc.." 'atrium', "..id..", @XmlData output\n"..
+    "select @XmlData as [xml]"
+end
+
+local function SetReply(handle,msgOpaque,iError,msgReplay)
     if dbCheckError(iError, msgReplay) then return end
+    print(msgReplay:ToString())
+    if msgOpaque:GetPathValue("Type", "") == 'DATA' then
+        dbRunSql(Data_GetSql(msgOpaque:GetPathValue("Proc", ""), msgReplay:GetPathValue("Object_Id", 0)), function(handle,Opaque,iError,msgR)
+            if dbCheckError(iError, msgR) then return end
+            print(msgR:ToString())
+            editor:SetText(XMLCAPT..xml.eval(msgR:GetPathValue('xml')):str())
+        end, 10, nil)
+    end
 end
 
 local function PutData(t_xml,strObjType)
@@ -82,6 +111,10 @@ local function PutData(t_xml,strObjType)
     local strXml = t_xml:str()
 
     local msgParams = mblua.CreateMessage()
+    local msgOpaq = mblua.CreateMessage()
+    msgOpaq:SetPathValue("Type"    ,'DATA')
+    msgOpaq:SetPathValue("Proc"    ,obj..'_Get')
+    msgOpaq:SetPathValue("id"    ,objId)
 
     dbAddProcParam(msgParams, "Usr", 'atrium', AD_VarChar, AD_ParamInput, 64)
     dbAddProcParam(msgParams, "Action", action, AD_VarChar, AD_ParamInput, 64)
@@ -89,7 +122,7 @@ local function PutData(t_xml,strObjType)
     dbAddProcParam(msgParams, "Object_Id"        , objId, AD_Double, AD_ParamOutput, 4)
     dbAddProcParam(msgParams, "IgnoreIdentifiers", IgnId, AD_VarChar, AD_ParamInput, 1)
     dbAddProcParam(msgParams, "IgnoreRevision"   , "Y", AD_VarChar, AD_ParamInput, 1)
-    dbRunProc(obj..'_IUD', msgParams, SetReply, 10, nil)
+    dbRunProc(obj..'_IUD', msgParams, SetReply, 10, msgOpaq)
 
 end
 
@@ -157,16 +190,6 @@ local function RunXml()
     end
 end
 
-local function Data_GetSql()
-    local sel = list_obj.marked:find('1') - 1
-    local strProc = iup.GetAttributeId2(list_obj, '', sel, 3)..'_Get'
-
-    sel = list_data.marked:find('1') - 1
-    local id = tonumber(iup.GetAttributeId2(list_data, '', sel, 1))
-    return "declare @XmlData tLongText\n"..
-    "exec "..strProc.." 'atrium', "..id..", @XmlData output\n"..
-    "select @XmlData as [xml]"
-end
 local function Data_OpenNew()
     dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
@@ -197,7 +220,7 @@ local function Metadata_OpenNew()
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(XMLCAPT..xml.eval(msgReplay:GetPathValue('Metadata')):str())
+        editor:SetText(XMLCAPT..SortXML(alltagsmeta, '%w+', xml.eval(msgReplay:GetPathValue('Metadata')):str()))
         scite.MenuCommand(1468)
     end,10,nil)
 end
@@ -211,7 +234,7 @@ local function Metadata_Unload()
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
         local f = io.open(strPath, "w")
-        f:write(XMLCAPT..xml.eval(msgReplay:GetPathValue('Metadata')):str())
+        f:write(XMLCAPT..SortXML(alltagsmeta, '%w+', xml.eval(msgReplay:GetPathValue('Metadata')):str()))
         f:close()
         scite.Open(strPath)
         scite.MenuCommand(1468)
@@ -228,6 +251,7 @@ local function FindTab_Init()
     iup.SetAttribute(cmb_mask, 1, "P")
     iup.SetAttribute(cmb_mask, 2, "S")
     iup.SetAttribute(cmb_mask, 3, "SP")
+    iup.SetAttribute(cmb_mask, 4, "SD")
     cmb_mask.value = 1
     btnRun = iup.button{image = 'IMAGE_FormRun', action=RunXml, tip='Обработка всего файла'}
 
@@ -239,6 +263,7 @@ local function FindTab_Init()
     cmb_syscust.value = 1
 
     txt_objmask = iup.text{expand='HORIZONTAL',tip='Маска метаданных'}
+    txt_objmask.k_any = (function(h,k) if k == iup.K_CR then SelectMetadata() end end)
     list_obj = iup.matrix{
     numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
@@ -266,6 +291,7 @@ local function FindTab_Init()
     end)
 
     txt_datamask = iup.text{expand='HORIZONTAL',tip='Маска кода объекта,\nвыбранного в верхнем гриде'}
+    txt_datamask.k_any = (function(h,k) if k == iup.K_CR then SelectData() end end)
     list_data = iup.matrix{
     numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",

@@ -190,7 +190,7 @@ local function InitSideBar()
     tDlg.show_cb=(function(h,state)
         if state == 0 then
 
-           iup.Refresh(h)
+           --iup.Refresh(h)
            h.size = '1x1'
         elseif state == 4 then
             for _,tbs in pairs(SideBar_obj.Tabs) do

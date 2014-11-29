@@ -99,8 +99,7 @@ form.DashboardUnsubscribe(strCube, strRow, strCell) Unsubscribes from dashboard 
 #$form=.*%.childforms(
 #$form=.*%.rootforms(
 
-controlscoll.Add ( Name, Type, FrameName )
-controlscoll.AddForm (Name, FrameName, Template, msgPropertyBag)
+controlscoll.Add (Name, Type, FrameName, [MsgProperties], [TemplateName], [PropertyBag])\nName - имя контрола (должно быть уникальным в коллекции);\nType - имя типа контрола ("TextBox", "Container" и т.д.)\nFrameName - имя фрейма, где должен быть создан контрол\nMsgProperties - опциональное сообщение, содержит свойства контрола, устанавливаемые в момент создания контрола:\nAlignment = L|R|C (на Win XP это св-во нельзя менять у существующего контрола)\nMultiline = Y|N\nTemplateName - имя шаблона. Указывается для контрола FormContainer.\nPropertyBag - указывается для контрола FormContainer в качестве PropertyBag вложенной формы.
 controlscoll.Remove ( Name )
 controlscoll.Item ( Name/Index ) - default method
 controlscoll.Count
@@ -151,6 +150,7 @@ frame.HeightPX
 frame.WidthPX read-only
 frame.GetTag()
 frame.SetTag(msgTag)
+frame.Parent Возвращает ссылку на родительскую форму.
 
 Form_OnTabClick(bVisible) Вызывается у задоченных форм, если таб на который они задочены становится \n" Активным (bVisible =True) или \n" Неактивным (bVisible =False)\n
 Form_OnMBConnect(strConnected) Message Bus connected or disconnected event.\nstrConnected: 'C'( if connected) || 'D' (if disconnected)\n
@@ -168,12 +168,12 @@ Form_Load() template has been loaded (all controls created) form is hidden
 
 Form( Name/Index ) Note: Index corresponds to addition order
 #$control=form(
-#$form=form("sub
 form.CreateForm(FormName, Template, [Replace], [Message], [bActivateTab])
 form.RaiseEvent(EventName, [Message]) call <$strFormName>_<EventName> function at parent form (if it exists) /nwith Message parameter  (Nothing by default); function is called asynchronously
 form.RaiseAsyncEvent(EventName, [Message]) call <$strFormName>_<EventName> function at parent form (if it exists) /nwith Message parameter  (Nothing by default); function is called asynchronously
 form.Invoke(Procedure, [P1], [P2], [P3], [P4], [P5]) invokes VB procedure of the form with specified parameter \n(used for forms interaction)\nProcedure: procedure name\nParameter: any parameter (including Message object)\n
 form.InvokeFunction(Procedure, [P1], [P2], [P3], [P4], [P5]) Аналог метода Invoke, только с return value
+form.InvokeAsync(Procedure, [P1], [P2], [P3], [P4], [P5]) Аналог метода Invoke, но выполняется асинхронно.
 form.MsgBox(Prompt, [Buttons], [Title], [SyncShow]) shows message box; \nButtons = VBScript constants (vbOkOnly, vbYesNo, vbCritical, vbExclamation)\nSyncShow = {true|false}; true by default (message box is modal by default, \n    else it returns vbOK immediatly and is shown asynchronously)\nreturns: vbOK, vbYes, vbNo\n
 form.MsgBoxEx(Prompt, [strBtn1], [strBtn2], [strBtn3], [Title], [DefaultBtn], [EscBtn]) Отображает модальный диалог с кастомными кнопками. Поддерживает максимально 3 кнопки. Минимально одну. Всегда модальный. Если необходим немодальный то используйте MsgBox.\n\nPrompt = Msg text\nstrBtn1-3 = Buttons text ( 2 & 3 may be empty)\nTitle = Msgbox title\nDefaultBtn = {1|2|3}; Кнопка на которую установлен фокус при открытии MsgBox(по умолчанию "1")\nEscBtn = {0|1|2|3..}; Номер кнопки возвращаемый при нажатии Esc; "0" - кнопка Esc не закрывает MsgBox(по умолчанию "0")\n\nReturns: Номер нажатой кнопки or EscBtn value {1|2|3| EscBtn}\n
 form.CalloutMsgBox(Prompt, [Buttons], [Title], [ShowPeriod]) shows callout message box; \nButtons = VBScript constants (vbCritical, vbExclamation)\nShowPeriod = number of seconds during which message box is visible \n    (-1 by default - infinite)\n
@@ -204,16 +204,31 @@ form.hwGetRecord(strCode) Returns Highway record image. If no such record – retu
 form.LicenseIsGranted(strRadiusLicenseKey)
 form.LicenseRequest(strRadiusLicenseKey)
 form.AddFramesXml(strXmlFrames, strInsertAfter) Добавляет новые фреймы на форму по их XML описанию.\nstrXmlFrames  - XML фреймов (теги <Frame> без внешнего обрамления)\nstrInsertAfter - имя фрейма, после которого будут вставлены фреймы("" - вставить последними)
+form.Parent Возвращает ссылку на родительский контрол (Container, Frame, Form). Для формы верхнего уровня возвращает Nothing.
+form.ControlProperties(strCtrlName) Устанавливает/Возвращает у контрола переданный набор свойств. Внимание некоторые свойства могут быть установлены только в момент создания контрола!
 
+#$container=form("cnt
+#$container=controlscoll%.add(.*"CONTAINER
+container.Controls	Коллекция вложенных контролов. API коллекции совпадает с Form.Controls. Отличие – параметр FrameName метода Add игнорируется.
+container.Value	Возвращает/устанавливает произвольное значение (variant).
+container.Handler	Возвращает/устанавливает имя функции – обработчика событий дочерних контролов. Прототип функции совпадает с вызовом Form_CtrlEvent.
 
 #$formctrl=form("sub
+#$formctrl=controlscoll%.add(.*"FORMCONTAINER
 formctrl.ContentName Имя вложенной формы
 formctrl.ContentTag Тег вложенной формы
 formctrl.ContentWidth Размеры вложенной формы( могут быть больше или меньше форм-контрола)
 formctrl.ContentHeight Размеры вложенной формы( могут быть больше или меньше форм-контрола)
 formctrl.ContentWidthPX Размеры вложенной формы( могут быть больше или меньше форм-контрола)
 formctrl.ContentHeightPX Размеры вложенной формы( могут быть больше или меньше форм-контрола)
-
+formctrl.GetTags	Аналог ctrl.Form.GetTags
+formctrl.Invoke	Аналог ctrl.Form.Invoke
+formctrl.InvokeFunction	Аналог ctrl.Form.InvokeFunction
+formctrl.Value	Возвращает/устанавливает произвольное значение (variant).
+formctrl.ForeReadOnlyColor	Возвращает/устанавливает ForeReadOnlyColor вложенной формы. Установка свойства генерирует во вложенной форме вызов FormControl_OnPropertySet
+formctrl.Controls	Аналог ctrl.Form.Controls
+formctrl.Frames	Аналог ctrl.Form.Frames
+formctrl.PropertyBag	Аналог ctrl.Form.PropertyBag
 
 #$message=form%.createmessage(
 #$message=.*%.createmessage
@@ -315,6 +330,8 @@ control.Move(left, top, width, height)
 control.GetTag () Возвращает ссылку на сообщение тега(Property Bag) контрола. \nЕсли тега не существовало, то он создается и возвращается пустое сообщение. \nSet msgTag = control.GetTag()\nЕсли производить манипуляции с полученным сообщением то поменяется TAG контрола, т.е. SetTag можно не иcпользовать\n
 #$message=.*%.gettag(
 control.SetTag(msgTag) Удаляет ссылку на существующий тэг (если он существовал) и устанавливает сообщение msgTag тегом (PropertyBag'ом) контрола.
+control.Parent Возвращает ссылку на родительский контрол (Container, Frame, Form). Для формы верхнего уровня возвращает Nothing.
+
 
 fnt.FontName
 fnt.FontSize
