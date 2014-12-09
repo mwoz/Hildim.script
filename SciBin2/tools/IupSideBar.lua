@@ -57,7 +57,7 @@ local function  CreateBox()
     if _G.iuprops['sidebar.useatriumpane'] == '1' then dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua") end
     props['sidebar.useatriumpane'] = _G.iuprops['sidebar.useatriumpane']
     -- Creates boxes
-    vFuncNav = iup.vbox{SideBar_obj.Tabs.findrepl.handle, SideBar_obj.Tabs.functions.handle }
+    vFuncNav = iup.vbox{SideBar_obj.Tabs.functions.handle,  SideBar_obj.Tabs.findrepl.handle}
     vFuncNav.tabtitle = "Func/Find"
     SideBar_obj.Tabs.functions.id = vFuncNav.tabtitle
     SideBar_obj.Tabs.navigation.id = vFuncNav.tabtitle

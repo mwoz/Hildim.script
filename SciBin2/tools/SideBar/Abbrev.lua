@@ -12,6 +12,10 @@ local function SetModif()
     bListModified = true
     list_abbrev:setcell(0, 1, 'Abbrev*')
     list_abbrev.redraw = 0
+    abbr_table = {}
+    for i = 1, list_abbrev.count - 1 do
+        abbr_table[#abbr_table+1] = {abbr=list_abbrev:getcell(i, 1), exp=list_abbrev:getcell(i, 2)}
+    end
 end
 
 local function EditAbbrev()

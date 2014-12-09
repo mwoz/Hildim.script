@@ -257,7 +257,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                 local lNum
                 if not _G.iuprops['findrez.groupbyfile'] then
                     if bSearchCapt then lNum = '.\\:'..(l+1)..': '
-                    else lNum = props["FilePath"]..':'..(l+1)..': ' end
+                    else lNum = props["FilePath"]:from_utf8(1251)..':'..(l+1)..': ' end
                 else
                     lNum = '\t'..(l+1)..': '
                 end
@@ -274,9 +274,9 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
             if bSearchCapt then scite.SendFindRez(SCI_REPLACESEL, '<'..strLive..'\n' ) end
             scite.SendFindRez(SCI_SETSEL,0,0)
             local strCapt = ''
-            if bSearchCapt then strCapt = strCapt..'>Search for "'..self.findWhat..'" in "'..props[Iif(_G.iuprops['findrez.groupbyfile'], "FileNameExt", "FilePath")]..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
+            if bSearchCapt then strCapt = strCapt..'>Search for "'..self.findWhat..'" in "'..props[Iif(_G.iuprops['findrez.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8(1251)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
 
-            if _G.iuprops['findrez.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]..'\n' end
+            if _G.iuprops['findrez.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]:from_utf8(1251)..'\n' end
             if bSearchCapt or wCount > 0 then  scite.SendFindRez(SCI_REPLACESEL, strCapt) end
 
             scite.SendFindRez(SCI_SETSEL,0,0)
