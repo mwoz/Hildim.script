@@ -509,6 +509,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
     local lineNum = findrez:LineFromPosition(findrez.CurrentPos)
     local function perfGo(s, p, strI)
         OnNavigation("Go")
+        s = s:to_utf8(1251)
         if s ~= props['FilePath'] then scite.Open(s) end
         if strI and strI:len() > 0 then
             editor.TargetStart = editor:PositionFromLine(p)
@@ -536,7 +537,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
     end
 
     if style == SCE_SEARCHRESULT_FILE_HEADER then
-        local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
+        local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1):to_utf8(1251)
         if s ~= props['FilePath'] then
             OnNavigation("Go")
             scite.Open(s)
@@ -550,7 +551,6 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         local _,_,p = s:find('^%s+(%d*)')
         if not p then _,_,exPath,p = s:find('^%.\\([^:]*):(%d+)') end
         if not p then _,_,lHeadPath,exPath,p = s:find('^([A-Z]:([^:]*)):(%d*)') end
-
         if not p then return end
         p = tonumber(p) - 1
         for i = lineNum, 0, -1 do

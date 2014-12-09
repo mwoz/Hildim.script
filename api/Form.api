@@ -72,6 +72,7 @@ form.Template read-only; form template name
 form.Tag any string supplied by the user (get/set)
 form.Controls collection (DEFAULT PROPERTY)\nmethods: Add ( Name, Type, FrameName ); Remove ( Name ); \nCount; Item ( Name/Index ) - default method\nNote: Index corresponds to addition order\n
 #$controlscoll=form%.controls
+#$controlscoll=container%.controls
 form.Frames Collection of form frames\nmethods: \n" Add ( Name, NameInsertAfter )\n" Remove ( Name )\n" Item (Name/Index ) - default\n" GetTags() - возвращает сообщение со вложенными ссылками на сообщения-теги всех фреймов, у которых теги заданы. Вложенные сообщения тегов имеют имена равные именам соответствующих фреймов.\nproperties:\n" Count\n
 #$framescollections=.*%.frames
 #$frame=.*%.frames(
@@ -106,6 +107,7 @@ controlscoll.Count
 
 #$control=controlscoll%.item(
 #$control=form%.controls(
+#$control=container%.controls(
 #$control=controlscoll%.add(
 #$control=controlscoll%.addform(
 #$formbox=controlscoll%.addform(
@@ -212,6 +214,7 @@ form.ControlProperties(strCtrlName) Устанавливает/Возвращает у контрола переданн
 container.Controls	Коллекция вложенных контролов. API коллекции совпадает с Form.Controls. Отличие – параметр FrameName метода Add игнорируется.
 container.Value	Возвращает/устанавливает произвольное значение (variant).
 container.Handler	Возвращает/устанавливает имя функции – обработчика событий дочерних контролов. Прототип функции совпадает с вызовом Form_CtrlEvent.
+#$control=container(
 
 #$formctrl=form("sub
 #$formctrl=controlscoll%.add(.*"FORMCONTAINER
@@ -331,7 +334,7 @@ control.GetTag () Возвращает ссылку на сообщение тега(Property Bag) контрола. \n
 #$message=.*%.gettag(
 control.SetTag(msgTag) Удаляет ссылку на существующий тэг (если он существовал) и устанавливает сообщение msgTag тегом (PropertyBag'ом) контрола.
 control.Parent Возвращает ссылку на родительский контрол (Container, Frame, Form). Для формы верхнего уровня возвращает Nothing.
-
+#$container=.*%.parent
 
 fnt.FontName
 fnt.FontSize
