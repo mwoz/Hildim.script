@@ -1,4 +1,4 @@
---local txtCol, txtSel, lblSel, txtLine
+local txtCol, txtSel, lblSel, txtLine, lblCode
 local isColor = false
 local needCoding = false
 
@@ -117,7 +117,38 @@ local function ShowCurrentColour(pos, word)
 	end
 end
 
+local function UpdateStatusCodePage(mode)
+	if mode == nil then mode = props["editor.unicode.mode"] end
+    mode = tonumber(mode)
+	if mode == IDM_ENCODING_UCS2BE then
+		return 'UTF-16 BE'
+	elseif mode == IDM_ENCODING_UCS2LE then
+		return 'UTF-16 LE'
+	elseif mode == IDM_ENCODING_UTF8 then
+		return 'UTF-8 BOM'
+	elseif mode == IDM_ENCODING_UCOOKIE then
+		return 'UTF-8'
+	else
+		if props["character.set"]=='255' then
+			return 'DOS-866'
+		elseif props["character.set"]=='204' then
+			return 'WIN-1251'
+		elseif tonumber(props["character.set"])==0 then
+			return 'CP1252'
+		elseif props["character.set"]=='238' then
+			return 'CP1250'
+		elseif props["character.set"]=='161' then
+			return 'CP1253'
+		elseif props["character.set"]=='162' then
+			return 'CP1254'
+		else
+			return '???'
+		end
+	end
+end
+
 local function OnSwitch()
+    lblCode.title = UpdateStatusCodePage()
     local t = 1000000
     if editor.Lexer ~= SCLEX_MSSQL then
         t = 200
@@ -158,6 +189,7 @@ local function FindTab_Init()
     txtLine = iup.text{size='25x'; mask='[0-9]*', tip=sTip,
              k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
     txtSel = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR'), canfocus  = "NO"}
+    lblCode = iup.label{size='50x'}
     lblSel = iup.text{size = '200x0'; readonly='YES',canfocus="NO", bgcolor=iup.GetGlobal('DLGBGCOLOR'),
         tip='Число вхождений выделенного слова',
         tips_cb=(function(h,x,y)
@@ -207,13 +239,21 @@ local function FindTab_Init()
             txtSel;
             lblSel;
             zbox_s;
-            expand='HORIZONTAL', minsize='200x', alignment='ACENTER',gap='8',margin='3x0'
+            expand='HORIZONTAL', minsize='200x', alignment='ACENTER',gap='8',margin='3x0' ,
+            lblCode,
         };
         OnUpdateUI = _OnUpdateUI;
         OnDwellStart = ShowCurrentColour;
         OnOpen=OnSwitch;
         OnSwitchFile=OnSwitch;
-        OnMenuCommand=(function(cmd, source) if cmd == IDM_GOTO then iup.SetFocus(txtLine) return true end end);
+        OnMenuCommand=(function(cmd, source)
+            if cmd == IDM_GOTO then
+                iup.SetFocus(txtLine)
+                return true
+            elseif cmd >= 150 and cmd <= 154 then
+                lblCode.title = UpdateStatusCodePage(cmd)
+            end
+        end);
         SetFindRes = (function(what,count)
                             if count > 0 then
                                 if needCoding then what = what:from_utf8(1251) end
