@@ -231,18 +231,21 @@ function s:replaceOne()
     end)
 end
 
-function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
-    if bColapsPrev then
-        scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
-        for line = 0, findrez.LineCount do
-            local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
-            if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-                scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
-                local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
-                if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
-            end
+function s:CollapseFindRez()
+    scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
+    for line = 0, findrez.LineCount do
+        local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
+        if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
+            scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
+            local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
+            if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
         end
     end
+end
+
+function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
+    if bColapsPrev and bSearchCapt then self:CollapseFindRez() end
+
     local strLive = Iif(bLive, "/\\", "")
     local needCoding = (self.e.CodePage ~= 0)
     scite.SendFindRez(SCI_SETSEL,0,0)
@@ -268,7 +271,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                 local str = self.e:GetLine(l):gsub('^[ \t]+', '')
                 if needCoding then str = str:from_utf8(1251) end
                 scite.SendFindRez(SCI_REPLACESEL, lNum..str )
-            end
+             end
             return lenTarget, true
         else
             if bSearchCapt then scite.SendFindRez(SCI_REPLACESEL, '<'..strLive..'\n' ) end
@@ -430,6 +433,7 @@ function s:FindInBufer()
     local cnt, lin, fil = 0, 0, 0
     scite.SendFindRez(SCI_SETSEL,0,0)
     scite.SendFindRez(SCI_REPLACESEL, '<\n')
+    scite.SendFindRez(SCI_SETSEL,0,0)
     return (function(nBuff, maxlines)
         local bCollapse = true
         local bSetEnding = false

@@ -10,7 +10,7 @@ local memo_path
 local list_dir
 local split_s
 local bymemokey=0
-
+local sort_by_tyme = _G.iuprops['sidebar.fileman.timesort']
 
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
@@ -54,14 +54,15 @@ function FileMan_ListFILL()
 	table.sort(table_folders, function(a, b) return a:lower() < b:lower() end)
     local name = file_mask..'*'
 
-	local files = gui.files(current_path..name)
+	local files = gui.files(current_path..name,false,true)
 	local table_files = {}
 	if files then
+        if sort_by_tyme then table.sort(files, function(a, b) return a[2] > b[2] end) end
 		for i, filename in ipairs(files) do
-			table_files[i] = filename:from_utf8(1251)
+			table_files[i] = filename[1]:from_utf8(1251)
 		end
 	end
-	table.sort(table_files, function(a, b) return a:lower() < b:lower() end)
+	if not sort_by_tyme then table.sort(table_files, function(a, b) return a:lower() < b:lower() end) end
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_folders + #table_files + 1))
@@ -84,6 +85,12 @@ function FileMan_ListFILL()
 	list_dir.focus_cell = "1:1"
     iup.SetAttribute(list_dir, 'MARK1:0', 1)
     list_dir.redraw = "ALL"
+end
+
+local function FileMan_ToggleSort()
+    sort_by_tyme = not sort_by_tyme
+    _G.iuprops['sidebar.fileman.timesort'] = sort_by_tyme
+    FileMan_ListFILL()
 end
 
 function FileMan_ListFillDir(strPath)
@@ -427,6 +434,7 @@ local function FileManTab_Init()
               iup.item{title="Exec with Params",action=FileMan_FileExecWithParams},
               iup.separator{},
               iup.item{title="Add to Favorites",action=Favorites_AddFile},
+              iup.item{title="Sort By Time",value=Iif(sort_by_tyme, "ON", "OFF"),action=FileMan_ToggleSort},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)

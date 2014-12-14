@@ -171,6 +171,7 @@ end
 
 local function FindInBuffers()
     ReadSettings()
+    findSettings:CollapseFindRez()
     local count = DoForBuffers(findSettings:FindInBufer(), 100)
     SetInfo('Всего найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
