@@ -261,7 +261,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
             end
             return 'captionwidth="'..txtCp.value..'"'
         end) end
-        if txtCp.value then
+        if tonumber(txtCp.value) == 0 then
             s = s:gsub('caption=".-"', ''):gsub('caption_ru=".-"', '')
         end
         if bDdx then
