@@ -11,26 +11,26 @@ elseif=ElseIf | Then
 sub=Sub |()\r\nEnd Sub\r\n
 fun=Function |()\r\nEnd Function\r\n
 rep=Sub |_reply(handle, code, error, m)\n\tIf CHECK_DB_ERROR(error, m, Null, True, True, Null) = False Then Exit Sub\nEnd Sub
-mb=Form.MsgBox "|"
+msb=Form.MsgBox "|"
 'l='#DEBUG Form.SysLog |,true
 'p='#DEBUG dbg____Publish m, "|"
 /d=<control name="btn%SEL%1" type="link" position="10;0;70;11" caption="%SEL%:" caption_ru="%SEL%:" tabstop="N"  forecolor="0000ff" hforecolor="ff0000"/>\r\n<control name="txt%SEL%_ShortName" type="textbox" position="80;0;90;11" maxlength="32"  font=";;Y" case="U" tag="ddx_Enabled=Y"/>\r\n<control name="txt%SEL%_Name" type="textbox" position="174;0;192;11" forecolor="#000000"   tag="ddx_Enabled=Y"/>\r\n<control name="btn%SEL%2" type="button" caption="" enabled="Y" position="369;0;11;11"/>\r\n<control name="btn%SEL%Info" type="link" position="380;0;26;11" alignment="R" caption="Info" tabstop="N"  forecolor="0000ff" hforecolor="ff0000"/>
 /f=<frame name="frm|" backcolor="#ffffff" height="12">\r\r\n</frame>
 /ft=<frame name="frmTab" backcolor="#ffffff" height="24" ><control name="tabCtrl" type="tabctrl" position="5;4;100;20" padleft="5" padright="5"/>\r\r\n</frame>
 /fc=<frame name="grid" height="120" backcolor="#ffffff"><control type="groupbox" position="5;0;484;115" caption="Dividends"/>\r\n<control name="grid" type="cube" position="10;12;474;96" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/></frame>
-/num=<control name="num|" caption="" position="10;0;180;11" captionwidth="90" type="numberbox" tag="ddx_Enabled=Y"/>‹FMCTL›
-/txt=<control name="txt|" caption="" position="10;0;180;11" captionwidth="90" type="textbox" tag="ddx_Enabled=Y"/>‹FMCTL›
-/lbl=<control caption="|" caption_ru="" position="10;0;70;11" type="label"/>‹FMCTL›
-/cmb=<control name="cmb|" caption="" position="10;0;180;11" captionwidth="90" type="combobox" tag="ddx_Enabled=Y">\n\t<option code="" caption=""/>\n</control>‹FMCTL›
+/num=<control name="num%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="numberbox" tag="ddx_Enabled=Y"/>‹FMCTL›
+/txt=<control name="txt%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="textbox" tag="ddx_Enabled=Y"/>‹FMCTL›
+/lbl=<control caption="%SEL%|" caption_ru="%SEL%" position="10;0;70;11" type="label"/>‹FMCTL›
+/cmb=<control name="cmb%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="combobox" tag="ddx_Enabled=Y">\n\t<option code="" caption=""/>\n</control>‹FMCTL›
 /cub=<control name="grid" position="10;12;474;96" type="cube" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/>‹FMCTL›
-/dt=<control name="dt|" caption="" position="10;0;180;11" captionwidth="90" type="datebox" tag="ddx_Enabled=Y"/>‹FMCTL›
-/tm=<control name="tm|" caption="" position="10;0;180;11" captionwidth="90" type="timebox"/>‹FMCTL›
+/dt=<control name="dt%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="datebox" tag="ddx_Enabled=Y"/>‹FMCTL›
+/tm=<control name="tm%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="timebox"/>‹FMCTL›
 /grp=<control type="groupbox" caption="|" position=""/>‹FMCTL›
-/lnk=<control name="|"  caption="" position="10;0;70;10" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>‹FMCTL›
-/btn=<control name="btn|" caption="" position="10;0;70;11"  type="button"/>‹FMCTL›
-/chk=<control name="chk|" caption="" position="10;0;70;11" type="checkbox" tag="ddx_Enabled=Y"/>‹FMCTL›
-/sub=<control name="sub|" template="" position="0;0;0;0"  type="form"  tag="ddx_Enabled=Y">\n</control>‹FMCTL›
-/cnt=<control name="cnt|" position="0;0;0;0"  type="container"  tag="ddx_Enabled=Y">\n</control>‹FMCTL›
+/lnk=<control name="|%SEL%"  caption="%SEL%" position="10;0;70;10" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>‹FMCTL›
+/btn=<control name="btn%SEL%|" caption="%SEL%" position="10;0;70;11"  type="button"/>‹FMCTL›
+/chk=<control name="chk%SEL%|" caption="%SEL%" position="10;0;70;11" type="checkbox" tag="ddx_Enabled=Y"/>‹FMCTL›
+/sub=<control name="sub%SEL%|" template="" position="0;0;0;0"  type="form"  tag="ddx_Enabled=Y">\n</control>‹FMCTL›
+/cnt=<control name="cnt|%SEL%" position="0;0;0;0"  type="container"  tag="ddx_Enabled=Y">\n</control>‹FMCTL›
 /st=<stringtable>\n</stringtable>
 /s1=<string id="%SEL%">\n\t<value lang="en" text="%SEL%"/>\n\t<value lang="ru" text="|"/>\n</string>
 /ssql=<string id="SQL_|"><value><![CDATA[--]\n]]></value></string>

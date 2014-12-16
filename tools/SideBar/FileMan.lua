@@ -11,7 +11,7 @@ local list_dir
 local split_s
 local bymemokey=0
 local sort_by_tyme = _G.iuprops['sidebar.fileman.timesort']
-
+local chkByTime
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
 	local i, j = 1
@@ -434,7 +434,6 @@ local function FileManTab_Init()
               iup.item{title="Exec with Params",action=FileMan_FileExecWithParams},
               iup.separator{},
               iup.item{title="Add to Favorites",action=Favorites_AddFile},
-              iup.item{title="Sort By Time",value=Iif(sort_by_tyme, "ON", "OFF"),action=FileMan_ToggleSort},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
@@ -493,6 +492,7 @@ local function FileManTab_Init()
     memo_mask.k_any=(function(h,k)
         return memoNav(k)
     end)
+    chkByTime = iup.toggle{title="Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"),action=FileMan_ToggleSort}
     -- memo_mask.killfocus_cb = (function(h)
         -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)
@@ -500,7 +500,7 @@ local function FileManTab_Init()
     SideBar_obj.Tabs.fileman =  {
         handle = iup.vbox{
                    iup.hbox{iup.label{title = "Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
-                   iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,expand="HORIZONTAL", alignment="ACENTER"},
+                   iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"},
                    split_s
                  };
         OnSwitchFile = function()OnSwitch(false,true) end;
