@@ -76,17 +76,23 @@ local alltags = {
 'tag',
 '$$$$'}
 
+local alltagsmeta = {
+'name',
+'type',
+'length',
+'mandatory',
+'$$$$'}
+
+require("LuaXml")
 
 function SortXML(tags, fld, sText)
     local tblIndex = {} --таблицу с индексами в качестве значений и именами в качестве имен полей
 	for i = 1, table.maxn(tags) do
 		tblIndex[tags[i]] = i
 	end
-
     local strtempl = '<('..fld..') ([^<]-)(%/?>)' --первый подшаблон - нежадный, дабы '/' по возможности попала во второй
     local wrdtempl = '([%w_]*)="([^"]*)"'
     local strout = sText:gsub(strtempl,function(s0,s1,s2)
-
             local tblTags = {}   --сложим сюда имена тегов в том порядке, в котором они лежат в ноде
             local tblMaps = {}   --смепируем значения тэгов с именами
             s1:gsub(wrdtempl,function(w1,w2)
@@ -115,7 +121,18 @@ function SortXML(tags, fld, sText)
 end
 
 function SortFormXML()
-    editor:ReplaceSel(SortXML(alltags, 'control', editor:GetSelText()))
+    local tbl
+    local t_xml = xml.eval(editor:GetText())
+    if t_xml then
+        local strObjType = t_xml[0]
+        if strObjType == "Template" then
+            editor:ReplaceSel(SortXML(alltagsmeta, 'Field', editor:GetSelText()))
+            editor:ReplaceSel(SortXML(alltagsmeta, 'Table', editor:GetSelText()))
+        else
+            editor:ReplaceSel(SortXML(alltags, 'control', editor:GetSelText()))
+        end
+    end
+
 end
 
 function For2ThreeTabIndent()

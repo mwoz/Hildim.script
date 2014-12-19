@@ -8,13 +8,6 @@ local AD_Double = 5
 local AD_DBTimeStamp = 135
 local AD_LongVarBinary = 205
 
-local alltagsmeta = {
-'name',
-'type',
-'length',
-'mandatory',
-'$$$$'}
-
 --направление для параметров процедур (по adodb::ParameterDirectionEnum)
 local AD_ParamInput = 1          --Default. Indicates that the parameter represents an input parameter.
 local AD_ParamInputOutput = 3    --Indicates that the parameter represents both an input and output parameter.
@@ -126,9 +119,7 @@ local function PutData(t_xml,strObjType)
 
 end
 
-local function ApplyMetadata(t_xml)
-
-    local strXml = t_xml:str()
+local function ApplyMetadata(strXml)
 
     local msgParams = mblua.CreateMessage()
 
@@ -141,7 +132,7 @@ end
 
 local function SelectMetadata()
     --"select __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1\n"..
-   local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, ObjectType_Code,ObjectType_Name,TableName from ObjectType where ObjectType_Code like ('"..iup.GetAttribute(cmb_syscust, cmb_syscust.value).."."..txt_objmask.value.."%')"
+   local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, ObjectType_Code,ObjectType_Name,TableName from ObjectType where ObjectType_Code like ('"..iup.GetAttribute(cmb_syscust, cmb_syscust.value).."."..txt_objmask.value.."%')  order by ObjectType_Code"
 
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
@@ -166,7 +157,7 @@ local function SelectData()
     sel = sel - 1
     local tbl = iup.GetAttributeId2(list_obj, '', sel, 3)
     local nm = iup.GetAttributeId2(list_obj, '', sel, 3):gsub('^.-([%w_]+)$', '%1')
-    local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..nm.."_Code from "..tbl.." where "..nm.."_Code like ('"..txt_datamask.value.."%')"
+    local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..nm.."_Code from "..tbl.." where "..nm.."_Code like ('"..txt_datamask.value.."%') order by "..nm.."_Code"
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         local _, mc = msgReplay:Counts()
@@ -184,7 +175,7 @@ local function RunXml()
     local t_xml = xml.eval(editor:GetText())
     local strObjType = t_xml[0]
     if strObjType == 'Template' then
-        ApplyMetadata(t_xml)
+        ApplyMetadata(editor:GetText())
     else
         PutData(t_xml,strObjType)
     end
@@ -220,7 +211,7 @@ local function Metadata_OpenNew()
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(XMLCAPT..SortXML(alltagsmeta, '%w+', xml.eval(msgReplay:GetPathValue('Metadata')):str()))
+        editor:SetText(msgReplay:GetPathValue('Metadata'))
         scite.MenuCommand(1468)
     end,10,nil)
 end
@@ -234,7 +225,7 @@ local function Metadata_Unload()
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
         local f = io.open(strPath, "w")
-        f:write(XMLCAPT..SortXML(alltagsmeta, '%w+', xml.eval(msgReplay:GetPathValue('Metadata')):str()))
+        f:write(msgReplay:GetPathValue('Metadata'))
         f:close()
         scite.Open(strPath)
         scite.MenuCommand(1468)
@@ -252,6 +243,7 @@ local function FindTab_Init()
     iup.SetAttribute(cmb_mask, 2, "S")
     iup.SetAttribute(cmb_mask, 3, "SP")
     iup.SetAttribute(cmb_mask, 4, "SD")
+    iup.SetAttribute(cmb_mask, 5, "SDP")
     cmb_mask.value = 1
     btnRun = iup.button{image = 'IMAGE_FormRun', action=RunXml, tip='Обработка всего файла'}
 
