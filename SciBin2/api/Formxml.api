@@ -142,6 +142,8 @@ checklistbox.tag
 
 colorpicker.style
 
+container.handler
+
 grid.title
 grid.style "hline;vline;openlevel;striped;oddrowcolor;evenrowcolor"\nfor example: "n,y,3,y,#ffffff,#dddddd"
 
