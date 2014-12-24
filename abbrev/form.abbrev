@@ -30,7 +30,7 @@ msb=Form.MsgBox "|"
 /btn=<control name="btn%SEL%|" caption="%SEL%" position="10;0;70;11"  type="button"/>‹FMCTL›
 /chk=<control name="chk%SEL%|" caption="%SEL%" position="10;0;70;11" type="checkbox" tag="ddx_Enabled=Y"/>‹FMCTL›
 /sub=<control name="sub%SEL%|" template="" position="0;0;0;0"  type="form"  tag="ddx_Enabled=Y">\n</control>‹FMCTL›
-/cnt=<control name="cnt|%SEL%" position="0;0;0;0"  type="container"  tag="ddx_Enabled=Y">\n</control>‹FMCTL›
+/ref=<control name="cnt%SEL%" position="10;0;380;11"  type="container" tag="ddx_MetaBind=Y;ddx_ContainerType=Ref"  >\n    <control name="btn1" caption="%SEL%:"  position="0;0;90;10" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>\n    <control name="Code"  position="90;0;80;11"  type="textbox" />\n    <control name="Name"  position="173;0;205;11"  type="textbox" />\n</control>\n
 /st=<stringtable>\n</stringtable>
 /s1=<string id="%SEL%">\n\t<value lang="en" text="%SEL%"/>\n\t<value lang="ru" text="|"/>\n</string>
 /ssql=<string id="SQL_|"><value><![CDATA[--]\n]]></value></string>

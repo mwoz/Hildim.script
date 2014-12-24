@@ -211,6 +211,8 @@ form.ControlProperties(strCtrlName) Устанавливает/Возвращает у контрола переданн
 
 #$container=form("cnt
 #$container=controlscoll%.add(.*"CONTAINER
+#$control=form("cnt
+#$control=controlscoll%.add(.*"CONTAINER
 container.Controls	Коллекция вложенных контролов. API коллекции совпадает с Form.Controls. Отличие – параметр FrameName метода Add игнорируется.
 container.Value	Возвращает/устанавливает произвольное значение (variant).
 container.Handler	Возвращает/устанавливает имя функции – обработчика событий дочерних контролов. Прототип функции совпадает с вызовом Form_CtrlEvent.

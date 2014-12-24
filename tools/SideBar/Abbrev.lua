@@ -112,6 +112,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     local txtCp = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
     local function onCmbAll(h)
         if tA1 == nil then return end
+        if #tA1 == 0 then return end
         txtX2.value = tA1[tonumber(h.value)][2][1]
         txtW2.value = tA1[tonumber(h.value)][2][2]
         txtCp.value = tA1[tonumber(h.value)][2][3]
@@ -123,8 +124,10 @@ local function frmControlPos(findSt, findEnd, s, dInd)
         end
     txtX2.action = onTxtX2
     local bDdx = s:find('tag="ddx_Enabled=Y"')
-    local chkDdx = iup.toggle{title='Ddx Enabled', active=Iif(bDdx, 'YES', 'NO'), value=Iif(bDdx, _G.iuprops['abbrev.ctrldlg.ddx'] or 'NO', 'NO')}
-
+    local cmbDdx = iup.list{dropdown="YES",visible_items="5",active=Iif(bDdx, 'YES', 'NO'), value=Iif(bDdx, _G.iuprops['abbrev.ctrldlg.ddx'] or 0, 0)}
+    iup.SetAttribute(cmbDdx, 1, '')
+    iup.SetAttribute(cmbDdx, 2, 'ddx_Enabled')
+    iup.SetAttribute(cmbDdx, 3, 'ddx_MetaBind')
     --найдем в тексте все контролы и извлечем из них все горизонтальные координаты - для выбора
     local b,e = 0,-1
     local body
@@ -223,7 +226,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     iup.SetHandle("CREATE_BTN_CLEAR",btn_clear)
 
     local vbox = iup.vbox{
-        iup.hbox{iup.label{size='60x0'},cmbAll,iup.fill{}, chkDdx,gap=20};
+        iup.hbox{iup.label{size='60x0'},cmbAll,iup.fill{}, cmbDdx,gap=20};
         iup.hbox{gap=20, alignment='ACENTER',
             iup.label{title="Left",size='60x0'},
             iup.label{title="Top",size='60x0'},
@@ -265,8 +268,9 @@ local function frmControlPos(findSt, findEnd, s, dInd)
             s = s:gsub('caption=".-"', ''):gsub('caption_ru=".-"', '')
         end
         if bDdx then
-            if chkDdx.value == 'OFF' then s = s:gsub('tag="ddx_Enabled=Y"', '') end
-            _G.iuprops['abbrev.ctrldlg.ddx'] = chkDdx.value
+            if cmbDdx.value == '1' then s = s:gsub('tag="ddx_Enabled=Y"', '') end
+            if cmbDdx.value == '3' then s = s:gsub('"ddx_Enabled=', '"ddx_MetaBind=') end
+            _G.iuprops['abbrev.ctrldlg.ddx'] = cmbDdx.value
         end
 
         replAbbr(findSt, findEnd, s, dInd)
