@@ -437,7 +437,6 @@ do
 		tb = tb*I*SC^0--*partb
 		tr = tr*I*SC^1*AnyCase"on"*SC^1*I --"параметр" триггера - идентификатор после I
 		local def = Ct(( pr + vi + tb + tr+ fn))
-
 		-- resulting pattern, which does the work
 		local patt = (def + IGNORED^1 + IDENTIFIER + 1)^0 * EOF
 

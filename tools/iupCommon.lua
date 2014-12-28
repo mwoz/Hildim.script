@@ -66,13 +66,19 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             end
         end
         if cmd == IDM_QUIT then ClearAllEventHandler() end
+        local nf,spathes = false,''
         DoForBuffers(function(i)
             if i and i ~= cur then
                 scite.SendEditor(SCI_SETSAVEPOINT)
+                if props['FilePath'] ~= '' then
+                    spathes = spathes..'Х'..props['FilePath']:from_utf8(1251)
+                    nf = true
+                end
                 scite.MenuCommand(IDM_CLOSE)
             end
         end)
-        if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup()
+        if nf and cmd == IDM_QUIT then _G.iuprops['buffers'] = spathes end
+        if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
         else return true end
     elseif cmd == 9117 then  --перезагрузка скрипта
         iup.DestroyDialogs();SaveIup()

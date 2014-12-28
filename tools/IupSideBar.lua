@@ -370,6 +370,13 @@ InitStatusBar()
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == 3 then  --Показ отдельным окном развязываем через пост, иначе плохо иконки показывает
+            props['session.reload'] = _G.iuprops['session.reload']
+            if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
+                for f in _G.iuprops['buffers']:gmatch('[^•]+') do
+                    scite.Open(f)
+                    _G.iuprops['buffers'] = nil
+                end
+            end
             if SideBar_obj.win then oDeatt.detach = 1 end
         end
     end

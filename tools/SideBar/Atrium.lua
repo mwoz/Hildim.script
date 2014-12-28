@@ -33,7 +33,7 @@ local function dbRunProc(strProc, msgParams, funCallback, timeout, opaque)
     msg:SetPathValue("sql", strProc)
     if msgParams ~= nil then msg:AttachMessage("params", msgParams) end
 
-    mblua.Request(funCallback,msg,10,opaque)
+    mblua.Request(funCallback,msg,timeout,opaque)
     msg:Destroy()
 end
 
@@ -88,7 +88,7 @@ local function SetReply(handle,msgOpaque,iError,msgReplay)
             if dbCheckError(iError, msgR) then return end
             print(msgR:ToString())
             editor:SetText(XMLCAPT..xml.eval(msgR:GetPathValue('xml')):str())
-        end, 10, nil)
+        end, 20, nil)
     end
 end
 
@@ -115,24 +115,25 @@ local function PutData(t_xml,strObjType)
     dbAddProcParam(msgParams, "Object_Id"        , objId, AD_Double, AD_ParamOutput, 4)
     dbAddProcParam(msgParams, "IgnoreIdentifiers", IgnId, AD_VarChar, AD_ParamInput, 1)
     dbAddProcParam(msgParams, "IgnoreRevision"   , "Y", AD_VarChar, AD_ParamInput, 1)
-    dbRunProc(obj..'_IUD', msgParams, SetReply, 10, msgOpaq)
+    dbRunProc(obj..'_IUD', msgParams, SetReply, 20, msgOpaq)
 
 end
 
 local function ApplyMetadata(strXml)
-
     local msgParams = mblua.CreateMessage()
 
     dbAddProcParam(msgParams, "Metadata"          , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
     dbAddProcParam(msgParams, "ExecMode", 'R', AD_VarChar, AD_ParamInput, 1)
     dbAddProcParam(msgParams, "ObjectMask", iup.GetAttribute(cmb_mask, cmb_mask.value), AD_VarChar, AD_ParamInput, 3)
 
-    dbRunProc('mpGenerateSql', msgParams, SetReply, 10, nil)
+    dbRunProc('mpGenerateSql', msgParams, SetReply, 20, nil)
 end
 
 local function SelectMetadata()
     --"select __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1\n"..
-   local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, ObjectType_Code,ObjectType_Name,TableName from ObjectType where ObjectType_Code like ('"..iup.GetAttribute(cmb_syscust, cmb_syscust.value).."."..txt_objmask.value.."%')  order by ObjectType_Code"
+   local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, ObjectType_Code,ObjectType_Name,TableName, "..
+   "convert(xml, Metadata).value('(/Template/DataModel/Tables/Table/Fields/Field[@type=''ObjectCode'']/@name)[1]', 'nvarchar(max)') as [CodeField]"..
+   " from ObjectType where ObjectType_Code like ('"..iup.GetAttribute(cmb_syscust, cmb_syscust.value).."."..txt_objmask.value.."%')  order by ObjectType_Code"
 
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
@@ -143,6 +144,7 @@ local function SelectMetadata()
             list_obj:setcell(i + 1, 1, msgReplay:Message(i):GetPathValue('ObjectType_Code'))
             list_obj:setcell(i + 1, 2, msgReplay:Message(i):GetPathValue('ObjectType_Name'))
             list_obj:setcell(i + 1, 3, msgReplay:Message(i):GetPathValue('TableName'))
+            list_obj:setcell(i + 1, 4, msgReplay:Message(i):GetPathValue('CodeField'))
         end
         --print(msgReplay:ToString())
         --msgReplay:Destroy()
@@ -157,7 +159,14 @@ local function SelectData()
     sel = sel - 1
     local tbl = iup.GetAttributeId2(list_obj, '', sel, 3)
     local nm = iup.GetAttributeId2(list_obj, '', sel, 3):gsub('^.-([%w_]+)$', '%1')
-    local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..nm.."_Code from "..tbl.." where "..nm.."_Code like ('"..txt_datamask.value.."%') order by "..nm.."_Code"
+    local cd = iup.GetAttributeId2(list_obj, '', sel, 4)
+    local sql
+    if cd == nil then
+        sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id from "..tbl
+        if tonumber(txt_datamask.value) ~= nil then sql =  sql.." where "..nm.."_Id >= "..tonumber(txt_datamask.value).." order by "..nm.."_Id" end
+    else
+        sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..cd.." from "..tbl.." where "..cd.." like ('"..txt_datamask.value.."%') order by "..cd
+    end
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         local _, mc = msgReplay:Counts()
@@ -168,14 +177,14 @@ local function SelectData()
             list_data:setcell(i + 1, 2, msgReplay:Message(i):GetPathValue(nm..'_Code'))
         end
         list_data.redraw = "ALL"
-    end,10,nil)
+    end,20,nil)
 end
 
 local function RunXml()
-    local t_xml = xml.eval(editor:GetText())
+    local t_xml = xml.eval(editor:GetText():gsub('^<\?.->\r?\n?',''))
     local strObjType = t_xml[0]
     if strObjType == 'Template' then
-        ApplyMetadata(editor:GetText())
+        ApplyMetadata(editor:GetText():gsub('^<\?.->\r?\n?',''))
     else
         PutData(t_xml,strObjType)
     end
@@ -187,7 +196,7 @@ local function Data_OpenNew()
         scite.MenuCommand(IDM_NEW)
         editor:SetText(XMLCAPT..xml.eval(msgReplay:GetPathValue('xml')):str())
         scite.MenuCommand(1468)
-    end,10,nil)
+    end,20,nil)
 end
 
 local function Data_Unload()
@@ -202,7 +211,7 @@ local function Data_Unload()
         f:close()
         scite.Open(strPath)
         scite.MenuCommand(1468)
-    end,10,nil)
+    end,20,nil)
 end
 
 local function Metadata_OpenNew()
@@ -211,9 +220,9 @@ local function Metadata_OpenNew()
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(msgReplay:GetPathValue('Metadata'))
+        editor:SetText(XMLCAPT..msgReplay:GetPathValue('Metadata'))
         scite.MenuCommand(1468)
-    end,10,nil)
+    end,20,nil)
 end
 
 local function Metadata_Unload()
@@ -221,6 +230,7 @@ local function Metadata_Unload()
     iup.GetAttributeId2(list_obj, '', sel, 1)
     local strName = iup.GetAttributeId2(list_obj, '', sel, 1)
     local sql =  "select  Metadata from ObjectType where ObjectType_Code = '"..strName.."'"
+
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
@@ -229,7 +239,7 @@ local function Metadata_Unload()
         f:close()
         scite.Open(strPath)
         scite.MenuCommand(1468)
-    end,10,nil)
+    end,20,nil)
 end
 
 local function FindTab_Init()
@@ -257,9 +267,9 @@ local function FindTab_Init()
     txt_objmask = iup.text{expand='HORIZONTAL',tip='Маска метаданных'}
     txt_objmask.k_any = (function(h,k) if k == iup.K_CR then SelectMetadata() end end)
     list_obj = iup.matrix{
-    numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=4, numcol_visible=4,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 150 ,rasterwidth2 = 150 ,rasterwidth3= 150}
+    width0 = 0 ,rasterwidth1 = 150 ,rasterwidth2 = 150 ,rasterwidth3= 150,rasterwidth4= 15}
   	list_obj:setcell(0, 1, "Code")
   	list_obj:setcell(0, 2, "Name")
   	list_obj:setcell(0, 3, "Table")

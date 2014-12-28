@@ -304,6 +304,14 @@ local function FindNextBack(bUp)
     return true
 end
 
+local function PassOrClose()
+    if _G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1' then
+        PostAction()
+    else
+        iup.PassFocus()
+    end
+end
+
 
 --создание диалога
 
@@ -344,7 +352,7 @@ local function create_dialog_FindReplace()
       dropdown = "YES",
       visible_items = "18",
       edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then return -1 end end),
-      k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then iup.PassFocus() end; end),
+      k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],
     margin = "0x00",
@@ -754,7 +762,7 @@ local function FuncBmkTab_Init()
     oDeatt = iup.detachbox{
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";
-        k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then iup.PassFocus() end end),
+        k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
         detached_cb=(function(h, hNew, x, y)
             hNew.resize ="YES"
             hNew.shrink ="YES"

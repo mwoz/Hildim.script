@@ -171,11 +171,11 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     end)
 
     --заполним списки комбобоксов
-    local l = 0
+    local l = 1
     for i, s in pairs(tX1) do if tonumber(s) > 0 then iup.SetAttribute(txtX2, l, s);l=l+1 end end
-    l = 0
+    l = 1
     for i, s in pairs(tW1) do if tonumber(s) > 0 then iup.SetAttribute(txtW2, l, s);l=l+1 end end
-    l = 0
+    l = 1
     for i, s in pairs(tCpt1) do if tonumber(s) > 0 then iup.SetAttribute(txtCp, l, s);l=l+1 end end
     for i, s in pairs(tA1) do iup.SetAttribute(cmbAll, i, s[1]) end
     txtX2.value=1;txtW2.value=1;txtCp.value=1;cmbAll.value=1
@@ -254,7 +254,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
 
     function btn_ok:action()
 
-        s = s:gsub('position="%d+;%d+;%d+;%d+"', 'position="'..txtX2.value..';'..txtY2.value..';'..txtW2.value..';'..txtH2.value ..'"'):gsub('ЛFMCTLЫ', '')
+        s = s:gsub('position="%d+;%d+;%d+;%d+"', 'position="'..txtX2.value..';'..txtY2.value..';'..txtW2.value..';'..txtH2.value ..'"', 1):gsub('ЛFMCTLЫ', '')
         local bNoCapt = false
         if txtCp.active=='YES' then s = s:gsub('captionwidth="%d+"',
         function()
