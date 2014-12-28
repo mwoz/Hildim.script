@@ -126,12 +126,20 @@ Sub Main()
         Do While iCount < 300
 
             If Not oExec.StdOut.AtEndOfStream Then
-                WScript.Echo oExec.StdOut.ReadAll
+                If m_bEncode Then
+                    WScript.Echo DOS2Win(oExec.StdOut.ReadAll)
+                Else
+                    WScript.Echo oExec.StdOut.ReadAll
+                End If
                 iCount = 0
             End If
 
             If Not oExec.StdErr.AtEndOfStream Then
-                WScript.Echo oExec.StdErr.ReadAll
+                If m_bEncode Then
+                    WScript.Echo DOS2Win(oExec.StdOut.ReadAll)
+                Else
+                    WScript.Echo oExec.StdOut.ReadAll
+                End If
                 iCount = 0
             End If
             If oExec.Status <> 0 Then
@@ -194,7 +202,8 @@ If dDebug = True Then
     Next
 End If
 'Задание и инициализация глобальных переменных
-Dim m_SourceFilePath, m_SciteDataDir, m_ProjectRootDir, m_DefHFile, m_mode, m_base, m_user, m_pwd, m_mbaseTempl, m_strIncSql, m_strFromM4RootPath
+Dim m_SourceFilePath, m_SciteDataDir, m_ProjectRootDir, m_DefHFile, m_mode, m_base, m_user, m_pwd, m_mbaseTempl, m_strIncSql, m_strFromM4RootPath, m_bEncode
+m_bEncode = False 'не используем перекодировку
 'Файл для Обработки. Передается параметром из SciTe
 m_SourceFilePath = objArgs(0)
 ' Корневая директория проектов Систематики. Передается параметром из SciTe(со слешом на конце)

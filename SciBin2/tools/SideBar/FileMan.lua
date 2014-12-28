@@ -443,7 +443,7 @@ local function FileManTab_Init()
     list_favorites = iup.matrix{
     numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 250 ,rasterwidth3= 450, tip ='jj'}
+    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 80 ,rasterwidth3= 450, tip ='jj'}
 
     list_favorites.tips_cb = (function(h, x, y)
         local l = iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))

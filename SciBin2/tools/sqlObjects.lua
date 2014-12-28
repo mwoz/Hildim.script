@@ -629,8 +629,9 @@ AddEventHandler("OnUserListSelection", OnUserListSelection_local)
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
 	if id_msg == SCN_NOTYFY_OUTPUTCMD then
         if props["output.hook"] == 'Y' then
-            local out = string.gsub(lp, "(Server '(%w+)', Procedure '([_%w]+)', Line (%d+):\r\n([^\r]*))", function(sAll,s,proc,lns,err)
-                local j = editor:LineFromPosition(editor:findtext("__CMD_DROP_PROC("..proc..")", 0, 0, editor.Length))
+            local out = string.gsub(lp, "(Server '?(%S+)'?, Procedure '?([_%w]+)'?, Line (%d+):?\r\n([^\r]*))", function(sAll,s,proc,lns,err)
+
+                local j = editor:LineFromPosition(editor:findtext("__CMD_DROP_....("..proc..")", SCFIND_REGEXP, 0, editor.Length))
                 if _G["SqlMap"] ~= nil then
                     if _G["SqlMap"] == '?' then
                         local file = io.input(props["SciteDefaultHome"].."\\data\\tmp.sql")
