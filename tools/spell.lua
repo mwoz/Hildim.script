@@ -38,7 +38,7 @@ local comment = {
     forth = {[1] = true, [2] = true, [3] = true},
     gap = {[9] = true},
     hypertext = {[9] = true, [20] = true, [29] = true, [42] = true, [43] = true, [44] = true, [57] = true, [58] = true, [59] = true, [72] = true, [82] = true, [92] = true, [107] = true, [124] = true, [125] = true},
-    xml = {[9] = true, [29] = true},
+    xml = {[9] = true, [29] = true, [0] = true, [6] = true},
     inno = {[1] = true, [7] = true},
     latex = {[4] = true},
     lua = {[1] = true, [2] = true, [3] = true},
