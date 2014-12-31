@@ -369,7 +369,7 @@ AddEventHandler("OnUpdateUI", function()
             end
 		end
     else
-        if props['braces.open.'..editor.LexerLanguage] ~= nil then
+        if props['braces.open.'..editor.LexerLanguage] ~= "" then
             props['braces.open.*'] = props['braces.open.'..editor.LexerLanguage]
             props['braces.close.*'] = props['braces.close.'..editor.LexerLanguage]
         else
