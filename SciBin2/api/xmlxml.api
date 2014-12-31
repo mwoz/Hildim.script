@@ -1,0 +1,42 @@
+template.schemaVersion Версия формата. В данный момент "1"
+template.code Код сущности. Для системного типа должен иметь префикс "system.".\nДля кастом-типа должен иметь "custom.".
+template.name Произвольное имя. Используется как описание.
+template.type  Версия формата. В данный момент "1".
+template.asset Тип сущности: Reference, Document, Configuration, Extension.
+template.audit  Если yes, мастер-таблица сущности синхронизируется с таблицей dbo.Asset\nкуда записываются идентификаторы всех активов,\nа поле-идентификатор обязано иметь атрибут sequence="system.Asset"\nдля сквозной нумерации всех активов в системе.
+
+masterobject.name Код расширяемой сущности.
+
+table.name Имя таблицы в БД. Создается в схеме dbo для системного типа и custom - для кастом-типа.
+table.type Тип таблицы: Master AppendixSingle AppendixMultiple
+table.movements Если yes, система ведет для таблицы Mvt-таблицу, куда записываются все изменения записей.
+table.extensionFor Имя расширяемой таблицы типа AppendixMultiple из мастер-типа.\nАтрибут может быть указан в таблице типа AppendixMultiple для сущности типа Extension.
+table.import Если yes (по умолчанию), поля таблицы попадают в число импортируемых.
+table.export Если yes (по умолчанию), поля таблицы попадают в число экспортируемых.
+table.view Если yes, данная таблица является представлением (view). SQL-код представления указывается в теге ViewSql.
+table.customIUD Если yes, для вставки/обновления вместо выполнения DML операций insert/update\nиз процедуры IUD вызывается процедура Тип_IU, а вместо delete - процедура Тип_Del,\nгде Тип - короткий код сущности (без префикса "system." или "custom.".)
+table.customIUDTemplate Используется при customIUD="yes".\nПредусмотренный вариант реализации процедур Тип_IU и Тип_Del.
+table.marketData Если yes, мастер-таблица сущности\nиспользуется для хранения рыночных котировок финансовых инструментов
+table.history Если yes, мастер-таблица сущности должна содержать поля HistDate и HistDateTo.\nДля таблицы создается триггер для расчета HistDateTo.
+
+field.type
+field.name
+field.mandatory
+field.scale Указывается для типа numeric.
+field.length Указывается для типов char, nchar, nvarchar, tChoice, numeric.\n-1 для nvarchar означает nvarchar(max). Наличие length превращает tChoice в nvarchar указанной длины, в этом случае поле допускает множественные односимвольные значения перечисления без разделителей.
+field.mandatory Если yes, поле объявляется как "not null". По умолчанию no.\nДля полей с типами ObjectId, ObjectCode, MasterId, MasterName, ExtensionId всегда mandatory="yes".
+field.object Для полей типа Reference/Document - код сущности из таблицы ObjectType.\nДля поля типа tChoice - код перечисления из таблицы Choice.
+field.codeName Имя альтернативного ключевого поля, которое может присутствовать в XML объекта,\nдля идентификации объекта из справочника.\nАтрибут обязателен для полей с типом Reference и Asset.
+field.default Текст SQL для значения по умолчанию. Используется для создания default constraint.
+field.import Если yes, поле попадает в число импортируемых.\nЗначение по умолчанию устанавливается на уровне таблицы с помощью одноименного атрибута.
+field.export Если yes, поле попадает в число экспортируемых.\nЗначение по умолчанию устанавливается на уровне таблицы с помощью одноименного атрибута.
+field.sequence Имя последовательности для генерации значения поля.\nМожет указываться для поля типа ObjectId. Последовательность автоматически регистрируется в таблице\nSystemSequence в момент первого обращения.\nЗначения последовательности генерируются функцией dbo.SequenceNextValue.
+field.marketData Если yes, информация о поле должна быть занесена в таблицу MarketDataTableField, которая используется сервером котировок.
+
+index.nameSuffix
+index.unique
+index.key
+
+externalref.object Код типа внешнего объекта, который хранит поле-ссылку на текущий объект.\nНапример, system.UsrGroupMember.
+externalref.table Имя мастер-таблицы внешнего объекта.\nНапример, UsrGroupMember.
+externalref.field Имя поля-ссылки в мастер-таблице внешнего объекта.\nНапример, Usr_Id.

@@ -184,7 +184,8 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     local i,str
     i,i,txtX2.value,txtY2.value,txtW2.value,txtH2.value=s:find('position="(%d+);(%d+);(%d+);(%d+)"')
     i,i,str=s:find('captionwidth="(%d+)"')
-    if i == nil then
+    local bIsRef = (nil ~= s:find('name="btn1"'))
+    if i == nil and not bIsRef then
         txtCp.value=''
         txtCp.active='NO'
     else
@@ -196,6 +197,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     local icL = editor:LineFromPosition(editor.CurrentPos)
 
     local onSameLine = true
+    local iDepth = 0
     for i = icL - 1, 1, -1 do
         local x,y,w
         local sl = editor:GetLine(i)
@@ -203,15 +205,20 @@ local function frmControlPos(findSt, findEnd, s, dInd)
             onSameLine = false --считаем, что если предыдущая строка пуста, то контрол на новой строке
         elseif sl:find('<frame ') then
             break
+        elseif sl:find('</control>') then
+            iDepth = iDepth + 1
         elseif sl:find('<control ') then
-            local _,_,x,y,w = sl:find('position="(%d+);(%d+);(%d+);%d+"')
-            if onSameLine then
-                txtY2.value = y
-                txtX2.value = ''..(tonumber(x) + tonumber(w))
-            else
-                txtY2.value = '' ..(tonumber(y) + 12)
+            if not sl:find('/>') then iDepth = iDepth - 1 end
+            if iDepth == 0 then
+                local _,_,x,y,w = sl:find('position="(%d+);(%d+);(%d+);%d+"')
+                if onSameLine then
+                    txtY2.value = y
+                    txtX2.value = ''..(tonumber(x) + tonumber(w))
+                else
+                    txtY2.value = '' ..(tonumber(y) + 12)
+                end
+                break
             end
-            break
         end
     end
     onTxtX2(txtX2,txtX2.value, nil, nil)

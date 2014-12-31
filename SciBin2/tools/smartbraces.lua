@@ -359,10 +359,23 @@ AddEventHandler("OnUpdateUI", function()
                 props['braces.open.*'] = props['braces.open.fm.x']
                 props['braces.close.*'] = props['braces.close.fm.x']
             else
-                props['braces.open.*'] = props['braces.open.fm']
-                props['braces.close.*'] = props['braces.close.fm']
+                if props['braces.open.'..editor.LexerLanguage] ~= nil then
+                    props['braces.open.*'] = props['braces.open.'..editor.LexerLanguage]
+                    props['braces.close.*'] = props['braces.close.'..editor.LexerLanguage]
+                else
+                    props['braces.open.*'] = props['braces.open.def']
+                    props['braces.close.*'] = props['braces.close.def']
+                end
             end
 		end
+    else
+        if props['braces.open.'..editor.LexerLanguage] ~= nil then
+            props['braces.open.*'] = props['braces.open.'..editor.LexerLanguage]
+            props['braces.close.*'] = props['braces.close.'..editor.LexerLanguage]
+        else
+            props['braces.open.*'] = props['braces.open.def']
+            props['braces.close.*'] = props['braces.close.def']
+        end
 	end
 end)
 

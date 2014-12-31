@@ -171,7 +171,7 @@ function GetInputObject(line)
     end
 
     local lineLen = string.len(line)
-    local inputObject = {"","","",nil}
+    local inputObject = {"noobj","","",nil}
     local char = string.sub(line,lineLen,lineLen)
     local bracketsCounter = 0
     if char == ')' then -- ищем object.metod() :TODO - возможно стоит добавить []
@@ -197,7 +197,7 @@ function GetInputObject(line)
             if string.find(newLine, '[%w_)]$') ~= nil then
                 inputObject[4] = GetInputObject(newLine)
     end end end
-    --prnTable(inputObject)
+    -- prnTable(inputObject)
     return inputObject
 end
 
@@ -478,7 +478,7 @@ local function ReCreateStructures(strText,tblFiles)
         objectsX_table = {}
         fillup_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".fillup.characters"])
         autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
-        str_vbkwrd = CreateTablesForFile(objects_table,alias_table,props["apii.*."..props["FileExt"]], str_vbkwrd ~= nil)
+        str_vbkwrd = CreateTablesForFile(objects_table,alias_table,props["apii.*."..editor.LexerLanguage], str_vbkwrd ~= nil)
     end
 
     if Favorites_Clear ~= nil then Favorites_Clear() end
@@ -487,7 +487,7 @@ local function ReCreateStructures(strText,tblFiles)
 
     -----------
     if m_ext ~= editor.Lexer or str_xmlkwrd~= nil then
-        str_xmlkwrd = CreateTablesForFile(objectsX_table,nil, props["apiix.*."..props["FileExt"]], str_xmlkwrd~=nil)
+        str_xmlkwrd = CreateTablesForFile(objectsX_table,nil, props["apiix.*."..editor.LexerLanguage], str_xmlkwrd~=nil)
     end
     if editor.Lexer == SCLEX_FORMENJINE then
         RecrReCreateStructures(editor:GetText(),{})
@@ -662,6 +662,7 @@ local function RunAutocomplete(char,pos,word)
 
     local input_object = GetInputObject(editor:textrange(editor:PositionFromLine(af_current_line),pos-1))
     if input_object[1] =='' then return '' end
+
 	-- ≈сли слева от курсора отсутствует слово, которое можно истолковать как им€ объекта, то выходим
     obj_names = GetObjectNames(input_object)
 	if table.maxn(obj_names) == 0 then return false end

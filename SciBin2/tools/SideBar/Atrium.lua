@@ -181,10 +181,10 @@ local function SelectData()
 end
 
 local function RunXml()
-    local t_xml = xml.eval(editor:GetText():gsub('^<\?.->\r?\n?',''))
+    local t_xml = xml.eval(editor:GetText():gsub('^<[?].->\r?\n?',''))
     local strObjType = t_xml[0]
     if strObjType == 'Template' then
-        ApplyMetadata(editor:GetText():gsub('^<\?.->\r?\n?',''))
+        ApplyMetadata(editor:GetText():gsub('^<[?].->\r?\n?',''))
     else
         PutData(t_xml,strObjType)
     end
@@ -220,7 +220,7 @@ local function Metadata_OpenNew()
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(XMLCAPT..msgReplay:GetPathValue('Metadata'))
+        editor:SetText(Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON',XMLCAPT,'')..msgReplay:GetPathValue('Metadata'))
         scite.MenuCommand(1468)
     end,20,nil)
 end
@@ -235,7 +235,8 @@ local function Metadata_Unload()
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
         local f = io.open(strPath, "w")
-        f:write(msgReplay:GetPathValue('Metadata'))
+        local sText = Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON',XMLCAPT,'')..msgReplay:GetPathValue('Metadata'):gsub('\r', '')
+        f:write(sText)
         f:close()
         scite.Open(strPath)
         scite.MenuCommand(1468)
@@ -287,7 +288,7 @@ local function FindTab_Init()
               iup.item{title="Открыть как новый файл",action=Metadata_OpenNew},
               iup.item{title="Выгрузить и открыть в текущей дериктории",action=Metadata_Unload},
               iup.separator{},
-              iup.item{title="Удалить",action=Metadata_Delete},
+              iup.item{title="Добавить XML заголовок",value=_G.iuprops['atrium.metadata.xmlcapt'],action=(function() _G.iuprops['atrium.metadata.xmlcapt']=Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON','OFF','ON') end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
