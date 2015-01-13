@@ -393,42 +393,54 @@ function template_MoveControls()
                 return "("..str..")"
             end
             local strtempl = 'position="'..InpValue(txtX1)..';'..InpValue(txtY1)..';'..InpValue(txtW1)..';'..InpValue(txtH1)..'"([^\n]*)'
-            local strout = editor:GetSelText():gsub(strtempl,function(s1,s2,s3,s4,tt)
-                local function f(s,c)
-                    if c.value:len() == 0 then return s end
-                    local sval = c.value:sub(2)
-                    if sval == nil then sval = 1 end
-                    local sign = c.value:sub(0,1)
-                    if sign == "-" then return s*1 - sval*1 end
-                    if sign == "+" then return s+sval end
-                    return c.value
-                end
-                local function ch(s,c)
-                    local z1,n1,z2,n2
-                    z1,n1,z2,n2=c.value:match("([><]?)(%d+)([><]?)(%d*)")
-                    if z1 ~= nil  then
-                        if n1 == nil then n1 = 0 end
-                        if z1 == "<" and s*1 > n1*1 then return false end
-                        if z1 == ">" and s*1 < n1*1 then return false end
-                        if z2.."" ~= "" then
-                            if n2 == nil then n2 = 0 end
-                            if z2 == "<" and s*1 > n2*1 then return false end
-                            if z2 == ">" and s*1 < n2*1 then return false end
-                        end
+            local iLevel = 0
+            local strout = editor:GetSelText():gsub("[^\n]+",function(s)
+                local strrow = s
+                if s:find('<control') then
+                    if iLevel == 0 then
+                        strrow = s:gsub(strtempl,function(s1,s2,s3,s4,tt)
+                            local function f(s,c)
+                                if c.value:len() == 0 then return s end
+                                local sval = c.value:sub(2)
+                                if sval == nil then sval = 1 end
+                                local sign = c.value:sub(0,1)
+                                if sign == "-" then return s*1 - sval*1 end
+                                if sign == "+" then return s+sval end
+                                return c.value
+                            end
+                            local function ch(s,c)
+                                local z1,n1,z2,n2
+                                z1,n1,z2,n2=c.value:match("([><]?)(%d+)([><]?)(%d*)")
+                                if z1 ~= nil  then
+                                    if n1 == nil then n1 = 0 end
+                                    if z1 == "<" and s*1 > n1*1 then return false end
+                                    if z1 == ">" and s*1 < n1*1 then return false end
+                                    if z2.."" ~= "" then
+                                        if n2 == nil then n2 = 0 end
+                                        if z2 == "<" and s*1 > n2*1 then return false end
+                                        if z2 == ">" and s*1 < n2*1 then return false end
+                                    end
+                                end
+                                return true
+                            end
+                            if ch(s1,txtX1) and ch(s2,txtY1) and ch(s3,txtW1) and ch(s4,txtH1) then
+                                local tt2 = tt:gsub('captionwidth="(%d+)"', function(cw)
+                                    return 'captionwidth="'..f(cw,txtCp)..'"'
+                                    end
+                                )
+                                return 'position="'..f(s1,txtX2)..';'..f(s2,txtY2)..';'..f(s3,txtW2)..';'..f(s4,txtH2)..'"'..tt2
+                            else
+                                return 'position="'..s1..';'..s2..';'..s3..';'..s4..'"'..tt
+                            end
+                        end)
                     end
-                    return true
+                if not s:find('/>') then iLevel = iLevel + 1 end
+                elseif s:find('</control') then
+                    iLevel = iLevel - 1
                 end
-                if ch(s1,txtX1) and ch(s2,txtY1) and ch(s3,txtW1) and ch(s4,txtH1) then
-                    local tt2 = tt:gsub('captionwidth="(%d+)"', function(cw)
-                        return 'captionwidth="'..f(cw,txtCp)..'"'
-                        end
-                    )
-                    return 'position="'..f(s1,txtX2)..';'..f(s2,txtY2)..';'..f(s3,txtW2)..';'..f(s4,txtH2)..'"'..tt2
-                else
-                    return 'position="'..s1..';'..s2..';'..s3..';'..s4..'"'..tt
-                end
-                end
-            )
+                return strrow
+            end)
+
             editor:ReplaceSel(strout)
             dlg2:hide()
         end
