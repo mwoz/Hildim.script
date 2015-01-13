@@ -308,11 +308,13 @@ local function ParseStructure(strSep,strOut,current_pos,current_line)
                 local s = string.find(strOut,"%_%s*$")
                 if s == nil then
                     local n = current_line - 1
-                    local _s,_e,ni,_b,p = string.find(editor:GetLine(n),"(%s*)(.-)(%_?)%s*$")
-                    while p == '_' and n>0 do
-                        nextIndent = ni
-                        n = n-1
-                        _s,_e,ni,_b,p = string.find(editor:GetLine(n),"(%s*)(.-)(%_?)%s*$")
+                    if n >= 0 then
+                        local _s,_e,ni,_b,p = string.find(editor:GetLine(n),"(%s*)(.-)(%_?)%s*$")
+                        while p == '_' and n>0 do
+                            nextIndent = ni
+                            n = n-1
+                            _s,_e,ni,_b,p = string.find(editor:GetLine(n),"(%s*)(.-)(%_?)%s*$")
+                        end
                     end
                 end
             end
