@@ -41,6 +41,7 @@ application.ConvertPt2PxY(longPt) as long.Converts PT to PX and back using X or 
 application.ConvertPx2PtX(longPx) as long.Converts PT to PX and back using X or Y scale (may be different)
 application.ConvertPx2PtY(longPx) as long.Converts PT to PX and back using X or Y scale (may be different)
 application.SelectFileDialog([InitialPath], [Filters], [OpenDialog], [FileName])Показывает стандартный диалог выбора файла "Открыть" или "Сохранить как".\nInitialPath: путь к папке для использования при открытии  диалога. Если не указан, используется папка, в которой производился выбор в последний раз.\nFilters: фильтры типов файлов. По умолчанию "All Files (*.*)|*.*||".\nOpenDialog: true - для диалога "Открыть" (по умолчанию), false - для диалога "Сохранить как".\nFileName: имя файла по умолчанию. Обычно используется для диалога "Сохранить как".\nЕсли пользователь выбрал файл, функция возвращает полный путь, иначе пустую строку.\n
+application.GetStackTrace Возвращает содержимое программного стека. Работает только в дебажном режиме (с ключем -D)
 
 form.BackColor BackColors used in form.
 form.ForeColor ForeColors used in form.
@@ -75,6 +76,7 @@ form.Frames Collection of form frames\nmethods: \n" Add ( Name, NameInsertAfter 
 #$framescollections=.*%.frames
 #$frame=.*%.frames(
 form.GetTags Возвращает сообщение с вложенными ссылками на сообщения-теги всех контролов, у которых теги заданы. Вложенные сообщения тегов имеют имена равные именам соответствующих контролов.
+form.GetTag
 #$message=.*%.gettags(
 form.RootForms Count, Item ( FormName / Index )
 #$rootforms=.*%.rootforms
@@ -214,6 +216,9 @@ form.ControlProperties(strCtrlName) Устанавливает/Возвращает у контрола переданн
 container.Controls	Коллекция вложенных контролов. API коллекции совпадает с Form.Controls. Отличие – параметр FrameName метода Add игнорируется.
 container.Value	Возвращает/устанавливает произвольное значение (variant).
 container.Handler	Возвращает/устанавливает имя функции – обработчика событий дочерних контролов. Прототип функции совпадает с вызовом Form_CtrlEvent.
+container.GetTags  Возвращает сообщение с вложенными ссылками на сообщения-теги всех контролов, у которых теги заданы. Имена вложенных сообщений-тегов совпадают с именами соответствующих контролов.
+container.ShareControls True - все контролы контейнера помещаются как в его коллекцию Controls, так и в коллекцию Controls ближайшего родительского контейнера, у которого это свойство равно False (или в Form.Controls, если такого контейнера нет). Разработчик должен обеспечить уникальность имени контролов на уровне родительского контейнера/формы, куда записываются контролы.
+container.RaiseEventAsync ( EventName, [EventParam] ) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam, который передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>. Если процедура обработчика события не имеет параметров, EventParam указывать не нужно.
 #$control=container(
 
 #$formctrl=form("sub
@@ -289,6 +294,8 @@ message.GetFieldNumber(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is 
 message.GetFieldDate(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found
 message.Execute(Statement, [MsgParameters])	Statement: may has one of next formats:\n\n1) CALC SUM(<FieldName1>), SUM(<FieldNameN>), COUNT [WHERE <expr>]\n2) GET WHERE <expr>\n3) SORT <FieldName1> [ASC | DESC] [, ..., <FieldNameN> [ASC | DESC] ]\n	\n<expr> ::= <arg> <operator> <arg> | <arg> <operator> <expr> | <expr> <operator> <expr> | (<expr>)\n<arg> ::= <FieldName> | '<string>' | <number> | ? | NULL\n<operator> ::= OR | AND | > | < | = | >= | <= | <>\n\nComparison of any value with NULL always returns False except cases:\n1) <NULL value> = <NULL value>\n2) <non-NULL value> <> <NULL value>\n\nMsgParameters: used when "?" arguments present. \nIt should contain one field of appropriate type for each "?" argument \nCommands of types 1) and 2) return result as Message object. \nFor 1) command result contains field for each specified function.\n\nExample:\nset args = form.TibCreateMessage\nargs.AddField "arg1", DateSerial(2001, 1, 9)\nrs.Execute "SORT col3 DESC, col1 DESC"\nset m = rs.Execute("GET WHERE col1 > ? OR col2 > 1.25", args)\nset m = rs.Execute("CALC SUM(col2), SUM(col3), COUNT WHERE col1 > ? OR col3 = 'Some string' ", args)\n
 #$message=.*%.execute(
+message.GetWireText() Returns  content of a message as a WireText
+message.SetWireText (strWireText) Sets message content from WireText string( see format in GetWIreText).\nReturns false if parsing string failed.\nExisiting data is replaced by data from WireText string
 
 field.Value VARIANT
 field.Name read-only
@@ -1001,3 +1008,36 @@ err.Source
 err.Raise(number, source, description, helpfile, helpcontext)
 err.Clear()
 
+#$udoc=doc(
+udoc.Value
+udoc.UserInput
+udoc.Visible
+udoc.Enable
+udoc.Caption
+udoc.Restriction
+udoc.SetValueHook
+
+app.CreateMessage
+app.Trace(strMsg)
+app.TraceErr(strMsg)
+app.TraceDoc(strPath)
+app.MessageBox(Prompt, Buttons)
+app.CalloutMsgBox(Prompt, Buttons, ShowPeriod)
+app.CreateDbOptions
+app.CreateDbParams
+app.RunSql(strSql, msgOpaque, objParams, msgAdvanced)
+app.RunProc(strSql, msgOpaque, objOptions)
+app.CancelTransaction Set only. Прерывание операции созранения
+
+#$objdbp=app.createdbparams
+objdbp.Add(strName, varValue, enumType, enumDirection, lSize)
+objdbp.Reset()
+
+#$objsqlo=app.createdboptions
+objsqlo.Adapter
+objsqlo.Block
+objsqlo.StatisticName
+objsqlo.SelfError
+objsqlo.HookError
+objsqlo.Database
+objsqlo.Timeout

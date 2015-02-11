@@ -225,6 +225,24 @@ local function Metadata_OpenNew()
     end,20,nil)
 end
 
+local function Metadata_NewData()
+    local sel = list_obj.marked:find('1') - 1
+    iup.GetAttributeId2(list_obj, '', sel, 1)
+    local strName = iup.GetAttributeId2(list_obj, '', sel, 1)
+
+    local msgParams = mblua.CreateMessage()
+
+    dbAddProcParam(msgParams, "ObjectCode" , strName, AD_VarChar, AD_ParamInput, 512)
+    dbAddProcParam(msgParams, "XmlData", 'R', AD_VarChar, AD_ParamOutput, 999999)
+
+    dbRunProc('ObjectType_Pattern', msgParams, function(handle,Opaque,iError,msgReplay)
+        print(msgReplay:GetPathValue('XmlData'))
+        scite.MenuCommand(IDM_NEW)
+        editor:SetText(msgReplay:GetPathValue('XmlData'))
+        scite.MenuCommand(1468)
+    end, 20, nil)
+end
+
 local function Metadata_Unload()
     local sel = list_obj.marked:find('1') - 1
     iup.GetAttributeId2(list_obj, '', sel, 1)
@@ -286,7 +304,9 @@ local function FindTab_Init()
             local mnu = iup.menu
             {
               iup.item{title="Открыть как новый файл",action=Metadata_OpenNew},
-              iup.item{title="Выгрузить и открыть в текущей дериктории",action=Metadata_Unload},
+              iup.item{title="Выгрузить и открыть в текущей деректории",action=Metadata_Unload},
+              iup.separator{},
+              iup.item{title="Открыть новый файл с данными",action=Metadata_NewData},
               iup.separator{},
               iup.item{title="Добавить XML заголовок",value=_G.iuprops['atrium.metadata.xmlcapt'],action=(function() _G.iuprops['atrium.metadata.xmlcapt']=Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON','OFF','ON') end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
