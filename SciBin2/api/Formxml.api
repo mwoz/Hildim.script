@@ -143,6 +143,7 @@ checklistbox.tag
 colorpicker.style
 
 container.handler
+container.ShareControls {"Y", "N"}
 
 grid.title
 grid.style "hline;vline;openlevel;striped;oddrowcolor;evenrowcolor"\nfor example: "n,y,3,y,#ffffff,#dddddd"

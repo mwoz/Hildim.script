@@ -104,6 +104,11 @@ function listCalc_addToRecent(strFile)
 	end]]
 end
 
+function UserScriptHandler(handle,Opaque,iError,msgReplay)
+    scite.Open(props["SciteDefaultHome"]..'\\data\\USERSCRIPT.inc')
+    editor:SetText(msgReplay:GetPathValue('Script'))
+end
+
 function listCalc_RunBatchWithSciTE()
     RunBatch(props["FilePath"])
 end
@@ -130,6 +135,7 @@ local function listMbTrancport_DoLua()
 		dofile(props["sys.calcsybase.dir"].."\\connectmb\\"..iup.GetAttribute(cmb_listMbTrancport, cmb_listMbTrancport.value))
         if _G.iuprops['precompiller.radiususername'] ~= '' then
             handle = mblua.Subscribe(TerminalErrorHandler,("RADIUS.SYS.VBERROR.".._G.iuprops['precompiller.radiususername'] ),nil)
+            handle = mblua.Subscribe(UserScriptHandler,("RADIUS.SYS.SCRIPT.".._G.iuprops['precompiller.radiususername'] ),nil)
         end
         btn_Open_Exec.active='YES'
 	else

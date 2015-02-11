@@ -166,7 +166,9 @@ local function OnSave_local()
                         delta = delta + newD
 
                         prevE = e + 1
-                        strOut = strOut..l..precomp_CompileTemplLib(s,true)
+                        local strInc = precomp_CompileTemplLib(s,true)
+                        if strInc then strOut = strOut..l..strInc
+                        else allRight = false; break; end
 
                         b = nil
                     end
@@ -302,7 +304,22 @@ function precomp_PreCompileTemplate()
     er,strOut = shell.exec('cscript /nologo "'..props['sys.calcsybase.dir']..'\\tmp.vbs"', nil, true, true)
     if er == 0 then
         strOut = ">>>Check VB  OK: "..props['FilePath']
-        vbOk = true
+        if props['FilePath'] == props["SciteDefaultHome"]..'\\data\\USERSCRIPT.inc' then
+            local msg = mblua.CreateMessage()
+            msg:SetPathValue("Script",editor:GetText())
+            msg:Subjects('SYSM.SAVESCRIPT.'.._G.iuprops["precompiller.radiususername"])
+                mblua.Request(function(handle,Opaque,iError,msgReplay)
+                    if iError == 0 then
+                        print(msgReplay:GetPathValue("strReplay"))
+                    else
+                        print("Obgect Type Form not responded")
+                    end
+                end,msg,3,nil)
+
+            msg:Destroy()
+        else
+            vbOk = true
+        end
     else
         strOut = string.gsub(string.gsub(strOut,(props['sys.calcsybase.dir']..'\\tmp.vbs'):gsub('%p','%%%1'),props['FilePath']),'\n','')
     end
