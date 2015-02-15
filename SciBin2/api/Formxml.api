@@ -71,6 +71,7 @@ numberbox.supportnulls {"Y", "N"}
 numberbox.format
 numberbox.minvalue
 numberbox.maxvalue
+numberbox.captionfont
 
 checkbox.mode {"C", "R", "B", "T", "P", "S"}  Gets/Sets CheckBox control mode:\n"C" - Checkbox\n"R" - Radiobutton\n"B" - Pushlike\n"T" - ThreeState mode \n"P" - Plus-Minus mode (with third state(shown as dot icon) enabled)\n"S" - small Plus-Minus mode (with third state(shown as dot icon) enabled)\n
 checkbox.outercolor
@@ -97,6 +98,7 @@ textbox.multiline {"Y", "N"}
 textbox.tooltiptext
 textbox.wordwrap {"Y", "N"}
 textbox.passwordchar
+textbox.captionfont
 
 datebox.format
 datebox.caption
@@ -105,6 +107,7 @@ datebox.captionwidth
 datebox.style = {"D", "F"}
 datebox.locked {"Y", "N"}
 datebox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \n‘N’ – display only text. ‘U’ - display whole control (with underline and button)
+datebox.captionfont
 
 timebox.alignment {"L", "R", "C"}
 timebox.maxlength
@@ -137,6 +140,7 @@ combobox.supportnulls  {"Y", "N"}
 combobox.editenabled  {"Y", "N"}
 combobox.sorted  {"Y", "N"}
 combobox.style = {"D", "F"}
+combobox.captionfont
 
 checklistbox.tag
 

@@ -45,42 +45,40 @@ end
 function FileMan_ListFILL()
     memo_path.value = current_path
 	if current_path == '' then return end
-	local folders = gui.files(current_path..'*', true)
-	if not folders then return end
-	local table_folders = {}
-	for i, d in ipairs(folders) do
-		table_folders[i] = d:from_utf8(1251)
-	end
-	table.sort(table_folders, function(a, b) return a:lower() < b:lower() end)
-    local name = file_mask..'*'
 
-	local files = gui.files(current_path..name,false,true)
-	local table_files = {}
-	if files then
-        if sort_by_tyme then table.sort(files, function(a, b) return a[2] > b[2] end) end
-		for i, filename in ipairs(files) do
-			table_files[i] = filename[1]:from_utf8(1251)
-		end
-	end
-	if not sort_by_tyme then table.sort(table_files, function(a, b) return a:lower() < b:lower() end) end
+    local table_dir = shell.findfiles(current_path..'*')
+    table.sort(table_dir, function(a, b)
+        if a.isdirectory ~= b.isdirectory then return a.isdirectory end
+        if a.isdirectory or not sort_by_tyme then
+            return a.name:lower() < b.name:lower()
+        else
+            return a.writetime > b.writetime
+        end
+    end)
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
-    iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_folders + #table_files + 1))
+    iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_dir - 1))
 	list_dir:setcell(1, 1, 'IMAGE_UpFolder')
 	list_dir:setcell(1, 2, '..')
 	list_dir:setcell(1, 3,'..')
 	list_dir:setcell(1, 4, 'd')
-	for i = 1, #table_folders do
-        list_dir:setcell(i + 1, 1, 'IMAGE_Folder')
-        list_dir:setcell(i + 1, 2, table_folders[i])
-        list_dir:setcell(i + 1, 3, table_folders[i])
-        list_dir:setcell(i + 1, 4, 'd')
-	end
-	for i = 1, #table_files do
-        list_dir:setcell(i + #table_folders + 1, 1,  GetExtImage(table_files[i]))
-        list_dir:setcell(i + #table_folders + 1, 2, table_files[i])
-        list_dir:setcell(i + #table_folders + 1, 3, table_files[i])
-        list_dir:setcell(i + #table_folders + 1, 4, '')
+    local j = 2
+	for i = 1, #table_dir do
+        if table_dir[i].isdirectory then
+            if table_dir[i].name ~= "." and table_dir[i].name ~= ".." then
+                list_dir:setcell(j, 1, 'IMAGE_Folder')
+                list_dir:setcell(j, 2, table_dir[i].name)
+                list_dir:setcell(j, 3, table_dir[i].name)
+                list_dir:setcell(j, 4, 'd')
+                j = j + 1
+            end
+        else
+            list_dir:setcell(j, 1,  GetExtImage(table_dir[i].name))
+            list_dir:setcell(j, 2, table_dir[i].name)
+            list_dir:setcell(j, 3, table_dir[i].name)
+            list_dir:setcell(j, 4, '')
+            j = j + 1
+        end
 	end
 	list_dir.focus_cell = "1:1"
     iup.SetAttribute(list_dir, 'MARK1:0', 1)
@@ -96,11 +94,18 @@ end
 function FileMan_ListFillDir(strPath)
     current_path = strPath:match('(.*\\)')
     if current_path == nil then current_path = '' end
-    local folders = gui.files(strPath..'*', true)
-    if not folders then return  strPath:len()-(strPath:find('[:%$]') or strPath:len())>0 end
+    local folders = shell.findfiles(strPath..'*')
+    if not folders then
+        iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
+        return  strPath:len()-(strPath:find('[:%$]') or strPath:len())>0
+    end
     local table_folders = {}
+    j = 1
     for i, d in ipairs(folders) do
-        table_folders[i] = d
+        if d.isdirectory and d.name ~= '.' and d.name ~= '..' then
+            table_folders[j] = d.name
+            j = j + 1
+        end
     end
     table.sort(table_folders, function(a, b) return a:lower() < b:lower() end)
 
@@ -130,7 +135,7 @@ function FileMan_ChangeDir()
     d:popup()
     local newPath = d.value
     d:destroy()
-	--local newPath = gui.select_dir_dlg('Please change current directory', current_path)
+
 	if newPath == nil then return end
 	if newPath:match('[\\/]$') then
 		current_path = newPath
@@ -213,10 +218,8 @@ local function FileMan_OpenItem()
 	local dir_or_file, attr = FileMan_GetSelectedItem()
 	if dir_or_file == '' then return end
 	if attr == 'd' then
-		gui.chdir(dir_or_file)
 		if dir_or_file == '..' then
 			local new_path = current_path:gsub('(.*\\).*\\$', '%1')
-			if not gui.files(new_path..'*',true) then return end
 			current_path = new_path
 		else
 			current_path = current_path..dir_or_file..'\\'
@@ -350,7 +353,6 @@ local function Favorites_OpenFile()
 	if idx == null then return end
 	local fname = list_favorites:getcell(idx,3)
 	if fname:match('\\$') then
-		gui.chdir(fname)
 		current_path = fname
 		FileMan_ListFILL()
 	else

@@ -78,23 +78,18 @@ function sql_FillMapFile()
 
     local function dir(strPath)
         local p = strPath
-        local fld = gui.files(strPath.."*",true)
-        if not fld then return end
+        local files = shell.findfiles(p.."*")
+        if not files then return end
+        if #files < 3 then return end
 
-        for i, d in ipairs(fld) do
-            dir(strPath..d:from_utf8(1251).."\\")
-        end
-        local files = gui.files(strPath.."*.m")
-        if files then
-            local i,filename
-            for i, filename in ipairs(files) do
-                AddObjectFromFile(strPath..filename:from_utf8(1251))
-            end
-        end
-        files = gui.files(strPath.."*.sql")
-        if files then
-            for i, filename in ipairs(files) do
-                AddObjectFromFile(strPath..filename:from_utf8(1251))
+        for i, filenameT in ipairs(files) do
+            filename = string.lower(filenameT.name)
+            if filenameT.isdirectory then
+                if filename ~= '.' and filename ~= '..' then dir(p..filename.."\\") end
+            else
+               if filename:lower():find('%.m$') or filename:lower():find('%.sql$') then
+                   AddObjectFromFile(p..filename)
+                end
             end
         end
     end

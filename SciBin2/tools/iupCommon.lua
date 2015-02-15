@@ -129,21 +129,18 @@ iup.list = function(t)
     function cmb:FillByDir(pathmask, strSel)
         local current_path = props["sys.calcsybase.dir"]..pathmask
 
-        local files = gui.files(current_path)
-        local table_files = {}
+        local files = shell.findfiles(current_path)
+        table.sort(files, function(a, b) return a.name:lower() < b.name:lower() end)
         if files then
             local i, filename
+            local j = 1
             for i, filename in ipairs(files) do
-                table_files[i] = {filename, {filename}}
+                if not filename.isdirectory then
+                    iup.SetAttribute(self, j, filename.name)
+                    if filename.name == strSel then self.value = j end
+                    j = j + 1
+                end
             end
-        end
-        table.sort(table_files, function(a, b) return a[1]:lower() < b[1]:lower() end)
-
-        local itSel = 0
-        for i = 1, #table_files do
-            local strIt = table_files[i][1]
-            iup.SetAttribute(self, i, strIt)
-            if strIt == strSel then self.value = i end
         end
     end
     function cmb:FillByHist(sHist,sLast)
