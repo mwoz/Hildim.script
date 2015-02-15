@@ -60,7 +60,7 @@ function FileMan_ListFILL()
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_dir - 1))
 	list_dir:setcell(1, 1, 'IMAGE_UpFolder')
 	list_dir:setcell(1, 2, '..')
-	list_dir:setcell(1, 3,'..')
+	list_dir:setcell(1, 3, 0)
 	list_dir:setcell(1, 4, 'd')
     local j = 2
 	for i = 1, #table_dir do
@@ -68,15 +68,18 @@ function FileMan_ListFILL()
             if table_dir[i].name ~= "." and table_dir[i].name ~= ".." then
                 list_dir:setcell(j, 1, 'IMAGE_Folder')
                 list_dir:setcell(j, 2, table_dir[i].name)
-                list_dir:setcell(j, 3, table_dir[i].name)
+                list_dir:setcell(j, 3, table_dir[i].attributes)
                 list_dir:setcell(j, 4, 'd')
                 j = j + 1
             end
         else
             list_dir:setcell(j, 1,  GetExtImage(table_dir[i].name))
             list_dir:setcell(j, 2, table_dir[i].name)
-            list_dir:setcell(j, 3, table_dir[i].name)
+            list_dir:setcell(j, 3, table_dir[i].attributes)
             list_dir:setcell(j, 4, '')
+            if shell.bit_and(table_dir[i].attributes,1) == 1 then
+                iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '190 0 0')
+            end
             j = j + 1
         end
 	end
@@ -127,7 +130,7 @@ local function FileMan_GetSelectedItem(idx)
     local l = list_getvaluenum(list_dir)
     if idx == nil then idx = l end
 	if idx == -1 then return '' end
-	return list_dir:getcell(idx, 3), list_dir:getcell(idx, 4)
+	return list_dir:getcell(idx, 2), list_dir:getcell(idx, 4), tonumber(list_dir:getcell(idx, 3))
 end
 
 function FileMan_ChangeDir()
@@ -322,6 +325,19 @@ function Favorites_AddFile()
 	Favorites_SaveList()
 end
 
+local function FileMan_ChangeReadOnly()
+    local fname, d, attr = FileMan_GetSelectedItem()
+	if fname == '' then return end
+	fname = current_path..fname
+    if shell.bit_and(attr, 1) then
+        attr = attr - 1
+    else
+        attr = attr - 1
+    end
+    shell.setfileattr(fname, attr)
+    FileMan_ListFILL()
+end
+
 function Favorites_AddCurrentBuffer()
 	list_fav_table[#list_fav_table+1] = {props['FilePath'], false}
 	Favorites_ListFILL()
@@ -422,6 +438,7 @@ local function FileManTab_Init()
         if h.marked then sel = h.marked:find('1') - 1 end
         iup.SetAttribute(h,  'MARK'..sel..':0', 0)
         iup.SetAttribute(h, 'MARK'..lin..':0', 1)
+        l = shell.bit_and(tonumber(list_dir:getcell(lin, 3)), 1)
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
             FileMan_OpenItem()
@@ -430,6 +447,7 @@ local function FileManTab_Init()
             local mnu = iup.menu
             {
               iup.item{title="Change Dir",action=FileMan_ChangeDir},
+              iup.item{title="Read Only",action=FileMan_ChangeReadOnly, value=Iif(l == 1, 'ON', 'OFF')},
               iup.separator{},
               iup.item{title="Open with SciTE",action=FileMan_OpenSelectedItems},
               iup.item{title="Execute",action=FileMan_FileExec},
