@@ -218,7 +218,7 @@ container.Value	Возвращает/устанавливает произвольное значение (variant).
 container.Handler	Возвращает/устанавливает имя функции – обработчика событий дочерних контролов. Прототип функции совпадает с вызовом Form_CtrlEvent.
 container.GetTags  Возвращает сообщение с вложенными ссылками на сообщения-теги всех контролов, у которых теги заданы. Имена вложенных сообщений-тегов совпадают с именами соответствующих контролов.
 container.ShareControls True - все контролы контейнера помещаются как в его коллекцию Controls, так и в коллекцию Controls ближайшего родительского контейнера, у которого это свойство равно False (или в Form.Controls, если такого контейнера нет). Разработчик должен обеспечить уникальность имени контролов на уровне родительского контейнера/формы, куда записываются контролы.
-container.RaiseEventAsync ( EventName, [EventParam] ) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam, который передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>. Если процедура обработчика события не имеет параметров, EventParam указывать не нужно.
+container.RaiseEventAsync ( EventName, [EventParam] ) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam,\nкоторый передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>
 #$control=container(
 
 #$formctrl=form("sub
@@ -237,6 +237,7 @@ formctrl.ForeReadOnlyColor	Возвращает/устанавливает ForeReadOnlyColor вложенной 
 formctrl.Controls	Аналог ctrl.Form.Controls
 formctrl.Frames	Аналог ctrl.Form.Frames
 formctrl.PropertyBag	Аналог ctrl.Form.PropertyBag
+formctrl.RaiseAsyncEvent(EventName, [EventParam]) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam,\nкоторый передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>
 
 #$message=form%.createmessage(
 #$message=.*%.createmessage
@@ -367,6 +368,7 @@ textbox.ShowPopupList(msgColumns, msgData, [anchorColumn], [highlightString]) По
 textbox.HidePopupList Скрывает всплывающий список.
 textbox.ChangingEventDelay Задержка генерации события Changing в миллисекундах. \nПо умолчанию -1 - событие не генерируется. \nЕсли 0, вызывается по каждому нажатию, которое приводит к изменению текста.\n
 textbox.PrevValue Returns previous value of ctrl(before user edit)
+textbox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
 
 #$numberbox=form("num
 #$numberbox=controlscoll%.add(.*"NUMBERBOX
@@ -392,6 +394,7 @@ numberbox.SupportNulls if true, controls could have null-values. In this case it
 numberbox.PrevValue Returns previous value of ctrl(before user edit)
 numberbox.MinValue Минимальное значение, которое может быть установлено. При вводе меньшего числа оно автоматически будет заменено на MinValue. (по умолчанию - не заданно(NULL))
 numberbox.MaxValue Максимальное значение, которое может быть установлено. При вводе большего числа оно автоматически будет заменено на MaxValue. (по умолчанию - не заданно(NULL))
+numberbox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
 
 #$datebox=form("dt
 #$datebox=controlscoll%.add(.*"DATEBOX
@@ -404,6 +407,7 @@ datebox.Locked
 datebox.LockedMode
 datebox.Style {‘D’|’F’} – Style of button if ‘F’ – flat style is used. Default – ‘D’.
 datebox.PrevValue Returns previous value of ctrl(before user edit)
+datebox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
 
 #$timebox=form("tm
 #$timebox=controlscoll%.add(.*"TIMEBOX
@@ -501,6 +505,7 @@ combobox.NewValueAllowed Get/set property (true/false). If true (by default) – a
 combobox.Case 'N' - normal (default), 'U' - upper, 'L' - lower
 combobox.MaxLength The maximum number of characters that could be entered into the combobox if it is editable.
 combobox.EditEnabled Get/set property (true/false). Enabled\Disables editing; default = false
+combobox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
 
 #$checklistbox=form("clb
 #$checklistbox=controlscoll%.add(.*"CHECKLISTBOX

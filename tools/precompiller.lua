@@ -49,24 +49,22 @@ local function getLineCount(s)
 end
 
 local function RereadTemplateFiles()
-require 'gui'
+require 'shell'
 	local precomp_strRootDir = props["precomp_strRootDir"].."\\"
     if precomp_strRootDir == "\\" then return end
     precomp_tblFiles = {}
+
     local function dir(strPath)
         local p = precomp_strRootDir..strPath
-        local folders = gui.files(p.."*",true)
-        if not folders then return end
+        local files = shell.findfiles(p.."*")
+        if not files then return end
+        if #files < 3 then return end
 
-        -- list_dir:clear()
-        -- list_dir:add_item ('[..]', {'..','d'})
-        for i, d in ipairs(folders) do
-            dir(strPath..d.."\\")
-        end
-        local files = gui.files(precomp_strRootDir..strPath.."*.*")
-        if files then
-            for i, filename in ipairs(files) do
-                filename = string.lower(filename)
+        for i, filenameT in ipairs(files) do
+            filename = string.lower(filenameT.name)
+            if filenameT.isdirectory then
+                if filename ~= '.' and filename ~= '..' then dir(strPath..filename.."\\") end
+            else
                 if precomp_tblFiles[filename] == nil then
                     precomp_tblFiles[filename] = strPath..filename
                 else

@@ -32,9 +32,9 @@ local function Find_onKey(key)
             return
         end
         editor:SetSel(editor:PositionFromLine(n-1), editor.LineEndPosition[n-1])
-        gui.pass_focus()
+        iup.PassFocus()
     elseif key == 27 then
-        gui.pass_focus()
+        iup.PassFocus()
     end
 end
 

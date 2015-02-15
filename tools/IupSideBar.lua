@@ -1,4 +1,3 @@
-require "gui"
 SideBar_obj = {}
 TabBar_obj = {}
 
