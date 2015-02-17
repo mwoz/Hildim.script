@@ -55,6 +55,8 @@ function FileMan_ListFILL()
             return a.writetime > b.writetime
         end
     end)
+    local maskVal = (file_mask..'*'):gsub('%.', '%%.'):gsub('%*', '.*'):lower()
+    maskVal = '^'..maskVal..'$'
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_dir - 1))
@@ -73,14 +75,16 @@ function FileMan_ListFILL()
                 j = j + 1
             end
         else
-            list_dir:setcell(j, 1,  GetExtImage(table_dir[i].name))
-            list_dir:setcell(j, 2, table_dir[i].name)
-            list_dir:setcell(j, 3, table_dir[i].attributes)
-            list_dir:setcell(j, 4, '')
-            if shell.bit_and(table_dir[i].attributes,1) == 1 then
-                iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '190 0 0')
+            if table_dir[i].name:lower():find(maskVal) and shell.bit_and(table_dir[i].attributes,2) ~= 2 then
+                list_dir:setcell(j, 1,  GetExtImage(table_dir[i].name))
+                list_dir:setcell(j, 2, table_dir[i].name)
+                list_dir:setcell(j, 3, table_dir[i].attributes)
+                list_dir:setcell(j, 4, '')
+                if shell.bit_and(table_dir[i].attributes,1) == 1 then
+                    iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '190 0 0')
+                end
+                j = j + 1
             end
-            j = j + 1
         end
 	end
 	list_dir.focus_cell = "1:1"

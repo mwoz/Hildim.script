@@ -10,6 +10,9 @@ ie=If | Then \r\nElse\r\nEnd If\r\n
 elseif=ElseIf | Then
 sub=Sub |()\r\nEnd Sub\r\n
 fun=Function |()\r\nEnd Function\r\n
+ps=Property Set |()\nEnd Property\n
+pl=Property Let |()\nEnd Property\n
+pg=Property Get |()\nEnd Property\n
 rep=Sub |_reply(handle, code, error, m)\n\tIf CHECK_DB_ERROR(error, m, Null, True, True, Null) = False Then Exit Sub\nEnd Sub
 msb=Form.MsgBox "|"
 'l='#DEBUG Form.SysLog |,true

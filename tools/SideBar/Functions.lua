@@ -29,7 +29,7 @@ local _backjumppos -- store position if jumping
 local line_count = 0
 local layout --имена полей - имена бранчей, значения - true/false, если отсутствует - значит открыто
 layout = {}
-
+local m__CLASS = '~~ROOT'
 local Lang2lpeg = {}
 do
 	local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
@@ -225,7 +225,7 @@ do
 		Lang2lpeg.JScript = lpeg.Ct(patt)
 	end --^----- JS ------^--
 
-	-- do --v----- VB ------v--
+	do --v----- VB ------v--
 		-- redefine common patterns
 		local SPACE = (S(" \t")+P"_"*S(" \t")^0*(P"\r\n"))^1
 		local SC = SPACE
@@ -254,43 +254,41 @@ do
 		--local stt=P("<stringtable>")
 
 		local restype = (P"As"+P"as")*SPACE*Cg(C(AZ^1),'')
-		let = Cg(let*Cc(true),'Property Let')
-		get = Cg(get*Cc(true),'Property Get')
-		set = Cg(set*Cc(true),'Property Set')
-		private = Cg(private*Cc(true),' Private')
-		public = Cg(public*Cc(true),' Public')
+		let = Cg(let*Cc(false),'{LET}')
+		get = Cg(get*Cc(false),'{GET}')
+		set = Cg(set*Cc(false),'{SET}')
+		private = Cg(private*Cc(false),'{PRIVATE}')
+		public = Cg(public*Cc(false),'{PUBLIC}')
+        p = Cg(p*Cc(true),'Property')
 		p = NL*((private+public)*SC^1)^0*p*SC^1*(let+get+set)
-		local ps = NL*(private+public)*SC^1*Cg(s*Cc(true),'Sub')
-		s = NL*Cg(s*Cc(true),'Sub')
-		local pf = NL*(private+public)*SC^1*Cg(f*Cc(true),'Function')
-		f = NL*Cg(f*Cc(true),'Function')
+		s = NL*((private+public)*SC^1)^0*Cg(s*Cc(true),'Sub')
+		f = NL*((private+public)*SC^1)^0*Cg(f*Cc(true),'Function')
 		dim = NL*Cg(dim*Cc(true),"Dim")
 		con = NL*Cg(con*Cc(true),"Constant")
 		fr = NL*Cg(fr*Cc(true),"Frame")
 		str = NL*Cg(str*Cc(true),"String")
 		class = NL*Cg(class*Cc(true),"Class")
+        local ec = NL*AnyCase"end"*SC^1*(AnyCase"class")  / (function(a,b) m__CLASS = '~~ROOT'; end)
 
 		local e = NL*AnyCase"end"*SC^1*(AnyCase"sub"+AnyCase"function"+AnyCase"property")
-		local body = (IGNORED^1 + IDENTIFIER + 1 - f - s - p - ps - pf - e)^0*e
+		local body = (IGNORED^1 + IDENTIFIER + 1 - f - s - p - e)^0*e
 
 		-- definitions to capture:
 		f = f*SC^1*I*SC^0*par
 		p = p*SC^1*I*SC^0*par
 		s = s*SC^1*I*SC^0*par
-		ps = ps*SC^1*I*SC^0*par
-		pf = pf*SC^1*I*SC^0*par
 		con = con*SC^1*I
 		dim = dim*SC^1*I
 		fr = fr*BR^1*I
 		str = str*BR^1*I
-		class = class*SC^1*I
-		local def = Ct((f + s + p + ps + pf)*(SPACE*restype)^-1)*body + Ct(dim+con+fr+str+class)
+		class = class*SC^1*(I / function(a,b) m__CLASS = a; return a,b end)
+		local def = Ct(((f + s + p)*(SPACE*restype)^-1)*(Cc('')/function() return m__CLASS end))*body + Ct(dim+con+fr+str+class) + ec
 		-- resulting pattern, which does the work
 
 		local patt = (def + IGNORED^1 + IDENTIFIER + (1-NL)^1 + NL)^0 * EOF
 
 		Lang2lpeg.VisualBasic = lpeg.Ct(patt)
-	-- end --^----- VB ------^--
+	end --^----- VB ------^--
 
 
 	do --v------- Python -------v--
@@ -496,7 +494,7 @@ local function Functions_GetNames()
 	local ext = props["FileExt"]:lower() -- a bit unsafe...
 	local lang = Ext2Lang[ext]
     if lang == "VisualBasic" then
-        fnTryGroupName = (function(s) if s == 'Sub' or s == 'Function' then return '__ROOT' else return s end end)
+        fnTryGroupName = (function(s,f) if s == 'Sub' or s == 'Function'  or s == 'Property' then return f else return s end end)
     elseif lang == 'Lua' then
         fnTryGroupName = (function(s) if s == '' then return 'Function' end return s end)
     else
@@ -517,6 +515,7 @@ local function Functions_GetNames()
 	local textAll = editor:GetText()
 	local start_code_pos = start_code and editor:findtext(start_code, SCFIND_REGEXP) or 0
 
+    m__CLASS = '~~ROOT'
 	-- lpegPattern = nil
 	table_functions = lpegPattern:match(textAll, start_code_pos+1) -- 2nd arg is the symbol index to start with
 	--SideBar_obj._DEBUG.timerstop('Functions_GetNames','lpeg')
@@ -526,16 +525,19 @@ local function GetFlags (funcitem)
 	if not _show_flags then return '' end
 	local res = ''
 	local add = ''
+    local res2 = ''
 	for flag,value in pairs(funcitem) do
 		if type(flag)=='string' then
-			if type(value)=='string' then	add = flag .. value
+			if type(value)=='boolean' then	if value then add = flag else res2 = res2..flag; add = '' end
+			elseif type(value)=='string' then	add = flag .. value
 			elseif type(value)=='number' then add = flag..':'..value
-			else add = flag end
+			else add = flag  end
 			res = res .. add
 		end
 	end
+
 	--if res~='' then res = res .. ' ' end
-	return res or ''
+	return (res or ''), res2
 end
 
 local function GetParams (funcitem)
@@ -544,16 +546,23 @@ local function GetParams (funcitem)
 end
 
 local function fixname (funcitem)
-	local flag = GetFlags(funcitem)
-	return funcitem[1]..GetParams(funcitem),flag
+	local flag, flag2 = GetFlags(funcitem)
+	return funcitem[1]..flag2..GetParams(funcitem),flag
+end
+
+function getPath(id)
+    if iup.GetAttributeId(tree_func, 'KIND', id) == 'BRANCH' then return '' end
+    local id2 = iup.GetAttributeId(tree_func, 'PARENT', id)
+    if id2 == nil then return '' end
+    return iup.GetAttributeId(tree_func, 'TITLE', id2)..':'..iup.GetAttributeId(tree_func, 'TITLE', id)
 end
 
 local function Functions_ListFILL()
 	if SideBar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_obj.Tabs.functions.id then return end
 	local function SortFuncList(a,b)
 		if _group_by_flags then --Если установлено, сначала сортируем по флагу
-			local fa = fnTryGroupName(GetFlags(a))
-			local fb = fnTryGroupName(GetFlags(b))
+			local fa = fnTryGroupName(GetFlags(a), a[4])
+			local fb = fnTryGroupName(GetFlags(b), b[4])
 			if fa ~=fb then return fa < fb end
 		end
 		if _sort == 'order' then
@@ -591,49 +600,49 @@ local function Functions_ListFILL()
 
         if _group_by_flags then
 
-            if tbFolders[fnTryGroupName(f)] == nil then
+            if tbFolders[fnTryGroupName(f, a[4])] == nil then
                 j = j + 1
-                tbBranches[table.maxn(tbBranches) + 1] = fnTryGroupName(f)
-                if fnTryGroupName(f) == '__ROOT' then
-                    tbFolders[fnTryGroupName(f)] = -i +1
-                else tbFolders[fnTryGroupName(f)] = table.maxn(tbBranches) end
+                tbBranches[table.maxn(tbBranches) + 1] = fnTryGroupName(f, a[4])
+                if fnTryGroupName(f, a[4]) == '~~ROOT'  then
+                    tbFolders[fnTryGroupName(f, a[4])] = -i +1
+                else tbFolders[fnTryGroupName(f, a[4])] = table.maxn(tbBranches) end
 			end
 		else
 
             iup.SetAttribute(tree_func, 'ADDLEAF'..j - 1, t)
             iup.SetAttribute(tree_func, 'IMAGE'..j, 'IMAGE_'..f)
-            lineMap[j] = a[2]
+            lineMap[getPath(j)] = a[2]
 		end
         j = j + 1
 	end
 
     if _group_by_flags then
         for i = table.maxn(tbBranches), 1, -1 do
-            if  tbBranches[i] ~= '__ROOT' then
+            if  tbBranches[i] ~= '~~ROOT' then
                 iup.SetAttribute(tree_func, 'ADDBRANCH0', tbBranches[i])
             end
         end
 
-        local f2 = 0
-        if tbFolders['__ROOT'] ~= nil then f2 = tbFolders['__ROOT'] + #table_functions  end
+        --[[local f2 = 0
+        if tbFolders['~~ROOT'] ~= nil then f2 = tbFolders['~~ROOT'] + #table_functions  end]]
         for i, a in ipairs(table_functions) do
             local t,f = fixname(a)
             local node = {}
             node.leafname = t
             node.imageid = f
 
-            --if tbFolders[fnTryGroupName(f)] == nil then j = j + 1 end
-            local f1 = tbFolders[fnTryGroupName(f)]
+            local f1 = tbFolders[fnTryGroupName(f, a[4])]
 
             iup.SetAttribute(tree_func, 'ADDLEAF'..i +  f1 - 1, t)
             iup.SetAttribute(tree_func, 'IMAGE'..i +  f1, 'IMAGE_'..f)
 
-            if fnTryGroupName(f) == '__ROOT' then
+--[[            if fnTryGroupName(f, a[4]) == '~~ROOT' then
                 k = i + f1
             else
                 k = i + f1 + f2
-            end
-            lineMap[k] = a[2]
+            end]]
+
+            lineMap[getPath(i +  f1)] = a[2]
         end
     end
     -- Восстановим  лэйаут
@@ -687,7 +696,7 @@ function ShowCompactedLine(line_num)
 end
 
 local function Functions_GotoLine()
-	local pos = lineMap[tonumber(tree_func.value)]
+	local pos = lineMap[getPath(tree_func.value)]
 	if pos ~= nil then
 		OnNavigation("Func")
 		ShowCompactedLine(pos)
@@ -743,9 +752,11 @@ local function  _OnUpdateUI()
             if def_line_count ~= 0 then --С прошлого раза увеличилось количество строк в файле
                     local cur_line = editor:LineFromPosition(editor.CurrentPos)
                     for i = 1, tree_func.count - 1 do
-                        if lineMap[i] ~=nil and lineMap[i] > cur_line then
+                        --if lineMap[i] ~=nil and lineMap[i] > cur_line then
+                        local iDx = getPath(i)
+                        if lineMap[iDx] ~= nil and lineMap[iDx] ~= '' and lineMap[iDx] >= cur_line then
                             -- в мэпе для всех функций ниже текущей строки изменим значение на сдвиг
-                            lineMap[i] = lineMap[i] + def_line_count
+                            lineMap[iDx] = lineMap[iDx] + def_line_count
                         end
                     end
                 line_count = line_count_new
@@ -767,7 +778,8 @@ local function  _OnUpdateUI()
                     iup.SetAttribute(tree_func, "MARK"..currFuncData, "NO")
                 end
                 for  i=0, tree_func.count do
-                    if lineMap[i] == fData then
+                    local iDx = getPath(i)
+                    if lineMap[iDx] == fData then
                         -- выделяем "функцию", в теле которой находится пользователь, но только если она не в свернутой папке - иначе выделяем саму папку
                         local pId = tonumber(iup.GetAttribute(tree_func, "PARENT"..i))
                         if iup.GetAttribute(tree_func, "STATE"..pId) == 'EXPANDED' then pId = i end

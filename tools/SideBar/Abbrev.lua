@@ -109,6 +109,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     local txtH2 = iup.text{size='60x0',mask="/d+"}
     local txtW2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
 
+    local _,_, ctype = s:find('type="(%l+)"')
     local txtCp = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
     local function onCmbAll(h)
         if tA1 == nil then return end
@@ -271,7 +272,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
             end
             return 'captionwidth="'..txtCp.value..'"'
         end) end
-        if tonumber(txtCp.value) == 0 then
+        if tonumber(txtCp.value) == 0 and (ctype ~= 'button' and ctype ~= 'label' and ctype ~= 'link' and ctype ~= 'checkbox') then
             s = s:gsub('caption=".-"', ''):gsub('caption_ru=".-"', '')
         end
         if bDdx then
