@@ -24,7 +24,17 @@ local table_functions = {}
 -- 1 - function names
 -- 2 - line number
 -- 3 - function parameters with parentheses
-
+--[[local function prnTb(tb, n)
+    local s = string.rep('    ', n)
+    for k,v in pairs(tb) do
+        if type(v) == 'table' then
+            print(s..k..'->  Table')
+            prnTb(v, n + 1)
+        else
+            print(s..k..'->  ', v)
+        end
+    end
+end]]
 local _backjumppos -- store position if jumping
 local line_count = 0
 local layout --имена полей - имена бранчей, значения - true/false, если отсутствует - значит открыто
@@ -248,17 +258,17 @@ do
         local str=Cmt(AnyCase"<string id=",(function(s,i) if _group_by_flags then return i else return nil end end))
 		local con=Cmt(AnyCase"const",(function(s,i) if _group_by_flags then return i else return nil end end))
 		local dim=Cmt(AnyCase"dim",(function(s,i) if _group_by_flags then return i else return nil end end))
-		local class=Cmt(AnyCase"class",(function(s,i) if _group_by_flags then return i else return nil end end))
+		--local class=Cmt(AnyCase"class",(function(s,i) if _group_by_flags then return i else return nil end end))
 
 		--local scr=P("<script>")
 		--local stt=P("<stringtable>")
 
 		local restype = (P"As"+P"as")*SPACE*Cg(C(AZ^1),'')
-		let = Cg(let*Cc(false),'{LET}')
-		get = Cg(get*Cc(false),'{GET}')
-		set = Cg(set*Cc(false),'{SET}')
-		private = Cg(private*Cc(false),'{PRIVATE}')
-		public = Cg(public*Cc(false),'{PUBLIC}')
+		let = Cg(let*Cc(false),' {LET}')
+		get = Cg(get*Cc(false),' {GET}')
+		set = Cg(set*Cc(false),' {SET}')
+		private = Cg(private*Cc(false),' {PRIVATE}')
+		public = Cg(public*Cc(false),' {PUBLIC}')
         p = Cg(p*Cc(true),'Property')
 		p = NL*((private+public)*SC^1)^0*p*SC^1*(let+get+set)
 		s = NL*((private+public)*SC^1)^0*Cg(s*Cc(true),'Sub')
@@ -267,8 +277,7 @@ do
 		con = NL*Cg(con*Cc(true),"Constant")
 		fr = NL*Cg(fr*Cc(true),"Frame")
 		str = NL*Cg(str*Cc(true),"String")
-		class = NL*Cg(class*Cc(true),"Class")
-        local ec = NL*AnyCase"end"*SC^1*(AnyCase"class")  / (function(a,b) m__CLASS = '~~ROOT'; end)
+        local ec = NL*AnyCase"end"*SC^1*(AnyCase"class") / (function(a,b) m__CLASS = '~~ROOT'; end)
 
 		local e = NL*AnyCase"end"*SC^1*(AnyCase"sub"+AnyCase"function"+AnyCase"property")
 		local body = (IGNORED^1 + IDENTIFIER + 1 - f - s - p - e)^0*e
@@ -281,14 +290,14 @@ do
 		dim = dim*SC^1*I
 		fr = fr*BR^1*I
 		str = str*BR^1*I
-		class = class*SC^1*(I / function(a,b) m__CLASS = a; return a,b end)
-		local def = Ct(((f + s + p)*(SPACE*restype)^-1)*(Cc('')/function() return m__CLASS end))*body + Ct(dim+con+fr+str+class) + ec
+		local class = (AnyCase"class")*SC^1*(I / function(a,b) m__CLASS = a; end)
+		local def = Ct(((f + s + p)*(SPACE*restype)^-1)*(Cc('')/function() return m__CLASS end))*body + Ct(dim+con+fr+str)+class + ec
 		-- resulting pattern, which does the work
 
 		local patt = (def + IGNORED^1 + IDENTIFIER + (1-NL)^1 + NL)^0 * EOF
 
 		Lang2lpeg.VisualBasic = lpeg.Ct(patt)
-	end --^----- VB ------^--
+	end --^----- VB ------^--]]
 
 
 	do --v------- Python -------v--
@@ -518,7 +527,9 @@ local function Functions_GetNames()
     m__CLASS = '~~ROOT'
 	-- lpegPattern = nil
 	table_functions = lpegPattern:match(textAll, start_code_pos+1) -- 2nd arg is the symbol index to start with
-	--SideBar_obj._DEBUG.timerstop('Functions_GetNames','lpeg')
+
+    --prnTb(table_functions,1)
+    --SideBar_obj._DEBUG.timerstop('Functions_GetNames','lpeg')
 end
 
 local function GetFlags (funcitem)
@@ -594,6 +605,7 @@ local function Functions_ListFILL()
     local rootCount = 0
 	for i, a in ipairs(table_functions) do
 		local t,f = fixname(a)
+
         local node = {}
         node.leafname = t
         node.imageid = f

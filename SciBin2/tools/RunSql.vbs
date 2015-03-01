@@ -161,7 +161,7 @@ Sub AfterInclude(outBody)
     outBody = outBody & "go" & vbCrLf
 End Sub
 
-'СЛужебные функции
+'Служебные функции
 Function DOS2Win(DOSstr)
     ' Перекодировка строки вывода программ
     WINstr=""

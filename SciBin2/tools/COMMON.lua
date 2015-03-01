@@ -338,7 +338,29 @@ function DoForBuffers(func, ...)
     UnBlockEventHandler"OnSwitchFile"
     return func(nil)
 end
+function debug_prnTb(tb, n)
+    local s = string.rep('    ', n)
+    for k,v in pairs(tb) do
+        if type(v) == 'table' then
+            print(s..k..'->  Table')
+            debug_prnTb(v, n + 1)
+        else
+            print(s..k..'->  ', v)
+        end
+    end
+end
 
+function debug_prnArgs(...)
+    print('-------------')
+    for i = 1, #arg do
+        if type(arg[i]) == 'table' then
+            print(i..'->  Table')
+            debug_prnTb(arg[i], 1)
+        else
+            print(i..'->  ',arg[i])
+        end
+    end
+end
 -- ==============================================================
 -- Функции, выполняющиеся только один раз, при открытии первого файла
 --   ( Выполнить их сразу, при загрузке SciTEStartup.lua, нельзя
