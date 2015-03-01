@@ -57,9 +57,17 @@ function FileMan_ListFILL()
     end)
     local maskVal = (file_mask..'*'):gsub('%.', '%%.'):gsub('%*', '.*'):lower()
     maskVal = '^'..maskVal..'$'
+    local j = 0
+
+	for i = 1, #table_dir do
+        if (not table_dir[i].isdirectory) and (not table_dir[i].name:lower():find(maskVal) or shell.bit_and(table_dir[i].attributes,2) == 2) then
+            j = j + 1
+        end
+	end
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
-    iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_dir - 1))
+    iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_dir - 1 - j))
+
 	list_dir:setcell(1, 1, 'IMAGE_UpFolder')
 	list_dir:setcell(1, 2, '..')
 	list_dir:setcell(1, 3, 0)
@@ -333,10 +341,10 @@ local function FileMan_ChangeReadOnly()
     local fname, d, attr = FileMan_GetSelectedItem()
 	if fname == '' then return end
 	fname = current_path..fname
-    if shell.bit_and(attr, 1) then
+    if shell.bit_and(attr, 1) == 1 then
         attr = attr - 1
     else
-        attr = attr - 1
+        attr = attr + 1
     end
     shell.setfileattr(fname, attr)
     FileMan_ListFILL()

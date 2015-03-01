@@ -21,6 +21,8 @@ local alltags = {
 'padbottompx',
 'fixedheight',
 'fixedwidth',
+'type',
+'template',
 'autowidth',
 'contentheight',
 'contentheightpx',
@@ -71,7 +73,6 @@ local alltags = {
 'text',
 'title',
 'tooltiptext',
-'type',
 'value',
 'tag',
 '$$$$'}
