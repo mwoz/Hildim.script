@@ -208,6 +208,9 @@ form.LicenseRequest(strRadiusLicenseKey)
 form.AddFramesXml(strXmlFrames, strInsertAfter) Добавляет новые фреймы на форму по их XML описанию.\nstrXmlFrames  - XML фреймов (теги <Frame> без внешнего обрамления)\nstrInsertAfter - имя фрейма, после которого будут вставлены фреймы("" - вставить последними)
 form.Parent Возвращает ссылку на родительский контрол (Container, Frame, Form). Для формы верхнего уровня возвращает Nothing.
 form.ControlProperties(strCtrlName) Устанавливает/Возвращает у контрола переданный набор свойств. Внимание некоторые свойства могут быть установлены только в момент создания контрола!
+form.Lock(bLock, msgCtrlsNoLock, iShowClockTimeout) Блокирует пользовательский ввод всех контролов формы, кроме контролов, имена которых\nпереданы в качестве полей параметра msgCtrlsNoLock.\nИмена полей передаются с именами всех\nродительских контролов\сабформ соединенных через символ «\»: ShowClockTimeout – опциональный парамтр. \nВремя в мс, через которое курсор над формой превратится в песочные часы
+form.IsLocked Read-only;Возвращает текущее состояние\nблокировки формы установленное методом Lock
+
 
 #$container=form("cnt
 #$container=controlscoll%.add(.*"CONTAINER
