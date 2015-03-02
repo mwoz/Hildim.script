@@ -230,10 +230,10 @@ local function refControlPos(findSt, findEnd, s, dInd)
     --debug_prnTb(defSizes, 1)
     local CtrlX, CtrlBtn1W, CtrlCodeW,CtrlNameW = {},{},{},{}
     local CtrlX1, CtrlBtn1W1, CtrlCodeW1,CtrlNameW1 = {},{},{},{}
-    CtrlX1[defSizes[1].x] = defSizes[1].x
-    CtrlBtn1W1[defSizes[2].w] = defSizes[2].w
-    CtrlCodeW1[defSizes[3].w] = defSizes[3].w
-    CtrlNameW1[defSizes[4].w] = defSizes[4].w
+    CtrlX[defSizes[1].x] = defSizes[1].x
+    CtrlBtn1W[defSizes[2].w] = defSizes[2].w
+    CtrlCodeW[defSizes[3].w] = defSizes[3].w
+    CtrlNameW[defSizes[4].w] = defSizes[4].w
 
     local iPl,iPY,iPpY, iPX = 0,0,0,0
     local iTmpX,iTmpY,iTmpYp = 0,0, 0
@@ -312,7 +312,8 @@ local function refControlPos(findSt, findEnd, s, dInd)
     for i, s in pairs(CtrlCodeW1) do if tonumber(s) > 0 then iup.SetAttribute(Ctrl("cmbCode"), l, s);l=l+1 end end
     l = 1
     for i, s in pairs(CtrlNameW1) do if tonumber(s) > 0 then iup.SetAttribute(Ctrl("cmbName"), l, s);l=l+1 end end
-    Ctrl("cmbX").value = 1; Ctrl("cmbBtn1").value = CtrlBtn1W1[1]; Ctrl("cmbCode").value = CtrlCodeW1[1]; Ctrl("cmbName").value = CtrlNameW1[1]
+
+    Ctrl("cmbX").value = 1; Ctrl("cmbBtn1").value = CtrlBtn1W1[1]..''; Ctrl("cmbCode").value = CtrlCodeW1[1]; Ctrl("cmbName").value = CtrlNameW1[1]
     if bInPrev then
         Ctrl('cmbX').value = iPX..''
         Ctrl('numY').value = iPpY..''
@@ -346,19 +347,22 @@ local function refControlPos(findSt, findEnd, s, dInd)
         end
         if Ctrl('chkCode').value == 'ON' then
             s = s..Lines[3]:gsub('position="(%d+);(%d+);%d+;(%d+)"', 'position="'..x..';%2;'..Ctrl('cmbCode').value..';'..h..'"', 1)
-            x = x + tonumber(Ctrl('cmbCode').value) + 2
+            x = x + tonumber(Ctrl('cmbCode').value)
         end
         if Ctrl('chkName').value == 'ON' then
+            x = x + defSizes[4].x - defSizes[3].x - defSizes[3].w
             s = s..Lines[4]:gsub('position="(%d+);(%d+);%d+;(%d+)"', 'position="'..x..';%2;'..Ctrl('cmbName').value..';'..h..'"', 1)
-            x = x + tonumber(Ctrl('cmbName').value) + defSizes[3].x - defSizes[2].x
+            x = x + tonumber(Ctrl('cmbName').value)
         end
         if Ctrl('chkBtn2').value == 'ON' then
+            x = x + defSizes[5].x - defSizes[4].x - defSizes[4].w
             s = s..Lines[5]:gsub('position="%d+;(%d+);(%d+);(%d+)"', 'position="'..x..';%1;'..h..';'..h..'"', 1)
-            x = x + h + defSizes[4].x - defSizes[2].x
+            x = x + h
         end
         if Ctrl('chkInfo').value == 'ON' then
+            x = x + defSizes[6].x - defSizes[5].x - defSizes[5].w
             s = s..Lines[6]:gsub('position="%d+;(%d+);(%d+);(%d+)"', 'position="'..x..';%1;%2;'..h..'"', 1)
-            x = x + defSizes[5].w + defSizes[5].x - defSizes[4].x
+            x = x + defSizes[6].w + defSizes[6].x - defSizes[5].x- defSizes[5].w
         end
         s = s..Lines[7]:gsub('‹REFCTL›', '')
 
