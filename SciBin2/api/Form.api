@@ -1017,13 +1017,17 @@ err.Raise(number, source, description, helpfile, helpcontext)
 err.Clear()
 
 #$udoc=doc(
-udoc.Value
-udoc.UserInput
+udoc.SubMsg Получение произвольного сабмессаджа\nиз основного мессаджа объекта
+udoc.Value  Получение значения из поля мессаджа объекта.\nУстановка значения в контрол
+udoc.UserInput Эмуляция пользовательского ввода
+udoc.Ref Получение сабмессаджа реф-контрола.\nУстановка значения рефконтрола по пути в мессадже объекта
+udoc.SetRef Установка значения рефконтрола по внешнему массаджу
 udoc.Visible
 udoc.Enable
+udoc.EnableSetDefault Блокировка,разблокировка контрола\nс одновременной "очисткой" при блокировании
 udoc.Caption
-udoc.Restriction
-udoc.SetValueHook
+udoc.Restriction  Установка,получение в теге рефконтрола\nsql фрагмента с ограничением поиска
+udoc.SetValueHook Установка ValueHook хендлера для контрола
 
 app.CreateMessage
 app.Trace(strMsg)
@@ -1049,3 +1053,53 @@ objsqlo.SelfError
 objsqlo.HookError
 objsqlo.Database
 objsqlo.Timeout
+
+papp.Name() Имя приложения
+papp.User() имя пользователя Радиус
+papp.UserId() id пользователя Радиус
+papp.SettingsAutoCloseTck()
+papp.SettingsShowKISWarnings()
+papp.SettingsShowKISConfirms()
+papp.SettingsAskForInsertOverDeal()
+papp.SettingsAutoCheckLimits()
+papp.SessionValue(Path) возвращает/устанавливает значение для заданного ключа реестра сессии из Application.PropertyBag
+papp.SessionMsg(strKey) возвращает message для заданного ключа реестра сессии из Application.PropertyBag
+papp.SettingsValue(Path) возвращает/устанавливает значение для заданного ключа реестра в сеттингах из Application.PropertyBag
+papp.Settings(strKey) возвращает message для заданного ключа реестра в сеттингах из Application.PropertyBag
+papp.WorkdataCurrentValue(Path) возвращает/устанавливает значение для временных данных сессии в WORKDATA из Application.PropertyBag
+papp.WorkdataMsg(Path) возвращает message для заданного ключа реестра сессии из Application.PropertyBag
+papp.objTemplate() Возвращает объект класса открытия формы
+#$objtmp=papp.objTemplate()
+papp.TreeMsg2FlatMsg(msgFrom, msgTo, bCopyRootFields, strPath) превращает tree-msg msgFrom во flat-msg msgTo (все поля из сабмессаджей превращаются в root-поля с префиксом, представляющим путь к полю с разделителями "_")
+papp.ResetMsgContent(msg) очищает содержимое мессаджа, в отличие от стандартной процедуры - не очищает имя msg
+papp.UpdateMsgFromMsg(msgDst, msgSrc) полностью замещает данные в msgDst на данные из msgScr
+papp.DateTime2Seconds(dttime) Преобразует переданное значение в количество секунд с начала дня - для отображения времени в тайм-контроле
+papp.Date2Str(dtIn) преобразует дату в строку (для хранения в реестре и т.п.)
+papp.Str2Date(strIn) преобразует дату из строки (полученную из реестра и т.п.) в дату vbs
+papp.Date2StrLoc(dtIn) преобразует дату в строку (для формирования сообщений пользователю и т.п.)
+papp.Date2Maturity(dtIn) Преобразует дату в строку формата Maturity Кондора - SEP15 и пр
+papp.StrTag2Msg(strTag) Функция создает мессадж из строки тэга
+papp.DblFromStr(strNum) переводит строку с любым десятичным разделителем (. или ,) в дробное число
+papp.IsLicenseInstalled(strLicense)
+papp.IsValueOneOfTypes( strTypes, strValue ) возвращает True, когда strValue -  одно из значений, перечисленных в strTypes
+papp.IsValueOneOfTypesM( strTypes, strValue ) возвращает True, когда strValue -  одно из МНОГОБУКВЕННЫХ значений, перечисленных в strTypes
+papp.Help_GetUrl() Возвращает путь к Рубрике
+papp.HlpDropDelay() Возвращает задержку по умолчанию между последним нажатием клавиши в текстбоксе и вызовом эвента Changing
+papp.HlpDropMsg(msgData) Возвращает мессадж для хранения данных хелплиста между его получением и кликом пользователя(один мессадж на всю форму)
+papp.HlpListEnabled()
+papp.FormatSTR(str, arNamesVals) Функция заменяет в строке str местодержатели переменных на их значения
+papp.FormatSQL(str, arNamesVals) Функция заменяет в строке str местодержатели переменных на их значения и удаляет SQL комменты
+papp.SQLRemoveComments(strSql) Возвращает strSql с уделенными строковыми (начинающимися на--) комментариями
+papp.Msg2Xml(msgObject, strName)
+papp.InitKustomCombo(f) Для формы f заполняем ее комбобоксы чойсами из тегов dnc_Source
+papp.GetParentHandler(control) Возвращает контейнер, содержащий хендлер для данного контрола
+papp.XmlAppMult2Msg(strXml)
+papp.ParseBracketsStr(f, strSource, fnOnReplace, opaque, strErrorPrefix)
+papp.GetRefFilds(strObjName, chType)
+papp.Metadata(strObj)
+papp.GenWindowMsg(strXmlMetadata)
+papp.CreateNewRow(xmlRow, msgNew)
+
+objtmp.PropertyBag(val)
+objtmp.bActiveTab(val)
+objtmp.OpenObj(vIdx, strTemplate, bReplace)

@@ -414,7 +414,7 @@ function s:MarkResult()
     if p > 0 then
         findrez:SetSel(0,p)
         findrez:Colourise(0,p)
-        self:findWalk(bInSel, self:onMarkOne(31, false))
+        self:findWalk(true, self:onMarkOne(31, false))
         findrez:SetSel(0,0)
     end
 

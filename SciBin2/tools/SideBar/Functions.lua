@@ -883,6 +883,14 @@ local function SaveLayoutToProp()
     _G.iuprops['sidebar.functions.layout'] = prp
 end
 
+local function Functions_Print()
+    for i,v in ipairs(table_functions) do
+        if type(v) == 'table' and ( v.Property or v.Function or v.Sub) then
+            print(v[4]..' '..v[1]..v[3])
+        end
+    end
+end
+
 local function Finc_Init()
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
     local w
@@ -911,6 +919,7 @@ local function Finc_Init()
               },
               iup.item{title="Show Parameters",value=Iif(_show_params, "ON", "OFF"),action=Functions_ToggleParams},
               iup.item{title="Group By Flags",value=Iif(_group_by_flags, "ON", "OFF"),action=Functions_ToggleGroup},
+              iup.item{title="Print",action=Functions_Print},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         elseif but == 49 and iup.isdouble(status) then --dbl left
             line = Functions_GotoLine()

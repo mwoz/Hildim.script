@@ -18,14 +18,14 @@ msb=Form.MsgBox "|"
 /f=<frame name="frm|" backcolor="#ffffff" height="12">\r\r\n</frame>
 /ft=<frame name="frmTab" backcolor="#ffffff" height="24" ><control name="tabCtrl" type="tabctrl" position="5;4;100;20" padleft="5" padright="5"/>\r\r\n</frame>
 /fc=<frame name="grid" height="120" backcolor="#ffffff"><control type="groupbox" position="5;0;484;115" caption="Dividends"/>\r\n<control name="grid" type="cube" position="10;12;474;96" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/></frame>
-/ref=<control name="cnt%SEL%" position="10;0;415;12"  type="container" tag="ddx_MetaBind=Y;ddx_ContainerType=Ref"  >\n    <control name="btn1" caption="%SEL%:" caption_ru="%SEL%:" position="0;0;90;12" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>\n    <control name="Code"  position="90;0;100;12"  type="textbox"/>\n    <control name="Name"  position="193;0;197;12"  type="textbox" tag="ddx_MetaBind=Y"/>\n    <control name="btn2"  position="393;0;12;12" type="button" style="F"/>\n    <control name="btnInfo" caption="Info" caption_ru="Èíôî" position="428;0;33;12" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>\n</control>‹REFCTL›\n
+/ref=<control name="cnt%SEL%" position="10;0;415;12"  type="container" tag="ddx_MetaBind=Y;ddx_ContainerType=Ref"  >\n    <control name="btn1" caption="%SEL%:" caption_ru="%SEL%:" position="0;0;90;12" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>\n    <control name="Code"  position="90;0;100;12"  type="textbox"/>\n    <control name="Name"  position="193;0;197;12"  type="textbox" tag="ddx_MetaBind=Y"/>\n    <control name="btn2"  position="393;0;12;12" type="button" style="F"/>\n    <control name="btnInfo" caption="Info" caption_ru="Èíôî" position="408;0;33;12" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>\n</control>‹REFCTL›\n
 /num=<control name="num%SEL%|" caption="%SEL%:" position="10;0;180;11" captionwidth="90" type="numberbox" tag="ddx_Enabled=Y"/>‹FMCTL›
 /txt=<control name="txt%SEL%|" caption="%SEL%:" position="10;0;180;11" captionwidth="90" type="textbox" tag="ddx_Enabled=Y"/>‹FMCTL›
 /lbl=<control caption="%SEL%|" caption_ru="%SEL%" position="10;0;70;11" type="label"/>‹FMCTL›
-/cmm=<control name="cmb%SEL%|" caption="%SEL%:" position="10;0;180;11" captionwidth="90" type="combobox" tag="ddx_Enabled=Y"/>‹FMCTL›
-/cmb=<control name="cmb%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="combobox" tag="ddx_Enabled=Y">\n\t<option code="" caption=""/>\n</control>‹FMCTL›
+/cmm=<control name="cmb%SEL%|" caption="%SEL%:" position="10;0;180;11" captionwidth="90" type="combobox" style="F" tag="ddx_Enabled=Y"/>‹FMCTL›
+/cmb=<control name="cmb%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="combobox" style="F" tag="ddx_Enabled=Y">\n\t<option code="" caption=""/>\n</control>‹FMCTL›
 /cub=<control name="grid" position="10;12;474;96" type="cube" multiselect="N" style="N,Y,1,Y,#ffffff,#f0f0f0" groupstyle="#e0e0e0,#0000ff"/>‹FMCTL›
-/dt=<control name="dt%SEL%|" caption="%SEL%:" position="10;0;180;11" captionwidth="90" type="datebox" tag="ddx_Enabled=Y"/>‹FMCTL›
+/dt=<control name="dt%SEL%|" caption="%SEL%:" position="10;0;180;11" captionwidth="90" type="datebox" style="F" tag="ddx_Enabled=Y"/>‹FMCTL›
 /tm=<control name="tm%SEL%|" caption="%SEL%" position="10;0;180;11" captionwidth="90" type="timebox"/>‹FMCTL›
 /grp=<control type="groupbox" caption="|" position=""/>‹FMCTL›
 /lnk=<control name="|%SEL%"  caption="%SEL%" position="10;0;70;10" type="link" tabstop="N" forecolor="0000ff" hforecolor="ff0000"/>‹FMCTL›
