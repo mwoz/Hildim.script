@@ -277,7 +277,9 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
             if bSearchCapt then scite.SendFindRez(SCI_REPLACESEL, '<'..strLive..'\n' ) end
             scite.SendFindRez(SCI_SETSEL,0,0)
             local strCapt = ''
-            if bSearchCapt then strCapt = strCapt..'>Search for "'..self.findWhat..'" in "'..props[Iif(_G.iuprops['findrez.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8(1251)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
+            local strSrch = self.findWhat
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
+            if bSearchCapt then strCapt = strCapt..'>Search for "'..strSrch..'" in "'..props[Iif(_G.iuprops['findrez.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8(1251)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
 
             if _G.iuprops['findrez.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]:from_utf8(1251)..'\n' end
             if bSearchCapt or wCount > 0 then  scite.SendFindRez(SCI_REPLACESEL, strCapt) end
@@ -405,6 +407,8 @@ function s:MarkResult()
     self.e = findrez
     self.send = scite.SendFindRez
     local origStyle = self.style
+    local origFind = self.findWhat
+    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then self.findWhat = self.findWhat:from_utf8(1251) end
     self.style = SCE_SEARCHRESULT_CURRENT_LINE
 
     for i = 1, findrez.LineCount - 1 do
@@ -419,6 +423,7 @@ function s:MarkResult()
     end
 
     self.style = origStyle
+    self.findWhat = origFind
     self.e = editor
     self.send = scite.SendEditor
 end
@@ -445,7 +450,9 @@ function s:FindInBufer()
             lin = lin + l
         else
             scite.SendFindRez(SCI_SETSEL,0,0)
-            scite.SendFindRez(SCI_REPLACESEL,'>Search for "'..self.findWhat..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
+            local strSrch = self.findWhat
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
+            scite.SendFindRez(SCI_REPLACESEL,'>Search for "'..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
             return cnt
         end
     end)
