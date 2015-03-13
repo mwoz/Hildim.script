@@ -89,7 +89,7 @@ function FileMan_ListFILL()
                 list_dir:setcell(j, 3, table_dir[i].attributes)
                 list_dir:setcell(j, 4, '')
                 if shell.bit_and(table_dir[i].attributes,1) == 1 then
-                    iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '190 0 0')
+                    iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '120 120 120')
                 end
                 j = j + 1
             end

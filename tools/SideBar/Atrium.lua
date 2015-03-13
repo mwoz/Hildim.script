@@ -87,7 +87,7 @@ local function SetReply(handle,msgOpaque,iError,msgReplay)
         dbRunSql(Data_GetSql(msgOpaque:GetPathValue("Proc", ""), msgReplay:GetPathValue("Object_Id", 0)), function(handle,Opaque,iError,msgR)
             if dbCheckError(iError, msgR) then return end
             print(msgR:ToString())
-            editor:SetText(XMLCAPT..xml.eval(msgR:GetPathValue('xml')):str())
+            editor:SetText(xml.eval(msgR:GetPathValue('xml')):str():to_utf8(1251))
         end, 20, nil)
     end
 end
@@ -109,6 +109,8 @@ local function PutData(t_xml,strObjType)
     msgOpaq:SetPathValue("Proc"    ,obj..'_Get')
     msgOpaq:SetPathValue("id"    ,objId)
 
+    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml = strXml:from_utf8(1251) end
+
     dbAddProcParam(msgParams, "Usr", 'atrium', AD_VarChar, AD_ParamInput, 64)
     dbAddProcParam(msgParams, "Action", action, AD_VarChar, AD_ParamInput, 64)
     dbAddProcParam(msgParams, "XmlData"          , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
@@ -121,6 +123,7 @@ end
 
 local function ApplyMetadata(strXml)
     local msgParams = mblua.CreateMessage()
+    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml = strXml:from_utf8(1251) end
 
     dbAddProcParam(msgParams, "Metadata"          , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
     dbAddProcParam(msgParams, "ExecMode", 'R', AD_VarChar, AD_ParamInput, 1)
@@ -194,22 +197,27 @@ local function Data_OpenNew()
     dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(XMLCAPT..xml.eval(msgReplay:GetPathValue('xml')):str())
+        scite.MenuCommand(IDM_ENCODING_UCS2LE)
+        editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
         scite.MenuCommand(1468)
     end,20,nil)
 end
 
 local function Data_Unload()
-    local strName = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 3):gsub('.*%.(.*)', '%1')..'.'..
-        iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1)
+    local strName = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
+        iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2)
 
     dbRunSql(Data_GetSql(), function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
         local f = io.open(strPath, "w")
-        f:write(XMLCAPT..xml.eval(msgReplay:GetPathValue('xml')):str())
+        f:write('')
+        f:flush()
         f:close()
         scite.Open(strPath)
+        scite.MenuCommand(IDM_ENCODING_UCS2LE)
+        editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
+        scite.MenuCommand(IDM_SAVE)
         scite.MenuCommand(1468)
     end,20,nil)
 end
@@ -220,7 +228,8 @@ local function Metadata_OpenNew()
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON',XMLCAPT,'')..msgReplay:GetPathValue('Metadata'))
+        scite.MenuCommand(IDM_ENCODING_UCS2LE)
+        editor:SetText(msgReplay:GetPathValue('Metadata'):to_utf8(1251))
         scite.MenuCommand(1468)
     end,20,nil)
 end
@@ -236,9 +245,9 @@ local function Metadata_NewData()
     dbAddProcParam(msgParams, "XmlData", 'R', AD_VarChar, AD_ParamOutput, 999999)
 
     dbRunProc('ObjectType_Pattern', msgParams, function(handle,Opaque,iError,msgReplay)
-        print(msgReplay:GetPathValue('XmlData'))
         scite.MenuCommand(IDM_NEW)
-        editor:SetText(msgReplay:GetPathValue('XmlData'))
+        scite.MenuCommand(IDM_ENCODING_UCS2LE)
+        editor:SetText(msgReplay:GetPathValue('XmlData'):to_utf8(1251))
         scite.MenuCommand(1468)
     end, 20, nil)
 end
@@ -253,10 +262,14 @@ local function Metadata_Unload()
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
         local f = io.open(strPath, "w")
-        local sText = Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON',XMLCAPT,'')..msgReplay:GetPathValue('Metadata'):gsub('\r', '')
-        f:write(sText)
+        f:write('')
+        f:flush()
         f:close()
         scite.Open(strPath)
+        scite.MenuCommand(IDM_ENCODING_UCS2LE)
+        --local sText = msgReplay:GetPathValue('Metadata'):gsub('\r', '')
+        editor:SetText(msgReplay:GetPathValue('Metadata'):to_utf8(1251))
+        scite.MenuCommand(IDM_SAVE)
         scite.MenuCommand(1468)
     end,20,nil)
 end
@@ -304,7 +317,7 @@ local function FindTab_Init()
             local mnu = iup.menu
             {
               iup.item{title="Открыть как новый файл",action=Metadata_OpenNew},
-              iup.item{title="Выгрузить и открыть в текущей деректории",action=Metadata_Unload},
+              iup.item{title="Выгрузить и открыть в текущей директории",action=Metadata_Unload},
               iup.separator{},
               iup.item{title="Открыть новый файл с данными",action=Metadata_NewData},
               iup.separator{},
@@ -333,7 +346,7 @@ local function FindTab_Init()
             local mnu = iup.menu
             {
               iup.item{title="Открыть как новый файл",action=Data_OpenNew},
-              iup.item{title="Выгрузить и открыть в текущей дериктории",action=Data_Unload},
+              iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
               iup.separator{},
               iup.item{title="Удалить",action=Metadata_Delete},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
