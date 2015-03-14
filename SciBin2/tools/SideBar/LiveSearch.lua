@@ -64,7 +64,9 @@ local function FindTab_Init()
             findrez.TargetEnd = findrez.LineEndPosition[findrez:LineFromPosition(a)]+1
             findrez:ReplaceTarget('')
         end
-        findSettings.findWhat = c.value
+        local str = c.value
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+        findSettings.findWhat = str
         findSettings:FindAll(50,true)
     end
 

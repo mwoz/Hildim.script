@@ -193,6 +193,20 @@ local function RunXml()
     end
 end
 
+local function Data_OpenNewChoice(strObj)
+    local strSql = "declare @XmlData tLongText, @id tId\n"..
+    "select @id=Choice_Id from Choice where Choice_Code='"..strObj.."'\n"..
+    "exec Choice_Get 'atrium', @id, @XmlData output\n"..
+    "select @XmlData as [xml]"
+    dbRunSql(strSql,function(handle,Opaque,iError,msgReplay)
+        if dbCheckError(iError, msgReplay) then return end
+        scite.MenuCommand(IDM_NEW)
+        scite.MenuCommand(IDM_ENCODING_UCS2LE)
+        editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
+        scite.MenuCommand(1468)
+    end,20,nil)
+end
+
 local function Data_OpenNew()
     dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
@@ -222,9 +236,8 @@ local function Data_Unload()
     end,20,nil)
 end
 
-local function Metadata_OpenNew()
-    local sel = list_obj.marked:find('1') - 1
-    local sql =  "select  Metadata from ObjectType where ObjectType_Code = '"..iup.GetAttributeId2(list_obj, '', sel, 1).."'"
+local function Metadata_OpenNewArg(strObj)
+    local sql =  "select  Metadata from ObjectType where ObjectType_Code = '"..strObj.."'"
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
@@ -232,6 +245,12 @@ local function Metadata_OpenNew()
         editor:SetText(msgReplay:GetPathValue('Metadata'):to_utf8(1251))
         scite.MenuCommand(1468)
     end,20,nil)
+end
+
+local function Metadata_OpenNew()
+    local sel = list_obj.marked:find('1') - 1
+    local strObj = iup.GetAttributeId2(list_obj, '', sel, 1)
+    Metadata_OpenNewArg(strObj)
 end
 
 local function Metadata_NewData()
@@ -274,6 +293,29 @@ local function Metadata_Unload()
     end,20,nil)
 end
 
+local function OnDoubleClickLocal(shift, ctrl, alt)
+    if not shift or ctrl or alt then return end
+    if editor.Lexer ~= SCLEX_XML then return end
+
+    if editor.StyleAt[editor.CurrentPos] ~= 6 then return end
+    local pb = editor.CurrentPos
+    local pe = pb
+    while editor.StyleAt[pb] == 6 do pb = pb -1 end
+    while editor.StyleAt[pe] == 6 do pe = pe +1 end
+    local obj = editor:textrange(pb + 2,pe - 1)
+    local _,_,typ = obj:find('^(%w+)%.%w+$')
+    if typ ~= 'system' and typ ~= 'custom' then return end
+    local lN = editor:LineFromPosition(pb)
+    local lin = editor:textrange(editor:PositionFromLine(lN), editor.LineEndPosition[lN])
+    _,_,typ = lin:find(' type="(%w+)"')
+    if typ == 'Reference' then
+        Metadata_OpenNewArg(obj)
+    elseif typ == 'tChoice' then
+        Data_OpenNewChoice(obj)
+    elseif lin:find('<ExternalRef ') then
+        Metadata_OpenNewArg(obj)
+    end
+end
 local function FindTab_Init()
     cmb_Action = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Сохранение/Удаление объекта'}
     iup.SetAttribute(cmb_Action, 1, "insupd")
@@ -383,6 +425,7 @@ orientation="HORIZONTAL", name='splitAtrium'};
 
     OnSwitchFile = OnSwitch;
     OnOpen = OnSwitch;
+    OnDoubleClick = OnDoubleClickLocal
 }
 end
 
