@@ -37,7 +37,7 @@ local function SaveIup()
 end
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
-    if cmd == 9132 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
+    if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
         local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
         if cmd ==  9132 then cur = scite.buffers.GetCurrent() end
 
@@ -45,7 +45,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         local notSaved = {}
         DoForBuffers(function(i)
             if i then
-                if editor.Modify and i ~= cur then
+                if editor.Modify and i ~= cur and (cmd ~= 9134 or props['FilePath']:from_utf8(1251):find('Безымянный')) then
                     msg = msg..'  '..props['FilePath']:from_utf8(1251)..'\n'
                     table.insert(notSaved, i)
                 end
@@ -63,12 +63,13 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
                     scite.buffers.SetDocumentAt(j)
                     scite.MenuCommand(IDM_SAVE)
                 end
+                if cmd == 9134 then return end
             end
         end
         if cmd == IDM_QUIT then ClearAllEventHandler() end
         local nf,spathes = false,''
         DoForBuffers(function(i)
-            if i and i ~= cur then
+            if i and i ~= cur and (cmd ~= 9134 or (props['FilePath']:from_utf8(1251):find('Безымянный') and editor.Modify)) then
                 scite.SendEditor(SCI_SETSAVEPOINT)
                 if props['FilePath'] ~= '' then
                     spathes = spathes..'•'..props['FilePath']:from_utf8(1251)
