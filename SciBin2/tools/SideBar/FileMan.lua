@@ -73,8 +73,10 @@ function FileMan_ListFILL()
 	list_dir:setcell(1, 3, 0)
 	list_dir:setcell(1, 4, 'd')
     local j = 2
+    local dc = 0
 	for i = 1, #table_dir do
         if table_dir[i].isdirectory then
+            dc = dc + 1
             if table_dir[i].name ~= "." and table_dir[i].name ~= ".." then
                 list_dir:setcell(j, 1, 'IMAGE_Folder')
                 list_dir:setcell(j, 2, table_dir[i].name)
@@ -89,14 +91,15 @@ function FileMan_ListFILL()
                 list_dir:setcell(j, 3, table_dir[i].attributes)
                 list_dir:setcell(j, 4, '')
                 if shell.bit_and(table_dir[i].attributes,1) == 1 then
-                    iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '120 120 120')
+                    iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '100 100 100')
                 end
                 j = j + 1
             end
         end
 	end
-	list_dir.focus_cell = "1:1"
-    iup.SetAttribute(list_dir, 'MARK1:0', 1)
+    local d = Iif(file_mask == '', 1, dc)
+	list_dir.focus_cell = d..":1"
+    iup.SetAttributeId2(list_dir, 'MARK', d, 0, '1')
     list_dir.redraw = "ALL"
 end
 
@@ -106,7 +109,7 @@ local function FileMan_ToggleSort()
     FileMan_ListFILL()
 end
 
-function FileMan_ListFillDir(strPath)
+local function FileMan_ListFillDir(strPath)
     current_path = strPath:match('(.*\\)')
     if current_path == nil then current_path = '' end
     local folders = shell.findfiles(strPath..'*')
@@ -228,7 +231,7 @@ local function OpenFile(filename)
 	end
 	iup.PassFocus()
 end
-
+local prev_filename = ''
 local function FileMan_OpenItem()
 	local dir_or_file, attr = FileMan_GetSelectedItem()
 	if dir_or_file == '' then return end
@@ -242,7 +245,8 @@ local function FileMan_OpenItem()
         memo_mask.value = ''
 		FileMan_ListFILLByMask(memo_mask.value)
 	else
-		OpenFile(current_path..dir_or_file)
+        prev_filename = current_path..dir_or_file
+		OpenFile(prev_filename)
 	end
 end
 
@@ -341,13 +345,67 @@ local function FileMan_ChangeReadOnly()
     local fname, d, attr = FileMan_GetSelectedItem()
 	if fname == '' then return end
 	fname = current_path..fname
+    l = list_getvaluenum(list_dir)
     if shell.bit_and(attr, 1) == 1 then
         attr = attr - 1
     else
         attr = attr + 1
     end
     shell.setfileattr(fname, attr)
-    FileMan_ListFILL()
+    attr = shell.getfileattr(fname)
+    list_dir:setcell(l, 3, attr)
+    if shell.bit_and(attr, 1) == 1 then
+        iup.SetAttributeId2(list_dir, 'FGCOLOR', l, 2, '100 100 100')
+    else
+        iup.SetAttributeId2(list_dir, 'FGCOLOR', l, 2, '0 0 0')
+    end
+end
+
+local function FileMan_Delete()
+    local fname, d, attr = FileMan_GetSelectedItem()
+	if fname == '' or d == 'd' then return end
+	fname = current_path..fname
+    local msb = iup.messagedlg{buttons='YESNO', value='Delete file\n'..fname..'\n?'}
+    msb.popup(msb)
+    if msb.buttonresponse == '1' then
+        local lRes = shell.delete_file(fname)
+        --local lRes = shell.rename_file(fname, current_path..'aa')
+        if lRes == 0 then
+            FileMan_ListFILL()
+        else
+            print('File '..fname..' not deleted!')
+        end
+    end
+    msb:destroy(msb)
+end
+
+local prevName
+local function FileMan_CheckRename(c,lin, col, mode, update)
+    if mode == 1 then
+        if prevName == nil then return -1 end
+    end
+end
+local function FileMan_DoRename(c, lin, col)
+    local fname, d, attr = FileMan_GetSelectedItem()
+    if fname ~= prevName then
+        local lRes = shell.rename_file(current_path..prevName, current_path..fname)
+        if lRes ~= 0 then
+            FileMan_ListFILL()
+            print('File '..prevName..' not renamed!')
+        end
+    end
+    prevName = nil
+end
+
+local function FileMan_Rename()
+    local fname, d, attr = FileMan_GetSelectedItem()
+    prevName = fname
+    local l = list_getvaluenum(list_dir)
+	if fname == '' or d == 'd' then return end
+
+    list_dir.focus_cell = l..":2"
+    iup.SetAttribute(list_dir, 'READONLY', 'NO')
+    iup.SetAttribute(list_dir, 'EDIT_MODE', 'YES')
 end
 
 function Favorites_AddCurrentBuffer()
@@ -380,6 +438,7 @@ local function Favorites_OpenFile()
 	local idx = list_getvaluenum(list_favorites)
 	if idx == null then return end
 	local fname = list_favorites:getcell(idx,3)
+        prev_filename = fname
 	if fname:match('\\$') then
 		current_path = fname
 		FileMan_ListFILL()
@@ -389,6 +448,8 @@ local function Favorites_OpenFile()
 end
 
 local function OnSwitch(bForse, bRelist)
+    if prev_filename:upper() == props['FilePath']:upper() then return end
+    prev_filename = ''
     if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
         iup.SetFocus(memo_mask)
         local path = props['FileDir']
@@ -405,7 +466,7 @@ local function OnSwitch(bForse, bRelist)
     end
 end
 
-function memoNav(key)
+local function memoNav(key)
     if key == 65364 then  --down
         local sel = 1
         if list_dir.marked then sel = list_dir.marked:find('1') end
@@ -441,7 +502,7 @@ local function FileManTab_Init()
 
     list_dir = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0,rasterwidth3= 0 ,rasterwidth4= 0 }
 
 	list_dir:setcell(0, 2, "Name")
@@ -454,12 +515,15 @@ local function FileManTab_Init()
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
             FileMan_OpenItem()
+            return -1
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
             local mnu = iup.menu
             {
               iup.item{title="Change Dir",action=FileMan_ChangeDir},
               iup.item{title="Read Only",action=FileMan_ChangeReadOnly, value=Iif(l == 1, 'ON', 'OFF')},
+              iup.item{title="Delete",action=FileMan_Delete},
+              iup.item{title="Rename",action=FileMan_Rename},
               iup.separator{},
               iup.item{title="Open with SciTE",action=FileMan_OpenSelectedItems},
               iup.item{title="Execute",action=FileMan_FileExec},
@@ -470,6 +534,8 @@ local function FileManTab_Init()
         end
     end)
     list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(key) end)
+    list_dir.value_edit_cb = FileMan_DoRename
+    list_dir.edition_cb = FileMan_CheckRename
     iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')
 
     list_favorites = iup.matrix{

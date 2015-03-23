@@ -293,8 +293,7 @@ local function Metadata_Unload()
     end,20,nil)
 end
 
-local function OnDoubleClickLocal(shift, ctrl, alt)
-    if not shift or ctrl or alt then return end
+local function OpenChoiceMeta()
     if editor.Lexer ~= SCLEX_XML then return end
 
     if editor.StyleAt[editor.CurrentPos] ~= 6 then return end
@@ -315,6 +314,11 @@ local function OnDoubleClickLocal(shift, ctrl, alt)
     elseif lin:find('<ExternalRef ') then
         Metadata_OpenNewArg(obj)
     end
+end
+
+local function OnDoubleClickLocal(shift, ctrl, alt)
+    if not shift or ctrl or alt then return end
+    OpenChoiceMeta()
 end
 local function FindTab_Init()
     cmb_Action = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Сохранение/Удаление объекта'}
@@ -431,4 +435,5 @@ end
 
 FindTab_Init()
 
+ AddEventHandler("GoToObjectDefenition", OpenChoiceMeta)
 

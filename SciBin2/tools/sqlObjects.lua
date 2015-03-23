@@ -8,6 +8,17 @@ local bIsListVisible = false
 local strObjToShow = nil
 local luaForRun =nil
 local reloaded = false
+-- Преобразовывает стринг в паттерн для поиска
+local function fPattern(str)
+	local str_out = ''
+	for i = 1, string.len(str) do
+		str_out = str_out..'%'..string.sub(str, i, i)
+	end
+    if str_out ~= '' then str_out = "["..str_out.."]" end
+	return str_out
+end
+local fillup_chars = fPattern'. (*+=-&,'
+local bIsListVisible = false
 
 local function AnyCase(str)
     local ch, CH
@@ -223,7 +234,7 @@ local function findDown(iPos)
     return strText
 end
 
-local function ShowUserList(nPos,sId)
+local function ShowUserList(nPos,sId, preinp)
 
     local sep = '•'
     local msg = msg_SqlFields:GetMessage(sId)
@@ -241,8 +252,11 @@ local function ShowUserList(nPos,sId)
 
         editor:UserListShow(msg:GetPathValue('id'), s)
 
+        if preinp ~= '' then msg_SqlFields:RemoveMessage(sId)  end
+
         bIsListVisible = true
-        current_poslst = editor.CurrentPos
+        current_poslst = editor.CurrentPos - preinp:len()
+        bIsListVisible = true
     end
 
 end
@@ -461,12 +475,13 @@ local function GetObjects(strscheme, strBase)
     msg:Destroy()
 end
 
-local function GetObjInfo(strObj,strTbl,strOwner,strObject)
+local function GetObjInfo(strObj,strTbl,strOwner,strObject, lb)
     local strSub=_G.iuprops['sql.dbcmdsubj']..".EXEC_CMD"
     local strKustomSelect="select 'S' as '__DATA_MODEL_MODE', '0' as '__INDEX_AUTO_OFF'\n"..
                           "select convert(varchar,c.colid) as '__DATA_PATH',convert(varchar,c.name) as Fields_Name\n"..
                           "from %s..sysobjects o, %s..syscolumns c\n"..
                           "where o.id=c.id and o.name='%s'\n"..
+                          "and c.name like '"..lb.."%%'\n"..
                           "order by c.name\n"
     strKustomSelect = strKustomSelect:format(strTbl,strTbl,strObject)
 --print(strKustomSelect,strSub)
@@ -478,6 +493,7 @@ local function GetObjInfo(strObj,strTbl,strOwner,strObject)
     local msgOpaq = mblua.CreateMessage()
     msgOpaq:SetPathValue("pos",editor.CurrentPos)
     msgOpaq:SetPathValue("obj",strObj)
+    msgOpaq:SetPathValue("preinput",lb)
     mblua.Request(function(handle,Opaque,iError,msgReplay)
         if iError ~= 0 then
             print("Get Object Info Error: "..iError)
@@ -502,7 +518,7 @@ local function GetObjInfo(strObj,strTbl,strOwner,strObject)
         local prevPos = Opaque:GetPathValue("pos")
 
         if editor.CurrentPos == prevPos then
-            ShowUserList(prevPos,objName)
+            ShowUserList(prevPos,objName, Opaque:GetPathValue("preinput"))
         end
 
         Opaque:Destroy()
@@ -519,9 +535,63 @@ local function OnUserListSelection_local(tp,str)
         bIsListVisible = false
     end
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
+    bIsListVisible = false
+end
+
+local function ProcessObjInfo(pos, strLine, preinp)
+    local strAllText = findUp(pos)..findDown(pos)
+
+    _,_,strObj= strAllText:find('([%w_#%.{}]+) +'..strLine..'[ ,\n\r]')
+    if strObj == nil then strObj = strLine end
+    if strObj:find('#') ~= nil then return end
+
+    --Нормализуем объект
+    local _,_,strTbl,strOwner,strObject = strObj:find('^([^%.]-)%.?([^%.]-)%.?([^%.]+)$')
+    if strObject == nil then return end
+
+    local sql_BaseNameSuffix = props['sql.basenamesuffix']
+    if strTbl == '' then
+
+    else
+        strTbl =strTbl:gsub('__KPLUS_BASE__','kplus'..sql_BaseNameSuffix)
+        strTbl =strTbl:gsub('__KUSTOM_BASE__','Kustom'..sql_BaseNameSuffix)
+        strTbl =strTbl:gsub('__ARCHIVE_BASE__','KplusArchive'..sql_BaseNameSuffix)
+        strTbl =strTbl:gsub('__KPLUSGLOBAL_BASE__','KplusGlobal'..sql_BaseNameSuffix)
+        strTbl =strTbl:gsub('%{appKustomDB%}','Kustom'..sql_BaseNameSuffix)
+
+    end
+    --if strOwner == 'dbo' then strOwner = '' end
+    strObj = strTbl..'.'..strOwner..'.'..strObject
+    if preinp ~= '' then msg_SqlFields:RemoveMessage(strObj)  end
+    if msg_SqlFields:ExistsMessage(strObj) and preinp == '' then
+        --ShowUserList(editor.CurrentPos,strObj)
+        strObjToShow = strObj
+    else
+        GetObjInfo(strObj,strTbl,strOwner,strObject, preinp:lower())
+    end
+end
+
+function ShowListManualySql()
+    local curPos = editor.CurrentPos
+    local str = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(curPos)), editor.CurrentPos)
+    local _, tstart, strObj, lineBeg = str:find('(%w*)%.(%w*)$')
+    if not tstart then return end
+    ProcessObjInfo(curPos, strObj, lineBeg)
 end
 
 local function local_OnChar(char)
+
+    if bIsListVisible and string.find(char,fillup_chars) then
+    --обеспечиваем вставку выбранного в листе значения вводе одного из завершающих символов(fillup_chars - типа (,. ...)
+    --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
+        if scite.SendEditor(SCI_AUTOCACTIVE) then
+            --editor:SetSel(editor:WordStartPosition(editor.CurrentPos), editor.CurrentPos)
+            scite.SendEditor(SCI_AUTOCCOMPLETE)
+            editor:ReplaceSel(char)
+        else
+            bIsListVisible = false
+        end
+    end
     if char ~= "." then return end
     --[[local ext = props["FileExt"]:lower()
     if ext ~= "m" and ext ~= "sql" then return end]]
@@ -569,43 +639,8 @@ local function local_OnChar(char)
         GetObjects(strschem, strObj)
         return
     end
+    ProcessObjInfo(pos, strLine, '')
 
-
-    local strAllText = findUp(pos)..findDown(pos)
-
-    _,_,strObj= strAllText:find('([%w_#%.{}]+) +'..strLine..'[ ,\n\r]')
-    if strObj == nil then strObj = strLine end
-    if strObj:find('#') ~= nil then return end
-
-    --Нормализуем объект
-    local _,_,strTbl,strOwner,strObject = strObj:find('^([^%.]-)%.?([^%.]-)%.?([^%.]+)$')
-    if strObject == nil then return end
-
-    local sql_BaseNameSuffix = props['sql.basenamesuffix']
-    if strTbl == '' then
---[[        if props['sql.type'] == 'SYBASE' then
-            if props["FileExt"]:lower() == 'xml' then
-                strTbl = 'kplus'..sql_BaseNameSuffix
-            else
-                strTbl = 'Kustom'..sql_BaseNameSuffix
-            end
-        end]]
-    else
-        strTbl =strTbl:gsub('__KPLUS_BASE__','kplus'..sql_BaseNameSuffix)
-        strTbl =strTbl:gsub('__KUSTOM_BASE__','Kustom'..sql_BaseNameSuffix)
-        strTbl =strTbl:gsub('__ARCHIVE_BASE__','KplusArchive'..sql_BaseNameSuffix)
-        strTbl =strTbl:gsub('__KPLUSGLOBAL_BASE__','KplusGlobal'..sql_BaseNameSuffix)
-        strTbl =strTbl:gsub('%{appKustomDB%}','Kustom'..sql_BaseNameSuffix)
-
-    end
-    --if strOwner == 'dbo' then strOwner = '' end
-    strObj = strTbl..'.'..strOwner..'.'..strObject
-    if msg_SqlFields:ExistsMessage(strObj) then
-        --ShowUserList(editor.CurrentPos,strObj)
-        strObjToShow = strObj
-    else
-        GetObjInfo(strObj,strTbl,strOwner,strObject)
-    end
 end
 
 local function local_OnUpdateUI()
