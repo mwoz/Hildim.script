@@ -904,6 +904,10 @@ function ShowTipManualy()
 end
 
 function ShowListManualy()
+    if cmpobj_GetFMDefault() == SCE_FM_SQL_DEFAULT or editor.Lexer == SCLEX_MSSQL then
+        ShowListManualySql()
+        return
+    end
     if not isXmlLine() then pasteFromXml = false end
 	if get_api == true then
 		ReCreateStructures()

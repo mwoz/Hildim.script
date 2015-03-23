@@ -241,6 +241,8 @@ formctrl.Controls	Аналог ctrl.Form.Controls
 formctrl.Frames	Аналог ctrl.Form.Frames
 formctrl.PropertyBag	Аналог ctrl.Form.PropertyBag
 formctrl.RaiseAsyncEvent(EventName, [EventParam]) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam,\nкоторый передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>
+#$form=.*%.form
+formctrl.Form
 
 #$message=form%.createmessage(
 #$message=.*%.createmessage
@@ -1018,11 +1020,13 @@ err.Clear()
 
 #$udoc=doc(
 udoc.SubMsg Получение произвольного сабмессаджа\nиз основного мессаджа объекта
+#$message=.*%.submsg
 udoc.Value  Получение значения из поля мессаджа объекта.\nУстановка значения в контрол
 udoc.UserInput Эмуляция пользовательского ввода
 udoc.Ref Получение сабмессаджа реф-контрола.\nУстановка значения рефконтрола по пути в мессадже объекта
 udoc.SetRef Установка значения рефконтрола по внешнему массаджу
 udoc.Visible
+udoc.VisibleSetDefault Скрытие, показ контрола\nс одновременной "очисткой" при блокировании
 udoc.Enable
 udoc.EnableSetDefault Блокировка,разблокировка контрола\nс одновременной "очисткой" при блокировании
 udoc.Caption
@@ -1099,7 +1103,10 @@ papp.GetRefFilds(strObjName, chType)
 papp.Metadata(strObj)
 papp.GenWindowMsg(strXmlMetadata)
 papp.CreateNewRow(xmlRow, msgNew)
-
+papp.calcPair_Sum(msgPair, dAmountFrom, dRate, lCcyIdFrom) для пары - рассчитывает сумму одной валюты пары в другую
+papp.calcPair_Rate(msgPair, dAmountFrom, dAmountTo, lCcyIdFrom) для пары - рассчитывает курс для пересчета суммы в одной валюты в сумму в другой валюте
+papp.calcBond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
+papp.ChoiceVal2Str(ChoiceName, Val) Возвращает отображаемое значение значение чойса ChoiceName по его хранимому значению
 objtmp.PropertyBag(val)
 objtmp.bActiveTab(val)
 objtmp.OpenObj(vIdx, strTemplate, bReplace)
