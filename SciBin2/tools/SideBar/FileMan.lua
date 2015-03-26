@@ -67,7 +67,7 @@ function FileMan_ListFILL()
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_dir - 1 - j))
-
+    local prevL = #table_dir - 1 - j
 	list_dir:setcell(1, 1, 'IMAGE_UpFolder')
 	list_dir:setcell(1, 2, '..')
 	list_dir:setcell(1, 3, 0)
@@ -77,10 +77,11 @@ function FileMan_ListFILL()
 	for i = 1, #table_dir do
         if table_dir[i].isdirectory then
             dc = dc + 1
-            if table_dir[i].name ~= "." and table_dir[i].name ~= ".." then
+            local n,a = table_dir[i].name, table_dir[i].attributes
+            if n ~= "." and n ~= ".." and not n:find('^%$') and shell.bit_and(a,2) == 0 and shell.bit_and(a,4) == 0 then
                 list_dir:setcell(j, 1, 'IMAGE_Folder')
-                list_dir:setcell(j, 2, table_dir[i].name)
-                list_dir:setcell(j, 3, table_dir[i].attributes)
+                list_dir:setcell(j, 2, n)
+                list_dir:setcell(j, 3, a)
                 list_dir:setcell(j, 4, 'd')
                 j = j + 1
             end
@@ -97,6 +98,7 @@ function FileMan_ListFILL()
             end
         end
 	end
+    if j<prevL+1 then iup.SetAttribute(list_dir, 'DELLIN', (j)..'-'..prevL) end
     local d = Iif(file_mask == '', 1, dc)
 	list_dir.focus_cell = d..":1"
     iup.SetAttributeId2(list_dir, 'MARK', d, 0, '1')
@@ -112,30 +114,30 @@ end
 local function FileMan_ListFillDir(strPath)
     current_path = strPath:match('(.*\\)')
     if current_path == nil then current_path = '' end
-    local folders = shell.findfiles(strPath..'*')
-    if not folders then
+    local table_folders = shell.findfiles(strPath..'*')
+    if not table_folders then
         iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
         return  strPath:len()-(strPath:find('[:%$]') or strPath:len())>0
     end
-    local table_folders = {}
-    j = 1
-    for i, d in ipairs(folders) do
-        if d.isdirectory and d.name ~= '.' and d.name ~= '..' then
-            table_folders[j] = d.name
-            j = j + 1
-        end
-    end
-    table.sort(table_folders, function(a, b) return a:lower() < b:lower() end)
+
+
+    table.sort(table_folders, function(a, b) return a.name:lower() < b.name:lower() end)
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..#table_folders)
 
+    local j = 1
     for i = 1, #table_folders do
-        list_dir:setcell(i, 1, 'IMAGE_Folder')
-        list_dir:setcell(i, 2, table_folders[i])
-        list_dir:setcell(i, 3, table_folders[i])
-        list_dir:setcell(i, 4, 'd')
+        local a = table_folders[i].attributes
+        if table_folders[i].isdirectory and shell.bit_and(a,2)==0 and shell.bit_and(a,4)==0 and not table_folders[i].name:find('^%$')  then
+            list_dir:setcell(j, 1, 'IMAGE_Folder')
+            list_dir:setcell(j, 2, table_folders[i].name)
+            list_dir:setcell(j, 3, a)
+            list_dir:setcell(j, 4, 'd')
+            j = j + 1
+        end
     end
+    if j< #table_folders+1 then iup.SetAttribute(list_dir, "DELLIN", (j).."-"..#table_folders) end
     iup.SetAttribute(list_dir, 'MARK1:0', 1)
     list_dir.focus_cell = "1:1"
     list_dir.redraw = "ALL"
@@ -235,7 +237,7 @@ local prev_filename = ''
 local function FileMan_OpenItem()
 	local dir_or_file, attr = FileMan_GetSelectedItem()
 	if dir_or_file == '' then return end
-	if attr == 'd' then
+    if attr == 'd' then
 		if dir_or_file == '..' then
 			local new_path = current_path:gsub('(.*\\).*\\$', '%1')
 			current_path = new_path
@@ -458,6 +460,15 @@ local function OnSwitch(bForse, bRelist)
             current_path = path:gsub('\\$','')..'\\'
             -- if bClearMask then memo_mask:set_text = "" end
             FileMan_ListFILL()
+            for i = 0, list_dir.count - 1 do
+                if list_dir:getcell(i,2) == props['FileNameExt'] then
+                    iup.SetAttributeId2(list_dir, 'MARK',1,0, 0)
+                    iup.SetAttributeId2(list_dir, 'MARK',i,0, 1)
+                    list_dir.focus_cell = i..":1"
+                    list_dir.redraw = "ALL"
+                    iup.SetAttribute(list_dir, 'SHOW', i..":1")
+                end
+            end
         end
     end
     if bRelist then
@@ -490,8 +501,10 @@ local function memoNav(key)
         end
         return -1
     elseif key == 13 then
-        current_path = memo_path.value:gsub('[^\\]*$','')
-        FileMan_OpenItem()
+        if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
+            current_path = memo_path.value:gsub('[\\/][^\\/]*$','')..'\\'
+            FileMan_OpenItem()
+        end
     elseif key == 65307 then --escape
         iup.PassFocus()
         FileMan_ListFILLByMask(memo_mask.value)
@@ -503,7 +516,7 @@ local function FileManTab_Init()
     list_dir = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0,rasterwidth3= 0 ,rasterwidth4= 0 }
+    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0, rasterwidth4= 0 }
 
 	list_dir:setcell(0, 2, "Name")
   	list_dir.click_cb = (function(h, lin, col, status)
@@ -514,7 +527,14 @@ local function FileManTab_Init()
         l = shell.bit_and(tonumber(list_dir:getcell(lin, 3)), 1)
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
-            FileMan_OpenItem()
+            if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
+                if list_dir:getcell(1, 2) ~= '..' then
+                    current_path = memo_path.value:gsub('[\\/][^\\/]*$','')..'\\'
+                end
+                FileMan_OpenItem()
+            else
+                OnSwitch(false,false)
+            end
             return -1
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
@@ -569,15 +589,14 @@ local function FileManTab_Init()
     split_s = iup.split{list_dir, list_favorites, orientation="HORIZONTAL", name='splitFileMan'}
     memo_path = iup.text{expand='YES'}
     memo_path.action = (function(h,s,new_value)
-        FileMan_ListFillDir(new_value)
+        if new_value:find('^%w:[\\/]') or new_value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
+            FileMan_ListFillDir(new_value)
+        end
     end)
     memo_path.getfocus_cb = (function(h)
         iup.SetAttribute(list_dir, 'MARK1:0', 1)
         list_dir.redraw = "1:1"
     end)
---[[    memo_path.killfocus_cb = (function(h)
-        FileMan_ListFILLByMask(memo_mask.value)
-    end)]]
 
     memo_path.k_any=(function(h,k)
         return memoNav(k)
