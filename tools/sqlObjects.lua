@@ -252,10 +252,12 @@ local function ShowUserList(nPos,sId, preinp)
 
         editor:UserListShow(msg:GetPathValue('id'), s)
 
-        if preinp ~= '' then msg_SqlFields:RemoveMessage(sId)  end
+        if preinp ~= nil and preinp ~= '' then msg_SqlFields:RemoveMessage(sId)  end
 
         bIsListVisible = true
-        current_poslst = editor.CurrentPos - preinp:len()
+        local dLen = 0
+        if preinp ~= nil then dLen = preinp:len() end
+        current_poslst = editor.CurrentPos - dLen
         bIsListVisible = true
     end
 
