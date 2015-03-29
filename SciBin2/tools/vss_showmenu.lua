@@ -1,10 +1,11 @@
 require 'shell'
-function vss_SetCurrentProject()
-    if not shell.fileexists(props['FileDir']..'\\'..'mssccprj.scc') then
+function vss_SetCurrentProject(dir)
+    local d = dir or props['FileDir']
+    if not shell.fileexists(d..'\\'..'mssccprj.scc') then
         print('"mssccprj.scc" not found in current dir')
         return false
     end
-	local fil = io.open(props['FileDir']..'\\'..'mssccprj.scc')
+	local fil = io.open(d..'\\'..'mssccprj.scc')
     local strFile = fil:read("*a")
 	fil:close()
     local _,_,strProgect = string.find(strFile,'SCC_Project_Name = "([^"]+)')

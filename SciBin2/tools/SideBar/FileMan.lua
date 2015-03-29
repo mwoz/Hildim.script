@@ -26,8 +26,8 @@ end
 
 local function GetExtImage(strName)
     local _, _, ext = strName:find('%.([^%.]+)$')
-    if ext=='inc' then return 'IMAGE_Library'
-    elseif ext=='xml' then return 'IMAGE_Frame'
+    if ext=='inc' or ext=='incl' then return 'IMAGE_Library'
+    elseif ext=='xml' or ext=='form' then return 'IMAGE_Frame'
     elseif ext=='m' then return 'IMAGE_Sub'
     elseif ext=='sql' then return 'IMAGE_String'
     elseif ext=='lua' then return 'IMGLEAF'
@@ -629,3 +629,26 @@ local function FileManTab_Init()
 end
 
 FileManTab_Init()
+
+local function reset_err(ierr, strerr, sName)
+	if ierr==0 then
+	else
+		print(sName, strerr)
+	end
+end
+
+function Ren_VSS()
+    local o1,o2 = 'xml', 'inc'
+    local n1,n2 = 'form', 'incl'
+    print(current_path)
+    if vss_SetCurrentProject(current_path) then
+        for i = 2, list_dir.numlin do
+            local sName = list_dir:getcell(i, 2)
+            if list_dir:getcell(i, 4) ~= 'd' and (sName:find('%.'..o1..'$') or sName:find('%.'..o2..'$')) then
+                local nName = sName:gsub('^(.*%.)'..o1..'$', '%1'..n1):gsub('^(.*%.)'..o2..'$', '%1'..n2)
+                reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Rename '..sName..' '..nName,nil,true,true), sName)
+            end
+        end
+    end
+    print('OK')
+end

@@ -7,6 +7,8 @@ props["precomp_strRootDir"] = ""
 local precomp_tblAddedtemplates
 _G["TemplatesMap"] = {}
 
+local XEXT, INCL = props['formenjine.xml'], props['formenjine.inc']
+
 function get_precomp_tblFiles(str)
     return precomp_tblFiles[str]
 end
@@ -25,8 +27,8 @@ function prnTable2(name)
 end
 
 function precom_BuildTemplates()
-    if(props["FileNameExt"] ~= "sys.System.xml") then
-        print('Команда работает только для шаблона sys.System.xml')
+    if(props["FileNameExt"] ~= "sys.System."..XEXT) then
+        print('Команда работает только для шаблона sys.System.'..XEXT)
         return
     end
     local start = editor:findtext('<template name="System"')
@@ -185,8 +187,8 @@ local function OnSave_local()
         if allRight then return strOut end
         return false
     end
-    local strExt = props["FileExt"]:sub(1, 3):lower()   --таким образом можем компилить шаблоны .xml1 и пр - которые не будут подхватыватся обычным сборщиком
-    if (strExt=="inc" or strExt=="xml") then
+    local strExt = props["FileExt"]:sub(1, XEXT:len()):lower()   --таким образом можем компилить шаблоны .xml1 и пр - которые не будут подхватыватся обычным сборщиком
+    if (props["FileExt"]:lower()==INCL or strExt==XEXT) then
         local allRight = false
         local strPath = string.sub(props["FilePath"],1,string.len(props["FilePath"])-string.len(props["FileNameExt"]))
         local strOut
@@ -268,13 +270,13 @@ end
 function precomp_PreCompileTemplate()
 --require( "luacom" )
     if editor.Lexer  ~= SCLEX_FORMENJINE then return end
-    local strExt = props["FileExt"]:sub(1, 3):lower()   --таким образом можем компилить шаблоны .xml1 и пр - которые не будут подхватыватся обычным сборщиком
-    if strExt ~= 'xml' and strExt ~= 'inc' then return end
+    local strExt = props["FileExt"]:sub(1, XEXT:len()):lower()   --таким образом можем компилить шаблоны .xml1 и пр - которые не будут подхватыватся обычным сборщиком
+    if strExt ~= XEXT and props["FileExt"]:lower() ~= INCL then return end
     local vbOk = false
     local strXml
     strXml = ""
     isText = false
-    if props['FileExt'] == 'inc' then
+    if props['FileExt'] == INCL then
         for i = 0, editor.LineCount - 1 do
             style = editor.StyleAt[editor.LineIndentPosition[i] + 1]
             if style >= SCE_FM_VB_DEFAULT then
@@ -302,7 +304,7 @@ function precomp_PreCompileTemplate()
     er,strOut = shell.exec('cscript /nologo "'..props['sys.calcsybase.dir']..'\\tmp.vbs"', nil, true, true)
     if er == 0 then
         strOut = ">>>Check VB  OK: "..props['FilePath']
-        if props['FilePath'] == props["SciteDefaultHome"]..'\\data\\USERSCRIPT.inc' then
+        if props['FilePath'] == props["SciteDefaultHome"]..'\\data\\USERSCRIPT.'..INCL then
             local msg = mblua.CreateMessage()
             msg:SetPathValue("Script",editor:GetText())
             msg:Subjects('SYSM.SAVESCRIPT.'.._G.iuprops["precompiller.radiususername"])
@@ -323,7 +325,7 @@ function precomp_PreCompileTemplate()
     end
     print( strOut )
     --Проверка XML
-    if strExt == 'xml' then
+    if strExt == XEXT then
 
         props["precompiller.xmlname"] = props["FileNameExt"]
         local s,e=editor:findtext("<?.+?>",SCFIND_REGEXP)
@@ -341,7 +343,7 @@ function precomp_PreCompileTemplate()
         end
 
     end
-    if strExt == 'xml' then listCalc_addToRecent(props["FileNameExt"]) end
+    if strExt == XEXT then listCalc_addToRecent(props["FileNameExt"]) end
     if vbOk then
         props["precompiller.ok"] = "Y"
     else

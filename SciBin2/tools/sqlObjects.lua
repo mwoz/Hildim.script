@@ -152,7 +152,7 @@ end)
 local function local_OnOpen()
     local ext = props["FileExt"]:lower()
     props["output.hook"] = 'N'
-    if ext == "m" or ext == "sql" or ext == "inc" or ext == "xml" then
+    if ext == "m" or ext == "sql" or ext == "inc" or ext == "xml" or ext == "incl" or ext == "form" then
         if msg_SqlObjectMap == nil then
             local file = io.open(msgPath)
             if file then

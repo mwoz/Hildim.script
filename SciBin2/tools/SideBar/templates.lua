@@ -29,7 +29,7 @@ function listCalc_CompileSelectedTemplate()
 end
 
 local function SSCtrls()
-    if props["FileExt"]:lower():sub(1,3) == 'xml' then btn_AddDoc.active='YES'
+    if props["FileExt"]:lower() == props['formenjine.xml'] then btn_AddDoc.active='YES'
     else  btn_AddDoc.active='NO' end
 
     if tonumber(cmb_resent.count) ~= 0 then btn_FormRun.active = 'YES'
