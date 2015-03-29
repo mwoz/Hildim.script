@@ -965,17 +965,6 @@ AddEventHandler("OnSwitchFile", function(file)
 end)
 require("LuaXml")
 AddEventHandler("OnOpen", function(file)
-    if props['FileExt'] == 'xml' then
-        local t_xml = xml.eval(editor:GetText())
-        if t_xml then
-            local strObjType = t_xml[0]
-            if strObjType ~= 'template' then
-                --scite.PostCommand(5,0)
-                scite.MenuCommand(1468) --переключение на обычный xml lexer
-                return
-            end
-        end
-    end
 	get_api = true
     ReCreateStructures()
     if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
