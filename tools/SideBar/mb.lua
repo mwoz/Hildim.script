@@ -105,7 +105,7 @@ function listCalc_addToRecent(strFile)
 end
 
 function UserScriptHandler(handle,Opaque,iError,msgReplay)
-    scite.Open(props["SciteDefaultHome"]..'\\data\\USERSCRIPT.inc')
+    scite.Open(props["SciteDefaultHome"]..'\\data\\USERSCRIPT.'..props['formenjine.inc'])
     editor:SetText(msgReplay:GetPathValue('Script'))
 end
 
