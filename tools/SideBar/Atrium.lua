@@ -58,7 +58,7 @@ local function dbCheckError(iError, msgReplay)
 end
 
 local function OnSwitch()
-    local bEn = (editor.Lexer == SCLEX_XML)
+    local bEn = (editor.Lexer == SCLEX_XML or editor.Lexer == SCLEX_FORMENJINE)
     btnRun.active = Iif(bEn, 'YES', 'NO')
 end
 
@@ -165,8 +165,16 @@ local function SelectData()
     local cd = iup.GetAttributeId2(list_obj, '', sel, 4)
     local sql
     if cd == nil then
-        sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id from "..tbl
-        if tonumber(txt_datamask.value) ~= nil then sql =  sql.." where "..nm.."_Id >= "..tonumber(txt_datamask.value).." order by "..nm.."_Id" end
+        if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
+            sql = "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, f.ObjectTypeForm_Id, (o.ObjectType_Code + '.' + v.Name) as [ObjectTypeForm_Code] from ObjectTypeForm f\n"..
+            "inner join ObjectType o on o.ObjectType_Id = f.ObjectType_Id\n"..
+            "inner join ChoiceValue v on v.Value = f.FormType\n"..
+            "inner join Choice c on c.Choice_Id = v.Choice_Id and c.Choice_Code = 'system.FormType'\n"..
+            "where (o.ObjectType_Code + '.' + f.FormType) like ('"..txt_datamask.value.."%') order by o.ObjectType_Code"
+        else
+            sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id from "..tbl
+            if tonumber(txt_datamask.value) ~= nil then sql =  sql.." where "..nm.."_Id >= "..tonumber(txt_datamask.value).." order by "..nm.."_Id" end
+        end
     else
         sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..cd.." from "..tbl.." where "..cd.." like ('"..txt_datamask.value.."%') order by "..cd
     end
@@ -183,11 +191,28 @@ local function SelectData()
     end,20,nil)
 end
 
+local function PutForm(objectType, formType)
+    if objectType == nil or formType == nil then
+        print('Incorrect Custom form!')
+        return
+    end
+    local strXml = editor:GetText()
+    local msgParams = mblua.CreateMessage()
+    dbAddProcParam(msgParams, "FormXml" , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
+    dbRunProc('ObjectTypeForm_Import', msgParams, function(handle,Opaque,iError,msgReplay)
+        print(msgReplay:ToString())
+    end, 20, nil)
+end
+
 local function RunXml()
     local t_xml = xml.eval(editor:GetText():gsub('^<[?].->\r?\n?',''))
     local strObjType = t_xml[0]
     if strObjType == 'Template' then
         ApplyMetadata(editor:GetText():gsub('^<[?].->\r?\n?',''))
+    elseif strObjType == 'Form' then
+        PutForm(t_xml['objectType'], t_xml['type'])
+    elseif strObjType == 'template' then
+        print('Not Supported!')
     else
         PutData(t_xml,strObjType)
     end
@@ -202,38 +227,77 @@ local function Data_OpenNewChoice(strObj)
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
         scite.MenuCommand(IDM_ENCODING_UCS2LE)
-        editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
-        scite.MenuCommand(1468)
+        editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
+        scite.MenuCommand(1467)
     end,20,nil)
 end
 
 local function Data_OpenNew()
-    dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
-        if dbCheckError(iError, msgReplay) then return end
-        scite.MenuCommand(IDM_NEW)
-        scite.MenuCommand(IDM_ENCODING_UCS2LE)
-        editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
-        scite.MenuCommand(1468)
-    end,20,nil)
+    local sel = list_obj.marked:find('1') - 1
+    if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
+        sel = list_data.marked:find('1') - 1
+        local sql = "select f.FormData \n"..
+        "from ObjectTypeForm f\n"..
+        "where f.ObjectTypeForm_Id = "..list_data:getcell(sel,1)
+        dbRunSql(sql,function(handle,Opaque,iError,msgReplay)
+            if dbCheckError(iError, msgReplay) then return end
+            scite.MenuCommand(IDM_NEW)
+            scite.MenuCommand(IDM_ENCODING_UCS2LE)
+            editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
+            scite.MenuCommand(1467)  --подсветка FormEnjine
+        end,20,nil)
+    else
+        dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
+            if dbCheckError(iError, msgReplay) then return end
+            scite.MenuCommand(IDM_NEW)
+            scite.MenuCommand(IDM_ENCODING_UCS2LE)
+            editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
+            scite.MenuCommand(1468)  --подсветка XML
+        end,20,nil)
+    end
 end
 
 local function Data_Unload()
-    local strName = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
-        iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2)
+    local sel = list_obj.marked:find('1') - 1
+    if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
+        sel = list_data.marked:find('1') - 1
+        local sql = "select f.FormData \n"..
+        "from ObjectTypeForm f\n"..
+        "where f.ObjectTypeForm_Id = "..list_data:getcell(sel,1)
 
-    dbRunSql(Data_GetSql(), function(handle,Opaque,iError,msgReplay)
-        if dbCheckError(iError, msgReplay) then return end
-        local strPath = props['FileDir']..'\\'..strName..'.xml'
-        local f = io.open(strPath, "w")
-        f:write('')
-        f:flush()
-        f:close()
-        scite.Open(strPath)
-        scite.MenuCommand(IDM_ENCODING_UCS2LE)
-        editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
-        scite.MenuCommand(IDM_SAVE)
-        scite.MenuCommand(1468)
-    end,20,nil)
+        local strName = list_data:getcell(sel,2)
+
+        dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
+            if dbCheckError(iError, msgReplay) then return end
+            local strPath = props['FileDir']..'\\'..strName..'.cform'
+            local f = io.open(strPath, "w")
+            f:write('')
+            f:flush()
+            f:close()
+            scite.Open(strPath)
+            scite.MenuCommand(IDM_ENCODING_UCS2LE)
+            editor:SetText(xml.eval(msgReplay:GetPathValue('FormData')):str():to_utf8(1251))
+            scite.MenuCommand(IDM_SAVE)
+            scite.MenuCommand(1468)
+        end,20,nil)
+    else
+        local strName = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
+            iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2)
+
+        dbRunSql(Data_GetSql(), function(handle,Opaque,iError,msgReplay)
+            if dbCheckError(iError, msgReplay) then return end
+            local strPath = props['FileDir']..'\\'..strName..'.xml'
+            local f = io.open(strPath, "w")
+            f:write('')
+            f:flush()
+            f:close()
+            scite.Open(strPath)
+            scite.MenuCommand(IDM_ENCODING_UCS2LE)
+            editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
+            scite.MenuCommand(IDM_SAVE)
+            scite.MenuCommand(1468)
+        end,20,nil)
+    end
 end
 
 local function Metadata_OpenNewArg(strObj)

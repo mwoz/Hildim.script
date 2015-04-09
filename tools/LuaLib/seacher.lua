@@ -49,6 +49,7 @@ function s:UnSlashAsNeeded(strIn)
     else
         str = strIn
     end
+    if str == nil then return "", 0 end
     local strLen = str:len()
     return str, strLen
 end
