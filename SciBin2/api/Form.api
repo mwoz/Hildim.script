@@ -1108,6 +1108,21 @@ papp.calcPair_Sum(msgPair, dAmountFrom, dRate, lCcyIdFrom) для пары - рассчитыва
 papp.calcPair_Rate(msgPair, dAmountFrom, dAmountTo, lCcyIdFrom) для пары - рассчитывает курс для пересчета суммы в одной валюты в сумму в другой валюте
 papp.calcBond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
 papp.ChoiceVal2Str(ChoiceName, Val) Возвращает отображаемое значение значение чойса ChoiceName по его хранимому значению
+papp.objTemplate()
+papp.ObjectMsg2PrintMsg(msgFrom, msgTo, strPath)
+papp.RGB2HTMLColor( colorRGB )
+papp.Str2Caption(str)
+papp.IsValueOneOfTypes( strTypes, strValue )
+papp.IsValueOneOfTypesM( strTypes, strValue )
+papp.MetaDataValue(strObj, strPath)
+papp.MetaDataNls(strObj, strName)
+papp.calcPair_CrossRate(mPCross, mP1, mP2, dCrossRate, d1Rate, d2Rate)
+papp.calcPair__GetRealRateFromRate(mPair, bStraight, dRate)
+papp.calcPair__GetRateFromRealRate(mPair, bStraight, dRate)
+
 objtmp.PropertyBag(val)
 objtmp.bActiveTab(val)
 objtmp.OpenObj(vIdx, strTemplate, bReplace)
+
+
+

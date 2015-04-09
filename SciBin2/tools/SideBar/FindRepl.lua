@@ -290,6 +290,28 @@ function ActivateFind(nTab)
     return true
 end
 
+local function FindNextSel(bUp)
+    if editor:LineFromPosition(editor.SelectionStart) == editor:LineFromPosition(editor.SelectionEnd) then
+        str = editor:GetSelText()
+        if str ~= '' then
+            local prevUp = findSettings.searchUp
+            ActivateFind(0)
+
+            ReadSettings()
+            OnNavigation("Find")
+            findSettings.searchUp = bUp
+            local pos = findSettings:FindNext(true)
+            OnNavigation("Find-")
+            if pos < 0 then SetInfo('Ничего не найдено', 'E')
+            else SetInfo('', '') end
+            Ctrl("cmbFindWhat"):SaveHist()
+
+            findSettings.searchUp = prevUp
+        end
+    end
+    return true
+end
+
 local function FindNextBack(bUp)
     if not findSettings.findWhat then ReadSettings() end
     if findSettings.findWhat == '' then return true end
@@ -814,6 +836,8 @@ local function FuncBmkTab_Init()
             elseif msg == IDM_FINDINFILES then return ActivateFind(2)
             elseif msg == IDM_FINDNEXT then return FindNextBack(false)
             elseif msg == IDM_FINDNEXTBACK then return FindNextBack(true)
+            elseif msg == IDM_FINDNEXTSEL then return FindNextSel(false)
+            elseif msg == IDM_FINDNEXTBACKSEL then return FindNextSel(true)
             end
         end);
         tabs_OnSelect = (function()

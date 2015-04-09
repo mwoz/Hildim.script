@@ -13,6 +13,32 @@ if not bSuc then print('Îרטבךא ג פאיכו settings.lua:', tMsg) end
 
 props['autoformat.line'] = _G.iuprops['autoformat.line']
 props['spell.autospell'] = _G.iuprops['spell.autospell']
+props['formenjine.old.ext'] = _G.iuprops['formenjine.old.ext']
+
+local function ResetFormEnjineExt()
+    if props['formenjine.old.ext'] == '1' then
+        props['formenjine.xml']='xml'
+        props['formenjine.inc']='inc'
+        props['file.patterns.formenjine']='*.inc;*.formenjine;*.xml;*.xml1;*.xml2;*.xml3;'
+        props['file.patterns.formxml']='*.xml;*.xml1;*.xml2;*.xml3;'
+        props['filter.formenjine']='Formenjine (xml inc)|*.inc;*.xml*|'
+    else
+        props['formenjine.xml']='form'
+        props['formenjine.inc']='incl'
+        props['file.patterns.formenjine']='*.incl;*.formenjine;*.form;*.form1;*.form2;*.form3;'
+        props['file.patterns.formxml']='*.form;*.form1;*.form2;*.form3;'
+        props['filter.formenjine']='Formenjine (form incl)|*.incl;*.form*|'
+    end
+end
+
+ResetFormEnjineExt()
+
+function CheckFMExt()
+	local cur_prop = ifnil(tonumber(props['formenjine.old.ext']), 0)
+	props['formenjine.old.ext'] = 1 - cur_prop
+    _G.iuprops['formenjine.old.ext'] = props['formenjine.old.ext']
+    ResetFormEnjineExt()
+end
 
 local function SaveIup()
 
