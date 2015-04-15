@@ -298,7 +298,7 @@ message.GetPathValue(Path, [DefaultValue]) as VARIANT - Path is like "Message1\M
 message.GetFieldText(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found
 message.GetFieldNumber(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found or convertion to number is impossible
 message.GetFieldDate(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found
-message.Execute(Statement, [MsgParameters])	Statement: may has one of next formats:\n\n1) CALC SUM(<FieldName1>), SUM(<FieldNameN>), COUNT [WHERE <expr>]\n2) GET WHERE <expr>\n3) SORT <FieldName1> [ASC | DESC] [, ..., <FieldNameN> [ASC | DESC] ]\n	\n<expr> ::= <arg> <operator> <arg> | <arg> <operator> <expr> | <expr> <operator> <expr> | (<expr>)\n<arg> ::= <FieldName> | '<string>' | <number> | ? | NULL\n<operator> ::= OR | AND | > | < | = | >= | <= | <>\n\nComparison of any value with NULL always returns False except cases:\n1) <NULL value> = <NULL value>\n2) <non-NULL value> <> <NULL value>\n\nMsgParameters: used when "?" arguments present. \nIt should contain one field of appropriate type for each "?" argument \nCommands of types 1) and 2) return result as Message object. \nFor 1) command result contains field for each specified function.\n\nExample:\nset args = form.TibCreateMessage\nargs.AddField "arg1", DateSerial(2001, 1, 9)\nrs.Execute "SORT col3 DESC, col1 DESC"\nset m = rs.Execute("GET WHERE col1 > ? OR col2 > 1.25", args)\nset m = rs.Execute("CALC SUM(col2), SUM(col3), COUNT WHERE col1 > ? OR col3 = 'Some string' ", args)\n
+message.Execute(Statement, [MsgParameters])	Statement: may has one of next formats:\n1) CALC SUM(<FieldName1>), SUM(<FieldNameN>), COUNT [WHERE <expr>]\n2) GET WHERE <expr>\n3) SORT <FieldName1> [ASC | DESC] [, ..., <FieldNameN> [ASC | DESC] ]	\n<expr> ::= <arg> <operator> <arg> | <arg> <operator> <expr> | <expr> <operator> <expr> | (<expr>)\n<arg> ::= <FieldName> | '<string>' | <number> | ? | NULL | EMPTY\n<operator> ::= OR | AND | > | < | = | >= | <= | <>\nExample:\nset args = Form.TibCreateMessage\nargs.AddField "arg1", DateSerial(2001, 1, 9)\nrs.Execute "SORT col3 DESC, col1 DESC"\nset m = rs.Execute("GET WHERE col1 <> EMPTY)\nset m = rs.Execute("GET WHERE col1 > ? OR col2 > 1.25", args)\nset m = rs.Execute("CALC SUM(col2), SUM(col3), COUNT WHERE col1 > ? OR col3 = 'Some string' ", args)
 #$message=.*%.execute(
 message.GetWireText() Returns  content of a message as a WireText
 message.SetWireText (strWireText) Sets message content from WireText string( see format in GetWIreText).\nReturns false if parsing string failed.\nExisiting data is replaced by data from WireText string
@@ -1117,8 +1117,8 @@ papp.IsValueOneOfTypesM( strTypes, strValue )
 papp.MetaDataValue(strObj, strPath)
 papp.MetaDataNls(strObj, strName)
 papp.calcPair_CrossRate(mPCross, mP1, mP2, dCrossRate, d1Rate, d2Rate)
-papp.calcPair__GetRealRateFromRate(mPair, bStraight, dRate)
-papp.calcPair__GetRateFromRealRate(mPair, bStraight, dRate)
+papp.calcPair_GetRealRateFromRate(mPair, bStraight, dRate)
+papp.calcPair_GetRateFromRealRate(mPair, bStraight, dRate)
 
 objtmp.PropertyBag(val)
 objtmp.bActiveTab(val)
