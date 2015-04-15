@@ -80,6 +80,7 @@ local alltags = {
 local alltagsmeta = {
 'name',
 'type',
+'code',
 'length',
 'mandatory',
 '$$$$'}
@@ -93,6 +94,7 @@ function SortXML(tags, fld, sText)
 	end
     local strtempl = '<('..fld..') ([^<]-)(%/?>)' --первый подшаблон - нежадный, дабы '/' по возможности попала во второй
     local wrdtempl = '([%w_]*)="([^"]*)"'
+    print(sText:find(strtempl))
     local strout = sText:gsub(strtempl,function(s0,s1,s2)
             local tblTags = {}   --сложим сюда имена тегов в том пор€дке, в котором они лежат в ноде
             local tblMaps = {}   --смепируем значени€ тэгов с именами
@@ -127,8 +129,7 @@ function SortFormXML()
     if t_xml then
         local strObjType = t_xml[0]
         if strObjType == "Template" then
-            editor:ReplaceSel(SortXML(alltagsmeta, 'Field', editor:GetSelText()))
-            editor:ReplaceSel(SortXML(alltagsmeta, 'Table', editor:GetSelText()))
+            editor:ReplaceSel(SortXML(alltagsmeta, 'Template',SortXML(alltagsmeta, 'Table', SortXML(alltagsmeta, 'Field', editor:GetSelText()))))
         else
             editor:ReplaceSel(SortXML(alltags, 'control', editor:GetSelText()))
         end

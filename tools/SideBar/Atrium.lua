@@ -201,6 +201,26 @@ local function PutForm(objectType, formType)
     dbAddProcParam(msgParams, "FormXml" , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
     dbRunProc('ObjectTypeForm_Import', msgParams, function(handle,Opaque,iError,msgReplay)
         print(msgReplay:ToString())
+        if msgReplay:GetPathValue('Error') == '0' then
+            local msg = mblua.CreateMessage()
+            strSubj = 'SYSM.SAVETEMPLATE'
+            if _G.iuprops["precompiller.radiususername"] ~= '' then
+                strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
+            end
+            msg:Subjects(strSubj)
+            -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
+            msg:SetPathValue("ExtText",editor:GetText():from_utf8(1251))
+
+            mblua.Request(function(handle,Opaque,iError,msgReplay)
+                if iError == 0 then
+                    print(msgReplay:GetPathValue("strReplay"))
+                else
+                    print("Terminal not responded")
+                end
+            end,msg,3,nil)
+            --mblua.Publish(msg)
+            msg:Destroy()
+        end
     end, 20, nil)
 end
 
@@ -232,6 +252,21 @@ local function Data_OpenNewChoice(strObj)
     end,20,nil)
 end
 
+local function TryCleanUp()
+    if _G.iuprops['atrium.data.cleanup']=='ON' then
+        local strText = editor:GetText()
+        strText = strText:gsub('[^\n]*<RecDate_Ins>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<RecDate_Upd>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<Usr_Id_Ins>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<Usr_Id_Upd>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<Revision>[^\n]*\n', '')
+        strText = strText:gsub(' xsi:nil="true"', '')
+        local _,_,id = strText:find('^<%w+%.(%w+)')
+        strText = strText:gsub('[^\n]*<'..id..'_Id>[^\n]*\n', '')
+        editor:SetText(strText)
+    end
+end
+
 local function Data_OpenNew()
     local sel = list_obj.marked:find('1') - 1
     if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
@@ -253,6 +288,7 @@ local function Data_OpenNew()
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
             scite.MenuCommand(1468)  --подсветка XML
+            TryCleanUp()
         end,20,nil)
     end
 end
@@ -279,6 +315,7 @@ local function Data_Unload()
             editor:SetText(xml.eval(msgReplay:GetPathValue('FormData')):str():to_utf8(1251))
             scite.MenuCommand(IDM_SAVE)
             scite.MenuCommand(1468)
+            TryCleanUp()
         end,20,nil)
     else
         local strName = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
@@ -458,7 +495,7 @@ local function FindTab_Init()
               iup.item{title="Открыть как новый файл",action=Data_OpenNew},
               iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
               iup.separator{},
-              iup.item{title="Удалить",action=Metadata_Delete},
+              iup.item{title="Очистить",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)

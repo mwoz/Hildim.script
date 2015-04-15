@@ -41,7 +41,7 @@ function str(var,indent,tagValue)
   if base.type(var)=="nil" then return end
   local indent = indent or 0
   local indentStr=""
-  for i = 1,indent do indentStr=indentStr.."  " end
+  for i = 1,indent do indentStr=indentStr.." " end
   local tableStr=""
 
   if base.type(var)=="table" then
@@ -66,7 +66,7 @@ function str(var,indent,tagValue)
         if base.type(v)=="string" then
           s = s..indentStr.." "..v.." \n"
         else
-          s = s..str(v,indent+2)
+          s = s..str(v,indent+3)
         end
       end
       s=s..tableStr..indentStr.."</"..tag..">\n"

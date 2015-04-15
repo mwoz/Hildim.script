@@ -371,9 +371,13 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         if wp == 3 then  --Показ отдельным окном развязываем через пост, иначе плохо иконки показывает
             props['session.reload'] = _G.iuprops['session.reload']
             if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
+                local t = {}
                 for f in _G.iuprops['buffers']:gmatch('[^•]+') do
-                    scite.Open(f)
-                    _G.iuprops['buffers'] = nil
+                    table.insert(t, f)
+                end
+                _G.iuprops['buffers'] = nil
+                for i = #t,1,-1 do
+                    scite.Open(t[i])
                 end
             end
             if SideBar_obj.win then oDeatt.detach = 1 end
