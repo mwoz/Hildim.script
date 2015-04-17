@@ -45,19 +45,19 @@ end
 local function CreateUntitledFile()
 	local file_ext = "."..props["FileExt"]
 	if file_ext == "." then file_ext = props["default.file.ext"] end
-	repeat
-		local file_path = props["FileDir"].."\\"..shell.to_utf8(scite.GetTranslation("Untitled"))..props["untitled.file.number"]..file_ext
-		props["untitled.file.number"] = tonumber(props["untitled.file.number"]) + 1
-		if not shell.fileexists(file_path) then
-			local warning_couldnotopenfile_disable = props['warning.couldnotopenfile.disable']
-			props['warning.couldnotopenfile.disable'] = 1
-			scite.Open(file_path)
-			if isMakeUTF8() then scite.MenuCommand(IDM_ENCODING_UCOOKIE) end
-			unsaved_files[file_path:upper()] = true --сохраняем путь к созданному буферу в таблице
-			props['warning.couldnotopenfile.disable'] = warning_couldnotopenfile_disable
-			return true
-		end
-	until false
+    local fName = props['scite.new.file']
+    if fName == '' then fName = shell.to_utf8(scite.GetTranslation("Untitled"))..props["untitled.file.number"]..file_ext end
+	props["default.file.ext"] = ''
+    local file_path = props["FileDir"].."\\".. fName
+    props["untitled.file.number"] = tonumber(props["untitled.file.number"]) + 1
+    local warning_couldnotopenfile_disable = props['warning.couldnotopenfile.disable']
+    props['warning.couldnotopenfile.disable'] = 1
+    scite.Open(file_path)
+    if isMakeUTF8() then scite.MenuCommand(IDM_ENCODING_UCOOKIE) end
+    unsaved_files[file_path:upper()] = true --сохраняем путь к созданному буферу в таблице
+    props['warning.couldnotopenfile.disable'] = warning_couldnotopenfile_disable
+    return true
+
 end
 AddEventHandler("OnMenuCommand", function(msg, source)
 	if msg == IDM_NEW then

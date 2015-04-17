@@ -2,6 +2,7 @@ require("LuaXML_lib")
 
 local base = _G
 local xml = xml
+local isz = 4
 module("xml")
 
 -- symbolic name for tag index, this allows accessing the tag by var[xml.TAG]
@@ -36,6 +37,7 @@ function append(var,tag)
   return newVar
 end
 
+function setIndent(i) isz = i end
 -- converts any Lua var into an XML string
 function str(var,indent,tagValue)
   if base.type(var)=="nil" then return end
@@ -66,7 +68,7 @@ function str(var,indent,tagValue)
         if base.type(v)=="string" then
           s = s..indentStr.." "..v.." \n"
         else
-          s = s..str(v,indent+3)
+          s = s..str(v,indent+isz)
         end
       end
       s=s..tableStr..indentStr.."</"..tag..">\n"
