@@ -196,7 +196,7 @@ local function PutForm(objectType, formType)
         print('Incorrect Custom form!')
         return
     end
-    local strXml = editor:GetText()
+    local strXml = editor:GetText():from_utf8(1251)
     local msgParams = mblua.CreateMessage()
     dbAddProcParam(msgParams, "FormXml" , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
     dbRunProc('ObjectTypeForm_Import', msgParams, function(handle,Opaque,iError,msgReplay)
@@ -261,6 +261,7 @@ local function TryCleanUp()
         strText = strText:gsub('[^\n]*<Usr_Id_Upd>[^\n]*\n', '')
         strText = strText:gsub('[^\n]*<Revision>[^\n]*\n', '')
         strText = strText:gsub(' xsi:nil="true"', '')
+        strText = strText:gsub(' xmlns:xsi="[^>]*', '')
         local _,_,id = strText:find('^<%w+%.(%w+)')
         strText = strText:gsub('[^\n]*<'..id..'_Id>[^\n]*\n', '')
         editor:SetText(strText)
@@ -276,6 +277,7 @@ local function Data_OpenNew()
         "where f.ObjectTypeForm_Id = "..list_data:getcell(sel,1)
         dbRunSql(sql,function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
+            props['scite.new.file'] = list_data:getcell(sel,2)..'.cform'
             scite.MenuCommand(IDM_NEW)
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
@@ -284,6 +286,8 @@ local function Data_OpenNew()
     else
         dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
+            props['scite.new.file'] = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
+                    iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2)..'.xml'
             scite.MenuCommand(IDM_NEW)
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
@@ -314,7 +318,7 @@ local function Data_Unload()
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(xml.eval(msgReplay:GetPathValue('FormData')):str():to_utf8(1251))
             scite.MenuCommand(IDM_SAVE)
-            scite.MenuCommand(1468)
+            scite.MenuCommand(1467)
             TryCleanUp()
         end,20,nil)
     else
@@ -341,6 +345,7 @@ local function Metadata_OpenNewArg(strObj)
     local sql =  "select  Metadata from ObjectType where ObjectType_Code = '"..strObj.."'"
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
+        props['scite.new.file'] = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml'
         scite.MenuCommand(IDM_NEW)
         scite.MenuCommand(IDM_ENCODING_UCS2LE)
         editor:SetText(msgReplay:GetPathValue('Metadata'):to_utf8(1251))
