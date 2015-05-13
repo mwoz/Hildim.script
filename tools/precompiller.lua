@@ -1,4 +1,5 @@
 require "mblua"
+require 'shell'
 
 local isText = false
 local strStartBasic, strEndBasic
@@ -50,8 +51,34 @@ local function getLineCount(s)
     return cnt
 end
 
+function formenjine_RunTemplate(strName)
+    props['formengine.runafter'] = ''
+    local msg2 = mblua.CreateMessage()
+    strSubj = 'SYSM.SAVETEMPLATE'
+    if _G.iuprops["precompiller.radiususername"] ~= '' then
+        strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
+    end
+    if strName:find('^xtm%.') or strName:find('^control%.') or strName:find('^debug%.') then strName = '' end
+    msg2:Subjects(strSubj)
+    -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
+    msg2:SetPathValue("Run",strName)
+
+    mblua.Request(function(handle,Opaque,iError,msgReplay)
+        if iError == 0 then
+
+            if msgReplay:GetPathValue("PID") then
+                print(msgReplay:GetPathValue("strReplay"), shell.activate_proc_wnd(msgReplay:GetPathValue("PID")))
+            else
+                print(msgReplay:GetPathValue("strReplay"))
+            end
+        else
+            print("Run: Terminal not responded")
+        end
+    end, msg2, 3, nil)
+end
+
 local function RereadTemplateFiles()
-require 'shell'
+
 	local precomp_strRootDir = props["precomp_strRootDir"].."\\"
     if precomp_strRootDir == "\\" then return end
     precomp_tblFiles = {}
@@ -96,7 +123,50 @@ local function ParseLine(strLine)
 	end
 end
 
+local function OnSaveCForm()
+    if props["precompiller.ok"] == "Y" then
+        local msg = mblua.CreateMessage()
+        strSubj = 'SYSM.SAVETEMPLATE'
+        if _G.iuprops["precompiller.radiususername"] ~= '' then
+            strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
+        end
+        msg:Subjects(strSubj)
+        -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
+        msg:SetPathValue("ExtText",editor:GetText():from_utf8(1251))
+
+        _G['formengine.reloadtemplate'] = true
+        mblua.Request(function(handle,Opaque,iError,msgReplay)
+            _G['formengine.reloadtemplate'] = false
+            if iError == 0 then
+                print(msgReplay:GetPathValue("strReplay"))
+                if _G['formengine.runafter'] then
+                    local msg2 = mblua.CreateMessage()
+                    strSubj = 'SYSM.SAVETEMPLATE'
+                    if _G.iuprops["precompiller.radiususername"] ~= '' then
+                        strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
+                    end
+                    msg2:Subjects(strSubj)
+                    -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
+                    msg:SetPathValue("Run","")
+
+                    mblua.Request(function(handle,Opaque,iError,msgReplay)
+                        _G['formengine.runafter'] = false
+                    end, msg2, 3, nil)
+                end
+            else
+                print("Terminal not responded")
+            end
+        end,msg,3,nil)
+        --mblua.Publish(msg)
+        msg:Destroy()
+    end
+end
+
 local function OnSave_local()
+    if props['FileExt']:lower() == 'cform' then
+        OnSaveCForm()
+        return
+    end
     local precomp_Map
 	local precomp_strRootDir = props["precomp_strRootDir"].."\\"
     if precomp_strRootDir == "\\" then return end
@@ -218,13 +288,16 @@ local function OnSave_local()
                 msg:Subjects(strSubj)
                 -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
                 msg:SetPathValue("TemplText",strOut)
-
+                _G['formengine.reloadtemplate'] = true
                 mblua.Request(function(handle,Opaque,iError,msgReplay)
+                    _G['formengine.reloadtemplate'] = false
                     if iError == 0 then
                         print(msgReplay:GetPathValue("strReplay"))
+                        if props['formengine.runafter'] == '1' then formenjine_RunTemplate(msgReplay:GetPathValue("template") or "") end
                     else
                         print("Terminal not responded")
                     end
+                    props['formengine.runafter'] = ''
                 end,msg,3,nil)
                 --mblua.Publish(msg)
                 msg:Destroy()
@@ -232,6 +305,20 @@ local function OnSave_local()
                 print(props["precompiller.xmlname"].." Build Erorr!")
             end
         end
+    end
+end
+
+function formenjine_Run()
+    if _G['formengine.reloadtemplate'] ~= true then
+        if props['FileExt']=='cform' then
+            props['formengine.runafter'] = '1'
+            atrium_RunXml()
+        else
+            local _,_,strName = editor:GetText():find('<template name="([^"]*)')
+            formenjine_RunTemplate(strName or '')
+        end
+    else
+        props['formengine.runafter'] = '1'
     end
 end
 
@@ -271,7 +358,7 @@ function precomp_PreCompileTemplate()
 --require( "luacom" )
     if editor.Lexer  ~= SCLEX_FORMENJINE then return end
     local strExt = props["FileExt"]:sub(1, XEXT:len()):lower()   --таким образом можем компилить шаблоны .xml1 и пр - которые не будут подхватыватся обычным сборщиком
-    if strExt ~= XEXT and props["FileExt"]:lower() ~= INCL then return end
+    if strExt ~= XEXT and props["FileExt"]:lower() ~= INCL and props["FileExt"]:lower() ~= 'cform' then return end
     local vbOk = false
     local strXml
     strXml = ""
@@ -325,12 +412,17 @@ function precomp_PreCompileTemplate()
     end
     print( strOut )
     --Проверка XML
-    if strExt == XEXT then
-
-        props["precompiller.xmlname"] = props["FileNameExt"]
-        local s,e=editor:findtext("<?.+?>",SCFIND_REGEXP)
-        j=editor:LineFromPosition(e)+1
-        strXml=string.sub(editor:GetText(),e+3)
+    if strExt == XEXT or props["FileExt"]:lower() == 'cform' then
+        local j
+        if strExt == XEXT then
+            props["precompiller.xmlname"] = props["FileNameExt"]
+            local s,e=editor:findtext("<?.+?>",SCFIND_REGEXP)
+            j=editor:LineFromPosition(e)+1
+            strXml=string.sub(editor:GetText(),e+3)
+        else
+            strXml=editor:GetText()
+            j = 0
+        end
 
         local nline,npos, msg = mblua.CheckXML(strXml)
 
@@ -349,7 +441,6 @@ function precomp_PreCompileTemplate()
     else
         props["precompiller.ok"] = "N"
     end
-
 end
 
 local function OnBeforeSave_local()

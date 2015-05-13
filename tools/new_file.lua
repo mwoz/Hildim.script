@@ -47,7 +47,7 @@ local function CreateUntitledFile()
 	if file_ext == "." then file_ext = props["default.file.ext"] end
     local fName = props['scite.new.file']
     if fName == '' then fName = shell.to_utf8(scite.GetTranslation("Untitled"))..props["untitled.file.number"]..file_ext end
-	props["default.file.ext"] = ''
+	props['scite.new.file'] = ''
     local file_path = props["FileDir"].."\\".. fName
     props["untitled.file.number"] = tonumber(props["untitled.file.number"]) + 1
     local warning_couldnotopenfile_disable = props['warning.couldnotopenfile.disable']

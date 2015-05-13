@@ -558,7 +558,7 @@ end
 
 local function fixname (funcitem)
 	local flag, flag2 = GetFlags(funcitem)
-	return funcitem[1]..flag2..GetParams(funcitem),flag
+	return funcitem[1]..(flag2 or '')..GetParams(funcitem),flag
 end
 
 function getPath(id)
