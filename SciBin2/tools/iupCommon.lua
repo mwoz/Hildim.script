@@ -71,7 +71,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         local notSaved = {}
         DoForBuffers(function(i)
             if i then
-                if editor.Modify and i ~= cur and (cmd ~= 9134 or props['FilePath']:from_utf8(1251):find('Безымянный')) then
+                if editor.Modify and i ~= cur and (cmd ~= 9134 or props['FilePath']:from_utf8(1251):find('Безымянный')) and not props['FileNameExt']:find('^%^') then
                     msg = msg..'  '..props['FilePath']:from_utf8(1251)..'\n'
                     table.insert(notSaved, i)
                 end
@@ -95,9 +95,9 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         if cmd == IDM_QUIT then ClearAllEventHandler() end
         local nf,spathes = false,''
         DoForBuffers(function(i)
-            if i and i ~= cur and (cmd ~= 9134 or (props['FilePath']:from_utf8(1251):find('Безымянный') and editor.Modify)) then
+            if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
                 scite.SendEditor(SCI_SETSAVEPOINT)
-                if props['FilePath'] ~= '' then
+                if props['FilePath'] ~= '' and not props['FileNameExt']:find('^%^') then
                     spathes = spathes..'•'..props['FilePath']:from_utf8(1251)
                     nf = true
                 end

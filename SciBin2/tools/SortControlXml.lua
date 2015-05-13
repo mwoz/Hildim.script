@@ -78,11 +78,30 @@ local alltags = {
 '$$$$'}
 
 local alltagsmeta = {
+-- TEMPLATE, TABLE, FIELD:
+'code',
 'name',
 'type',
-'code',
+'asset',
 'length',
+'object',
+'codeName',
 'mandatory',
+'permissionGet',
+'permissionIUD',
+-- TABLE only:
+'movements',
+-- TEMPLATE only:
+'audit',
+'realtimeNotify',
+'schemaVersion',
+-- INDEX:
+'nameSuffix',
+'unique',
+'key',
+-- EXTERNALREF only:
+'table',
+'field',
 '$$$$'}
 
 require("LuaXml")
@@ -128,7 +147,7 @@ function SortFormXML()
     if t_xml then
         local strObjType = t_xml[0]
         if strObjType == "Template" then
-            editor:ReplaceSel(SortXML(alltagsmeta, 'Template',SortXML(alltagsmeta, 'Table', SortXML(alltagsmeta, 'Field', editor:GetSelText()))))
+            editor:ReplaceSel(SortXML(alltagsmeta, 'ExternalRef',(SortXML(alltagsmeta, 'Check',(SortXML(alltagsmeta, 'Index',(SortXML(alltagsmeta, 'Template',SortXML(alltagsmeta, 'Table', SortXML(alltagsmeta, 'Field', editor:GetSelText()))))))))))
         else
             editor:ReplaceSel(SortXML(alltags, 'control', editor:GetSelText()))
         end

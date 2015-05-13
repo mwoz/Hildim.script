@@ -555,9 +555,9 @@ local function frmControlPos(findSt, findEnd, s, dInd)
                 local _,_,x,y,w,h = sl:find('position="(%d+);(%d+);(%d+);(%d+)"')
                 if onSameLine then
                     txtY2.value = y
-                    txtX2.value = ''..(tonumber(x) + tonumber(w))
+                    txtX2.value = ''..(tonumber(x or 0) + tonumber(w or 0))
                 else
-                    txtY2.value = '' ..(tonumber(y) + tonumber(h) + tonumber(txtDx.value))
+                    txtY2.value = '' ..(tonumber(y or 0) + tonumber(h or 0) + tonumber(txtDx.value or 0))
                 end
                 break
             end

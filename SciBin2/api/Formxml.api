@@ -3,7 +3,7 @@ control.name
 control.backcolor
 control.forecolor
 control.font "name;size;bold;italic;underline"\nfor example: "Tahoma;8;N;Y;N"
-control.position "left;top;width;height"
+control.position "left;top;width;height" авпавпыва
 control.padright
 control.padtop
 control.padbottom

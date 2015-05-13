@@ -69,7 +69,7 @@ Sub Main()
     Set out = oFso.OpenTextFile(strOutPath, 2, True)
     On Error Resume Next
 
-    Set oExec = WshShell.Exec("m4 """ & m_SciteDataDir & "tmp.m""")
+    Set oExec = WshShell.Exec(m_SciteDataDir & "\..\m4.exe """ & m_SciteDataDir & "tmp.m""")
     On Error GoTo 0
     If Err.Number <> 0 Then
         WScript.Echo "Error: " & Err.Description

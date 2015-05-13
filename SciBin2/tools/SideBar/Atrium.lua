@@ -17,6 +17,7 @@ local AD_ParamUnknown = 0        --Indicates that the parameter direction is unk
 local XMLCAPT = '<?xml version="1.0" encoding="Windows-1251" standalone="yes"?>\n'
 
 local cmb_Action, chk_ign, cmb_syscust, txt_objmask, txt_datamask, list_obj, list_data, cmb_mask, btnRun
+local cmb_RefDepth, cmb_apDept, chk_IncludeExt
 
 local function dbAddProcParam(msgParams, strName, varValue, enumType, enumDirection ,lSize )
     msgParams:SetPathValue(strName.."\\Value"    ,varValue)
@@ -58,6 +59,7 @@ local function dbCheckError(iError, msgReplay)
 end
 
 local function OnSwitch()
+    props['are.you.sure.close'] = Iif(props['FileNameExt']:find('^%^'),0,1)
     local bEn = (editor.Lexer == SCLEX_XML or editor.Lexer == SCLEX_FORMENJINE)
     btnRun.active = Iif(bEn, 'YES', 'NO')
 end
@@ -76,8 +78,25 @@ local function Data_GetSql(strProc, id)
         id = tonumber(iup.GetAttributeId2(list_data, '', sel, 1))
     end
     return "declare @XmlData tLongText\n"..
-    "exec "..strProc.." 'atrium', "..id..", @XmlData output\n"..
+    "exec "..strProc.." 'atrium', "..id..", @XmlData output, "..
+    (cmb_RefDepth.value-1)..', '..(cmb_apDept.value-1)..', '..Iif(chk_IncludeExt.value=='ON', "'Y'", "'N'")..'\n'..
     "select @XmlData as [xml]"
+end
+
+local function TryCleanUp()
+    if _G.iuprops['atrium.data.cleanup']=='ON' then
+        local strText = editor:GetText()
+        strText = strText:gsub('[^\n]*<RecDate_Ins>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<RecDate_Upd>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<Usr_Id_Ins>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<Usr_Id_Upd>[^\n]*\n', '')
+        strText = strText:gsub('[^\n]*<Revision>[^\n]*\n', '')
+        strText = strText:gsub(' xsi:nil="true"', '')
+        strText = strText:gsub(' xmlns:xsi="[^>]*', '')
+        local _,_,id = strText:find('^<%w+%.(%w+)')
+        strText = strText:gsub('[^\n]*<'..id..'_Id>[^\n]*\n', '')
+        editor:SetText(strText)
+    end
 end
 
 local function SetReply(handle,msgOpaque,iError,msgReplay)
@@ -86,8 +105,8 @@ local function SetReply(handle,msgOpaque,iError,msgReplay)
     if msgOpaque:GetPathValue("Type", "") == 'DATA' then
         dbRunSql(Data_GetSql(msgOpaque:GetPathValue("Proc", ""), msgReplay:GetPathValue("Object_Id", 0)), function(handle,Opaque,iError,msgR)
             if dbCheckError(iError, msgR) then return end
-            print(msgR:ToString())
             editor:SetText(xml.eval(msgR:GetPathValue('xml')):str():to_utf8(1251))
+            TryCleanUp()
         end, 20, nil)
     end
 end
@@ -210,10 +229,12 @@ local function PutForm(objectType, formType)
             msg:Subjects(strSubj)
             -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
             msg:SetPathValue("ExtText",editor:GetText():from_utf8(1251))
-
+            _G['formengine.reloadtemplate'] = true
             mblua.Request(function(handle,Opaque,iError,msgReplay)
+            _G['formengine.reloadtemplate'] = false
                 if iError == 0 then
                     print(msgReplay:GetPathValue("strReplay"))
+                    if props['formengine.runafter'] == '1' then formenjine_RunTemplate("") end
                 else
                     print("Terminal not responded")
                 end
@@ -224,7 +245,8 @@ local function PutForm(objectType, formType)
     end, 20, nil)
 end
 
-local function RunXml()
+function atrium_RunXml()
+    if btnRun.active == 'NO' then return end
     local t_xml = xml.eval(editor:GetText():gsub('^<[?].->\r?\n?',''))
     local strObjType = t_xml[0]
     if strObjType == 'Template' then
@@ -248,24 +270,7 @@ local function Data_OpenNewChoice(strObj)
         scite.MenuCommand(IDM_NEW)
         scite.MenuCommand(IDM_ENCODING_UCS2LE)
         editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
-        scite.MenuCommand(1467)
     end,20,nil)
-end
-
-local function TryCleanUp()
-    if _G.iuprops['atrium.data.cleanup']=='ON' then
-        local strText = editor:GetText()
-        strText = strText:gsub('[^\n]*<RecDate_Ins>[^\n]*\n', '')
-        strText = strText:gsub('[^\n]*<RecDate_Upd>[^\n]*\n', '')
-        strText = strText:gsub('[^\n]*<Usr_Id_Ins>[^\n]*\n', '')
-        strText = strText:gsub('[^\n]*<Usr_Id_Upd>[^\n]*\n', '')
-        strText = strText:gsub('[^\n]*<Revision>[^\n]*\n', '')
-        strText = strText:gsub(' xsi:nil="true"', '')
-        strText = strText:gsub(' xmlns:xsi="[^>]*', '')
-        local _,_,id = strText:find('^<%w+%.(%w+)')
-        strText = strText:gsub('[^\n]*<'..id..'_Id>[^\n]*\n', '')
-        editor:SetText(strText)
-    end
 end
 
 local function Data_OpenNew()
@@ -277,21 +282,19 @@ local function Data_OpenNew()
         "where f.ObjectTypeForm_Id = "..list_data:getcell(sel,1)
         dbRunSql(sql,function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
-            props['scite.new.file'] = list_data:getcell(sel,2)..'.cform'
+            props['scite.new.file'] = '^'..list_data:getcell(sel,2)..'.cform'
             scite.MenuCommand(IDM_NEW)
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
-            scite.MenuCommand(1467)  --подсветка FormEnjine
         end,20,nil)
     else
         dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
-            props['scite.new.file'] = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
-                    iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2)..'.xml'
+            props['scite.new.file'] = '^'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
+                    (iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2) or iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1))..'.xml'
             scite.MenuCommand(IDM_NEW)
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
-            scite.MenuCommand(1468)  --подсветка XML
             TryCleanUp()
         end,20,nil)
     end
@@ -316,14 +319,12 @@ local function Data_Unload()
             f:close()
             scite.Open(strPath)
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
-            editor:SetText(xml.eval(msgReplay:GetPathValue('FormData')):str():to_utf8(1251))
+            editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
             scite.MenuCommand(IDM_SAVE)
-            scite.MenuCommand(1467)
-            TryCleanUp()
         end,20,nil)
     else
         local strName = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
-            iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2)
+            (iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2) or iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1))
 
         dbRunSql(Data_GetSql(), function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
@@ -335,8 +336,8 @@ local function Data_Unload()
             scite.Open(strPath)
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
+            TryCleanUp()
             scite.MenuCommand(IDM_SAVE)
-            scite.MenuCommand(1468)
         end,20,nil)
     end
 end
@@ -345,7 +346,7 @@ local function Metadata_OpenNewArg(strObj)
     local sql =  "select  Metadata from ObjectType where ObjectType_Code = '"..strObj.."'"
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
-        props['scite.new.file'] = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml'
+        props['scite.new.file'] = '^'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml'
         scite.MenuCommand(IDM_NEW)
         scite.MenuCommand(IDM_ENCODING_UCS2LE)
         editor:SetText(msgReplay:GetPathValue('Metadata'):to_utf8(1251))
@@ -439,7 +440,7 @@ local function FindTab_Init()
     iup.SetAttribute(cmb_mask, 4, "SD")
     iup.SetAttribute(cmb_mask, 5, "SDP")
     cmb_mask.value = 1
-    btnRun = iup.button{image = 'IMAGE_FormRun', action=RunXml, tip='Обработка всего файла'}
+    btnRun = iup.button{image = 'IMAGE_FormRun', action=atrium_RunXml, tip='Обработка всего файла'}
 
 
     cmb_syscust = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Сохранение/Удаление объекта'}
@@ -450,6 +451,23 @@ local function FindTab_Init()
 
     txt_objmask = iup.text{expand='HORIZONTAL',tip='Маска метаданных'}
     txt_objmask.k_any = (function(h,k) if k == iup.K_CR then SelectMetadata() end end)
+
+    cmb_RefDepth = iup.list{dropdown="YES",visible_items="15",size='20x0', expand='NO', tip='Reference Repth'}
+    iup.SetAttribute(cmb_RefDepth, 1, "0")
+    iup.SetAttribute(cmb_RefDepth, 2, "1")
+    iup.SetAttribute(cmb_RefDepth, 3, "2")
+    iup.SetAttribute(cmb_RefDepth, 4, "3")
+    cmb_RefDepth.value = 1
+
+    cmb_apDept = iup.list{dropdown="YES",visible_items="15",size='20x0', expand='NO', tip='Reference Repth'}
+    iup.SetAttribute(cmb_apDept, 1, "0")
+    iup.SetAttribute(cmb_apDept, 2, "1")
+    iup.SetAttribute(cmb_apDept, 3, "2")
+    iup.SetAttribute(cmb_apDept, 4, "3")
+    cmb_apDept.value = 2
+
+    chk_IncludeExt = iup.toggle{title='En.ApM', tip='Enrich Appendix Multiple'}
+
     list_obj = iup.matrix{
     numcol=4, numcol_visible=4,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
@@ -518,9 +536,19 @@ handle =iup.split{
         list_obj;
     },iup.vbox{
         iup.hbox{
+            iup.expander{iup.hbox{
+                    iup.label{title=' Ref Dp: '},
+                    cmb_RefDepth,
+                    iup.label{title=' ApM.Dp: '},
+                    cmb_apDept, chk_IncludeExt,
+                    alignment="ACENTER", gap="3", margin="3x0"
+                },
+                barposition='LEFT', state='CLOSE', autoshow='YES'
+            },
             txt_datamask,
             iup.button{image = "IMAGE_search", action=SelectData},
         },
+
         list_data,
         iup.hbox{
             iup.label{title = "Action:"},
