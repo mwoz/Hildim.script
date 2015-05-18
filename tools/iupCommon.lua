@@ -1,5 +1,5 @@
 _G.iuprops = {}
-
+local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
 local text = ''
 if pcall(io.input, file) then
@@ -8,7 +8,11 @@ end
 io.close()
 
 local bSuc, tMsg = pcall(dostring,text)
-if not bSuc then print('Îרטבךא ג פאיכו settings.lua:', tMsg) end
+if not bSuc then
+    print('Îרטבךא ג פאיכו settings.lua:', tMsg)
+else
+    iuprops_read_ok = true
+end
 
 
 props['autoformat.line'] = _G.iuprops['autoformat.line']
@@ -41,7 +45,7 @@ function CheckFMExt()
 end
 
 local function SaveIup()
-
+    if not iuprops_read_ok then return end
     local t = {}
     for n,v in pairs(_G.iuprops) do
         local tp = type(v)
