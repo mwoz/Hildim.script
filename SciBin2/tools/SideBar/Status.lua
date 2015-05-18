@@ -268,54 +268,19 @@ FindTab_Init()
 
 
 
-
-
 function test_runtest()
-  local containers = {}
-
-  containers[3] = iup.sbox{
-    iup.canvas{
-
-      name = "Sourse",
-    },
-    direction="SOUTH",
-  }
-
-  containers[7] = iup.split{
-    iup.canvas{
-
-      name = "Run",
-    },
-    iup.canvas{
-
-      name = "FindRez",
-    },
-  }
-
-  containers[6] = iup.hbox{
-    containers[7],
-  }
-
-  containers[5] = iup.detachbox{
-    containers[6],
-    name = "BottomBar",
-  }
-
---[[  containers[4] = iup.hbox{
-    containers[5],
-  }]]
-
-  containers[2] = iup.vbox{
-    iup.canvas{
-      name = "TollBar",
-      minsize="x20",
-      maxsize="x20",
-    },
-    --[[containers[3],]]
- --[[   containers[5],]]
-    iup.button{title="Test", expand="YES"},
-    name = "SciteVB",
-  }
+local dlg , cnv
+    -- local function  showcb(h,state)
+        -- if state == 0 then
+            -- print('start')
+            -- iup.ReattachWndTo(cnv, 'FindRez')
+        -- elseif state == 4 then
+            -- dlg:postdestroy()
+        -- end
+    -- end
+    -- cnv = iup.canvas{posx = "0.000000000",posy = "0.000000000"}
+  -- dlg = iup.scitedialog{cnv, show_cb = showcb, minsize = "300x200",sciteparent="SCITE", sciteid="tmptmp" }
+  print(123)
 bt2 = iup.button{title="Test11", size="x20"}
 bt = iup.button{title="Test"}
 bt.expand = "YES"
@@ -325,10 +290,13 @@ box.color = "0 0 255"
 
 ml = iup.multiline{}
 ml.expand = "YES"
-vbox = iup.vbox{    iup.label{title="Tes11t", minsize = "x30", maxsize = "x30", expand="HORIZONTAL"}, containers[3], containers[5]}
+vbox = iup.vbox{bt2, box, ml}
 
 lb = iup.label{title="Label"}
 lb.expand = "YES"
+dlg = iup.scitedialog{iup.hbox{vbox, lb},sciteparent="SCITE", sciteid="tmptmp" }
 
-   local dd= iup.scitedialog{vbox,sciteparent="SCITE", sciteid="tmptmp" }
+
+
 end
+

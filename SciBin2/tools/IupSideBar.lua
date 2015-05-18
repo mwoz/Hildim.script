@@ -10,6 +10,12 @@ local vSys
 local vFileMan
 local vFindRepl
 local oDeatt
+local hMainLayout = iup.GetLayout()
+local BottomBar
+
+iup.PassFocus=(function()
+    iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
+end)
 
 function sidebar_Switch(n)
     SideBar_obj.TabCtrl.valuepos = n -1
@@ -33,7 +39,7 @@ local function  CreateToolBar()
                             TabBar_obj.Tabs.m4.handle,
                             TabBar_obj.Tabs.template.handle,
                             TabBar_obj.Tabs.livesearch.handle,
-                            gap='3',margin='3x0'
+                            gap='3',margin='3x0', name="ToolBar", maxsize="x36",
                         }
     return tolsp1
 end
@@ -41,7 +47,7 @@ local function  CreateStatusBar()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Status.lua")
     local tolsp1=iup.hbox{
                             StatusBar_obj.Tabs.statusbar.handle,
-                            gap='3',margin='3x0'
+                            gap='3',margin='3x0', name="StatusBar", maxsize="x30",
                         }
     return tolsp1
 end
@@ -81,7 +87,7 @@ local function  CreateBox()
     end
 
     -- Creates tabs
-    local tabs = iup.tabs{vFuncNav, vAbbrev, vFileMan, vFindRepl, name="tabMain", tip= 'Ctrl+1,2,3,4'  }
+    local tabs = iup.tabs{ vFuncNav, vAbbrev, vFileMan,vFindRepl, name="tabMain", tip= 'Ctrl+1,2,3,4'  }
 
     tabs.tabchange_cb = (function(_,new_tab, old_tab)
         --сначала найдем активный таб и установим его в SideBar_obj
@@ -129,7 +135,7 @@ local function  CreateBox()
 
     vbox = iup.vbox{tabs}       --SideBar_obj.Tabs.livesearch.handle,
     oDeatt = iup.detachbox{
-        vbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";
+        vbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name='SideBarSB'; shrink="yes";
         detached_cb=(function(h, hNew, x, y)
             hNew.resize ="YES"
             hNew.shrink ="YES"
@@ -144,13 +150,13 @@ local function  CreateBox()
             hNew.rastersize = _G.iuprops['dialogs.sidebar.rastersize']
             _G.iuprops['sidebar.win']='1'
             _G.iuprops['dialogs.sidebarp.rastersize'] = h.rastersize
-
+            _G.iuprops['dialogs.sidebarp.splitvalue'] = iup.GetDialogChild(hMainLayout, "SourceSplit").value
+            iup.GetDialogChild(hMainLayout, "SourceSplit").value = "1000"
+            iup.GetDialogChild(hMainLayout, "SourceSplit").barsize = "0"
             hNew.close_cb =(function(h)
                 if _G.dialogs['sidebar'] ~= nil then
 
                     _G.iuprops['sidebar.win']='0'
-                    local w = _G.iuprops['dialogs.sidebarp.rastersize']:gsub('x%d*', '')
-                    iup.ShowSideBar(tonumber(w))
                     oDeatt.restore = 1
                     _G.dialogs['sidebar'] = nul
                     return -1
@@ -164,9 +170,11 @@ local function  CreateBox()
                     _G.iuprops["dialogs.sidebar.x"]= h.x
                     _G.iuprops["dialogs.sidebar.y"]= h.y
                     _G.iuprops['dialogs.sidebar.rastersize'] = h.rastersize
+                    iup.GetDialogChild(hMainLayout, "SourceSplit").value = _G.iuprops['dialogs.sidebarp.splitvalue']
+                    iup.GetDialogChild(hMainLayout, "SourceSplit").barsize = "3"
                 end
             end)
-            iup.ShowSideBar(-1)
+            --iup.ShowSideBar(-1)
             if tonumber(_G.iuprops["dialogs.sidebar.x"])== nil or tonumber(_G.iuprops["dialogs.sidebar.y"]) == nil then _G.iuprops["dialogs.sidebar.x"]=0;_G.iuprops["dialogs.sidebar.y"]=0 end
             return tonumber(_G.iuprops["dialogs.sidebar.x"])*2^16+tonumber(_G.iuprops["dialogs.sidebar.y"])
         end)
@@ -176,6 +184,7 @@ end
 local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
 local function InitSideBar()
+    --hMainLayout = iup.GetLayout()
 --SideBar_obj._DEBUG = true --включает вывод отладочной информации
 -- отображение флагов/параметров по умолчанию:
     if tonumber(props['sidebar.hide']) == 1 then return end
@@ -188,8 +197,6 @@ local function InitSideBar()
     local tDlg = {CreateBox(); title="SideBar", maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="100x100"}
     tDlg.show_cb=(function(h,state)
         if state == 0 then
-
-           --iup.Refresh(h)
            h.size = '1x1'
         elseif state == 4 then
             for _,tbs in pairs(SideBar_obj.Tabs) do
@@ -213,9 +220,8 @@ local function InitSideBar()
         repeat
             child = iup.GetNextChild(h, child)
             if child then
-                if (child.value or child.valuepos or child.focusitem) and child.name then
+                if (child.value or child.valuepos or child.focusitem or child.size) and child.name then
                     local _,_,cType = tostring(child):find('IUP%((%w+)')
-
                     local val = child.value
                     if cType == 'list' and child.dropdown == "YES" then
                         local hist = {}
@@ -227,6 +233,8 @@ local function InitSideBar()
                         val = child.valuepos
                     elseif cType == 'matrixlist' then
                         val = child.focusitem
+                    elseif cType == 'sbox' then
+                        val = child.size
                     end
                     _G.iuprops['sidebarctrl.'..child.name..'.value'] = val
                 end
@@ -275,14 +283,17 @@ local function InitSideBar()
         for _,tbs in pairs(SideBar_obj.Tabs) do
             if tbs.OnSaveValues then tbs.OnSaveValues() end
         end
+        SaveNamedValues(hMainLayout)
         SaveNamedValues(tDlg[1])
     end)
 
-    tDlg.sciteparent="SIDEBAR"
+    tDlg.sciteparent="SideBarPH"
     tDlg.control = "YES"
     tDlg.sciteid="sidebarp"
     -- end
     dlg = iup.scitedialog(tDlg)
+
+    RestoreNamedValues(hMainLayout)
     RestoreNamedValues(tDlg[1])
     --if SideBar_obj.win then oDeatt.detach = 1 end
 
@@ -292,9 +303,58 @@ local function InitSideBar()
         end
     end
     SideBar_obj.OnCreate()
+
+    BottomBar = iup.GetDialogChild(hMainLayout, "BottomBar")
+
+    BottomBar.detached_cb=(function(h, hNew, x, y)
+        hNew.resize ="YES"
+        hNew.shrink ="YES"
+        hNew.minsize="200x100"
+        hNew.maxbox="NO"
+        hNew.minbox="NO"
+        --hNew.toolbox="YES"
+        hNew.title="BottomBar /Close For Attach/"
+        hNew.x=10
+        hNew.y=10
+        x=10;y=10
+        hNew.rastersize = _G.iuprops['dialogs.bottombar.rastersize']
+        _G.iuprops['bottombar.win']='1'
+        _G.iuprops['dialogs.bottombar.rastersize'] = h.rastersize
+
+        hNew.close_cb =(function(h)
+            if _G.dialogs['bottombar'] ~= nil then
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombarp.splitvalue']
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "3"
+                iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
+                _G.iuprops['bottombar.win']='0'
+                iup.GetDialogChild(hMainLayout, "BottomBar").restore = 1
+                _G.dialogs['bottombar'] = nil
+                return -1
+            end
+        end)
+
+        hNew.show_cb=(function(h,state)
+            if state == 0 then
+                iup.GetDialogChild(hMainLayout, "BottomExpander").state = "CLOSE"
+                _G.iuprops['dialogs.bottombarp.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "0"
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = "1000"
+                _G.dialogs['bottombar'] = iup.GetDialogChild(hMainLayout, "BottomBar")
+            elseif state == 4 then
+                _G.iuprops["dialogs.bottombar.x"]= h.x
+                _G.iuprops["dialogs.bottombar.y"]= h.y
+                _G.iuprops['dialogs.bottombar.rastersize'] = h.rastersize
+            end
+        end)
+        --iup.ShowSideBar(-1)
+        if tonumber(_G.iuprops["dialogs.bottombar.x"])== nil or tonumber(_G.iuprops["dialogs.bottombar.y"]) == nil then _G.iuprops["dialogs.bottombar.x"]=0;_G.iuprops["dialogs.bottombar.y"]=0 end
+        return tonumber(_G.iuprops["dialogs.bottombar.x"])*2^16+tonumber(_G.iuprops["dialogs.bottombar.y"])
+
+    end)
 end
 
 local function InitToolBar()
+    local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     TabBar_obj.Tabs = {}
                      --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
     local tTlb = {CreateToolBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
@@ -317,7 +377,13 @@ local function InitToolBar()
         end
     end)
     tTlb.resize_cb=(function(_,x,y) if TabBar_obj.handle ~= nil then TabBar_obj.size = TabBar_obj.handle.size end end)
-    TabBar_obj.handle = iup.scitedialog(tTlb)
+    --TabBar_obj.handle = iup.scitedialog(tTlb)
+    local hTmp= iup.dialog(tTlb)
+    local hBx = iup.GetDialogChild(hTmp, 'ToolBar')
+    iup.Detach(hBx)
+    iup.Destroy(hTmp)
+    TabBar_obj.handle = iup.Insert(vbScite, nil, hBx)
+    iup.Map(hBx)
     for i = 1, #tEvents do
         for _,tbs in pairs(TabBar_obj.Tabs) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
@@ -329,6 +395,7 @@ end
 
 
 local function InitStatusBar()
+     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     StatusBar_obj = {}
     StatusBar_obj.Tabs = {}
                      --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
@@ -351,8 +418,15 @@ local function InitStatusBar()
             end
         end
     end)
-    tTlb.resize_cb=(function(_,x,y) if StatusBar_obj.handle ~= nil then  StatusBar_obj.size = StatusBar_obj.handle.size end end)
-    StatusBar_obj.handle = iup.scitedialog(tTlb)
+    --tTlb.resize_cb=(function(_,x,y) if StatusBar_obj.handle ~= nil then  StatusBar_obj.size = StatusBar_obj.handle.size end end)
+    --StatusBar_obj.handle = iup.scitedialog(tTlb)
+    local hTmp= iup.dialog(tTlb)
+    local hBx = iup.GetDialogChild(hTmp, 'StatusBar')
+    iup.Detach(hBx)
+    iup.Destroy(hTmp)
+    StatusBar_obj.handle = iup.Append(vbScite, hBx)
+    iup.Map(hBx)
+
     for i = 1, #tEvents do
         for _,tbs in pairs(StatusBar_obj.Tabs) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
@@ -362,10 +436,10 @@ local function InitStatusBar()
     StatusBar_obj.size = StatusBar_obj.handle.size
     iup.PassFocus()
 end
-
 InitSideBar()
 InitToolBar()
 InitStatusBar()
+iup.Refresh(hMainLayout)
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == 3 then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
@@ -381,6 +455,16 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                 end
             end
             if SideBar_obj.win then oDeatt.detach = 1 end
+            if _G.iuprops['bottombar.win']=='1' then BottomBar.detach = 1 end
         end
     end
 end)
+
+AddEventHandler("OnLayOutNotify", function(cmd)
+    if cmd == "SHOW_FINDRES" then
+        if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
+    elseif cmd == "SHOW_OUTPUT" then
+        if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
+    end
+end)
+
