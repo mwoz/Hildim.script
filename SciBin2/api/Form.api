@@ -42,6 +42,7 @@ application.ConvertPx2PtX(longPx) as long.Converts PT to PX and back using X or 
 application.ConvertPx2PtY(longPx) as long.Converts PT to PX and back using X or Y scale (may be different)
 application.SelectFileDialog([InitialPath], [Filters], [OpenDialog], [FileName])Показывает стандартный диалог выбора файла "Открыть" или "Сохранить как".\nInitialPath: путь к папке для использования при открытии  диалога. Если не указан, используется папка, в которой производился выбор в последний раз.\nFilters: фильтры типов файлов. По умолчанию "All Files (*.*)|*.*||".\nOpenDialog: true - для диалога "Открыть" (по умолчанию), false - для диалога "Сохранить как".\nFileName: имя файла по умолчанию. Обычно используется для диалога "Сохранить как".\nЕсли пользователь выбрал файл, функция возвращает полный путь, иначе пустую строку.\n
 application.GetStackTrace Возвращает содержимое программного стека. Работает только в дебажном режиме (с ключем -D)
+application.SetCalendars (msgCalendars [,DefaultCalendar_Id]) Устанавливает сообщение со всеми доступными календарями и календарь по умолчанию для использование в DateBox контролах. Терминал сохраняет ссылку на данное сообщение(AddRef)\nmsgCalendars  - сообщение со всеми календарями.\nDefaultCalendar_Id - Id или код календаря, используемого по умолчанию в DateBox контролах (используется, если в DateBox явным образом не установлены никакие календари)
 
 form.BackColor BackColors used in form.
 form.ForeColor ForeColors used in form.
@@ -413,6 +414,13 @@ datebox.LockedMode
 datebox.Style {‘D’|’F’} – Style of button if ‘F’ – flat style is used. Default – ‘D’.
 datebox.PrevValue Returns previous value of ctrl(before user edit)
 datebox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
+datebox.AddCalendar(CalendarId, bCheckOnly) Calendar_Id - int/string - либо Id либо Code календаря\nbCheckOnly = false (значение по умочанию) тогда по этому календарю вычисляются +1 рабочие дни (Calc календари)\nbCheckOnly = True тогда этот календарь не участвует в расчетах T+N, а против этого календаря идет проверка на рабочий день конечного полученного результата (Check календари)\nОдин и тот же календарь может быть передан несколько раз ( в том числе с разными значениями bCheckOnly).
+datebox.ClearCalendars() Очищает спиcок переданных через AddCalendar календарей. После вызова данного метода контрол работает по календарю по умолчанию(см. метод Application.SetCalendars)
+datebox.IsHoliday(date, bUseCheckCalendars) True\false - Возвращает true, если переданная дата корректна и является выходным днем. \nЕсли bUseCheckCalendars = true - для всех Calc календарей  и для всех Check календарей.\nЕсли bUseCheckCalendars = false - только для всех Calc календарей
+datebox.DateAdd(daysToAdd, [dateIn], [daysMode]) daysToAdd - количество прибавляемых или вычитаемых дней.\ndateIn - Дата от которой идет расчет (если не указана - берется BaseDate)\ndaysMode - 'B'|'C' - рабочие или календарные дни. Если не указана используется свойство DaysMode.
+datebox.DateAddByCalendar(daysToAdd, dateIn, CalendarId) Возвращает дату, полученную прибавкой или вычитанием указанного числа бизнес дней к указанной дате по указанному календарю\ndaysToAdd - количество прибавляемых или вычитаемых дней.\ndateIn - Дата от которой идет расчет (если не указана - берется BaseDate)\nCalendarID - Id или Код используемого для расчета\nCalendarId может быть любым( не обязательно добавленным через AddCalendar)
+datebox.DateDiff( dateFrom, dateTo, [daysMode] ) Возвращает разницу в днях между двумя датами, расчитанную по следующим правилам:\ndateFrom - Начальная дата\ndateTo - конечная дата \ndaysMode - 'B'|'C' - рабочие или календарные дни. Если не указана используется свойство DaysMode.\nDateFrom и DateTo могут быть любыми. Если DateFrom > DateTo то возвращаемый результат = -DateDiff(DateTo, DateFrom, daysMode)\nЕсли DateFrom или DateTo некорректная дата - результат = 0
+datebox.DateDiffByCalendar(dtFrom, dtTo, CalendarId) Возвращает кол-во рабочих дней днях между двумя датами по указанному календарю.\ndateFrom - Начальная дата\ndateTo - конечная дата \nCalendarID - Id или Код используемого для расчета календаря\nDateFrom и DateTo могут быть любыми. Если DateFrom > DateTo то возвращаемый результат = -DateDiff(DateTo, DateFrom, daysMode)\nЕсли DateFrom или DateTo некорректная дата, или не найдет календарь - результат = 0\n
 
 #$timebox=form("tm
 #$timebox=controlscoll%.add(.*"TIMEBOX
@@ -1104,9 +1112,6 @@ papp.GetRefFilds(strObjName, chType)
 papp.Metadata(strObj)
 papp.GenWindowMsg(strXmlMetadata)
 papp.CreateNewRow(xmlRow, msgNew)
-papp.calcPair_Sum(msgPair, dAmountFrom, dRate, lCcyIdFrom) для пары - рассчитывает сумму одной валюты пары в другую
-papp.calcPair_Rate(msgPair, dAmountFrom, dAmountTo, lCcyIdFrom) для пары - рассчитывает курс для пересчета суммы в одной валюты в сумму в другой валюте
-papp.calcBond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
 papp.ChoiceVal2Str(ChoiceName, Val) Возвращает отображаемое значение значение чойса ChoiceName по его хранимому значению
 papp.objTemplate()
 papp.ObjectMsg2PrintMsg(msgFrom, msgTo, strPath)
@@ -1116,9 +1121,15 @@ papp.IsValueOneOfTypes( strTypes, strValue )
 papp.IsValueOneOfTypesM( strTypes, strValue )
 papp.MetaDataValue(strObj, strPath)
 papp.MetaDataNls(strObj, strName)
-papp.calcPair_CrossRate(mPCross, mP1, mP2, dCrossRate, d1Rate, d2Rate)
-papp.calcPair_GetRealRateFromRate(mPair, bStraight, dRate)
-papp.calcPair_GetRateFromRealRate(mPair, bStraight, dRate)
+papp.Calc Calc object for calculations
+#$calc=.*%.calc
+
+calc.Bond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
+calc.Pair_Sum(msgPair, dAmountFrom, dRate, lCcyIdFrom) для пары - рассчитывает сумму одной валюты пары в другую
+calc.Pair_Rate(msgPair, dAmountFrom, dAmountTo, lCcyIdFrom) для пары - рассчитывает курс для пересчета суммы в одной валюты в сумму в другой валюте
+calc.Pair_CrossRate(mPCross, mP1, d1Rate, mP2, d2Rate) для пары - рассчитывает кросс-курс по 2-м сплитовым курсам
+# calc.Pair_RealRate2StoredRate(msgPair, dRate, bDirect) для пары - получаем "нормальный" курс (тот, что хранится в базе) из "расчетного"
+# calc.Pair_StoredRate2RealRate(msgPair, dRate, bDirect) для пары - получаем "расчетный" курс из "нормального" - того, что хранится в базе
 
 objtmp.PropertyBag(val)
 objtmp.bActiveTab(val)

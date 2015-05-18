@@ -292,6 +292,9 @@ local function InitSideBar()
     tDlg.sciteid="sidebarp"
     -- end
     dlg = iup.scitedialog(tDlg)
+    local ts = iup.GetDialogChild(hMainLayout, "SourceSplit").value
+    iup.GetDialogChild(hMainLayout, "SourceSplit").value = "1"
+    iup.GetDialogChild(hMainLayout, "SourceSplit").value = t
 
     RestoreNamedValues(hMainLayout)
     RestoreNamedValues(tDlg[1])
