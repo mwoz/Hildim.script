@@ -261,6 +261,8 @@ end)
 
 --”ничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
+    local hMainLayout = iup.GetLayout()
+
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
         _G.dialogs['findrepl'].restore = 1
@@ -279,10 +281,26 @@ iup.DestroyDialogs = function()
                 _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
             end
             _G.dialogs[sciteid] = nil
-            dlg:hide()
-            dlg:destroy()
+            if sciteid ~= 'bottombar' then
+                dlg:hide()
+                dlg:destroy()
+            else
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombarp.splitvalue']
+                --iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "5"
+                iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
+
+                dlg.restore = 1
+            end
         end
     end
+    h = iup.GetDialogChild(hMainLayout, "ToolBar")
+    iup.Detach(h)
+    iup.Destroy(h)
+
+    local h = iup.GetDialogChild(hMainLayout, "StatusBar")
+    iup.Detach(h)
+    iup.Destroy(h)
+
     _G.dialogs = nil
     iup.ShowSideBar(-1)
 end

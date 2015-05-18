@@ -12,6 +12,7 @@ local split_s
 local bymemokey=0
 local sort_by_tyme = _G.iuprops['sidebar.fileman.timesort']
 local chkByTime
+local bListOpened = false
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
 	local i, j = 1
@@ -299,7 +300,6 @@ function Favorites_ListFILL()
         list_favorites:setcell(i, 3, s[1])
     end
     list_favorites.redraw = "ALL"
-
 end
 
 function Favorites_OpenList()
@@ -314,12 +314,12 @@ function Favorites_OpenList()
 		end
 		favorites_file:close()
 	end
-	--Favorites_ListFILL()
+    bListOpened = true
 end
 
 
 local function Favorites_SaveList()
-	if pcall(io.output, favorites_filename) then
+	if bListOpened and pcall(io.output, favorites_filename) then
         local tbl = {}
         for i = 1, #list_fav_table do
             if not list_fav_table[i][2] then table.insert(tbl,list_fav_table[i][1]) end
@@ -524,7 +524,7 @@ local function FileManTab_Init()
         if h.marked then sel = h.marked:find('1') - 1 end
         iup.SetAttribute(h,  'MARK'..sel..':0', 0)
         iup.SetAttribute(h, 'MARK'..lin..':0', 1)
-        l = shell.bit_and(tonumber(list_dir:getcell(lin, 3)), 1)
+        l = shell.bit_and(tonumber(list_dir:getcell(lin, 3) or 0), 1)
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
             if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
@@ -626,6 +626,7 @@ local function FileManTab_Init()
         OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir']=memo_path.value end);
         tabs_OnSelect = function()OnSwitch(true,false) end;
     }
+    Favorites_OpenList()
 end
 
 FileManTab_Init()
