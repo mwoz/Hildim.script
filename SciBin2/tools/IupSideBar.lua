@@ -11,7 +11,7 @@ local vFileMan
 local vFindRepl
 local oDeatt
 local hMainLayout = iup.GetLayout()
-local BottomBar
+local BottomBar, ConsoleBar, FindRepl
 
 iup.PassFocus=(function()
     iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
@@ -155,7 +155,9 @@ local function  CreateBox()
             iup.GetDialogChild(hMainLayout, "SourceSplit").barsize = "0"
             hNew.close_cb =(function(h)
                 if _G.dialogs['sidebar'] ~= nil then
-
+                    if _G.iuprops['findrepl.win']=='1' then
+                        FindReplDialog.close_cb(FindReplDialog)
+                    end
                     _G.iuprops['sidebar.win']='0'
                     oDeatt.restore = 1
                     _G.dialogs['sidebar'] = nul
@@ -291,11 +293,11 @@ local function InitSideBar()
     tDlg.control = "YES"
     tDlg.sciteid="sidebarp"
     -- end
-    dlg = iup.scitedialog(tDlg)
+    local dlg = iup.scitedialog(tDlg)
     local ts = iup.GetDialogChild(hMainLayout, "SourceSplit").value
     iup.GetDialogChild(hMainLayout, "SourceSplit").value = "1"
     iup.GetDialogChild(hMainLayout, "SourceSplit").value = t
-
+    FindRepl = iup.GetDialogChild(dlg, "FindReplDetach")
     RestoreNamedValues(hMainLayout)
     RestoreNamedValues(tDlg[1])
     --if SideBar_obj.win then oDeatt.detach = 1 end
@@ -326,7 +328,15 @@ local function InitSideBar()
 
         hNew.close_cb =(function(h)
             if _G.dialogs['bottombar'] ~= nil then
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombarp.splitvalue']
+                if _G.iuprops['concolebar.win']=='1' then
+                    iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
+                    iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = "3"
+                    iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
+                    _G.iuprops['concolebar.win']='0'
+                    iup.GetDialogChild(hMainLayout, "ConsoleDetach").restore = 1
+                    _G.dialogs['concolebar'] = nil
+                end
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombar.splitvalue']
                 iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "3"
                 iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
                 _G.iuprops['bottombar.win']='0'
@@ -339,7 +349,7 @@ local function InitSideBar()
         hNew.show_cb=(function(h,state)
             if state == 0 then
                 iup.GetDialogChild(hMainLayout, "BottomExpander").state = "CLOSE"
-                _G.iuprops['dialogs.bottombarp.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
+                _G.iuprops['dialogs.bottombar.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
                 iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "0"
                 iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = "1000"
                 _G.dialogs['bottombar'] = iup.GetDialogChild(hMainLayout, "BottomBar")
@@ -354,6 +364,55 @@ local function InitSideBar()
         return tonumber(_G.iuprops["dialogs.bottombar.x"])*2^16+tonumber(_G.iuprops["dialogs.bottombar.y"])
 
     end)
+
+    ConsoleBar = iup.GetDialogChild(hMainLayout, "ConsoleDetach")
+
+    ConsoleBar.detached_cb=(function(h, hNew, x, y)
+        hNew.resize ="YES"
+        hNew.shrink ="YES"
+        hNew.minsize="200x100"
+        hNew.maxbox="NO"
+        hNew.minbox="NO"
+        --hNew.toolbox="YES"
+        hNew.title="ConsoleBar /Close For Attach/"
+        hNew.x=10
+        hNew.y=10
+        x=10;y=10
+        hNew.rastersize = _G.iuprops['dialogs.concolebar.rastersize']
+        _G.iuprops['concolebar.win']='1'
+        _G.iuprops['dialogs.concolebar.rastersize'] = h.rastersize
+
+        hNew.close_cb =(function(h)
+            if _G.dialogs['concolebar'] ~= nil then
+                iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
+                iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = "3"
+                iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
+                _G.iuprops['concolebar.win']='0'
+                iup.GetDialogChild(hMainLayout, "ConsoleDetach").restore = 1
+                _G.dialogs['concolebar'] = nil
+                return -1
+            end
+        end)
+
+        hNew.show_cb=(function(h,state)
+            if state == 0 then
+                iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "CLOSE"
+                _G.iuprops['dialogs.concolebar.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomSplit").value
+                iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0"
+                iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = "0"
+                _G.dialogs['concolebar'] = iup.GetDialogChild(hMainLayout, "ConsoleDetach")
+            elseif state == 4 then
+                _G.iuprops["dialogs.concolebar.x"]= h.x
+                _G.iuprops["dialogs.concolebar.y"]= h.y
+                _G.iuprops['dialogs.concolebar.rastersize'] = h.rastersize
+            end
+        end)
+        --iup.ShowSideBar(-1)
+        if tonumber(_G.iuprops["dialogs.concolebar.x"])== nil or tonumber(_G.iuprops["dialogs.concolebar.y"]) == nil then _G.iuprops["dialogs.concolebar.x"]=0;_G.iuprops["dialogs.concolebar.y"]=0 end
+        return tonumber(_G.iuprops["dialogs.concolebar.x"])*2^16+tonumber(_G.iuprops["dialogs.concolebar.y"])
+
+    end)
+
 end
 
 local function InitToolBar()
@@ -459,6 +518,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             end
             if SideBar_obj.win then oDeatt.detach = 1 end
             if _G.iuprops['bottombar.win']=='1' then BottomBar.detach = 1 end
+            if _G.iuprops['concolebar.win']=='1' then ConsoleBar.detach = 1 end
+            if _G.iuprops['findrepl.win']=='1' then FindRepl.detach = 1 end
         end
     end
 end)
