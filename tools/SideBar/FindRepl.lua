@@ -143,7 +143,9 @@ local function FindInFiles()
     local fFilter = Ctrl("cmbFilter").value
     local fDir = Ctrl("cmbFolders").value
     if Ctrl("chkRegExp").value =='ON' then
-        fWhat = fWhat:gsub('\\([^abfnrtv\\]?)','%%%1')
+        fWhat = fWhat:gsub('\\\\', '•')
+        fWhat = fWhat:gsub('\\([^abfnrtv])','%%%1')
+        fWhat = fWhat:gsub('•', '\\')
     end
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
@@ -783,9 +785,10 @@ end
 local function FuncBmkTab_Init()
     oDeatt = iup.detachbox{
         create_dialog_FindReplace();
-        orientation="HORIZONTAL";barsize=5;minsize="100x100";
+        orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
         detached_cb=(function(h, hNew, x, y)
+            FindReplDialog = hNew
             hNew.resize ="YES"
             hNew.shrink ="YES"
             hNew.minsize="384x270"
@@ -797,14 +800,14 @@ local function FuncBmkTab_Init()
             hNew.y=10
             x=10;y=10
             hNew.rastersize = _G.iuprops['dialogs.findrepl.rastersize']
-            _G.iuprops['findrepl.win']=1
+            _G.iuprops['findrepl.win']='1'
             _G.iuprops['dialogs.sidebarp.rastersize'] = h.rastersize
             _G.iuprops["sidebarctrl.zPin.pinned.value"] = Ctrl("zPin").valuepos
             if _G.iuprops["sidebarctrl.zPin.unpinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.unpinned.value"] end
 
             hNew.close_cb =(function(h)
                 if _G.dialogs['findrepl'] ~= nil then
-                    _G.iuprops['findrepl.win']=0
+                    _G.iuprops['findrepl.win']='0'
                     oDeatt.restore = 1
                     _G.iuprops["sidebarctrl.zPin.unpinned.value"] = Ctrl("zPin").valuepos
                     if _G.iuprops["sidebarctrl.zPin.pinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.pinned.value"] end

@@ -285,15 +285,19 @@ iup.DestroyDialogs = function()
                 _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
             end
             _G.dialogs[sciteid] = nil
-            if sciteid ~= 'bottombar' then
-                dlg:hide()
-                dlg:destroy()
-            else
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombarp.splitvalue']
-                --iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "5"
+            if sciteid == 'bottombar' then
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombar.splitvalue']
                 iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
 
                 dlg.restore = 1
+            elseif sciteid == 'concolebar' then
+                iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
+                iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
+
+                dlg.restore = 1
+            else
+                dlg:hide()
+                dlg:destroy()
             end
         end
     end
