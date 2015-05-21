@@ -2,6 +2,7 @@
 -----------------------------------------------
 --в таблице имена тегов в том порядке, в котором мы хотим их видеть внутри ноды
 local alltags = {
+'code',
 'name',
 'caption',
 'caption_ru',
@@ -149,7 +150,7 @@ function SortFormXML()
         if strObjType == "Template" then
             editor:ReplaceSel(SortXML(alltagsmeta, 'ExternalRef',(SortXML(alltagsmeta, 'Check',(SortXML(alltagsmeta, 'Index',(SortXML(alltagsmeta, 'Template',SortXML(alltagsmeta, 'Table', SortXML(alltagsmeta, 'Field', editor:GetSelText()))))))))))
         else
-            editor:ReplaceSel(SortXML(alltags, 'control', editor:GetSelText()))
+            editor:ReplaceSel(SortXML(alltags, 'option', SortXML(alltags, 'control', editor:GetSelText())))
         end
     end
 

@@ -50,6 +50,5 @@ for dirName in string.gmatch(strPath, "[^;]+") do
     dir(dirName.."\\")
 end
 msg_SqlObjectMap:Store(strOut)
-print("Sql object map reloaded")
 
 

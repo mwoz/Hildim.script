@@ -518,7 +518,7 @@ local function FindTab_Init()
               iup.item{title="Открыть как новый файл",action=Data_OpenNew},
               iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
               iup.separator{},
-              iup.item{title="Очистить",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
+              iup.item{title="Не выгружать ID и технические поля",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)

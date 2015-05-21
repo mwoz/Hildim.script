@@ -67,7 +67,7 @@ function formenjine_RunTemplate(strName)
         if iError == 0 then
 
             if msgReplay:GetPathValue("PID") then
-                print(msgReplay:GetPathValue("strReplay"), shell.activate_proc_wnd(msgReplay:GetPathValue("PID")))
+                print(msgReplay:GetPathValue("strReplay"))
             else
                 print(msgReplay:GetPathValue("strReplay"))
             end
