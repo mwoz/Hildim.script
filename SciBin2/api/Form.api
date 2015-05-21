@@ -1108,7 +1108,7 @@ papp.InitKustomCombo(f) Для формы f заполняем ее комбобоксы чойсами из тегов dnc
 papp.GetParentHandler(control) Возвращает контейнер, содержащий хендлер для данного контрола
 papp.XmlAppMult2Msg(strXml)
 papp.ParseBracketsStr(f, strSource, fnOnReplace, opaque, strErrorPrefix)
-papp.GetRefFilds(strObjName, chType)
+papp.GetRefFields(strObjName, chType)
 papp.Metadata(strObj)
 papp.GenWindowMsg(strXmlMetadata)
 papp.CreateNewRow(xmlRow, msgNew)

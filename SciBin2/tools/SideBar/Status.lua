@@ -267,36 +267,3 @@ end
 FindTab_Init()
 
 
-
-function test_runtest()
-local dlg , cnv
-    -- local function  showcb(h,state)
-        -- if state == 0 then
-            -- print('start')
-            -- iup.ReattachWndTo(cnv, 'FindRez')
-        -- elseif state == 4 then
-            -- dlg:postdestroy()
-        -- end
-    -- end
-    -- cnv = iup.canvas{posx = "0.000000000",posy = "0.000000000"}
-  -- dlg = iup.scitedialog{cnv, show_cb = showcb, minsize = "300x200",sciteparent="SCITE", sciteid="tmptmp" }
-  print(123)
-bt2 = iup.button{title="Test11", size="x20"}
-bt = iup.button{title="Test"}
-bt.expand = "YES"
-box = iup.sbox{bt}
-box.direction = "SOUTH"
-box.color = "0 0 255"
-
-ml = iup.multiline{}
-ml.expand = "YES"
-vbox = iup.vbox{bt2, box, ml}
-
-lb = iup.label{title="Label"}
-lb.expand = "YES"
-dlg = iup.scitedialog{iup.hbox{vbox, lb},sciteparent="SCITE", sciteid="tmptmp" }
-
-
-
-end
-

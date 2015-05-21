@@ -174,6 +174,7 @@ local function local_OnOpen()
 end
 
 function sql_ResetMap()
+    print("Sql object map reloaded")
     if msg_SqlObjectMap ~= nil then
         msg_SqlObjectMap:Destroy()
         msg_SqlObjectMap = nil
