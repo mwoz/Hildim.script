@@ -359,6 +359,9 @@ local function InitSideBar()
                 _G.iuprops['dialogs.bottombar.rastersize'] = h.rastersize
             end
         end)
+        hNew.resize_cb = (function(h,width, height)
+            if _G.iuprops['concolebar.win']=='1' then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0" end
+        end)
         --iup.ShowSideBar(-1)
         if tonumber(_G.iuprops["dialogs.bottombar.x"])== nil or tonumber(_G.iuprops["dialogs.bottombar.y"]) == nil then _G.iuprops["dialogs.bottombar.x"]=0;_G.iuprops["dialogs.bottombar.y"]=0 end
         return tonumber(_G.iuprops["dialogs.bottombar.x"])*2^16+tonumber(_G.iuprops["dialogs.bottombar.y"])

@@ -276,29 +276,30 @@ iup.DestroyDialogs = function()
         _G.dialogs['sidebar'].restore = 1
         _G.dialogs['sidebar'] = nul
     end
+    if _G.dialogs['concolebar'] ~= nil then
+        iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
+        iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
+        _G.dialogs['concolebar'].restore = 1
+        _G.dialogs['concolebar'] = nul
+    end
+    if _G.dialogs['bottombar'] ~= nil then
+        iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombar.splitvalue']
+        iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
+        _G.dialogs['bottombar'].restore = 1
+        _G.dialogs['bottombar'] = nul
+    end
     if _G.dialogs['sidebarp'] then _G.dialogs['sidebarp'].SaveValues() end
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
+        print(sciteid)
             if sciteid ~= 'sidebarp' or _G.iuprops['sidebar.win'] == '0' then
                 _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
                 _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
                 _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
             end
             _G.dialogs[sciteid] = nil
-            if sciteid == 'bottombar' then
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombar.splitvalue']
-                iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
-
-                dlg.restore = 1
-            elseif sciteid == 'concolebar' then
-                iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
-                iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
-
-                dlg.restore = 1
-            else
-                dlg:hide()
-                dlg:destroy()
-            end
+            dlg:hide()
+            dlg:destroy()
         end
     end
     h = iup.GetDialogChild(hMainLayout, "ToolBar")
