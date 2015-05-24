@@ -9,10 +9,12 @@ io.close()
 
 local bSuc, tMsg = pcall(dostring,text)
 if not bSuc then
-    print('Ошибка в файле settings.lua:', tMsg)
-else
-    iuprops_read_ok = true
+    print('Ошибка в файле settings.lua:', tMsg..'\nсохраним текущий settings.lua в settings.lua.bak')
+    io.output(props["scite.userhome"]..'\\settings.lua.bak')
+    io.write(text)
+    io.close()
 end
+iuprops_read_ok = true
 
 
 props['autoformat.line'] = _G.iuprops['autoformat.line']
@@ -291,7 +293,6 @@ iup.DestroyDialogs = function()
     if _G.dialogs['sidebarp'] then _G.dialogs['sidebarp'].SaveValues() end
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
-        print(sciteid)
             if sciteid ~= 'sidebarp' or _G.iuprops['sidebar.win'] == '0' then
                 _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
                 _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
