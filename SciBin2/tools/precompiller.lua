@@ -66,11 +66,8 @@ function formenjine_RunTemplate(strName)
     mblua.Request(function(handle,Opaque,iError,msgReplay)
         if iError == 0 then
 
-            if msgReplay:GetPathValue("PID") then
-                print(msgReplay:GetPathValue("strReplay"))
-            else
-                print(msgReplay:GetPathValue("strReplay"))
-            end
+            if msgReplay:GetPathValue("PID") then  shell.activate_proc_wnd(msgReplay:GetPathValue("PID")) end
+            print(msgReplay:GetPathValue("strReplay"))
         else
             print("Run: Terminal not responded")
         end

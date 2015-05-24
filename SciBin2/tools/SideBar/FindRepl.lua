@@ -10,6 +10,15 @@ local function Ctrl(s)
     return iup.GetDialogChild(containers[2],s)
 end
 
+local function PrepareFindText(s)
+    if Ctrl("chkRegExp").value == "ON" or Ctrl("chkBackslash").value == "ON" then
+        return s:gsub('\\', '\\\\'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t')
+    else
+        local _,_,ret = s:find('^([^\n\r\t]*)')
+        return ret or ''
+    end
+end
+
 local function SetInfo(msg, chColor)
     local strColor
     if chColor == 'E' then strColor = "255 0 0"
@@ -272,8 +281,8 @@ function ActivateFind(nTab)
     local s
     if editor.SelectionStart == editor.SelectionEnd then s = GetCurrentWord()
     else s = editor:GetSelText() end
-    if s:find('[\n\r]') then s = '' end
     if editor.CodePage ~= 0 then s = s:from_utf8(1251) end
+    s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
     if _G.dialogs['findrepl'] then
@@ -375,7 +384,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visible_items = "18",
-      edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then return -1 end end),
+      edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then h.value = PrepareFindText(new_value) return -1 end end),
       k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],
@@ -483,7 +492,7 @@ local function create_dialog_FindReplace()
       rastersize = "1x0",
       editbox = "YES",
       dropdown = "YES",
-      edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then return -1 end end),
+      edit_cb=(function(h, c, new_value) if new_value:find('[\n\r\t]') then _,_,h.value = new_value:find('^([^\n\r\t]*)')return -1 end end),
       visible_items = "18",
     },
     containers[15],
