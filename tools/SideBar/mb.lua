@@ -17,7 +17,7 @@ local function RunBatch(filePath)
     if props["output.hook"] == 'Y' then return end
 	if(editor.Lexer == SCLEX_MSSQL) then
 
-		local inc =props["sys.calcsybase.dir"].."\\BuildM4\\"..cmb_listCalc:get_item_text(-2)
+		local inc =props["sys.calcsybase.dir"].."\\BuildM4\\"..iup.GetAttribute(cmb_listCalc, cmb_listCalc.value)
         local vbRun = props["SciteDefaultHome"].."\\tools\\RunSql.vbs"
         --local vbRun = props["sys.calcsybase.dir"].."\\RunSql.vbs"
         cmd = 'cscript //nologo "'..vbRun..'" "'..filePath..'" "'..props["sybase.projects.dir"]..'\\" "'..inc..'"'
