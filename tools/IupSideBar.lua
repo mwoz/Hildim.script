@@ -185,6 +185,71 @@ local function  CreateBox()
 end
 local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
+local function SaveNamedValues(h, root)
+    if not h then return end
+    local child = nil
+    repeat
+        child = iup.GetNextChild(h, child)
+        if child then
+            if (child.value or child.valuepos or child.focusitem or child.size) and child.name then
+                local _,_,cType = tostring(child):find('IUP%((%w+)')
+                local val = child.value
+                if cType == 'list' and child.dropdown == "YES" then
+                    local hist = {}
+                    for i = 1, child.count do
+                        table.insert(hist,iup.GetAttributeId(child, '', i))
+                    end
+                    _G.iuprops[root..'.'..child.name..'.hist'] = table.concat(hist,'¤')
+                elseif cType == 'zbox' or cType == 'tabs' then
+                    val = child.valuepos
+                elseif cType == 'matrixlist' then
+                    val = child.focusitem
+                elseif cType == 'sbox' then
+                    val = child.size
+                end
+                _G.iuprops[root..'.'..child.name..'.value'] = val
+            end
+            SaveNamedValues(child, root)
+        end
+    until not child
+end
+
+local function RestoreNamedValues(h, root)
+    if not h then return end
+    local child = nil
+    repeat
+        child = iup.GetNextChild(h, child)
+        if child then
+            if child.name then
+                local _,_,cType = tostring(child):find('IUP%((%w+)')
+                local val = _G.iuprops[root..'.'..child.name..'.value']
+                if cType == 'list' and child.dropdown == "YES" then
+                    local s = _G.iuprops[root..'.'..child.name..'.hist']
+                    if s then
+                        local i = 1
+                        for w in s:gmatch('([^¤]+)') do
+                            iup.SetAttributeId(child, 'INSERTITEM', i, w)
+                            i = i + 1
+                        end
+                    end
+                    if val then child.value = val end
+                elseif cType == 'zbox' or cType == 'tabs' then
+                    if val then child.valuepos = val end
+                elseif cType == 'matrixlist' then
+                    if val then
+                        child.focusitem = val
+                        child["show"] = val..":*"
+                        child.redraw = 1
+                    end
+                else
+                    if val then child.value = val end
+                end
+            end
+            RestoreNamedValues(child, root)
+        end
+    until not child
+end
+
 local function InitSideBar()
     --hMainLayout = iup.GetLayout()
 --SideBar_obj._DEBUG = true --включает вывод отладочной информации
@@ -216,77 +281,14 @@ local function InitSideBar()
         if key == 65307 then iup.PassFocus() end
     end)
     --OnCreate()
-    local function SaveNamedValues(h)
-        if not h then return end
-        local child = nil
-        repeat
-            child = iup.GetNextChild(h, child)
-            if child then
-                if (child.value or child.valuepos or child.focusitem or child.size) and child.name then
-                    local _,_,cType = tostring(child):find('IUP%((%w+)')
-                    local val = child.value
-                    if cType == 'list' and child.dropdown == "YES" then
-                        local hist = {}
-                        for i = 1, child.count do
-                            table.insert(hist,iup.GetAttributeId(child, '', i))
-                        end
-                        _G.iuprops['sidebarctrl.'..child.name..'.hist'] = table.concat(hist,'¤')
-                    elseif cType == 'zbox' or cType == 'tabs' then
-                        val = child.valuepos
-                    elseif cType == 'matrixlist' then
-                        val = child.focusitem
-                    elseif cType == 'sbox' then
-                        val = child.size
-                    end
-                    _G.iuprops['sidebarctrl.'..child.name..'.value'] = val
-                end
-                SaveNamedValues(child)
-            end
-        until not child
-    end
 
-    local function RestoreNamedValues(h)
-        if not h then return end
-        local child = nil
-        repeat
-            child = iup.GetNextChild(h, child)
-            if child then
-                if child.name then
-                    local _,_,cType = tostring(child):find('IUP%((%w+)')
-                    local val = _G.iuprops['sidebarctrl.'..child.name..'.value']
-                    if cType == 'list' and child.dropdown == "YES" then
-                        local s = _G.iuprops['sidebarctrl.'..child.name..'.hist']
-                        if s then
-                            local i = 1
-                            for w in s:gmatch('([^¤]+)') do
-                                iup.SetAttributeId(child, 'INSERTITEM', i, w)
-                                i = i + 1
-                            end
-                        end
-                        if val then child.value = val end
-                    elseif cType == 'zbox' or cType == 'tabs' then
-                        if val then child.valuepos = val end
-                    elseif cType == 'matrixlist' then
-                        if val then
-                            child.focusitem = val
-                            child["show"] = val..":*"
-                            child.redraw = 1
-                        end
-                    else
-                        if val then child.value = val end
-                    end
-                end
-                RestoreNamedValues(child)
-            end
-        until not child
-    end
 
     tDlg.SaveValues = (function()
         for _,tbs in pairs(SideBar_obj.Tabs) do
             if tbs.OnSaveValues then tbs.OnSaveValues() end
         end
-        SaveNamedValues(hMainLayout)
-        SaveNamedValues(tDlg[1])
+        SaveNamedValues(hMainLayout,'sidebarctrl')
+        SaveNamedValues(tDlg[1],'sidebarctrl')
     end)
 
     tDlg.sciteparent="SideBarPH"
@@ -298,8 +300,8 @@ local function InitSideBar()
     iup.GetDialogChild(hMainLayout, "SourceSplit").value = "1"
     iup.GetDialogChild(hMainLayout, "SourceSplit").value = t
     FindRepl = iup.GetDialogChild(dlg, "FindReplDetach")
-    RestoreNamedValues(hMainLayout)
-    RestoreNamedValues(tDlg[1])
+    RestoreNamedValues(hMainLayout, 'sidebarctrl')
+    RestoreNamedValues(tDlg[1], 'sidebarctrl')
     --if SideBar_obj.win then oDeatt.detach = 1 end
 
     for i = 1, #tEvents do
@@ -422,11 +424,12 @@ local function InitToolBar()
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     TabBar_obj.Tabs = {}
                      --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
-    local tTlb = {CreateToolBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
+    tTlb = {CreateToolBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
     tTlb.sciteparent="IUPTOOLBAR"
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
     tTlb.show_cb=(function(h,state)
+        print(h,state)
         if state == 0 and props['iuptoolbar.visible'] == '1' and props['iuptoolbar.restarted'] ~= '1' then
            scite.MenuCommand(IDM_VIEWTLBARIUP)
         elseif state == 4 then
