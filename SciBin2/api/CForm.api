@@ -1,0 +1,391 @@
+
+message.Name read-only
+message.FieldCount Number of fields in the message. Use Field( pos ) to access the element
+message.MessageCount Number of messages in the message. Use Message( pos ) to access the element
+message.SendSubject
+message.ReplySubject
+
+
+#$message=m_msg[%w_]*
+#$message=msg[%w_]*
+#$message=mparams
+#$message=m
+
+message.Message(Index/Name) returns specified object or Nothing if the field doesn't exist
+#$message=.*%.message(
+message.MessageIndex(Name) as Int - Returns index of specified submessage. If submessage doesn't exist returns -1
+message.GetMessage(Path)as Message - returns existed message or create a new one; Path - path to the message in format "Message1\Message2\...\MessageN"
+#$message=.*%.getmessage(
+message.ExistsField(Name)  as BOOL
+message.ExistsMessage(Name)	as BOOL
+#$field=message%.field(
+message.Field( Index/Name ) returns specified object or Nothing if the field doesn't exist
+message.AddField(Name, VARIANT Value) as BOOL Name may be non-unique
+message.UpdateField(Name, VARIANT Value) as BOOL - update existing field with specified name or add new one
+message.InsertField(Name, VARIANT Value, Index) as BOOL - Inserts field at Index position
+#$field=message%.removefield(
+message.RemoveField(Index/Name) as Field - only one field is removed(even more than one field has specified name) result may be Nothing
+message.AddPathField(Path, VARIANT Value) - Path has format: "Message1\...\ MessageN\FieldName"
+message.UpdatePathField(Path, VARIANT Value) - updates existing field with specified path or add new one
+#$field=message%.removepathfield(
+message.RemovePathField(Path) - Field only one field is removed(even more than one field has specified name) result may be Nothing
+message.AddMessage(Name, Message)	BOOL	Name may be non-unique
+message.InsertMessage(Name, Message, Index) as BOOL inserts message at Index position
+message.UpdateMessage(Name, Message) as BOOL Replaces existing message (detaches old and attaches a new one) with specified name or adds a new message
+#$message=.*%.removemessage(
+message.RemoveMessage(Index/Name)	as Message - only one message is removed(even more than one msg has specified name)result may be Nothing
+message.AddHeadMessage(Name, Message) as BOOL - inserts a new submessage at the beginnig of the message
+message.AddTailMessage(Name, Message) as BOOL - inserts a new submessage at the end of the message
+#$message=.*%.removeheadmessage(
+#$message=.*%.removetailmessage(
+message.RemoveHeadMessage() as Message - removes first submessage
+message.RemoveTailMessage() as Message -  removes last submessage
+message.Reset() - clean up message, including Name and subject names
+message.CopyFrom(Message)  as BOOL -adds all content from Message parameter(creating independent data copy) including SendSubject and ReplySubject
+message.UpdateFrom(Message)	like CopyFrom method; difference - updates data
+message.AttachContents(Message) - attaches all submessages and fields of Message parameter
+message.FlatMessage() - makes message flat applying fields(do update) of submessages to the root and deleting submessages after
+message.ToString() as BSTR - returns string representation of message(for debug purposes)
+message.GetFieldValue(Index/Name, [DefaultValue])	returns original field value or DefaultValue if field is not found
+message.GetPathValue(Path, [DefaultValue]) as VARIANT - Path is like "Message1\Message2\Field1"
+message.GetFieldText(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found
+message.GetFieldNumber(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found or convertion to number is impossible
+message.GetFieldDate(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Null by default; returns DefaultValue if field is not found
+message.Execute(Statement, [MsgParameters])	Statement: may has one of next formats:\n1) CALC SUM(<FieldName1>), SUM(<FieldNameN>), COUNT [WHERE <expr>]\n2) GET WHERE <expr>\n3) SORT <FieldName1> [ASC | DESC] [, ..., <FieldNameN> [ASC | DESC] ]	\n<expr> ::= <arg> <operator> <arg> | <arg> <operator> <expr> | <expr> <operator> <expr> | (<expr>)\n<arg> ::= <FieldName> | '<string>' | <number> | ? | NULL | EMPTY\n<operator> ::= OR | AND | > | < | = | >= | <= | <>\nExample:\nset args = Form.TibCreateMessage\nargs.AddField "arg1", DateSerial(2001, 1, 9)\nrs.Execute "SORT col3 DESC, col1 DESC"\nset m = rs.Execute("GET WHERE col1 <> EMPTY)\nset m = rs.Execute("GET WHERE col1 > ? OR col2 > 1.25", args)\nset m = rs.Execute("CALC SUM(col2), SUM(col3), COUNT WHERE col1 > ? OR col3 = 'Some string' ", args)
+#$message=.*%.execute(
+message.GetWireText() Returns  content of a message as a WireText
+message.SetWireText (strWireText) Sets message content from WireText string( see format in GetWIreText).\nReturns false if parsing string failed.\nExisiting data is replaced by data from WireText string
+
+field.Value VARIANT
+field.Name read-only
+field.ValueText()returns string - Value is converted into string
+
+#$xml=createobject("Microsoft.XMLDOM
+xml.async Specifies if asynchronous download is permitted. Read/write.
+xml.attributes Contains the list of attributes for this node. Read-only.
+xml.baseName Returns the base name for the name qualified with the namespace. Read-only.
+xml.childNodes Contains a node list containing the children nodes. Read-only.
+xml.dataType Specifies the data type for this node. Read/write.
+xml.definition Returns the definition of the node in the document type definition (DTD) or schema. Read-only.
+xml.doctype  Contains the document type node that specifies the DTD for this document. Read-only.
+xml.documentElement  Contains the root element of the document. Read/write.
+xml.firstChild  Contains the first child of this node. Read-only.
+xml.implementation  Contains the IXMLDOMImplementation object for the document. Read-only.
+xml.lastChild  Returns the last child node. Read-only.
+xml.namespaceURI Returns the Uniform Resource Identifier (URI) for the namespace. Read-only.
+xml.nextSibling  Contains the next sibling of the node in the parent's child list. Read-only.
+xml.nodeName  Returns the qualified name for attribute, document type, element, entity, or notation nodes. Returns a fixed string for all other node types. Read-only.
+xml.nodeType  Specifies the XML Document Object Model (DOM) node type, which determines valid values and whether the node can have child nodes. Read-only.
+xml.nodeTypedValue Contains this node's value expressed in its defined data type. Read/write.
+xml.nodeTypeString Returns the node type in string form. Read-only.
+xml.nodeValue  Contains the text associated with the node. Read/write.
+xml.ondataavailable Specifies the event handler for the ondataavailable event. Write-only.
+xml.onreadystatechange Specifies the event handler to be called when the readyState property changes. Write-only.
+xml.ontransformnode Specifies the event handler for the ontransformnode event. Write-only.
+xml.ownerDocument  Returns the root of the document that contains this node. Read-only.
+xml.parentNode  Contains the parent node. Read-only.
+xml.parsed Indicates the parsed status of the node and child nodes. Read-only.
+xml.parseError Returns an IXMLDOMParseError object that contains information about the last parsing error. Read-only.
+xml.prefix Returns the namespace prefix. Read-only.
+xml.preserveWhiteSpace Specifies the default white space handling. Read/write.
+xml.previousSibling  Contains the previous sibling of the node in the parent's child list. Read-only.
+xml.readyState Indicates the current state of the XML document. Read-only.
+xml.resolveExternals Indicates whether external definitions (resolvable namespaces, DTD external subsets, and external entity references) are to be resolved at parse time, independent of validation. Read/write.
+xml.specified Indicates whether the node (usually an attribute) is explicitly specified or derived from a default value in the DTD or schema. Read-only.
+xml.text Represents the text content of the node or the concatenated text representing the node and its descendants. Read/write.
+xml.url Returns the URL for the last loaded XML document. Read-only.
+xml.validateOnParse Indicates whether the parser should validate this document. Read/write.
+xml.xml Contains the XML representation of the node and all its descendants. Read-only.
+xml.abort Aborts an asynchronous download in progress.
+xml.appendChild  Appends a new child as the last child of this node.
+xml.cloneNode  Clones a new node.
+xml.createAttribute  Creates a new attribute with the specified name.
+xml.createCDATASection  Creates a CDATA section node that contains the supplied data.
+xml.createComment  Creates a comment node that contains the supplied data.
+xml.createDocumentFragment  Creates an empty IXMLDOMDocumentFragment object.
+xml.createElement  Creates an element node using the specified name.
+xml.createEntityReference  Creates a new EntityReference object.
+xml.createNode Creates a node using the supplied type, name, and namespace.
+xml.createProcessingInstruction  Creates a processing instruction node that contains the supplied target and data.
+xml.createTextNode  Creates a text node that contains the supplied data.
+xml.getElementsByTagName  Returns a collection of elements that have the specified name.
+xml.hasChildNodes  Provides a fast way to determine whether a node has children.
+xml.insertBefore  Inserts a child node to the left of the specified node or at the end of the list.
+xml.load Loads an XML document from the specified location.
+xml.loadXML Loads an XML document using the supplied string.
+xml.nodeFromID Returns the node that matches the ID attribute.
+xml.removeChild  Removes the specified child node from the list of children and returns it.
+xml.replaceChild  Replaces the specified old child node with the supplied new child node.
+xml.save Saves an XML document to the specified location.
+xml.selectNodes Applies the specified pattern-matching operation to this node's context and returns the list of matching nodes as IXMLDOMNodeList.
+xml.selectSingleNode Applies the specified pattern-matching operation to this node's context and returns the first matching node.
+xml.transformNode Processes this node and its children using the supplied XSLT style sheet and returns the resulting transformation.
+xml.transformNodeToObject Processes this node and its children using the supplied XSLT style sheet and returns the resulting transformation in the supplied object.
+
+### Источник: Справочник "Некоторые объекты Automation" <http://www.script-coding.info/wsh_chm.zip>
+
+# Строковые функции
+Asc(str)  Возвращает ASCII-код первого символа в строке str.
+Chr(code)  Возвращает символ с ASCII-кодом code.
+InStr([start,] str1, str2[, compare])  Возвращает индекс символа, с которого начинается первое вхождение подстроки str2 в строку str1.\nПараметр start задаёт номер символа, с которого следует начинать поиск (если не задан, то с начала строки).\nПоиск производится слева направо.\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+InStrRev(str1, str2[, start[, compare]])  То же самое, что InStr, но поиск производится справа налево, т.е возвращается номер последнего символа, с которого начинается вхождение подстроки str2 в строку str1.
+Join(list[, delim])  Возвращает строку, полученную в результате конкатенации подстрок, содержащихся в массиве list.\nПараметр delim задаёт символ разделителя (по умолчанию - пробел).
+Split(expr[, delim[, count[, compare]]])  Возвращает массив строк, полученных в результате разбиения строки expr на подстроки.\nПараметр delim задаёт символ разделителя (по умолчанию - пробел).\nПараметр count определяет число подстрок (по умолчанию - все).\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+LCase(str)  Возвращает строку, в которой все символы преобразованы к нижнему регистру.
+UCase(str)  Возвращает строку, в которой все символы преобразованы к верхнему регистру.
+Left(str, len)  Возвращает len символов с начала строки str.
+Right(str, len)  Возвращает len символов с конца строки str.
+Mid(str, start[, len]))  Возвращает из строки str подстроку, которая начинается с позиции start и имеет длину len.\nЕсли параметр len не указан, возвращаются все символы до конца строки.
+Len(str)  Возвращает число символов в строке str.
+LTrim(str)  Возвращает строку, в которой удалены все начальные пробелы.
+RTrim(str)  Возвращает строку, в которой удалены все конечные пробелы.
+Trim(str)  Возвращает строку, в которой удалены все начальные и конечные пробелы.
+Replace(expr, find, replacewith[, start[, count[, compare]]])  Возвращает строку, которая получается из строки expr путём замен входящих в неё подстрок find на подстроки replacewith.\nПараметр start определяет начальную позицию поиска.\nПараметр count определяет число замен (по умолчанию - все).\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+Space(x)  Возвращает строку, состоящую из х пробелов.
+String(number, char)  Возвращает строку, состоящую из number символов char.
+StrComp(str1, str2[, compare])  Сравнивает строки.\nЕсли str1<str2, возвращается -1, если str1=str2, возвращается 0, если str1>str2, возвращается 1.\nПараметр compare задаёт режим сравнения при обработке строк (0 - двоичное сравнение, 1 - текстовое сравнение).
+StrReverse(str)  Возвращает строку, полученную из строки str путём изменения порядка символов в строке на обратный.
+FormatCurrency(expr[, numDigitsAfterDecimal[, includeLeadDigit[, useParens[, groupDigits]]]])  Возвращает строку, отформатированную в денежном формате.\nПараметр expr задаёт значение для форматирования.\nЕсли необязательные параметры не заданы, значения берутся из региональных настроек.\nПараметр numDigitsAfterDecimal задаёт количество десятичных разрядов справа от точки.\nПараметр includeLeadDigit задаёт отображение лидирующих нулей для дробных значений (true или false).\nПараметр useParens задаёт отображение скобок для отрицательных значений (true или false).\nПараметр groupDigits задаёт группировку разрядов с использованием разделителя из региональных настроек (true или false).
+FormatDateTime(date[, namedFormat])  Возвращает строку, отформатированную в формате даты-времени.\nПараметр date задаёт значение для форматирования.\nПараметр namedFormat задаёт способ форматирования (см. описание констант форматов даты и времени в разделе "Константы даты и времени").
+FormatNumber(expr[, numDigitsAfterDecimal[, includeLeadDigit[, useParens[, groupDigits]]]])  Возвращает строку, отформатированную в числовом формате.\nПараметр expr задаёт значение для форматирования.\nЕсли необязательные параметры не заданы, значения берутся из региональных настроек.\nПараметр numDigitsAfterDecimal задаёт количество десятичных разрядов справа от точки.\nПараметр includeLeadDigit задаёт отображение лидирующих нулей для дробных значений (true или false).\nПараметр useParens задаёт отображение скобок для отрицательных значений (true или false).\nПараметр groupDigits задаёт группировку разрядов с использованием разделителя из региональных настроек (true или false).
+FormatPercent(expr[, numDigitsAfterDecimal[, includeLeadDigit[, useParens[, groupDigits]]]])  Возвращает строку, отформатированную в процентном формате (аргумент умножается на 100).\nПараметр expr задаёт значение для форматирования.\nЕсли необязательные параметры не заданы, значения берутся из региональных настроек.\nПараметр numDigitsAfterDecimal задаёт количество десятичных разрядов справа от точки.\nПараметр includeLeadDigit задаёт отображение лидирующих нулей для дробных значений (true или false).\nПараметр useParens задаёт отображение скобок для отрицательных значений (true или false).\nПараметр groupDigits задаёт группировку разрядов с использованием разделителя из региональных настроек (true или false).
+
+# Математические функции
+Abs(x)  Возвращает абсолютное значение числа x.
+Int(x)  Возвращает целую часть числа x.\nЕсли х - отрицательное число, функция вернёт ближайшее целое число, меньшее, чем х.
+Fix(x)  Возвращает целую часть числа x.\nЕсли х - отрицательное число, функция вернёт ближайшее целое число, большее, чем х.
+Sgn(x)  Знаковая функция числа x.\nВозвращает 1 для чисел больше нуля, 0 для нуля и -1 для чисел меньше нуля.
+Round(x, [numdecimal])  Возвращает результат округления числа x с точностью до numdecimal знаков после запятой.
+Rnd([x])  Возвращает случайное число от 0 до 1.\nНеобязательный аргумент является начальным значением для генерации случайных чисел.
+Sqr(x)  Возвращает квадратный корень числа x.
+Sin(x)  Возвращает синус числа x.
+Cos(x)  Возвращает косинус числа x.
+Tan(x)  Возвращает тангенс числа x.
+Atn(x)  Возвращает арктангенс числа x.
+Exp(x)  Экспоненциальная функция, возвращает число е в степени x.
+Log(x)  Возвращает натуральный логарифм числа x.
+
+# Функции для работы с датой и временем
+Date Возвращает текущую системную дату.
+Now Возвращает текущие системные дату и время в виде, соответствующем региональным настройкам Windows.
+Time Возвращает текущее системное время.
+Timer Возвращает количество секунд, прошедших с полуночи.
+IsDate(expr)  Возвращает true, если параметр expr задаёт корректную дату, и false в противном случае.
+Year(date)  Выделяет год из даты, заданной параметром date, и возвращает это целое число.
+Month(date)  Выделяет номер месяца из даты, заданной параметром date, и возвращает целое число от 1 до 12.
+Day(date)  Выделяет номер дня месяца из даты, заданной параметром date, и возвращает целое число от 1 до 31.
+Weekday(date[, firstdayofweek])  Возвращает целое число - день недели для даты, заданной параметром date.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.
+Hour(time)  Выделяет номер часа из даты или момента времени, заданных параметром time, и возвращает целое число от 0 до 23.
+Minute(time)  Выделяет количество минут из даты или момента времени, заданных параметром time, и возвращает целое число от 0 до 59.
+Second(time)  Выделяет количество секунд из даты или момента времени, заданных параметром time, и возвращает целое число от 0 до 59.
+DateValue(date)  Возвращает переменную подтипа Date, которая соответствует дате, заданной символьным параметром date.
+TimeValue(time)  Возвращает переменную подтипа Date, которая соответствует времени, заданному символьным параметром time.
+DateSerial(year, month, day)  Возвращает переменную подтипа Date, которая соответствует указанным году (параметр year), месяцу (параметр month) и дню (параметр day).
+TimeSerial(hour, minute, second)  Возвращает переменную подтипа Date, которая соответствует указанным часу (параметр hour), минуте (параметр minute) и секунде (параметр second).
+MonthName(month[, abbr])  Возвращает наименование для месяца с номером month.\nЕсли параметр abbr равен true, наименование месяца представляется в виде аббревиатуры, если false - в полном виде.
+WeekdayName(weekday[, abbr[, firstdayofweek]])  Возвращает наименование дня недели с порядковым номером weekday.\nЕсли параметр abbr равен true, наименование дня недели представляется в виде аббревиатуры, если false - в полном виде.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.
+DateAdd(interval, number, date)  Возвращает дату, отстоящую от даты date на number интервалов, заданных параметром interval, который может принимать значения: \n"yyyy" - год \n"q" - квартал \n"m" - месяц \n"y" - день года \n"d" - день \n"w" - день недели \n"ww" - неделя года \n"h" - час \n"n" - минута \n"s" - секунда
+DateDiff(interval, date1, date2[, firstdayofweek[, firstweekofyear]])  Возвращает количество интервалов interval между датами date1 и date2.\nВозможные значения параметра interval - те же, что и в функции DateAdd.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.\nПараметр firstweekofyear - константа, показывающая, какую неделю считать первой в году.
+DatePart(interval, date[, firstdayofweek[, firstweekofyear]])  Возвращает ту часть даты, которая соответствует параметру interval.\nВозможные значения параметра interval - те же, что и в функции DateAdd.\nПараметр firstdayofweek - константа, показывающая, какой из дней недели считать первым.\nПараметр firstweekofyear - константа, показывающая, какую неделю считать первой в году.
+
+# Прочие функции
+Array(arglist)  Возвращает массив, составленный из элементов списка arglist.\nЭлементы в списке arglist должны быть отделены друг от друга запятыми.
+LBound(arrayname[, dimension])  Возвращает наименьшее значение, которое которое может принимать индекс в массиве arrayname в размерности dimension (по умолчанию параметр dimension равен 1).
+UBound(arrayname[, dimension])  Возвращает наибольшее значение, которое которое может принимать индекс в массиве arrayname в размерности dimension (по умолчанию параметр dimension равен 1).
+Filter(inputStrings, value[, include[, compare]])  Возвращает массив, созданный путём фильтрации переданного массива по заданным критериям.\nПараметр inputStrings - исходный одномерный массив строк.\nПараметр value - строка, критерий отбора.\nПараметр include - если задано true, в результат попадут только строки, которые содержат подстроку value, если задано false - в результат попадут только строки, которые не содержат подстроку value.\nПараметр compare - тип сравнения (0 - двоичный, 1 - текстовый).
+IsArray(varname)  Возвращает true, если параметр varname является массивом, и false в противном случае.
+IsDate(varname)  Возвращает true, если параметр varname задаёт корректную дату, и false в противном случае.
+IsEmpty(varname)  Возвращает true, если переменная varname объявлена, но не инициализирована, и false в противном случае.
+IsNull(varname)  Возвращает true, если переменная varname не содеоржит никаких корректных данных, и false в противном случае.
+IsNumeric(varname)  Возвращает true, если переменная varname может быть рассмотрена в качестве числа, и false в противном случае.
+IsObject(varname)  Возвращает true, если переменная varname является указателем на внешний объект, и false в противном случае.
+VarType(varname)  Возвращает числовое значение, соответствующее подтипу переменной varname (см. описание констант подтипов данных в разделе "Прочие константы").
+TypeName(varname)  Возвращает строку, содержащую тип переменной varname.
+Hex(number)  Возвращает шестнадцатеричное представление (в символьном виде) числа number.
+Oct(number)  Возвращает восьмеричное представление (в символьном виде) числа number.
+MsgBox(prompt[, buttons][, title][, helpfile, context])  Выводит на экран диалоговое окно с сообщением и различными кнопками и возвращает результат нажатия на одну из кнопок.\nВозможные варианты возврата - см. описание констант нажатий на кнопки в разделе "Константы для диалоговых окон".\nПараметр prompt задаёт текст сообщения.\nЧисловой параметр buttons определяет состав кнопок, значок, кнопку по умолчанию и режим модальности окна - \nсм. описание констант в разделе "Константы для диалоговых окон" (значения необходимых констант для передачи в параметр buttons нужно просто сложить).\nПараметр title задаёт текст заголовка диалогового окна.\nПараметр helpfile задаёт путь к файлу помощи.\nПараметр context задаёт идентификатор содержания помощи.
+InputBox(prompt[, title][, default][, xpos][, ypos][, helpfile, context])  Выводит на экран диалоговое окно со полем ввода и кнопками ОК, Отмена и возвращает введённую в этом окне символьную строку.\nПараметр prompt задаёт текст сообщения, которое выводится рядом с полем ввода.\nПараметр title задаёт текст заголовка диалогового окна.\nПараметр default задаёт значение по умолчанию для поля ввода.\nПараметры xpos и ypos определяют координаты левого верхнего угла окна.\nПараметр helpfile задаёт путь к файлу помощи.\nПараметр context задаёт идентификатор содержания помощи.
+CreateObject(servername.typename[, location])  Создаёт экземпляр объекта автоматизации и возвращает ссылку на него.\nЗдесь servername - имя приложения, являющегося сервером автоматизации, typename - тип или класс создаваемого объекта, location - сетевое имя компьютера, на котором будет создан объект.
+GetObject([pathname][, classname])  Возвращает ссылку на объект класса classname, который хранится в отдельном файле, путь к которому задаётся параметром pathname.
+CBool(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных boolean (true или false).\nНапример, CBool(3=2) или CBool("-1").
+CByte(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных byte (целое число от 0 до 255).\nНапример, CByte(256) вызовет ошибку переполнения.
+CCur(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных currency (специальный числовой формат для денежных величин).
+CDate(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных date/time (даты от 1 января 100 года до 31 декабря 9999 года).
+CDbl(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных double (числа с плавающей точкой двойной точности).
+CInt(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных integer (целые числа в диапазоне от -32768 до 32768).
+CLng(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных long (целые числа в диапазоне от -2 147 483 648 до 2 147 483 647).
+CSng(expr) Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных single (числа с плавающей точкой одинарной точности).
+CStr(expr)  Возвращает значение, полученное в результате преобразования выражения expr к подтипу данных string.
+Eval(expr)  Вычисляет выражение и возвращает результат.\nНапример, Eval(3=2).
+GetLocale Возвращает текущее значение (ID) настроек локализации (набор установок языка, региона, раскладки клавиатуры и т.д.).\nВозможные значения - см. MSDN статью "Locale ID (LCID) Chart".
+SetLocale(lcid)  Возвращает текущее значение (ID) настроек локализации (набор установок языка, региона, раскладки клавиатуры и т.д.) и устанавливает новое.\nВозможные значения - см. MSDN статью "Locale ID (LCID) Chart".
+ScriptEngine Возвращает название текущего языка, например, "VBScript".
+ScriptEngineBuildVersion Возвращает номер сборки текущей среды исполнения скриптов.
+ScriptEngineMajorVersion Возвращает номер версии текущей среды исполнения скриптов.
+ScriptEngineMinorVersion Возвращает номер подверсии текущей среды исполнения скриптов.
+RGB(red, green, blue)  Возвращает целочисленное значение, соответствующее цвету RGB, заданному с помощью трёх составляющих - красного, зелёного и синего цветов числами от 0 до 255.
+
+# Константы для диалоговых окон
+vbOKOnly 0 Выводится кнопка ОК.
+vbOKCancel 1 Выводятся кнопки ОК и Отмена (Cancel).
+vbAbortRetryIgnore 2 Выводятся кнопки Стоп (Abort), Повтор (Retry) и Пропустить (Ignore).
+vbYesNoCancel 3 Выводятся кнопки Да (Yes), Нет (No) и Отмена (Cancel).
+vbYesNo 4 Выводятся кнопки Да (Yes) и Нет (No).
+vbRetryCancel 5 Выводятся кнопки Повтор (Retry) и Отмена (Cancel).
+vbCritical 16 Выводится значок Stop Mark.
+vbQuestion 32 Выводится значок Question Mark.
+vbExclamation 48 Выводится значок Exclamation Mark.
+vbInformation 64 Выводится значок Information Mark.
+vbDefaultButton1 0 По умолчанию в окне выбирается первая кнопка.
+vbDefaultButton2 256 По умолчанию в окне выбирается вторая кнопка.
+vbDefaultButton3 512 По умолчанию в окне выбирается третья кнопка.
+vbDefaultButton4 768 По умолчанию в окне выбирается четвёртая кнопка.
+vbApplicationModal 0 Диалоговое окно выводится в модальном режиме.
+vbSystemModal 4096 Диалоговое окно выводится в модальном режиме и располагается сверху всех запускаемых приложений.
+vbOK 1 Нажата кнопка ОК.
+vbCancel 2 Нажата кнопка Отмена (Cancel).
+vbAbort 3 Нажата кнопка Стоп (Abort).
+vbRetry 4 Нажата кнопка Повтор (Retry).
+vbIgnore 5 Нажата кнопка Пропустить (Ignore).
+vbYes 6 Нажата кнопка Да (Yes).
+vbNo 7 Нажата кнопка Нет (No).
+
+# Строковые константы
+vbCr Chr(13) Возврат каретки.
+VbCrLf Chr(13) & Chr(10) Возврат каретки и перевод строки.
+vbFormFeed Chr(12) Перевод страницы.
+vbLf Chr(10) Перевод строки.
+vbNewLine Chr(13) & Chr(10) or Chr(10) Определяемый платформой (подходящий) символ новой строки.
+vbNullChar Chr(0) Символ с нулевым кодом.
+vbNullString Нулевая строка Не тоже самое, что строка нулевой длины ("").
+vbTab Chr(9) Символ табуляции.
+vbVerticalTab Chr(11) Символ вертикальной табуляции
+
+# Константы даты и времени
+vbSunday 1 Воскресенье
+vbMonday 2 Понедельник
+vbTuesday 3 Вторник
+vbWednesday 4 Среда
+vbThursday 5 Четверг
+vbFriday 6 Пятница
+vbSaturday 7 Суббота
+vbUseSystemDayOfWeek 0 Использовать для определения первого дня недели региональные настройки системы.
+vbFirstJan1 1 Первой неделей в году считается та, в которой было 1 января.
+vbFirstFourDays 2 Первой неделей в году считается та, в которой было по крайней мере четыре дня нового года.
+vbFirstFullWeek 3 Первой неделей в году считается первая полная неделя.
+vbGeneralDate 0 Дата и время выводятся в формате, определяемом региональными настройками системы.
+vbLongDate 1 Выводить дату, используя полный формат.
+vbShortDate 2 Выводить дату, используя краткий формат.
+vbLongTime 3 Выводить время, используя полный формат.
+vbShortTime 4 Выводить время, используя краткий формат.
+
+# Прочие константы
+vbBlack &h00 Чёрный цвет
+vbRed &hFF Красный цвет
+vbGreen &hFF00 Зелёный цвет
+vbYellow &hFFFF Жёлтый цвет
+vbBlue &hFF0000 Синий цвет
+vbMagenta &hFF00FF Фиолетовый цвет
+vbCyan &hFFFF00 Бирюзовый (голубой) цвет
+vbWhite &hFFFFFF Белый цвет
+vbBinaryCompare 0 Определяет двоичное сравнение.
+vbTextCompare 1 Определяет текстовое сравнение.
+vbObjectError -2147221504 Определяет минимальное значение для номеров ошибок, задаваемых пользователем.
+vbUseDefault -2 Использовать значения по умолчанию из региональных настроек системы.
+vbTrue -1 Логическое значение "Истина".
+vbFalse 0 Логическое значение "Ложь".
+vbEmpty 0 Переменная не инициализирована.
+vbNull 1 Переменная не содержит корректных данных.
+vbInteger 2 Переменная имеет подтип Integer.
+vbLong 3 Переменная имеет подтип Long.
+vbSingle 4 Переменная имеет подтип Single.
+vbDouble 5 Переменная имеет подтип Double.
+vbCurrency 6 Переменная имеет подтип Currency.
+vbDate 7 Переменная имеет подтип Date.
+vbString 8 Переменная имеет подтип String.
+vbObject 9 Переменная имеет подтип Object.
+vbError 10 Переменная имеет подтип Error.
+vbBoolean 11 Переменная имеет подтип Boolean.
+vbVariant 12 Переменная имеет подтип Variant (только для массивов переменных типа Variant).
+vbDataObject 13 Объект доступа к данным.
+vbDecimal 14 Переменная имеет подтип Decimal.
+vbByte 17 Переменная имеет подтип Byte.
+vbArray 8192 Переменная является массивом.
+
+#$regex=regexp
+regex.Pattern Sets or returns the regular expression pattern being searched for.
+regex.Global Sets or returns a Boolean value that indicates if a pattern should match all occurrences in an entire search string or just the first one.
+regex.IgnoreCase  True | False - Sets or returns a Boolean value that indicates if a pattern search is case-sensitive or not.
+regex.Execute(string) Executes a regular expression search against a specified string.
+regex.Test Executes a regular expression search against a specified string and returns a Boolean value that indicates if a pattern match was found.
+regex.Replace(string1, string2)  Replaces text found in a regular expression search. string1 \nRequired. String1 is the text string in which the text replacement is to occur. \nstring2 \nRequired. String2 is the replacement text string.
+
+#$matches=regex.execute(
+matches.count
+match.Length
+match.FirstIndex
+match.Value
+
+err.Description
+err.HelpContext
+err.HelpFile
+err.Number
+err.Source
+err.Raise(number, source, description, helpfile, helpcontext)
+err.Clear()
+
+#$udoc=doc(
+udoc.SubMsg Получение произвольного сабмессаджа\nиз основного мессаджа объекта
+#$message=.*%.submsg
+udoc.Value  Получение значения из поля мессаджа объекта.\nУстановка значения в контрол
+udoc.UserInput Эмуляция пользовательского ввода
+udoc.Ref Получение сабмессаджа реф-контрола.\nУстановка значения рефконтрола по пути в мессадже объекта
+udoc.SetRef Установка значения рефконтрола по внешнему массаджу
+udoc.ClearSetDefault Очистка контрола (или установка дефолтного значения если есть)
+udoc.Visible
+udoc.VisibleSetDefault Скрытие, показ контрола\nс одновременной "очисткой" при блокировании
+udoc.Enable
+udoc.EnableSetDefault Блокировка,разблокировка контрола\nс одновременной "очисткой" при блокировании
+udoc.Caption
+udoc.Restriction  Установка,получение в теге рефконтрола\nsql фрагмента с ограничением поиска
+udoc.SetValueHook Установка ValueHook хендлера для контрола
+AddRecord(msg)
+DelRecord(id)
+ToolTip(bUseDef)
+
+#$message=.app.createmessage(
+app.CreateMessage
+app.Trace(strMsg)
+app.TraceErr(strMsg)
+app.TraceDoc(strPath)
+app.MessageBox(Prompt, Buttons)
+app.CalloutMsgBox(Prompt, Buttons, ShowPeriod)
+app.CreateDbOptions
+app.CreateDbParams
+app.DbRunSql(strSql, msgOpaque, objOptions)
+app.DbRunProc(strSql, msgOpaque, objParams, objOptions)
+app.CancelTransaction Set only. Прерывание операции созранения
+app.ShowCustomWindow(bShow)
+app.RefLoadHook(msgOpaque)
+app.ChangedFields
+#$message=.app.changedfields
+
+#$objdbp=app.createdbparams
+objdbp.Add(strName, varValue, enumType, enumDirection, lSize)
+objdbp.Reset()
+
+#$objsqlo=app.createdboptions
+objsqlo.Adapter
+objsqlo.Block
+objsqlo.StatisticName
+objsqlo.SelfError
+objsqlo.HookError
+objsqlo.Database
+objsqlo.Timeout
+
+objtmp.PropertyBag(val)
+objtmp.bActiveTab(val)
+objtmp.OpenObj(vIdx, strTemplate, bReplace)
+
+
+

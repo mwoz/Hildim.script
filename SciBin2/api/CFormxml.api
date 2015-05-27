@@ -1,0 +1,48 @@
+control.type  reference|choice|text|float|integer|date|\ndatetime|boolean|button
+
+control.code
+control.backcolor
+control.forecolor
+control.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
+control.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для рабиобаттона,width3 - максимальное число колонок
+control.padRight "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
+control.padLeft "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
+control.autoWidth {"yes", "no"}
+control.fixedWidth {"yes", "no"}
+control.visible {"yes", "no"}
+control.enabled {"yes", "no"}
+control.locked {"yes", "no"}
+control.positionPrevLine {"yes", "no"}
+control.tooltip
+
+container.type  frame|container
+container.code
+container.backcolor
+container.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для рабиобаттона,width3 - максимальное число колонок
+container.padRight "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
+container.padLeft "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
+container.visible {"yes", "no"}
+container.positionPrevLine {"yes", "no"}
+
+reference.source
+
+choice.source
+choice.choiceType
+
+form.objectType
+form.type
+
+design.caption
+design.caption_ru
+design.locationRef
+design.location
+design.visible
+
+string.id
+value.lang
+value.text
+
+
+
+
+

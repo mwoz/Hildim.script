@@ -286,6 +286,7 @@ iup.DestroyDialogs = function()
         end
     end
     h = iup.GetDialogChild(hMainLayout, "ToolBar")
+    tTlb.show_cb(h,4)
     iup.Detach(h)
     iup.Destroy(h)
 
