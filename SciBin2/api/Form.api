@@ -401,6 +401,7 @@ numberbox.PrevValue Returns previous value of ctrl(before user edit)
 numberbox.MinValue Минимальное значение, которое может быть установлено. При вводе меньшего числа оно автоматически будет заменено на MinValue. (по умолчанию - не заданно(NULL))
 numberbox.MaxValue Максимальное значение, которое может быть установлено. При вводе большего числа оно автоматически будет заменено на MaxValue. (по умолчанию - не заданно(NULL))
 numberbox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
+numberbox.Format Get\Set number format\nExample: Format = "0.00####"  is same as PrecisionMin=2; PrecisionMax=6;\n\nNote: "K"|"M"|"Y"|"KMY" format specifications are NOT supported for numberbox(ignored if entered).\n
 
 #$datebox=form("dt
 #$datebox=controlscoll%.add(.*"DATEBOX

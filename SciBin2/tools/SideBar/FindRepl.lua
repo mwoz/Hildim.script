@@ -797,7 +797,7 @@ local function FuncBmkTab_Init()
         orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
         detached_cb=(function(h, hNew, x, y)
-            FindReplDialog = hNew
+            _G.FindReplDialog = hNew
             hNew.resize ="YES"
             hNew.shrink ="YES"
             hNew.minsize="384x270"
