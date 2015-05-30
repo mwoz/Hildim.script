@@ -14,6 +14,9 @@ control.enabled {"yes", "no"}
 control.locked {"yes", "no"}
 control.positionPrevLine {"yes", "no"}
 control.tooltip
+control.rightButtonMode {"all", "personal"} показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
+control.showInfo {"yes", "no"} показ кнопки инфо в рефконтролах
+control.choiceMode {"radio", "dropMenu"} режим показа чойса. по умолчанию - обычный комбобокс
 
 container.type  frame|container
 container.code

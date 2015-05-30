@@ -342,50 +342,55 @@ udoc.UserInput Эмуляция пользовательского ввода
 udoc.Ref Получение сабмессаджа реф-контрола.\nУстановка значения рефконтрола по пути в мессадже объекта
 udoc.SetRef Установка значения рефконтрола по внешнему массаджу
 udoc.ClearSetDefault Очистка контрола (или установка дефолтного значения если есть)
-udoc.Visible
+udoc.Visible True / False - показать / скрыть поле
 udoc.VisibleSetDefault Скрытие, показ контрола\nс одновременной "очисткой" при блокировании
-udoc.Enable
+udoc.Enabled True / False - заблокировать поле
+udoc.Locked True / False - заблокировать поле
 udoc.EnableSetDefault Блокировка,разблокировка контрола\nс одновременной "очисткой" при блокировании
-udoc.Caption
+udoc.Caption Заголовок контрола
 udoc.Restriction  Установка,получение в теге рефконтрола\nsql фрагмента с ограничением поиска
 udoc.SetValueHook Установка ValueHook хендлера для контрола
-AddRecord(msg)
-DelRecord(id)
-ToolTip(bUseDef)
+udoc.AddRecord(msg) Добавляет в список аппендикса запись , заданную в msg
+udoc.DelRecord(id) Удаляет из аппендикса Малтипл запись\nс номером(если id целое) или ключом Id.\nВ сабконтроле срабатывают обработчики событий,\nкак при пользовательском вводе
+udoc.SetRecordset(msg) Полностью загружает содержимое аппендикса из мессаджа msg
+udoc.ToolTip(bUseDef) Текст всплывающей подсказки
+udoc.Format Строка формата поля для numberbox: \nПример: Format = “0.00####”  аналогичен PrecisionMin=2; PrecisionMax=6;
 
 #$message=.app.createmessage(
-app.CreateMessage
-app.Trace(strMsg)
-app.TraceErr(strMsg)
-app.TraceDoc(strPath)
-app.MessageBox(Prompt, Buttons)
-app.CalloutMsgBox(Prompt, Buttons, ShowPeriod)
-app.CreateDbOptions
-app.CreateDbParams
+app.CreateMessage Возвращает новый объект мессаджа.
+app.Trace(strMsg) Логирует текст черным цветом.
+app.TraceErr(strMsg)Логирует текст красным  цветом.
+app.TraceDoc(strPath) Логирует "главный" мессадж объекта, либо его сабмессадж.
+app.MessageBox(Prompt, Buttons) Показать модальный message box;
+app.CalloutMsgBox(Prompt, Buttons, ShowPeriod)Показать Callout Message Box;
+app.CreateDbOptions() Возвращает новый объект класса objectDbRunOptions
+app.CreateDbParams() Возвращает новый экземпляр DbParams
 app.DbRunSql(strSql, msgOpaque, objOptions)
 app.DbRunProc(strSql, msgOpaque, objParams, objOptions)
-app.CancelTransaction Set only. Прерывание операции созранения
-app.ShowCustomWindow(bShow)
-app.RefLoadHook(msgOpaque)
-app.ChangedFields
+app.CancelTransaction Set only. Метод, вызванный из DATA_IUD_BEFORE прерывает операцию.
+app.ShowCustomWindow(bShow) Предназначено для динамического скрытия, показа МОЕГО кастомного окна.
+app.RefLoadHook(msgOpaque) Предназначено для перехват в EVENT_HANDLER события загрузки деталей справочников.
+app.ChangedFields Свойство содержит  сообщение с информацией об измененных полях с момент последнего DATA_CONSISTENT события.
 #$message=.app.changedfields
+app.StringTable(Id) Получение строки из строковой таблицы по указанному strCode
+app.StringFormat(str, arNamesVals) В строке str  заменяет вхождение параметра в фигурных скобках на его значение
+app.DateToDBString(dt, bQuotes)
+app.StringToDBString(str, bQuotes)
+app.NumberToDBString(number)
 
-#$objdbp=app.createdbparams
-objdbp.Add(strName, varValue, enumType, enumDirection, lSize)
-objdbp.Reset()
+#$objdbp=app.createdbparams(
+objdbp.Add(strName, varValue, enumType, enumDirection, lSize)  enumType - тип параметра : adChar , adVarChar , adInteger , adDouble , adDBTimeStamp, adLongVarBinary\nenumDirection - Направление : adParamInput, adParamInputOutput, adParamOutput
+objdbp.Reset() Очистить объект
 
-#$objsqlo=app.createdboptions
-objsqlo.Adapter
-objsqlo.Block
-objsqlo.StatisticName
+#$objsqlo=app.createdboptions(
+objsqlo.Adapter имя адаптера базы данных - используется для переключения контекста запросов (определяет сабжект посылаемого mb-запроса)
+objsqlo.Block (Y/N) блокирующий / неблокирующий запрос - с точки зрения блокирования полей формы от редактирования.
+objsqlo.StatisticName имя для переопределения в дб-адаптере при сборе статистики вызовов
 objsqlo.SelfError
-objsqlo.HookError
-objsqlo.Database
-objsqlo.Timeout
+objsqlo.HookError (Y/N) – скрипт самостоятельно обрабатывает ошибки, при таймауте вызывается RPC_TIMEOUT
+objsqlo.Database имя базы данных - имя базы данных, для которой вызываются процедуры (используется только перед dbRunProc
+objsqlo.Timeout в секундах
 
-objtmp.PropertyBag(val)
-objtmp.bActiveTab(val)
-objtmp.OpenObj(vIdx, strTemplate, bReplace)
 
 
 

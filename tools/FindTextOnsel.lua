@@ -455,31 +455,9 @@ end
 
 
 AddEventHandler("OnClick", function(shift, ctrl, alt)
-    if not shift and ctrl and alt then
-        FindSelToConcole() return true
-    elseif output.Focus and alt then
-        local lineNum = output:LineFromPosition(output.CurrentPos) + 1
-        local curLine = output:GetCurLine()
-        if 1 == curLine:find(">Search for", 1, true) then
-            local _,_,_,dir = curLine:find('"([^"]*)" in "([^"\*]*)')
-            local prevFile = ''
-            while true do
-                local fline = output:GetLine(lineNum)
-                if fline == '' or fline == nil then break end
-                if fline:find('>!!') == 1 then break end
-                local _,_,newFile = fline:find('([^:]*)',3)
-                if newFile == nil then break end
-                newFile = dir..newFile
-                if newFile ~= prevFile then
-                    prevFile = newFile
-                    --print(newFile)
-                    scite.Open(newFile)
-                end
-                lineNum = lineNum + 1
-            end
-        end
+    if editor.Focus and not shift and ctrl and alt then
+        FindSelToConcole()
     end
-
 end)
 AddEventHandler("OnContextMenu", function(lp, wp, source)       --סרטבךא err
     if source ~= "FINDREZ" then return end

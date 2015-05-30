@@ -156,7 +156,7 @@ local function  CreateBox()
             hNew.close_cb =(function(h)
                 if _G.dialogs['sidebar'] ~= nil then
                     if _G.iuprops['findrepl.win']=='1' then
-                        FindReplDialog.close_cb(FindReplDialog)
+                        _G.FindReplDialog.close_cb(_G.FindReplDialog)
                     end
                     _G.iuprops['sidebar.win']='0'
                     oDeatt.restore = 1
@@ -429,7 +429,6 @@ local function InitToolBar()
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
     tTlb.show_cb=(function(h,state)
-        print(h,state)
         if state == 0 and props['iuptoolbar.visible'] == '1' and props['iuptoolbar.restarted'] ~= '1' then
            scite.MenuCommand(IDM_VIEWTLBARIUP)
         elseif state == 4 then
