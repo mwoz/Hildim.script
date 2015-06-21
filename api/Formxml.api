@@ -3,7 +3,7 @@ control.name
 control.backcolor
 control.forecolor
 control.font "name;size;bold;italic;underline"\nfor example: "Tahoma;8;N;Y;N"
-control.position "left;top;width;height" авпавпыва
+control.position "left;top;width;height"
 control.padright
 control.padtop
 control.padbottom
@@ -126,6 +126,8 @@ label.caption
 label.caption_ru
 label.alignment {"L", "R", "C"}
 label.autowidth {"Y", "N"}
+label.drawline {"Y", "N"}
+label.linecolor
 
 logbox.showtime  {"Y", "N"}
 

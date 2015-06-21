@@ -210,8 +210,15 @@ form.AddFramesXml(strXmlFrames, strInsertAfter) Добавляет новые фреймы на форму 
 form.Parent Возвращает ссылку на родительский контрол (Container, Frame, Form). Для формы верхнего уровня возвращает Nothing.
 form.ControlProperties(strCtrlName) Устанавливает/Возвращает у контрола переданный набор свойств. Внимание некоторые свойства могут быть установлены только в момент создания контрола!
 form.Lock(bLock, msgCtrlsNoLock, iShowClockTimeout) Блокирует пользовательский ввод всех контролов формы, кроме контролов, имена которых\nпереданы в качестве полей параметра msgCtrlsNoLock.\nИмена полей передаются с именами всех\nродительских контролов\сабформ соединенных через символ «\»: ShowClockTimeout – опциональный парамтр. \nВремя в мс, через которое курсор над формой превратится в песочные часы
-form.IsLocked Read-only;Возвращает текущее состояние\nблокировки формы установленное методом Lock
+form.Locked Read-only;Возвращает текущее состояние\nблокировки формы установленное методом Lock
+form.Scripts Коллекция vbs-скриптов.
+#$scriptscol=form.scripts
 
+scriptscol.Add(Name, Text)
+scriptscol.Remove(Name/Index )
+scriptscol.Item(Name/Index )
+scriptscol.Clear()
+scriptscol.Count
 
 #$container=form("cnt
 #$container=controlscoll%.add(.*"CONTAINER
@@ -543,6 +550,8 @@ label.AutoWidth If true control width is calculated automatically. Must\nbe used
 label.Caption
 label.Value
 label.ToolTipText
+label.DrawLine Boolean. Default = false. Рисует линию до границ области контрола( влево/вправо/от центра до краев, в зависимости от Alignment).\nРаботает только для однострочного текста(если текст не помещается в одну строку -\nлиния не отображается).
+label.LineColor Цвет рисуемой линии для режима DrawLine= true
 
 #$button=form("btn
 #$button=form("lnk
@@ -1042,6 +1051,7 @@ udoc.EnableSetDefault Блокировка,разблокировка контрола\nс одновременной "очистк
 udoc.Caption
 udoc.Restriction  Установка,получение в теге рефконтрола\nsql фрагмента с ограничением поиска
 udoc.SetValueHook Установка ValueHook хендлера для контрола
+udoc.ObjectType Свойство используется для установки режима работы Ref контейнера, а также может быть программно прочитано.
 
 app.CreateMessage
 app.Trace(strMsg)
@@ -1069,6 +1079,8 @@ objsqlo.Database
 objsqlo.Timeout
 
 papp.Name() Имя приложения
+papp.ProviderGUI() провайдер для вставки объектов из GUI
+papp.ProviderGEN() провайдер для автоматически генерируемых системой объектов
 papp.User() имя пользователя Радиус
 papp.UserId() id пользователя Радиус
 papp.SettingsAutoCloseTck()

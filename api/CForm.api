@@ -377,6 +377,10 @@ app.StringFormat(str, arNamesVals) В строке str  заменяет вхождение параметра в 
 app.DateToDBString(dt, bQuotes)
 app.StringToDBString(str, bQuotes)
 app.NumberToDBString(number)
+app.Usr_Id Id текущего пользователя
+app.Usr_Code Код текущего пользователя
+app.MainObjectType Тип (имя метаданных) объекта, содержащего текущее кастомное окно
+app.CustomFormExists(strName) (True/False) Проверяет наличие кастомного окна strName
 
 #$objdbp=app.createdbparams(
 objdbp.Add(strName, varValue, enumType, enumDirection, lSize)  enumType - тип параметра : adChar , adVarChar , adInteger , adDouble , adDBTimeStamp, adLongVarBinary\nenumDirection - Направление : adParamInput, adParamInputOutput, adParamOutput
@@ -390,6 +394,8 @@ objsqlo.SelfError
 objsqlo.HookError (Y/N) – скрипт самостоятельно обрабатывает ошибки, при таймауте вызывается RPC_TIMEOUT
 objsqlo.Database имя базы данных - имя базы данных, для которой вызываются процедуры (используется только перед dbRunProc
 objsqlo.Timeout в секундах
+objsqlo.DataModelMode (R/S/T/M)
+objsqlo.IndexAuto (Y/N)
 
 
 
