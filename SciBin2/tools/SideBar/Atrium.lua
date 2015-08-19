@@ -210,6 +210,36 @@ local function SelectData()
     end,20,nil)
 end
 
+local function PutReport()
+    local strXml = editor:GetText():from_utf8(1251)
+    local msgParams = mblua.CreateMessage()
+    dbAddProcParam(msgParams, "FormData" , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
+    dbRunProc('Report_Register', msgParams, function(handle,Opaque,iError,msgReplay)
+        print(msgReplay:ToString())
+        if msgReplay:GetPathValue('Error') == '0' then
+            local msg = mblua.CreateMessage()
+            strSubj = 'SYSM.SAVEREPORT'
+            if _G.iuprops["precompiller.radiususername"] ~= '' then
+                strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
+            end
+            msg:Subjects(strSubj)
+            -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
+            msg:SetPathValue("ExtText",editor:GetText():from_utf8(1251))
+            _G['formengine.reloadtemplate'] = true
+            mblua.Request(function(handle,Opaque,iError,msgReplay)
+            _G['formengine.reloadtemplate'] = false
+                if iError == 0 then
+                    print(msgReplay:GetPathValue("strReplay"))
+                else
+                    print("Terminal not responded")
+                end
+            end,msg,3,nil)
+            --mblua.Publish(msg)
+            msg:Destroy()
+        end
+    end, 20, nil)
+end
+
 local function PutForm(objectType, formType)
     if objectType == nil or formType == nil then
         print('Incorrect Custom form!')
@@ -251,6 +281,8 @@ function atrium_RunXml()
     local strObjType = t_xml[0]
     if strObjType == 'Template' then
         ApplyMetadata(editor:GetText():gsub('^<[?].->\r?\n?',''))
+    elseif strObjType == 'Form' and t_xml['type'] == 'Report' then
+        PutReport()
     elseif strObjType == 'Form' then
         PutForm(t_xml['objectType'], t_xml['type'])
     elseif strObjType == 'template' then
@@ -275,14 +307,17 @@ end
 
 local function Data_OpenNew()
     local sel = list_obj.marked:find('1') - 1
-    if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
+    local oName = list_obj:getcell(sel,1)
+    if oName == 'system.ObjectTypeForm' or oName == 'system.Report' then
+        oName = oName:gsub('system.','')
         sel = list_data.marked:find('1') - 1
         local sql = "select f.FormData \n"..
-        "from ObjectTypeForm f\n"..
-        "where f.ObjectTypeForm_Id = "..list_data:getcell(sel,1)
+        "from "..oName.." f\n"..
+        "where f."..oName.."_Id = "..list_data:getcell(sel,1)
+
         dbRunSql(sql,function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
-            props['scite.new.file'] = '^'..list_data:getcell(sel,2)..'.cform'
+            props['scite.new.file'] = '^'..list_data:getcell(sel,2)..Iif(oName == 'ObjectTypeForm', '.cform', '.rform')
             scite.MenuCommand(IDM_NEW)
             scite.MenuCommand(IDM_ENCODING_UCS2LE)
             editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
@@ -302,17 +337,19 @@ end
 
 local function Data_Unload()
     local sel = list_obj.marked:find('1') - 1
-    if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
+    local oName = list_obj:getcell(sel,1)
+    if oName == 'system.ObjectTypeForm' or oName == 'system.Report' then
+        oName = oName:gsub('system.','')
         sel = list_data.marked:find('1') - 1
         local sql = "select f.FormData \n"..
-        "from ObjectTypeForm f\n"..
-        "where f.ObjectTypeForm_Id = "..list_data:getcell(sel,1)
+        "from "..oName.." f\n"..
+        "where f."..oName.."_Id = "..list_data:getcell(sel,1)
 
         local strName = list_data:getcell(sel,2)
 
         dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
-            local strPath = props['FileDir']..'\\'..strName..'.cform'
+            local strPath = props['FileDir']..'\\'..strName..'.'..Iif(oName == 'ObjectTypeForm', 'cform', 'rform')
             local f = io.open(strPath, "w")
             f:write('')
             f:flush()
