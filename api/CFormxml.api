@@ -17,6 +17,10 @@ control.tooltip
 control.rightButtonMode {"all", "personal"} показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
 control.showInfo {"yes", "no"} показ кнопки инфо в рефконтролах
 control.choiceMode {"radio", "dropMenu"} режим показа чойса. по умолчанию - обычный комбобокс
+control.paramType тип данных sql(параметры отчета)
+control.mandatory обязательное поле(параметры отчета)
+control.valueColumn колонка занчение из которой нужно отображать(SqlQuery контрол)
+control.displayColumns список колонок:заголовков для отображения(SqlQuery контрол)
 
 container.type  frame|container
 container.code
@@ -34,6 +38,8 @@ choice.choiceType
 
 form.objectType
 form.type
+form.procedure
+form.menuPath
 
 design.caption
 design.caption_ru
