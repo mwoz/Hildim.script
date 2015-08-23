@@ -1120,7 +1120,7 @@ papp.Msg2Xml(msgObject, strName)
 papp.InitKustomCombo(f) Для формы f заполняем ее комбобоксы чойсами из тегов dnc_Source
 papp.GetParentHandler(control) Возвращает контейнер, содержащий хендлер для данного контрола
 papp.XmlAppMult2Msg(strXml)
-papp.ParseBracketsStr(f, strSource, fnOnReplace, opaque, strErrorPrefix)
+papp.ParseBracesStr(f, strSource, fnOnReplace, opaque, strErrorPrefix)
 papp.GetRefFields(strObjName, chType)
 papp.Metadata(strObj)
 papp.GenWindowMsg(strXmlMetadata)
@@ -1135,6 +1135,9 @@ papp.IsValueOneOfTypesM( strTypes, strValue )
 papp.MetaDataValue(strObj, strPath)
 papp.MetaDataNls(strObj, strName)
 papp.Calc Calc object for calculations
+papp.ObjType2Table
+papp.ObjType2Schema
+papp.ObjType2TableWithSchema
 #$calc=.*%.calc
 
 calc.Bond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
