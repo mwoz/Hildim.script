@@ -461,7 +461,7 @@ local function OnSwitch(bForse, bRelist)
             -- if bClearMask then memo_mask:set_text = "" end
             FileMan_ListFILL()
             for i = 0, list_dir.count - 1 do
-                if list_dir:getcell(i,2) == props['FileNameExt'] then
+                if list_dir:getcell(i,2):upper() == props['FileNameExt']:upper() then
                     iup.SetAttributeId2(list_dir, 'MARK',1,0, 0)
                     iup.SetAttributeId2(list_dir, 'MARK',i,0, 1)
                     list_dir.focus_cell = i..":1"
