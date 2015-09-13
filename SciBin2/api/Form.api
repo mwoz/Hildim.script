@@ -1138,6 +1138,10 @@ papp.Calc Calc object for calculations
 papp.ObjType2Table
 papp.ObjType2Schema
 papp.ObjType2TableWithSchema
+papp.ObjTypeFull
+papp.SqlFromCData(str)
+papp.SqlToCData(str)
+papp.FilterDate2Date(strType, val)
 #$calc=.*%.calc
 
 calc.Bond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
