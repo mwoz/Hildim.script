@@ -83,11 +83,13 @@ local alltagsmeta = {
 'code',
 'name',
 'type',
+'sequence',
 'asset',
 'length',
 'object',
 'codeName',
 'mandatory',
+'default',
 'permissionGet',
 'permissionIUD',
 -- TABLE only:
@@ -95,6 +97,8 @@ local alltagsmeta = {
 -- TEMPLATE only:
 'audit',
 'realtimeNotify',
+'importCallbacks',
+'extensible',
 'schemaVersion',
 -- INDEX:
 'nameSuffix',

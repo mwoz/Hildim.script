@@ -18,17 +18,28 @@ function sidebar_Find()
 end
 local needCoding = false
 
+local function Find_onFocus(setfocus)
+    if not setfocus then
+        local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)
+        if a then
+            findrez.TargetStart = a
+            findrez.TargetEnd = a+3
+            findrez:ReplaceTarget('<')
+        end
+    end
+end
+
 local function OnSwitch()
     needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
 end
 
 local function FindTab_Init()
     local tm = iup.timer{time=300}
-    local tmConsole = iup.timer{time=1800000}
+    local tmConsole = iup.timer{time=600000}
     tmConsole.action_cb = (function()
-        if output.LineCount > 300 then
+        if output.LineCount > 200 then
             output.TargetStart = 0
-            output.TargetEnd = output:PositionFromLine(output.LineCount-300)
+            output.TargetEnd = output:PositionFromLine(output.LineCount-200)
             output:ReplaceTarget('')
         end
     end)
@@ -91,7 +102,7 @@ local function FindTab_Init()
             iup.PassFocus()
         end
     end)
-    btn_search = iup.button{image = 'IMAGE_search',active='NO', action=(function() Find_onChange(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
+    btn_search = iup.button{image = 'IMAGE_search',active='NO', action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
     TabBar_obj.Tabs.livesearch = {
         handle = iup.hbox{
                 iup.button{image = 'IMAGE_AlignObjectsLeft', action=(function() iup.PassFocus();do_Align() end), tip='Диалог выравнивания кода(Alt+A)'};

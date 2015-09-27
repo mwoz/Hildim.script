@@ -168,6 +168,11 @@ local function SelectMetadata()
             list_obj:setcell(i + 1, 3, msgReplay:Message(i):GetPathValue('TableName'))
             list_obj:setcell(i + 1, 4, msgReplay:Message(i):GetPathValue('CodeField'))
         end
+        if mc > 0 then
+            iup.SetAttribute(list_obj,  'MARK1:0', 1)
+            iup.SetAttribute(list_data, "DELLIN", "1-"..list_data.numlin)
+            iup.SetFocus(list_obj)
+        end
         --print(msgReplay:ToString())
         --msgReplay:Destroy()
         list_obj.redraw = "ALL"
@@ -486,8 +491,13 @@ local function FindTab_Init()
     iup.SetAttribute(cmb_syscust, 3, "custom")
     cmb_syscust.value = 1
 
-    txt_objmask = iup.text{expand='HORIZONTAL',tip='Маска метаданных'}
+    --txt_objmask = iup.text{expand='HORIZONTAL',tip='Маска метаданных'}
+    txt_objmask = iup.list{editbox = "YES",dropdown="YES",visible_items="15",expand='HORIZONTAL',tip='Маска метаданных'}
+    iup.SetAttribute(txt_objmask, 1, "Choice")
+    iup.SetAttribute(txt_objmask, 2, "ObjectTypeForm")
+    iup.SetAttribute(txt_objmask, 3, "Report")
     txt_objmask.k_any = (function(h,k) if k == iup.K_CR then SelectMetadata() end end)
+    txt_objmask.action = (function(h,text,item,state) if state == 1 then txt_objmask.value = text; SelectMetadata() end end)
 
     cmb_RefDepth = iup.list{dropdown="YES",visible_items="15",size='20x0', expand='NO', tip='Reference Repth'}
     iup.SetAttribute(cmb_RefDepth, 1, "0")
@@ -512,7 +522,7 @@ local function FindTab_Init()
   	list_obj:setcell(0, 1, "Code")
   	list_obj:setcell(0, 2, "Name")
   	list_obj:setcell(0, 3, "Table")
-    list_obj.click_cb = (function(h, lin, col, status)
+--[[    list_obj.click_cb = (function(h, lin, col, status)
         local sel = 0
         if list_obj.marked then sel = list_obj.marked:find('1') - 1 end
         if sel ~= lin then iup.SetAttribute(list_data, "DELLIN", "1-"..list_data.numlin) end
@@ -531,7 +541,22 @@ local function FindTab_Init()
               iup.item{title="Добавить XML заголовок",value=_G.iuprops['atrium.metadata.xmlcapt'],action=(function() _G.iuprops['atrium.metadata.xmlcapt']=Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON','OFF','ON') end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
-    end)
+    end)]]
+    local function obj_mnu()
+            local mnu = iup.menu
+            {
+              iup.item{title="Открыть как новый файл",action=Metadata_OpenNew},
+              iup.item{title="Выгрузить и открыть в текущей директории",action=Metadata_Unload},
+              iup.separator{},
+              iup.item{title="Открыть новый файл с данными",action=Metadata_NewData},
+              iup.separator{},
+              iup.item{title="Добавить XML заголовок",value=_G.iuprops['atrium.metadata.xmlcapt'],action=(function() _G.iuprops['atrium.metadata.xmlcapt']=Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON','OFF','ON') end)},
+            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+    end
+    local function obj_resel(old_l)
+        iup.SetAttribute(list_data, "DELLIN", "1-"..list_data.numlin)
+    end
+    list_obj:SetCommonCB(nil,obj_resel,nil,obj_mnu)
 
     txt_datamask = iup.text{expand='HORIZONTAL',tip='Маска кода объекта,\nвыбранного в верхнем гриде'}
     txt_datamask.k_any = (function(h,k) if k == iup.K_CR then SelectData() end end)
@@ -542,23 +567,16 @@ local function FindTab_Init()
     list_data:setcell(0, 1, "Id")
     list_data:setcell(0, 2, "Code")
 
-    list_data.click_cb = (function(h, lin, col, status)
-        local sel = 0
-        if list_data.marked then sel = list_data.marked:find('1') - 1 end
-        iup.SetAttribute(list_data,  'MARK'..sel..':0', 0)
-        iup.SetAttribute(list_data, 'MARK'..lin..':0', 1)
-        list_data.redraw = lin..'*'
-        if iup.isbutton3(status) then
-            h.focus_cell = lin..':'..col
-            local mnu = iup.menu
-            {
-              iup.item{title="Открыть как новый файл",action=Data_OpenNew},
-              iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
-              iup.separator{},
-              iup.item{title="Не выгружать ID и технические поля",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
-        end
-    end)
+    local function dat_mnu()
+        local mnu = iup.menu
+        {
+          iup.item{title="Открыть как новый файл",action=Data_OpenNew},
+          iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
+          iup.separator{},
+          iup.item{title="Не выгружать ID и технические поля",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
+        }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+    end
+    list_data:SetCommonCB(Data_OpenNew,nil,nil,dat_mnu)
 
     --iup.toogle
     SideBar_obj.Tabs.atrium =  {
