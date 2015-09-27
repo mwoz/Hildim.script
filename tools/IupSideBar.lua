@@ -13,6 +13,8 @@ local oDeatt
 local hMainLayout = iup.GetLayout()
 local BottomBar, ConsoleBar, FindRepl
 
+iup.SetGlobal("DEFAULTFONTSIZE", "10")
+
 iup.PassFocus=(function()
     iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
 end)

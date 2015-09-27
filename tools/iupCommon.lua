@@ -138,6 +138,63 @@ function Max(a,b)
     return b
 end
 
+local old_matrix = iup.matrix
+iup.matrix = function(t)
+
+    local mtr = old_matrix(t)
+    function mtr:SetCommonCB(act_act,act_resel, act_esc, act_right)
+        local function a_cb(h, key, lin, col, edition, value)
+            if key == 65364 then  --down
+                local sel = 1
+                if h.marked then sel = h.marked:find('1') end
+                sel = sel - 1
+                if sel < h.count - 1 then
+                    iup.SetAttribute(h, 'MARK'..(sel)..':0', 0)
+                    iup.SetAttribute(h, 'MARK'..(sel+1)..':0', 1)
+                    h.focus_cell = (sel+1)..":1"
+                    h.redraw = "ALL"
+                    if act_resel then act_resel(sel) end
+                end
+                return -1
+            elseif key == 65362 then  --up
+                local sel = h.marked:find('1')
+                if sel == nil then sel = h.count + 2 end
+                sel = sel - 1
+                if sel > 1 then
+                    iup.SetAttribute(h, 'MARK'..(sel)..':0', 0)
+                    iup.SetAttribute(h, 'MARK'..(sel-1)..':0', 1)
+                    h.focus_cell = (sel-1)..":1"
+                    h.redraw = "ALL"
+                    if act_resel then act_resel(sel) end
+                end
+                return -1
+            elseif key == 13 then
+                if act_act then act_act(lin) end
+            elseif key == 65307 then --escape
+                if act_esc then act_esc() end
+            end
+        end
+        local function c_cb(h, lin, col, status)
+            local sel = 0
+            if h.marked then sel = h.marked:find('1') - 1 end
+            iup.SetAttribute(h,  'MARK'..sel..':0', 0)
+            iup.SetAttribute(h, 'MARK'..lin..':0', 1)
+            h.redraw = lin..'*'
+            if iup.isdouble(status) and iup.isbutton1(status) then
+                if act_act then act_act(lin) end
+                return -1
+            elseif iup.isbutton3(status) then
+                h.focus_cell = lin..':'..col
+                if act_right then act_right(lin) end
+            end
+            if lin ~= sel and act_resel then act_resel(sel) end
+        end
+        self.action_cb = a_cb
+        self.click_cb = c_cb
+    end
+    return mtr
+end
+
 local old_iup_list = iup.list
 iup.list = function(t)
     local cmb = old_iup_list(t)
@@ -174,7 +231,7 @@ iup.list = function(t)
         local i = tonumber(self.count)
         local mn = tonumber(self.visible_items)
         while(i > 1) do
-            if i> mn + 1 or (iup.GetAttribute(self,i) == s) then
+            if i> mn-1 or (iup.GetAttribute(self,i) == s) then
                 self.removeitem = i
             end
             i = i - 1

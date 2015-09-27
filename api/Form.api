@@ -552,6 +552,8 @@ label.Value
 label.ToolTipText
 label.DrawLine Boolean. Default = false. –исует линию до границ области контрола( влево/вправо/от центра до краев, в зависимости от Alignment).\n–аботает только дл€ однострочного текста(если текст не помещаетс€ в одну строку -\nлини€ не отображаетс€).
 label.LineColor ÷вет рисуемой линии дл€ режима DrawLine= true
+label.AutoEllipsis {'Y'|'N'} If true the additional caption text is to be indicated by an ellipsis when client area is too small, otherwise caption text is truncated (by default).
+
 
 #$button=form("btn
 #$button=form("lnk
@@ -569,6 +571,7 @@ button.BackDisabledColor
 button.HForeColor
 button.Style {'D'|'F'} - Style of button if 'F' - flat style is used. Default - 'D'.
 button.AutoWidth If true control width is calculated automatically. Must\nbe used with at least one of vertical paddings set. \nOtherwise property is ignored.
+button.AutoEllipsis {'Y'|'N'} (For link) If true the additional caption text is to be indicated by an ellipsis when client area is too small, otherwise caption text is truncated (by default).
 
 #$colorpicker=form("clr
 #$colorpicker=controlscoll%.add(.*"COLORPICKER

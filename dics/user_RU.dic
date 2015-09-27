@@ -1,4 +1,4 @@
-324
+330
 Альфабанк/IIIhIiIk
 БД
 ВТБ
@@ -19,6 +19,7 @@
 апдейт/IIIhIiIk
 апдейтировать/BBLLNN
 апдейтить/BBLLNN
+ассет/IIIhIiIk
 аудировать/BbLLNn
 аудируемый/CCCDSa
 батч/IIIiIqIw
@@ -34,6 +35,7 @@
 варант/IIIhIiIk
 визард/IIIhIiIk
 визуализировать/BbLLNn
+волатильность/IF
 ворнинг/IIIhIiIk
 генерить/BBLLNN
 грид/IIIhIiIk
@@ -48,6 +50,8 @@
 дебажный/CCCDCOSa
 дериватив/IIIhIiIk
 дефолтный/CCCDCOSa
+джойнить/BBLLNN
+джойниться/BBLLNN
 дизейблить/BBLLNN
 дрилдаун/IIIhIiIk
 зааудировать/BbLLNn
@@ -57,6 +61,8 @@
 задоченный/CCSaXX
 закомментировать/BbLLNn
 закомметированный/CCSaXX
+закэшированный/CCSaXX
+закэшировать/BbLLNn
 заликвидированный/CCSaXX
 залогиниться/BBLLNN
 залогировать/BbLLNn

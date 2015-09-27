@@ -355,8 +355,10 @@ udoc.DelRecord(id) Удаляет из аппендикса Малтипл запись\nс номером(если id целое
 udoc.SetRecordset(msg) Полностью загружает содержимое аппендикса из мессаджа msg
 udoc.ToolTip(bUseDef) Текст всплывающей подсказки
 udoc.Format Строка формата поля для numberbox: \nПример: Format = “0.00####”  аналогичен PrecisionMin=2; PrecisionMax=6;
+udoc.ObjectType Свойство используется для установки режима работы Ref контейнера, а также может быть программно прочитано.
 udoc.Locked Доступность контрола для редактирования
 udoc.Query текст запроса(Для контрола SqlQuery)
+udoc.ControlType тип контрола
 
 #$message=.app.createmessage(
 app.CreateMessage Возвращает новый объект мессаджа.

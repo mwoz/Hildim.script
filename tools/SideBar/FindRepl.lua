@@ -247,6 +247,22 @@ local function SetStaticControls()
     Ctrl("btnArrowDown").active = Iif(notInFiles, 'YES', 'NO')
 end
 
+local function ReattachFind()
+    local hMainLayout = iup.GetLayout()
+    Ctrl("chkInBottom").value = Iif(Ctrl("chkInBottom").value=='ON', 'OFF', 'ON')
+    _G.iuprops['sidebarctrl.chkInBottom.value']=Ctrl("chkInBottom").value
+    if Ctrl("chkInBottom").value == 'ON'  then
+        iup.Reparent(oDeatt, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
+        iup.GetDialogChild(hMainLayout, "BottomSplit2").value="700"
+        iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
+    else
+        iup.Reparent(oDeatt, SideBar_obj.Tabs.findrepl.handle, nil)
+        iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000"
+        iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="0"
+    end
+    iup.Refresh(SideBar_obj.Tabs.findrepl.handle)
+end
+
 local function onMapMColorList(h)
     for i = 0, 5 do
         local _,_,r,g,b = props["indic.style."..(i + firstMark - 1)]:find('#(%x%x)(%x%x)(%x%x)')
@@ -286,7 +302,7 @@ function ActivateFind(nTab)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
     if _G.dialogs['findrepl'] then
-    else
+    elseif Ctrl("chkInBottom").value == 'OFF' then
         if Ctrl("zPin").valuepos == '0' then SideBar_obj.TabCtrl.valuepos = 0; SideBar_obj.Tabs.functions.OnSwitchFile()
         elseif SideBar_obj.TabCtrl.valuepos ~= 0 then oDeatt.detach = 1 end
     end
@@ -419,6 +435,12 @@ local function create_dialog_FindReplace()
   containers[7] = iup.vbox{
     iup.hbox{
         margin = "0x0",
+        iup.toggle{
+          title = "Нижняя панель:",
+          name = "chkInBottom",
+          action = ReattachFind,
+          visible = "NO",
+        },
     },
     iup.hbox{
       iup.button{
@@ -797,6 +819,12 @@ local function FuncBmkTab_Init()
         orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
         detached_cb=(function(h, hNew, x, y)
+            if Ctrl("chkInBottom").value == 'ON' then
+                local hMainLayout = iup.GetLayout()
+                _G.iuprops['sidebarctrl.BottomSplit2.value'] = iup.GetDialogChild(hMainLayout, "BottomSplit2").value
+                iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="0"
+                iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000"
+            end
             _G.FindReplDialog = hNew
             hNew.resize ="YES"
             hNew.shrink ="YES"
@@ -815,6 +843,11 @@ local function FuncBmkTab_Init()
             if _G.iuprops["sidebarctrl.zPin.unpinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.unpinned.value"] end
 
             hNew.close_cb =(function(h)
+                if Ctrl("chkInBottom").value == 'ON' then
+                    local hMainLayout = iup.GetLayout()
+                    iup.GetDialogChild(hMainLayout, "BottomSplit2").value = _G.iuprops['sidebarctrl.BottomSplit2.value']
+                    iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
+                end
                 if _G.dialogs['findrepl'] ~= nil then
                     _G.iuprops['findrepl.win']='0'
                     oDeatt.restore = 1
@@ -839,6 +872,15 @@ local function FuncBmkTab_Init()
             return tonumber(_G.iuprops["dialogs.findrepl.x"])*2^16+tonumber(_G.iuprops["dialogs.findrepl.y"])
         end)
         }
+    Ctrl('tabFinrRepl').rightclick_cb = (function()
+       if  _G.iuprops['findrepl.win']=='0' then
+            iup.menu
+            {
+              iup.item{title="Bottom pane",value=Ctrl("chkInBottom").value,action=ReattachFind};
+            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+        end
+    end)
+
 
     SideBar_obj.Tabs.findrepl = {
         handle = iup.vbox{oDeatt};
@@ -856,12 +898,26 @@ local function FuncBmkTab_Init()
             if SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.findrepl.id and not _G.dialogs['findrepl'] then
                 iup.SetFocus(Ctrl("cmbFindWhat"))
             end
+        end);
+        OnSideBarClouse=(function()
+            if Ctrl('chkInBottom').value == 'ON' then
+                iup.Reparent(oDeatt, SideBar_obj.Tabs.findrepl.handle, nil)
+            end
         end)
 --[[		OnSave = OnSwitch;
         OnSwitchFile = OnSwitch;
         OnOpen = OnSwitch;]]
         }
-    SideBar_obj.OnCreate = SetStaticControls;
+    SideBar_obj.OnCreate = (function()
+            if _G.iuprops['sidebarctrl.chkInBottom.value']=='ON' then
+                local hMainLayout = iup.GetLayout()
+                iup.Reparent(oDeatt, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
+                iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
+                iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
+                iup.Refresh(SideBar_obj.Tabs.findrepl.handle)
+            end
+            SetStaticControls()
+    end)
 end
 
 FuncBmkTab_Init()

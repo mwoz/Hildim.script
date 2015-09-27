@@ -51,6 +51,18 @@ string.id
 value.lang
 value.text
 
+column.code
+column.caption
+column.caption_ru
+column.alignment
+column.format
+column.width
+
+lookup.code
+lookup.object
+
+
+
 
 
 
