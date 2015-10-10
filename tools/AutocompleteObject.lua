@@ -44,6 +44,7 @@ local calltipinfo = {-1} -- в первом поле - строка, в которой открывали толтип -
 local constObjGlobal = '___G___'
 local constListId = 7
 local constListIdXml = 8
+local constListIdXmlPar = 88
 local maxListsItems = 16
 local bIsListVisible = false
 local obj_names = {}
@@ -96,14 +97,41 @@ end
 
 local function GetStrAsTable(str)
     local _start, _end, sVar, sValue,sBrash,sPar = string.find(str, '^#$([%w_]+)=([^%s%(]+)([%(]?[%s]*)([^%s]*)', 1)
-    if _start ~=nil and sValue ~= nil then --строку разбили на объект, алиас, скобку и параметр - втавляем, как таблицу
+    if _start ~=nil and sValue ~= nil then --строку разбили на объект, алиас, скобку и параметр - вставляем, как таблицу
         string.gsub(sPar,'^[%s]*','')
         return {sVar, sValue,sBrash,sPar}
     end
     return nil
 end
 
+-- Сортирует таблицу по алфавиту и удаляет дубликаты
+local function TableSort(table_name)
+	table.sort(table_name, function(a, b) return string.upper(a) < string.upper(b) end)
+	-- remove duplicates
+	for i = table.maxn(table_name)-1, 0, -1 do
+		if table_name[i] == table_name[i+1] then
+			table.remove (table_name, i+1)
+		end
+	end
+	return table_name
+end
+
 local function ShowCallTip(pos,str,s,e)
+    local _,_,list = str:find('.-<<(.+)>>')
+    if list then
+        local tList = {}
+        for w in list:gmatch('[^|]+') do
+            table.insert(tList, w)
+        end
+        tList = TableSort(tList)
+        list = table.concat(tList, ',')
+        editor.AutoCSeparator = string.byte(',')
+        current_poslst = current_pos
+        pasteFromXml = false
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then list = list:to_utf8(1251) end
+        editor:UserListShow(constListIdXmlPar,list)
+        return
+    end
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
     scite.SendEditor(SCI_CALLTIPSHOW,pos,str)
     if  s == nil then return end
@@ -142,18 +170,6 @@ local function fPattern(str)
 	end
     if str_out ~= '' then str_out = "["..str_out.."]" end
 	return str_out
-end
-
--- Сортирует таблицу по алфавиту и удаляет дубликаты
-local function TableSort(table_name)
-	table.sort(table_name, function(a, b) return string.upper(a) < string.upper(b) end)
-	-- remove duplicates
-	for i = table.maxn(table_name)-1, 0, -1 do
-		if table_name[i] == table_name[i+1] then
-			table.remove (table_name, i+1)
-		end
-	end
-	return table_name
 end
 
 ------------------------------------------------------
@@ -657,7 +673,16 @@ local function OnUserListSelection_local(tp,str)
 
 	editor:SetSel(current_poslst, editor.CurrentPos)
     local s
-    if pasteFromXml then s = str..'=""' else s = str end
+    if tp == constListIdXmlPar then
+        calltipinfo={0}
+        s = str:gsub(' .*','')
+    elseif pasteFromXml then
+        s = str..'=""'
+    else
+        s = str
+    end
+
+
 	editor:ReplaceSel(s)
     if pasteFromXml then
         editor.CurrentPos = editor.CurrentPos - 1
@@ -975,7 +1000,7 @@ AddEventHandler("OnChar", function(char)
 end)
 AddEventHandler("OnUserListSelection", function(tp,sel_value)
     if not useAutocomp then return end
-	if tp == constListIdXml or tp == constListId then
+	if tp == constListIdXml or tp == constListId or tp == constListIdXmlPar then
 		if OnUserListSelection_local(tp, sel_value) then return true end
 	end
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
