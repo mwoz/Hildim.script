@@ -385,6 +385,8 @@ app.Usr_Id Id текущего пользователя
 app.Usr_Code Код текущего пользователя
 app.MainObjectType Тип (имя метаданных) объекта, содержащего текущее кастомное окно
 app.CustomFormExists(strName) (True/False) Проверяет наличие кастомного окна strName
+app.TabVisibility (True/False) Проверяет наличие кастомного окна strName
+app.DrillDown (msg) msg - мессадж или строка в ware-формате с параметрами дрилдауна
 
 #$objdbp=app.createdbparams(
 objdbp.Add(strName, varValue, enumType, enumDirection, lSize)  enumType - тип параметра : adChar , adVarChar , adInteger , adDouble , adDBTimeStamp, adLongVarBinary\nenumDirection - Направление : adParamInput, adParamInputOutput, adParamOutput

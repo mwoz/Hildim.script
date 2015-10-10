@@ -1098,7 +1098,8 @@ papp.Settings(strKey) возвращает message для заданного ключа реестра в сеттингах
 papp.WorkdataCurrentValue(Path) возвращает/устанавливает значение для временных данных сессии в WORKDATA из Application.PropertyBag
 papp.WorkdataMsg(Path) возвращает message для заданного ключа реестра сессии из Application.PropertyBag
 papp.objTemplate() Возвращает объект класса открытия формы
-#$objtmp=papp.objTemplate()
+#$objtmp=papp%.objtemplate(
+#$objtmp=papp%.objtemplate
 papp.TreeMsg2FlatMsg(msgFrom, msgTo, bCopyRootFields, strPath) превращает tree-msg msgFrom во flat-msg msgTo (все поля из сабмессаджей превращаются в root-поля с префиксом, представляющим путь к полю с разделителями "_")
 papp.ResetMsgContent(msg) очищает содержимое мессаджа, в отличие от стандартной процедуры - не очищает имя msg
 papp.UpdateMsgFromMsg(msgDst, msgSrc) полностью замещает данные в msgDst на данные из msgScr
@@ -1157,6 +1158,7 @@ calc.Pair_CrossRate(mPCross, mP1, d1Rate, mP2, d2Rate) для пары - рассчитывает к
 objtmp.PropertyBag(val)
 objtmp.bActiveTab(val)
 objtmp.OpenObj(vIdx, strTemplate, bReplace)
+objtmp.ParentForm(f)
 
 
 

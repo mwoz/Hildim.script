@@ -321,13 +321,13 @@ iup.DestroyDialogs = function()
         iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
         iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
         _G.dialogs['concolebar'].restore = 1
-        _G.dialogs['concolebar'] = nul
+        _G.dialogs['concolebar'] = nil
     end
     if _G.dialogs['bottombar'] ~= nil then
         iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombar.splitvalue']
         iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
         _G.dialogs['bottombar'].restore = 1
-        _G.dialogs['bottombar'] = nul
+        _G.dialogs['bottombar'] = nil
     end
     if _G.dialogs['sidebarp'] then _G.dialogs['sidebarp'].SaveValues() end
     for sciteid, dlg in pairs(_G.dialogs) do

@@ -1,9 +1,9 @@
 control.type
 control.name
-control.backcolor
-control.forecolor
+control.backcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+control.forecolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 control.font "name;size;bold;italic;underline"\nfor example: "Tahoma;8;N;Y;N"
-control.position "left;top;width;height"
+control.position [left;top;width;height]
 control.padright
 control.padtop
 control.padbottom
@@ -16,11 +16,11 @@ control.padleftctrl
 control.padrightctrl
 control.padtopctrl
 control.padbottomctrl
-control.fixedwidth {"Y", "N"}
-control.fixedheight {"Y", "N"}
-control.tabstop {"Y", "N"}
-control.visible {"Y", "N"}
-control.enabled {"Y", "N"}
+control.fixedwidth <<Y|N>>
+control.fixedheight <<Y|N>>
+control.tabstop <<Y|N>>
+control.visible <<Y|N>>
+control.enabled <<Y|N>>
 control.tag
 
 formbox.contentname
@@ -34,69 +34,69 @@ formbox.caption
 formbox.caption_ru
 formbox.template
 
-link.default {"Y", "N"}
-link.hforecolor
-link.foredisabledcolor
+link.default <<Y|N>>
+link.hforecolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+link.foredisabledcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 link.tooltiptext
-link.supportnulls {"Y", "N"}
-link.autowidth {"Y", "N"}
+link.supportnulls <<Y|N>>
+link.autowidth <<Y|N>>
 link.caption
 link.caption_ru
-link.alignment {"L", "R", "C"}
+link.alignment <<L eft|R ight|C enter>>
 
-button.default {"Y", "N"}
-button.outercolor
+button.default <<Y|N>>
+button.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 button.tooltiptext
-button.style = {"D", "F"}
+button.style = <<D efoult|F loat>>
 button.caption
 button.caption_ru
 
-numberbox.autoprecision {"Y", "N"} | {"A", "E", "L", "H"}
-numberbox.largenumber {"Y", "N"}
+numberbox.autoprecision <<Y|N|A|E|L|H>>
+numberbox.largenumber <<Y|N>>
 numberbox.decimals { 0, 1, 2, … }
-numberbox.roundtype {"R", "T"}
+numberbox.roundtype <<R|T>>
 numberbox.formatting
 numberbox.caption
 numberbox.caption_ru
 numberbox.captionwidth
-numberbox.showplus {"Y", "N"}
-numberbox.positiveonly {"Y", "N"}
-numberbox.alignment {"L", "R", "C"}
+numberbox.showplus <<Y|N>>
+numberbox.positiveonly <<Y|N>>
+numberbox.alignment <<L eft|R ight|C enter>>
 numberbox.maxlength
-numberbox.locked {"Y", "N"}
-numberbox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \n‘N’ – display only text. ‘U’ - display whole control (with underline and button)
+numberbox.locked <<Y|N>>
+numberbox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
 numberbox.text
 numberbox.tooltiptext
-numberbox.supportnulls {"Y", "N"}
+numberbox.supportnulls <<Y|N>>
 numberbox.format
 numberbox.minvalue
 numberbox.maxvalue
 numberbox.captionfont
 
-checkbox.mode {"C", "R", "B", "T", "P", "S"}  Gets/Sets CheckBox control mode:\n"C" - Checkbox\n"R" - Radiobutton\n"B" - Pushlike\n"T" - ThreeState mode \n"P" - Plus-Minus mode (with third state(shown as dot icon) enabled)\n"S" - small Plus-Minus mode (with third state(shown as dot icon) enabled)\n
-checkbox.outercolor
+checkbox.mode <<C Checkbox|R Radiobutton|B Pushlike|T ThreeState|P Plus-Minus mode |S small Plus-Minus mode >>
+checkbox.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 checkbox.caption
 checkbox.caption_ru
 checkbox.tooltiptext
-checkbox.locked {"Y", "N"}
-checkbox.autowidth {"Y", "N"}
+checkbox.locked <<Y|N>>
+checkbox.autowidth <<Y|N>>
 
-groupbox.outercolor
-groupbox.bordercolor
-groupbox.style "[B][F][R]"
+groupbox.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+groupbox.bordercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+groupbox.style <<B|F|R>>
 
 textbox.case
 textbox.caption
 textbox.caption_ru
 textbox.captionwidth
-textbox.alignment {"L", "R", "C"}
+textbox.alignment <<L eft|R ight|C enter>>
 textbox.maxlength
-textbox.locked {"Y", "N"}
-textbox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \n‘N’ – display only text. ‘U’ - display whole control (with underline and button)
+textbox.locked <<Y|N>>
+textbox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
 textbox.text
-textbox.multiline {"Y", "N"}
+textbox.multiline <<Y|N>>
 textbox.tooltiptext
-textbox.wordwrap {"Y", "N"}
+textbox.wordwrap <<Y|N>>
 textbox.passwordchar
 textbox.captionfont
 
@@ -104,44 +104,44 @@ datebox.format
 datebox.caption
 datebox.caption_ru
 datebox.captionwidth
-datebox.style = {"D", "F"}
-datebox.locked {"Y", "N"}
-datebox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \n‘N’ – display only text. ‘U’ - display whole control (with underline and button)
+datebox.style = <<D efoult|F loat>>
+datebox.locked <<Y|N>>
+datebox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
 datebox.captionfont
 
-timebox.alignment {"L", "R", "C"}
+timebox.alignment <<L eft|R ight|C enter>>
 timebox.maxlength
 timebox.caption
 timebox.caption_ru
 timebox.captionwidth
-timebox.locked {"Y", "N"}
+timebox.locked <<Y|N>>
 timebox.text
-timebox.showseconds {"Y", "N"}
+timebox.showseconds <<Y|N>>
 timebox.tooltiptext
-timebox.supportnulls {"Y", "N"}
-timebox.style = {"D", "F"}
-timebox.alignment {"L", "R", "C"}
+timebox.supportnulls <<Y|N>>
+timebox.style = <<D efoult|F loat>>
+timebox.alignment <<L eft|R ight|C enter>>
 
 label.caption
 label.caption_ru
-label.alignment {"L", "R", "C"}
-label.autowidth {"Y", "N"}
-label.drawline {"Y", "N"}
+label.alignment <<L eft|R ight|C enter>>
+label.autowidth <<Y|N>>
+label.drawline <<Y|N>>
 label.linecolor
 
-logbox.showtime  {"Y", "N"}
+logbox.showtime  <<Y|N>>
 
 combobox.droppedsize number of items in dropped list box (5 by default)
 combobox.tooltiptext
 combobox.caption
 combobox.caption_ru
 combobox.captionwidth
-combobox.locked  {"Y", "N"}
-combobox.lockedmode {"N", "U"} Get/set property is used when control is Locked. \n‘N’ – display only text. ‘U’ - display whole control (with underline and button)
-combobox.supportnulls  {"Y", "N"}
-combobox.editenabled  {"Y", "N"}
-combobox.sorted  {"Y", "N"}
-combobox.style = {"D", "F"}
+combobox.locked  <<Y|N>>
+combobox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
+combobox.supportnulls  <<Y|N>>
+combobox.editenabled  <<Y|N>>
+combobox.sorted  <<Y|N>>
+combobox.style = <<D efoult|F loat>>
 combobox.captionfont
 
 checklistbox.tag
@@ -149,7 +149,7 @@ checklistbox.tag
 colorpicker.style
 
 container.handler
-container.ShareControls {"Y", "N"}
+container.ShareControls <<Y|N>>
 
 grid.title
 grid.style "hline;vline;openlevel;striped;oddrowcolor;evenrowcolor"\nfor example: "n,y,3,y,#ffffff,#dddddd"
@@ -158,10 +158,10 @@ cube.title
 cube.style "hline,vline,openlevel,striped,oddrowcolor,evenrowcolor"	\n for example: "n,y,3,y,#ffffff,#dddddd"
 cube.groups "ColumnId1,ColumnId2"\ncolumn IDs
 cube.sorting "ColumnId,Ascending"\nfor example: "Time,Y"
-cube.datastyle "backcolor,forecolor,style"\nfor example: "#ffffff,#dddddd,N"; style: {"N", "B", "I"}
-cube.groupstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {"N", "B", "I"}
-cube.rootstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {"N", "B", "I"}
-cube.multiselect {"Y", "N"}
+cube.datastyle "backcolor,forecolor,style"\nfor example: "#ffffff,#dddddd,N"; style: {N|B|I}
+cube.groupstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {N|B|I}
+cube.rootstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {N|B|I}
+cube.multiselect <<Y|N>>
 
 column.caption
 column.caption_ru
@@ -177,7 +177,7 @@ option.code
 option.caption
 option.caption_ru
 
-frame.backcolor
+frame.backcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 frame.name
 frame.visible
 frame.enabled
@@ -197,18 +197,18 @@ form.caption
 form.backcolor
 form.font "name;size;italic;bold;underline"\nfor example: "Tahoma;8;N;Y;N"
 form.position "left;top;width "\nheight is determined by visible frames
-form.center {"Y", "N"}\n"Y" - center form relative to it's parent
-form.scalemode  {"0", "1"}\n"0" - pixels; "1" - points (by default)
-form.sizable Sizable = {"Y", "N"}\n"Y" - form should have sizable frame
+form.center <<Y center form relative to it's parent|N>>
+form.scalemode  <<0 pixels|1 points (by default)>>
+form.sizable Sizable = <<Y|N>>
 form.minwidth
 
 template.name
-template.type {"report", "utility", "deal"} (в Arena не анализируется)
+template.type <<report|utility|deal>> (в Arena не анализируется)
 template.license выражение для проверки лицензии (в Arena не используется)
 template.access выражение для проверки прав
 template.minkplusversion минимальная версия Kondor для данной формы.maxkplusversion = “”
 template.maxkplusversion макимальная версия Kondor для данной формы.maxkplusversion = “”
-template.style {"dropdown"}
+template.style <<dropdown>>
 template.minterminalbuild
 template.minterminalversion
 template.version
@@ -219,5 +219,5 @@ value.lang
 value.text
 
 menu.instance
-menu.recreate {"Y", "N"}
+menu.recreate <<Y|N>>
 

@@ -129,7 +129,9 @@ local function OnSaveCForm()
         end
         msg:Subjects(strSubj)
         -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
-        msg:SetPathValue("ExtText",editor:GetText():from_utf8(1251))
+        local sTxt = editor:GetText()
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then sTxt = sTxt:from_utf8(1251) end
+        msg:SetPathValue("ExtText",sTxt)
 
         _G['formengine.reloadtemplate'] = true
         mblua.Request(function(handle,Opaque,iError,msgReplay)

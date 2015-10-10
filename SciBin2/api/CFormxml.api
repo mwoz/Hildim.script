@@ -1,40 +1,46 @@
-control.type  reference|choice|text|float|integer|date|\ndatetime|boolean|button
+control.type  <<keypart|sqlquery|refgroup|container|frame|report|label|link|button|boolean|datetime|datefilter|date|integer|float|text|choicemult|choice|reference>>
 
 control.code
-control.backcolor
-control.forecolor
+control.caption
+control.caption_ru
+control.backcolor <<00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный>>
+control.forecolor <<00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный>>
 control.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
 control.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для рабиобаттона,width3 - максимальное число колонок
 control.padRight "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
 control.padLeft "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
-control.autoWidth {"yes", "no"}
-control.fixedWidth {"yes", "no"}
-control.visible {"yes", "no"}
-control.enabled {"yes", "no"}
-control.locked {"yes", "no"}
-control.positionPrevLine {"yes", "no"}
+control.autoWidth <<yes|no>>
+control.fixedWidth <<yes|no>>
+control.visible <<yes|no>>
+control.enabled <<yes|no>>
+control.locked <<yes|no>>
+control.positionPrevLine <<yes|no>>
 control.tooltip
-control.rightButtonMode {"all", "personal"} показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
-control.showInfo {"yes", "no"} показ кнопки инфо в рефконтролах
-control.choiceMode {"radio", "dropMenu"} режим показа чойса. по умолчанию - обычный комбобокс
+control.alignment <<Center|Right>>
 control.paramType тип данных sql(параметры отчета)
 control.mandatory обязательное поле(параметры отчета)
-control.valueColumn колонка занчение из которой нужно отображать(SqlQuery контрол)
-control.displayColumns список колонок:заголовков для отображения(SqlQuery контрол)
 
-container.type  frame|container
+container.type  <<frame|container>>
 container.code
-container.backcolor
+container.caption
+container.caption_ru
+container.backcolor <<00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный>>
 container.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для рабиобаттона,width3 - максимальное число колонок
 container.padRight "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
 container.padLeft "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
-container.visible {"yes", "no"}
-container.positionPrevLine {"yes", "no"}
+container.visible <<yes|no>>
+container.positionPrevLine <<yes|no>>
 
 reference.source
+reference.rightButtonMode <<all по правой кнопке показывать весь список|personal ... персональный лист>> показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
+reference.showInfo <<yes|no>> показ кнопки инфо в рефконтролах
 
 choice.source
-choice.choiceType
+choice.choiceType <<List>>
+choice.choiceMode <<radio группа радиобаттонов|dropMenu "клювик" с выпадающим списком>>
+
+sqlquery.valueColumn колонка занчение из которой нужно отображать(SqlQuery контрол)
+sqlquery.displayColumns список колонок:заголовков для отображения(SqlQuery контрол)
 
 form.objectType
 form.type
@@ -45,7 +51,7 @@ design.caption
 design.caption_ru
 design.locationRef
 design.location
-design.visible
+design.visible <<yes|no>>
 
 string.id
 value.lang
@@ -54,8 +60,8 @@ value.text
 column.code
 column.caption
 column.caption_ru
-column.alignment
-column.format
+column.alignment <<Center|Right>>
+column.format <<0.###############|0.|+0.|0.##|0.##K|0.##M|0.##Y|0.##KMY|0.##%|0.00|0.00K|0.00M|0.00Y|0.00KMY|0.00%|0.00##|0.0000%|+0.0000%|0.0000####|0.############|DD.MM.YY|DD.MM.YYYY|DD/MM/YYYY|DDMMYYhh:mm:ss|DDMMMYYhh:mm:ss|hh:mm|icon|color|bar|sbar|checkbox>>
 column.width
 
 lookup.code

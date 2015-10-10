@@ -38,6 +38,11 @@ local function dbRunProc(strProc, msgParams, funCallback, timeout, opaque)
     msg:Destroy()
 end
 
+local function ProbablyToUTF(str)
+    if _G.iuprops['atrium.data.win1251'] ~= 'ON' then return str:to_utf8(1251)
+    else return str end
+end
+
 local function dbRunSql(sql, funCallback, timeout, opaque)
     local msg = mblua.CreateMessage()
     msg:Subjects(_G.iuprops['sql.dbcmdsubj']..".EXEC_CMD")
@@ -105,7 +110,7 @@ local function SetReply(handle,msgOpaque,iError,msgReplay)
     if msgOpaque:GetPathValue("Type", "") == 'DATA' then
         dbRunSql(Data_GetSql(msgOpaque:GetPathValue("Proc", ""), msgReplay:GetPathValue("Object_Id", 0)), function(handle,Opaque,iError,msgR)
             if dbCheckError(iError, msgR) then return end
-            editor:SetText(xml.eval(msgR:GetPathValue('xml')):str():to_utf8(1251))
+            editor:SetText(ProbablyToUTF(xml.eval(msgR:GetPathValue('xml')):str()))
             TryCleanUp()
         end, 20, nil)
     end
@@ -216,7 +221,8 @@ local function SelectData()
 end
 
 local function PutReport()
-    local strXml = editor:GetText():from_utf8(1251)
+    local strXml = editor:GetText()
+    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml = strXml:from_utf8(1251) end
     local msgParams = mblua.CreateMessage()
     dbAddProcParam(msgParams, "FormData" , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
     dbRunProc('Report_Register', msgParams, function(handle,Opaque,iError,msgReplay)
@@ -229,7 +235,9 @@ local function PutReport()
             end
             msg:Subjects(strSubj)
             -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
-            msg:SetPathValue("ExtText",editor:GetText():from_utf8(1251))
+            local strXml2 = editor:GetText()
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml2 = strXml2:from_utf8(1251) end
+            msg:SetPathValue("ExtText",strXml2)
             _G['formengine.reloadtemplate'] = true
             mblua.Request(function(handle,Opaque,iError,msgReplay)
             _G['formengine.reloadtemplate'] = false
@@ -250,7 +258,8 @@ local function PutForm(objectType, formType)
         print('Incorrect Custom form!')
         return
     end
-    local strXml = editor:GetText():from_utf8(1251)
+    local strXml = editor:GetText()
+    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml = strXml:from_utf8(1251) end
     local msgParams = mblua.CreateMessage()
     dbAddProcParam(msgParams, "FormXml" , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
     dbRunProc('ObjectTypeForm_Import', msgParams, function(handle,Opaque,iError,msgReplay)
@@ -263,7 +272,9 @@ local function PutForm(objectType, formType)
             end
             msg:Subjects(strSubj)
             -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
-            msg:SetPathValue("ExtText",editor:GetText():from_utf8(1251))
+            local strXml2 = editor:GetText()
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml2 = strXml2:from_utf8(1251) end
+            msg:SetPathValue("ExtText",strXml2)
             _G['formengine.reloadtemplate'] = true
             mblua.Request(function(handle,Opaque,iError,msgReplay)
             _G['formengine.reloadtemplate'] = false
@@ -303,10 +314,11 @@ local function Data_OpenNewChoice(strObj)
     "exec Choice_Get 'atrium', @id, @XmlData output\n"..
     "select @XmlData as [xml]"
     dbRunSql(strSql,function(handle,Opaque,iError,msgReplay)
+        props['scite.new.file'] = '^Choice.xml'
         if dbCheckError(iError, msgReplay) then return end
         scite.MenuCommand(IDM_NEW)
-        scite.MenuCommand(IDM_ENCODING_UCS2LE)
-        editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
+        if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+        editor:SetText(ProbablyToUTF(xml.eval(msgReplay:GetPathValue('xml')):str()))
     end,20,nil)
 end
 
@@ -324,8 +336,8 @@ local function Data_OpenNew()
             if dbCheckError(iError, msgReplay) then return end
             props['scite.new.file'] = '^'..list_data:getcell(sel,2)..Iif(oName == 'ObjectTypeForm', '.cform', '.rform')
             scite.MenuCommand(IDM_NEW)
-            scite.MenuCommand(IDM_ENCODING_UCS2LE)
-            editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
+            if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+            editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('FormData')))
         end,20,nil)
     else
         dbRunSql(Data_GetSql(),function(handle,Opaque,iError,msgReplay)
@@ -333,8 +345,8 @@ local function Data_OpenNew()
             props['scite.new.file'] = '^'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
                     (iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2) or iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1))..'.xml'
             scite.MenuCommand(IDM_NEW)
-            scite.MenuCommand(IDM_ENCODING_UCS2LE)
-            editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
+            if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+            editor:SetText(ProbablyToUTF(xml.eval(msgReplay:GetPathValue('xml')):str()))
             TryCleanUp()
         end,20,nil)
     end
@@ -360,8 +372,8 @@ local function Data_Unload()
             f:flush()
             f:close()
             scite.Open(strPath)
-            scite.MenuCommand(IDM_ENCODING_UCS2LE)
-            editor:SetText(msgReplay:GetPathValue('FormData'):to_utf8(1251))
+            if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+            editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('FormData')))
             scite.MenuCommand(IDM_SAVE)
         end,20,nil)
     else
@@ -376,8 +388,8 @@ local function Data_Unload()
             f:flush()
             f:close()
             scite.Open(strPath)
-            scite.MenuCommand(IDM_ENCODING_UCS2LE)
-            editor:SetText(xml.eval(msgReplay:GetPathValue('xml')):str():to_utf8(1251))
+            if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+            editor:SetText(ProbablyToUTF(xml.eval(msgReplay:GetPathValue('xml')):str()))
             TryCleanUp()
             scite.MenuCommand(IDM_SAVE)
         end,20,nil)
@@ -388,10 +400,12 @@ local function Metadata_OpenNewArg(strObj)
     local sql =  "select  Metadata from ObjectType where ObjectType_Code = '"..strObj.."'"
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
-        props['scite.new.file'] = '^'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml'
+        if props['scite.new.file']..'' == '' then
+            props['scite.new.file'] = '^'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml'
+        end
         scite.MenuCommand(IDM_NEW)
-        scite.MenuCommand(IDM_ENCODING_UCS2LE)
-        editor:SetText(msgReplay:GetPathValue('Metadata'):to_utf8(1251))
+        if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+        editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('Metadata')))
         scite.MenuCommand(1468)
     end,20,nil)
 end
@@ -414,8 +428,8 @@ local function Metadata_NewData()
 
     dbRunProc('ObjectType_Pattern', msgParams, function(handle,Opaque,iError,msgReplay)
         scite.MenuCommand(IDM_NEW)
-        scite.MenuCommand(IDM_ENCODING_UCS2LE)
-        editor:SetText(msgReplay:GetPathValue('XmlData'):to_utf8(1251))
+        if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+        editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('XmlData')))
         scite.MenuCommand(1468)
     end, 20, nil)
 end
@@ -434,9 +448,9 @@ local function Metadata_Unload()
         f:flush()
         f:close()
         scite.Open(strPath)
-        scite.MenuCommand(IDM_ENCODING_UCS2LE)
+        if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
         --local sText = msgReplay:GetPathValue('Metadata'):gsub('\r', '')
-        editor:SetText(msgReplay:GetPathValue('Metadata'):to_utf8(1251))
+        editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('Metadata')))
         scite.MenuCommand(IDM_SAVE)
         scite.MenuCommand(1468)
     end,20,nil)
@@ -457,10 +471,12 @@ local function OpenChoiceMeta()
     local lin = editor:textrange(editor:PositionFromLine(lN), editor.LineEndPosition[lN])
     _,_,typ = lin:find(' type="(%w+)"')
     if typ == 'Reference' then
+        props['scite.new.file'] = '^Reference.xml'
         Metadata_OpenNewArg(obj)
     elseif typ == 'tChoice' then
         Data_OpenNewChoice(obj)
     elseif lin:find('<ExternalRef ') then
+        props['scite.new.file'] = '^Reference.xml'
         Metadata_OpenNewArg(obj)
     end
 end
@@ -574,6 +590,7 @@ local function FindTab_Init()
           iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
           iup.separator{},
           iup.item{title="Не выгружать ID и технические поля",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
+          iup.item{title="WIN-1251",value=_G.iuprops['atrium.data.win1251'],action=(function() _G.iuprops['atrium.data.win1251']=Iif(_G.iuprops['atrium.data.win1251']=='ON','OFF','ON') end)},
         }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
     end
     list_data:SetCommonCB(Data_OpenNew,nil,nil,dat_mnu)

@@ -15,7 +15,7 @@ local mark = tonumber(props["spell.mark"])
 local cHeck,cSpell,cSkip=0,1,2
 local commentsStyles
 local cADDYODIC,cADDBYZXAMPLE = '<Add-to-Dic>','<Add-with-Example>'
-local constFirstSpell = 65000     --65535 - максимально вазможная комманда      coow
+local constFirstSpell = 65000     --65535 - максимально возможная комманда      coow
 local constAddToDic = 65500
 local constWithExample = 65501
 
@@ -69,7 +69,7 @@ local CheckNeedSpell
 local function CheckNeedSpellFM(iStyle,p)
     --SCE_FM_VB_COMMENT,SCE_FM_VB_STRING,SCE_FM_X_COMMENT,SCE_FM_SQL_COMMENT,SCE_FM_SQL_LINE_COMMENT
     --print("          "..iStyle)
-    if iStyle == 11 or iStyle == 14 or iStyle == 54 or iStyle == 81 or iStyle == 82 then return cSpell
+    if iStyle == 11 or iStyle == 14 or iStyle == 49 or iStyle == 54 or iStyle == 81 or iStyle == 82 then return cSpell
     elseif iStyle == 52 then  --SCE_FM_X_STRING
         if fmSpellTag[editor:textrange(editor:WordStartPosition(p-2),p-1)] then return cSpell end
         return cSkip
