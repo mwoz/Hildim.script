@@ -309,7 +309,7 @@ end
 
 function formenjine_Run()
     if _G['formengine.reloadtemplate'] ~= true then
-        if props['FileExt']=='cform' then
+        if props['FileExt']=='cform' or props['FileExt']=='rform' then
             props['formengine.runafter'] = '1'
             atrium_RunXml()
         else

@@ -1,43 +1,43 @@
-control.type  <<keypart|sqlquery|refgroup|container|frame|report|label|link|button|boolean|datetime|datefilter|date|integer|float|text|choicemult|choice|reference>>
+control.type  {{keypart|sqlquery|refgroup|container|frame|report|label|link|button|boolean|datetime|datefilter|date|integer|float|text|choicemult|choice|reference}}
 
 control.code
 control.caption
 control.caption_ru
-control.backcolor <<00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный>>
-control.forecolor <<00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный>>
+control.backcolor {{00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный}}
+control.forecolor {{00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный}}
 control.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
 control.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для рабиобаттона,width3 - максимальное число колонок
 control.padRight "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
 control.padLeft "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
-control.autoWidth <<yes|no>>
-control.fixedWidth <<yes|no>>
-control.visible <<yes|no>>
-control.enabled <<yes|no>>
-control.locked <<yes|no>>
-control.positionPrevLine <<yes|no>>
+control.autoWidth {{yes}} 'no' by def. \n yes - При выставленных правом и левом паддинге контрл сохраняет\nустановленную ширину\n no - растягивается
+control.fixedWidth {{yes}} 'no' by def \n yes - При выставленных нижнем и верхнем паддинге контрл сохраняет\nустановленную высоту\n no- растягивается
+control.visible {{no}} 'yes' by def
+control.enabled {{no}} 'yes' by def
+control.locked {{yes}} 'no' by def
+control.positionPrevLine {{yes}} 'no' by def \nПри невыставленной позиции контрол остается на\nтекущей строке с отступом от предыдущего
 control.tooltip
-control.alignment <<Center|Right>>
+control.alignment {{Center|Right}}  Left by def
 control.paramType тип данных sql(параметры отчета)
 control.mandatory обязательное поле(параметры отчета)
 
-container.type  <<frame|container>>
+container.type  {{frame|container}} фрейм - только на верхнем уровне. вс остальные контролы только во фреймах
 container.code
 container.caption
 container.caption_ru
-container.backcolor <<00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный>>
+container.backcolor {{00FFFF Аквамарин|FFFFFF Белый|FFFF00 Желтый|008000 Зеленый|FFD700 Золотистый|4B0080 Индиго|800000 Каштановый|FF0000 Красный|808000 Оливковый|800080 Пурпурный|00FF00 Светло-зеленый|C0C0C0 Серебристый|808080 Серый|008080 Сизый|0000FF Синий|000080 Ультрамарин|EE80EE Фиолетовый|FF00FF Фуксиновый|000000 Черный}}
 container.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для рабиобаттона,width3 - максимальное число колонок
 container.padRight "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
 container.padLeft "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
-container.visible <<yes|no>>
-container.positionPrevLine <<yes|no>>
+container.visible {{no}} 'yes' by def
+container.positionPrevLine {{yes}} 'no' by def \nПри невыставленной позиции контрол остается на\nтекущей строке с отступом от предыдущего
 
 reference.source
-reference.rightButtonMode <<all по правой кнопке показывать весь список|personal ... персональный лист>> показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
-reference.showInfo <<yes|no>> показ кнопки инфо в рефконтролах
+reference.rightButtonMode {{all по правой кнопке показывать весь список|personal ... персональный лист}}  показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
+reference.showInfo {{no}} 'yes' by def показ кнопки инфо в рефконтролах
 
-choice.source
-choice.choiceType <<List>>
-choice.choiceMode <<radio группа радиобаттонов|dropMenu "клювик" с выпадающим списком>>
+choice.source Код чойса из метаданных либо\nсписок в формате <val>=<caption>[ru:<caption_ru][;...]
+choice.choiceType {{List}} 'Standard' by def.\nЗадается ли чойс списком или именем в метаданных
+choice.choiceMode {{radio группа радиобаттонов|dropMenu "клювик" с выпадающим списком}}
 
 sqlquery.valueColumn колонка занчение из которой нужно отображать(SqlQuery контрол)
 sqlquery.displayColumns список колонок:заголовков для отображения(SqlQuery контрол)
@@ -51,7 +51,7 @@ design.caption
 design.caption_ru
 design.locationRef
 design.location
-design.visible <<yes|no>>
+design.visible {{yes}} 'no' by def
 
 string.id
 value.lang
@@ -60,8 +60,8 @@ value.text
 column.code
 column.caption
 column.caption_ru
-column.alignment <<Center|Right>>
-column.format <<0.###############|0.|+0.|0.##|0.##K|0.##M|0.##Y|0.##KMY|0.##%|0.00|0.00K|0.00M|0.00Y|0.00KMY|0.00%|0.00##|0.0000%|+0.0000%|0.0000####|0.############|DD.MM.YY|DD.MM.YYYY|DD/MM/YYYY|DDMMYYhh:mm:ss|DDMMMYYhh:mm:ss|hh:mm|icon|color|bar|sbar|checkbox>>
+column.alignment {{Center|Right}} Left by def
+column.format {{0.###############|0.|+0.|0.##|0.##K|0.##M|0.##Y|0.##KMY|0.##%|0.00|0.00K|0.00M|0.00Y|0.00KMY|0.00%|0.00##|0.0000%|+0.0000%|0.0000####|0.############|DD.MM.YY|DD.MM.YYYY|DD/MM/YYYY|DDMMYYhh:mm:ss|DDMMMYYhh:mm:ss|hh:mm|icon|color|bar|sbar|checkbox}}
 column.width
 
 lookup.code

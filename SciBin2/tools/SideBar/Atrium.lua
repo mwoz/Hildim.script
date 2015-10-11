@@ -238,11 +238,18 @@ local function PutReport()
             local strXml2 = editor:GetText()
             if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml2 = strXml2:from_utf8(1251) end
             msg:SetPathValue("ExtText",strXml2)
+
+            if props['formengine.runafter'] == '1' then msg:SetPathValue("Open","Y") end
+
             _G['formengine.reloadtemplate'] = true
             mblua.Request(function(handle,Opaque,iError,msgReplay)
             _G['formengine.reloadtemplate'] = false
                 if iError == 0 then
                     print(msgReplay:GetPathValue("strReplay"))
+                    if props['formengine.runafter'] == '1' then
+                        props['formengine.runafter'] = ''
+                        if msgReplay:GetPathValue("PID") then  shell.activate_proc_wnd(msgReplay:GetPathValue("PID")) end
+                    end
                 else
                     print("Terminal not responded")
                 end
@@ -275,12 +282,16 @@ local function PutForm(objectType, formType)
             local strXml2 = editor:GetText()
             if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml2 = strXml2:from_utf8(1251) end
             msg:SetPathValue("ExtText",strXml2)
+            if props['formengine.runafter'] == '1' then msg:SetPathValue("Open","Y") end
             _G['formengine.reloadtemplate'] = true
             mblua.Request(function(handle,Opaque,iError,msgReplay)
             _G['formengine.reloadtemplate'] = false
                 if iError == 0 then
                     print(msgReplay:GetPathValue("strReplay"))
-                    if props['formengine.runafter'] == '1' then formenjine_RunTemplate("") end
+                    if props['formengine.runafter'] == '1' then
+                        props['formengine.runafter'] = ''
+                        if msgReplay:GetPathValue("PID") then  shell.activate_proc_wnd(msgReplay:GetPathValue("PID")) end
+                    end
                 else
                     print("Terminal not responded")
                 end
