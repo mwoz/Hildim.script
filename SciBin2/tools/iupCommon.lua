@@ -241,7 +241,21 @@ iup.list = function(t)
     return cmb
 end
 
+local old_iup_ShowXY = iup.ShowXY
+iup.ShowXY = function(h,x,y)
+    x = tonumber(x)
+    y = tonumber(y)
+    local _,_,_,_,x2,y2 = iup.GetGlobal('VIRTUALSCREEN'):find('(%d*) (%d*) (%d*) (%d*)')
+    x2 = tonumber(x2)
+    y2 = tonumber(y2)
+    if x > x2 - 10 then x = 100 end
+    if y > y2 - 10 then y = 100 end
+    return old_iup_ShowXY(h,x,y)
+end
 ---Расширение iup
+iup.sciteDetach = function(t)
+end
+
 _G.dialogs = {}
 iup.scitedialog = function(t)
     local dlg = _G.dialogs[t.sciteid]

@@ -108,6 +108,7 @@ local function  CreateBox()
             local mnu = iup.menu
             {
               iup.item{title="Deattach Sidebar",action=(function()
+                  oDeatt.DetachRestore = true;
                   oDeatt.detach = 1
               end)};
               iup.item{title="LayOut Dialog",action=(function()
@@ -166,10 +167,14 @@ local function  CreateBox()
                     return -1
                 end
             end)
-
+            local bMove = false
             hNew.show_cb=(function(h,state)
                 if state == 0 then
                     _G.dialogs['sidebar'] = oDeatt
+                    if oDeatt.DetachRestore then
+                        oDeatt.DetachRestore = false
+                        iup.ShowXY(h, _G.iuprops["dialogs.sidebar.x"],_G.iuprops["dialogs.sidebar.y"])
+                    end
                 elseif state == 4 then
                     _G.iuprops["dialogs.sidebar.x"]= h.x
                     _G.iuprops["dialogs.sidebar.y"]= h.y
@@ -178,9 +183,10 @@ local function  CreateBox()
                     iup.GetDialogChild(hMainLayout, "SourceSplit").barsize = "3"
                 end
             end)
-            --iup.ShowSideBar(-1)
+
             if tonumber(_G.iuprops["dialogs.sidebar.x"])== nil or tonumber(_G.iuprops["dialogs.sidebar.y"]) == nil then _G.iuprops["dialogs.sidebar.x"]=0;_G.iuprops["dialogs.sidebar.y"]=0 end
-            return tonumber(_G.iuprops["dialogs.sidebar.x"])*2^16+tonumber(_G.iuprops["dialogs.sidebar.y"])
+            bMove = true
+            --return tonumber(_G.iuprops["dialogs.sidebar.x"])*2^16+tonumber(_G.iuprops["dialogs.sidebar.y"])
         end)
         }
     return oDeatt
@@ -352,6 +358,11 @@ local function InitSideBar()
 
         hNew.show_cb=(function(h,state)
             if state == 0 then
+                if BottomBar.DetachRestore then
+                    BottomBar.DetachRestore = false
+                    iup.ShowXY(h, _G.iuprops["dialogs.bottombar.x"],_G.iuprops["dialogs.bottombar.y"])
+                    return
+                end
                 iup.GetDialogChild(hMainLayout, "BottomExpander").state = "CLOSE"
                 _G.iuprops['dialogs.bottombar.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
                 iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "0"
@@ -366,9 +377,9 @@ local function InitSideBar()
         hNew.resize_cb = (function(h,width, height)
             if _G.iuprops['concolebar.win']=='1' then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0" end
         end)
-        --iup.ShowSideBar(-1)
+
         if tonumber(_G.iuprops["dialogs.bottombar.x"])== nil or tonumber(_G.iuprops["dialogs.bottombar.y"]) == nil then _G.iuprops["dialogs.bottombar.x"]=0;_G.iuprops["dialogs.bottombar.y"]=0 end
-        return tonumber(_G.iuprops["dialogs.bottombar.x"])*2^16+tonumber(_G.iuprops["dialogs.bottombar.y"])
+        --return tonumber(_G.iuprops["dialogs.bottombar.x"])*2^16+tonumber(_G.iuprops["dialogs.bottombar.y"])
 
     end)
 
@@ -403,6 +414,11 @@ local function InitSideBar()
 
         hNew.show_cb=(function(h,state)
             if state == 0 then
+                if ConsoleBar.DetachRestore then
+                    ConsoleBar.DetachRestore = false
+                    iup.ShowXY(h, _G.iuprops["dialogs.concolebar.x"],_G.iuprops["dialogs.concolebar.y"])
+                    return
+                end
                 iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "CLOSE"
                 _G.iuprops['dialogs.concolebar.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomSplit").value
                 iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0"
@@ -414,9 +430,9 @@ local function InitSideBar()
                 _G.iuprops['dialogs.concolebar.rastersize'] = h.rastersize
             end
         end)
-        --iup.ShowSideBar(-1)
+
         if tonumber(_G.iuprops["dialogs.concolebar.x"])== nil or tonumber(_G.iuprops["dialogs.concolebar.y"]) == nil then _G.iuprops["dialogs.concolebar.x"]=0;_G.iuprops["dialogs.concolebar.y"]=0 end
-        return tonumber(_G.iuprops["dialogs.concolebar.x"])*2^16+tonumber(_G.iuprops["dialogs.concolebar.y"])
+        --return tonumber(_G.iuprops["dialogs.concolebar.x"])*2^16+tonumber(_G.iuprops["dialogs.concolebar.y"])
 
     end)
 
@@ -523,10 +539,10 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     scite.Open(t[i])
                 end
             end
-            if SideBar_obj.win then oDeatt.detach = 1 end
-            if _G.iuprops['bottombar.win']=='1' then BottomBar.detach = 1 end
-            if _G.iuprops['concolebar.win']=='1' then ConsoleBar.detach = 1 end
-            if _G.iuprops['findrepl.win']=='1' then FindRepl.detach = 1 end
+            if SideBar_obj.win then oDeatt.DetachRestore = true; oDeatt.detach = 1 end
+            if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
+            if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end
+            if _G.iuprops['findrepl.win']=='1' then FindRepl.DetachRestore = true;FindRepl.detach = 1 end
         end
     end
 end)
