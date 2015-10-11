@@ -50,6 +50,7 @@ local bIsListVisible = false
 local obj_names = {}
 local m_last = nil
 local m_ext, m_ptrn = "", ""
+local bManualTip = false
 
 local Ext2Ptrn = {}
 do
@@ -117,21 +118,42 @@ local function TableSort(table_name)
 end
 
 local function ShowCallTip(pos,str,s,e)
-    local _,_,list = str:find('.-<<(.+)>>')
+    local _,_,list = str:find('.-{{(.+)}}')
+
     if list then
-        local tList = {}
-        for w in list:gmatch('[^|]+') do
-            table.insert(tList, w)
+        local _,_,str2 = str:find'.-{{.+}}(.+)'
+
+        if not list:find('|') then
+            calltipinfo={0}
+            if not bManualTip then
+                editor:SetSel(editor.CurrentPos, editor.CurrentPos)
+                editor:ReplaceSel(list)
+                if str2 then str = str2
+                else return end
+            end
+        else
+            local tList = {}
+            for w in list:gmatch('[^|]+') do
+                table.insert(tList, w)
+            end
+            tList = TableSort(tList)
+            list = table.concat(tList, ',')
+            editor.AutoCSeparator = string.byte(',')
+            current_poslst = current_pos
+            pasteFromXml = false
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then list = list:to_utf8(1251) end
+            editor:UserListShow(constListIdXmlPar,list)
+            if str2 then
+                calltipinfo['attr'] = {}
+                calltipinfo['attr']['pos'] = pos
+                calltipinfo['attr']['str'] = str2
+                calltipinfo['attr']['s'] = s
+                calltipinfo['attr']['e'] = e
+            end
+            return
         end
-        tList = TableSort(tList)
-        list = table.concat(tList, ',')
-        editor.AutoCSeparator = string.byte(',')
-        current_poslst = current_pos
-        pasteFromXml = false
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then list = list:to_utf8(1251) end
-        editor:UserListShow(constListIdXmlPar,list)
-        return
     end
+    if not str then calltipinfo={0};return end
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
     scite.SendEditor(SCI_CALLTIPSHOW,pos,str)
     if  s == nil then return end
@@ -665,6 +687,7 @@ local function CallTipXml(sMethod)
         for i=1,table.maxn(object_names) do
             if TryTipFor(object_names[i][1],sMethod,objectsX_table,current_pos) then break end
         end
+        bManualTip = false
     end
 end
 
@@ -672,16 +695,26 @@ end
 local function OnUserListSelection_local(tp,str)
 
 	editor:SetSel(current_poslst, editor.CurrentPos)
-    local s
+    local s, shift = nil,0
     if tp == constListIdXmlPar then
+        if calltipinfo['attr'] then
+            ShowCallTip(calltipinfo['attr']['pos'],calltipinfo['attr']['str'],calltipinfo['attr']['s'],calltipinfo['attr']['e'])
+        end
         calltipinfo={0}
         s = str:gsub(' .*','')
     elseif pasteFromXml then
         s = str..'=""'
+    elseif editor.LexerLanguage == 'xml' then
+        if iup.GetGlobal('SHIFTKEY') == 'ON' then
+            shift = 2
+            s = str..'/>'
+        else
+            shift = #str + 3
+            s = str..'></'..str..'>'
+        end
     else
         s = str
     end
-
 
 	editor:ReplaceSel(s)
     if pasteFromXml then
@@ -689,6 +722,10 @@ local function OnUserListSelection_local(tp,str)
         editor:SetSel( editor.CurrentPos, editor.CurrentPos)
         CallTipXml(str)
     else
+        if shift > 0 then
+            editor.CurrentPos = editor.CurrentPos - shift
+            editor:SetSel( editor.CurrentPos, editor.CurrentPos)
+        end
         --Если objects_tabl содержит несколько(2) имен объектов, то вроде бы первый родительский,а второй чайлдовый. сохраним наш выбор для чайлдового
         if table.maxn(obj_names) > 0 then
             local upObj = string.upper(obj_names[table.maxn(obj_names)][1])
@@ -939,6 +976,7 @@ function ShowTipManualy()
                 local str=editor:textrange(posLine,current_pos)
                 local _s,_e,sMethod = string.find(str,'(%w+)="[^"]*$')
                 if sMethod == nil then return end
+                bManualTip = true
                 CallTipXml(sMethod)
                 return
             end

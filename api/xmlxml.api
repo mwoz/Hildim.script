@@ -1,42 +1,52 @@
 template<schemaVersion Версия формата. В данный момент "1"
 template<code Код сущности. Для системного типа должен иметь префикс "system.".\nДля кастом-типа должен иметь "custom.".
 template<name Произвольное имя. Используется как описание.
-template<type  Версия формата. В данный момент "1".
-template<asset Тип сущности: Reference, Document, Configuration, Extension.
-template<audit  Если yes, мастер-таблица сущности синхронизируется с таблицей dbo.Asset\nкуда записываются идентификаторы всех активов,\nа поле-идентификатор обязано иметь атрибут sequence="system.Asset"\nдля сквозной нумерации всех активов в системе.
-
+template<schemaVersion  Версия формата. В данный момент "1".
+template<type {{Reference|Document|Table|Configuration|MarketData|MarketDataHistory|Extension|Plugin}}
+template<asset {{yes}} 'no' by def\n Если yes, мастер-таблица сущности синхронизируется с таблицей dbo.Asset
+template<audit  {{yes}} 'no' by def\n Если yes, система ведет аудит операций с объектами данного типа.
+template<realtimeNotify Если yes, модификация объекта приводит к публикации сообщения
 masterobject<name Код расширяемой сущности.
 
 table<name Имя таблицы в БД. Создается в схеме dbo для системного типа и custom - для кастом-типа.
 table<type Тип таблицы: Master AppendixSingle AppendixMultiple
-table<movements Если yes, система ведет для таблицы Mvt-таблицу, куда записываются все изменения записей.
+table<movements {{yes}} 'no' by def\n Если yes, система ведет для таблицы Mvt-таблицу, куда записываются все изменения записей.
 table<extensionFor Имя расширяемой таблицы типа AppendixMultiple из мастер-типа.\nАтрибут может быть указан в таблице типа AppendixMultiple для сущности типа Extension.
-table<import Если yes (по умолчанию), поля таблицы попадают в число импортируемых.
-table<export Если yes (по умолчанию), поля таблицы попадают в число экспортируемых.
-table<view Если yes, данная таблица является представлением (view). SQL-код представления указывается в теге ViewSql.
-table<customIUD Если yes, для вставки/обновления вместо выполнения DML операций insert/update\nиз процедуры IUD вызывается процедура Тип_IU, а вместо delete - процедура Тип_Del,\nгде Тип - короткий код сущности (без префикса "system." или "custom.".)
+table<import {{no}} 'yes' by def\n Если yes (по умолчанию), поля таблицы попадают в число импортируемых.
+table<export {{no}} 'yes' by def\n Если yes (по умолчанию), поля таблицы попадают в число экспортируемых.
+table<view {{yes}} 'no' by def\n Если yes, данная таблица является представлением (view). SQL-код представления указывается в теге ViewSql.
+table<customIUD {{yes}} 'no' by def\n Если yes, для вставки/обновления вместо выполнения DML операций insert/update\nиз процедуры IUD вызывается процедура Тип_IU, а вместо delete - процедура Тип_Del,\nгде Тип - короткий код сущности (без префикса "system." или "custom.".)
 table<customIUDTemplate Используется при customIUD="yes".\nПредусмотренный вариант реализации процедур Тип_IU и Тип_Del.
-table<marketData Если yes, мастер-таблица сущности\nиспользуется для хранения рыночных котировок финансовых инструментов
-table<history Если yes, мастер-таблица сущности должна содержать поля HistDate и HistDateTo.\nДля таблицы создается триггер для расчета HistDateTo.
+table<marketData {{yes}} 'no' by def\n Если yes, мастер-таблица сущности\nиспользуется для хранения рыночных котировок финансовых инструментов
+table<history {{yes}} 'no' by def\n Если yes, мастер-таблица сущности должна содержать поля HistDate и HistDateTo.\nДля таблицы создается триггер для расчета HistDateTo.
 
-field<type
+field<type {{tYesNo|tComment|tName|tCode|tChoice|tAmount|tId|WorkflowActionData|PluginData|ForeignId|Asset|Reference|ExtensionId|MasterTypeId|MasterId|ObjectCode|ObjectId}}
 field<name
-field<mandatory
 field<scale Указывается для типа numeric.
 field<length Указывается для типов char, nchar, nvarchar, tChoice, numeric.\n-1 для nvarchar означает nvarchar(max). Наличие length превращает tChoice в nvarchar указанной длины, в этом случае поле допускает множественные односимвольные значения перечисления без разделителей.
-field<mandatory Если yes, поле объявляется как "not null". По умолчанию no.\nДля полей с типами ObjectId, ObjectCode, MasterId, MasterName, ExtensionId всегда mandatory="yes".
+field<mandatory {{yes|no}} Если yes, поле объявляется как "not null". По умолчанию no.\nДля полей с типами ObjectId, ObjectCode, MasterId, MasterName, ExtensionId всегда mandatory="yes".
 field<object Для полей типа Reference/Document - код сущности из таблицы ObjectType.\nДля поля типа tChoice - код перечисления из таблицы Choice.
 field<codeName Имя альтернативного ключевого поля, которое может присутствовать в XML объекта,\nдля идентификации объекта из справочника.\nАтрибут обязателен для полей с типом Reference и Asset.
 field<default Текст SQL для значения по умолчанию. Используется для создания default constraint.
-field<import Если yes, поле попадает в число импортируемых.\nЗначение по умолчанию устанавливается на уровне таблицы с помощью одноименного атрибута.
-field<export Если yes, поле попадает в число экспортируемых.\nЗначение по умолчанию устанавливается на уровне таблицы с помощью одноименного атрибута.
+field<import {{yes}} 'no' by def\n Если yes, поле попадает в число импортируемых.\nЗначение по умолчанию устанавливается на уровне таблицы с помощью одноименного атрибута.
+field<export {{yes}} 'no' by def\n Если yes, поле попадает в число экспортируемых.\nЗначение по умолчанию устанавливается на уровне таблицы с помощью одноименного атрибута.
 field<sequence Имя последовательности для генерации значения поля.\nМожет указываться для поля типа ObjectId. Последовательность автоматически регистрируется в таблице\nSystemSequence в момент первого обращения.\nЗначения последовательности генерируются функцией dbo.SequenceNextValue.
-field<marketData Если yes, информация о поле должна быть занесена в таблицу MarketDataTableField, которая используется сервером котировок.
+field<marketData {{yes}} 'no' by def\n Если yes, информация о поле должна быть занесена в таблицу MarketDataTableField, которая используется сервером котировок.
 
-index<nameSuffix
-index<unique
-index<key
+index<nameSuffix Суффикс имени индекса.\nФормат имени индекса: IX_ИмяТаблицы_Суффикс.
+index<unique {{yes}} 'no' by def\n Если yes, индекс является уникальным
 
+index<key {{yes}} 'no' by def\n Если yes, данный индекс является альтернативным ключом записи.\nПоля такого индекса используются в процедуре IUD\nдля поиска записи в таблице.
+index<clustered {{yes}} 'no' by def\n Если yes, индекс создается кластерным.\nДопустимо только при отсутствии поля типа ObjectId (для типа Table).
+index<filter Логическое выражение для условного индекса.
+index<export {{yes}} 'no' by def\n  Если yes, индекс используется в процедурах экспорта\n(Get и GetMsg) для сортировки данных.\nУказывается для таблиц типа AppendixMultiple.
 externalref<object Код типа внешнего объекта, который хранит поле-ссылку на текущий объект.\nНапример, system.UsrGroupMember.
 externalref<table Имя мастер-таблицы внешнего объекта.\nНапример, UsrGroupMember.
 externalref<field Имя поля-ссылки в мастер-таблице внешнего объекта.\nНапример, Usr_Id.
+
+check<nameSuffix Суффикс имени ограничения.\nФормат имени индекса: CHK_ИмяТаблицы_Суффикс
+check<expression Логическое выражение на T-SQL
+
+value<lang {{en|ru}}
+
+string<name {{caption_plural|caption}}

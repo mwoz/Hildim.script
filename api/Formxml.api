@@ -16,11 +16,11 @@ control.padleftctrl
 control.padrightctrl
 control.padtopctrl
 control.padbottomctrl
-control.fixedwidth <<Y|N>>
-control.fixedheight <<Y|N>>
-control.tabstop <<Y|N>>
-control.visible <<Y|N>>
-control.enabled <<Y|N>>
+control.fixedwidth <<Y>> N by def.
+control.fixedheight <<Y>> N by def.
+control.tabstop <<N>> Y by def.
+control.visible <<N>> Y by def.
+control.enabled <<N>> Y by def.
 control.tag
 
 formbox.contentname
@@ -34,41 +34,41 @@ formbox.caption
 formbox.caption_ru
 formbox.template
 
-link.default <<Y|N>>
+link.default <<Y>> N by def.
 link.hforecolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 link.foredisabledcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 link.tooltiptext
-link.supportnulls <<Y|N>>
-link.autowidth <<Y|N>>
+link.supportnulls <<Y>> N by def.
+link.autowidth <<Y>> N by def.
 link.caption
 link.caption_ru
 link.alignment <<L eft|R ight|C enter>>
 
-button.default <<Y|N>>
+button.default <<Y>> N by def.
 button.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 button.tooltiptext
-button.style = <<D efoult|F loat>>
+button.style = <<D efoult|F loat>> Выпуклая или плоская кнопка
 button.caption
 button.caption_ru
 
-numberbox.autoprecision <<Y|N|A|E|L|H>>
-numberbox.largenumber <<Y|N>>
+numberbox.autoprecision <<Y|N|A Auto|E Exact|L Low|H High>>
+numberbox.largenumber <<Y>> N by def.
 numberbox.decimals { 0, 1, 2, … }
-numberbox.roundtype <<R|T>>
+numberbox.roundtype <<R ound(def)|T runcate>>
 numberbox.formatting
 numberbox.caption
 numberbox.caption_ru
 numberbox.captionwidth
-numberbox.showplus <<Y|N>>
-numberbox.positiveonly <<Y|N>>
+numberbox.showplus <<Y>> N by def.
+numberbox.positiveonly <<Y>> N by def.
 numberbox.alignment <<L eft|R ight|C enter>>
 numberbox.maxlength
-numberbox.locked <<Y|N>>
+numberbox.locked <<Y>> N by def.
 numberbox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
 numberbox.text
 numberbox.tooltiptext
-numberbox.supportnulls <<Y|N>>
-numberbox.format
+numberbox.supportnulls <<Y>> N by def.
+numberbox.format <<0.|0.00|0.00#####|0.0000####|0.####|0.#########|0.00#######>>
 numberbox.minvalue
 numberbox.maxvalue
 numberbox.captionfont
@@ -78,12 +78,12 @@ checkbox.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зел
 checkbox.caption
 checkbox.caption_ru
 checkbox.tooltiptext
-checkbox.locked <<Y|N>>
-checkbox.autowidth <<Y|N>>
+checkbox.locked <<Y>> N by def.
+checkbox.autowidth <<Y>> N by def.
 
 groupbox.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 groupbox.bordercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
-groupbox.style <<B|F|R>>
+groupbox.style <<B lock|F lat|R ound corners>>
 
 textbox.case
 textbox.caption
@@ -91,12 +91,12 @@ textbox.caption_ru
 textbox.captionwidth
 textbox.alignment <<L eft|R ight|C enter>>
 textbox.maxlength
-textbox.locked <<Y|N>>
+textbox.locked <<Y>> N by def.
 textbox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
 textbox.text
-textbox.multiline <<Y|N>>
+textbox.multiline <<Y>> N by def.
 textbox.tooltiptext
-textbox.wordwrap <<Y|N>>
+textbox.wordwrap <<Y>> N by def.
 textbox.passwordchar
 textbox.captionfont
 
@@ -105,7 +105,7 @@ datebox.caption
 datebox.caption_ru
 datebox.captionwidth
 datebox.style = <<D efoult|F loat>>
-datebox.locked <<Y|N>>
+datebox.locked <<Y>> N by def.
 datebox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
 datebox.captionfont
 
@@ -114,33 +114,33 @@ timebox.maxlength
 timebox.caption
 timebox.caption_ru
 timebox.captionwidth
-timebox.locked <<Y|N>>
+timebox.locked <<Y>> N by def.
 timebox.text
 timebox.showseconds <<Y|N>>
 timebox.tooltiptext
-timebox.supportnulls <<Y|N>>
+timebox.supportnulls <<Y>> N by def.
 timebox.style = <<D efoult|F loat>>
 timebox.alignment <<L eft|R ight|C enter>>
 
 label.caption
 label.caption_ru
 label.alignment <<L eft|R ight|C enter>>
-label.autowidth <<Y|N>>
-label.drawline <<Y|N>>
+label.autowidth <<Y>> N by def.
+label.drawline <<Y>> N by def.
 label.linecolor
 
-logbox.showtime  <<Y|N>>
+logbox.showtime  <<Y>> N by def.
 
 combobox.droppedsize number of items in dropped list box (5 by default)
 combobox.tooltiptext
 combobox.caption
 combobox.caption_ru
 combobox.captionwidth
-combobox.locked  <<Y|N>>
+combobox.locked  <<Y>> N by def.
 combobox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
-combobox.supportnulls  <<Y|N>>
-combobox.editenabled  <<Y|N>>
-combobox.sorted  <<Y|N>>
+combobox.supportnulls  <<Y>> N by def.
+combobox.editenabled  <<Y>> N by def.
+combobox.sorted  <<Y>> N by def.
 combobox.style = <<D efoult|F loat>>
 combobox.captionfont
 
@@ -149,7 +149,7 @@ checklistbox.tag
 colorpicker.style
 
 container.handler
-container.ShareControls <<Y|N>>
+container.sharecontrols <<Y>> N by def.
 
 grid.title
 grid.style "hline;vline;openlevel;striped;oddrowcolor;evenrowcolor"\nfor example: "n,y,3,y,#ffffff,#dddddd"
@@ -161,7 +161,7 @@ cube.sorting "ColumnId,Ascending"\nfor example: "Time,Y"
 cube.datastyle "backcolor,forecolor,style"\nfor example: "#ffffff,#dddddd,N"; style: {N|B|I}
 cube.groupstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {N|B|I}
 cube.rootstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {N|B|I}
-cube.multiselect <<Y|N>>
+cube.multiselect <<Y>> N by def.
 
 column.caption
 column.caption_ru
@@ -179,10 +179,10 @@ option.caption_ru
 
 frame.backcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
 frame.name
-frame.visible
-frame.enabled
+frame.visible <<N>> Y by def.
+frame.enabled <<N>> Y by def.
 frame.height
-frame.sizable
+frame.sizable <<Y>> N by def.
 frame.minheight
 frame.tag
 
@@ -199,7 +199,7 @@ form.font "name;size;italic;bold;underline"\nfor example: "Tahoma;8;N;Y;N"
 form.position "left;top;width "\nheight is determined by visible frames
 form.center <<Y center form relative to it's parent|N>>
 form.scalemode  <<0 pixels|1 points (by default)>>
-form.sizable Sizable = <<Y|N>>
+form.sizable Sizable = <<Y>> N by def.
 form.minwidth
 
 template.name
@@ -219,5 +219,5 @@ value.lang
 value.text
 
 menu.instance
-menu.recreate <<Y|N>>
+menu.recreate <<Y>> N by def.
 
