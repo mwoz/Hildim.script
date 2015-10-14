@@ -241,6 +241,75 @@ iup.list = function(t)
     return cmb
 end
 
+iup.scitedetachbox = function(t)
+    local dtb = t.HANDLE or iup.detachbox(t)
+    dtb.sciteid = t.sciteid
+    dtb.Dlg_Close_Cb = t.Dlg_Close_Cb
+    dtb.Dlg_Show_Cb = t.Dlg_Show_Cb
+    dtb.Split_h = t.Split_h
+    dtb.Split_Title = t.Split_Title
+    dtb.Split_CloseVal = t.Split_CloseVal
+    dtb.Dlg_Resize_Cb = t.Dlg_Resize_Cb
+    dtb.On_Detach = t.On_Detach
+
+    dtb.detached_cb=(function(h, hNew, x, y)
+        if h.On_Detach then h.On_Detach(h, hNew, x, y) end
+        hNew.resize ="YES"
+        hNew.shrink ="YES"
+        hNew.minsize="100x100"
+        hNew.maxbox="NO"
+        hNew.minbox="NO"
+        hNew.toolbox="YES"
+        hNew.title= t.Dlg_Title or "dialog"
+        hNew.x=10
+        hNew.y=10
+        x=10;y=10
+        hNew.rastersize = _G.iuprops['dialogs.'..h.sciteid..'.rastersize']
+        _G.iuprops[h.sciteid..'.win']='1'
+        _G.iuprops['dialogs.'..h.sciteid..'.rastersize'] = h.rastersize
+        if h.Split_h then  _G.iuprops['dialogs.'..h.sciteid..'.splitvalue'] = h.Split_h.value end
+        hNew.close_cb =(function(h)
+            if _G.dialogs[dtb.sciteid] ~= nil then
+
+                if dtb.Dlg_Close_Cb then dtb.Dlg_Close_Cb(h) end
+
+                _G.iuprops[dtb.sciteid..'.win']='0'
+                dtb.restore = 1
+                _G.dialogs[dtb.sciteid] = nil
+                return -1
+            end
+        end)
+        hNew.show_cb=(function(h,state)
+            if state == 0 then
+                if dtb.DetachRestore then
+                    dtb.DetachRestore = false
+                    iup.ShowXY(h, _G.iuprops['dialogs.'..dtb.sciteid..'.x'],_G.iuprops['dialogs.'..dtb.sciteid..'.y'])
+                    return
+                end
+                if dtb.Split_h then
+                    dtb.Split_h.value = dtb.Split_CloseVal
+                    dtb.Split_h.barsize = "0"
+                end
+                _G.dialogs[dtb.sciteid] = dtb
+            elseif state == 4 then
+                _G.iuprops['dialogs.'..dtb.sciteid..'.x']= h.x
+                _G.iuprops['dialogs.'..dtb.sciteid..'.y']= h.y
+                _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = h.rastersize
+                if dtb.Split_h then
+                    dtb.Split_h.value = _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue']
+                    dtb.Split_h.barsize = "3"
+                end
+            end
+            if dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(h, state) end
+        end)
+        if h.Dlg_Resize_Cb then
+            hNew.resize_cb = h.Dlg_Resize_Cb
+        end
+        if tonumber(_G.iuprops["dialogs.'..h.sciteid..'.x"])== nil or tonumber(_G.iuprops["dialogs.'..h.sciteid..'.y"]) == nil then _G.iuprops["dialogs.'..h.sciteid..'.x"]=0;_G.iuprops["dialogs.'..h.sciteid..'.y"]=0 end
+    end)
+    return dtb
+end
+
 local old_iup_ShowXY = iup.ShowXY
 iup.ShowXY = function(h,x,y)
     x = tonumber(x)
@@ -269,7 +338,7 @@ iup.scitedialog = function(t)
         elseif t.sciteparent == "IUPSTATUSBAR" then
             dlg:showxy(0,0)
         elseif t.sciteparent == "SCITE" then
-            dlg:showxy(tonumber(_G.iuprops['dialogs.'..t.sciteid..'.x']),tonumber(_G.iuprops['dialogs.'..t.sciteid..'.y']))
+            dlg:showxy((tonumber(_G.iuprops['dialogs.'..t.sciteid..'.x']) or 400),(tonumber(_G.iuprops['dialogs.'..t.sciteid..'.y'])) or 300)
         else
             local w = (_G.iuprops['dialogs.'..t.sciteid..'.rastersize'] or ''):gsub('x%d*', '')
             if w=='' then w='300' end

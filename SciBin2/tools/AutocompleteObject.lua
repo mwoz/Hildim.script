@@ -51,6 +51,7 @@ local obj_names = {}
 local m_last = nil
 local m_ext, m_ptrn = "", ""
 local bManualTip = false
+local m_tblSubstitution = {}
 
 local Ext2Ptrn = {}
 do
@@ -122,7 +123,8 @@ local function ShowCallTip(pos,str,s,e)
 
     if list then
         local _,_,str2 = str:find'.-{{.+}}(.+)'
-
+        local _,_,sub = list:find('^(#@%u+)$')
+        if sub then list = m_tblSubstitution[sub] end
         if not list:find('|') then
             calltipinfo={0}
             if not bManualTip then
@@ -418,6 +420,9 @@ local function CreateTablesForFile(o_tbl,al_tbl,strApis, needKwd)
                         if tmp_tbl ~= nil then
                             table.insert(al_tbl, tmp_tbl)
                         end
+                    elseif string.find(line,'^#@%u') == 1 then
+                        local _,_,name,subs = string.find(line,'^(#@%u+) +(.+)')
+                        m_tblSubstitution[name] = subs
                     else
                         --line = string.gsub(line,'[%s(].+$','') -- обрезаем комментарии
                         local _s,_e,l,c = string.find(line,'^([^%s%(]+)([^%s%(]?.-)$')
@@ -540,6 +545,7 @@ local function ReCreateStructures(strText,tblFiles)
 
         --print(props["keywords6."..Ext2Ptrn[props['FileExt']]]:len())
     end
+    m_tblSubstitution = {}
     if m_ext ~= editor.Lexer or str_vbkwrd ~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']] or '&&&&')  then
         alias_table = {}
         objects_table = {}

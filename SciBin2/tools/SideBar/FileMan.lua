@@ -453,7 +453,7 @@ local function OnSwitch(bForse, bRelist)
     if prev_filename:upper() == props['FilePath']:upper() then return end
     prev_filename = ''
     if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
-        iup.SetFocus(memo_mask)
+        if bForse then iup.SetFocus(memo_mask) end
         local path = props['FileDir']
         if path == '' then path = _G.iuprops['FileMan.Dir'] end
         if path ~= '' then

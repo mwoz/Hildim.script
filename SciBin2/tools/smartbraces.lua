@@ -260,12 +260,13 @@ local function SmartBraces( char )
 					if ( char == braceOpen ) and  virtSpace > 0 then
 						editor:BeginUndoAction()
 						isUndo = true
-						for i = 0, virtSpace do
-							editor:ReplaceSel(' ')
-							editor:CharRight()
-						end
+                        editor:LineEnd()
+                        editor.TargetStart = editor.CurrentPos
+                        editor.TargetEnd = editor.CurrentPos
+                        editor:ReplaceTarget(string.rep(' ', virtSpace))
+                        editor:LineEnd()
 					end
-					-- по волшебному обрабатываем скобку { в cpp
+					-- по волшебному обрабатываем скобку { в cpp()
 					if	( char == '{' ) and
 						( use_multiline )
 					then

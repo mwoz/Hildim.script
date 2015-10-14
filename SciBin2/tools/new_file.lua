@@ -62,6 +62,11 @@ end
 AddEventHandler("OnMenuCommand", function(msg, source)
 	if msg == IDM_NEW then
 		return CreateUntitledFile()
+	elseif msg == IDM_SAVE then
+        if props["FileNameExt"]:find'^%^' and not shell.fileexists(props["FilePath"]) then
+            scite.MenuCommand(IDM_SAVEAS)
+            return true
+        end
 	elseif msg == IDM_SAVEAS then
 		unsaved_files[props["FilePath"]:upper()] = nil --удаляем запись о буфере из таблицы
 	end

@@ -18,6 +18,9 @@ local cADDYODIC,cADDBYZXAMPLE = '<Add-to-Dic>','<Add-with-Example>'
 local constFirstSpell = 65000     --65535 - максимально возможная комманда      coow
 local constAddToDic = 65500
 local constWithExample = 65501
+local SpellRange
+local bReset = false
+local bNeedList = false
 
 local fmSpellTag={caption=true,caption_ru=true,tooltiptext=true,tooltiptext_ru=true,text=true}
 
@@ -82,7 +85,7 @@ local function CheckNeedSpellAll(iStyle,p)
     return cHeck
 end
 
-local function SpellRange(posStart, posEnd)
+local function SpellRange1251(posStart, posEnd)
     if posStart == 0 then posStart = 1 end
     local e,s = posStart,0
     local bSpell
@@ -103,7 +106,51 @@ local function SpellRange(posStart, posEnd)
     end
 end
 
+local function ProbabblyFromUT(str)
+    if  tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then return str end
+    return str:from_utf8(1251)
+end
+
+local function SpellRangeUTF8(posStart, posEnd)
+    if posStart == 0 then posStart = 1 end
+    local e,s = posStart,0
+    local bSpell
+    local str = editor:textrange(posStart-1, posEnd+1):from_utf8(1251)
+    local iUt = 2
+    local t = nil
+    --local str2 = editor:textrange(posStart-1, posEnd+1)
+    for s,word,e in str:gmatch('[ \t\n\r!-/:-?\[-^{-§]()([A-Za-zА-яЁё]+)()') do
+        if string.find(str:sub(e,e),'[ \t\n\r!-/:-?\[-^{-»]') then
+            if word:byte() >=160 then
+                bSpell = sRu:spell(word)
+            else
+                if(word:sub(2) == word:sub(2):lower()) then
+                    bSpell = sEn:spell(word)
+                else bSpell = true  end
+            end
+            if not bSpell then
+                if t == nil then
+                    t = {}
+                    t[0]=0
+                    for i = 1, #str do
+                        if (iUt == 2) ~= (str:byte(i) > 127) then if iUt == 2 then iUt = 1 else iUt = 2 end end
+                        t[i] = t[i-1] + iUt
+                    end
+                end
+                local sb = editor:WordStartPosition(posStart+t[s-2],t[e-s]+ 1,true)
+                local se = editor:WordEndPosition(posStart+t[s-2],t[e-s]+ 1,true) - sb
+                -- print(editor:WordStartPosition(posStart+t[s-2],t[e-s]+ 1,true), editor:WordEndPosition(posStart+t[s-2],t[e-s]+ 1,true) - editor:WordStartPosition(posStart+t[s-2],t[e-s]+ 1,true),posStart+t[s-2],t[e-s]+ 1)
+                -- EditorMarkText(posStart+t[s-2],t[e-s]+ 1, mark)
+                EditorMarkText(sb,se, mark)
+                --EditorMarkText(editor:WordStartPosition(posStart+t[s-2],t[e-s]+ 1,true), editor:WordEndPosition(posStart+t[s-2],t[e-s]+ 1,true))
+            end
+        end
+    end
+end
+
 local function OnSwitch_local()
+    bReset = false
+    if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then SpellRange = SpellRange1251 else  SpellRange = SpellRangeUTF8 end
     if(editor.Lexer  == SCLEX_FORMENJINE) then
         CheckNeedSpell = CheckNeedSpellFM
     else
@@ -141,8 +188,10 @@ local function SpellLexer(posStart, posEnd)
     end
 end
 
+
 local sPel, pUser, curLine
 local function OnUserListSelection_local(tp,str)
+    if  tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
     local function saveDic(newWord,pUser)
         local text    = ''
         local tbl     = {}
@@ -189,7 +238,7 @@ local function OnUserListSelection_local(tp,str)
                         local s = scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos)
                         local e = scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)
 
-                        local word = editor:textrange(s,e)
+                        local word = ProbabblyFromUT(editor:textrange(s,e))
                         txt_sorse.value = word
 
                         txt_example.value = ''
@@ -239,7 +288,7 @@ local function OnUserListSelection_local(tp,str)
                 dlg:show();
             end
         elseif str == cADDYODIC then
-            local word = editor:textrange(s,e)
+            local word = ProbabblyFromUT(editor:textrange(s,e))
             --EditorClearMarks(mark,s,e-s)
             local sPel, pUser
             if word:byte() >=160 then
@@ -274,34 +323,21 @@ local function OnColorise_local(s,e)
     end
 end
 
-local function OnIdle_local()
-    if spellEnd then
-        SpellLexer(spellStart, spellEnd)
-        spellStart, spellEnd = nil, nil
-    end
-end
-
-function spell_Selected()
-    local posStart,posEnd = editor.SelectionStart, editor.SelectionEnd
-    EditorClearMarks(mark,posStart, posEnd - posStart)
-    SpellRange(editor.SelectionStart, editor.SelectionEnd)
-end
-
-function spell_ByLex()
-    local s,e = editor.SelectionStart,editor.SelectionEnd
-    if s==e then s,e = 0,editor.TextLength end
-    _G.iuprops["spell.autospell"] = 0
-    editor:Colourise(s,e)
-    _G.iuprops["spell.autospell"] = 1
-    SpellLexer(s,e)
-end
-
 function spell_ErrorList()
 --[[    local iPos = scite.SendEditor(SCI_INDICATOREND, mark, 1)
     print(editor:textrange(editor:WordStartPosition(iPos, true),
 							editor:WordEndPosition(iPos, true)))
-    print(scite.SendEditor(SCI_INDICATOREND, mark, editor:WordEndPosition(iPos, true)), iPos)      коровввва
+    print(scite.SendEditor(SCI_INDICATOREND, mark, editor:WordEndPosition(iPos, true)), iPos)
     print(scite.SendEditor(SCI_INDICATOREND, mffrk, editor.TextLength-20), editor.TextLength)]]
+    local prLine = editor:LineFromPosition(editor.CurrentPos)
+    local fLine = editor.FirstVisibleLine
+    editor:DocumentEnd()
+    editor:LineScroll(1,fLine)
+    editor:GotoLine(prLine)
+    bNeedList = true
+end
+
+local function ListErrors()
     local count,lCount,line = 0,0,-1
     local s,e = 0,-1
 
@@ -313,7 +349,7 @@ function spell_ErrorList()
         if iPos >= editor.TextLength or iPos == nextStart then break end
 
         nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
-        local word = editor:textrange(editor:WordStartPosition(iPos, true), nextStart)
+        local word = ProbabblyFromUT(editor:textrange(editor:WordStartPosition(iPos, true), nextStart))
 
         count = count + 1
         local l = editor:LineFromPosition(iPos)
@@ -321,7 +357,7 @@ function spell_ErrorList()
             lineErrors = lineErrors..':'..word
         else
             if lineErrors ~= "" then
-                out = out..lineErrors..': '..editor:GetLine(line):gsub('^ *','')
+                out = out..lineErrors..': '..ProbabblyFromUT(editor:GetLine(line):gsub('^ *',''))
             end
             lineErrors = '\t'..(l + 1)..':'..word
             line = l
@@ -329,7 +365,7 @@ function spell_ErrorList()
         end
     end
     if lineErrors ~= "" then
-        out = out..lineErrors..': '..editor:GetLine(line)
+        out = out..lineErrors..': '..ProbabblyFromUT(editor:GetLine(line))
     end
     out = out..'<'
 
@@ -349,10 +385,39 @@ function spell_ErrorList()
     scite.SendFindRez(SCI_REPLACESEL, '>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]..'\n')
 end
 
+
+local function OnIdle_local()
+    if spellEnd then
+        if not bReset then
+            if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then SpellRange = SpellRange1251 else  SpellRange = SpellRangeUTF8 end
+            bReset = true
+        end
+        SpellLexer(spellStart, spellEnd)
+        spellStart, spellEnd = nil, nil
+    end
+    if bNeedList then bNeedList = false; ListErrors() end
+end
+
+function spell_Selected()
+    local posStart,posEnd = editor.SelectionStart, editor.SelectionEnd
+    EditorClearMarks(mark,posStart, posEnd - posStart)
+    SpellRange(editor.SelectionStart, editor.SelectionEnd)
+end
+
+function spell_ByLex()
+    local s,e = editor.SelectionStart,editor.SelectionEnd
+    if s==e then s,e = 0,editor.TextLength end
+    _G.iuprops["spell.autospell"] = 0
+    editor:Colourise(s,e)
+    _G.iuprops["spell.autospell"] = 1
+    SpellLexer(s,e)
+end
+
 local function OnContextMenu_local(lp, wp, source)       --ашибка eror  дочеринм
     if source ~= "EDITOR" then return end
 	if scite.SendEditor(SCI_INDICATORVALUEAT, mark, editor.CurrentPos) == 1 then
-        local word = editor:textrange(scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos), scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos))
+        local word = ProbabblyFromUT(editor:textrange(scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos), scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)))
+
         local s
         if word:byte() >=192 then
             s = sRu
@@ -385,7 +450,6 @@ local function OnMenuCommand_local(msg, source)
     OnUserListSelection_local(800,str)
 end
 
-AddEventHandler("OnUserListSelection", OnUserListSelection_local)
 AddEventHandler("OnColorized", OnColorise_local)
 AddEventHandler("OnOpen", OnSwitch_local)
 AddEventHandler("OnSwitchFile", OnSwitch_local)
