@@ -1,7 +1,10 @@
+#@COLORS #F0F8FF Alice Blue|#FAEBD7 Antique White|#00FFFF Aqua|#7FFFD4 Aquamarine|#F0FFFF Azure|#F5F5DC Beige|#FFE4C4 Bisque|#000000 Black|#FFEBCD Blanched Almond|#0000FF Blue|#8A2BE2 Blue Violet|#A52A2A Brown|#DEB887 Burly Wood|#5F9EA0 Cadet Blue|#7FFF00 Chartreuse|#D2691E Chocolate|#FF7F50 Coral|#6495ED Cornflower|#FFF8DC Cornsilk|#DC143C Crimson|#00FFFF Cyan|#00008B Dark Blue|#008B8B Dark Cyan|#B8860B Dark Golden Rod|#A9A9A9 Dark Gray|#006400 Dark Green|#BDB76B Dark Khaki|#8B008B Dark Magenta|#556B2F Dark Olive Green|#FF8C00 Dark Orange|#9932CC Dark Orchid|#8B0000 Dark Red|#E9967A Dark Salmon|#8FBC8F Dark Sea Green|#483D8B Dark Slate Blue|#2F4F4F Dark Slate Gray|#00CED1 Dark Turquoise|#9400D3 Dark Violet|#FF1493 Deep Pink|#00BFFF Deep Sky Blue|#696969 Dim Gray|#1E90FF Dodger Blue|#B22222 Fire Brick|#FFFAF0 Floral White|#228B22 Forest Green|#FF00FF Fuchsia|#DCDCDC Gainsboro|#F8F8FF Ghost White|#FFD700 Gold|#DAA520 Golden Rod|#BEBEBE Gray|#808080 Gray(W3C)|#008000 Green|#007F00 Green(W3C)|#ADFF2F Green Yellow|#F0FFF0 Honeydew|#FF69B4 Hot Pink|#CD5C5C Indian Red|#4B0082 Indigo|#FFFFF0 Ivory|#F0E68C Khaki|#E6E6FA Lavender|#FFF0F5 Lavender Blush|#7CFC00 Lawn Green|#FFFACD Lemon Chiffon|#ADD8E6 Light Blue|#F08080 Light Coral|#E0FFFF Light Cyan|#FAFAD2 Light Golden Rod|#D3D3D3 Light Gray|#90EE90 Light Green|#FFB6C1 Light Pink|#FFA07A Light Salmon|#20B2AA Light Sea Green|#87CEFA Light Sky Blue|#778899 Light Slate Gray|#B0C4DE Light Steel Blue|#FFFFE0 Light Yellow|#00FF00 Lime|#32CD32 Lime Green|#FAF0E6 Linen|#FF00FF Magenta|#B03060 Maroon|#7F0000 Maroon(W3C)|#66CDAA Medium Aquamarine|#0000CD Medium Blue|#BA55D3 Medium Orchid|#9370DB Medium Purple|#3CB371 Medium Sea Green|#7B68EE Medium Slate Blue|#00FA9A Medium Spring Green|#48D1CC Medium Turquoise|#C71585 Medium Violet Red|#191970 Midnight Blue|#F5FFFA Mintcream|#FFE4E1 Mistyrose|#FFE4B5 Moccasin|#FFDEAD Navajo White|#000080 Navy|#FDF5E6 Oldlace|#808000 Olive|#6B8E23 Olive Drab|#FFA500 Orange|#FF4500 Orange Red|#DA70D6 Orchid|#EEE8AA Pale Golden Rod|#98FB98 Pale Green|#AFEEEE Pale Turquoise|#DB7093 Pale Violetred|#FFEFD5 Papaya Whip|#FFDAB9 Peachpuff|#CD853F Peru|#FFC0CB Pink|#DDA0DD Plum|#B0E0E6 Powder Blue|#A020F0 Purple|#7F007F Purple(W3C)|#FF0000 Red|#BC8F8F Rosy Brown|#4169E1 Royal Blue|#8B4513 Saddle Brown|#FA8072 Salmon|#F4A460 Sandy Brown|#2E8B57 Sea Green|#FFF5EE Seashell|#A0522D Sienna|#C0C0C0 Silver|#87CEEB Sky Blue|#6A5ACD Slate Blue|#708090 Slate Gray|#FFFAFA Snow|#00FF7F Spring Green|#4682B4 Steel Blue|#D2B48C Tan|#008080 Teal|#D8BFD8 Thistle|#FF6347 Tomato|#40E0D0 Turquoise|#EE82EE Violet|#F5DEB3 Wheat|#FFFFFF White|#F5F5F5 White Smoke|#FFFF00 Yellow|#9ACD32 Yellow Green
+#@LOCKEDMODE N display only text|U  display whole control (with underline and button)
+#@ALIGN L eft|R ight|C enter
 control.type
 control.name
-control.backcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
-control.forecolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+control.backcolor {{#@COLORS}}
+control.forecolor {{#@COLORS}}
 control.font "name;size;bold;italic;underline"\nfor example: "Tahoma;8;N;Y;N"
 control.position [left;top;width;height]
 control.padright
@@ -16,11 +19,11 @@ control.padleftctrl
 control.padrightctrl
 control.padtopctrl
 control.padbottomctrl
-control.fixedwidth <<Y>> N by def.
-control.fixedheight <<Y>> N by def.
-control.tabstop <<N>> Y by def.
-control.visible <<N>> Y by def.
-control.enabled <<N>> Y by def.
+control.fixedwidth {{Y}} N by def.
+control.fixedheight {{Y{{ N by def.
+control.tabstop {{N}} Y by def.
+control.visible {{N}} Y by def.
+control.enabled {{N}} Y by def.
 control.tag
 
 formbox.contentname
@@ -34,69 +37,69 @@ formbox.caption
 formbox.caption_ru
 formbox.template
 
-link.default <<Y>> N by def.
-link.hforecolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
-link.foredisabledcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+link.default {{Y}} N by def.
+link.hforecolor {{#@COLORS}}
+link.foredisabledcolor {{#@COLORS}}
 link.tooltiptext
-link.supportnulls <<Y>> N by def.
-link.autowidth <<Y>> N by def.
+link.supportnulls {{Y}} N by def.
+link.autowidth {{Y}} N by def.
 link.caption
 link.caption_ru
-link.alignment <<L eft|R ight|C enter>>
+link.alignment {{#@ALIGN}}
 
-button.default <<Y>> N by def.
-button.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+button.default {{Y}} N by def.
+button.outercolor {{#@COLORS}}
 button.tooltiptext
-button.style = <<D efoult|F loat>> Выпуклая или плоская кнопка
+button.style = {{D efoult|F loat}} Выпуклая или плоская кнопка
 button.caption
 button.caption_ru
 
-numberbox.autoprecision <<Y|N|A Auto|E Exact|L Low|H High>>
-numberbox.largenumber <<Y>> N by def.
+numberbox.autoprecision {{Y|N|A Auto|E Exact|L Low|H High}}
+numberbox.largenumber {{Y}} N by def.
 numberbox.decimals { 0, 1, 2, … }
-numberbox.roundtype <<R ound(def)|T runcate>>
+numberbox.roundtype {{R ound(def)|T runcate}}
 numberbox.formatting
 numberbox.caption
 numberbox.caption_ru
 numberbox.captionwidth
-numberbox.showplus <<Y>> N by def.
-numberbox.positiveonly <<Y>> N by def.
-numberbox.alignment <<L eft|R ight|C enter>>
+numberbox.showplus {{Y}} N by def.
+numberbox.positiveonly {{Y}} N by def.
+numberbox.alignment {{#@ALIGN}}
 numberbox.maxlength
-numberbox.locked <<Y>> N by def.
-numberbox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
+numberbox.locked {{Y}} N by def.
+numberbox.lockedmode {{#@LOCKEDMODE}}
 numberbox.text
 numberbox.tooltiptext
-numberbox.supportnulls <<Y>> N by def.
-numberbox.format <<0.|0.00|0.00#####|0.0000####|0.####|0.#########|0.00#######>>
+numberbox.supportnulls {{Y}} N by def.
+numberbox.format {{0.|0.00|0.00#####|0.0000####|0.####|0.#########|0.00#######}}
 numberbox.minvalue
 numberbox.maxvalue
 numberbox.captionfont
 
-checkbox.mode <<C Checkbox|R Radiobutton|B Pushlike|T ThreeState|P Plus-Minus mode |S small Plus-Minus mode >>
-checkbox.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+checkbox.mode {{C Checkbox|R Radiobutton|B Pushlike|T ThreeState|P Plus-Minus mode |S small Plus-Minus mode }}
+checkbox.outercolor {{#@COLORS}}
 checkbox.caption
 checkbox.caption_ru
 checkbox.tooltiptext
-checkbox.locked <<Y>> N by def.
-checkbox.autowidth <<Y>> N by def.
+checkbox.locked {{Y}} N by def.
+checkbox.autowidth {{Y}} N by def.
 
-groupbox.outercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
-groupbox.bordercolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
-groupbox.style <<B lock|F lat|R ound corners>>
+groupbox.outercolor {{#@COLORS}}
+groupbox.bordercolor {{#@COLORS}}
+groupbox.style {{B lock|F lat|R ound corners}}
 
 textbox.case
 textbox.caption
 textbox.caption_ru
 textbox.captionwidth
-textbox.alignment <<L eft|R ight|C enter>>
+textbox.alignment {{#@ALIGN}}
 textbox.maxlength
-textbox.locked <<Y>> N by def.
-textbox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
+textbox.locked {{Y}} N by def.
+textbox.lockedmode {{#@LOCKEDMODE}}
 textbox.text
-textbox.multiline <<Y>> N by def.
+textbox.multiline {{Y}} N by def.
 textbox.tooltiptext
-textbox.wordwrap <<Y>> N by def.
+textbox.wordwrap {{Y}} N by def.
 textbox.passwordchar
 textbox.captionfont
 
@@ -104,44 +107,44 @@ datebox.format
 datebox.caption
 datebox.caption_ru
 datebox.captionwidth
-datebox.style = <<D efoult|F loat>>
-datebox.locked <<Y>> N by def.
-datebox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
+datebox.style = {{D efoult|F loat}}
+datebox.locked {{Y}} N by def.
+datebox.lockedmode {{#@LOCKEDMODE}}
 datebox.captionfont
 
-timebox.alignment <<L eft|R ight|C enter>>
+timebox.alignment {{#@ALIGN}}
 timebox.maxlength
 timebox.caption
 timebox.caption_ru
 timebox.captionwidth
-timebox.locked <<Y>> N by def.
+timebox.locked {{Y}} N by def.
 timebox.text
-timebox.showseconds <<Y|N>>
+timebox.showseconds {{Y|N}}
 timebox.tooltiptext
-timebox.supportnulls <<Y>> N by def.
-timebox.style = <<D efoult|F loat>>
-timebox.alignment <<L eft|R ight|C enter>>
+timebox.supportnulls {{Y}} N by def.
+timebox.style = {{D efoult|F loat}}
+timebox.alignment {{#@ALIGN}}
 
 label.caption
 label.caption_ru
-label.alignment <<L eft|R ight|C enter>>
-label.autowidth <<Y>> N by def.
-label.drawline <<Y>> N by def.
+label.alignment {{#@ALIGN}}
+label.autowidth {{Y}} N by def.
+label.drawline {{Y}} N by def.
 label.linecolor
 
-logbox.showtime  <<Y>> N by def.
+logbox.showtime  {{Y}} N by def.
 
 combobox.droppedsize number of items in dropped list box (5 by default)
 combobox.tooltiptext
 combobox.caption
 combobox.caption_ru
 combobox.captionwidth
-combobox.locked  <<Y>> N by def.
-combobox.lockedmode <<N display only text|U  display whole control (with underline and button)>>
-combobox.supportnulls  <<Y>> N by def.
-combobox.editenabled  <<Y>> N by def.
-combobox.sorted  <<Y>> N by def.
-combobox.style = <<D efoult|F loat>>
+combobox.locked  {{Y}} N by def.
+combobox.lockedmode {{#@LOCKEDMODE}}
+combobox.supportnulls  {{Y}} N by def.
+combobox.editenabled  {{Y}} N by def.
+combobox.sorted  {{Y}} N by def.
+combobox.style = {{D efoult|F loat}}
 combobox.captionfont
 
 checklistbox.tag
@@ -149,7 +152,7 @@ checklistbox.tag
 colorpicker.style
 
 container.handler
-container.sharecontrols <<Y>> N by def.
+container.sharecontrols {{Y}} N by def.
 
 grid.title
 grid.style "hline;vline;openlevel;striped;oddrowcolor;evenrowcolor"\nfor example: "n,y,3,y,#ffffff,#dddddd"
@@ -161,7 +164,7 @@ cube.sorting "ColumnId,Ascending"\nfor example: "Time,Y"
 cube.datastyle "backcolor,forecolor,style"\nfor example: "#ffffff,#dddddd,N"; style: {N|B|I}
 cube.groupstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {N|B|I}
 cube.rootstyle "backcolor,forecolor,style"\nfor example: "#ffdddd,#000000,B"; style: {N|B|I}
-cube.multiselect <<Y>> N by def.
+cube.multiselect {{Y}} N by def.
 
 column.caption
 column.caption_ru
@@ -177,12 +180,12 @@ option.code
 option.caption
 option.caption_ru
 
-frame.backcolor <<#00ffff Аквамарин|#ffffff Белый|#ffff00 Желтый|#008000 Зеленый|#ffd700 Золотистый|#4b0080 Индиго|#800000 Каштановый|#ff0000 Красный|#808000 Оливковый|#800080 Пурпурный|#00ff00 Светло-зеленый|#c0c0c0 Серебристый|#808080 Серый|#008080 Сизый|#0000ff Синий|#000080 Ультрамарин|#ee80ee Фиолетовый|#ff00ff Фуксиновый|#000000 Черный>>
+frame.backcolor {{#@COLORS}}
 frame.name
-frame.visible <<N>> Y by def.
-frame.enabled <<N>> Y by def.
+frame.visible {{N}} Y by def.
+frame.enabled {{N}} Y by def.
 frame.height
-frame.sizable <<Y>> N by def.
+frame.sizable {{Y}} N by def.
 frame.minheight
 frame.tag
 
@@ -197,18 +200,18 @@ form.caption
 form.backcolor
 form.font "name;size;italic;bold;underline"\nfor example: "Tahoma;8;N;Y;N"
 form.position "left;top;width "\nheight is determined by visible frames
-form.center <<Y center form relative to it's parent|N>>
-form.scalemode  <<0 pixels|1 points (by default)>>
-form.sizable Sizable = <<Y>> N by def.
+form.center {{Y center form relative to it's parent|N}}
+form.scalemode  {{0 pixels|1 points (by default)}}
+form.sizable Sizable = {{Y}} N by def.
 form.minwidth
 
 template.name
-template.type <<report|utility|deal>> (в Arena не анализируется)
+template.type {{report|utility|deal}} (в Arena не анализируется)
 template.license выражение для проверки лицензии (в Arena не используется)
 template.access выражение для проверки прав
 template.minkplusversion минимальная версия Kondor для данной формы.maxkplusversion = “”
 template.maxkplusversion макимальная версия Kondor для данной формы.maxkplusversion = “”
-template.style <<dropdown>>
+template.style {{dropdown}}
 template.minterminalbuild
 template.minterminalversion
 template.version
@@ -219,5 +222,5 @@ value.lang
 value.text
 
 menu.instance
-menu.recreate <<Y>> N by def.
+menu.recreate {{Y}} N by def.
 

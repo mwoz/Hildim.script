@@ -1,6 +1,6 @@
 require "seacher"
 local containers
-local oDeatt
+local oDeattFnd
 local firstMark = tonumber(props["findtext.first.mark"])
 local popUpFind
 
@@ -252,11 +252,11 @@ local function ReattachFind()
     Ctrl("chkInBottom").value = Iif(Ctrl("chkInBottom").value=='ON', 'OFF', 'ON')
     _G.iuprops['sidebarctrl.chkInBottom.value']=Ctrl("chkInBottom").value
     if Ctrl("chkInBottom").value == 'ON'  then
-        iup.Reparent(oDeatt, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
+        iup.Reparent(oDeattFnd, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
         iup.GetDialogChild(hMainLayout, "BottomSplit2").value="700"
         iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
     else
-        iup.Reparent(oDeatt, SideBar_obj.Tabs.findrepl.handle, nil)
+        iup.Reparent(oDeattFnd, SideBar_obj.Tabs.findrepl.handle, nil)
         iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000"
         iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="0"
     end
@@ -304,7 +304,7 @@ function ActivateFind(nTab)
     if _G.dialogs['findrepl'] then
     elseif Ctrl("chkInBottom").value == 'OFF' then
         if Ctrl("zPin").valuepos == '0' then SideBar_obj.TabCtrl.valuepos = 0; SideBar_obj.Tabs.functions.OnSwitchFile()
-        elseif SideBar_obj.TabCtrl.valuepos ~= 0 then oDeatt.detach = 1 end
+        elseif SideBar_obj.TabCtrl.valuepos ~= 0 then oDeattFnd.DetachRestore = true; oDeattFnd.detach = 1 end
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = editor.StyleAt[editor.SelectionStart] end
@@ -814,64 +814,34 @@ local function create_dialog_FindReplace()
 end
 
 local function FuncBmkTab_Init()
-    oDeatt = iup.detachbox{
+
+    oDeattFnd = iup.scitedetachbox{
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
-        detached_cb=(function(h, hNew, x, y)
-            if Ctrl("chkInBottom").value == 'ON' then
+        sciteid = 'findrepl';  Dlg_Title = "Поиск и замена";
+        On_Detach = (function(h, hNew, x, y)
+             if Ctrl("chkInBottom").value == 'ON' then
                 local hMainLayout = iup.GetLayout()
                 _G.iuprops['sidebarctrl.BottomSplit2.value'] = iup.GetDialogChild(hMainLayout, "BottomSplit2").value
                 iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="0"
                 iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000"
             end
-            _G.FindReplDialog = hNew
-            hNew.resize ="YES"
-            hNew.shrink ="YES"
-            hNew.minsize="384x270"
-            hNew.title="Поиск и замена"
-            hNew.maxbox="NO"
-            hNew.minbox="NO"
-            hNew.toolbox="YES"
-            hNew.x=10
-            hNew.y=10
-            x=10;y=10
-            hNew.rastersize = _G.iuprops['dialogs.findrepl.rastersize']
-            _G.iuprops['findrepl.win']='1'
-            _G.iuprops['dialogs.sidebarp.rastersize'] = h.rastersize
-            _G.iuprops["sidebarctrl.zPin.pinned.value"] = Ctrl("zPin").valuepos
-            if _G.iuprops["sidebarctrl.zPin.unpinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.unpinned.value"] end
-
-            hNew.close_cb =(function(h)
-                if Ctrl("chkInBottom").value == 'ON' then
-                    local hMainLayout = iup.GetLayout()
-                    iup.GetDialogChild(hMainLayout, "BottomSplit2").value = _G.iuprops['sidebarctrl.BottomSplit2.value']
-                    iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
-                end
-                if _G.dialogs['findrepl'] ~= nil then
-                    _G.iuprops['findrepl.win']='0'
-                    oDeatt.restore = 1
-                    _G.iuprops["sidebarctrl.zPin.unpinned.value"] = Ctrl("zPin").valuepos
-                    if _G.iuprops["sidebarctrl.zPin.pinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.pinned.value"] end
-                    _G.dialogs['findrepl'] = nil
-                    return -1
-                end
-            end)
-            hNew.show_cb=(function(h,state)
-                if state == 0 then
-                    _G.dialogs['findrepl'] = oDeatt
-                    popUpFind = h
-                elseif state == 4 then
-                    _G.iuprops["dialogs.findrepl.x"]= h.x
-                    _G.iuprops["dialogs.findrepl.y"]= h.y
-                    _G.iuprops['dialogs.findrepl.rastersize'] = h.rastersize
-                end
-            end)
-
-            if tonumber(_G.iuprops["dialogs.findrepl.x"])== nil or tonumber(_G.iuprops["dialogs.findrepl.y"]) == nil then _G.iuprops["dialogs.findrepl.x"]=0;_G.iuprops["dialogs.findrepl.y"]=0 end
-            return tonumber(_G.iuprops["dialogs.findrepl.x"])*2^16+tonumber(_G.iuprops["dialogs.findrepl.y"])
+        end);
+        Dlg_Close_Cb = (function(h)
+            if Ctrl("chkInBottom").value == 'ON' then
+                local hMainLayout = iup.GetLayout()
+                iup.GetDialogChild(hMainLayout, "BottomSplit2").value = _G.iuprops['sidebarctrl.BottomSplit2.value']
+                iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
+            end
+            _G.iuprops["sidebarctrl.zPin.unpinned.value"] = Ctrl("zPin").valuepos
+            if _G.iuprops["sidebarctrl.zPin.pinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.pinned.value"] end
+        end);
+        Dlg_Show_Cb = (function(h,state)
+            if state == 0 then popUpFind = h end
         end)
         }
+
     Ctrl('tabFinrRepl').rightclick_cb = (function()
        if  _G.iuprops['findrepl.win']=='0' then
             iup.menu
@@ -883,7 +853,7 @@ local function FuncBmkTab_Init()
 
 
     SideBar_obj.Tabs.findrepl = {
-        handle = iup.vbox{oDeatt};
+        handle = iup.vbox{oDeattFnd};
         OnMenuCommand = (function(msg)
             if msg == IDM_FIND then return ActivateFind(0)
             elseif msg == IDM_REPLACE then return ActivateFind(1)
@@ -901,7 +871,7 @@ local function FuncBmkTab_Init()
         end);
         OnSideBarClouse=(function()
             if Ctrl('chkInBottom').value == 'ON' then
-                iup.Reparent(oDeatt, SideBar_obj.Tabs.findrepl.handle, nil)
+                iup.Reparent(oDeattFnd, SideBar_obj.Tabs.findrepl.handle, nil)
             end
         end)
 --[[		OnSave = OnSwitch;
@@ -911,7 +881,7 @@ local function FuncBmkTab_Init()
     SideBar_obj.OnCreate = (function()
             if _G.iuprops['sidebarctrl.chkInBottom.value']=='ON' then
                 local hMainLayout = iup.GetLayout()
-                iup.Reparent(oDeatt, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
+                iup.Reparent(oDeattFnd, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
                 iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
                 iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
                 iup.Refresh(SideBar_obj.Tabs.findrepl.handle)

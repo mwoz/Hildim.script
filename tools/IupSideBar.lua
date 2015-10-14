@@ -137,58 +137,16 @@ local function  CreateBox()
     SideBar_obj.TabCtrl = tabs
 
     vbox = iup.vbox{tabs}       --SideBar_obj.Tabs.livesearch.handle,
-    oDeatt = iup.detachbox{
+    oDeatt = iup.scitedetachbox{
         vbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name='SideBarSB'; shrink="yes";
-        detached_cb=(function(h, hNew, x, y)
-            hNew.resize ="YES"
-            hNew.shrink ="YES"
-            hNew.minsize="100x100"
-            hNew.maxbox="NO"
-            hNew.minbox="NO"
-            --hNew.toolbox="YES"
-            hNew.title="SideBar /Close For Attach/"
-            hNew.x=10
-            hNew.y=10
-            x=10;y=10
-            hNew.rastersize = _G.iuprops['dialogs.sidebar.rastersize']
-            _G.iuprops['sidebar.win']='1'
-            _G.iuprops['dialogs.sidebarp.rastersize'] = h.rastersize
-            _G.iuprops['dialogs.sidebarp.splitvalue'] = iup.GetDialogChild(hMainLayout, "SourceSplit").value
-            iup.GetDialogChild(hMainLayout, "SourceSplit").value = "1000"
-            iup.GetDialogChild(hMainLayout, "SourceSplit").barsize = "0"
-            hNew.close_cb =(function(h)
-                if _G.dialogs['sidebar'] ~= nil then
-                    if _G.iuprops['findrepl.win']=='1' then
-                        _G.FindReplDialog.close_cb(_G.FindReplDialog)
-                    end
-                    _G.iuprops['sidebar.win']='0'
-                    oDeatt.restore = 1
-                    _G.dialogs['sidebar'] = nul
-                    return -1
-                end
-            end)
-            local bMove = false
-            hNew.show_cb=(function(h,state)
-                if state == 0 then
-                    _G.dialogs['sidebar'] = oDeatt
-                    if oDeatt.DetachRestore then
-                        oDeatt.DetachRestore = false
-                        iup.ShowXY(h, _G.iuprops["dialogs.sidebar.x"],_G.iuprops["dialogs.sidebar.y"])
-                    end
-                elseif state == 4 then
-                    _G.iuprops["dialogs.sidebar.x"]= h.x
-                    _G.iuprops["dialogs.sidebar.y"]= h.y
-                    _G.iuprops['dialogs.sidebar.rastersize'] = h.rastersize
-                    iup.GetDialogChild(hMainLayout, "SourceSplit").value = _G.iuprops['dialogs.sidebarp.splitvalue']
-                    iup.GetDialogChild(hMainLayout, "SourceSplit").barsize = "3"
-                end
-            end)
-
-            if tonumber(_G.iuprops["dialogs.sidebar.x"])== nil or tonumber(_G.iuprops["dialogs.sidebar.y"]) == nil then _G.iuprops["dialogs.sidebar.x"]=0;_G.iuprops["dialogs.sidebar.y"]=0 end
-            bMove = true
-            --return tonumber(_G.iuprops["dialogs.sidebar.x"])*2^16+tonumber(_G.iuprops["dialogs.sidebar.y"])
+        sciteid = 'sidebar';Split_h = iup.GetDialogChild(hMainLayout, "SourceSplit");Split_CloseVal = "1000";
+        Dlg_Title = "SideBar /Close For Attach/"; Dlg_Show_Cb = nil;
+        Dlg_Close_Cb = (function(h)
+            if _G.iuprops['findrepl.win']=='1' then
+                _G.FindReplDialog.close_cb(_G.FindReplDialog)
+            end
         end)
-        }
+    }
     return oDeatt
 end
 local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
@@ -288,8 +246,6 @@ local function InitSideBar()
     tDlg.k_any=(function(_,key)
         if key == 65307 then iup.PassFocus() end
     end)
-    --OnCreate()
-
 
     tDlg.SaveValues = (function()
         for _,tbs in pairs(SideBar_obj.Tabs) do
@@ -319,122 +275,34 @@ local function InitSideBar()
     end
     SideBar_obj.OnCreate()
 
-    BottomBar = iup.GetDialogChild(hMainLayout, "BottomBar")
-
-    BottomBar.detached_cb=(function(h, hNew, x, y)
-        hNew.resize ="YES"
-        hNew.shrink ="YES"
-        hNew.minsize="200x100"
-        hNew.maxbox="NO"
-        hNew.minbox="NO"
-        --hNew.toolbox="YES"
-        hNew.title="BottomBar /Close For Attach/"
-        hNew.x=10
-        hNew.y=10
-        x=10;y=10
-        hNew.rastersize = _G.iuprops['dialogs.bottombar.rastersize']
-        _G.iuprops['bottombar.win']='1'
-        _G.iuprops['dialogs.bottombar.rastersize'] = h.rastersize
-
-        hNew.close_cb =(function(h)
-            if _G.dialogs['bottombar'] ~= nil then
-                if _G.iuprops['concolebar.win']=='1' then
-                    iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
-                    iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = "3"
-                    iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
-                    _G.iuprops['concolebar.win']='0'
-                    iup.GetDialogChild(hMainLayout, "ConsoleDetach").restore = 1
-                    _G.dialogs['concolebar'] = nil
-                end
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops['dialogs.bottombar.splitvalue']
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "3"
-                iup.GetDialogChild(hMainLayout, "BottomExpander").state = "OPEN"
-                _G.iuprops['bottombar.win']='0'
-                iup.GetDialogChild(hMainLayout, "BottomBar").restore = 1
-                _G.dialogs['bottombar'] = nil
-                return -1
-            end
-        end)
-
-        hNew.show_cb=(function(h,state)
-            if state == 0 then
-                if BottomBar.DetachRestore then
-                    BottomBar.DetachRestore = false
-                    iup.ShowXY(h, _G.iuprops["dialogs.bottombar.x"],_G.iuprops["dialogs.bottombar.y"])
-                    return
-                end
-                iup.GetDialogChild(hMainLayout, "BottomExpander").state = "CLOSE"
-                _G.iuprops['dialogs.bottombar.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = "0"
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = "1000"
-                _G.dialogs['bottombar'] = iup.GetDialogChild(hMainLayout, "BottomBar")
-            elseif state == 4 then
-                _G.iuprops["dialogs.bottombar.x"]= h.x
-                _G.iuprops["dialogs.bottombar.y"]= h.y
-                _G.iuprops['dialogs.bottombar.rastersize'] = h.rastersize
-            end
-        end)
-        hNew.resize_cb = (function(h,width, height)
-            if _G.iuprops['concolebar.win']=='1' then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0" end
-        end)
-
-        if tonumber(_G.iuprops["dialogs.bottombar.x"])== nil or tonumber(_G.iuprops["dialogs.bottombar.y"]) == nil then _G.iuprops["dialogs.bottombar.x"]=0;_G.iuprops["dialogs.bottombar.y"]=0 end
-        --return tonumber(_G.iuprops["dialogs.bottombar.x"])*2^16+tonumber(_G.iuprops["dialogs.bottombar.y"])
-
-    end)
-
-    ConsoleBar = iup.GetDialogChild(hMainLayout, "ConsoleDetach")
-
-    ConsoleBar.detached_cb=(function(h, hNew, x, y)
-        hNew.resize ="YES"
-        hNew.shrink ="YES"
-        hNew.minsize="200x100"
-        hNew.maxbox="NO"
-        hNew.minbox="NO"
-        --hNew.toolbox="YES"
-        hNew.title="ConsoleBar /Close For Attach/"
-        hNew.x=10
-        hNew.y=10
-        x=10;y=10
-        hNew.rastersize = _G.iuprops['dialogs.concolebar.rastersize']
-        _G.iuprops['concolebar.win']='1'
-        _G.iuprops['dialogs.concolebar.rastersize'] = h.rastersize
-
-        hNew.close_cb =(function(h)
-            if _G.dialogs['concolebar'] ~= nil then
+    BottomBar = iup.scitedetachbox{
+        HANDLE = iup.GetDialogChild(hMainLayout, "BottomBar");
+        sciteid = 'bottombar';Split_h = iup.GetDialogChild(hMainLayout, "BottomBarSplit");Split_CloseVal = "1000";
+        Dlg_Title = "BottomBar /Close For Attach/";
+        Dlg_Close_Cb = (function(h)
+            if _G.iuprops['concolebar.win']=='1' then
                 iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
                 iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = "3"
                 iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
                 _G.iuprops['concolebar.win']='0'
                 iup.GetDialogChild(hMainLayout, "ConsoleDetach").restore = 1
                 _G.dialogs['concolebar'] = nil
-                return -1
             end
-        end)
+        end);
+        Dlg_Resize_Cb = (function(h,width, height)
+            if _G.iuprops['concolebar.win']=='1' then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0" end
+        end);
+     }
 
-        hNew.show_cb=(function(h,state)
-            if state == 0 then
-                if ConsoleBar.DetachRestore then
-                    ConsoleBar.DetachRestore = false
-                    iup.ShowXY(h, _G.iuprops["dialogs.concolebar.x"],_G.iuprops["dialogs.concolebar.y"])
-                    return
-                end
-                iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "CLOSE"
-                _G.iuprops['dialogs.concolebar.splitvalue'] = iup.GetDialogChild(hMainLayout, "BottomSplit").value
-                iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0"
-                iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = "0"
-                _G.dialogs['concolebar'] = iup.GetDialogChild(hMainLayout, "ConsoleDetach")
-            elseif state == 4 then
-                _G.iuprops["dialogs.concolebar.x"]= h.x
-                _G.iuprops["dialogs.concolebar.y"]= h.y
-                _G.iuprops['dialogs.concolebar.rastersize'] = h.rastersize
-            end
-        end)
-
-        if tonumber(_G.iuprops["dialogs.concolebar.x"])== nil or tonumber(_G.iuprops["dialogs.concolebar.y"]) == nil then _G.iuprops["dialogs.concolebar.x"]=0;_G.iuprops["dialogs.concolebar.y"]=0 end
-        --return tonumber(_G.iuprops["dialogs.concolebar.x"])*2^16+tonumber(_G.iuprops["dialogs.concolebar.y"])
-
-    end)
+    ConsoleBar = iup.scitedetachbox{
+        HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach");
+        sciteid = 'concolebar';Split_h = iup.GetDialogChild(hMainLayout, "BottomSplit");Split_CloseVal = "0";
+        Dlg_Title = "ConsoleBar /Close For Attach/"; Dlg_Show_Cb = nil;
+        Dlg_Close_Cb = (function(h)
+        end);
+        Dlg_Resize_Cb = (function(h,width, height)
+        end);
+     }
 
 end
 
