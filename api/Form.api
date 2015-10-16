@@ -1155,10 +1155,12 @@ calc.Pair_CrossRate(mPCross, mP1, d1Rate, mP2, d2Rate) дл€ пары - рассчитывает к
 # calc.Pair_RealRate2StoredRate(msgPair, dRate, bDirect) дл€ пары - получаем "нормальный" курс (тот, что хранитс€ в базе) из "расчетного"
 # calc.Pair_StoredRate2RealRate(msgPair, dRate, bDirect) дл€ пары - получаем "расчетный" курс из "нормального" - того, что хранитс€ в базе
 
-objtmp.PropertyBag(val)
-objtmp.bActiveTab(val)
-objtmp.OpenObj(vIdx, strTemplate, bReplace)
-objtmp.ParentForm(f)
+objtmp.OpenObj(vIdx, strTemplate, bReplace) метод открыти€ формы объекта\nvIdxProp - либо msgPropertyBag, либо Id/Code объекта, либо Null\nstrObjectType_Code - код типа объекта\nbReplace = True/False/Null, при Null - используем False, но еще провер€ем CheckCtrl\n
+objtmp.InstanceName задает инстанс открываемой формы
+objtmp.bActivateTab активировать ли таб при открытии формы
+objtmp.RandomInstance признак открыти€ формы в новом уникальном инстансе
+objtmp.TemplateName «адает им€ шаблона, если оно отличаетс€ от дефолтного дл€ данного объекта
+objtmp.ParentForm задает родительское окно дл€ открываемой формы\n≈сли задано, открываетс€ как дочерн€€ форма
 
 
 

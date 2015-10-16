@@ -367,7 +367,7 @@ local function ListErrors()
     if lineErrors ~= "" then
         out = out..lineErrors..': '..ProbabblyFromUT(editor:GetLine(line))
     end
-    out = out..'<'
+    out = out..'<\r\n'
 
     for line = 0, editor.LineCount do
         local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
