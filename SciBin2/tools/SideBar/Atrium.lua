@@ -17,7 +17,7 @@ local AD_ParamUnknown = 0        --Indicates that the parameter direction is unk
 local XMLCAPT = '<?xml version="1.0" encoding="Windows-1251" standalone="yes"?>\n'
 
 local cmb_Action, chk_ign, cmb_syscust, txt_objmask, txt_datamask, list_obj, list_data, cmb_mask, btnRun
-local cmb_RefDepth, cmb_apDept, chk_IncludeExt
+local cmb_RefDepth, cmb_apDept, chk_IncludeExt,cmb_dataShem,exp_dataSchem,exp_dataOptions
 
 local function dbAddProcParam(msgParams, strName, varValue, enumType, enumDirection ,lSize )
     msgParams:SetPathValue(strName.."\\Value"    ,varValue)
@@ -36,6 +36,20 @@ local function dbRunProc(strProc, msgParams, funCallback, timeout, opaque)
 
     mblua.Request(funCallback,msg,timeout,opaque)
     msg:Destroy()
+end
+
+local function AtriumCompare(strPath, strContent)
+
+    local _, tmppath=shell.exec('CMD /c set TEMP',nil,true,true)
+    tmppath=string.sub(tmppath,6,string.len(tmppath)-2)..'\\atrtmp'
+    local f = io.open(tmppath, "w")
+    strContent = strContent:gsub('\r\n','\n')
+    f:write(strContent)
+    f:flush()
+    f:close()
+
+    cmd=string.gsub(string.gsub(props['vsscompare'],'%%bname','"'..strPath..'"'),'%%yname','"'..tmppath..'"')
+    shell.exec(cmd)
 end
 
 local function ProbablyToUTF(str)
@@ -156,11 +170,66 @@ local function ApplyMetadata(strXml)
     dbRunProc('mpGenerateSql', msgParams, SetReply, 20, nil)
 end
 
-local function SelectMetadata()
+local function SelectData()
+    if not list_obj.marked then return end
+    local sel = list_obj.marked:find('1')
+    if not sel then return end
+    sel = sel - 1
+    local tbl = iup.GetAttributeId2(list_obj, '', sel, 3)
+    local bSceme
+    if tbl == 'dbo.ObjectTypeForm' or tbl == 'dbo.Choice' then
+        exp_dataOptions.barsize = '0'
+        exp_dataOptions.state = 'CLOSE'
+        exp_dataSchem.state = 'OPEN'
+        bSceme = true
+    elseif tbl == 'dbo.Report' then
+        exp_dataOptions.barsize = '0'
+        exp_dataOptions.state = 'CLOSE'
+        exp_dataSchem.state = 'CLOSE'
+        bSceme = false
+    else
+        exp_dataOptions.barsize = '20'
+        exp_dataSchem.state = 'CLOSE'
+        bSceme = false
+    end
+    iup.Refresh(exp_dataOptions)
+
+    local nm = iup.GetAttributeId2(list_obj, '', sel, 3):gsub('^.-([%w_]+)$', '%1')
+    local cd = iup.GetAttributeId2(list_obj, '', sel, 4)
+    local sql
+    local code = Iif(bSceme, iup.GetAttribute(cmb_dataShem, cmb_dataShem.value)..'.', '')..Trim(txt_datamask.value)
+    if cd == nil then
+        if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
+            sql = "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, f.ObjectTypeForm_Id, (o.ObjectType_Code + '.' + v.Tag) as [ObjectTypeForm_Code] from ObjectTypeForm f\n"..
+            "inner join ObjectType o on o.ObjectType_Id = f.ObjectType_Id\n"..
+            "inner join ChoiceValue v on v.Value = f.FormType\n"..
+            "inner join Choice c on c.Choice_Id = v.Choice_Id and c.Choice_Code = 'system.FormType'\n"..
+            "where (o.ObjectType_Code + '.' + f.FormType) like ('"..code.."%') order by o.ObjectType_Code"
+        else
+            sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id from "..tbl
+            if tonumber(txt_datamask.value) ~= nil then sql =  sql.." where "..nm.."_Id >= "..tonumber(txt_datamask.value).." order by "..nm.."_Id" end
+        end
+    else
+        sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..cd.." from "..tbl.." where "..cd.." like ('"..code.."%') order by "..cd
+    end
+    dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
+        if dbCheckError(iError, msgReplay) then return end
+        local _, mc = msgReplay:Counts()
+        iup.SetAttribute(list_data, "DELLIN", "1-"..list_data.numlin)
+        iup.SetAttribute(list_data, "ADDLIN", "1-"..mc)
+        for i = 0, mc - 1 do
+            list_data:setcell(i + 1, 1, msgReplay:Message(i):GetPathValue(nm..'_Id'))
+            list_data:setcell(i + 1, 2, msgReplay:Message(i):GetPathValue(nm..'_Code'))
+        end
+        list_data.redraw = "ALL"
+    end,20,nil)
+end
+
+local function SelectMetadata(bPreset)
     --"select __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1\n"..
    local sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, ObjectType_Code,ObjectType_Name,TableName, "..
    "convert(xml, Metadata).value('(/Template/DataModel/Tables/Table/Fields/Field[@type=''ObjectCode'']/@name)[1]', 'nvarchar(max)') as [CodeField]"..
-   " from ObjectType where ObjectType_Code like ('"..iup.GetAttribute(cmb_syscust, cmb_syscust.value).."."..txt_objmask.value.."%')  order by ObjectType_Code"
+   " from ObjectType where ObjectType_Code like ('"..iup.GetAttribute(cmb_syscust, cmb_syscust.value).."."..Trim(txt_objmask.value)..Iif(bPreset, "", "%").."')  order by ObjectType_Code"
 
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
@@ -181,43 +250,11 @@ local function SelectMetadata()
         --print(msgReplay:ToString())
         --msgReplay:Destroy()
         list_obj.redraw = "ALL"
+        if bPreset then
+            SelectData();
+            iup.SetFocus(txt_datamask)
+        end
     end,10,nil)
-end
-
-local function SelectData()
-    if not list_obj.marked then return end
-    local sel = list_obj.marked:find('1')
-    if not sel then return end
-    sel = sel - 1
-    local tbl = iup.GetAttributeId2(list_obj, '', sel, 3)
-    local nm = iup.GetAttributeId2(list_obj, '', sel, 3):gsub('^.-([%w_]+)$', '%1')
-    local cd = iup.GetAttributeId2(list_obj, '', sel, 4)
-    local sql
-    if cd == nil then
-        if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
-            sql = "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, f.ObjectTypeForm_Id, (o.ObjectType_Code + '.' + v.Name) as [ObjectTypeForm_Code] from ObjectTypeForm f\n"..
-            "inner join ObjectType o on o.ObjectType_Id = f.ObjectType_Id\n"..
-            "inner join ChoiceValue v on v.Value = f.FormType\n"..
-            "inner join Choice c on c.Choice_Id = v.Choice_Id and c.Choice_Code = 'system.FormType'\n"..
-            "where (o.ObjectType_Code + '.' + f.FormType) like ('"..txt_datamask.value.."%') order by o.ObjectType_Code"
-        else
-            sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id from "..tbl
-            if tonumber(txt_datamask.value) ~= nil then sql =  sql.." where "..nm.."_Id >= "..tonumber(txt_datamask.value).." order by "..nm.."_Id" end
-        end
-    else
-        sql =  "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, "..nm.."_Id, "..cd.." from "..tbl.." where "..cd.." like ('"..txt_datamask.value.."%') order by "..cd
-    end
-    dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
-        if dbCheckError(iError, msgReplay) then return end
-        local _, mc = msgReplay:Counts()
-        iup.SetAttribute(list_data, "DELLIN", "1-"..list_data.numlin)
-        iup.SetAttribute(list_data, "ADDLIN", "1-"..mc)
-        for i = 0, mc - 1 do
-            list_data:setcell(i + 1, 1, msgReplay:Message(i):GetPathValue(nm..'_Id'))
-            list_data:setcell(i + 1, 2, msgReplay:Message(i):GetPathValue(nm..'_Code'))
-        end
-        list_data.redraw = "ALL"
-    end,20,nil)
 end
 
 local function PutReport()
@@ -363,7 +400,7 @@ local function Data_OpenNew()
     end
 end
 
-local function Data_Unload()
+local function Data_Unload(bCompare)
     local sel = list_obj.marked:find('1') - 1
     local oName = list_obj:getcell(sel,1)
     if oName == 'system.ObjectTypeForm' or oName == 'system.Report' then
@@ -378,14 +415,18 @@ local function Data_Unload()
         dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
             local strPath = props['FileDir']..'\\'..strName..'.'..Iif(oName == 'ObjectTypeForm', 'cform', 'rform')
-            local f = io.open(strPath, "w")
-            f:write('')
-            f:flush()
-            f:close()
-            scite.Open(strPath)
-            if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
-            editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('FormData')))
-            scite.MenuCommand(IDM_SAVE)
+            if bCompare == true then
+                AtriumCompare(strPath, msgReplay:GetPathValue('FormData'))
+            else
+                local f = io.open(strPath, "w")
+                f:write('')
+                f:flush()
+                f:close()
+                scite.Open(strPath)
+                if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+                editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('FormData')))
+                scite.MenuCommand(IDM_SAVE)
+            end
         end,20,nil)
     else
         local strName = iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1):gsub('.*%.(.*)', '%1')..'.'..
@@ -394,15 +435,19 @@ local function Data_Unload()
         dbRunSql(Data_GetSql(), function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
             local strPath = props['FileDir']..'\\'..strName..'.xml'
-            local f = io.open(strPath, "w")
-            f:write('')
-            f:flush()
-            f:close()
-            scite.Open(strPath)
-            if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
-            editor:SetText(ProbablyToUTF(xml.eval(msgReplay:GetPathValue('xml')):str()))
-            TryCleanUp()
-            scite.MenuCommand(IDM_SAVE)
+            if bCompare == true then
+                AtriumCompare(strPath, msgReplay:GetPathValue('FormData'))
+            else
+                local f = io.open(strPath, "w")
+                f:write('')
+                f:flush()
+                f:close()
+                scite.Open(strPath)
+                if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+                editor:SetText(ProbablyToUTF(xml.eval(msgReplay:GetPathValue('xml')):str()))
+                TryCleanUp()
+                scite.MenuCommand(IDM_SAVE)
+            end
         end,20,nil)
     end
 end
@@ -445,7 +490,7 @@ local function Metadata_NewData()
     end, 20, nil)
 end
 
-local function Metadata_Unload()
+local function Metadata_Unload(bCompare)
     local sel = list_obj.marked:find('1') - 1
     iup.GetAttributeId2(list_obj, '', sel, 1)
     local strName = iup.GetAttributeId2(list_obj, '', sel, 1)
@@ -454,16 +499,20 @@ local function Metadata_Unload()
     dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
         if dbCheckError(iError, msgReplay) then return end
         local strPath = props['FileDir']..'\\'..strName..'.xml'
-        local f = io.open(strPath, "w")
-        f:write('')
-        f:flush()
-        f:close()
-        scite.Open(strPath)
-        if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
-        --local sText = msgReplay:GetPathValue('Metadata'):gsub('\r', '')
-        editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('Metadata')))
-        scite.MenuCommand(IDM_SAVE)
-        scite.MenuCommand(1468)
+        if bCompare==true then
+            AtriumCompare(strPath, msgReplay:GetPathValue('Metadata'))
+        else
+            local f = io.open(strPath, "w")
+            f:write('')
+            f:flush()
+            f:close()
+            scite.Open(strPath)
+            if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+            --local sText = msgReplay:GetPathValue('Metadata'):gsub('\r', '')
+            editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('Metadata')))
+            scite.MenuCommand(IDM_SAVE)
+            scite.MenuCommand(1468)
+        end
     end,20,nil)
 end
 
@@ -518,13 +567,19 @@ local function FindTab_Init()
     iup.SetAttribute(cmb_syscust, 3, "custom")
     cmb_syscust.value = 1
 
-    --txt_objmask = iup.text{expand='HORIZONTAL',tip='Маска метаданных'}
+
     txt_objmask = iup.list{editbox = "YES",dropdown="YES",visible_items="15",expand='HORIZONTAL',tip='Маска метаданных'}
     iup.SetAttribute(txt_objmask, 1, "Choice")
     iup.SetAttribute(txt_objmask, 2, "ObjectTypeForm")
     iup.SetAttribute(txt_objmask, 3, "Report")
-    txt_objmask.k_any = (function(h,k) if k == iup.K_CR then SelectMetadata() end end)
-    txt_objmask.action = (function(h,text,item,state) if state == 1 then txt_objmask.value = text; SelectMetadata() end end)
+    txt_objmask.k_any = (function(h,k) if k == iup.K_CR then SelectMetadata(false) end end)
+    txt_objmask.action = (function(h,text,item,state)
+        if state == 1 then
+            cmb_syscust.value = 2
+            txt_objmask.value = text;
+            SelectMetadata(true)
+        end
+    end)
 
     cmb_RefDepth = iup.list{dropdown="YES",visible_items="15",size='20x0', expand='NO', tip='Reference Repth'}
     iup.SetAttribute(cmb_RefDepth, 1, "0")
@@ -549,31 +604,16 @@ local function FindTab_Init()
   	list_obj:setcell(0, 1, "Code")
   	list_obj:setcell(0, 2, "Name")
   	list_obj:setcell(0, 3, "Table")
---[[    list_obj.click_cb = (function(h, lin, col, status)
-        local sel = 0
-        if list_obj.marked then sel = list_obj.marked:find('1') - 1 end
-        if sel ~= lin then iup.SetAttribute(list_data, "DELLIN", "1-"..list_data.numlin) end
-        iup.SetAttribute(list_obj,  'MARK'..sel..':0', 0)
-        iup.SetAttribute(list_obj, 'MARK'..lin..':0', 1)
-        list_obj.redraw = lin..'*'
-        if iup.isbutton3(status) then
-            h.focus_cell = lin..':'..col
-            local mnu = iup.menu
-            {
-              iup.item{title="Открыть как новый файл",action=Metadata_OpenNew},
-              iup.item{title="Выгрузить и открыть в текущей директории",action=Metadata_Unload},
-              iup.separator{},
-              iup.item{title="Открыть новый файл с данными",action=Metadata_NewData},
-              iup.separator{},
-              iup.item{title="Добавить XML заголовок",value=_G.iuprops['atrium.metadata.xmlcapt'],action=(function() _G.iuprops['atrium.metadata.xmlcapt']=Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON','OFF','ON') end)},
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
-        end
-    end)]]
+    local function Compare()
+        Metadata_Unload(true)
+    end
     local function obj_mnu()
             local mnu = iup.menu
             {
               iup.item{title="Открыть как новый файл",action=Metadata_OpenNew},
-              iup.item{title="Выгрузить и открыть в текущей директории",action=Metadata_Unload},
+              iup.item{title="Выгрузить и открыть в текущей директории",action=Metadata_Unload}, nil,
+              Iif(shell.fileexists(props["FileDir"]..'//'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml'),
+                iup.item{title="Сравнить с файлом в текущей директории",action=Compare}, nil),
               iup.separator{},
               iup.item{title="Открыть новый файл с данными",action=Metadata_NewData},
               iup.separator{},
@@ -593,12 +633,20 @@ local function FindTab_Init()
     width0 = 0 ,rasterwidth1 = 50 ,rasterwidth2= 350}
     list_data:setcell(0, 1, "Id")
     list_data:setcell(0, 2, "Code")
-
+    local function CompareData()
+        Data_Unload(true)
+    end
     local function dat_mnu()
+        local oExt = list_obj:getcell(list_obj.marked:find('1') - 1 ,1)
+        if oExt == 'system.ObjectTypeForm' then oExt = '.cform'
+        elseif oExt == 'system.Report' then oExt = '.rform'
+        else oExt = '.xml' end
         local mnu = iup.menu
         {
           iup.item{title="Открыть как новый файл",action=Data_OpenNew},
           iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
+          Iif(shell.fileexists(props["FileDir"]..'\\'..(iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2) or iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1))..oExt),
+            iup.item{title="Сравнить с файлом в текущей директории",action=CompareData}, nil),
           iup.separator{},
           iup.item{title="Не выгружать ID и технические поля",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
           iup.item{title="WIN-1251",value=_G.iuprops['atrium.data.win1251'],action=(function() _G.iuprops['atrium.data.win1251']=Iif(_G.iuprops['atrium.data.win1251']=='ON','OFF','ON') end)},
@@ -606,6 +654,26 @@ local function FindTab_Init()
     end
     list_data:SetCommonCB(Data_OpenNew,nil,nil,dat_mnu)
 
+
+    cmb_dataShem = iup.list{dropdown="YES",visible_items="15",size='40x0', expand='NO', tip='Сохранение/Удаление объекта'}
+    iup.SetAttribute(cmb_dataShem, 1, "%")
+    iup.SetAttribute(cmb_dataShem, 2, "system")
+    iup.SetAttribute(cmb_dataShem, 3, "custom")
+    cmb_dataShem.value = 1
+    exp_dataSchem = iup.expander{iup.hbox{
+        cmb_dataShem,
+        },
+        barposition='LEFT', state='CLOSE', barsize = '0',
+    }
+    exp_dataOptions = iup.expander{iup.hbox{
+            iup.label{title=' Ref Dp: '},
+            cmb_RefDepth,
+            iup.label{title=' ApM.Dp: '},
+            cmb_apDept, chk_IncludeExt,
+            alignment="ACENTER", gap="3", margin="3x0"
+        },
+        barposition='LEFT', state='CLOSE', autoshow='YES'
+    }
     --iup.toogle
     SideBar_obj.Tabs.atrium =  {
 handle =iup.split{
@@ -613,21 +681,14 @@ handle =iup.split{
         iup.hbox{
             cmb_syscust,
             txt_objmask,
-            iup.button{image = "IMAGE_search", action=SelectMetadata},
+            iup.button{image = "IMAGE_search", action=function() SelectMetadata(false) end},
             alignment="ACENTER", gap="3", margin="3x7"
         };
         list_obj;
     },iup.vbox{
         iup.hbox{
-            iup.expander{iup.hbox{
-                    iup.label{title=' Ref Dp: '},
-                    cmb_RefDepth,
-                    iup.label{title=' ApM.Dp: '},
-                    cmb_apDept, chk_IncludeExt,
-                    alignment="ACENTER", gap="3", margin="3x0"
-                },
-                barposition='LEFT', state='CLOSE', autoshow='YES'
-            },
+            exp_dataSchem,
+            exp_dataOptions,
             txt_datamask,
             iup.button{image = "IMAGE_search", action=SelectData},
         },
