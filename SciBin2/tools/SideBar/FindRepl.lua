@@ -785,7 +785,6 @@ local function create_dialog_FindReplace()
 
   containers[24] = iup.frame{
     containers[25],
-    size = "241x49",
   }
 
   containers[23] = iup.hbox{

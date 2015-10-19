@@ -3,6 +3,7 @@ local list_bookmarks
 local tab2
 local Abbreviations_USECALLTIPS = tonumber(props['sidebar.abbrev.calltip']) == 1
 local isEditor = false
+local m_lastLin = -2
 
 ----------------------------------------------------------
 -- tab1:list_bookmarks   Bookmarks
@@ -62,6 +63,7 @@ local function Bookmarks_ListFILL()
         list_bookmarks:setcell(i, 3, bmk.FilePath)
         list_bookmarks:setcell(i, 4, bmk.LineNumber)
 	end
+    m_lastLin = -2
     list_bookmarks.redraw = "L1-100"
 end
 
@@ -80,12 +82,12 @@ local function Bookmarks_GotoLine(item)
     local lin = tonumber(list_bookmarks:getcell(item,4))
 
 	--if pos then
-		OnNavigation("Bcmk")
+		OnNavigation("Bkmk")
 		scite.Open(path) -- FilePath
 		ShowCompactedLine(lin) -- LineNumber
 		editor:GotoLine(lin)
 		iup.PassFocus()
-		OnNavigation("Bcmk-")
+		OnNavigation("Bkmk-")
 	--end
 end
 local function  _OnUpdateUI()
@@ -144,6 +146,16 @@ local function AbbreviationsTab_Init()
 	list_bookmarks.click_cb = (function(_, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Bookmarks_GotoLine(lin)
+        end
+    end)
+    list_bookmarks.mousemove_cb = (function(_,lin, col)
+        if m_lastLin ~= lin then
+            m_lastLin = lin
+            if list_bookmarks:getcell(lin,4) then
+                list_bookmarks.tip = list_bookmarks:getcell(lin,2)..'\n\n File: '..list_bookmarks:getcell(lin,3)..'\nLine:  '..list_bookmarks:getcell(lin,4)
+            else
+                list_bookmarks.tip = 'Список букмарков'
+            end
         end
     end)
 

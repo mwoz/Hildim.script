@@ -13,6 +13,7 @@ local bymemokey=0
 local sort_by_tyme = _G.iuprops['sidebar.fileman.timesort']
 local chkByTime
 local bListOpened = false
+local m_prevSel = 0
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
 	local i, j = 1
@@ -232,7 +233,10 @@ local function OpenFile(filename)
 	else
 		scite.Open(filename)
 	end
-	iup.PassFocus()
+    if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='ON' then sidebar_Switch(m_prevSel+1)
+    elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='1' then sidebar_Switch(1)
+    end
+    iup.PassFocus()
 end
 local prev_filename = ''
 local function FileMan_OpenItem()
@@ -455,7 +459,7 @@ local function OnSwitch(bForse, bRelist)
     if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
         if bForse then iup.SetFocus(memo_mask) end
         local path = props['FileDir']
-        if path == '' then path = _G.iuprops['FileMan.Dir'] end
+        if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
         if path ~= '' then
             current_path = path:gsub('\\$','')..'\\'
             -- if bClearMask then memo_mask:set_text = "" end
@@ -524,7 +528,7 @@ local function FileManTab_Init()
         if h.marked then sel = h.marked:find('1') - 1 end
         iup.SetAttribute(h,  'MARK'..sel..':0', 0)
         iup.SetAttribute(h, 'MARK'..lin..':0', 1)
-        l = shell.bit_and(tonumber(list_dir:getcell(lin, 3) or 0), 1)
+        local l = shell.bit_and(tonumber(list_dir:getcell(lin, 3) or 0), 1)
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
             if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
@@ -550,6 +554,13 @@ local function FileManTab_Init()
               iup.item{title="Exec with Params",action=FileMan_FileExecWithParams},
               iup.separator{},
               iup.item{title="Add to Favorites",action=Favorites_AddFile},
+              iup.submenu{title='When open file',
+                  iup.menu{
+                    iup.item{title="Stay Here",action=function() _G.iuprops['sidebarfileman.restoretab']='OFF' end, value=Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='OFF','ON','OFF')},
+                    iup.item{title="Restore First Tab",action=function() _G.iuprops['sidebarfileman.restoretab']='1' end,value=Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='1','ON','OFF')},
+                    iup.item{title="Restore Prev. Tab",action=function() _G.iuprops['sidebarfileman.restoretab']='ON' end,value=Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='ON','ON','OFF')},
+                  }
+              },
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
@@ -623,15 +634,20 @@ local function FileManTab_Init()
         OnSwitchFile = function()OnSwitch(false,true) end;
         OnSave = function()OnSwitch(false,false) end;
         OnOpen = function()OnSwitch(false,true) end;
-        OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir']=memo_path.value end);
-        tabs_OnSelect = function()OnSwitch(true,false) end;
+        OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir.restoretab']=memo_path.value end);
+        tabs_OnSelect = function()
+            if SideBar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_obj.Tabs.fileman.id then
+                m_prevSel = SideBar_obj.TabCtrl.valuepos
+            end
+            OnSwitch(true,false)
+        end;
     }
     Favorites_OpenList()
 end
 
 FileManTab_Init()
 
-local function reset_err(ierr, strerr, sName)
+--[[local function reset_err(ierr, strerr, sName)
 	if ierr==0 then
 	else
 		print(sName, strerr)
@@ -641,7 +657,6 @@ end
 function Ren_VSS()
     local o1,o2 = 'xml', 'inc'
     local n1,n2 = 'form', 'incl'
-    print(current_path)
     if vss_SetCurrentProject(current_path) then
         for i = 2, list_dir.numlin do
             local sName = list_dir:getcell(i, 2)
@@ -652,4 +667,4 @@ function Ren_VSS()
         end
     end
     print('OK')
-end
+end]]

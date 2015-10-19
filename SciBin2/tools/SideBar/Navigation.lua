@@ -1,9 +1,10 @@
 local currentItem = 0
 local list_navigation
-local blockUpdate = false
+SideBar_obj.blockUpdate = true
+local m_lastLin = -2
 
 local function OnNavigate(item)
-	if blockUpdate then return  end
+	if SideBar_obj.blockUpdate then return  end
 
 	while currentItem > 1 do
 		list_navigation.dellin = 0
@@ -34,7 +35,7 @@ local function OnNavigate(item)
     list_navigation:setcell(1,3,item)
     list_navigation:setcell(1,4,(line_+1))
     list_navigation:setcell(1,5, path_)
-
+    m_lastLin = -2
 	while tonumber(list_navigation.numlin) > 100 do
 		list_navigation.dellin = tonumber(list_navigation.numlin) - 1
 	end
@@ -53,12 +54,12 @@ local function Navigation_Go(item)
     if not path then return end
     local lin = tonumber(list_navigation:getcell(item,4))
 
-	blockUpdate = true
+	SideBar_obj.blockUpdate = true
 	if props['FilePath'] ~= path then scite.Open(path) end
 
 	editor:SetSel(editor:PositionFromLine(lin-1),editor:PositionFromLine(lin))
 	iup.PassFocus()
-	blockUpdate = false
+	SideBar_obj.blockUpdate = false
 
     iup.SetAttribute(list_navigation, "BGCOLOR"..(currentItem)..":*", "255 255 255")
     iup.SetAttribute(list_navigation, "BGCOLOR"..item..":*", "192 192 192")
@@ -94,7 +95,7 @@ local function FuncBmkTab_Init()
     numcol=5, numcol_visible=4,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 250 ,rasterwidth2 = 70 ,rasterwidth3 = 50 ,rasterwidth4 = 40 ,rasterwidth5 = 0,
-    tip='История\n(Alt+<)/(Alt+>) - Назад/Вперед'}
+    }
 
 	list_navigation:setcell(0, 1, "Text")         -- ,size="400x400"
 	list_navigation:setcell(0, 2, "File")
@@ -103,6 +104,16 @@ local function FuncBmkTab_Init()
 	list_navigation.click_cb = (function(_, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Navigation_Go(lin)
+        end
+    end)
+    list_navigation.mousemove_cb = (function(_,lin, col)
+        if m_lastLin ~= lin then
+            m_lastLin = lin
+            if list_navigation:getcell(lin,5) then
+                list_navigation.tip = list_navigation:getcell(lin,1)..'\n\n File: '..list_navigation:getcell(lin,5)..'\nLine:  '..list_navigation:getcell(lin,4)
+            else
+                list_navigation.tip = 'История\n(Alt+<)/(Alt+>) - Назад/Вперед'
+            end
         end
     end)
 
