@@ -1,3 +1,4 @@
+require 'shell'
 SideBar_obj = {}
 TabBar_obj = {}
 
@@ -13,7 +14,7 @@ local oDeatt
 local hMainLayout = iup.GetLayout()
 local BottomBar, ConsoleBar, FindRepl
 
-iup.SetGlobal("DEFAULTFONTSIZE", "10")
+iup.SetGlobal("DEFAULTFONTSIZE", Iif(props['iup.defaultfontsize']=='', "10", props['iup.defaultfontsize']))
 
 iup.PassFocus=(function()
     iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
@@ -61,36 +62,50 @@ local function  CreateBox()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Functions.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Navigation.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
-    if _G.iuprops['sidebar.useatriumpane'] == '1' then dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua") end
-    props['sidebar.useatriumpane'] = _G.iuprops['sidebar.useatriumpane']
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua")
+
     -- Creates boxes
-    vFuncNav = iup.vbox{SideBar_obj.Tabs.functions.handle,  SideBar_obj.Tabs.findrepl.handle}
-    vFuncNav.tabtitle = "Func/Find"
-    SideBar_obj.Tabs.functions.id = vFuncNav.tabtitle
-    SideBar_obj.Tabs.navigation.id = vFuncNav.tabtitle
-
-    vAbbrev = iup.split{SideBar_obj.Tabs.abbreviations.handle, iup.split{SideBar_obj.Tabs.bookmark.handle, SideBar_obj.Tabs.navigation.handle, orientation="HORIZONTAL", name="splitFuncNav"}, orientation="HORIZONTAL", name="splitAbbrev"}
-
-    -- Sets titles of the vboxes Navigation
-    vAbbrev.tabtitle = "Abbrev/Bmk/Nav"
-    SideBar_obj.Tabs.abbreviations.id = vAbbrev.tabtitle
-
-    -- vSys = iup.vbox{SideBar_obj.Tabs.m4.handle, SideBar_obj.Tabs.mb.handle , SideBar_obj.Tabs.template.handle }
-    -- vSys.tabtitle = "Sys"
-
-    vFileMan = SideBar_obj.Tabs.fileman.handle
-    vFileMan.tabtitle = "FileMan"
-    SideBar_obj.Tabs.fileman.id = vFileMan.tabtitle
-
-    if _G.iuprops['sidebar.useatriumpane'] == '1' then
-        vFindRepl = iup.vbox{SideBar_obj.Tabs.atrium.handle}
-        vFindRepl.tabtitle = "Atrium"
-        SideBar_obj.Tabs.findrepl.id = vFindRepl.tabtitle
+    local sb_elements = {}
+    function Pane(t)
+        for i = 1, #t do
+            if type(t[i])=='string' then
+                table.insert(sb_elements, SideBar_obj.Tabs[t[i]])
+                t[i] = SideBar_obj.Tabs[t[i]].handle
+            end
+        end
+        if t.tabtitle then
+            for i = 1, #sb_elements do sb_elements[i].id = t.tabtitle end
+            sb_elements = {}
+        end
+        local b
+        if t.type == "VBOX" then
+            l = iup.vbox(t)
+        elseif t.type == "SPLIT" then
+            l = iup.split(t)
+        elseif t.type == nil then
+            l = t[1]
+        else print('Unsupported type:'..t.type) end
+        l.tabtitle = t.tabtitle
+        return l
     end
+    local function SideBar(t)
+        t.name="tabMain"
+        t.tip= 'Ctrl+1,2,3,4'
+        return iup.tabs(t)
+    end
+    tbArg = function()
+        return {
+            Pane{'functions', 'findrepl', tabtitle = "Func/Find", type='VBOX'},
+            Pane{'abbreviations', Pane{'bookmark','navigation', orientation="HORIZONTAL", name="splitFuncNav",  type='SPLIT'}, orientation="HORIZONTAL", name="splitAbbrev", tabtitle = "Abbrev/Bmk/Nav", type="SPLIT"},
+            Pane{'fileman', tabtitle = "FileMan"},
+            Pane{'atrium', tabtitle = "Atrium", type= "VBOX"},
+        }
+    end
+    local plugin = props["SciteDefaultHome"].."\\data\\home\\SideBarLayout.lua"
+    if shell.fileexists(plugin) then dofile(plugin) end
 
-    -- Creates tabs
-    local tabs = iup.tabs{ vFuncNav, vAbbrev, vFileMan,vFindRepl, name="tabMain", tip= 'Ctrl+1,2,3,4'  }
-
+    local tabs =  SideBar(tbArg())
+    tbArg = nil
     tabs.tabchange_cb = (function(_,new_tab, old_tab)
         --сначала найдем активный таб и установим его в SideBar_obj
 
@@ -135,6 +150,7 @@ local function  CreateBox()
     end)
 
     SideBar_obj.TabCtrl = tabs
+    tbArg = nil
 
     vbox = iup.vbox{tabs}       --SideBar_obj.Tabs.livesearch.handle,
     oDeatt = iup.scitedetachbox{
@@ -398,15 +414,27 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         if wp == 3 then  --Показ отдельным окном развязываем через пост, иначе плохо иконки показывает
             props['session.reload'] = _G.iuprops['session.reload']
             if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
-                local t = {}
+                local bNew = (props['FileName'] ~= '')
+                local t,p = {},{}
                 for f in _G.iuprops['buffers']:gmatch('[^•]+') do
                     table.insert(t, f)
+                end
+                for f in _G.iuprops['buffers.pos']:gmatch('[^•]+') do
+                    table.insert(p, f)
                 end
                 _G.iuprops['buffers'] = nil
                 for i = #t,1,-1 do
                     scite.Open(t[i])
+                    if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
+                end
+                if bNew then
+                    scite.buffers.SetDocumentAt(0)
+                else
+                    local b = tonumber(_G.iuprops['buffers.current'] or -1)
+                    if b >= 0 then scite.buffers.SetDocumentAt(b) end
                 end
             end
+            SideBar_obj.blockUpdate = false
             if SideBar_obj.win then oDeatt.DetachRestore = true; oDeatt.detach = 1 end
             if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end

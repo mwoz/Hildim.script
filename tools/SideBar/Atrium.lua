@@ -39,7 +39,6 @@ local function dbRunProc(strProc, msgParams, funCallback, timeout, opaque)
 end
 
 local function AtriumCompare(strPath, strContent)
-
     local _, tmppath=shell.exec('CMD /c set TEMP',nil,true,true)
     tmppath=string.sub(tmppath,6,string.len(tmppath)-2)..'\\atrtmp'
     local f = io.open(tmppath, "w")
@@ -47,7 +46,6 @@ local function AtriumCompare(strPath, strContent)
     f:write(strContent)
     f:flush()
     f:close()
-
     cmd=string.gsub(string.gsub(props['vsscompare'],'%%bname','"'..strPath..'"'),'%%yname','"'..tmppath..'"')
     shell.exec(cmd)
 end
@@ -608,12 +606,17 @@ local function FindTab_Init()
         Metadata_Unload(true)
     end
     local function obj_mnu()
-            local mnu = iup.menu
+        local mDif = nil
+        if list_obj.marked then
+            if shell.fileexists(props["FileDir"]..'//'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml') then
+                mDif = iup.item{title="Сравнить с файлом в текущей директории",action=Compare}
+            end
+        end
+        local mnu = iup.menu
             {
               iup.item{title="Открыть как новый файл",action=Metadata_OpenNew},
               iup.item{title="Выгрузить и открыть в текущей директории",action=Metadata_Unload}, nil,
-              Iif(shell.fileexists(props["FileDir"]..'//'..iup.GetAttributeId2(list_obj, '', list_obj.marked:find('1') - 1, 1)..'.xml'),
-                iup.item{title="Сравнить с файлом в текущей директории",action=Compare}, nil),
+              mDif,
               iup.separator{},
               iup.item{title="Открыть новый файл с данными",action=Metadata_NewData},
               iup.separator{},
@@ -637,16 +640,21 @@ local function FindTab_Init()
         Data_Unload(true)
     end
     local function dat_mnu()
-        local oExt = list_obj:getcell(list_obj.marked:find('1') - 1 ,1)
-        if oExt == 'system.ObjectTypeForm' then oExt = '.cform'
-        elseif oExt == 'system.Report' then oExt = '.rform'
-        else oExt = '.xml' end
+        local mDif = nil
+        if list_obj.marked then
+            local oExt = list_obj:getcell(list_obj.marked:find('1') - 1 ,1)
+            if oExt == 'system.ObjectTypeForm' then oExt = '.cform'
+            elseif oExt == 'system.Report' then oExt = '.rform'
+            else oExt = '.xml' end
+            if list_data.marked and shell.fileexists(props["FileDir"]..'\\'..(iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2) or iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1))..oExt) then
+                mDif = iup.item{title="Сравнить с файлом в текущей директории",action=CompareData}
+            end
+        end
         local mnu = iup.menu
         {
           iup.item{title="Открыть как новый файл",action=Data_OpenNew},
           iup.item{title="Выгрузить и открыть в текущей директории",action=Data_Unload},
-          Iif(shell.fileexists(props["FileDir"]..'\\'..(iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2) or iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1))..oExt),
-            iup.item{title="Сравнить с файлом в текущей директории",action=CompareData}, nil),
+          mDif,
           iup.separator{},
           iup.item{title="Не выгружать ID и технические поля",value=_G.iuprops['atrium.data.cleanup'],action=(function() _G.iuprops['atrium.data.cleanup']=Iif(_G.iuprops['atrium.data.cleanup']=='ON','OFF','ON') end)},
           iup.item{title="WIN-1251",value=_G.iuprops['atrium.data.win1251'],action=(function() _G.iuprops['atrium.data.win1251']=Iif(_G.iuprops['atrium.data.win1251']=='ON','OFF','ON') end)},

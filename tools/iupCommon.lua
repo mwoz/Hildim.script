@@ -81,18 +81,25 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             end
         end
         if cmd == IDM_QUIT then ClearAllEventHandler() end
-        local nf,spathes = false,''
+        local nf,spathes = false,'',''
+        local sposes
+        if cmd == IDM_QUIT then sposes = '' end
+        local curBuf = scite.buffers.GetCurrent()
         DoForBuffers(function(i)
             if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
                 scite.SendEditor(SCI_SETSAVEPOINT)
-                if props['FilePath'] ~= '' and not props['FileNameExt']:find('^%^') then
+                if not props['FileNameExt']:from_utf8(1251):find('Безымянный') and not props['FileNameExt']:find('^%^') then
                     spathes = spathes..'•'..props['FilePath']:from_utf8(1251)
+                    if sposes then sposes = sposes..'•'..editor.FirstVisibleLine end
                     nf = true
+                else
+                    if i <= curBuf then curBuf = curBuf - 1 end
                 end
                 scite.MenuCommand(IDM_CLOSE)
             end
         end)
-        if nf and cmd == IDM_QUIT then _G.iuprops['buffers'] = spathes end
+        if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
+        if nf and cmd == IDM_QUIT then _G.iuprops['buffers'] = spathes; _G.iuprops['buffers.pos'] = sposes end
         if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
         else return true end
     elseif cmd == 9117 then  --перезагрузка скрипта
