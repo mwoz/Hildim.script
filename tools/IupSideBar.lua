@@ -15,7 +15,9 @@ local hMainLayout = iup.GetLayout()
 local BottomBar, ConsoleBar, FindRepl
 
 iup.SetGlobal("DEFAULTFONTSIZE", Iif(props['iup.defaultfontsize']=='', "10", props['iup.defaultfontsize']))
-
+iup.SetGlobal("TXTHLCOLOR", "0 255 0")
+iup.SetGlobal("HLCOLORALPHA", "200 200 200")
+                               -- RGB(220, 238, 254)
 iup.PassFocus=(function()
     iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
 end)
@@ -81,6 +83,7 @@ local function  CreateBox()
         if t.type == "VBOX" then
             l = iup.vbox(t)
         elseif t.type == "SPLIT" then
+            t.layoutdrag = 'NO'
             l = iup.split(t)
         elseif t.type == nil then
             l = t[1]
@@ -161,7 +164,11 @@ local function  CreateBox()
             if _G.iuprops['findrepl.win']=='1' then
                 _G.FindReplDialog.close_cb(_G.FindReplDialog)
             end
-        end)
+        end);
+--[[        On_Detach = (function(h)
+            iup.ShowSideBar(-1)
+            print(iup.GetParent(h).title, iup.GetParent(iup.GetParent(h)))
+        end);]]
     }
     return oDeatt
 end
@@ -415,17 +422,31 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             props['session.reload'] = _G.iuprops['session.reload']
             if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
                 local bNew = (props['FileName'] ~= '')
-                local t,p = {},{}
+                local t,p,bk = {},{},{}
                 for f in _G.iuprops['buffers']:gmatch('[^•]+') do
                     table.insert(t, f)
                 end
+                local bki
                 for f in _G.iuprops['buffers.pos']:gmatch('[^•]+') do
-                    table.insert(p, f)
+                    local i = 0
+                    for g in f:gmatch('[^¦]+') do
+                        if i==0 then
+                            table.insert(p, g)
+                            bki = {}
+                            table.insert(bk, bki)
+                        else table.insert(bki, g) end
+                        i = 1
+                    end
                 end
                 _G.iuprops['buffers'] = nil
                 for i = #t,1,-1 do
                     scite.Open(t[i])
                     if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
+                    if bk[i] then
+                        for j = 1, #(bk[i]) do
+                            editor:MarkerAdd(tonumber(bk[i][j]), 1)
+                        end
+                    end
                 end
                 if bNew then
                     scite.buffers.SetDocumentAt(0)

@@ -152,7 +152,7 @@ local function AbbreviationsTab_Init()
         if m_lastLin ~= lin then
             m_lastLin = lin
             if list_bookmarks:getcell(lin,4) then
-                list_bookmarks.tip = list_bookmarks:getcell(lin,2)..'\n\n File: '..list_bookmarks:getcell(lin,3)..'\nLine:  '..list_bookmarks:getcell(lin,4)
+                list_bookmarks.tip = list_bookmarks:getcell(lin,2)..'\n\n File: '..list_bookmarks:getcell(lin,3)..'\nLine:  '..(tonumber(list_bookmarks:getcell(lin,4)) + 1)
             else
                 list_bookmarks.tip = 'Список букмарков'
             end
