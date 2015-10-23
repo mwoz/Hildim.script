@@ -90,7 +90,14 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
                 scite.SendEditor(SCI_SETSAVEPOINT)
                 if not props['FileNameExt']:from_utf8(1251):find('Ѕезым€нный') and not props['FileNameExt']:find('^%^') then
                     spathes = spathes..'Х'..props['FilePath']:from_utf8(1251)
-                    if sposes then sposes = sposes..'Х'..editor.FirstVisibleLine end
+                    local ml,bk = 0,''
+                    while true do
+                        ml = editor:MarkerNext(ml, 2)
+                        if (ml == -1) then break end
+                        bk = bk..'¶'..ml
+                        ml = ml + 1
+                    end
+                    if sposes then sposes = sposes..'Х'..editor.FirstVisibleLine..bk end
                     nf = true
                 else
                     if i <= curBuf then curBuf = curBuf - 1 end
@@ -271,9 +278,9 @@ iup.scitedetachbox = function(t)
         hNew.x=10
         hNew.y=10
         x=10;y=10
+        local firstShow = true
         hNew.rastersize = _G.iuprops['dialogs.'..h.sciteid..'.rastersize']
         _G.iuprops[h.sciteid..'.win']='1'
-        _G.iuprops['dialogs.'..h.sciteid..'.rastersize'] = h.rastersize
         if h.Split_h then  _G.iuprops['dialogs.'..h.sciteid..'.splitvalue'] = h.Split_h.value end
         hNew.close_cb =(function(h)
             if _G.dialogs[dtb.sciteid] ~= nil then
@@ -290,8 +297,14 @@ iup.scitedetachbox = function(t)
             if state == 0 then
                 if dtb.DetachRestore then
                     dtb.DetachRestore = false
+                    firstShow = false
+                    h.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
                     iup.ShowXY(h, _G.iuprops['dialogs.'..dtb.sciteid..'.x'],_G.iuprops['dialogs.'..dtb.sciteid..'.y'])
                     return
+                elseif firstShow then
+                    firstShow = false
+                    h.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
+                    iup.ShowXY(h, h.x,h.y)
                 end
                 if dtb.Split_h then
                     dtb.Split_h.value = dtb.Split_CloseVal
@@ -301,6 +314,7 @@ iup.scitedetachbox = function(t)
             elseif state == 4 then
                 _G.iuprops['dialogs.'..dtb.sciteid..'.x']= h.x
                 _G.iuprops['dialogs.'..dtb.sciteid..'.y']= h.y
+                dtb.visible = 'YES'
                 _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = h.rastersize
                 if dtb.Split_h then
                     dtb.Split_h.value = _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue']

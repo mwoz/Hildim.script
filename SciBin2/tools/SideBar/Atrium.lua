@@ -597,7 +597,7 @@ local function FindTab_Init()
 
     list_obj = iup.matrix{
     numcol=4, numcol_visible=4,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",hlcoloralpha ="200 200 200",
     width0 = 0 ,rasterwidth1 = 150 ,rasterwidth2 = 150 ,rasterwidth3= 150,rasterwidth4= 15}
   	list_obj:setcell(0, 1, "Code")
   	list_obj:setcell(0, 2, "Name")
@@ -632,7 +632,7 @@ local function FindTab_Init()
     txt_datamask.k_any = (function(h,k) if k == iup.K_CR then SelectData() end end)
     list_data = iup.matrix{
     numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",hlcoloralpha ="200 200 200",
     width0 = 0 ,rasterwidth1 = 50 ,rasterwidth2= 350}
     list_data:setcell(0, 1, "Id")
     list_data:setcell(0, 2, "Code")

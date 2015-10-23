@@ -229,7 +229,7 @@ container.Value	Возвращает/устанавливает произвольное значение (variant).
 container.Handler	Возвращает/устанавливает имя функции – обработчика событий дочерних контролов. Прототип функции совпадает с вызовом Form_CtrlEvent.
 container.GetTags  Возвращает сообщение с вложенными ссылками на сообщения-теги всех контролов, у которых теги заданы. Имена вложенных сообщений-тегов совпадают с именами соответствующих контролов.
 container.ShareControls True - все контролы контейнера помещаются как в его коллекцию Controls, так и в коллекцию Controls ближайшего родительского контейнера, у которого это свойство равно False (или в Form.Controls, если такого контейнера нет). Разработчик должен обеспечить уникальность имени контролов на уровне родительского контейнера/формы, куда записываются контролы.
-container.RaiseEventAsync ( EventName, [EventParam] ) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam,\nкоторый передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>
+container.RaiseAsyncEvent ( EventName, [EventParam] ) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam,\nкоторый передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>
 #$control=container(
 
 #$formctrl=form("sub
@@ -765,7 +765,11 @@ cubetrgrcoll.Clear
 cubetrgrcoll.Remove
 cubetrgrcoll.Count
 
-#$xml=createobject("Microsoft.XMLDOM
+#$xml=createobject("MSXML
+#$xml=papp%.metadata(
+#$xml=*.%.selectsinglenode(
+#$xml=*.%.firstchild
+#$xml=*.%.nextsibling
 xml.async Specifies if asynchronous download is permitted. Read/write.
 xml.attributes Contains the list of attributes for this node. Read-only.
 xml.baseName Returns the base name for the name qualified with the namespace. Read-only.
@@ -827,6 +831,9 @@ xml.selectSingleNode Applies the specified pattern-matching operation to this no
 xml.transformNode Processes this node and its children using the supplied XSLT style sheet and returns the resulting transformation.
 xml.transformNodeToObject Processes this node and its children using the supplied XSLT style sheet and returns the resulting transformation in the supplied object.
 
+
+xml.getAttribute
+xml.setAttribute
 ### Источник: Справочник "Некоторые объекты Automation" <http://www.script-coding.info/wsh_chm.zip>
 
 # Строковые функции
@@ -1055,6 +1062,22 @@ udoc.Caption
 udoc.Restriction  Установка,получение в теге рефконтрола\nsql фрагмента с ограничением поиска
 udoc.SetValueHook Установка ValueHook хендлера для контрола
 udoc.ObjectType Свойство используется для установки режима работы Ref контейнера, а также может быть программно прочитано.
+udoc.SetRefOriginal(msgRef)
+udoc.AddRecord(msg)
+udoc.DelRecord(id)
+udoc.SetRecordset(msg)
+udoc.ExecuteReport(strProc, objParams, objectDbRunOptions)
+udoc.Enabled
+udoc.Locked
+udoc.Format()
+udoc.DisplayedValue(nls)
+udoc.ToolTipUseDef(bUseDef)
+udoc.ToolTip
+udoc.TextColor
+udoc.BackColor
+udoc.Query
+udoc.ObjectType
+udoc.SetValueHookLow
 
 app.CreateMessage
 app.Trace(strMsg)

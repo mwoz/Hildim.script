@@ -798,7 +798,7 @@ local function  _OnUpdateUI()
                         currFuncData = fData
                         iup.SetAttribute(tree_func, "MARKED"..pId, "YES")
                         iup.SetAttribute(tree_func, "COLOR"..pId, "30 180 30")
-                        if curSelect > -1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") end
+                        if curSelect > -1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0");--[[iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") ]]end
                         curSelect = pId
                         tree_func.topitem="YES"
                         return
@@ -897,8 +897,8 @@ local function Finc_Init()
     for w in string.gmatch(prp, "[^|]+") do
        layout[w] = 'COLLAPSED'
     end
-    local line = nil
-    tree_func = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_func.size"]}
+    local line = nil                                                                                              --RGB(73, 163, 83)  RGB(30,180,30)
+    tree_func = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_func.size"], hlcolor="104 205 115"}
         --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
         tree_func.size = nil
 
