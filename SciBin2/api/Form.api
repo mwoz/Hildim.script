@@ -744,7 +744,6 @@ cubelvlcollections.Clear
 cubelvlcollections.Index(Index)
 cubelvlcollections.Count
 
-
 cubelvl.BackColor
 cubelvl.ForeColor
 cubelvl.Style
@@ -765,11 +764,19 @@ cubetrgrcoll.Clear
 cubetrgrcoll.Remove
 cubetrgrcoll.Count
 
+xmllst.length
+#$xmllst=.*%.selectnodes(
+#$xmllst=.*%.childnodes
+#$xml=xmllst(
 #$xml=createobject("MSXML
 #$xml=papp%.metadata(
-#$xml=*.%.selectsinglenode(
-#$xml=*.%.firstchild
-#$xml=*.%.nextsibling
+#$xml=.*%.selectsinglenode(
+#$xml=.*%.firstchild
+#$xml=.*%.nextsibling
+#$xml=m_x[%w_]*
+#$xml=xml[%w_]*
+#$xml=objxml
+
 xml.async Specifies if asynchronous download is permitted. Read/write.
 xml.attributes Contains the list of attributes for this node. Read-only.
 xml.baseName Returns the base name for the name qualified with the namespace. Read-only.

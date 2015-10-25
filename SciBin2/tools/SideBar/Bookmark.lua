@@ -139,7 +139,7 @@ local function AbbreviationsTab_Init()
     list_bookmarks = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 25 ,rasterwidth2 = 600 ,rasterwidth3 = 0 ,rasterwidth4 = 0 }
+    width0 = 0 ,width1 = 25 ,width2 = 600 ,width3 = 0 ,width4 = 0 }
 
 	list_bookmarks:setcell(0, 1, "@")         -- ,size="400x400"
 	list_bookmarks:setcell(0, 2, "Bookmarks")
@@ -147,6 +147,9 @@ local function AbbreviationsTab_Init()
         if iup.isdouble(status) and iup.isbutton1(status) then
             Bookmarks_GotoLine(lin)
         end
+    end)
+	list_bookmarks.map_cb = (function(h)
+        h.size="1x1"
     end)
     list_bookmarks.mousemove_cb = (function(_,lin, col)
         if m_lastLin ~= lin then

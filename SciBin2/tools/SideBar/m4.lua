@@ -123,7 +123,7 @@ local function OnSwitch()
 end
 
 local function FindTab_Init()
-    cmb_listCalc = iup.list{dropdown="YES",visible_items="55", expand='NO',size='120x0', tip='—писок доступных вариантов дл€ исполнени€ в базе (build)\nи компил€ции в SQL (compile). \n‘айлы нахлд€тс€ в директории Scite\\data\\UserData\\BuildM4'  }
+    cmb_listCalc = iup.list{dropdown="YES",visibleitems="55", expand='NO',size='120x0', tip='—писок доступных вариантов дл€ исполнени€ в базе (build)\nи компил€ции в SQL (compile). \n‘айлы нахлд€тс€ в директории Scite\\data\\UserData\\BuildM4'  }
     cmb_listCalc.map_cb = (function(h) h.value=tonumber(_G.iuprops["sidebar.m4.value"] or '1'); end)
     TabBar_obj.Tabs.m4 = {
 
