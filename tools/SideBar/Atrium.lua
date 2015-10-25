@@ -544,12 +544,12 @@ local function OnDoubleClickLocal(shift, ctrl, alt)
     OpenChoiceMeta()
 end
 local function FindTab_Init()
-    cmb_Action = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Сохранение/Удаление объекта'}
+    cmb_Action = iup.list{dropdown="YES",visibleitems="15",size='70x0', expand='NO', tip='Сохранение/Удаление объекта'}
     iup.SetAttribute(cmb_Action, 1, "insupd")
     iup.SetAttribute(cmb_Action, 2, "delete")
     cmb_Action.value = 1
     chk_ign = iup.toggle{title = "Ign. Id-s", tip='Игнорироапть Id объекта при вставке\n(вставить копию)'}
-    cmb_mask = iup.list{dropdown="YES",visible_items="15",size='30x0', expand='NO', tip='program scripts|schema scripts|schema+program'}
+    cmb_mask = iup.list{dropdown="YES",visibleitems="15",size='30x0', expand='NO', tip='program scripts|schema scripts|schema+program'}
     iup.SetAttribute(cmb_mask, 1, "P")
     iup.SetAttribute(cmb_mask, 2, "S")
     iup.SetAttribute(cmb_mask, 3, "SP")
@@ -559,14 +559,14 @@ local function FindTab_Init()
     btnRun = iup.button{image = 'IMAGE_FormRun', action=atrium_RunXml, tip='Обработка всего файла'}
 
 
-    cmb_syscust = iup.list{dropdown="YES",visible_items="15",size='70x0', expand='NO', tip='Сохранение/Удаление объекта'}
+    cmb_syscust = iup.list{dropdown="YES",visibleitems="15",size='70x0', expand='NO', tip='Сохранение/Удаление объекта'}
     iup.SetAttribute(cmb_syscust, 1, "%")
     iup.SetAttribute(cmb_syscust, 2, "system")
     iup.SetAttribute(cmb_syscust, 3, "custom")
     cmb_syscust.value = 1
 
 
-    txt_objmask = iup.list{editbox = "YES",dropdown="YES",visible_items="15",expand='HORIZONTAL',tip='Маска метаданных'}
+    txt_objmask = iup.list{editbox = "YES",dropdown="YES",visibleitems="15",expand='HORIZONTAL',tip='Маска метаданных'}
     iup.SetAttribute(txt_objmask, 1, "Choice")
     iup.SetAttribute(txt_objmask, 2, "ObjectTypeForm")
     iup.SetAttribute(txt_objmask, 3, "Report")
@@ -579,14 +579,14 @@ local function FindTab_Init()
         end
     end)
 
-    cmb_RefDepth = iup.list{dropdown="YES",visible_items="15",size='20x0', expand='NO', tip='Reference Repth'}
+    cmb_RefDepth = iup.list{dropdown="YES",visibleitems="15",size='20x0', expand='NO', tip='Reference Repth'}
     iup.SetAttribute(cmb_RefDepth, 1, "0")
     iup.SetAttribute(cmb_RefDepth, 2, "1")
     iup.SetAttribute(cmb_RefDepth, 3, "2")
     iup.SetAttribute(cmb_RefDepth, 4, "3")
     cmb_RefDepth.value = 1
 
-    cmb_apDept = iup.list{dropdown="YES",visible_items="15",size='20x0', expand='NO', tip='Reference Repth'}
+    cmb_apDept = iup.list{dropdown="YES",visibleitems="15",size='20x0', expand='NO', tip='Reference Repth'}
     iup.SetAttribute(cmb_apDept, 1, "0")
     iup.SetAttribute(cmb_apDept, 2, "1")
     iup.SetAttribute(cmb_apDept, 3, "2")
@@ -597,8 +597,8 @@ local function FindTab_Init()
 
     list_obj = iup.matrix{
     numcol=4, numcol_visible=4,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",hlcoloralpha ="200 200 200",
-    width0 = 0 ,rasterwidth1 = 150 ,rasterwidth2 = 150 ,rasterwidth3= 150,rasterwidth4= 15}
+    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    width0 = 0 ,rasterwidth1 = 150 ,rasterwidth2 = 150 ,rasterwidth3= 150,rasterwidth4= 15, map_cb = (function(h) h.size="1x1" end)}
   	list_obj:setcell(0, 1, "Code")
   	list_obj:setcell(0, 2, "Name")
   	list_obj:setcell(0, 3, "Table")
@@ -632,8 +632,8 @@ local function FindTab_Init()
     txt_datamask.k_any = (function(h,k) if k == iup.K_CR then SelectData() end end)
     list_data = iup.matrix{
     numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",hlcoloralpha ="200 200 200",
-    width0 = 0 ,rasterwidth1 = 50 ,rasterwidth2= 350}
+    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    width0 = 0 ,rasterwidth1 = 50 ,rasterwidth2= 350, map_cb = (function(h) h.size="1x1" end)}
     list_data:setcell(0, 1, "Id")
     list_data:setcell(0, 2, "Code")
     local function CompareData()
@@ -663,7 +663,7 @@ local function FindTab_Init()
     list_data:SetCommonCB(Data_OpenNew,nil,nil,dat_mnu)
 
 
-    cmb_dataShem = iup.list{dropdown="YES",visible_items="15",size='40x0', expand='NO', tip='Сохранение/Удаление объекта'}
+    cmb_dataShem = iup.list{dropdown="YES",visibleitems="15",size='40x0', expand='NO', tip='Сохранение/Удаление объекта'}
     iup.SetAttribute(cmb_dataShem, 1, "%")
     iup.SetAttribute(cmb_dataShem, 2, "system")
     iup.SetAttribute(cmb_dataShem, 3, "custom")
@@ -671,7 +671,7 @@ local function FindTab_Init()
     exp_dataSchem = iup.expander{iup.hbox{
         cmb_dataShem,
         },
-        barposition='LEFT', state='CLOSE', barsize = '0',
+        barposition='LEFT', state='CLOSE', barsize = '0', visible='NO'
     }
     exp_dataOptions = iup.expander{iup.hbox{
             iup.label{title=' Ref Dp: '},
@@ -686,32 +686,32 @@ local function FindTab_Init()
     SideBar_obj.Tabs.atrium =  {
 handle =iup.split{
     iup.vbox{
-        iup.hbox{
+        iup.scrollbox{iup.hbox{
             cmb_syscust,
             txt_objmask,
             iup.button{image = "IMAGE_search", action=function() SelectMetadata(false) end},
             alignment="ACENTER", gap="3", margin="3x7"
-        };
+        },scrollbar='NO', minsize='x35', maxsize='x35', expand="HORIZONTAL",};
         list_obj;
     },iup.vbox{
-        iup.hbox{
+        iup.scrollbox{iup.hbox{
             exp_dataSchem,
             exp_dataOptions,
             txt_datamask,
             iup.button{image = "IMAGE_search", action=SelectData},
-        },
+        },scrollbar='NO', minsize='x29', maxsize='x29', expand="HORIZONTAL",};
 
         list_data,
-        iup.hbox{
+        iup.scrollbox{iup.hbox{
             iup.label{title = "Action:"},
             cmb_Action,
             chk_ign,
             cmb_mask,
             btnRun,
-            alignment="ACENTER", gap="3", margin="3x7"
-        };
+            alignment="ACENTER", gap="3",
+        },scrollbar='NO', minsize='x29', maxsize='x29', expand="HORIZONTAL",};
     };
-orientation="HORIZONTAL", name='splitAtrium'};
+orientation="HORIZONTAL", name='splitAtrium',layoutdrag = 'NO'};
 
     OnSwitchFile = OnSwitch;
     OnOpen = OnSwitch;

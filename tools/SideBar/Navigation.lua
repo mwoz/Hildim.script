@@ -41,10 +41,8 @@ local function OnNavigate(item)
 	end
 
 	list_navigation.marked = nil
-	--iup.SetAttributeId2(list_navigation, "MARK",1,0, "1")
-	--iup.SetAttributeId2(list_navigation, "BGCOLOR",1, -1, "195 192 192")
-    iup.SetAttribute(list_navigation, "BGCOLOR"..(currentItem + 1)..":*", "255 255 255")
-    iup.SetAttribute(list_navigation, "BGCOLOR1:*", "192 192 192")
+	iup.SetAttributeId2(list_navigation, "MARK",currentItem + 1,0, "0")
+	iup.SetAttributeId2(list_navigation, "MARK",1,0, "1")
     list_navigation.redraw = "L1-100"
 	currentItem = 1
 end
@@ -61,8 +59,8 @@ local function Navigation_Go(item)
 	iup.PassFocus()
 	SideBar_obj.blockUpdate = false
 
-    iup.SetAttribute(list_navigation, "BGCOLOR"..(currentItem)..":*", "255 255 255")
-    iup.SetAttribute(list_navigation, "BGCOLOR"..item..":*", "192 192 192")
+	iup.SetAttributeId2(list_navigation, "MARK",currentItem ,0, "0")
+	iup.SetAttributeId2(list_navigation, "MARK",item,0, "1")
     list_navigation.redraw = "L1-100"
 	currentItem = item
 end
@@ -116,7 +114,9 @@ local function FuncBmkTab_Init()
             end
         end
     end)
-
+	list_navigation.map_cb = (function(h)
+        h.size="1x1"
+    end)
     SideBar_obj.Tabs.navigation = {
         handle = list_navigation;
         id = myId;

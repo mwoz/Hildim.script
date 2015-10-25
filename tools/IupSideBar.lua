@@ -15,9 +15,8 @@ local hMainLayout = iup.GetLayout()
 local BottomBar, ConsoleBar, FindRepl
 
 iup.SetGlobal("DEFAULTFONTSIZE", Iif(props['iup.defaultfontsize']=='', "10", props['iup.defaultfontsize']))
-iup.SetGlobal("TXTHLCOLOR", "0 255 0")
-iup.SetGlobal("HLCOLORALPHA", "200 200 200")
-                               -- RGB(220, 238, 254)
+iup.SetGlobal("TXTHLCOLOR", "200 200 200")
+                               -- RGB(121, 161, 201)
 iup.PassFocus=(function()
     iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
 end)
@@ -85,6 +84,14 @@ local function  CreateBox()
         elseif t.type == "SPLIT" then
             t.layoutdrag = 'NO'
             l = iup.split(t)
+        elseif t.type == "EXPANDER" then
+            t.barsize = '0'
+            l = iup.expander(t)
+        elseif t.type == "SCROLLBOX" then
+            t.expand="HORIZONTAL"
+            t.scrollbar='NO'
+            t.minsize='x250'
+            l = iup.scrollbox(t)--iup.expander{, barsize='0', barposition="LEFT",minsize="0x0"}
         elseif t.type == nil then
             l = t[1]
         else print('Unsupported type:'..t.type) end
@@ -94,11 +101,14 @@ local function  CreateBox()
     local function SideBar(t)
         t.name="tabMain"
         t.tip= 'Ctrl+1,2,3,4'
+        t.map_cb = (function(h)
+            h.size="1x1"
+        end)
         return iup.tabs(t)
     end
     tbArg = function()
         return {
-            Pane{'functions', 'findrepl', tabtitle = "Func/Find", type='VBOX'},
+            Pane{'functions', Pane{Pane{'findrepl', type="SCROLLBOX"}, type='EXPANDER', name="FinReplExp"}, tabtitle = "Func/Find", type='VBOX'},
             Pane{'abbreviations', Pane{'bookmark','navigation', orientation="HORIZONTAL", name="splitFuncNav",  type='SPLIT'}, orientation="HORIZONTAL", name="splitAbbrev", tabtitle = "Abbrev/Bmk/Nav", type="SPLIT"},
             Pane{'fileman', tabtitle = "FileMan"},
             Pane{'atrium', tabtitle = "Atrium", type= "VBOX"},
@@ -165,10 +175,6 @@ local function  CreateBox()
                 _G.FindReplDialog.close_cb(_G.FindReplDialog)
             end
         end);
---[[        On_Detach = (function(h)
-            iup.ShowSideBar(-1)
-            print(iup.GetParent(h).title, iup.GetParent(iup.GetParent(h)))
-        end);]]
     }
     return oDeatt
 end
@@ -250,7 +256,9 @@ local function InitSideBar()
     SideBar_obj.Active = true
 
     local dlg
-    local tDlg = {CreateBox(); title="SideBar", maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="100x100"}
+    --if true then return end
+    local tDlg = CreateBox();
+    --local tDlg = {CreateBox(); title="SideBar", maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="100x100"}
     tDlg.show_cb=(function(h,state)
         if state == 0 then
            h.size = '1x1'
@@ -278,15 +286,11 @@ local function InitSideBar()
         SaveNamedValues(tDlg[1],'sidebarctrl')
     end)
 
-    tDlg.sciteparent="SideBarPH"
-    tDlg.control = "YES"
-    tDlg.sciteid="sidebarp"
-    -- end
-    local dlg = iup.scitedialog(tDlg)
-    local ts = iup.GetDialogChild(hMainLayout, "SourceSplit").value
-    iup.GetDialogChild(hMainLayout, "SourceSplit").value = "1"
-    iup.GetDialogChild(hMainLayout, "SourceSplit").value = t
-    FindRepl = iup.GetDialogChild(dlg, "FindReplDetach")
+    SideBar_obj.handle = tDlg
+    local rightBarPH = iup.GetDialogChild(hMainLayout, "RightBarPH")
+    iup.Append(rightBarPH,tDlg)
+    iup.Map(tDlg)
+
     RestoreNamedValues(hMainLayout, 'sidebarctrl')
     RestoreNamedValues(tDlg[1], 'sidebarctrl')
     --if SideBar_obj.win then oDeatt.detach = 1 end
@@ -374,7 +378,7 @@ local function InitStatusBar()
      local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     StatusBar_obj = {}
     StatusBar_obj.Tabs = {}
-                     --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
+
     local tTlb = {CreateStatusBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
     tTlb.sciteparent="IUPSTATUSBAR"
     tTlb.control = "YES"
@@ -416,6 +420,7 @@ InitSideBar()
 InitToolBar()
 InitStatusBar()
 iup.Refresh(hMainLayout)
+
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == 3 then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
@@ -427,22 +432,24 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     table.insert(t, f)
                 end
                 local bki
-                for f in _G.iuprops['buffers.pos']:gmatch('[^Х]+') do
-                    local i = 0
-                    for g in f:gmatch('[^¶]+') do
-                        if i==0 then
-                            table.insert(p, g)
-                            bki = {}
-                            table.insert(bk, bki)
-                        else table.insert(bki, g) end
-                        i = 1
+                if _G.iuprops['buffers.pos'] then
+                    for f in _G.iuprops['buffers.pos']:gmatch('[^Х]+') do
+                        local i = 0
+                        for g in f:gmatch('[^¶]+') do
+                            if i==0 then
+                                table.insert(p, g)
+                                bki = {}
+                                table.insert(bk, bki)
+                            else table.insert(bki, g) end
+                            i = 1
+                        end
                     end
                 end
                 _G.iuprops['buffers'] = nil
                 for i = #t,1,-1 do
                     scite.Open(t[i])
                     if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
-                    if bk[i] then
+                    if bk and bk[i] then
                         for j = 1, #(bk[i]) do
                             editor:MarkerAdd(tonumber(bk[i][j]), 1)
                         end

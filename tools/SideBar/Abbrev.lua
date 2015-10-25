@@ -120,7 +120,7 @@ local function create_dialog_Ref()
 
   containers[5] = iup.hbox{
     iup.list{
-      visible_items = "15", size = "60x0", editbox = "YES", name = "cmbX", mask = "/d+", dropdown = "YES",
+      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbX", mask = "/d+", dropdown = "YES",
     },
     iup.text{
       size = "60x0", name = "numY", mask = "/d+",
@@ -140,13 +140,13 @@ local function create_dialog_Ref()
       title = "btn1", name = "chkBtn1",size = "60x0",
     },
     iup.list{
-      visible_items = "15", size = "60x0", editbox = "YES", name = "cmbBtn1", mask = "/d+", dropdown = "YES",
+      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbBtn1", mask = "/d+", dropdown = "YES",
     },
     iup.toggle{
       title = "Code", name = "chkCode", size = "60x0",
     },
     iup.list{
-      visible_items = "15", size = "60x0", editbox = "YES", name = "cmbCode", mask = "/d+", dropdown = "YES",
+      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbCode", mask = "/d+", dropdown = "YES",
     },
     gap = "20",
   }
@@ -156,7 +156,7 @@ local function create_dialog_Ref()
       title = "Name", name = "chkName",size = "60x0",
     },
     iup.list{
-      visible_items = "15", size = "60x0", editbox = "YES", name = "cmbName", mask = "/d+", dropdown = "YES",
+      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbName", mask = "/d+", dropdown = "YES",
     },
     iup.toggle{
       title = "btn2", name = "chkBtn2", size = "60x0",
@@ -442,13 +442,13 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     local tX, tW, tCpt, tA = {},{},{},{}
     local tX1, tW1, tCpt1, tA1 = {},{},{}, {}
     --создаем контролы
-    local txtX2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
+    local txtX2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visibleitems="15"}
     local txtY2 = iup.text{size='60x0',mask="/d+"}
     local txtH2 = iup.text{size='60x0',mask="/d+"}
-    local txtW2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
+    local txtW2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visibleitems="15"}
 
     local _,_, ctype = s:find('type="(%l+)"')
-    local txtCp = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visible_items="15"}
+    local txtCp = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visibleitems="15"}
     local function onCmbAll(h)
         if tA1 == nil then return end
         if #tA1 == 0 then return end
@@ -456,7 +456,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
         txtW2.value = tA1[tonumber(h.value)][2][2]
         txtCp.value = tA1[tonumber(h.value)][2][3]
     end
-    local cmbAll = iup.list{size='60x0',dropdown="YES",visible_items="15",valuechanged_cb = onCmbAll}
+    local cmbAll = iup.list{size='60x0',dropdown="YES",visibleitems="15",valuechanged_cb = onCmbAll}
     local function onTxtX2(h,text, item, state)
             local n = tonumber(text)
             for i, s in pairs(tA1) do if tonumber(s[2][1]) >= n then cmbAll.value=i;break;end end
@@ -464,7 +464,7 @@ local function frmControlPos(findSt, findEnd, s, dInd)
     txtX2.action = onTxtX2
     local txtDx = iup.text{size='35x0',mask="/d+"}
     local bDdx = s:find('tag="ddx_Enabled=Y"')
-    local cmbDdx = iup.list{dropdown="YES",visible_items="5",active=Iif(bDdx, 'YES', 'NO'), value=Iif(bDdx, _G.iuprops['abbrev.ctrldlg.ddx'] or 0, 0)}
+    local cmbDdx = iup.list{dropdown="YES",visibleitems="5",active=Iif(bDdx, 'YES', 'NO'), value=Iif(bDdx, _G.iuprops['abbrev.ctrldlg.ddx'] or 0, 0)}
     iup.SetAttribute(cmbDdx, 1, '')
     iup.SetAttribute(cmbDdx, 2, 'ddx_Enabled')
     iup.SetAttribute(cmbDdx, 3, 'ddx_MetaBind')
@@ -778,7 +778,9 @@ local function Abbreviations_Init()
         local s = iup.GetAttribute(h, iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))..':2')
         h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n')
     end)
-
+	list_abbrev.map_cb = (function(h)
+        h.size="1x1"
+    end)
 
 	list_abbrev.keypress_cb = (function(_, key, press)
         if press == 0 then return end

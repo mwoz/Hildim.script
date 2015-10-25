@@ -898,7 +898,7 @@ local function Finc_Init()
        layout[w] = 'COLLAPSED'
     end
     local line = nil                                                                                              --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_func = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_func.size"], hlcolor="104 205 115"}
+    tree_func = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_func.size"]}
         --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
         tree_func.size = nil
 

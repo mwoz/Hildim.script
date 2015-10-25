@@ -154,7 +154,8 @@ end
 
 local old_matrix = iup.matrix
 iup.matrix = function(t)
-
+    t.hlcolor="255 255 255"
+    t.hlcoloralpha="255"
     local mtr = old_matrix(t)
     function mtr:SetCommonCB(act_act,act_resel, act_esc, act_right)
         local function a_cb(h, key, lin, col, edition, value)
@@ -243,7 +244,7 @@ iup.list = function(t)
         self.insertitem1 = s
 
         local i = tonumber(self.count)
-        local mn = tonumber(self.visible_items)
+        local mn = tonumber(self.visibleitems)
         while(i > 1) do
             if i> mn-1 or (iup.GetAttribute(self,i) == s) then
                 self.removeitem = i
@@ -326,7 +327,7 @@ iup.scitedetachbox = function(t)
         if h.Dlg_Resize_Cb then
             hNew.resize_cb = h.Dlg_Resize_Cb
         end
-        if tonumber(_G.iuprops["dialogs.'..h.sciteid..'.x"])== nil or tonumber(_G.iuprops["dialogs.'..h.sciteid..'.y"]) == nil then _G.iuprops["dialogs.'..h.sciteid..'.x"]=0;_G.iuprops["dialogs.'..h.sciteid..'.y"]=0 end
+        if tonumber(_G.iuprops['dialogs.'..h.sciteid..'.x'])== nil or tonumber(_G.iuprops['dialogs.'..h.sciteid..'.y']) == nil then _G.iuprops['dialogs.'..h.sciteid..'.x']=0;_G.iuprops['dialogs.'..h.sciteid..'.y']=0 end
     end)
     return dtb
 end
@@ -417,6 +418,8 @@ iup.DestroyDialogs = function()
         _G.dialogs['findrepl'].restore = 1
         _G.dialogs['findrepl'] = nul
     end
+    iup.Detach(iup.GetDialogChild(hMainLayout, "FindReplDetach"))
+    iup.Destroy(iup.GetDialogChild(hMainLayout, "FindReplDetach"))
     if _G.dialogs['sidebar'] ~= nil then
         _G.dialogs['sidebar'].restore = 1
         _G.dialogs['sidebar'] = nul
@@ -433,7 +436,11 @@ iup.DestroyDialogs = function()
         _G.dialogs['bottombar'].restore = 1
         _G.dialogs['bottombar'] = nil
     end
-    if _G.dialogs['sidebarp'] then _G.dialogs['sidebarp'].SaveValues() end
+    _G.iuprops['dialogs.sidebar.splitvalue'] = iup.GetDialogChild(hMainLayout, "SourceSplit").value
+    SideBar_obj.handle.SaveValues()
+    iup.Detach(SideBar_obj.handle)
+    iup.Destroy(SideBar_obj.handle)
+    SideBar_obj.handle = nil
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
             if sciteid ~= 'sidebarp' or _G.iuprops['sidebar.win'] == '0' then
@@ -456,5 +463,5 @@ iup.DestroyDialogs = function()
     iup.Destroy(h)
 
     _G.dialogs = nil
-    iup.ShowSideBar(-1)
+    --iup.ShowSideBar(-1)
 end

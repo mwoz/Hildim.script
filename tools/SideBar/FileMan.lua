@@ -519,10 +519,14 @@ local function FileManTab_Init()
 
     list_dir = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",hlcolor ="0 255 0",hlcoloralpha ="200 200 200",
+    resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0, rasterwidth4= 0 }
 
-	list_dir:setcell(0, 2, "Name")
+    list_dir.map_cb = (function(h)
+        h.size="1x1"
+    end)
+
+    list_dir:setcell(0, 2, "Name")
   	list_dir.click_cb = (function(h, lin, col, status)
         local sel = 0
         if h.marked then sel = h.marked:find('1') - 1 end
@@ -580,7 +584,9 @@ local function FileManTab_Init()
         else h.tip = iup.GetAttributeId2(h, '', l, 3)
         end
     end)
-
+	list_favorites.map_cb = (function(h)
+        h.size="1x1"
+    end)
     iup.SetAttribute(list_favorites, 'TYPE*:1', 'IMAGE')
     list_favorites:setcell(0, 2, "Name")
     list_favorites:setcell(0, 3, "Path")
@@ -597,7 +603,7 @@ local function FileManTab_Init()
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
-    split_s = iup.split{list_dir, list_favorites, orientation="HORIZONTAL", name='splitFileMan'}
+    split_s = iup.split{list_dir, list_favorites, orientation="HORIZONTAL", name='splitFileMan',layoutdrag = 'NO'}
     memo_path = iup.text{expand='YES'}
     memo_path.action = (function(h,s,new_value)
         if new_value:find('^%w:[\\/]') or new_value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
@@ -625,10 +631,12 @@ local function FileManTab_Init()
         -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)
 
+
     SideBar_obj.Tabs.fileman =  {
         handle = iup.vbox{
-                   iup.hbox{iup.label{title = "Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
-                   iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"},
+                   iup.scrollbox{iup.vbox{iup.hbox{iup.label{title = "Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
+                   iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"}},
+                   scrollbar='NO', minsize='x54', maxsize='x54', expand="HORIZONTAL",};
                    split_s
                  };
         OnSwitchFile = function()OnSwitch(false,true) end;
