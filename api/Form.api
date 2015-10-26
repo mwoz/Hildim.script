@@ -43,6 +43,7 @@ application.ConvertPx2PtY(longPx) as long.Converts PT to PX and back using X or 
 application.SelectFileDialog([InitialPath], [Filters], [OpenDialog], [FileName])Показывает стандартный диалог выбора файла "Открыть" или "Сохранить как".\nInitialPath: путь к папке для использования при открытии  диалога. Если не указан, используется папка, в которой производился выбор в последний раз.\nFilters: фильтры типов файлов. По умолчанию "All Files (*.*)|*.*||".\nOpenDialog: true - для диалога "Открыть" (по умолчанию), false - для диалога "Сохранить как".\nFileName: имя файла по умолчанию. Обычно используется для диалога "Сохранить как".\nЕсли пользователь выбрал файл, функция возвращает полный путь, иначе пустую строку.\n
 application.GetStackTrace Возвращает содержимое программного стека. Работает только в дебажном режиме (с ключем -D)
 application.SetCalendars (msgCalendars [,DefaultCalendar_Id]) Устанавливает сообщение со всеми доступными календарями и календарь по умолчанию для использование в DateBox контролах. Терминал сохраняет ссылку на данное сообщение(AddRef)\nmsgCalendars  - сообщение со всеми календарями.\nDefaultCalendar_Id - Id или код календаря, используемого по умолчанию в DateBox контролах (используется, если в DateBox явным образом не установлены никакие календари)
+application.TemplateText
 
 form.BackColor BackColors used in form.
 form.ForeColor ForeColors used in form.

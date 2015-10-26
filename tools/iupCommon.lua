@@ -412,6 +412,7 @@ end)
 --”ничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
     local hMainLayout = iup.GetLayout()
+    SideBar_obj.handle.SaveValues()
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
@@ -437,7 +438,6 @@ iup.DestroyDialogs = function()
         _G.dialogs['bottombar'] = nil
     end
     _G.iuprops['dialogs.sidebar.splitvalue'] = iup.GetDialogChild(hMainLayout, "SourceSplit").value
-    SideBar_obj.handle.SaveValues()
     iup.Detach(SideBar_obj.handle)
     iup.Destroy(SideBar_obj.handle)
     SideBar_obj.handle = nil

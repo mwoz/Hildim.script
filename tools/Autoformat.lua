@@ -328,7 +328,7 @@ local function doAutoformat(current_pos)
     if current_pos < 0 then return true end
     local current_line = editor:LineFromPosition(current_pos)
     local startLine = editor:PositionFromLine(current_line)
-    --ПРоверим стили - форматировать нужно только в Бэйсике
+    --Проверим стили - форматировать нужно только в Бэйсике
     if cmpobj_GetFMDefault() ~= SCE_FM_VB_DEFAULT then return end
     local strLine =  editor:textrange(startLine,current_pos)
     local strSep,strOut = FormatString(strLine, startLine)
@@ -340,11 +340,12 @@ local function doAutoformat(current_pos)
     bIsError,strSep,poses = ParseStructure(strSep,strOut,current_pos,current_line)
 
     local strNew = strSep..strOut
-    editor:SetSel(startLine,current_pos)
-    --print(editor.CurrentPos)
-    editor:BeginUndoAction()
-    editor:ReplaceSel(strNew)
-    editor:EndUndoAction()
+
+    editor.TargetStart = startLine
+    editor.TargetEnd = current_pos
+
+    if strLine:gsub('%s*$','')~=strNew:gsub('%s*$','') then editor:ReplaceTarget(strNew) end
+
     current_pos = current_pos + 1 + #strNew - #strLine
     editor:SetSel(current_pos, current_pos)
 
