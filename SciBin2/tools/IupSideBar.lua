@@ -283,7 +283,6 @@ local function InitSideBar()
             if tbs.OnSaveValues then tbs.OnSaveValues() end
         end
         SaveNamedValues(hMainLayout,'sidebarctrl')
-        SaveNamedValues(tDlg[1],'sidebarctrl')
     end)
 
     SideBar_obj.handle = tDlg
@@ -292,8 +291,6 @@ local function InitSideBar()
     iup.Map(tDlg)
 
     RestoreNamedValues(hMainLayout, 'sidebarctrl')
-    RestoreNamedValues(tDlg[1], 'sidebarctrl')
-    --if SideBar_obj.win then oDeatt.detach = 1 end
 
     for i = 1, #tEvents do
         for _,tbs in pairs(SideBar_obj.Tabs) do
