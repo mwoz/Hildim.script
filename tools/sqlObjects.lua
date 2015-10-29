@@ -174,7 +174,6 @@ local function local_OnOpen()
 end
 
 function sql_ResetMap()
-    print("Sql object map reloaded")
     if msg_SqlObjectMap ~= nil then
         msg_SqlObjectMap:Destroy()
         msg_SqlObjectMap = nil
@@ -560,6 +559,7 @@ local function ProcessObjInfo(pos, strLine, preinp)
         strTbl =strTbl:gsub('__KUSTOM_BASE__','Kustom'..sql_BaseNameSuffix)
         strTbl =strTbl:gsub('__ARCHIVE_BASE__','KplusArchive'..sql_BaseNameSuffix)
         strTbl =strTbl:gsub('__KPLUSGLOBAL_BASE__','KplusGlobal'..sql_BaseNameSuffix)
+        strTbl =strTbl:gsub('__LIMIT_BASE__','Limit'..sql_BaseNameSuffix)
         strTbl =strTbl:gsub('%{appKustomDB%}','Kustom'..sql_BaseNameSuffix)
 
     end
@@ -618,6 +618,7 @@ local function local_OnChar(char)
         or strObj == '__KUSTOM_BASE__'
         or strObj == '__ARCHIVE_BASE__'
         or strObj == '__KPLUSGLOBAL_BASE__'
+        or strObj == '__LIMIT_BASE__'
         or strObj == '{appKustomDB}'
         ) and props['sql.type'] == 'SYBASE' then
         strschem = 'dbo'
@@ -638,6 +639,8 @@ local function local_OnChar(char)
             strObj =  'KplusArchive'..sql_BaseNameSuffix
         elseif strObj == '__KPLUSGLOBAL_BASE__' then
             strObj =  'KplusGlobal'..sql_BaseNameSuffix
+        elseif strObj == '__LIMIT_BASE__' then
+            strObj =  'Limit'..sql_BaseNameSuffix
         end
         GetObjects(strschem, strObj)
         return
