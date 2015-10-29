@@ -340,14 +340,14 @@ local function doAutoformat(current_pos)
     bIsError,strSep,poses = ParseStructure(strSep,strOut,current_pos,current_line)
 
     local strNew = strSep..strOut
+    if strLine:gsub('%s*$','')~=strNew:gsub('%s*$','') then
+        editor:SetSel(startLine,current_pos)
 
-    editor.TargetStart = startLine
-    editor.TargetEnd = current_pos
+        editor:ReplaceSel(strNew)
 
-    if strLine:gsub('%s*$','')~=strNew:gsub('%s*$','') then editor:ReplaceTarget(strNew) end
-
-    current_pos = current_pos + 1 + #strNew - #strLine
-    editor:SetSel(current_pos, current_pos)
+        current_pos = current_pos + 1 + #strNew - #strLine
+        editor:SetSel(current_pos, current_pos)
+    end
 
     if poses ~=nil then
         if bIsError then mark = errmark else mark = goodmark end

@@ -842,6 +842,7 @@ xml.transformNodeToObject Processes this node and its children using the supplie
 
 xml.getAttribute
 xml.setAttribute
+xml.setProperty
 ### Источник: Справочник "Некоторые объекты Automation" <http://www.script-coding.info/wsh_chm.zip>
 
 # Строковые функции

@@ -258,6 +258,7 @@ local function ReattachFind()
         iup.GetDialogChild(hMainLayout, "FinReplExp").state="CLOSE";
     else
         iup.Reparent(oDeattFnd, SideBar_obj.Tabs.findrepl.handle, nil)
+        iup.Reparent(oDeattFnd, iup.GetDialogChild(hMainLayout, "FinReplScroll"), nil)
         iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000"
         iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="0"
         iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
@@ -843,12 +844,12 @@ local function FuncBmkTab_Init()
             if _G.iuprops["sidebarctrl.zPin.pinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.pinned.value"] end
         end);
         Dlg_Show_Cb = (function(h,state)
-            if state == 0 then popUpFind = h; end
+            if state == 0 then popUpFind = h; oDeattFnd.visible='YES' end
         end);
         }
 
     Ctrl('tabFinrRepl').rightclick_cb = (function()
-       if  _G.iuprops['findrepl.win']=='0' then
+       if  (_G.iuprops['findrepl.win'] or '0') =='0' then
             iup.menu
             {
               iup.item{title="Bottom pane",value=Ctrl("chkInBottom").value,action=ReattachFind};
@@ -858,7 +859,7 @@ local function FuncBmkTab_Init()
 
 
     SideBar_obj.Tabs.findrepl = {
-        handle = iup.vbox{oDeattFnd};
+        handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};
         OnMenuCommand = (function(msg)
             if msg == IDM_FIND then return ActivateFind(0)
             elseif msg == IDM_REPLACE then return ActivateFind(1)

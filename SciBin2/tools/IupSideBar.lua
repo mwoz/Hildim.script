@@ -84,14 +84,8 @@ local function  CreateBox()
         elseif t.type == "SPLIT" then
             t.layoutdrag = 'NO'
             l = iup.split(t)
-        elseif t.type == "EXPANDER" then
-            t.barsize = '0'
-            l = iup.expander(t)
-        elseif t.type == "SCROLLBOX" then
-            t.expand="HORIZONTAL"
-            t.scrollbar='NO'
-            t.minsize='x250'
-            l = iup.scrollbox(t)--iup.expander{, barsize='0', barposition="LEFT",minsize="0x0"}
+        elseif t.type == "FIND" then
+            l =iup.expander{iup.scrollbox{SideBar_obj.Tabs.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',minsize='x250'}, barsize = '0', name="FinReplExp"}
         elseif t.type == nil then
             l = t[1]
         else print('Unsupported type:'..t.type) end
@@ -106,16 +100,11 @@ local function  CreateBox()
         end)
         return iup.tabs(t)
     end
-    tbArg = function()
-        return {
-            Pane{'functions', Pane{Pane{'findrepl', type="SCROLLBOX"}, type='EXPANDER', name="FinReplExp"}, tabtitle = "Func/Find", type='VBOX'},
-            Pane{'abbreviations', Pane{'bookmark','navigation', orientation="HORIZONTAL", name="splitFuncNav",  type='SPLIT'}, orientation="HORIZONTAL", name="splitAbbrev", tabtitle = "Abbrev/Bmk/Nav", type="SPLIT"},
-            Pane{'fileman', tabtitle = "FileMan"},
-            Pane{'atrium', tabtitle = "Atrium", type= "VBOX"},
-        }
-    end
+
     local plugin = props["SciteDefaultHome"].."\\data\\home\\SideBarLayout.lua"
-    if shell.fileexists(plugin) then dofile(plugin) end
+    if shell.fileexists(plugin) then dofile(plugin)
+    else dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\SideBarLayout.lua")
+    end
 
     local tabs =  SideBar(tbArg())
     tbArg = nil
@@ -289,6 +278,11 @@ local function InitSideBar()
     local rightBarPH = iup.GetDialogChild(hMainLayout, "RightBarPH")
     iup.Append(rightBarPH,tDlg)
     iup.Map(tDlg)
+
+    -- local findPH = Iif(_G.iuprops['sidebarctrl.chkInBottom.value']=='ON',iup.GetDialogChild(hMainLayout, "FindPlaceHolder"),iup.GetDialogChild(tDlg, "FinReplScroll"))
+
+    -- iup.Append(findPH,SideBar_obj.Tabs.findrepl.handle)
+    -- iup.Map(SideBar_obj.Tabs.findrepl.handle)
 
     RestoreNamedValues(hMainLayout, 'sidebarctrl')
 

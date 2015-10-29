@@ -117,6 +117,8 @@ function GoToDef(strSelText)
     end
     if _incStart ~=nil then
         OnNavigation(strNav)
+        iup.SetGlobal('KEYRELEASE','K_RSHIFT')
+        iup.SetGlobal('KEYRELEASE','K_LSHIFT')
         editor:SetSel(_incStart,_incEnd)
         if prevLine ~= editor:GetCurLine() then
             OnNavigation(strNav.."-")
