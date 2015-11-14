@@ -52,6 +52,7 @@ local m_last = nil
 local m_ext, m_ptrn = "", ""
 local bManualTip = false
 local m_tblSubstitution = {}
+local curr_fillup_char = ''
 
 local Ext2Ptrn = {}
 do
@@ -167,9 +168,9 @@ local function ShowCallTip(pos,str,s,e)
 end
 
 local function isXmlLine()
---определяем, является литекущая строка тэгом xml
+--определяем, является ли текущая строка тэгом xml
     if editor:PositionFromLine(af_current_line) > current_pos-1 then return false end
-    return string.find(editor:textrange(editor:PositionFromLine(af_current_line),current_pos-1),"^%s*%<")
+    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',',','..editor.StyleAt[editor.SelectionStart]..',')
 end
 
 local function isPosInString()
@@ -227,7 +228,8 @@ function GetInputObject(line)
     end
 
     local lineLen = string.len(line)
-    local inputObject = {"noobj","","",nil}
+    local inputObject = {"","","",nil}
+    if props["autocomplete."..editor.LexerLanguage..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] then inputObject = {"noobj","","",nil} end
     local char = string.sub(line,lineLen,lineLen)
     local bracketsCounter = 0
     if char == ')' then -- ищем object.metod() :TODO - возможно стоит добавить []
@@ -699,8 +701,8 @@ end
 
 -- Вставляет выбранный из раскрывающегося списка метод в редактируемую строку
 local function OnUserListSelection_local(tp,str)
-
 	editor:SetSel(current_poslst, editor.CurrentPos)
+    local fmDef = cmpobj_GetFMDefault()
     local s, shift = nil,0
     if tp == constListIdXmlPar then
         if calltipinfo['attr'] then
@@ -710,13 +712,15 @@ local function OnUserListSelection_local(tp,str)
         s = str:gsub(' .*','')
     elseif pasteFromXml then
         s = str..'=""'
-    elseif editor.LexerLanguage == 'xml' then
-        if iup.GetGlobal('SHIFTKEY') == 'ON' then
+    elseif editor.LexerLanguage == 'xml' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
+        if (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
             shift = 2
             s = str..'/>'
+            if curr_fillup_char == '/' then curr_fillup_char = '' end
         else
             shift = #str + 3
             s = str..'></'..str..'>'
+            if curr_fillup_char == '>' then curr_fillup_char = '' end
         end
     else
         s = str
@@ -917,20 +921,24 @@ local function OnChar_local(char)
     --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
         if scite.SendEditor(SCI_AUTOCACTIVE) then
             --editor:SetSel(editor:WordStartPosition(editor.CurrentPos), editor.CurrentPos)
+            curr_fillup_char = char
             scite.SendEditor(SCI_AUTOCCOMPLETE)
-            editor:ReplaceSel(char)
+            editor:ReplaceSel(curr_fillup_char)
+            curr_fillup_char = ''
         else
             bIsListVisible = false
         end
     end
 
-	if IsComment(editor.CurrentPos-2) then return false end  -- Если строка закомментирована, то выходим
+	if IsComment(editor.CurrentPos-2) then return false end  -- Если строка закомметирована, то выходим
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
     local result = false
 
     local bResetCallTip = true
 	local autocomplete_start_characters = props["autocomplete."..editor.LexerLanguage..".start.characters"]
+    if cmpobj_GetFMDefault() == SCE_FM_X_DEFAULT then autocomplete_start_characters = autocomplete_start_characters..'<' end
+
 	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
 	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
 	if not (autocomplete_start_characters == '' and calltip_start_characters == '') then

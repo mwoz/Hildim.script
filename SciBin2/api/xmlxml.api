@@ -49,4 +49,11 @@ check<expression Логическое выражение на T-SQL
 
 value<lang {{en|ru}}
 
+display<caption
+display<caption_ru
+display<tooltip
+display<tooltip_ru
+
 string<name {{caption_plural|caption}}
+
+

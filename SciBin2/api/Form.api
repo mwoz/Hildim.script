@@ -20,6 +20,7 @@ application.GetMD5(Data) returns MD5 (string representation) of Unicode string p
 application.PopupMsgBox(Prompt, Sender, [IsError]) shows popup message box (at system tray) and add it into Radius messenger
 application.CreateSSLAdapter(Form) Form: Form object (adapter consumer). NOT USED AND SHOULD BE REMOVED IN NEAR FUTURE
 application.IsKeyPressed(nVirtKey)  Returns current state (True=pressed, false=unpressed) of the key, specified by nVirtKey parameter (virtual key code)
+application.IsKeyPressedAtEvent(nVirtKey)  Returns current state (True=pressed, false=unpressed) of the key, specified by nVirtKey parameter (virtual key code)
 application.KplusFeedMsgConvert(strKplusFeedMsg)
 application.KplusFeedMsgRecordsetConvert(msgRecordSet, strKplusFeedFieldName, msgMappingStructure) msgRecordSet -  сообщение с подсообщениями,в котрые требуются добавить некоторые данные из strKplusFeedMsg, которые содержатся в этих подсообщениях в поле с именем strKplusFeedFieldName\nmsgMappingStructure задает правила маппинга для различных типов сделок\n{root}\n    DefaultDateFormat:\n    {ImportTableName}\n        {TargetColumnName}\n            SourcePath:   Table/Field | $DefaultTable$/$DefaultTable$PostFix\n            Type:    N-number | T-text(by default) | D-Date/datetime | C - choice\n            {MapValueTo}\n                Value1:    MapValue1\n                Value2:    MapValue2\n                ...\n        ...\n    {$DefaultTable$} // Если не найдена таблица для mapping, то берется эта\n    ...\n
 application.RML_MessageConvert(msgSource, strKeyLine_FieldNname,strColumn_FieldName,strValue_FieldName,strEventField,strEventFieldFireValue,strFireFmt,strNormalFmt) CMessage = application.RML_MessageConvert \n( \n  msgSource, \n  strKeyLine_FieldNname /* ='Lines_Id' */,  ' Lines_Id это int, нужно \n                                              преобразовать в строку без кавычек !!!\n  strColumn_FieldName /* ='Columns_Id'*/,  ' Columns_Id это int, нужно \n                                               преобразовать в строку (имя поля) без \n                                                                      ' кавычек (у декад) !!!\n  strValue_FieldName /* ='Value' */   ' Value это float; просто переприсвоить \n                                                                       variant  ->   *.Value = *.Value\nstrEventField /* =LimitExcess */\nstrEventFieldFireValue /* =Y */\nstrFireFmt /*  = BG=ff0000,FG=ffffff */       ' fmt = fmt(i) + <contents of Columns_Id>:BG=ff0000,FG=ffffff;\nstrNormalFmt  /* R */                                   '  если event = N то contents of <Columns_Id>:R;\n)\nMsg After Conversion (то, что получаем на выходе)\nmsg: 1 (Lines_Id)\n                1 (Columns_Id) = 16816.725 (Value)\n                2  = 0\n                 $ftm$ = …\nmsg: 2 \n                1 = 0 \n                 $ftm$ = …\n
@@ -98,6 +99,7 @@ form.StartControlsReposition This method should be called before changing contro
 form.EndControlsReposition Must be used in pair with StartControlsReposition method. See it’s description for details.
 form.DashboardSubscribe(strCube, strRow, strCell) Subscribes for dashboard data. Data is received via OnDashboardData callback
 form.DashboardUnsubscribe(strCube, strRow, strCell) Unsubscribes from dashboard data.
+form.Lock_CancelPendingEvent Очищает сохранные события для залоченной формы
 #$form=form%.masterform
 #$form=.*%.childforms(
 #$form=.*%.rootforms(
@@ -1178,6 +1180,8 @@ papp.ObjTypeFull
 papp.SqlFromCData(str)
 papp.SqlToCData(str)
 papp.FilterDate2Date(strType, val)
+papp.Node2Tooltip(ParentTooltip, xmlNode, nls) Возвращает дефолтный тултип для поля по его описанию в метаданных
+papp.Node2Caption(ParentCaption, xmlNode, nls) Возвращает дефолтный заголовок для поля по его описанию в метаданных
 #$calc=.*%.calc
 
 calc.Bond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
@@ -1195,4 +1199,13 @@ objtmp.TemplateName Задает имя шаблона, если оно отличается от дефолтного для да
 objtmp.ParentForm задает родительское окно для открываемой формы\nЕсли задано, открывается как дочерняя форма
 
 
+noobj.control
+noobj.form
+noobj.string
+noobj.stringtable
+noobj.frame
+noobj.template
+noobj.menu
+noobj.script
+noobj.menuparam
 

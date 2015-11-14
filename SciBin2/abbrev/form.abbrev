@@ -2,11 +2,11 @@ dow=Do While |\r\nLoop
 dou=Do Until |\r\nLoop
 dolw=Do\r\nLoop While |
 dolu=Do\r\nLoop Until |
-for=For i = 0 To | \r\nNext\r\n
+for=For i = 0 To | \nNext
 each=For Each | In \r\nNext\r\n
-sel=Select Case |\r\nCase \r\nEnd Select\r\n
+sel=Select Case |\nCase \nEnd Select
 if=If | Then \r\nEnd If\r\n
-ie=If | Then \r\nElse\r\nEnd If\r\n
+ie=If | Then \nElse\nEnd If
 elseif=ElseIf | Then
 sub=Sub |()\r\nEnd Sub\r\n
 fun=Function |()\r\nEnd Function\r\n
