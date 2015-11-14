@@ -198,7 +198,7 @@ local function SelectData()
     local code = Iif(bSceme, iup.GetAttribute(cmb_dataShem, cmb_dataShem.value)..'.', '')..Trim(txt_datamask.value)
     if cd == nil then
         if list_obj:getcell(sel,1) == 'system.ObjectTypeForm' then
-            sql = "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, f.ObjectTypeForm_Id, (o.ObjectType_Code + '.' + v.Tag) as [ObjectTypeForm_Code] from ObjectTypeForm f\n"..
+            sql = "select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1, f.ObjectTypeForm_Id, (o.ObjectType_Code + '.' + v.Tag + case when f.Presentation = '' then '' else '.' + f.Presentation end) as [ObjectTypeForm_Code] from ObjectTypeForm f\n"..
             "inner join ObjectType o on o.ObjectType_Id = f.ObjectType_Id\n"..
             "inner join ChoiceValue v on v.Value = f.FormType\n"..
             "inner join Choice c on c.Choice_Id = v.Choice_Id and c.Choice_Code = 'system.FormType'\n"..
@@ -295,7 +295,7 @@ local function PutReport()
     end, 20, nil)
 end
 
-local function PutForm(objectType, formType)
+local function PutForm(objectType, formType, formPresent)
     if objectType == nil or formType == nil then
         print('Incorrect Custom form!')
         return
@@ -346,7 +346,7 @@ function atrium_RunXml()
     elseif strObjType == 'Form' and t_xml['type'] == 'Report' then
         PutReport()
     elseif strObjType == 'Form' then
-        PutForm(t_xml['objectType'], t_xml['type'])
+        PutForm(t_xml['objectType'], t_xml['type'], t_xml['presentation'])
     elseif strObjType == 'template' then
         print('Not Supported!')
     else
@@ -514,6 +514,34 @@ local function Metadata_Unload(bCompare)
     end,20,nil)
 end
 
+local function GetEHXml(strType)
+    local sel = list_obj.marked:find('1') - 1
+    iup.GetAttributeId2(list_obj, '', sel, 1)
+    local fType = iup.GetAttributeId2(list_obj, '', sel, 1)
+    local msg = mblua.CreateMessage()
+    local strSubj = 'SYSM.SAVETEMPLATE'
+    if _G.iuprops["precompiller.radiususername"] ~= '' then
+        strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
+    end
+    msg:Subjects(strSubj)    msg:SetPathValue("Command","GetTemplate")
+    msg:SetPathValue("ObjectType",fType)
+    msg:SetPathValue("FormType",strType)
+
+    mblua.Request(function(handle,Opaque,iError,msgReplay)
+--[[        if iError ~= 0 then
+            print('Получение шаблона - терминал не отчечает')
+            return
+        end]]
+        props['scite.new.file'] = '^'..msgReplay:GetPathValue("FileName")
+        scite.MenuCommand(IDM_NEW)
+        if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
+        editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('xml')))
+        --scite.MenuCommand(1468)
+    end
+    ,msg,15,null)
+    msg:Destroy()
+end
+
 local function OpenChoiceMeta()
     if editor.Lexer ~= SCLEX_XML then return end
 
@@ -619,6 +647,14 @@ local function FindTab_Init()
               mDif,
               iup.separator{},
               iup.item{title="Открыть новый файл с данными",action=Metadata_NewData},
+              iup.submenu{title='Создать EH форму',
+                  iup.menu{
+                    iup.item{title="Тикет",action=function() GetEHXml('C') end, },
+                    iup.item{title="Блоттер",action=function() GetEHXml('B')  end,},
+                    iup.item{title="Фильтр блоттера",action=function() GetEHXml('F') end,},
+                    iup.item{title="Поиск",action=function() GetEHXml('S') end,},
+                  }
+              },
               iup.separator{},
               iup.item{title="Добавить XML заголовок",value=_G.iuprops['atrium.metadata.xmlcapt'],action=(function() _G.iuprops['atrium.metadata.xmlcapt']=Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON','OFF','ON') end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)

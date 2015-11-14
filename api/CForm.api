@@ -403,6 +403,18 @@ objsqlo.Timeout в секундах
 objsqlo.DataModelMode (R/S/T/M)
 objsqlo.IndexAuto (Y/N)
 
-
+noobj.Choice
+noobj.Column
+noobj.Container
+noobj.Control
+noobj.Design
+noobj.Form
+noobj.Lookup
+noobj.Reference
+noobj.Sqlquery
+noobj.String
+noobj.Stringtable
+noobj.Sql
+noobj.Value
 
 

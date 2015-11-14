@@ -51,7 +51,7 @@ link.alignment {{#@ALIGN}}
 button.default {{Y}} N by def.
 button.outercolor {{#@COLORS}}
 button.tooltiptext
-button.style = {{D efoult|F loat}} Выпуклая или плоская кнопка
+button.style = {{D efoult|F loat|I nfo}} Выпуклая или плоская кнопка
 button.caption
 button.caption_ru
 
