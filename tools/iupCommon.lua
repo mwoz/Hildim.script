@@ -268,6 +268,7 @@ iup.scitedetachbox = function(t)
     dtb.On_Detach = t.On_Detach
 
     dtb.detached_cb=(function(h, hNew, x, y)
+
         if h.On_Detach then h.On_Detach(h, hNew, x, y) end
         hNew.resize ="YES"
         hNew.shrink ="YES"
@@ -308,10 +309,12 @@ iup.scitedetachbox = function(t)
                     iup.ShowXY(h, h.x,h.y)
                 end
                 if dtb.Split_h then
+                    if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value end
                     dtb.Split_h.value = dtb.Split_CloseVal
                     dtb.Split_h.barsize = "0"
                 end
                 _G.dialogs[dtb.sciteid] = dtb
+                iup.GetDialogChild(iup.GetLayout(), "SourceSplitLeft").value = 0
             elseif state == 4 then
                 _G.iuprops['dialogs.'..dtb.sciteid..'.x']= h.x
                 _G.iuprops['dialogs.'..dtb.sciteid..'.y']= h.y
@@ -322,6 +325,7 @@ iup.scitedetachbox = function(t)
                     dtb.Split_h.barsize = "3"
                 end
             end
+            if state == 0 then dtb.visible='YES' end
             if dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(h, state) end
         end)
         if h.Dlg_Resize_Cb then
@@ -388,7 +392,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                 sciteid = table.remove(_G.deletedDialogs)
                 local dlg = _G.dialogs[sciteid]
                 if dlg ~= nil then
-                    if sciteid ~= 'sidebarp' or _G.iuprops['sidebar.win'] == '0' then
+                    if _G.iuprops['sidebar.win'] == '0' then
                         _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
                         _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
                         _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
@@ -412,7 +416,8 @@ end)
 --”ничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
     local hMainLayout = iup.GetLayout()
-    SideBar_obj.handle.SaveValues()
+    if SideBar_obj.handle then SideBar_obj.handle.SaveValues() end
+    if LeftBar_obj.handle then LeftBar_obj.handle.SaveValues() end
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
@@ -423,7 +428,11 @@ iup.DestroyDialogs = function()
     iup.Destroy(iup.GetDialogChild(hMainLayout, "FindReplDetach"))
     if _G.dialogs['sidebar'] ~= nil then
         _G.dialogs['sidebar'].restore = 1
-        _G.dialogs['sidebar'] = nul
+        _G.dialogs['sidebar'] = nil
+    end
+    if _G.dialogs['leftbar'] ~= nil then
+        _G.dialogs['leftbar'].restore = 1
+        _G.dialogs['leftbar'] = nil
     end
     if _G.dialogs['concolebar'] ~= nil then
         iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
@@ -437,13 +446,19 @@ iup.DestroyDialogs = function()
         _G.dialogs['bottombar'].restore = 1
         _G.dialogs['bottombar'] = nil
     end
-    _G.iuprops['dialogs.sidebar.splitvalue'] = iup.GetDialogChild(hMainLayout, "SourceSplit").value
-    iup.Detach(SideBar_obj.handle)
-    iup.Destroy(SideBar_obj.handle)
-    SideBar_obj.handle = nil
+    if SideBar_obj.handle then
+        iup.Detach(SideBar_obj.handle)
+        iup.Destroy(SideBar_obj.handle)
+        SideBar_obj.handle = nil
+    end
+    if LeftBar_obj.handle then
+        iup.Detach(LeftBar_obj.handle)
+        iup.Destroy(LeftBar_obj.handle)
+        LeftBar_obj.handle = nil
+    end
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
-            if sciteid ~= 'sidebarp' or _G.iuprops['sidebar.win'] == '0' then
+            if _G.iuprops['sidebar.win'] == '0' then
                 _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
                 _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
                 _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y

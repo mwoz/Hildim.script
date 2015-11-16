@@ -1,10 +1,14 @@
 local currentItem = 0
 local list_navigation
-SideBar_obj.blockUpdate = true
+local navigation_blockUpdate = true
 local m_lastLin = -2
 
+function navigation_Unblock()
+    navigation_blockUpdate = false
+end
+
 local function OnNavigate(item)
-	if SideBar_obj.blockUpdate then return  end
+	if navigation_blockUpdate then return  end
 
 	while currentItem > 1 do
 		list_navigation.dellin = 0
@@ -52,12 +56,12 @@ local function Navigation_Go(item)
     if not path then return end
     local lin = tonumber(list_navigation:getcell(item,4))
 
-	SideBar_obj.blockUpdate = true
+	navigation_blockUpdate = true
 	if props['FilePath'] ~= path then scite.Open(path) end
 
 	editor:SetSel(editor:PositionFromLine(lin-1),editor:PositionFromLine(lin))
 	iup.PassFocus()
-	SideBar_obj.blockUpdate = false
+	navigation_blockUpdate = false
 
 	iup.SetAttributeId2(list_navigation, "MARK",currentItem ,0, "0")
 	iup.SetAttributeId2(list_navigation, "MARK",item,0, "1")
@@ -117,7 +121,7 @@ local function FuncBmkTab_Init()
 	list_navigation.map_cb = (function(h)
         h.size="1x1"
     end)
-    SideBar_obj.Tabs.navigation = {
+    SideBar_Plugins.navigation = {
         handle = list_navigation;
         id = myId;
         tab = tab1;

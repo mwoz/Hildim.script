@@ -312,7 +312,7 @@ message.GetFieldDate(Index/Name, [DefaultValue]) as VARIANT - DefaultValue is Nu
 message.Execute(Statement, [MsgParameters])	Statement: may has one of next formats:\n1) CALC SUM(<FieldName1>), SUM(<FieldNameN>), COUNT [WHERE <expr>]\n2) GET WHERE <expr>\n3) SORT <FieldName1> [ASC | DESC] [, ..., <FieldNameN> [ASC | DESC] ]	\n<expr> ::= <arg> <operator> <arg> | <arg> <operator> <expr> | <expr> <operator> <expr> | (<expr>)\n<arg> ::= <FieldName> | '<string>' | <number> | ? | NULL | EMPTY\n<operator> ::= OR | AND | > | < | = | >= | <= | <>\nExample:\nset args = Form.TibCreateMessage\nargs.AddField "arg1", DateSerial(2001, 1, 9)\nrs.Execute "SORT col3 DESC, col1 DESC"\nset m = rs.Execute("GET WHERE col1 <> EMPTY)\nset m = rs.Execute("GET WHERE col1 > ? OR col2 > 1.25", args)\nset m = rs.Execute("CALC SUM(col2), SUM(col3), COUNT WHERE col1 > ? OR col3 = 'Some string' ", args)
 #$message=.*%.execute(
 message.GetWireText() Returns  content of a message as a WireText
-message.SetWireText (strWireText) Sets message content from WireText string( see format in GetWIreText).\nReturns false if parsing string failed.\nExisiting data is replaced by data from WireText string
+message.SetWireText (strWireText, strError) Sets message content from WireText string( see format in GetWIreText).\nReturns false if parsing string failed.\nstrError returns error description if parsing failed\nExisiting data is replaced by data from WireText string
 
 field.Value VARIANT
 field.Name read-only

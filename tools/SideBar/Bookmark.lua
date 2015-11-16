@@ -91,7 +91,7 @@ local function Bookmarks_GotoLine(item)
 	--end
 end
 local function  _OnUpdateUI()
-    if SideBar_obj.ActiveTab == myId then
+    if SideBar_Plugins.bookmark.Bar_obj.ActiveTab == myId then
         if (editor.Focus) then
             local line_count_new = editor.LineCount
             local def_line_count = line_count_new - line_count
@@ -128,7 +128,7 @@ end
 
 local function OnSwitch()
     isEditor = true
-    if SideBar_obj.ActiveTab == myId then
+    if SideBar_Plugins.bookmark.Bar_obj.ActiveTab == myId then
         Abbreviations_ListFILL()
         Bookmarks_ListFILL()
     end
@@ -169,7 +169,7 @@ local function AbbreviationsTab_Init()
         end
 	end)
 
-    SideBar_obj.Tabs.bookmark = {
+    SideBar_Plugins.bookmark = {
         handle = list_bookmarks;
         OnSendEditor = _OnSendEditor;
         OnClose = _OnClose;
