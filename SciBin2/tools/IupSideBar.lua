@@ -1,5 +1,7 @@
 require 'shell'
 SideBar_obj = {}
+LeftBar_obj = {}
+SideBar_Plugins = {}
 TabBar_obj = {}
 
 local win_parent --создаем основное окно
@@ -10,9 +12,9 @@ local vAbbrev
 local vSys
 local vFileMan
 local vFindRepl
-local oDeatt
 local hMainLayout = iup.GetLayout()
 local BottomBar, ConsoleBar, FindRepl
+local pane_curObj
 
 iup.SetGlobal("DEFAULTFONTSIZE", Iif(props['iup.defaultfontsize']=='', "10", props['iup.defaultfontsize']))
 iup.SetGlobal("TXTHLCOLOR", "200 200 200")
@@ -22,16 +24,28 @@ iup.PassFocus=(function()
 end)
 
 function sidebar_Switch(n)
-    SideBar_obj.TabCtrl.valuepos = n -1
-    local v
-    for _,tbs in pairs(SideBar_obj.Tabs) do
-        if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
+    if LeftBar_obj.handle then
+        leftCount = tonumber(LeftBar_obj.TabCtrl.count)
+        if n <= leftCount then
+            LeftBar_obj.TabCtrl.valuepos = n -1
+            for _,tbs in pairs(SideBar_Plugins) do
+                if tbs.tabs_OnSelect and LeftBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
+            end
+        end
+        n = n - leftCount
+    end
+    if SideBar_obj.handle and n > 0 then
+        SideBar_obj.TabCtrl.valuepos = n -1
+        for _,tbs in pairs(SideBar_Plugins) do
+            if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
+        end
     end
 
+
 end
-function sidebar_Focus()
+--[[function sidebar_Focus()
     iup.SetFocus(SideBar_obj.TabCtrl)
-end
+end]]
 local function  CreateToolBar()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\LiveSearch.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\m4.lua")
@@ -55,119 +69,6 @@ local function  CreateStatusBar()
                         }
     return tolsp1
 end
-local function  CreateBox()
-
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Abbrev.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Bookmark.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FileMan.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Functions.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Navigation.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua")
-
-    -- Creates boxes
-    local sb_elements = {}
-    function Pane(t)
-        for i = 1, #t do
-            if type(t[i])=='string' then
-                table.insert(sb_elements, SideBar_obj.Tabs[t[i]])
-                t[i] = SideBar_obj.Tabs[t[i]].handle
-            end
-        end
-        if t.tabtitle then
-            for i = 1, #sb_elements do sb_elements[i].id = t.tabtitle end
-            sb_elements = {}
-        end
-        local b
-        if t.type == "VBOX" then
-            l = iup.vbox(t)
-        elseif t.type == "SPLIT" then
-            t.layoutdrag = 'NO'
-            l = iup.split(t)
-        elseif t.type == "FIND" then
-            l =iup.expander{iup.scrollbox{SideBar_obj.Tabs.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',minsize='x250'}, barsize = '0', name="FinReplExp"}
-        elseif t.type == nil then
-            l = t[1]
-        else print('Unsupported type:'..t.type) end
-        l.tabtitle = t.tabtitle
-        return l
-    end
-    local function SideBar(t)
-        t.name="tabMain"
-        t.tip= 'Ctrl+1,2,3,4'
-        t.map_cb = (function(h)
-            h.size="1x1"
-        end)
-        return iup.tabs(t)
-    end
-
-    local plugin = props["SciteDefaultHome"].."\\data\\home\\SideBarLayout.lua"
-    if shell.fileexists(plugin) then dofile(plugin)
-    else dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\SideBarLayout.lua")
-    end
-
-    local tabs =  SideBar(tbArg())
-    tbArg = nil
-    tabs.tabchange_cb = (function(_,new_tab, old_tab)
-        --сначала найдем активный таб и установим его в SideBar_obj
-
-        for _,tbs in pairs(SideBar_obj.Tabs) do
-            if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
-            if tbs.id == new_tab.tabtitle then
-                if tbs["on_SelectMe"] then tbs.on_SelectMe() end
-            end
-        end
-    end)
-    tabs.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
-
-    tabs.rightclick_cb=(function()
-        if _G.iuprops['sidebar.win'] == '0' then
-            local mnu = iup.menu
-            {
-              iup.item{title="Deattach Sidebar",action=(function()
-                  oDeatt.DetachRestore = true;
-                  oDeatt.detach = 1
-              end)};
-              iup.item{title="LayOut Dialog",action=(function()
-                local f = iup.filedlg{}
-                iup.SetNativeparent(f, "SCITE")
-                f:popup()
-                local path = f.value
-                f:destroy()
-                 testHandle = nil
-                if path ~= nil then
-                    local l = io.open(path)
-                    local strLua = l:read('*a')
-                    l:close()
-                    local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
-                    strLua = strLua..'\n testHandle = '..fName..'()'
-                    dostring(strLua)
-                end
-                local dlg = iup.LayoutDialog(testHandle)
-                iup.Show(dlg)
-              end)};
-
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
-        end
-    end)
-
-    SideBar_obj.TabCtrl = tabs
-    tbArg = nil
-
-    vbox = iup.vbox{tabs}       --SideBar_obj.Tabs.livesearch.handle,
-    oDeatt = iup.scitedetachbox{
-        vbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name='SideBarSB'; shrink="yes";
-        sciteid = 'sidebar';Split_h = iup.GetDialogChild(hMainLayout, "SourceSplit");Split_CloseVal = "1000";
-        Dlg_Title = "SideBar /Close For Attach/"; Dlg_Show_Cb = nil;
-        Dlg_Close_Cb = (function(h)
-            if _G.iuprops['findrepl.win']=='1' then
-                _G.FindReplDialog.close_cb(_G.FindReplDialog)
-            end
-        end);
-    }
-    return oDeatt
-end
-local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
 local function SaveNamedValues(h, root)
     if not h then return end
@@ -190,13 +91,181 @@ local function SaveNamedValues(h, root)
                     val = child.focusitem
                 elseif cType == 'sbox' then
                     val = child.size
+                elseif cType == 'split' then
+                    if "0" == child.barsize then val = nil end
                 end
-                _G.iuprops[root..'.'..child.name..'.value'] = val
+                if val then _G.iuprops[root..'.'..child.name..'.value'] = val end
             end
             SaveNamedValues(child, root)
         end
     until not child
 end
+
+local function  CreateBox()
+
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Abbrev.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Bookmark.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FileMan.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Functions.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Navigation.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua")
+
+    -- Creates boxes
+    local sb_elements = {}
+    function Pane(t)
+        for i = 1, #t do
+            if type(t[i])=='string' then
+                table.insert(sb_elements, SideBar_Plugins[t[i]])
+                SideBar_Plugins[t[i]].Bar_obj = pane_curObj
+                t[i] = SideBar_Plugins[t[i]].handle
+            end
+        end
+        if t.tabtitle then
+            for i = 1, #sb_elements do sb_elements[i].id = t.tabtitle end
+            sb_elements = {}
+        end
+        local b
+        if t.type == "VBOX" then
+            l = iup.vbox(t)
+        elseif t.type == "SPLIT" then
+            t.layoutdrag = 'NO'
+            l = iup.split(t)
+        elseif t.type == "FIND" then
+            SideBar_Plugins.findrepl.Bar_obj = pane_curObj
+            l =iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',minsize='x250'}, barsize = '0', name="FinReplExp"}
+        elseif t.type == nil then
+            l = t[1]
+        else print('Unsupported type:'..t.type) end
+        l.tabtitle = t.tabtitle
+        return l
+    end
+    local function SideBar(t, Bar_Obj)
+        if not t then return end
+        t.name="tabMain"
+        t.tip= 'Ctrl+1,2,3,4'
+        t.map_cb = (function(h)
+            h.size="1x1"
+        end)
+        t.tabchange_cb = (function(_,new_tab, old_tab)
+            --сначала найдем активный таб и установим его в SideBar_obj
+
+            for _,tbs in pairs(SideBar_Plugins) do
+                if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
+                if tbs.id == new_tab.tabtitle then
+                    if tbs["on_SelectMe"] then tbs.on_SelectMe() end
+                end
+            end
+        end)
+        t.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
+
+        t.rightclick_cb=(function()
+            if _G.iuprops['sidebar.win'] == '0' then
+                local mnu = iup.menu
+                {
+                  iup.item{title="Deattach Sidebar",action=(function()
+                      Bar_obj.handle.DetachRestore = true;     --!!!
+                      Bar_obj.handle.detach = 1
+                  end)};
+                  iup.item{title="LayOut Dialog",action=(function()
+                    local f = iup.filedlg{}
+                    iup.SetNativeparent(f, "SCITE")
+                    f:popup()
+                    local path = f.value
+                    f:destroy()
+                     testHandle = nil
+                    if path ~= nil then
+                        local l = io.open(path)
+                        local strLua = l:read('*a')
+                        l:close()
+                        local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
+                        strLua = strLua..'\n testHandle = '..fName..'()'
+                        dostring(strLua)
+                    end
+                    local dlg = iup.LayoutDialog(testHandle)
+                    iup.Show(dlg)
+                  end)};
+
+                }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+            end
+        end)
+    return iup.tabs(t)
+    end
+
+    local function SidePane(hVbox,sName,sSciteId,sSplit,sExpander,sSplit_CloseVal, Bar_obj, sSide)
+        local h = iup.scitedetachbox{
+            hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes";
+            sciteid = sSciteId;Split_h = iup.GetDialogChild(hMainLayout, sSplit);Split_CloseVal = sSplit_CloseVal;
+            Dlg_Title = sSide.." Side Bar /Close For Attach/"; Dlg_Show_Cb = nil;
+            On_Detach = (function(h, hNew, x, y)
+                iup.GetDialogChild(iup.GetLayout(), sExpander).state="CLOSE";
+                --h.visible
+            end);
+            Dlg_Close_Cb = (function(h)
+                if _G.iuprops['findrepl.win']=='1' then
+                    _G.FindReplDialog.close_cb(_G.FindReplDialog)
+                end
+                iup.GetDialogChild(iup.GetLayout(), sExpander).state="OPEN";
+            end);
+            show_cb=(function(h,state)
+                if state == 0 then
+                   h.size = '1x1'
+                elseif state == 4 then
+                    for _,tbs in pairs(SideBar_Plugins) do
+                        if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
+                    end
+                    for i = 1, #tEvents do
+                        for _,tbs in pairs(SideBar_Plugins) do
+                           if tbs[tEvents[i]] then RemoveEventHandler(tEvents[i],tbs[tEvents[i]]) end
+                        end
+                    end
+                    Bar_obj.Active = false
+                end
+            end);
+            k_any=(function(_,key)
+                if key == 65307 then iup.PassFocus() end
+            end);
+
+        }
+        h.SaveValues = (function()
+            for _,tbs in pairs(SideBar_Plugins) do
+                if tbs.OnSaveValues then tbs.OnSaveValues() end
+            end
+            SaveNamedValues(hMainLayout,'sidebarctrl')
+            SaveNamedValues(hVbox,'sidebarctrl')
+        end)
+        return h
+    end
+
+    local plugin = props["SciteDefaultHome"].."\\data\\home\\SideBarLayout.lua"
+    if shell.fileexists(plugin) then dofile(plugin)
+    else dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\SideBarLayout.lua")
+    end
+
+    pane_curObj = SideBar_obj
+    local tabs =  SideBar(tbArgRight(), SideBar_obj)
+    tbArgRight = nil
+
+    if tabs then
+        SideBar_obj.TabCtrl = tabs
+
+        vbox = iup.vbox{tabs}       --SideBar_Plugins.livesearch.handle,
+        SideBar_obj.handle = SidePane(vbox, 'SideBarSB','sidebar','SourceSplitRight', 'RightBarExpander', '1000', SideBar_obj, 'Right' )
+    end
+
+    pane_curObj = LeftBar_obj
+    tabs =  SideBar(tbArgLeft(), LeftBar_obj)
+    tbArgLeft = nil
+
+    if tabs then
+        LeftBar_obj.TabCtrl = tabs
+
+        vbox = iup.vbox{tabs}       --SideBar_Plugins.livesearch.handle,
+        LeftBar_obj.handle = SidePane(vbox, 'LeftBarSB','leftbar','SourceSplitLeft', 'LeftBarExpander', '0', LeftBar_obj, 'Left' )
+    end
+
+end
+local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
 local function RestoreNamedValues(h, root)
     if not h then return end
@@ -235,63 +304,36 @@ local function RestoreNamedValues(h, root)
 end
 
 local function InitSideBar()
-    --hMainLayout = iup.GetLayout()
---SideBar_obj._DEBUG = true --включает вывод отладочной информации
--- отображение флагов/параметров по умолчанию:
     if tonumber(props['sidebar.hide']) == 1 then return end
     -- SideBar_obj.win = false --если установить true - панель будет показана отдельным окном
+    SideBar_Plugins = {}
     SideBar_obj.win = (_G.iuprops['sidebar.win']=='1') --если установить true - панель будет показана отдельным окном
-    SideBar_obj.Tabs = {}
     SideBar_obj.Active = true
+    LeftBar_obj.win = (_G.iuprops['leftbar.win']=='1') --если установить true - панель будет показана отдельным окном
+    LeftBar_obj.Active = true
 
-    local dlg
-    --if true then return end
-    local tDlg = CreateBox();
-    --local tDlg = {CreateBox(); title="SideBar", maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="100x100"}
-    tDlg.show_cb=(function(h,state)
-        if state == 0 then
-           h.size = '1x1'
-        elseif state == 4 then
-            for _,tbs in pairs(SideBar_obj.Tabs) do
-                if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
-            end
-            for i = 1, #tEvents do
-                for _,tbs in pairs(SideBar_obj.Tabs) do
-                   if tbs[tEvents[i]] then RemoveEventHandler(tEvents[i],tbs[tEvents[i]]) end
-                end
-            end
-            SideBar_obj.Active = false
-        end
-    end)
-    tDlg.k_any=(function(_,key)
-        if key == 65307 then iup.PassFocus() end
-    end)
+    --if true then return end=
 
-    tDlg.SaveValues = (function()
-        for _,tbs in pairs(SideBar_obj.Tabs) do
-            if tbs.OnSaveValues then tbs.OnSaveValues() end
-        end
-        SaveNamedValues(hMainLayout,'sidebarctrl')
-    end)
+    CreateBox();
 
-    SideBar_obj.handle = tDlg
-    local rightBarPH = iup.GetDialogChild(hMainLayout, "RightBarPH")
-    iup.Append(rightBarPH,tDlg)
-    iup.Map(tDlg)
+    if SideBar_obj.handle then
+        iup.Append(iup.GetDialogChild(hMainLayout, "RightBarPH"),SideBar_obj.handle)
+        iup.Map(SideBar_obj.handle)
+    end
 
-    -- local findPH = Iif(_G.iuprops['sidebarctrl.chkInBottom.value']=='ON',iup.GetDialogChild(hMainLayout, "FindPlaceHolder"),iup.GetDialogChild(tDlg, "FinReplScroll"))
+    if LeftBar_obj.handle then
+        iup.Append(iup.GetDialogChild(hMainLayout, "LeftBarPH"),LeftBar_obj.handle)
+        iup.Map(LeftBar_obj.handle)
+    end
 
-    -- iup.Append(findPH,SideBar_obj.Tabs.findrepl.handle)
-    -- iup.Map(SideBar_obj.Tabs.findrepl.handle)
-
-    RestoreNamedValues(hMainLayout, 'sidebarctrl')
+    -- RestoreNamedValues(hMainLayout, 'sidebarctrl')
 
     for i = 1, #tEvents do
-        for _,tbs in pairs(SideBar_obj.Tabs) do
+        for _,tbs in pairs(SideBar_Plugins) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
-    SideBar_obj.OnCreate()
+    SideBar_Plugins.findrepl.OnCreate()
 
     BottomBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "BottomBar");
@@ -410,7 +452,12 @@ end
 InitSideBar()
 InitToolBar()
 InitStatusBar()
+RestoreNamedValues(hMainLayout, 'sidebarctrl')
 iup.Refresh(hMainLayout)
+if not LeftBar_obj.handle then iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0'
+else iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '3'   end
+if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000'
+else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '3'   end
 
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
@@ -453,8 +500,9 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     if b >= 0 then scite.buffers.SetDocumentAt(b) end
                 end
             end
-            SideBar_obj.blockUpdate = false
-            if SideBar_obj.win then oDeatt.DetachRestore = true; oDeatt.detach = 1 end
+            navigation_Unblock()
+            if SideBar_obj.win then SideBar_obj.handle.DetachRestore = true; SideBar_obj.handle.detach = 1 end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
+            if LeftBar_obj.win then LeftBar_obj.handle.DetachRestore = true; LeftBar_obj.handle.detach = 1 end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
             if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end
             if _G.iuprops['findrepl.win']=='1' then FindRepl.DetachRestore = true;FindRepl.detach = 1 end

@@ -14,9 +14,7 @@ local tree_func
 local currentLine = -1
 local currFuncData = -1
 
-local selFolderFlag = {}
 local currentItem = 0
-local blockUpdate = false
 local lineMap  -- падает дерево на userdata(((
 lineMap = {}
 
@@ -496,7 +494,7 @@ do -- Fill_Ext2Lang
 end -- Fill_Ext2Lang
 
 local function Functions_GetNames()
-	--SideBar_obj._DEBUG.timerstart('Functions_GetNames')
+
 	table_functions = {}
 	if editor.Length == 0 then return end
 
@@ -528,8 +526,6 @@ local function Functions_GetNames()
 	-- lpegPattern = nil
 	table_functions = lpegPattern:match(textAll, start_code_pos+1) -- 2nd arg is the symbol index to start with
 
-    --prnTb(table_functions,1)
-    --SideBar_obj._DEBUG.timerstop('Functions_GetNames','lpeg')
 end
 
 local function GetFlags (funcitem)
@@ -569,7 +565,7 @@ function getPath(id)
 end
 
 local function Functions_ListFILL()
-	if SideBar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_obj.Tabs.functions.id then return end
+	if SideBar_Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_Plugins.functions.id then return end
 	local function SortFuncList(a,b)
 		if _group_by_flags then --Если установлено, сначала сортируем по флагу
 			local fa = fnTryGroupName(GetFlags(a), a[4])
@@ -690,7 +686,6 @@ function Functions_ToggleFlags ()
 	_show_flags = not _show_flags
 	if not _show_flags then
 		_group_by_flags = false
-		selFolderFlag = {}
 	end
 	Functions_ListFILL()
 end
@@ -740,7 +735,7 @@ local function JumpToFuncDefinition(funcname)
 end
 
 local function OnSwitch()
-    if SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.functions.id then
+    if SideBar_Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle == SideBar_Plugins.functions.id then
         Functions_GetNames()
 		Functions_ListFILL()
 		line_count = editor.LineCount
@@ -748,16 +743,11 @@ local function OnSwitch()
     end
 end
 
-local function OnSwitchFileOpen()
-    selFolderFlag = {}
-    OnSwitch()
-end
-
 local curSelect
 curSelect = -1
 
 local function  _OnUpdateUI()
-    if SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.functions.id then
+    if SideBar_Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle == SideBar_Plugins.functions.id then
         if editor.Focus then
             local line_count_new = editor.LineCount
             local def_line_count = line_count_new - line_count
@@ -829,8 +819,6 @@ function Functions_ToggleGroup()
 
 	if _group_by_flags then
 		_show_flags = true
-	else
-		selFolderFlag = {}
 	end
 
     Functions_GetNames()
@@ -946,16 +934,16 @@ local function Finc_Init()
         SaveLayoutToProp()
     end)
 
-    SideBar_obj.Tabs.functions = {   -- iup.vbox{   };
+    SideBar_Plugins.functions = {   -- iup.vbox{   };
         handle = tree_func;
-        OnSwitchFile = OnSwitchFileOpen;
+        OnSwitchFile = OnSwitch;
         OnSave = OnMySave;
-        OnOpen = OnSwitchFileOpen;
+        OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
 		OnNavigation = OnNavigate;
         OnSideBarClouse = OnMyClouse;
-        tabs_OnSelect = OnSwitchFileOpen;
+        tabs_OnSelect = OnSwitch;
         on_SelectMe = function() iup.SetFocus(tree_func); iup.Flush();end
         }
 

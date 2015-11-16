@@ -789,7 +789,7 @@ local function Abbreviations_Init()
         end
 	end)
 
-    SideBar_obj.Tabs.abbreviations = {
+    SideBar_Plugins.abbreviations = {
         handle = list_abbrev;
         OnSwitchFile = Abbreviations_ListFILL;
         OnSave = Abbreviations_ListFILL;

@@ -145,13 +145,6 @@ local function listMbTrancport_DoLua()
     _G.iuprops['mbTrancport.file'] = iup.GetAttribute(cmb_listMbTrancport, cmb_listMbTrancport.value)
 end
 
-
-local function OnSwitch()
-    if SideBar_obj.ActiveTab == myId then
-        txt_Template:set_text(props['precompiller.xmlname'])
-    end
-end
-
 local function _OnKey(key, shift, ctrl, alt, char)
 	if shift and ctrl and alt and key == 82 then
         if  chk_RunConnect:get_checked() then

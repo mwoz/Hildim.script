@@ -719,7 +719,7 @@ local function FindTab_Init()
         barposition='LEFT', state='CLOSE', autoshow='YES'
     }
     --iup.toogle
-    SideBar_obj.Tabs.atrium =  {
+    SideBar_Plugins.atrium =  {
 handle =iup.split{
     iup.vbox{
         iup.scrollbox{iup.hbox{

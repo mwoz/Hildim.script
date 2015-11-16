@@ -226,6 +226,13 @@ function FileMan_FileExecWithParams()
 	end
 end
 
+local function mybar_Switch(n)
+    SideBar_Plugins.fileman.Bar_obj.TabCtrl.valuepos = n -1
+    for _,tbs in pairs(SideBar_Plugins) do
+        if tbs.tabs_OnSelect and SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
+    end
+end
+
 local function OpenFile(filename)
 	if filename:match(".session$") ~= nil then
 		filename = filename:gsub('\\','\\\\')
@@ -233,8 +240,8 @@ local function OpenFile(filename)
 	else
 		scite.Open(filename)
 	end
-    if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='ON' then sidebar_Switch(m_prevSel+1)
-    elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='1' then sidebar_Switch(1)
+    if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='ON' then mybar_Switch(m_prevSel+1)
+    elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='1' then mybar_Switch(1)
     end
     iup.PassFocus()
 end
@@ -425,7 +432,7 @@ function Favorites_AddFileName(fName) --для добавления из других библиотек
 end
 
 function Favorites_Clear()
-    if SideBar_obj.Active  ~= true then return end
+    if SideBar_Plugins.fileman.Bar_obj.Active  ~= true then return end
     for i = #list_fav_table,1,-1 do
         if list_fav_table[i][2] then table.remove(list_fav_table,i) end
     end
@@ -456,7 +463,7 @@ end
 local function OnSwitch(bForse, bRelist)
     if prev_filename:upper() == props['FilePath']:upper() then return end
     prev_filename = ''
-    if bForse or (SideBar_obj.TabCtrl.value_handle.tabtitle == SideBar_obj.Tabs.fileman.id) then
+    if bForse or (SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == SideBar_Plugins.fileman.id) then
         if bForse then iup.SetFocus(memo_mask) end
         local path = props['FileDir']
         if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
@@ -632,7 +639,7 @@ local function FileManTab_Init()
     -- end)
 
 
-    SideBar_obj.Tabs.fileman =  {
+    SideBar_Plugins.fileman =  {
         handle = iup.vbox{
                    iup.scrollbox{iup.vbox{iup.hbox{iup.label{title = "Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
                    iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"}},
@@ -644,8 +651,8 @@ local function FileManTab_Init()
         OnOpen = function()OnSwitch(false,true) end;
         OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir.restoretab']=memo_path.value end);
         tabs_OnSelect = function()
-            if SideBar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_obj.Tabs.fileman.id then
-                m_prevSel = SideBar_obj.TabCtrl.valuepos
+            if SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_Plugins.fileman.id then
+                m_prevSel = SideBar_Plugins.fileman.Bar_obj.TabCtrl.valuepos
             end
             OnSwitch(true,false)
         end;
