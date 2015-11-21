@@ -21,13 +21,6 @@ props['autoformat.line'] = _G.iuprops['autoformat.line']
 props['spell.autospell'] = _G.iuprops['spell.autospell']
 props['formenjine.old.ext'] = _G.iuprops['formenjine.old.ext']
 
-function CheckFMExt()
-	local cur_prop = ifnil(tonumber(props['formenjine.old.ext']), 0)
-	props['formenjine.old.ext'] = 1 - cur_prop
-    _G.iuprops['formenjine.old.ext'] = props['formenjine.old.ext']
-    ResetFormEnjineExt()
-end
-
 local function SaveIup()
     if not iuprops_read_ok then return end
     local t = {}
@@ -113,6 +106,20 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         iup.DestroyDialogs();SaveIup()
         scite.PostCommand(1,0)
         return true
+    elseif cmd == IDM_TOGGLEOUTPUT then
+        if _G.iuprops['bottombar.win']~='1' then
+            local hMainLayout = iup.GetLayout()
+            if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
+               iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
+               iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
+               iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops["sidebarctrl.BottomBarSplit.value"] or '900'
+            else
+               iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
+               iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
+               _G.iuprops["sidebarctrl.BottomBarSplit.value"] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
+            end
+        end
     end
 end)
 AddEventHandler("OnSave", function(cmd, source)
@@ -314,7 +321,6 @@ iup.scitedetachbox = function(t)
                     dtb.Split_h.barsize = "0"
                 end
                 _G.dialogs[dtb.sciteid] = dtb
-                iup.GetDialogChild(iup.GetLayout(), "SourceSplitLeft").value = 0
             elseif state == 4 then
                 _G.iuprops['dialogs.'..dtb.sciteid..'.x']= h.x
                 _G.iuprops['dialogs.'..dtb.sciteid..'.y']= h.y
@@ -340,7 +346,7 @@ local old_iup_ShowXY = iup.ShowXY
 iup.ShowXY = function(h,x,y)
     x = tonumber(x)
     y = tonumber(y)
-    local _,_,_,_,x2,y2 = iup.GetGlobal('VIRTUALSCREEN'):find('(%d*) (%d*) (%d*) (%d*)')
+    local _,_,_,_,x2,y2 = iup.GetGlobal('VIRTUALSCREEN'):find('(%-?%d*) (%-?%d*) (%-?%d*) (%-?%d*)')
     x2 = tonumber(x2)
     y2 = tonumber(y2)
     if x > x2 - 10 then x = 100 end

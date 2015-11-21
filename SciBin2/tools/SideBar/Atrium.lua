@@ -158,14 +158,29 @@ local function PutData(t_xml,strObjType)
 end
 
 local function ApplyMetadata(strXml)
-    local msgParams = mblua.CreateMessage()
-    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml = strXml:from_utf8(1251) end
+    if cmb_mask.value == '6' then --drop
+        local msb = iup.messagedlg{buttons='YESNO', value='Удалить сущность из базы?'}
+        msb.popup(msb)
+        if msb.buttonresponse == '1' then
+            local t_xml = xml.eval(strXml)
+            local code = t_xml['code']
+            local msgParams = mblua.CreateMessage()
+            dbAddProcParam(msgParams, "ObjectType_Code", code, AD_VarChar, AD_ParamInput, code:len() + 1)
+                dbRunProc('mpDropMetadata', msgParams, function(handle,Opaque,iError,msgReplay)
+                    print("Удаление метаданных '"..code.."'. Ответ: "..msgReplay:ToString())
+            end, 20, nil)
+        end
+        msb:destroy(msb)
+    else
+        local msgParams = mblua.CreateMessage()
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml = strXml:from_utf8(1251) end
 
-    dbAddProcParam(msgParams, "Metadata"          , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
-    dbAddProcParam(msgParams, "ExecMode", 'R', AD_VarChar, AD_ParamInput, 1)
-    dbAddProcParam(msgParams, "ObjectMask", iup.GetAttribute(cmb_mask, cmb_mask.value), AD_VarChar, AD_ParamInput, 3)
+        dbAddProcParam(msgParams, "Metadata"          , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
+        dbAddProcParam(msgParams, "ExecMode", 'R', AD_VarChar, AD_ParamInput, 1)
+        dbAddProcParam(msgParams, "ObjectMask", iup.GetAttribute(cmb_mask, cmb_mask.value), AD_VarChar, AD_ParamInput, 3)
 
-    dbRunProc('mpGenerateSql', msgParams, SetReply, 20, nil)
+        dbRunProc('mpGenerateSql', msgParams, SetReply, 20, nil)
+    end
 end
 
 local function SelectData()
@@ -583,6 +598,7 @@ local function FindTab_Init()
     iup.SetAttribute(cmb_mask, 3, "SP")
     iup.SetAttribute(cmb_mask, 4, "SD")
     iup.SetAttribute(cmb_mask, 5, "SDP")
+    iup.SetAttribute(cmb_mask, 6, "Drop")
     cmb_mask.value = 1
     btnRun = iup.button{image = 'IMAGE_FormRun', action=atrium_RunXml, tip='Обработка всего файла'}
 
@@ -759,3 +775,137 @@ FindTab_Init()
 
  AddEventHandler("GoToObjectDefenition", OpenChoiceMeta)
 
+local function FieldsSql(objectType, path, condition)
+return
+" select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1                                                             \n"..
+" declare @path nvarchar(4000), @fld nvarchar(100), @object_code nvarchar(100)                                            \n"..
+" declare @x xml, @hdoc int, @strPath varchar(256)                                                                        \n"..
+" Set @path = '"..path.."'                                                                                                \n"..
+" set @object_code = '"..objectType.."'                                                                                   \n"..
+" while LEN(@path) > 1                                                                                                    \n"..
+" begin                                                                                                                   \n"..
+" 	set @fld = SUBSTRING(@path,1, CHARINDEX('/', @path,1)-1)                                                              \n"..
+" 	set @path = SUBSTRING(@path, CHARINDEX('/', @path,1 )+1, 4000)                                                        \n"..
+" 	select @x = CONVERT(xml, d.Metadata),                                                                                 \n"..
+" 	@strPath = case                                                                                                       \n"..
+" 		when d.Category = 'R' or d.Category = 'D'  then '/Template/DataModel/Tables/Table[@type=''Master'']/Fields/Field' \n"..
+" 		when d.Category = 'E'  then '/Template/DataModel/Tables/Table[@type=''AppendixSingle'']/Fields/Field'             \n"..
+" 		when d.Category = 'P' or d.Category = 'W' then '/Template/DataModel/Fields/Field'                                 \n"..
+" 		end                                                                                                               \n"..
+" 	from ObjectType d                                                                                                     \n"..
+" 	where d.ObjectType_Code = @object_code                                                                                \n"..
+" 	exec sp_xml_preparedocument @hdoc out, @x                                                                             \n"..
+" 	select @object_code = obj from openxml(@hdoc, @strPath) with                                                          \n"..
+" 	(                                                                                                                     \n"..
+" 		name varchar(500) 'attribute::name',                                                                              \n"..
+" 		obj varchar(500) 'attribute::object'		                                                                      \n"..
+" 	)where name =  @fld                                                                                                   \n"..
+" 	exec sp_xml_removedocument @hdoc		                                                                              \n"..
+" end                                                                                                                     \n"..
+" 	select @x = CONVERT(xml, d.Metadata),                                                                                 \n"..
+" 	@strPath = case                                                                                                       \n"..
+" 		when d.Category = 'R' or d.Category = 'D'  then '/Template/DataModel/Tables/Table[@type=''Master'']/Fields/Field' \n"..
+" 		when d.Category = 'E'  then '/Template/DataModel/Tables/Table[@type=''AppendixSingle'']/Fields/Field'             \n"..
+" 		when d.Category = 'P' or d.Category = 'W' then '/Template/DataModel/Fields/Field'                                 \n"..
+" 		end                                                                                                               \n"..
+" 	from ObjectType d                                                                                                     \n"..
+" 	where d.ObjectType_Code = @object_code	                                                                              \n"..
+" 	exec sp_xml_preparedocument @hdoc out, @x                                                                             \n"..
+" 	select name from openxml(@hdoc, @strPath) with                                                                        \n"..
+" 	(                                                                                                                     \n"..
+" 		name varchar(500) 'attribute::name',                                                                              \n"..
+" 		typ varchar(32) 'attribute::type'		                                                                          \n"..
+" 	)where "..condition.."                                                                                                \n"..
+" 	exec sp_xml_removedocument @hdoc                                                                                      \n"
+
+end
+
+function atrium_controlList(clbk)
+    local t_xml = xml.eval(editor:GetText())
+    local f_clb = clbk
+
+    dbRunSql(FieldsSql(t_xml['objectType'], '/', '1=1'),
+    (function(handle,Opaque,iError,msgReplay)
+        if dbCheckError(iError, msgReplay) then return end
+        local _, mc = msgReplay:Counts()
+        local strLst = ''
+        for i = 0, mc - 1 do
+            if i>0 then strLst = strLst..'|' end
+            strLst = strLst..msgReplay:Message(i):GetPathValue('name')
+        end
+        f_clb(strLst)
+    end)
+    ,20,nil)
+end
+
+function atrium_columnList(clbk)
+    local function fnd(tb)
+        for k,v in pairs(tb) do
+            if type(v) == 'table' then
+                if v[0] == 'Form' or v[0] == 'Columns' or v[0] == 'Lookup' then
+                    local res = fnd(v)
+                    if res then
+                        if v['code'] then return v['code']..'/'..res
+                        else return res end
+                    end
+                elseif v[0] == 'Column' then
+                    if v['code'] == '' then return '' end
+                end
+            end
+        end
+    end
+
+    local t_xml = xml.eval(editor:GetText())
+    local path = fnd(t_xml)
+    local f_clb = clbk
+    if not path then return end
+
+    dbRunSql(FieldsSql(t_xml['objectType'], path, "typ <> 'Reference' and typ <> 'Asset'"),
+    (function(handle,Opaque,iError,msgReplay)
+        if dbCheckError(iError, msgReplay) then return end
+        local _, mc = msgReplay:Counts()
+        local strLst = ''
+        for i = 0, mc - 1 do
+            if i>0 then strLst = strLst..'|' end
+            strLst = strLst..msgReplay:Message(i):GetPathValue('name')
+        end
+        f_clb(strLst)
+    end)
+    ,20,nil)
+end
+
+function atrium_lookupList(clbk)
+    local function fnd(tb)
+        for k,v in pairs(tb) do
+            if type(v) == 'table' then
+                if v[0] == 'Form' or v[0] == 'Columns' or v[0] == 'Lookup' then
+                    --print(v[0],v['code'])
+                    if v['code'] == '' then return '' end
+                    local res = fnd(v)
+                    if res then
+                        if v['code'] then return v['code']..'/'..res
+                        else return res end
+                    end
+                end
+            end
+        end
+    end
+
+    local t_xml = xml.eval(editor:GetText())
+    local path = fnd(t_xml)
+    local f_clb = clbk
+    if not path then return end
+
+    dbRunSql(FieldsSql(t_xml['objectType'], path, "typ = 'Reference' or typ = 'Asset'"),
+    (function(handle,Opaque,iError,msgReplay)
+        if dbCheckError(iError, msgReplay) then return end
+        local _, mc = msgReplay:Counts()
+        local strLst = ''
+        for i = 0, mc - 1 do
+            if i>0 then strLst = strLst..'|' end
+            strLst = strLst..msgReplay:Message(i):GetPathValue('name')
+        end
+        f_clb(strLst)
+    end)
+    ,20,nil)
+end

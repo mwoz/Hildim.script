@@ -144,6 +144,7 @@ local function  CreateBox()
         if not t then return end
         t.name="tabMain"
         t.tip= 'Ctrl+1,2,3,4'
+        local brObj = Bar_Obj
         t.map_cb = (function(h)
             h.size="1x1"
         end)
@@ -164,8 +165,8 @@ local function  CreateBox()
                 local mnu = iup.menu
                 {
                   iup.item{title="Deattach Sidebar",action=(function()
-                      Bar_obj.handle.DetachRestore = true;     --!!!
-                      Bar_obj.handle.detach = 1
+                      brObj.handle.DetachRestore = true;     --!!!
+                      brObj.handle.detach = 1
                   end)};
                   iup.item{title="LayOut Dialog",action=(function()
                     local f = iup.filedlg{}
@@ -458,6 +459,7 @@ if not LeftBar_obj.handle then iup.GetDialogChild(hMainLayout, "LeftBarExpander"
 else iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '3'   end
 if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000'
 else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '3'   end
+if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000" end
 
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
@@ -505,7 +507,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             if LeftBar_obj.win then LeftBar_obj.handle.DetachRestore = true; LeftBar_obj.handle.detach = 1 end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
             if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end
-            if _G.iuprops['findrepl.win']=='1' then FindRepl.DetachRestore = true;FindRepl.detach = 1 end
+            if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").DetachRestore = true;iup.GetDialogChild(hMainLayout, "FindReplDetach").detach = 1 end
         end
     end
 end)

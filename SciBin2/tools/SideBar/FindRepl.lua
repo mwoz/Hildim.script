@@ -52,6 +52,12 @@ local function PostAction()
     end
 end
 
+local function CloseFind()
+    if _G.dialogs['findrepl'] then
+        popUpFind.close_cb(popUpFind)
+    end
+end
+
 local function ReplaceAll(h)
     ReadSettings()
     local count = findSettings:ReplaceAll(false)
@@ -305,9 +311,11 @@ function ActivateFind(nTab)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
     if _G.dialogs['findrepl'] then
-    elseif Ctrl("chkInBottom").value == 'OFF' then
+    elseif Ctrl("chkInBottom").value == 'OFF'  then
         if Ctrl("zPin").valuepos == '0' then SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos = 0; SideBar_Plugins.functions.OnSwitchFile()
         elseif SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos ~= 0 then oDeattFnd.DetachRestore = true; oDeattFnd.detach = 1 end
+    elseif (iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize == '0' and _G.iuprops['bottombar.win']~='1') then
+        oDeattFnd.DetachRestore = true; oDeattFnd.detach = 1
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = editor.StyleAt[editor.SelectionStart] end
@@ -444,6 +452,11 @@ local function create_dialog_FindReplace()
           action = ReattachFind,
           visible = "NO",
         },
+        iup.button{
+          action = CloseFind,
+          name = 'btn_esc',
+          size = '1x1',
+        },
     },
     iup.hbox{
       iup.button{
@@ -458,6 +471,7 @@ local function create_dialog_FindReplace()
         title = "Подсчитать",
         action = GetCount,
       },
+
       normalizesize = "HORIZONTAL",
       gap = "3",
       alignment = "ABOTTOM",
@@ -819,10 +833,11 @@ local function FuncBmkTab_Init()
 
     oDeattFnd = iup.scitedetachbox{
         create_dialog_FindReplace();
-        orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";
+        orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";defaultesc="FIND_BTN_ESC";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
         sciteid = 'findrepl';  Dlg_Title = "Поиск и замена";
         On_Detach = (function(h, hNew, x, y)
+            iup.SetHandle("FIND_BTN_ESC",Ctrl('btn_esc'))
             local hMainLayout = iup.GetLayout()
              if Ctrl("chkInBottom").value == 'ON' then
                 _G.iuprops['sidebarctrl.BottomSplit2.value'] = iup.GetDialogChild(hMainLayout, "BottomSplit2").value
@@ -831,6 +846,9 @@ local function FuncBmkTab_Init()
             else
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="CLOSE";
             end
+            popUpFind = hNew
+            _G.iuprops["sidebarctrl.zPin.pinned.value"] = Ctrl("zPin").valuepos
+            if _G.iuprops["sidebarctrl.zPin.unpinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.unpinned.value"] end
         end);
         Dlg_Close_Cb = (function(h)
             local hMainLayout = iup.GetLayout()
