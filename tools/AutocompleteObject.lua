@@ -121,38 +121,49 @@ end
 
 local function ShowCallTip(pos,str,s,e)
     local _,_,list = str:find('.-{{(.+)}}')
-
+    local function ls(l)
+        local tl = {}
+        for w in l:gmatch('[^|]+') do
+            table.insert(tl, w)
+        end
+        tl = TableSort(tl)
+        l = table.concat(tl, ',')
+        editor.AutoCSeparator = string.byte(',')
+        current_poslst = current_pos
+        pasteFromXml = false
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
+        editor:UserListShow(constListIdXmlPar,l)
+        if str2 then
+            calltipinfo['attr'] = {}
+            calltipinfo['attr']['pos'] = pos
+            calltipinfo['attr']['str'] = str2
+            calltipinfo['attr']['s'] = s
+            calltipinfo['attr']['e'] = e
+        end
+    end
     if list then
         local _,_,str2 = str:find'.-{{.+}}(.+)'
         local _,_,sub = list:find('^(#@%u+)$')
         if sub then list = m_tblSubstitution[sub] end
         if not list:find('|') then
-            calltipinfo={0}
-            if not bManualTip then
-                editor:SetSel(editor.CurrentPos, editor.CurrentPos)
-                editor:ReplaceSel(list)
-                if str2 then str = str2
-                else return end
+            if list:find('^@@') then
+                strfun = list:gsub('^@@', '')
+                local callback = loadstring('return '..strfun)()
+                callback(function(strList)
+                    ls(strList)
+                end)
+                return
+            else
+                calltipinfo={0}
+                if not bManualTip then
+                    editor:SetSel(editor.CurrentPos, editor.CurrentPos)
+                    editor:ReplaceSel(list)
+                    if str2 then str = str2
+                    else return end
+                end
             end
         else
-            local tList = {}
-            for w in list:gmatch('[^|]+') do
-                table.insert(tList, w)
-            end
-            tList = TableSort(tList)
-            list = table.concat(tList, ',')
-            editor.AutoCSeparator = string.byte(',')
-            current_poslst = current_pos
-            pasteFromXml = false
-            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then list = list:to_utf8(1251) end
-            editor:UserListShow(constListIdXmlPar,list)
-            if str2 then
-                calltipinfo['attr'] = {}
-                calltipinfo['attr']['pos'] = pos
-                calltipinfo['attr']['str'] = str2
-                calltipinfo['attr']['s'] = s
-                calltipinfo['attr']['e'] = e
-            end
+            ls(list)
             return
         end
     end

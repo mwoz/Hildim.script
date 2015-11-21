@@ -222,6 +222,31 @@ function FindSelToConcole()
     findSettings:FindAll(100, false)
 end
 
+function FindNextWrd(ud)
+    local sText = editor:GetSelText()
+    local wholeWord = false
+    if (sText == '') then
+        sText = GetCurrentWord()
+        wholeWord= true
+    end
+    local fs = seacher{
+    wholeWord = wholeWord
+    ,matchCase = false
+    ,wrapFind = true
+    ,backslash = false
+    ,regExp = false
+    ,style = nil
+    ,searchUp = (ud==2)
+    ,replaceWhat = ''
+    ,findWhat = sText
+    }
+    local pos = fs:FindNext(true)
+    if wholeWord then
+        editor.SelectionStart = pos +1
+        editor.SelectionEnd = pos +1
+    end
+end
+
 function FindMarkNext()
     local flag1 = 0
     if props['findtext.matchcase'] == '1' then flag1 = SCFIND_MATCHCASE end
