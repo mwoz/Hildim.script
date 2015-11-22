@@ -79,7 +79,7 @@ local function RereadTemplateFiles()
 	local precomp_strRootDir = props["precomp_strRootDir"].."\\"
     if precomp_strRootDir == "\\" then return end
     precomp_tblFiles = {}
-
+    if props["FileExt"] ~= 'form' and props["FileExt"] ~= 'incl' then return end
     local function dir(strPath)
         local p = precomp_strRootDir..strPath
         local files = shell.findfiles(p.."*")
@@ -448,6 +448,7 @@ end
 
 local function OnSwitchFile_local(file)
     local strPathNew, iFind = props['FileDir']:gsub('(\\Templates[^\\]*).*', '%1', 1)
+
     if iFind > 0 then
         if props["precomp_strRootDir"] ~= strPathNew then
             props["precomp_strRootDir"] = strPathNew

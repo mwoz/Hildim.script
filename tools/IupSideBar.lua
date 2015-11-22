@@ -372,7 +372,6 @@ local function InitToolBar()
     TabBar_obj.Tabs = {}
                      --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
     tTlb = {CreateToolBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
-    tTlb.sciteparent="IUPTOOLBAR"
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
     tTlb.show_cb=(function(h,state)
@@ -414,7 +413,6 @@ local function InitStatusBar()
     StatusBar_obj.Tabs = {}
 
     local tTlb = {CreateStatusBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
-    tTlb.sciteparent="IUPSTATUSBAR"
     tTlb.control = "YES"
     tTlb.sciteid="iupstatusbar"
     tTlb.show_cb=(function(h,state)
@@ -461,13 +459,28 @@ if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander
 else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '3'   end
 if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000" end
 
+local function RestoreLayOut(strLay)
+    strLay = strLay:gsub('^Х','')
+    for n in strLay:gmatch('%d+') do
+        n = tonumber(n)
+        if shell.bit_and(editor.FoldLevel[n],SC_FOLDLEVELHEADERFLAG) ~=0 then
+            local lineMaxSubord = editor:GetLastChild(n,-1)
+            if n < lineMaxSubord then
+                editor.FoldExpanded[n] = false
+                editor:HideLines(n + 1, lineMaxSubord)
+            end
+        end
+    end
+
+end
+
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == 3 then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
             props['session.reload'] = _G.iuprops['session.reload']
             if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
                 local bNew = (props['FileName'] ~= '')
-                local t,p,bk = {},{},{}
+                local t,p,bk,l = {},{},{},{}
                 for f in _G.iuprops['buffers']:gmatch('[^Х]+') do
                     table.insert(t, f)
                 end
@@ -485,6 +498,11 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                         end
                     end
                 end
+                if _G.iuprops['buffers.layouts'] then
+                    for f in _G.iuprops['buffers.layouts']:gmatch('Х[^Х]*') do
+                        table.insert(l, f)
+                    end
+                end
                 _G.iuprops['buffers'] = nil
                 for i = #t,1,-1 do
                     scite.Open(t[i])
@@ -493,6 +511,9 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                         for j = 1, #(bk[i]) do
                             editor:MarkerAdd(tonumber(bk[i][j]), 1)
                         end
+                    end
+                    if l and l[i] then
+                        RestoreLayOut(l[i])
                     end
                 end
                 if bNew then

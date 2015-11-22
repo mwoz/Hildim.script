@@ -776,51 +776,52 @@ FindTab_Init()
  AddEventHandler("GoToObjectDefenition", OpenChoiceMeta)
 
 local function FieldsSql(objectType, path, condition)
-return
-" select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1                                                             \n"..
-" declare @path nvarchar(4000), @fld nvarchar(100), @object_code nvarchar(100)                                            \n"..
-" declare @x xml, @hdoc int, @strPath varchar(256)                                                                        \n"..
-" Set @path = '"..path.."'                                                                                                \n"..
-" set @object_code = '"..objectType.."'                                                                                   \n"..
-" while LEN(@path) > 1                                                                                                    \n"..
-" begin                                                                                                                   \n"..
-" 	set @fld = SUBSTRING(@path,1, CHARINDEX('/', @path,1)-1)                                                              \n"..
-" 	set @path = SUBSTRING(@path, CHARINDEX('/', @path,1 )+1, 4000)                                                        \n"..
-" 	select @x = CONVERT(xml, d.Metadata),                                                                                 \n"..
-" 	@strPath = case                                                                                                       \n"..
-" 		when d.Category = 'R' or d.Category = 'D'  then '/Template/DataModel/Tables/Table[@type=''Master'']/Fields/Field' \n"..
-" 		when d.Category = 'E'  then '/Template/DataModel/Tables/Table[@type=''AppendixSingle'']/Fields/Field'             \n"..
-" 		when d.Category = 'P' or d.Category = 'W' then '/Template/DataModel/Fields/Field'                                 \n"..
-" 		end                                                                                                               \n"..
-" 	from ObjectType d                                                                                                     \n"..
-" 	where d.ObjectType_Code = @object_code                                                                                \n"..
-" 	exec sp_xml_preparedocument @hdoc out, @x                                                                             \n"..
-" 	select @object_code = obj from openxml(@hdoc, @strPath) with                                                          \n"..
-" 	(                                                                                                                     \n"..
-" 		name varchar(500) 'attribute::name',                                                                              \n"..
-" 		obj varchar(500) 'attribute::object'		                                                                      \n"..
-" 	)where name =  @fld                                                                                                   \n"..
-" 	exec sp_xml_removedocument @hdoc		                                                                              \n"..
-" end                                                                                                                     \n"..
-" 	select @x = CONVERT(xml, d.Metadata),                                                                                 \n"..
-" 	@strPath = case                                                                                                       \n"..
-" 		when d.Category = 'R' or d.Category = 'D'  then '/Template/DataModel/Tables/Table[@type=''Master'']/Fields/Field' \n"..
-" 		when d.Category = 'E'  then '/Template/DataModel/Tables/Table[@type=''AppendixSingle'']/Fields/Field'             \n"..
-" 		when d.Category = 'P' or d.Category = 'W' then '/Template/DataModel/Fields/Field'                                 \n"..
-" 		end                                                                                                               \n"..
-" 	from ObjectType d                                                                                                     \n"..
-" 	where d.ObjectType_Code = @object_code	                                                                              \n"..
-" 	exec sp_xml_preparedocument @hdoc out, @x                                                                             \n"..
-" 	select name from openxml(@hdoc, @strPath) with                                                                        \n"..
-" 	(                                                                                                                     \n"..
-" 		name varchar(500) 'attribute::name',                                                                              \n"..
-" 		typ varchar(32) 'attribute::type'		                                                                          \n"..
-" 	)where "..condition.."                                                                                                \n"..
-" 	exec sp_xml_removedocument @hdoc                                                                                      \n"
-
+return [[
+ select top 100 __DATA_MODEL_MODE = 'S', __INDEX_AUTO_ON = 1
+ declare @path nvarchar(4000), @fld nvarchar(100), @object_code nvarchar(100)
+ declare @x xml, @hdoc int, @strPath varchar(256)
+ Set @path = ']]..path..[['
+ set @object_code = ']]..objectType..[['
+ while LEN(@path) > 1
+ begin
+ 	set @fld = SUBSTRING(@path,1, CHARINDEX('/', @path,1)-1)
+ 	set @path = SUBSTRING(@path, CHARINDEX('/', @path,1 )+1, 4000)
+ 	select @x = CONVERT(xml, d.Metadata),
+ 	@strPath = case
+ 		when d.Category = 'R' or d.Category = 'D'  then '/Template/DataModel/Tables/Table[@type=''Master'']/Fields/Field'
+ 		when d.Category = 'E'  then '/Template/DataModel/Tables/Table[@type=''AppendixSingle'']/Fields/Field'
+ 		when d.Category = 'P' or d.Category = 'W' then '/Template/DataModel/Fields/Field'
+ 		end
+ 	from ObjectType d
+ 	where d.ObjectType_Code = @object_code
+ 	exec sp_xml_preparedocument @hdoc out, @x
+ 	select @object_code = obj from openxml(@hdoc, @strPath) with
+ 	(
+ 		name varchar(500) 'attribute::name',
+ 		obj varchar(500) 'attribute::object'
+ 	)where name =  @fld
+ 	exec sp_xml_removedocument @hdoc
+ end
+ 	select @x = CONVERT(xml, d.Metadata),
+ 	@strPath = case
+ 		when d.Category = 'R' or d.Category = 'D'  then '/Template/DataModel/Tables/Table[@type=''Master'']/Fields/Field'
+ 		when d.Category = 'E'  then '/Template/DataModel/Tables/Table[@type=''AppendixSingle'']/Fields/Field'
+ 		when d.Category = 'P' or d.Category = 'W' then '/Template/DataModel/Fields/Field'
+ 		end
+ 	from ObjectType d
+ 	where d.ObjectType_Code = @object_code
+ 	exec sp_xml_preparedocument @hdoc out, @x
+ 	select name from openxml(@hdoc, @strPath) with
+ 	(
+ 		name varchar(500) 'attribute::name',
+ 		typ varchar(32) 'attribute::type'
+ 	)where ]]..condition..[[
+ 	exec sp_xml_removedocument @hdoc
+]]
 end
 
 function atrium_controlList(clbk)
+    if iup.GetDialogChild(iup.GetLayout(), "chkRunConnect").value ~= 'ON' then return end
     local t_xml = xml.eval(editor:GetText())
     local f_clb = clbk
 
@@ -839,6 +840,7 @@ function atrium_controlList(clbk)
 end
 
 function atrium_columnList(clbk)
+    if iup.GetDialogChild(iup.GetLayout(), "chkRunConnect").value ~= 'ON' then return end
     local function fnd(tb)
         for k,v in pairs(tb) do
             if type(v) == 'table' then
@@ -875,6 +877,7 @@ function atrium_columnList(clbk)
 end
 
 function atrium_lookupList(clbk)
+    if iup.GetDialogChild(iup.GetLayout(), "chkRunConnect").value ~= 'ON' then return end
     local function fnd(tb)
         for k,v in pairs(tb) do
             if type(v) == 'table' then

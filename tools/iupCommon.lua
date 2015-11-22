@@ -42,6 +42,14 @@ local function SaveIup()
 	io.close()
 
 end
+
+local function SaveLayOut()
+    local res = ''
+    for l=0, editor.LineCount do
+        if shell.bit_and(editor.FoldLevel[l],SC_FOLDLEVELHEADERFLAG) ~=0 and not editor.FoldExpanded[l] then res = res..','..l end
+    end
+    return res
+end
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
@@ -76,6 +84,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         if cmd == IDM_QUIT then ClearAllEventHandler() end
         local nf,spathes = false,'',''
         local sposes
+        local slayout = ''
         if cmd == IDM_QUIT then sposes = '' end
         local curBuf = scite.buffers.GetCurrent()
         DoForBuffers(function(i)
@@ -90,7 +99,10 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
                         bk = bk..'¶'..ml
                         ml = ml + 1
                     end
-                    if sposes then sposes = sposes..'Х'..editor.FirstVisibleLine..bk end
+                    if sposes then
+                        sposes = sposes..'Х'..editor.FirstVisibleLine..bk
+                        slayout = slayout..'Х'..SaveLayOut()
+                    end
                     nf = true
                 else
                     if i <= curBuf then curBuf = curBuf - 1 end
@@ -99,7 +111,11 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             end
         end)
         if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
-        if nf and cmd == IDM_QUIT then _G.iuprops['buffers'] = spathes; _G.iuprops['buffers.pos'] = sposes end
+        if nf and cmd == IDM_QUIT then
+            _G.iuprops['buffers'] = spathes;
+            _G.iuprops['buffers.pos'] = sposes
+            _G.iuprops['buffers.layouts'] = slayout
+        end
         if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
         else return true end
     elseif cmd == 9117 then  --перезагрузка скрипта

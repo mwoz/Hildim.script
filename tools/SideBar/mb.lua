@@ -173,7 +173,7 @@ local function FindTab_Init()
 
     cmb_Subjects.map_cb=(function(h) h.value=tonumber(_G.iuprops["sidebar.mb.subject.value"]); SetSubjProps(h);end)
     cmb_Subjects.action = SetSubjProps
-    chk_RunConnect = iup.toggle{title = "Connect",action=listMbTrancport_DoLua, tip='Соединение с мессаджбасом'}
+    chk_RunConnect = iup.toggle{title = "Connect",action=listMbTrancport_DoLua, tip='Соединение с мессаджбасом', name='chkRunConnect'}
     btn_Open_Exec = iup.button{image = 'IMAGE_Sub',active='NO', action=(function() sql_ExecCmd() end), tip='Диалог генерации кода запуска\nSQL процедуры(Alt+Shift+E)'}
     TabBar_obj.Tabs.mb =  {
         handle = iup.hbox{  iup.label{title = "Mb:"},
@@ -187,6 +187,7 @@ local function FindTab_Init()
 
     }
     cmb_listMbTrancport:FillByDir("\\connectmb\\*.lua", _G.iuprops['mbTrancport.file'])
+    _G.iuprops["sidebarctrl.chkRunConnect.value"] = 'OFF'
 end
 
 FindTab_Init()
