@@ -222,6 +222,31 @@ function FindSelToConcole()
     findSettings:FindAll(100, false)
 end
 
+function Toggle_ToggleSubfolders(bShow)
+    local lStart = editor:LineFromPosition(editor.SelectionStart)
+    local baseLevel = shell.bit_and(editor.FoldLevel[lStart],SC_FOLDLEVELNUMBERMASK)
+    if baseLevel > SC_FOLDLEVELBASE and shell.bit_and(baseLevel,SC_FOLDLEVELHEADERFLAG) == 0 then
+        while (baseLevel <= shell.bit_and(editor.FoldLevel[lStart],SC_FOLDLEVELNUMBERMASK)) and (lStart >=0) do lStart = lStart - 1 end
+    end
+    local lEnd = editor:GetLastChild(lStart, -1)
+    local baseLevel = shell.bit_and(editor.FoldLevel[lStart],SC_FOLDLEVELNUMBERMASK)
+    for l = lStart + 1, lEnd do
+        local level = editor.FoldLevel[l]
+        if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and baseLevel + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
+            editor.FoldExpanded[l] = bShow
+            local lineMaxSubord = editor:GetLastChild(l,-1)
+            if l < lineMaxSubord then
+                if bShow then
+                    editor:ShowLines(l + 1, lineMaxSubord)
+                else
+                    editor:HideLines(l + 1, lineMaxSubord)
+                end
+                l = lineMaxSubord
+            end
+        end
+    end
+end
+
 function FindNextWrd(ud)
     local sText = editor:GetSelText()
     local wholeWord = false
