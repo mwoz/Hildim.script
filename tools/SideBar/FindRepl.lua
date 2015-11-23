@@ -196,7 +196,7 @@ local function FindInBuffers()
     PostAction()
 end
 
-function GoToMarkDown()
+function GoToMarkDown()         --todel
     local iPos = editor.SelectionStart
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
     local nextStart = iPos
@@ -214,7 +214,7 @@ function GoToMarkDown()
     end
     SetInfo(Iif(bMark, '', 'Меток не обнаружено'), Iif(bMark, '', 'E'))
 end
-function GoToMarkUp()
+function GoToMarkUp()     --todel
     local curPos = editor.SelectionStart
     local iPos = 0
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
@@ -646,12 +646,12 @@ local function create_dialog_FindReplace()
     iup.button{
       image = "IMAGE_ArrowUp",
       action = GoToMarkUp,
-      tip = "Предыдущая метка Alt+Shift+F3",
+      tip = "Предыдущая метка",
     },
     iup.button{
       image = "IMAGE_ArrowDown",
       action = GoToMarkDown,
-      tip = "Следующая метка Alt+F3",
+      tip = "Следующая метка",
     },
     margin = "0x3",
   }
@@ -879,8 +879,12 @@ local function FuncBmkTab_Init()
             if msg == IDM_FIND then return ActivateFind(0)
             elseif msg == IDM_REPLACE then return ActivateFind(1)
             elseif msg == IDM_FINDINFILES then return ActivateFind(2)
-            elseif msg == IDM_FINDNEXT then return FindNextBack(false)
-            elseif msg == IDM_FINDNEXTBACK then return FindNextBack(true)
+            elseif msg == IDM_FINDNEXT then
+                ReadSettings()
+                return FindNextBack(false)
+            elseif msg == IDM_FINDNEXTBACK then
+                ReadSettings()
+                return FindNextBack(true)
             elseif msg == IDM_FINDNEXTSEL then return FindNextSel(false)
             elseif msg == IDM_FINDNEXTBACKSEL then return FindNextSel(true)
             end

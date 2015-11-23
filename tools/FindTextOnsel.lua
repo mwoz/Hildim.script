@@ -247,6 +247,18 @@ function Toggle_ToggleSubfolders(bShow)
     end
 end
 
+function Find_FindInDialog()
+    local sText = editor:GetSelText()
+    local wholeWord = false
+    if (sText == '') then
+        sText = GetCurrentWord()
+        wholeWord= true
+    end
+    iup.GetDialogChild(iup.GetLayout(),"cmbFindWhat").value = sText
+    iup.GetDialogChild(iup.GetLayout(),"cmbFindWhat"):SaveHist()
+    iup.GetDialogChild(iup.GetLayout(),"btnFind").action()
+end
+
 function FindNextWrd(ud)
     local sText = editor:GetSelText()
     local wholeWord = false
