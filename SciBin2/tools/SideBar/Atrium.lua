@@ -157,6 +157,36 @@ local function PutData(t_xml,strObjType)
 
 end
 
+local function DeleteTemplate(t_xml)
+    local strSql =
+[[declare @id int, @objectTypeId  int
+select @objectTypeId = t.ObjectType_Id from ObjectType t where t.ObjectType_Code = ']]..t_xml['objectType']..[['
+select @id = t.ObjectTypeForm_Id from ObjectTypeForm t
+where t.FormType = ']]..t_xml['type']:gsub('^(.).*', '%1')..[[' and
+ t.ObjectType_Id = @objectTypeId and
+ (case when t.Presentation is null then '' else t.Presentation end) = ']]..(t_xml['Presentation'] or '')..[['
+execute ObjectTypeForm_IUD 'atrium','delete', '<Form/>', @id]]
+
+   dbRunSql(strSql,function(handle,Opaque,iError,msgReplay)
+        if dbCheckError(iError, msgReplay) then return end
+        print('Form Deleted')
+   end, 20, msgOpaq)
+end
+
+local function DeleteWizard(code)
+    local strSql =
+[[declare @id int, @objectTypeId  int
+select @id = t.Wizard_Id from Wizard t
+where t.Wizard_Code = ']]..code..[['
+execute Wizard_IUD 'atrium','delete', '<Form/>', @id]]
+
+   dbRunSql(strSql,function(handle,Opaque,iError,msgReplay)
+        if dbCheckError(iError, msgReplay) then return end
+        print('Form Deleted')
+   end, 20, msgOpaq)
+end
+
+
 local function ApplyMetadata(strXml)
     if cmb_mask.value == '6' then --drop
         local msb = iup.messagedlg{buttons='YESNO', value='Удалить сущность из базы?'}
@@ -311,7 +341,7 @@ local function PutReport()
 end
 
 local function PutForm(objectType, formType, formPresent)
-    if objectType == nil or formType == nil then
+    if formType == nil then
         print('Incorrect Custom form!')
         return
     end
@@ -319,7 +349,19 @@ local function PutForm(objectType, formType, formPresent)
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strXml = strXml:from_utf8(1251) end
     local msgParams = mblua.CreateMessage()
     dbAddProcParam(msgParams, "FormXml" , strXml, AD_VarChar, AD_ParamInput, strXml:len() + 1)
-    dbRunProc('ObjectTypeForm_Import', msgParams, function(handle,Opaque,iError,msgReplay)
+    local strProc
+
+    if (formType == 'Wizard' or formType == 'Dialog') then
+        strProc = 'Wizard_Import'
+    else
+        if objectType == nil then
+            print('Incorrect Custom form!')
+            return
+        end
+        strProc = 'ObjectTypeForm_Import'
+    end
+
+    dbRunProc(strProc, msgParams, function(handle,Opaque,iError,msgReplay)
         print(msgReplay:ToString())
         if msgReplay:GetPathValue('Error') == '0' then
             local msg = mblua.CreateMessage()
@@ -361,7 +403,15 @@ function atrium_RunXml()
     elseif strObjType == 'Form' and t_xml['type'] == 'Report' then
         PutReport()
     elseif strObjType == 'Form' then
-        PutForm(t_xml['objectType'], t_xml['type'], t_xml['presentation'])
+        if cmb_Action.value == '1' then
+            PutForm(t_xml['objectType'], t_xml['type'], t_xml['presentation'])
+        else
+            if (t_xml['type'] == 'Wizard' or t_xml['type'] == 'Dialog') then
+                DeleteWizard(t_xml['code'])
+            else
+                DeleteTemplate(t_xml)
+            end
+        end
     elseif strObjType == 'template' then
         print('Not Supported!')
     else
@@ -386,7 +436,7 @@ end
 local function Data_OpenNew()
     local sel = list_obj.marked:find('1') - 1
     local oName = list_obj:getcell(sel,1)
-    if oName == 'system.ObjectTypeForm' or oName == 'system.Report' then
+    if oName == 'system.ObjectTypeForm' or oName == 'system.Report' or oName == 'system.Wizard' then
         oName = oName:gsub('system.','')
         sel = list_data.marked:find('1') - 1
         local sql = "select f.FormData \n"..
@@ -614,6 +664,7 @@ local function FindTab_Init()
     iup.SetAttribute(txt_objmask, 1, "Choice")
     iup.SetAttribute(txt_objmask, 2, "ObjectTypeForm")
     iup.SetAttribute(txt_objmask, 3, "Report")
+    iup.SetAttribute(txt_objmask, 4, "Wizard")
     txt_objmask.k_any = (function(h,k) if k == iup.K_CR then SelectMetadata(false) end end)
     txt_objmask.action = (function(h,text,item,state)
         if state == 1 then
@@ -697,6 +748,7 @@ local function FindTab_Init()
             local oExt = list_obj:getcell(list_obj.marked:find('1') - 1 ,1)
             if oExt == 'system.ObjectTypeForm' then oExt = '.cform'
             elseif oExt == 'system.Report' then oExt = '.rform'
+            elseif oExt == 'system.Wizard' then oExt = '.wform'
             else oExt = '.xml' end
             if list_data.marked and shell.fileexists(props["FileDir"]..'\\'..(iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 2) or iup.GetAttributeId2(list_data, '', list_data.marked:find('1') - 1, 1))..oExt) then
                 mDif = iup.item{title="Сравнить с файлом в текущей директории",action=CompareData}

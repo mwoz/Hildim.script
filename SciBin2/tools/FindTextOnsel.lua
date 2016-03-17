@@ -452,7 +452,7 @@ function template_MoveControls()
         function btn_ok:action()
             local function InpValue(t)
                 str = t.value
-                if str.."" == "" then str = "%d+" end
+                if str.."" == "" then str = "%d*" end
                 if str:find("[<>]") ~= nil then str = "%d+" end
                 return "("..str..")"
             end
@@ -464,6 +464,7 @@ function template_MoveControls()
                     if iLevel == 0 then
                         strrow = s:gsub(strtempl,function(s1,s2,s3,s4,tt)
                             local function f(s,c)
+                                if s=="" then return "" end
                                 if c.value:len() == 0 then return s end
                                 local sval = c.value:sub(2)
                                 if sval == nil then sval = 1 end
@@ -473,6 +474,7 @@ function template_MoveControls()
                                 return c.value
                             end
                             local function ch(s,c)
+                                if s=="" then return true end
                                 local z1,n1,z2,n2
                                 z1,n1,z2,n2=c.value:match("([><]?)(%d+)([><]?)(%d*)")
                                 if z1 ~= nil  then
@@ -527,13 +529,42 @@ AddEventHandler("OnContextMenu", function(lp, wp, source)       --сшибка err
     if source ~= "FINDREZ" then return end
     local mnu = ''
     if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
-        mnu = mnu..'Открыть файлы|60000|||'
+        mnu = mnu..'Открыть файлы|60000|Закрыть файлы|60003|Закрыть не найденные|60004|||'
     end
     mnu = mnu..'[MAIN]||'..Iif(_G.iuprops['findrez.clickonlynumber'], '^', '')..'DblClick только по номеру|60001|'..
                            Iif(_G.iuprops['findrez.groupbyfile'], '^', '')..'Группировать по имени файла|60002|'
     return mnu:to_utf8(1251)
 end)
+
 AddEventHandler("OnMenuCommand", function(msg, source)
+    local function fndFiles()
+        local t = {}
+        if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
+            local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
+            while true do
+                local style = findrez.StyleAt[findrez:PositionFromLine(lineNum) + 1]
+                if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
+                elseif style == SCE_SEARCHRESULT_FILE_HEADER then
+                    local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
+                    table.insert(t,s)
+                end
+                lineNum = lineNum + 1
+            end
+        end
+        return t
+    end
+
+    local function CloseIfFound(_,t, bFounded)
+        if not t then return end
+        for i = 1, #t do
+            if t[i]:upper() == string.upper(props['FileDir']..'\\'..props["FileNameExt"]) then
+                if bFounded then scite.MenuCommand(IDM_CLOSE) end
+                return
+            end
+        end
+        if not bFounded then scite.MenuCommand(IDM_CLOSE) end
+    end
+
     if msg == 60000 then
         if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
             local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
@@ -553,6 +584,12 @@ AddEventHandler("OnMenuCommand", function(msg, source)
         return true
     elseif msg == 60002 then
         _G.iuprops['findrez.groupbyfile'] = not _G.iuprops['findrez.groupbyfile']
+        return true
+    elseif msg == 60003 then
+        DoForBuffers(CloseIfFound, fndFiles(), true)
+        return true
+    elseif msg == 60004 then
+        DoForBuffers(CloseIfFound, fndFiles(), false)
         return true
     end
 end)

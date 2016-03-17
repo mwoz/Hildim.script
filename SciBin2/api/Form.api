@@ -313,6 +313,22 @@ message.Execute(Statement, [MsgParameters])	Statement: may has one of next forma
 #$message=.*%.execute(
 message.GetWireText() Returns  content of a message as a WireText
 message.SetWireText (strWireText, strError) Sets message content from WireText string( see format in GetWIreText).\nReturns false if parsing string failed.\nstrError returns error description if parsing failed\nExisiting data is replaced by data from WireText string
+message.Recordset Возвращает объект типа Recordset или Nothing, если сообщение не имеет вложенного рекордсета. Обычно конструируется DB-адаптером для табличных данных при указании соответствующих опций - см. документацию по DB-адаптеру.
+
+#$rcset=.*%.recordset
+rcset.ColumnCount Возвращает количество колонок. Используйте метод Column для доступа к колонкам.
+rcset.RecordCount Возвращает количество записей. Используйте методы MoveBeforeFirst и MoveNext для итерации по записям.
+rcset.Column(Index/Name) Возвращает объект RecordsetColumn или Nothing, если колонка не найдена.
+rcset.CreateReader Создает и возвращает объект RecordsetReader для чтения данных. После создания объекта RecordsetReader внутренний курсор стоит "перед" первой записью.
+#$rsreader=.*%.createreader
+#$rscolumn=.*%.column(
+
+rsreader.MoveNext Сдвигает курсор на следующую запись. Если следующей записи нет, возвращает false, иначе true.
+rsreader.Reset Сбрасывает текущее положение курсора для чтения рекордсета с начала.
+rsreader.GetValue(Index/Name) Возвращает  значение колонки  из текущей записи по индексу колонки или имени. Если колонка не найдена, генерирует исключение.
+
+rscolumn.Name Возвращает имя колонки.
+rscolumn.Index Возвращает индекс колонки в коллекции колонок.
 
 field.Value VARIANT
 field.Name read-only
@@ -699,6 +715,11 @@ cubectrl.SuperCubeGetSourcesForms()
 cubectrl.CheckedKeys(Id) read-only; \nchkColumnId - Id ofcheckbox column (CheckBox format).\nReturns Message - contains keys(in field values) of checked rows.\nFieldCount = 0 if no cheked rows; \nOnly data rows (child) are returned(both visible and filtered out).
 #$message=.*%.checkedkeys(
 cubectrl.CheckboxClearAll() Resets all checkboxes in CheckBoxSelection
+cubectrl.ColumnsAutoFit Get/Set property (default = false) включает режим автосайза колонок по размеру куба\n(колонки автоматически растягиваются/сжимаются чтобы занимать всю ширину контрола).
+cubectrl.ProcessRecordset batch update to add all rows from a recordset
+cubectrl.ProcessAsTree(message, bSmartSort) Fills cube with message data in a tree view  (messages are nodes, datums are leaves).
+cubectrl.SetChoicesConfig(msgChoices) Sets choices message to be used by cube.\nPreviously set message is released.\nData in columns with set choice is replaced by code caption.\nExisting data isn’t updated. Doesn’t affect custom columns.
+
 
 cuberow.BackColor
 cuberow.ForeColor
@@ -1182,6 +1203,8 @@ papp.SqlToCData(str)
 papp.FilterDate2Date(strType, val)
 papp.Node2Tooltip(ParentTooltip, xmlNode, nls) Возвращает дефолтный тултип для поля по его описанию в метаданных
 papp.Node2Caption(ParentCaption, xmlNode, nls) Возвращает дефолтный заголовок для поля по его описанию в метаданных
+papp.GetForm(control)'Возвращает форму, содержащую данный контрол
+papp.FormatXml(xml) 'Возвращает строку с отформатированным XML
 #$calc=.*%.calc
 
 calc.Bond_FaceValue(msgBond, dtCalcDate, bUseCurrent) возвращает номинал облигации на заданную дату
