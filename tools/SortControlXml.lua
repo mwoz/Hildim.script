@@ -109,6 +109,55 @@ local alltagsmeta = {
 'field',
 '$$$$'}
 
+local tgControls={
+'code',
+'caption',
+'caption_ru',
+'type',
+'source',
+'position',
+'positionPrevLine',
+'choiceType',
+'choiceMode',
+'visible',
+'locked',
+'enabled',
+'backColor',
+'foreColor',
+'format',
+'font',
+'alignment',
+'padLeft',
+'padRight',
+'padTop',
+'padBottom',
+'autoWidth',
+'fixedWidth',
+'tooltip',
+'rightButtonMode',
+'showInfo',
+'sizable',
+'useCode',
+'mandatory',
+'paramType',
+'valueColumn',
+'displayColumns',
+'$$$$'}
+
+local tgColumns={
+'code',
+'caption',
+'caption_ru',
+'alignment',
+'format',
+'width',
+'tooltip',
+'tooltip_ru',
+'sql',
+'regexReplace',
+'regexPattern',
+'$$$$'}
+
 require("LuaXml")
 
 function SortXML(tags, fld, sText)
@@ -119,29 +168,30 @@ function SortXML(tags, fld, sText)
     local strtempl = '<('..fld..') ([^<]-)(%/?>)' --первый подшаблон - нежадный, дабы '/' по возможности попала во второй
     local wrdtempl = '([%w_]*)="([^"]*)"'
     local strout = sText:gsub(strtempl,function(s0,s1,s2)
-            local tblTags = {}   --сложим сюда имена тегов в том порядке, в котором они лежат в ноде
-            local tblMaps = {}   --смепируем значения тэгов с именами
-            s1:gsub(wrdtempl,function(w1,w2)
-                    table.insert(tblTags,w1)
-                    tblMaps[w1] = w2
-                end
-            )
-            table.sort(tblTags, function(e1,e2)  --отсортируем таблицу по индексу
-                    local n1 = tblIndex[e1]
-                    local n2 = tblIndex[e2]
-                    if n1 == nil then n1 = 9999 end
-                    if n2 == nil then n2 = 9999 end
-                    return n1 < n2
-                end
-            )
-            local strOut = "<"..s0
-            for j = 1,table.maxn(tblTags) do   --запишем в строку отсортированные теги
-                local o1 = tblTags[j]
-                local o2 = tblMaps[o1]
-                strOut = strOut..' '..o1..'="'..o2..'"'
+        local tblTags = {}   --сложим сюда имена тегов в том порядке, в котором они лежат в ноде
+        local tblMaps = {}   --смепируем значения тэгов с именами
+        s1:gsub(wrdtempl,function(w1,w2)
+                table.insert(tblTags,w1)
+                tblMaps[w1] = w2
             end
-            return strOut..s2
+        )
+        table.sort(tblTags, function(e1,e2)  --отсортируем таблицу по индексу
+                local n1 = tblIndex[e1]
+                local n2 = tblIndex[e2]
+                if n1 == nil then n1 = 9999 end
+                if n2 == nil then n2 = 9999 end
+                if n1 == n2 then return e1<e2 end
+                return n1 < n2
+            end
+        )
+        local strOut = "<"..s0
+        for j = 1,table.maxn(tblTags) do   --запишем в строку отсортированные теги
+            local o1 = tblTags[j]
+            local o2 = tblMaps[o1]
+            strOut = strOut..' '..o1..'="'..o2..'"'
         end
+        return strOut..s2
+    end
     )
     return strout
 end
@@ -153,8 +203,10 @@ function SortFormXML()
         local strObjType = t_xml[0]
         if strObjType == "Template" then
             editor:ReplaceSel(SortXML(alltagsmeta, 'ExternalRef',(SortXML(alltagsmeta, 'Check',(SortXML(alltagsmeta, 'Index',(SortXML(alltagsmeta, 'Template',SortXML(alltagsmeta, 'Table', SortXML(alltagsmeta, 'Field', editor:GetSelText()))))))))))
-        else
+        elseif strObjType == "template" then
             editor:ReplaceSel(SortXML(alltags, 'option', SortXML(alltags, 'control', editor:GetSelText())))
+        elseif strObjType == "Form" then
+            editor:ReplaceSel(SortXML(tgColumns, 'Column', SortXML(tgControls, 'Control', SortXML(tgControls, 'Container', editor:GetSelText()))))
         end
     end
 

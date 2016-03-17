@@ -3,7 +3,7 @@ SciTE Smart comment
 Author: Dmitry Maslov
 Version: 2.7.4
 ------------------------------------------------------
-Выделяем текст нажимаем на клавиатуре символ 
+Выделяем текст нажимаем на клавиатуре символ
 с которого начинается комментарий и строка комментируется
 пример: выделить строку в cpp, нажать на клавишу * или /
 -------------------------------------------------
@@ -18,8 +18,8 @@ Version: 2.7.4
 то скрипт вел себя непредсказуемо
 -------------------------------------------------
 Версия 2.1
-Закрытие блочным комментирием во всех языках по первому 
-символу блочного комментария, во как загнул ;) 
+Закрытие блочным комментирием во всех языках по первому
+символу блочного комментария, во как загнул ;)
 Благодарность mozers за подсказку в реализации.
 -------------------------------------------------
 Версия 1.0
@@ -105,28 +105,28 @@ local function StrimComment(commentbegin, commentend)
 	local b,e = string.find(text, MakeFind(commentbegin))
 	if (e and (string.byte(text, e+1) == 10 or string.byte(text, e+1) == 13))
 	then
-		e=e+1 
+		e=e+1
 	end
 	if (e and (string.byte(text, e+1) == 10 or string.byte(text, e+1) == 13))
 	then
-		e=e+1 
+		e=e+1
 	end
 	local b2,e2
 	if IsEOLlast(text)
 	then
-		b2,e2 = string.find(text, MakeFind(commentend), 
+		b2,e2 = string.find(text, MakeFind(commentend),
 			string.len(text)-string.len(commentend)-string.len(GetEOL()))
 	else
-		b2,e2 = string.find(text, MakeFind(commentend), 
+		b2,e2 = string.find(text, MakeFind(commentend),
 			string.len(text)-string.len(commentend))
 	end
 	if (b2 and (string.byte(text, b2-1) == 10 or string.byte(text, b2-1) == 13))
 	then
-		b2=b2-1 
+		b2=b2-1
 	end
 	if (b2 and (string.byte(text, b2-1) == 10 or string.byte(text, b2-1) == 13))
 	then
-		b2=b2-1 
+		b2=b2-1
 	end
 	editor:BeginUndoAction()
 	if (b and b2)

@@ -154,7 +154,7 @@ local function LineUnComment()
 		local comment_pos, _ = string.find(text_line,Pattern(comment_block).."~? ?", 1)
 		local line_uncomment = string.gsub(text_line,Pattern(comment_block).."~? ?","",1)
 		local line_pos_start = editor:PositionFromLine(line_sel_start)
-		local line_pos_end = line_pos_start + string.len(text_line)
+		local line_pos_end = editor:PositionFromLine(line_sel_start + 1)  --line_pos_start + string.len(text_line)
 		editor:SetSel(line_pos_start, line_pos_end)
 		editor:ReplaceSel(line_uncomment)
 		if comment_pos and cur_pos > (line_pos_start + comment_pos) then

@@ -387,6 +387,10 @@ app.MainObjectType Тип (имя метаданных) объекта, содержащего текущее кастомное о
 app.CustomFormExists(strName) (True/False) Проверяет наличие кастомного окна strName
 app.TabVisibility (True/False) Проверяет наличие кастомного окна strName
 app.DrillDown (msg) msg - мессадж или строка в ware-формате с параметрами дрилдауна
+app.NlsLang Возвращает текущий язык системы
+app.Nls(strEn, strRu) В зависимости от текущего языка возвращает переменную strEn или strRu
+app.Wnd Возвращает экземпляр класса Wnd(различается для разных типов форм)
+app.MetadataCaption(strObj, bPlural Получение имени объекта для показа пользователю по его коду\nstrObj – код объекта (напр system.SecurityDeal)\nbPlural (True/False)  если True то множественное  число
 
 #$objdbp=app.createdbparams(
 objdbp.Add(strName, varValue, enumType, enumDirection, lSize)  enumType - тип параметра : adChar , adVarChar , adInteger , adDouble , adDBTimeStamp, adLongVarBinary\nenumDirection - Направление : adParamInput, adParamInputOutput, adParamOutput

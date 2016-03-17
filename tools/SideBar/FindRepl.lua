@@ -196,7 +196,7 @@ local function FindInBuffers()
     PostAction()
 end
 
-function GoToMarkDown()         --todel
+function GoToMarkDown()
     local iPos = editor.SelectionStart
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
     local nextStart = iPos
@@ -214,7 +214,7 @@ function GoToMarkDown()         --todel
     end
     SetInfo(Iif(bMark, '', 'Меток не обнаружено'), Iif(bMark, '', 'E'))
 end
-function GoToMarkUp()     --todel
+function GoToMarkUp()
     local curPos = editor.SelectionStart
     local iPos = 0
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)

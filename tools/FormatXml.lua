@@ -1,8 +1,26 @@
 require("LuaXml")
--- local ttt = xml.eval(editor:GetText())
--- local yy = ttt:find('Choice_Id').ttt
--- print(yy, 123)
+
+local _,_, h = editor:GetText():find('^(<%?[^\n]*%?>)')
 xml.setIndent(editor.Indent)
-editor:SetText(xml.eval(editor:GetText()):str():gsub('>%s+</Field>', '></Field>'))
+-- debug_prnTb(xml.eval(editor:GetText()),1)
+local strFrm = xml.eval(editor:GetText()):str()
+if props['FileExt'] == 'form' then
+    strFrm = strFrm:gsub('>%s+</form>', '></form>')
+    strFrm = strFrm:gsub(' +<script', '<script')
+    strFrm = strFrm:gsub(' +(</?string)', '%1')
+    strFrm = strFrm:gsub(' +(</?value)', '    %1')
+    strFrm = strFrm:gsub('>%s+<value><!%[CDATA%[', '><value><![CDATA[')
+    strFrm = strFrm:gsub('%]%]></value>%s+<', ']]></value><')
+elseif props['FileExt'] == 'cform' or props['FileExt'] == 'rform' then
+    strFrm = strFrm:gsub(' +<Script', '<Script')
+    strFrm = strFrm:gsub(' +<ConditionScript', '<ConditionScript')
+    strFrm = strFrm:gsub(' +<Query', '<Query')
+    strFrm = strFrm:gsub(' +(</?String)', '%1')
+else
+    strFrm = strFrm:gsub('>%s+</Field>', '></Field>')
+end
+editor:SetText(strFrm)
 editor:SetSel(0, editor.Length)
 SortFormXML()
+editor:SetSel(0, 0)
+if h then editor:ReplaceSel(h..'\r\n') end

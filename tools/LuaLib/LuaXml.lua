@@ -66,6 +66,9 @@ function str(var,indent,tagValue)
       s = s..">\n"
       for k,v in base.ipairs(var) do -- elements
         if base.type(v)=="string" then
+          if not v:find('^<!--') then s = s:gsub('\n$','')
+          else v = base.string.rep(' ', isz)..v
+          end
           s = s..indentStr.." "..v.." \n"
         else
           s = s..str(v,indent+isz)
