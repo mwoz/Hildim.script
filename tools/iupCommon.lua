@@ -290,8 +290,15 @@ iup.scitedetachbox = function(t)
     dtb.Dlg_Resize_Cb = t.Dlg_Resize_Cb
     dtb.On_Detach = t.On_Detach
 
-    dtb.detached_cb=(function(h, hNew, x, y)
+    dtb.detachPos = (function()
+        local oldPos = iup.GetGlobal('CURSORPOS')
+        iup.SetGlobal('CURSORPOS', (_G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100')..'x'..(_G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100'));
+        dtb.DetachRestore = true
+        dtb.detach = 1
+        iup.SetGlobal('CURSORPOS', oldPos)
+    end)
 
+    dtb.detached_cb=(function(h, hNew, x, y)
         if h.On_Detach then h.On_Detach(h, hNew, x, y) end
         hNew.resize ="YES"
         hNew.shrink ="YES"
@@ -370,8 +377,6 @@ iup.ShowXY = function(h,x,y)
     return old_iup_ShowXY(h,x,y)
 end
 ---Расширение iup
-iup.sciteDetach = function(t)
-end
 
 _G.dialogs = {}
 iup.scitedialog = function(t)
