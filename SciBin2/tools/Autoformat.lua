@@ -345,7 +345,8 @@ local function doAutoformat(current_pos)
 
         editor:ReplaceSel(strNew)
 
-        current_pos = current_pos + 1 + editor.SelectionEnd -editor.SelectionStart - (current_pos - startLine)
+        -- current_pos = current_pos + 1 + editor.SelectionEnd -editor.SelectionStart - (current_pos - startLine)
+        current_pos = current_pos + 1 + #strNew - #strLine
         editor:SetSel(current_pos, current_pos)
     end
 

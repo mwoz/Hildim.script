@@ -796,10 +796,13 @@ xmllst.length
 #$xml=papp%.metadata(
 #$xml=.*%.selectsinglenode(
 #$xml=.*%.firstchild
+#$xml=.*%.lastchild
+#$xml=.*%.parentnode
 #$xml=.*%.nextsibling
 #$xml=m_x[%w_]*
 #$xml=xml[%w_]*
 #$xml=objxml
+#$xml=.*%.childnodes(
 
 xml.async Specifies if asynchronous download is permitted. Read/write.
 xml.attributes Contains the list of attributes for this node. Read-only.

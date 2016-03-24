@@ -82,6 +82,7 @@ local function SaveNamedValues(h, root)
                 if cType == 'list' and child.dropdown == "YES" then
                     local hist = {}
                     for i = 1, child.count do
+                        if i > tonumber(child.visibleitems  or 15) then break end
                         table.insert(hist,iup.GetAttributeId(child, '', i))
                     end
                     _G.iuprops[root..'.'..child.name..'.hist'] = table.concat(hist,'¤')
@@ -282,6 +283,7 @@ local function RestoreNamedValues(h, root)
                     if s then
                         local i = 1
                         for w in s:gmatch('([^¤]+)') do
+                            if i > tonumber(child.visibleitems  or 15) then break end
                             iup.SetAttributeId(child, 'INSERTITEM', i, w)
                             i = i + 1
                         end
@@ -528,7 +530,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             if LeftBar_obj.win then LeftBar_obj.handle.DetachRestore = true; LeftBar_obj.handle.detach = 1 end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
             if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end
-            if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").DetachRestore = true;iup.GetDialogChild(hMainLayout, "FindReplDetach").detach = 1 end
+            if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos() end
         end
     end
 end)
