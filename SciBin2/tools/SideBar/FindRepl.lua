@@ -472,7 +472,7 @@ local function create_dialog_FindReplace()
         action = GetCount,
       },
 
-      normalizesize = "HORIZONTAL",
+      --normalizesize = "HORIZONTAL",
       gap = "3",
       alignment = "ABOTTOM",
       margin = "0x2",
@@ -625,7 +625,7 @@ local function create_dialog_FindReplace()
       action = ClearMarkAll,
       padding = "2",
     },
-    normalizesize = "HORIZONTAL",
+    --normalizesize = "HORIZONTAL",
     margin = "0x00",
   }
   containers[22] = iup.hbox{
@@ -634,7 +634,7 @@ local function create_dialog_FindReplace()
       name = "chkMarkInSelection",
     },
     iup.button{
-      title = "Пометить закладками",
+      title = "*** Закладками",
       action = BookmarkAll,
     },
     gap = "4",
@@ -781,7 +781,7 @@ local function create_dialog_FindReplace()
 
   containers[27] = iup.vbox{
     iup.toggle{
-      title = "Backslash-выражения(\\n,\\r,\\t...)",
+      title = "Backslash (\\n,\\r,\\t...)",
       name = "chkBackslash",
     },
     iup.toggle{

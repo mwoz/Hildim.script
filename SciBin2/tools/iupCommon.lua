@@ -299,6 +299,7 @@ iup.scitedetachbox = function(t)
     end)
 
     dtb.detached_cb=(function(h, hNew, x, y)
+
         if h.On_Detach then h.On_Detach(h, hNew, x, y) end
         hNew.resize ="YES"
         hNew.shrink ="YES"
