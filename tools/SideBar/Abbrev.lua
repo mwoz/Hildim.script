@@ -216,7 +216,7 @@ end
 local function refControlPos(findSt, findEnd, s, dInd)
     tblXml = lpegCtrlParser():match(editor:GetText(),1)
     local icL = editor:LineFromPosition(editor.CurrentPos)
-
+--debug_prnTb(tblXml,0)
     local Lines = {}
     for w in s:gmatch("[^\n]+") do
        table.insert(Lines,w)
@@ -252,6 +252,7 @@ local function refControlPos(findSt, findEnd, s, dInd)
             CtrlX[''..v.position.x] = v.position.x
         end
         for ind,arg in pairs(v) do
+
             if arg.inLine and arg.isAttr ~= true then
                 local l = tonumber(arg.inLine)
                 if l> iPl and l < icL then
@@ -261,17 +262,19 @@ local function refControlPos(findSt, findEnd, s, dInd)
                     iPl = l
                 end
             end
-            if arg.isAttr == true then
-                iTmpX = arg.position.x + arg.position.w
-                iTmpY = arg.position.y + arg.position.h
-                iTmpYp = arg.position.y
-                CtrlX[''..arg.position.x] = arg.position.x
-            elseif arg.name == 'btn1' then
-                CtrlBtn1W[''..arg.position.w] = tonumber(arg.position.w)
-            elseif arg.name == 'Code' then
-                CtrlCodeW[''..arg.position.w] = arg.position.w
-            elseif arg.name == 'Name' then
-                CtrlNameW[''..arg.position.w] = arg.position.w
+            if arg.position then
+                if arg.isAttr == true then
+                    iTmpX = arg.position.x + arg.position.w
+                    iTmpY = arg.position.y + arg.position.h
+                    iTmpYp = arg.position.y
+                    CtrlX[''..arg.position.x] = arg.position.x
+                elseif arg.name == 'btn1' then
+                    CtrlBtn1W[''..arg.position.w] = tonumber(arg.position.w)
+                elseif arg.name == 'Code' then
+                    CtrlCodeW[''..arg.position.w] = arg.position.w
+                elseif arg.name == 'Name' then
+                    CtrlNameW[''..arg.position.w] = arg.position.w
+                end
             end
         end
     end
@@ -653,8 +656,14 @@ local function InsertAbbreviation(expan,dInd,curSel)
     replAbbr(findSt, editor.SelectionEnd, s, dInd)
 end
 
-local function TryInsAbbrev()
-    local curSel = editor:GetSelText()
+local function TryInsAbbrev(bClip)
+    local curSel
+    if bClip then
+        local cpb = iup.clipboard{};
+        curSel = iup.GetAttribute(cpb, "TEXT")
+        iup.Destroy(cpb)
+    else curSel = editor:GetSelText() end
+
     local pos = editor.SelectionStart
     local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)
 	for i,v in ipairs(abbr_table) do
@@ -667,6 +676,10 @@ local function TryInsAbbrev()
         end
 	end
     print("Error Abbrev not found in: '"..lBegin.."'")
+end
+
+function TryInsAbbrevClp()
+    TryInsAbbrev(true)
 end
 
 ----------------------------------------------------------
@@ -794,7 +807,7 @@ local function Abbreviations_Init()
         OnSwitchFile = Abbreviations_ListFILL;
         OnSave = Abbreviations_ListFILL;
         OnOpen = Abbreviations_ListFILL;
-        OnMenuCommand = (function(msg) if msg == IDM_ABBREV then TryInsAbbrev() return true;end end);
+        OnMenuCommand = (function(msg) if msg == IDM_ABBREV then TryInsAbbrev(false) return true;end end);
         on_SelectMe = (function()  Abbreviations_ListFILL();end)
         }
 end

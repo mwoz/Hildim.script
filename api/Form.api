@@ -1082,6 +1082,8 @@ err.Raise(number, source, description, helpfile, helpcontext)
 err.Clear()
 
 #$udoc=doc(
+#$udoc=masterdoc(
+#$udoc=docex(
 udoc.SubMsg Получение произвольного сабмессаджа\nиз основного мессаджа объекта
 #$message=.*%.submsg
 udoc.Value  Получение значения из поля мессаджа объекта.\nУстановка значения в контрол

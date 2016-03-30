@@ -391,6 +391,9 @@ iup.scitedialog = function(t)
             dlg:showxy(0,0)
         elseif t.sciteparent == "IUPSTATUSBAR" then
             dlg:showxy(0,0)
+        elseif t.sciteid == "splash" then
+            local _,_,x2,y2 = iup.GetGlobal('SCREENSIZE'):find('(%d*)x(%d*)')
+            dlg:showxy(tonumber(x2)/2 - 100,tonumber(y2)/2 - 100)
         elseif t.sciteparent == "SCITE" then
             dlg:showxy((tonumber(_G.iuprops['dialogs.'..t.sciteid..'.x']) or 400),(tonumber(_G.iuprops['dialogs.'..t.sciteid..'.y'])) or 300)
         else
@@ -406,7 +409,6 @@ iup.scitedialog = function(t)
             table.insert(_G.deletedDialogs, t.sciteid)
             scite.PostCommand(2,0)
         end
-        --dlg.rastersize = "NULL"
     else
         dlg:show()
     end
@@ -508,3 +510,21 @@ iup.DestroyDialogs = function()
     _G.dialogs = nil
     --iup.ShowSideBar(-1)
 end
+
+
+local function Splash()
+
+    dlg_SPLASH = iup.scitedialog{iup.hbox{
+    iup.label{
+      padding = "30x30",
+      title = "!!!WAIT!!!",
+      font = "Arial, 33", background= "IMAGE_search";
+    }, background= "IMAGE_search";
+  }; maxbox="NO",minbox ="NO",resize ="NO", menubox = "NO", border = "NO",opacity= "123",
+    sciteparent="SCITE", sciteid="splash", resize ="NO"}
+    dlg_SPLASH.show_cb=(function(h,state)
+        if state == 4 then dlg_SPLASH:postdestroy() end
+    end)
+
+end
+Splash()
