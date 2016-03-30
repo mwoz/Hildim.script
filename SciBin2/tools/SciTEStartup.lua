@@ -3,7 +3,8 @@
 -- Здесь (с помощью dofile) грузятся только скрипты, обрабатывающие события редактора.
 
 ----[[ C O M M O N ]]-------------------------------------------------------
-
+--Загрузка имэджей
+dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 -- Подключение файла с общими функциями, использующимися во многих скриптах
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 
@@ -25,7 +26,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\ROCheck.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\smartbraces.lua")
 
 -- Автозакрытие HTML тегов
---dofile (props["SciteDefaultHome"].."\\tools\\html_tags_autoclose.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\paired_tags.lua")
 
 -- Универсальное комментирование и снятие комментариев (по Ctrl+Q)
 dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
@@ -122,7 +123,5 @@ end
 -- Лексер для текстовых файлов
 --dofile (props["SciteDefaultHome"].."\\languages\\text.lua")
 
---Загрузка имэджей
-dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 
 scite.PostCommand(3,0)

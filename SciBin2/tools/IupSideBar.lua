@@ -518,6 +518,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                         RestoreLayOut(l[i])
                     end
                 end
+                scite.EnsureVisible()
                 if bNew then
                     scite.buffers.SetDocumentAt(0)
                 else
@@ -531,6 +532,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end
             if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos() end
+            scite.EnsureVisible()
+            dlg_SPLASH:postdestroy()
         end
     end
 end)

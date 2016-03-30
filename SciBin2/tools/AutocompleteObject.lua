@@ -181,7 +181,7 @@ end
 local function isXmlLine()
 --определяем, является ли текущая строка тэгом xml
     if editor:PositionFromLine(af_current_line) > current_pos-1 then return false end
-    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',',','..editor.StyleAt[editor.SelectionStart]..',')
+    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',',','..editor.StyleAt[editor.SelectionStart]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
 end
 
 local function isPosInString()

@@ -1,17 +1,25 @@
 template<schemaVersion Версия формата. В данный момент "1"
 template<code Код сущности. Для системного типа должен иметь префикс "system.".\nДля кастом-типа должен иметь "custom.".
 template<name Произвольное имя. Используется как описание.
-template<schemaVersion  Версия формата. В данный момент "1".
 template<type {{Reference|Document|Table|Configuration|MarketData|MarketDataHistory|Extension|Plugin}}
 template<asset {{yes}} 'no' by def\n Если yes, мастер-таблица сущности синхронизируется с таблицей dbo.Asset
 template<audit  {{yes}} 'no' by def\n Если yes, система ведет аудит операций с объектами данного типа.
 template<realtimeNotify Если yes, модификация объекта приводит к публикации сообщения
+template<import {{no}} 'yes' by def\nЕсли yes, для сущности создаются процедуры импорта – см. разделы «Процедура IUD» и «Процедуры расширения (custom callbacks)».
+template<importCallbacks {{no}} 'yes' by def\nЕсли yes, для сущности создаются процедуры расширения импорта - см. "Процедуры расширения (custom callbacks)".\nЕсли no, процедуры не создаются и IUD не делает соответствующих вызовов.
+template<importCallbackMask Указывает набор кастом-процедур, которые вызываются из IUD - см.\nПроцедуры расширения (custom callbacks). Может содержать символы:\nN - NormalizeXML\nE - EnrichAndValidate\nB - BeforeIUD\nA - AfterIUD\nC - AfterCommit\nПо умолчанию EBAC.
+template<export {{no}} 'yes' by def\n Если yes, для сущности создаются процедуры экспорта – см. разделы «Процедура Get» и «Процедура GetMsg».
+template<extensible {{no}} 'yes' by de\nЕсли yes, сущность допускает расширение с помощью других сущностей типа Extension.
+
 masterobject<name Код расширяемой сущности.
 
+extension<name Код сущности.
+
 table<name Имя таблицы в БД. Создается в схеме dbo для системного типа и custom - для кастом-типа.
-table<type Тип таблицы: Master AppendixSingle AppendixMultiple
+table<type {{Master|AppendixSingle|AppendixMultiple}}
 table<movements {{yes}} 'no' by def\n Если yes, система ведет для таблицы Mvt-таблицу, куда записываются все изменения записей.
-table<extensionFor Имя расширяемой таблицы типа AppendixMultiple из мастер-типа.\nАтрибут может быть указан в таблице типа AppendixMultiple для сущности типа Extension.
+table<extensionаor Имя расширяемой таблицы типа AppendixMultiple из мастер-типа.\nАтрибут может быть указан в таблице типа AppendixMultiple для сущности типа Extension.
+table<auditсolumns {{no}} 'yes' by def\n Если yes, для таблицы создаются служебные поля (см. раздел «Элемент <Fields») и триггер для их заполнения.
 table<import {{no}} 'yes' by def\n Если yes (по умолчанию), поля таблицы попадают в число импортируемых.
 table<export {{no}} 'yes' by def\n Если yes (по умолчанию), поля таблицы попадают в число экспортируемых.
 table<view {{yes}} 'no' by def\n Если yes, данная таблица является представлением (view). SQL-код представления указывается в теге ViewSql.
@@ -19,6 +27,9 @@ table<customIUD {{yes}} 'no' by def\n Если yes, для вставки/обновления вместо вы
 table<customIUDTemplate Используется при customIUD="yes".\nПредусмотренный вариант реализации процедур Тип_IU и Тип_Del.
 table<marketData {{yes}} 'no' by def\n Если yes, мастер-таблица сущности\nиспользуется для хранения рыночных котировок финансовых инструментов
 table<history {{yes}} 'no' by def\n Если yes, мастер-таблица сущности должна содержать поля HistDate и HistDateTo.\nДля таблицы создается триггер для расчета HistDateTo.
+table<mandatory {{no}} 'yes' by def\n Для AppendixSingle
+table<propagateAuditIf Имеет смысл указывать, если есть хотя бы одно поле с атрибутом propagateAudit="yes".\nЗадает логическое выражение SQL, которое используется как критерий записи аудита по объекту-ссылке.
+
 
 field<type {{tYesNo|tComment|tName|tCode|tChoice|tAmount|tId|WorkflowActionData|PluginData|ForeignId|Asset|Reference|ExtensionId|MasterTypeId|MasterId|ObjectCode|ObjectId}}
 field<name
@@ -32,10 +43,21 @@ field<import {{yes}} 'no' by def\n Если yes, поле попадает в число импортируемых
 field<export {{yes}} 'no' by def\n Если yes, поле попадает в число экспортируемых.\nЗначение по умолчанию устанавливается на уровне таблицы с помощью одноименного атрибута.
 field<sequence Имя последовательности для генерации значения поля.\nМожет указываться для поля типа ObjectId. Последовательность автоматически регистрируется в таблице\nSystemSequence в момент первого обращения.\nЗначения последовательности генерируются функцией dbo.SequenceNextValue.
 field<marketData {{yes}} 'no' by def\n Если yes, информация о поле должна быть занесена в таблицу MarketDataTableField, которая используется сервером котировок.
+field<longId {{yes}} 'no' by def\nЕсли yes, идентификатор представлен типом tLongId, иначе tId.\nУказывается только для ObjectId, MasterId, ExtensionId, Reference, ForeignId.
+field<cascadeDelete {{yes|no}} Только для сущностей типа Table и полей типа ForeignId.
+field<function Если атрибут указан, для поля не создается колонка в таблице БД,\nа функции Get и GetMsg возвращают в данном поле результат вызова указанной функции.\nФункция принимает один параметр типа tId – ключ записи в таблице.
+field<identity {{yes}} 'no' by def\n Если yes, поле объявляется как identity.\nИспользуется только в метаданных типа Table.
+field<endOfRange Имя поля в данной таблице, которое является конечной датой диапазона.\nМожет быть указано только для поля типа date или datetime.\nПоле, для которого указывается этот атрибут, должно входить в альтернативный ключ.
+field<pluginRef Имя поля в данной таблице со ссылкой на плагин (system.Plugin),\nданные которого хранятся в данном поле.\nУказывается для поля типа PluginData.
+field<caseSensitive {{yes|no}} Указывается для строковых полей.\nЕсли yes, поле в таблице создается с collation, чувствительным к регистру (берется collation базы данных и «_CI_» заменяется на «_CS_»).
+field<propagateAudit {{yes}} 'no' by def\n Указывается для полей типа Reference или DynamicReference.\nЕсли yes, процедура IUD по данному объекту дублирует запись в аудите для ссылаемого объекта.\nПример использования – объект system.ObjectGroupMember, транзакция по которому должна отражаться как в аудите группы,\nтак и в аудите объекта.
+field<assetObjects Для полей типа Asset список кодов поддерживаемых типов объектов через запятую.
 
 index<nameSuffix Суффикс имени индекса.\nФормат имени индекса: IX_ИмяТаблицы_Суффикс.
 index<unique {{yes}} 'no' by def\n Если yes, индекс является уникальным
 
+index<unique {{yes}} 'no' by def\n Если yes, индекс является уникальным.
+index<nameSuffix Суффикс имени индекса. Формат имени индекса: IX_ИмяТаблицы_Суффикс.
 index<key {{yes}} 'no' by def\n Если yes, данный индекс является альтернативным ключом записи.\nПоля такого индекса используются в процедуре IUD\nдля поиска записи в таблице.
 index<clustered {{yes}} 'no' by def\n Если yes, индекс создается кластерным.\nДопустимо только при отсутствии поля типа ObjectId (для типа Table).
 index<filter Логическое выражение для условного индекса.

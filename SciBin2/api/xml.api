@@ -4,6 +4,8 @@ noobj<Comment
 noobj<DataModel
 noobj<ExternalRef
 noobj<ExternalRefs
+noobj<Extensions
+noobj<Extension
 noobj<Field
 noobj<Fields
 noobj<Index
