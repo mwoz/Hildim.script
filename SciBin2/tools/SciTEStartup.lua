@@ -7,7 +7,7 @@
 dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 -- Подключение файла с общими функциями, использующимися во многих скриптах
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
-
+Splash_Screen()
 ----[[ R E A D   O N L Y ]]-------------------------------------------------
 
 -- Замена стандартной команды "Read-Only"
@@ -81,10 +81,10 @@ dofile (props["SciteDefaultHome"].."\\tools\\CopyPathToClipboard.lua")
 ----[[ Д О П О Л Н И Т Е Л Ь Н Ы Е  М Е Н Ю ]]--------------------------------
 
 -- Создает в контекстном меню таба (вкладки) подменю для команд SVN
-dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
+--dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
 
 -- Создает в контекстном меню таба (вкладки) подменю для команд VSS
---dofile (props["SciteDefaultHome"].."\\tools\\vss_showmenu.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\vss_showmenu.lua")
 
 ----[[ У Т И Л И Т Ы  И  И Н С Т Р У М Е Н Т Ы ]]-----------------------------
 

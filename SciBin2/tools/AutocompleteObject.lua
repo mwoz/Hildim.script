@@ -495,6 +495,11 @@ local function FillTableFromText(incText,patterns, tblfList)
 end
 
 local function ReCreateStructures(strText,tblFiles)
+    local rootTag
+
+    if editor:GetLine(0) then _,_,rootTag = (editor:GetLine(0)..''):find('^<(%w+)') end
+    rootTag = rootTag or ''
+
     local tbl_fList= {}
     local function RecrReCreateStructures(strTxt,tblFiles)
         local _incStart,_incEnd,incFind,incPath,_start, _end, fName
@@ -565,7 +570,7 @@ local function ReCreateStructures(strText,tblFiles)
         objectsX_table = {}
         fillup_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".fillup.characters"])
         autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
-        str_vbkwrd = CreateTablesForFile(objects_table,alias_table,props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')], str_vbkwrd ~= nil)
+        str_vbkwrd = CreateTablesForFile(objects_table,alias_table,props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_vbkwrd ~= nil)
     end
 
     if Favorites_Clear ~= nil then Favorites_Clear() end
@@ -573,7 +578,7 @@ local function ReCreateStructures(strText,tblFiles)
 
     -----------
     if m_ext ~= editor.Lexer or str_xmlkwrd~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']] or '&&&&') then
-        str_xmlkwrd = CreateTablesForFile(objectsX_table,nil, props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')], str_xmlkwrd~=nil)
+        str_xmlkwrd = CreateTablesForFile(objectsX_table,nil, props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_xmlkwrd~=nil)
     end
     if editor.Lexer == SCLEX_FORMENJINE then
         RecrReCreateStructures(editor:GetText(),{})

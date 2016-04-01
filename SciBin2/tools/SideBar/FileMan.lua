@@ -561,7 +561,7 @@ local function FileManTab_Init()
               iup.item{title="Rename",action=FileMan_Rename},
               iup.separator{},
               iup.item{title="Open with SciTE",action=FileMan_OpenSelectedItems},
-              iup.item{title="Execute",action=FileMan_FileExec},
+              iup.item{title="Execute",action=(function() FileMan_FileExec(nil) end)},
               iup.item{title="Exec with Params",action=FileMan_FileExecWithParams},
               iup.separator{},
               iup.item{title="Add to Favorites",action=Favorites_AddFile},

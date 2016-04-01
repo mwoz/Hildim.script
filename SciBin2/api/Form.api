@@ -599,6 +599,31 @@ colorpicker.defaultvaluestr Значение цвета по умолчанию (HEX строка вида "#RRGGB
 colorpicker.defaulttext Текст, отображаемый для значения по умолчанию в pop-up окне
 colorpicker.style 'D' - Default 3d Button 'F' - Flat button
 
+#$docking=form("dck
+#$docking=controlscoll%.add(.*"DOCKING
+docking.SelectedIndex get/set currently selected item or -1
+docking.FaceColor selected tab color
+docking.FaceForeColor selected tab text color
+docking.BackColor unselected tabs color
+docking.BackForeColor unselected tabs text color
+docking.HBackForeColor highlight text color (used when the mouse is over a tab)
+docking.Tabs collection of tabs
+#$dockingtabcoll=docking.tabs
+#$dockingtab=docking.tabs(
+docking.Settings Message object with information about all tabs, panes and docked forms;\nused to store/restore layout; it stores name, template name and property bag for each form
+
+dockingtabcoll.Add ([Index], Key, Caption)
+dockingtabcoll.Item ( Key/Index )
+dockingtabcoll.Remove ( Key/Index )
+dockingtabcoll.Count
+
+dockingtab.RootPane  DockingPane object
+dockingtab.Key read-only; tab string key
+dockingtab.Caption tab caption
+dockingtab.LockedLayout true - user can't to add/remove panes or close forms; false by default
+dockingtab.LockedSplitters true - user can't move splitters; false by default
+dockingtab.SynchroSizing включение пропорционального изменения размеров секций при изменении размеров формы
+
 #$control=cube
 #$control=m_cube
 #$cubectrl=cube
@@ -1236,4 +1261,5 @@ noobj.template
 noobj.menu
 noobj.script
 noobj.menuparam
+noobj.pane
 
