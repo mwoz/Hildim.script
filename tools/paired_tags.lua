@@ -62,7 +62,9 @@ local t = {}
 -- t.tag_start, t.tag_end, t.paired_start, t.paired_end  -- positions
 -- t.begin, t.finish  -- contents of tags (when copying)
 local old_current_pos
-local blue_indic, red_indic = 11, 12 -- номера используемых маркеров
+local blue_indic, red_indic = 24, 23 -- номера используемых маркеров
+
+local bEnable, styleSpace, styleBracket = false, 0, 1
 
 function CopyTags()
 	if not t.tag_start then
@@ -162,33 +164,43 @@ local function FindPairedTag(tag)
 		find_end = 0
 		dec = 1
 	end
-
 	repeat
-		local paired_start, paired_end = editor:findtext("</?"..tag..".*?>", SCFIND_REGEXP, find_start, find_end)
-		if not paired_start then break end
-		if editor.CharAt[paired_start+1] == 47 then -- [/]
-			count = count + dec
-		else
-			count = count - dec
-		end
-		if count == 0 then
-			t.paired_start = paired_start
-			t.paired_end = paired_end - 1
-			break
+		local paired_start, paired_end = editor:findtext("</?"..tag.."[ >]", SCFIND_REGEXP, find_start, find_end)
+        if paired_end and editor.CharAt[paired_end - 1] ~= 62 then
+            if dec == -1 then
+            _, paired_end = editor:findtext(".*?>", SCFIND_REGEXP, paired_end, find_end)
+            else
+            _, paired_end = editor:findtext(".*?>", SCFIND_REGEXP, paired_end, find_start)
+            end
+        end
+        if not paired_end or not paired_end then return end
+        if paired_end and editor.CharAt[paired_end-2] ~= 47 then
+            if not paired_start then break end
+            if editor.CharAt[paired_start+1] == 47 then -- [/]
+                count = count + dec
+            else
+                count = count - dec
+            end
+            if count == 0 then
+                t.paired_start = paired_start
+                t.paired_end = paired_end - 1
+                break
+            end
 		end
 		find_start = (dec==1) and paired_start or paired_end
 	until false
 end
 
 local function PairedTagsFinder()
+    if styleSpace == 49 and cmpobj_GetFMDefault() ~= SCE_FM_X_DEFAULT then return end
 	local current_pos = editor.CurrentPos
 	if current_pos == old_current_pos then return end
 	old_current_pos = current_pos
-
 	local tag_start = editor:findtext("[<>]", SCFIND_REGEXP, current_pos, 0)
+
 	if tag_start == nil
 		or editor.CharAt[tag_start] ~= 60 -- [<]
-		or editor.StyleAt[tag_start+1] ~= 1
+		or (editor.StyleAt[tag_start] ~= styleBracket and editor.StyleAt[tag_start] ~= styleBracket )
 		then
 			t.tag_start = nil
 			t.tag_end = nil
@@ -202,14 +214,18 @@ local function PairedTagsFinder()
 	local tag_end = editor:findtext("[<>]", SCFIND_REGEXP, current_pos, editor.Length)
 	if tag_end == nil
 		or editor.CharAt[tag_end] ~= 62 -- [>]
-		then return
+		or editor.CharAt[tag_end - 1] == 47 -- [/]
+		then
+            if editor.CharAt[tag_end - 1] then EditorClearMarks(red_indic); EditorClearMarks(blue_indic) end
+        return
 	end
+
 	t.tag_end = tag_end
 
 	t.paired_start = nil
 	t.paired_end = nil
-	if editor.CharAt[t.tag_end-1] ~= 47 then -- не ищем парные теги для закрытых тегов, типа <BR />
-		local tag = editor:textrange(editor:findtext("\\w+", SCFIND_REGEXP, t.tag_start, t.tag_end))
+	if editor.CharAt[t.tag_end-1] ~= 47 then -- не ищем парные теги для закрытых тегов, типа <BR >
+		local tag = editor:textrange(editor:findtext("[\\w\\.:]+", SCFIND_REGEXP, t.tag_start, t.tag_end))
 		FindPairedTag(tag)
 	end
 
@@ -228,12 +244,71 @@ local function PairedTagsFinder()
 	end
 end
 
+local function CloseTag(nUnbodyScipped)
+    local pos = editor.CurrentPos
+    if (editor.StyleAt[pos] == styleSpace or editor.StyleAt[pos - 1] == styleSpace) or
+       (editor.StyleAt[pos] == styleBracket and editor.CharAt[pos - 1] == 62 and editor.CharAt[pos] == 60)
+    then
+        local tg_end, find_start = nil,pos
+        repeat
+            find_start = editor:findtext("<[\\w\\.:]+", SCFIND_REGEXP, find_start, 0)
+            if not find_start then break end
+
+            local tag_end = editor:findtext("[<>]", SCFIND_REGEXP, find_start + 1, editor.Length)
+
+            if not(tag_end == nil or editor.CharAt[tag_end] ~= 62) then -- [>]
+                t.tag_start = find_start
+                t.tag_end = tag_end
+
+                t.paired_start = nil
+                t.paired_end = nil
+                local tag = editor:textrange(editor:findtext("[\\w\\.:]+", SCFIND_REGEXP, t.tag_start, t.tag_end))
+                if not tag then break end
+                if editor.CharAt[tag_end - 1] == 47 then -- [/]
+                    nUnbodyScipped = nUnbodyScipped - 1
+                    if nUnbodyScipped == 0 then
+                        editor:BeginUndoAction()
+                        editor:ReplaceSel('</'..tag..'>')
+                        editor:SetSel(tag_end - 1, tag_end)
+                        editor:ReplaceSel('')
+                        editor:SetSel(pos - 1, pos - 1)
+                        editor:EndUndoAction()
+                        break
+                    end
+                else
+                    FindPairedTag(tag)
+                    if not t.paired_start then
+                        editor:ReplaceSel('</'..tag..'>')
+                        return
+                    end
+                    if t.paired_start > pos then break end
+                end
+            end
+        until false
+    end
+end
+
+local function OnSwitchFile_local()
+    if editor.Lexer == SCLEX_FORMENJINE then
+        bEnable, styleSpace, styleBracket = true, 49, 50
+    elseif editor.Lexer == SCLEX_XML then
+        bEnable, styleSpace, styleBracket = true, 0, 1
+    else
+        bEnable = false
+    end
+end
+
+function CloseIncompleteTag()
+    CloseTag(0)
+end
+
+function CloseUnbodyTag()
+    -- iup.GetParam("sdfsd",(function(h, ind) print((iup.GetParamParam(h,0)).value); return 1 end), "Tag%i[1,100,1]{}\n", 1)
+    CloseTag(1)
+end
+
 AddEventHandler("OnUpdateUI", function()
-	if props['FileName'] ~= '' then
-		if tonumber(props["hypertext.highlighting.paired.tags"]) == 1 then
-			if props['Language'] == "hypertext" or props['Language'] == "xml" then
-				PairedTagsFinder()
-			end
-		end
-	end
+    if bEnable then PairedTagsFinder() end
 end)
+AddEventHandler("OnSwitchFile", OnSwitchFile_local)
+AddEventHandler("OnOpen", OnSwitchFile_local)

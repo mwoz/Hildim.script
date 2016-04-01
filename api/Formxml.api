@@ -152,8 +152,16 @@ checklistbox.tag
 
 colorpicker.style
 
+splitcontainer.orientation {{V ertical|H orisontal}}
+splitcontainer.synchrosizing {{Y|N}}
+
+pane.name
+pane.size
+pane.borderstyle {{NONE|SUNKEN|SUNKEN3D}} NONE by def.
+
 container.handler
 container.sharecontrols {{Y}} N by def.
+container.borderstyle {{NONE|SUNKEN|SUNKEN3D}} NONE by def.
 
 grid.title
 grid.style "hline;vline;openlevel;striped;oddrowcolor;evenrowcolor"\nfor example: "n,y,3,y,#ffffff,#dddddd"

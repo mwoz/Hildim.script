@@ -511,8 +511,7 @@ iup.DestroyDialogs = function()
     --iup.ShowSideBar(-1)
 end
 
-
-local function Splash()
+function Splash_Screen()
 
     dlg_SPLASH = iup.scitedialog{iup.hbox{
     iup.label{
@@ -527,4 +526,3 @@ local function Splash()
     end)
 
 end
-Splash()
