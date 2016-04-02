@@ -16,10 +16,11 @@ if not bSuc then
 end
 iuprops_read_ok = true
 
-
+_G.iuprops['pariedtag.on'] = _G.iuprops['pariedtag.on'] or 1
 props['autoformat.line'] = _G.iuprops['autoformat.line']
 props['spell.autospell'] = _G.iuprops['spell.autospell']
 props['formenjine.old.ext'] = _G.iuprops['formenjine.old.ext']
+props['pariedtag.on'] = _G.iuprops['pariedtag.on']
 
 local function SaveIup()
     if not iuprops_read_ok then return end
