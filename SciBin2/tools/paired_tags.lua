@@ -308,7 +308,7 @@ function CloseUnbodyTag()
 end
 
 AddEventHandler("OnUpdateUI", function()
-    if bEnable then PairedTagsFinder() end
+    if bEnable and (tonumber(_G.iuprops['pariedtag.on']) == 1) then PairedTagsFinder() end
 end)
 AddEventHandler("OnSwitchFile", OnSwitchFile_local)
 AddEventHandler("OnOpen", OnSwitchFile_local)

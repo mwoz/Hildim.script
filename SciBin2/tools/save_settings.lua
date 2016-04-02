@@ -41,6 +41,7 @@ local function SaveSettings()
 
 
 	SaveKey('spell.autospell')
+	SaveKey('pariedtag.on')
 
 
 	if pcall(io.output, file) then
