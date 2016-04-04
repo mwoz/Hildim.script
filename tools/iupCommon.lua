@@ -51,6 +51,7 @@ local function SaveLayOut()
     end
     return res
 end
+
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
@@ -120,7 +121,8 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
         else return true end
     elseif cmd == 9117 then  --перезагрузка скрипта
-        iup.DestroyDialogs();SaveIup()
+        iup.DestroyDialogs();
+        SaveIup()
         scite.PostCommand(1,0)
         return true
     elseif cmd == IDM_TOGGLEOUTPUT then
@@ -440,6 +442,10 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             print("...Ok")
         elseif wp == 4 then   --перезагрузка скрипта
             scite.MenuCommand(9117)
+        elseif wp == 5 then
+            iup.DestroyDialogs();
+            SaveIup()
+            scite.PostCommand(1,0)
         end
     end
 end)
@@ -500,20 +506,20 @@ iup.DestroyDialogs = function()
         end
     end
     h = iup.GetDialogChild(hMainLayout, "ToolBar")
-    tTlb.show_cb(h,4)
-    iup.Detach(h)
-    iup.Destroy(h)
+    if h then tTlb.show_cb(h,4) iup.Detach(h); iup.Destroy(h) end
 
     local h = iup.GetDialogChild(hMainLayout, "StatusBar")
-    iup.Detach(h)
-    iup.Destroy(h)
+    if h then iup.Detach(h); iup.Destroy(h) end
+
+    local h = iup.GetDialogChild(hMainLayout, "MenuBar")
+    if h then iup.Detach(h); iup.Destroy(h) end
 
     _G.dialogs = nil
     --iup.ShowSideBar(-1)
 end
 
 function Splash_Screen()
-
+    if props['iuptoolbar.restarted'] == '1' then return end
     dlg_SPLASH = iup.scitedialog{iup.hbox{
     iup.label{
       padding = "30x30",

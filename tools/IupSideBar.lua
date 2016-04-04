@@ -372,8 +372,8 @@ end
 local function InitToolBar()
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     TabBar_obj.Tabs = {}
-                     --iup.hbox{iup.text{expand='YES', expand='HORIZONTAL'}}
-    tTlb = {CreateToolBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
+
+    tTlb = {CreateToolBar()}
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
     tTlb.show_cb=(function(h,state)
@@ -414,7 +414,7 @@ local function InitStatusBar()
     StatusBar_obj = {}
     StatusBar_obj.Tabs = {}
 
-    local tTlb = {CreateStatusBar();expand='YES', maxbox="NO",minbox ="NO",resize ="YES", menubox="NO", shrink='YES', minsize="10x10"}
+    local tTlb = {CreateStatusBar()}
     tTlb.control = "YES"
     tTlb.sciteid="iupstatusbar"
     tTlb.show_cb=(function(h,state)
@@ -432,8 +432,6 @@ local function InitStatusBar()
             end
         end
     end)
-    --tTlb.resize_cb=(function(_,x,y) if StatusBar_obj.handle ~= nil then  StatusBar_obj.size = StatusBar_obj.handle.size end end)
-    --StatusBar_obj.handle = iup.scitedialog(tTlb)
     local hTmp= iup.dialog(tTlb)
     local hBx = iup.GetDialogChild(hTmp, 'StatusBar')
     iup.Detach(hBx)
@@ -450,8 +448,50 @@ local function InitStatusBar()
     StatusBar_obj.size = StatusBar_obj.handle.size
     iup.PassFocus()
 end
+
+require "menuhandler"
+local function InitMenuBar()
+    if not _G.sys_Menus then return end
+    local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
+    MenuBar_obj = {}
+    MenuBar_obj.Tabs = {}
+
+    local mnu = sys_Menus.MainWindowMenu
+
+    local hb = {gap='10',margin='10x3', name="MenuBar", maxsize="x30"}
+    for i = 1, #mnu do
+        if mnu[i][1] ~='_HIDDEN_' then
+            table.insert(hb, iup.link{title = menuhandler:get_title(mnu[i]), fgcolor='#000000', url='NO', action=
+                function(h)
+                    local pos = loadstring('return {'..iup.GetAttribute(h, "SCREENPOSITION")..'}')()
+                    local sz = loadstring('return {'..iup.GetAttribute(h, "RASTERSIZE"):gsub('x', ',')..'}')()
+                    menuhandler:PopMnu(mnu[i][2],pos[1],pos[2] + sz[2])
+                end
+            })
+            if i < #mnu then table.insert(hb, iup.label{title='|'}) end
+        end
+    end
+
+    local tTlb = {iup.hbox(hb)};
+
+    tTlb.control = "YES"
+    tTlb.sciteid="iupmenubar"
+
+    local hTmp= iup.dialog(tTlb)
+
+    local hBx = iup.GetDialogChild(hTmp, 'MenuBar')
+    iup.Detach(hBx)
+    iup.Destroy(hTmp)
+    MenuBar_obj.handle = iup.Insert(vbScite,nil, hBx)
+    iup.Map(hBx)
+
+
+    iup.PassFocus()
+end
+
 InitSideBar()
 InitToolBar()
+InitMenuBar()
 InitStatusBar()
 RestoreNamedValues(hMainLayout, 'sidebarctrl')
 iup.Refresh(hMainLayout)
@@ -518,7 +558,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                         RestoreLayOut(l[i])
                     end
                 end
-                scite.EnsureVisible()
+                --scite.EnsureVisible()
                 if bNew then
                     scite.buffers.SetDocumentAt(0)
                 else
@@ -532,8 +572,9 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end
             if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos() end
+            menuhandler:RegistryHotKeys()
             scite.EnsureVisible()
-            dlg_SPLASH:postdestroy()
+            if dlg_SPLASH then dlg_SPLASH:postdestroy() end
         end
     end
 end)
@@ -546,3 +587,6 @@ AddEventHandler("OnLayOutNotify", function(cmd)
     end
 end)
 
+AddEventHandler("OnHotKey", function(cmd)
+    menuhandler:OnHotKey(cmd)
+end)

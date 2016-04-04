@@ -1,4 +1,4 @@
-346
+355
 Альфабанк/IIIhIiIk
 БД
 ВТБ
@@ -38,6 +38,7 @@
 визард/IIIhIiIk
 визуализировать/BbLLNn
 волатильность/IF
+воркфлоу
 ворнинг/IIIhIiIk
 генерить/BBLLNN
 генсоглашение/IIIw
@@ -175,6 +176,7 @@
 перезапросить/BBLLNn
 перезапрошенный/CCSaXX
 перезатереть/JJ
+переинициализироавть/BbLLNn
 переназначаться/BBLLNN
 перерасчитанный/CCCDCOSa
 перерасчитать/BBLLNN
@@ -233,13 +235,17 @@
 ресайз/IIIhIiIk
 ресайзить/BBLLNn
 ресайзиться/BBLLNn
+реф/IIIhIiIk
 референс/IIIhIiIk
+рефконтрол/
+рефконтрол/IIIhIiIk
 рик/IIIhIiIk
 ролловер/IIIhIiIk
 ролловерный/CCCDCOSa
 роу
 рэйт/IIIhIiIk
 сабжект/IIIhIiIk
+сабконтрол/IIIhIiIk
 сабмессадж/IIIiIqIw
 сабскрипшн
 сабформа/IIIhIw
@@ -262,6 +268,7 @@
 сингл
 скайт/IIIhIiIk
 сквитованный/CCSaXX
+скриптинг/IIIhIiIk
 скроллить/BBLLNn
 скроллиться/BBLLNn
 смэпировать/BbLLNn
@@ -278,6 +285,7 @@
 спотовый/CCCDCOSa
 спрэд/IIIhIiIk
 страйк
+стрингтэйбл/IIIhIiIk
 стэйт/IIIhIiIk
 субменю
 суперблоттер/IIIhIiIk
@@ -342,6 +350,7 @@
 эвент/IIIhIiIk
 эксель/IIIi
 эксесайз/IIIhIiIk
+экстеншн/IIIhIiIk
 эмаунт/IIIhIiIk
 эмулировать/BbLLNn
 энэйблить/BBLLNN
