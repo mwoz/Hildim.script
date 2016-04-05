@@ -1,3 +1,12 @@
+--Constants
+POST_SCRIPTRELOAD = 1
+POST_CLOSEDIALOG = 2
+POST_CONTINUESTARTUP = 3
+POST_SCRIPTRELOAD_OLD = 4
+POST_CONTINUESHOWMENU = 6
+
+
+
 _G.iuprops = {}
 local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
@@ -123,7 +132,8 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
     elseif cmd == 9117 then  --перезагрузка скрипта
         iup.DestroyDialogs();
         SaveIup()
-        scite.PostCommand(1,0)
+        scite.PostCommand(POST_SCRIPTRELOAD_OLD,0)
+        --scite.PostCommand(POST_SCRIPTRELOAD,0)
         return true
     elseif cmd == IDM_TOGGLEOUTPUT then
         if _G.iuprops['bottombar.win']~='1' then
@@ -143,7 +153,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
 end)
 AddEventHandler("OnSave", function(cmd, source)
     if props["ext.lua.startup.script"] == props["FilePath"] then
-        scite.PostCommand(4,0)
+        scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
 end)
 
@@ -410,7 +420,7 @@ iup.scitedialog = function(t)
             --вызывать destroy из обработчиков событий в диалоге нельзя - развязываемся через пост
             if _G.deletedDialogs == nil then _G.deletedDialogs = {} end
             table.insert(_G.deletedDialogs, t.sciteid)
-            scite.PostCommand(2,0)
+            scite.PostCommand(POST_CLOSEDIALOG,0)
         end
     else
         dlg:show()
@@ -420,7 +430,7 @@ end
 
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
-        if wp == 2 then --закрытие диалога (отложенное)
+        if wp == POST_CLOSEDIALOG then --закрытие диалога (отложенное)
             while table.maxn(_G.deletedDialogs) > 0 do
                 sciteid = table.remove(_G.deletedDialogs)
                 local dlg = _G.dialogs[sciteid]
@@ -435,17 +445,21 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     dlg:destroy()
                 end
             end
-        elseif wp == 1 then   --перезагрузка скрипта
+        elseif wp == POST_SCRIPTRELOAD_OLD then   --перезагрузка скрипта
+            print("Reload22...")
+            scite.ReloadStartupScript()
+            OnSwitchFile("")
+            print("...Ok")
+--[[        elseif wp == POST_STARTUPSCRIPTSAVED then   --перезагрузка скрипта
+            scite.MenuCommand(9117)]]
+        elseif wp == POST_SCRIPTRELOAD then
+            iup.DestroyDialogs();
+            SaveIup()
+            --scite.PostCommand(1,0)
             print("Reload...")
             scite.ReloadStartupScript()
             OnSwitchFile("")
             print("...Ok")
-        elseif wp == 4 then   --перезагрузка скрипта
-            scite.MenuCommand(9117)
-        elseif wp == 5 then
-            iup.DestroyDialogs();
-            SaveIup()
-            scite.PostCommand(1,0)
         end
     end
 end)

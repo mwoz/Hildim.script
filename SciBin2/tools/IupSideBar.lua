@@ -518,7 +518,7 @@ end
 
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
-        if wp == 3 then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
+        if wp == POST_CONTINUESTARTUP then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
             props['session.reload'] = _G.iuprops['session.reload']
             if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
                 local bNew = (props['FileName'] ~= '')
@@ -575,6 +575,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             menuhandler:RegistryHotKeys()
             scite.EnsureVisible()
             if dlg_SPLASH then dlg_SPLASH:postdestroy() end
+        elseif wp == POST_CONTINUESHOWMENU then
+            menuhandler:ContinuePopUp()
         end
     end
 end)
