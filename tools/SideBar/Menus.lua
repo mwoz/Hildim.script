@@ -1,10 +1,12 @@
 --[[
 первое поле - английский заголовок и уникальный(в данном подменю) идентификатор
-для подменю второе поле - таблица со строками итемами, подменю и сепараторами. Наличие второго, неименованного поля - признак саюменю
+для подменю второе поле - таблица со строками итемами, подменю и сепараторами. Или функция, возвращающая такую таблицу. Наличие второго, неименованного поля - признак саюменю
 атрибуты:
     - <nls> - заголовок на языке
     - key - акселератор
-    - key_external - его не нужно регистрировать
+    - key_external - акселератор не нужно регистрировать
+    Для подменю, построенных по функциям
+    plane - пункты добавляются в основное меню
     Доступность пунктов
     - active - строка с логическим выражением, возвращающим true или false
     Видимость
@@ -19,11 +21,20 @@
     - action_lua
     - action_cmd
 ]]
+
 _G.sys_Menus = {}
+local function IsSelection()
+    return editor.SelectionStart<editor.SelectionEnd
+end
+
 _G.sys_Menus.MainWindowMenu = {
+    {'_HIDDEN_', {
+        {'Ctrl+Tab', key = 'Ctrl+Tab', idm = IDM_NEXTFILESTACK},
+        {'Ctrl+Shift+Tab', key = 'Ctrl+Shift+Tab', idm = IDM_PREVFILESTACK},
+    },},
     {'File', ru='Файл',{
         {'New', ru='Создать', key = 'Ctrl+N', idm = IDM_NEW},
-        {'&Open...', ru = 'Открыть', key = 'Ctrl+O', idm = IDM_OPEN},
+        {'&Open...', ru = 'Открыть', key = 'Ctrl+O', idm = IDM_OPEN, active = function() return editor.Modify end},
         {'Open Selected &Filename', ru = 'Открыть выделенный файл', key = 'Ctrl+Shift+O', idm = IDM_OPENSELECTED},
         {'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+R', idm = IDM_REVERT},
         {'&Close', ru = 'Закрыть', key = 'Ctrl+W', idm = IDM_CLOSE},
@@ -39,11 +50,11 @@ _G.sys_Menus.MainWindowMenu = {
             {'&UTF-8', ru = '', idm = IDM_ENCODING_UCOOKIE},
         },},
         {'&Export', ru='Экспорт',{
-            {'As &HTML...', ru = '', idm = IDM_SAVEASHTML},
-            {'As &RTF...', ru = '', idm = IDM_SAVEASRTF},
-            {'As &PDF...', ru = '', idm = IDM_SAVEASPDF},
-            {'As &LaTeX...', ru = '', idm = IDM_SAVEASTEX},
-            {'As &XML...', ru = '', idm = IDM_SAVEASXML},
+            {'As &HTML...' , ru = 'В &HTML..', idm = IDM_SAVEASHTML},
+            {'As &RTF...'  , ru = 'В &RTF...', idm = IDM_SAVEASRTF},
+            {'As &PDF...'  , ru = 'В &PDF...', idm = IDM_SAVEASPDF},
+            {'As &LaTeX...', ru = 'В &LaTeX...', idm = IDM_SAVEASTEX},
+            {'As &XML...'  , ru = 'В &XML...', idm = IDM_SAVEASXML},
         },},
         {'s1', separator=1},
         {'Page Set&up...', ru = 'Параметры страницы', idm = IDM_PRINTSETUP},
@@ -55,16 +66,16 @@ _G.sys_Menus.MainWindowMenu = {
         {'Exit', ru='Выход', idm = IDM_QUIT},
     },},
     {'Edit', ru='Правка',{
-        {'&Undo', ru = 'Отменить', key = 'Ctrl+Z',key_external = 1, idm = IDM_UNDO},
-        {'&Redo', ru = 'Повторить', key = 'Ctrl+Y',key_external = 1, idm = IDM_REDO},
+        {'&Undo', ru = 'Отменить', key = 'Ctrl+Z',key_external = 1, idm = IDM_UNDO, active=function() return editor:CanUndo() end},
+        {'&Redo', ru = 'Повторить', key = 'Ctrl+Y',key_external = 1, idm = IDM_REDO, active=function() return editor:CanRedo() end},
         {'s1',  separator=1},
-        {'Cu&t', ru = 'Вырезать', key = 'Ctrl+X',key_external = 1, idm = IDM_CUT, active="editor.SelectionStart<editor.SelectionEnd"},
-        {'&Copy', ru = 'Копировать', key = 'Ctrl+C',key_external = 1, idm = IDM_COPY, active="editor.SelectionStart<editor.SelectionEnd"},
+        {'Cu&t', ru = 'Вырезать', key = 'Ctrl+X',key_external = 1, idm = IDM_CUT, active=IsSelection},
+        {'&Copy', ru = 'Копировать', key = 'Ctrl+C',key_external = 1, idm = IDM_COPY, active=IsSelection},
         {'&Paste', ru = 'Вставить', key = 'Ctrl+V',key_external = 1, idm = IDM_PASTE},
         {'Duplicat&e', ru = 'Дублировать', key = 'Ctrl+D',key_external = 1, idm = IDM_DUPLICATE},
         {'&Delete', ru = 'Удалить', key = 'Del',key_external = 1, idm = IDM_CLEAR},
-        {'Select &All', ru = 'Выбрать все', key = 'Ctrl+A',key_external = 1, idm = IDM_SELECTALL, active="editor.SelectionStart<editor.SelectionEnd"},
-        {'Copy as RT&F', ru = 'Копировать в формате RTF', idm = IDM_COPYASRTF, active="editor.SelectionStart<editor.SelectionEnd"},
+        {'Select &All', ru = 'Выбрать все', key = 'Ctrl+A',key_external = 1, idm = IDM_SELECTALL, active=IsSelection},
+        {'Copy as RT&F', ru = 'Копировать в формате RTF', idm = IDM_COPYASRTF, active=IsSelection},
         {'s2', separator=1},
         {'Match &Brace', ru = 'Найти парную скобку', key = 'Ctrl+E', idm = IDM_MATCHBRACE},
         {'Select t&o Brace', ru = 'Выделить до парний сокбки', key = 'Ctrl+Shift+E', idm = IDM_SELECTTOBRACE},
@@ -116,7 +127,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Go', ru = 'Выполнить', key = 'F5', idm = IDM_GO},
         {'&Stop Executing', ru = 'Остановить выполнение', key = 'Ctrl+Break', idm = IDM_STOPEXECUTE},
         {'Script', ru='Скрипт автозагрузки',{
-            {'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', --[[idm = 9117]] action = function() scite.PostCommand(5,0) end,},
+            {'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', action = function() scite.PostCommand(POST_SCRIPTRELOAD,0) end,},
         },},
         {'s1', separator=1},
         {'&Next Message', ru = 'Следующее сообщение', key = 'F4', idm = IDM_NEXTMSG},
@@ -168,10 +179,6 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Help', ru = 'Справка по LUA', key = 'F1', idm = IDM_HELP},
         {'&SciTE Help', ru = 'Справка по SciTE', idm = IDM_HELP_SCITE},
         {'&About SciTE', ru = 'О программе', idm = IDM_ABOUT},
-    },},
-    {'_HIDDEN_', {
-        {'Ctrl+Tab', key = 'Ctrl+Tab', idm = IDM_NEXTFILESTACK},
-        {'Ctrl+Shift+Tab', key = 'Ctrl+Shift+Tab', idm = IDM_PREVFILESTACK},
     },},
 }
 

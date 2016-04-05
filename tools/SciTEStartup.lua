@@ -127,4 +127,4 @@ end
 --dofile (props["SciteDefaultHome"].."\\languages\\text.lua")
 
 
-scite.PostCommand(3,0)
+scite.PostCommand(POST_CONTINUESTARTUP,0)

@@ -1,5 +1,6 @@
-local sys_KeysToMenus, sys_Menus
+local sys_KeysToMenus
 
+local waited_mnu, w_x, w_y = nil,nil, nil
 function class()
     local c = {}
     c.__index = c
@@ -39,20 +40,31 @@ end
 
 function s:PopMnu(smnu, x, y)
     --debug_prnArgs(smnu)
-    local function CreateMenu(m)
-        local t = {}
+    local CreateMenu, CreateItems
+
+    CreateItems = function(m,t)
         for i = 1, #m do
             if (not m[i].visible or assert(loadstring('return '..m[i].visible))()) and
                (not m[i].visible_ext or string.find(','..m[i].visible_ext..',',','..props["FileExt"]..',')) then
                 if m[i][2] then
-                    table.insert(t, iup.submenu{title = s:get_title(m[i]), CreateMenu(m[i][2])})
+                    if type(m[i][2]) == 'table' then
+                        table.insert(t, iup.submenu{title = s:get_title(m[i]), CreateMenu(m[i][2])})
+                    elseif type(m[i][2]) == 'function' then
+                        if m[i].plane then
+                            CreateItems(m[i][2](),t)
+                        else
+                            local t2 = m[i][2]()
+                            table.insert(t, iup.submenu{title = s:get_title(m[i]), CreateMenu(t2)})
+                            if #t2 == 0 then t[#t].active = 'NO' end
+                        end
+                    end
                 elseif m[i].separator then
                     table.insert(t, iup.separator{})
                 elseif not m[i].visible or assert(loadstring('return '..m[i].visible))() then --вставка пункта меню - только видимые
 
                     local titem = {title = s:get_title(m[i])} --заголовок
                     if m[i].active then --доступность
-                        if not assert(loadstring('return '..m[i].active))() then titem.active = 'NO' end
+                        if not m[i].active() then titem.active = 'NO' end
                     end
 
                     if m[i].check then  --отметки. по выражению
@@ -66,16 +78,26 @@ function s:PopMnu(smnu, x, y)
                     end
 
                     if not titem.active then --'экшны обрабатываем только для активных меню
-                        GetAction(m[i])
+                        titem.action = GetAction(m[i])
                     end
                     table.insert(t, iup.item(titem))
                 end
             end
         end
+    end
+    CreateMenu = function(m)
+        local t = {}
+        CreateItems(m,t)
         return iup.menu(t)
     end
 
-    CreateMenu(smnu):popup(x,y)
+    waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
+    scite.PostCommand(POST_CONTINUESHOWMENU,0)
+end
+
+function s:ContinuePopUp()
+    waited_mnu:popup(w_x, w_y)
+    waited_mnu, w_x, w_y = nil,nil, nil
 end
 
 local function InsertItem(mnu, path, t)
@@ -126,7 +148,7 @@ function s:RegistryHotKeys()
                 sys_KeysToMenus[id] = lp
                 if not mnu[i].idm then idm_loc = idm_loc + 1 end
             end
-            if mnu[i][2] then DropDown(lp, mnu[i][2])end
+            if mnu[i][2] and type(mnu[i][2]) == 'table' then DropDown(lp, mnu[i][2])end
         end
 
     end
@@ -134,8 +156,6 @@ function s:RegistryHotKeys()
     for ups,submnu in pairs(sys_Menus) do
         DropDown(ups,submnu)
     end
-    -- debug_prnArgs(tMap,tKeys)
-
    scite.RegistryHotKeys(tKeys)
 end
 
@@ -164,5 +184,5 @@ function s:OnHotKey(cmd)
 
 end
 
-menuhandler = s
+_G.menuhandler = s
 

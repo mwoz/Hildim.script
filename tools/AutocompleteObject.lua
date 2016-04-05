@@ -1092,7 +1092,6 @@ AddEventHandler("OnOpen", function(file)
         if t_xml then
             local strObjType = t_xml[0]
             if strObjType ~= 'template' then
-                --scite.PostCommand(5,0)
                 scite.MenuCommand(1468) --переключение на обычный xml lexer
                 return
             end
