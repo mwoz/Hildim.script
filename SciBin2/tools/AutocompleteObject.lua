@@ -39,7 +39,7 @@ local af_current_line
 local isXml=false
 local apiX_table = {}
 local pasteFromXml=false
-local calltipinfo = {-1} -- в первом поле - строка, в которой открывали толтип - дальше - паровоз из активных толтипов - в структурах:
+local calltipinfo = {{-1}} -- в первом поле - строка, в которой открывали толтип - дальше - паровоз из активных толтипов - в структурах:
                         --{позиция,текст,всего_параметров,текущий_параметр{start1,start2,...end}}
 local constObjGlobal = '___G___'
 local constListId = 7

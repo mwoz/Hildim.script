@@ -1,5 +1,4 @@
-local sys_KeysToMenus
-
+local sys_KeysToMenus = {}
 local waited_mnu, w_x, w_y = nil,nil, nil
 function class()
     local c = {}
@@ -30,21 +29,27 @@ end
 
 
 local function GetAction(mnu)
-
-    if mnu.idm then return function() scite.MenuCommand(mnu.idm) end
-    elseif mnu.action then return mnu.action
+    if mnu.action then
+        if type(mnu.action) == 'number' then return function() scite.MenuCommand(mnu.action) end end
+        return mnu.action
     else
         return function() debug_prnArgs('Error in menu format!!',mnu) end
     end
 end
 
 function s:PopMnu(smnu, x, y)
-    --debug_prnArgs(smnu)
     local CreateMenu, CreateItems
-
     CreateItems = function(m,t)
+        local function getParam(p, bDef)
+            local v,tp = bDef, type(p)
+            if tp == 'boolean' then v = p
+            elseif tp == 'function' then v = p()
+            elseif tp == 'string' then v = assert(loadstring('return '..p))() end
+            return v
+        end
         for i = 1, #m do
-            if (not m[i].visible or assert(loadstring('return '..m[i].visible))()) and
+
+            if getParam(m[i].visible,true) and
                (not m[i].visible_ext or string.find(','..m[i].visible_ext..',',','..props["FileExt"]..',')) then
                 if m[i][2] then
                     if type(m[i][2]) == 'table' then
@@ -60,21 +65,20 @@ function s:PopMnu(smnu, x, y)
                     end
                 elseif m[i].separator then
                     table.insert(t, iup.separator{})
-                elseif not m[i].visible or assert(loadstring('return '..m[i].visible))() then --вставка пункта меню - только видимые
+                else --вставка пункта меню - только видимые
 
                     local titem = {title = s:get_title(m[i])} --заголовок
-                    if m[i].active then --доступность
-                        if not m[i].active() then titem.active = 'NO' end
-                    end
+                    --доступность
+                    if not getParam(m[i].active, true) then titem.active = 'NO' end
 
-                    if m[i].check then  --отметки. по выражению
-                        if assert(loadstring('return '..m[i].check))() then titem.value = 'ON' end
-                    elseif m[i].check_idm then
+                    if m[i].check_idm then
                         if tonumber(props[m[i].check_idm]) == m[i].idm then
                             titem.value = 'ON'
                             titem.active = 'NO'
                             titem.image = 'IMAGE_PinPush'
                         end
+                    elseif getParam(m[i].check, false) then
+                        titem.value = 'ON'
                     end
 
                     if not titem.active then --'экшны обрабатываем только для активных меню
@@ -134,8 +138,7 @@ end
 
 function s:RegistryHotKeys()
     if not sys_Menus then return end
-
-    local idm_loc = 28000
+    local idm_loc = IDM_GANERETED
     local tKeys = {}
     sys_KeysToMenus = {}
 
@@ -161,7 +164,6 @@ end
 
 function s:OnHotKey(cmd)
     local path = sys_KeysToMenus[cmd]
-
     local strFld
     local function DropDown(path, mnu)
         _,_, strFld = path:find('^([^/]+)/')

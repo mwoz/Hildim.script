@@ -558,7 +558,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                         RestoreLayOut(l[i])
                     end
                 end
-                --scite.EnsureVisible()
+                --scite.EnsureV visible()
                 if bNew then
                     scite.buffers.SetDocumentAt(0)
                 else
@@ -567,8 +567,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                 end
             end
             navigation_Unblock()
-            if SideBar_obj.win then SideBar_obj.handle.DetachRestore = true; SideBar_obj.handle.detach = 1 end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
-            if LeftBar_obj.win then LeftBar_obj.handle.DetachRestore = true; LeftBar_obj.handle.detach = 1 end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
+            if SideBar_obj.win and SideBar_obj.handle then SideBar_obj.handle.DetachRestore = true; SideBar_obj.handle.detach = 1 end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
+            if LeftBar_obj.win and LeftBar_obj.handle then LeftBar_obj.handle.DetachRestore = true; LeftBar_obj.handle.detach = 1 end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
             if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;BottomBar.detach = 1 end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;ConsoleBar.detach = 1 end
             if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos() end

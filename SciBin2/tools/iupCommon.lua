@@ -467,8 +467,9 @@ end)
 --”ничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
     local hMainLayout = iup.GetLayout()
-    if SideBar_obj.handle then SideBar_obj.handle.SaveValues() end
-    if LeftBar_obj.handle then LeftBar_obj.handle.SaveValues() end
+    if not hMainLayout then return end
+    if SideBar_obj and SideBar_obj.handle then SideBar_obj.handle.SaveValues() end
+    if LeftBar_obj and LeftBar_obj.handle then LeftBar_obj.handle.SaveValues() end
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
