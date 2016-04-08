@@ -79,10 +79,12 @@ function cmpobj_GetFMDefault()
 end
 
 local function useAutocomp()
-    iLex = editor.Lexer
-    if(iLex == SCLEX_LUA or iLex == SCLEX_VB or iLex == SCLEX_VBSCRIPT ) then return true end
-    if iLex == SCLEX_FORMENJINE then return cmpobj_GetFMDefault() ~= SCE_FM_SQL_DEFAULT end
-    return false
+    if editor.Focus then
+        iLex = editor.Lexer
+        if(iLex == SCLEX_LUA or iLex == SCLEX_VB or iLex == SCLEX_VBSCRIPT ) then return true end
+        if iLex == SCLEX_FORMENJINE then return cmpobj_GetFMDefault() ~= SCE_FM_SQL_DEFAULT end
+        return false
+    end
 end
 -- Тест для распечатки содержимого заданной таблицы
 local function prnTable(name)
@@ -906,7 +908,7 @@ local function OnUpdateUI_local()
     if calltipinfo[1] ~= 0 then
         current_pos = editor.CurrentPos
         af_current_line = editor:LineFromPosition(current_pos)
-        if calltipinfo[1] ~= af_current_line then--проверяем, не осталось ли информации в calltipinfo
+        if calltipinfo[1] ~= af_current_line then--проверяем, не осталось ли информации в scalloping
             calltipinfo={0}
             return false
         else --обеспечим обработку передвижения
@@ -1062,12 +1064,12 @@ function ShowListManualy()
 end
 ------------------------------------------------------
 AddEventHandler("OnChar", function(char)
-    if not useAutocomp then return end
+    if not useAutocomp() then return end
 	if props['macro-recording'] ~= '1' and OnChar_local(char) then return true end
 	return result
 end)
 AddEventHandler("OnUserListSelection", function(tp,sel_value)
-    if not useAutocomp then return end
+    if not useAutocomp() then return end
 	if tp == constListIdXml or tp == constListId or tp == constListIdXmlPar then
 		if OnUserListSelection_local(tp, sel_value) then return true end
 	end

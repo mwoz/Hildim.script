@@ -59,6 +59,22 @@ local function AddObjectFromFile(filename)
     end
 end
 
+local function AddDEFFromFile(filename)
+print(99)
+    local j = 0
+    local fname = filename:lower()
+    for line in io.lines(fname) do
+        j = j + 1
+        if line == nil then break end
+        local s,e,w
+        s,e,w = line:lower():find("define%(([%w_]+)")
+        if s~=nil then
+                msg_SqlObjectMap:SetPathValue(w.."\\file", fname:lower())
+                msg_SqlObjectMap:SetPathValue(w.."\\line", j)
+        end
+    end
+end
+
 local sql_objects={}
 local function sql_FillMapFile_tread()
 --—читываем мессадж с объектами из сорсов и сохран€ем его в файле
@@ -73,7 +89,6 @@ local function sql_FillMapFile_tread()
     local file = io.open(props["SciteDefaultHome"].."\\tools\\resetmap.lua")
     cmd = cmd..file:read('*a')
     file:close()
-
     props['script.blockrestart'] = 'Y'
     scite.RunLuaThread(cmd,"resetmap.lua+3 strings in header|:::LUA::: sql_ResetMap()")
 
@@ -98,8 +113,14 @@ function sql_FillMapFile()
             if filenameT.isdirectory then
                 if filename ~= '.' and filename ~= '..' then dir(p..filename.."\\") end
             else
-               if filename:lower():find('%.m$') or filename:lower():find('%.sql$') then
-                   AddObjectFromFile(p..filename)
+                local _,_,ext = filename:find('%.(%w+)$')
+                if ext then
+                    ext = ext:lower()
+                    local f = AddObjectFromFile
+                    if ext == 'h' then f = AddDEFFromFile end
+                    if ext == 'h' or ext == 'sql' or ext == 'm' then
+                        f(p..filename)
+                    end
                 end
             end
         end
@@ -152,14 +173,14 @@ end)
 local function local_OnOpen()
     local ext = props["FileExt"]:lower()
     props["output.hook"] = 'N'
-    if ext == "m" or ext == "sql" or ext == "inc" or ext == "xml" or ext == "incl" or ext == "form" then
+    if ext == "m" or ext == "sql" or ext == "incl" or ext == "form"  or ext == "h" then
         if msg_SqlObjectMap == nil then
             local file = io.open(msgPath)
             if file then
                 io.close(file)
                 msg_SqlObjectMap = mblua.RestoreMessage(msgPath)
             end
-            if not reloaded and _G.iuprops['sqlobject.mapreloadtime'] ~= os.date():sub(0,8) then
+            if not reloaded and (_G.iuprops['sqlobject.mapreloadtime'] ~= os.date():sub(0,8) or not file) then
                 reloaded = true
                 sql_FillMapFile_tread ()
                 -- if props['sidebar.pan'] ~= '1' then  end
@@ -189,8 +210,9 @@ end
 
 local function local_OnSave()
     local ext = props["FileExt"]:lower()
+    local f = Iif(ext == 'h', AddDEFFromFile, AddObjectFromFile)
 
-    if ext == "m" or ext == "sql" then
+    if ext == "m" or ext == "sql" or ext == "h" then
         local msg = msg_SqlObjectMap:Execute("GET WHERE file='"..props["FilePath"]:lower().."'")
         local i,_,Name
         local _,msgCount = msg:Counts()
@@ -199,7 +221,7 @@ local function local_OnSave()
             msg_SqlObjectMap:RemoveMessage(Name)
         end
         msg:Destroy()
-        AddObjectFromFile(props["FilePath"])
+        f(props["FilePath"])
         msg_SqlObjectMap:Store(msgPath)
     end
 end
@@ -713,7 +735,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         end
     elseif id_msg == SCN_NOTYFY_OUTPUTEXIT then
         if luaForRun then
-            print(' ')
+            print('Map Reloaded')
             local s = luaForRun
             luaForRun = nil
             _G["SqlMap"] = nil

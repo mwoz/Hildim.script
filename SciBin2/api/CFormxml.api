@@ -7,11 +7,11 @@ control.caption_ru
 control.backcolor {{#@COLORS}}
 control.forecolor {{#@COLORS}}
 control.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
-control.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для рабиобаттона,width3 - максимальное число колонок
+control.position "left;top;[width1,width2,...];height"\nгде width1,width2 - ширины полей контрола в порядке следования\nДля группы радиобаттонов - width1 - ширина заголовка,width2 - ширина поля для радиобаттона,width3 - максимальное число колонок
 control.padRight "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
 control.padLeft "padControl;padSize" padControl- контрол, от которого отсчитывается паддинг\nесли не указан - от границы контейнера\npadSize - размер паддинга(5, если не указан)
-control.autoWidth {{yes}} 'no' by def. \n yes - При выставленных правом и левом паддинге контрл сохраняет\nустановленную ширину\n no - растягивается
-control.fixedWidth {{yes}} 'no' by def \n yes - При выставленных нижнем и верхнем паддинге контрл сохраняет\nустановленную высоту\n no- растягивается
+control.autoWidth {{yes}} 'no' by def. \n yes - При выставленных правом и левом паддинге контрол сохраняет\nустановленную ширину\n no - растягивается
+control.fixedWidth {{yes}} 'no' by def \n yes - При выставленных нижнем и верхнем паддинге контрол сохраняет\nустановленную высоту\n no- растягивается
 control.visible {{no}} 'yes' by def
 control.enabled {{no}} 'yes' by def
 control.locked {{yes}} 'no' by def
@@ -20,6 +20,8 @@ control.tooltip
 control.alignment {{Center|Right}}  Left by def
 control.paramType тип данных sql(параметры отчета)
 control.mandatory обязательное поле(параметры отчета)
+control.lineSpacing для первого контрола в непервой строке - отступ от предыдущей строки
+control.style
 
 container.type  {{frame|container}} фрейм - только на верхнем уровне. вс остальные контролы только во фреймах
 container.code
@@ -32,21 +34,22 @@ container.padLeft "padControl;padSize" padControl- контрол, от которого отсчитыв
 container.visible {{no}} 'yes' by def
 container.positionPrevLine {{yes}} 'no' by def \nПри невыставленной позиции контрол остается на\nтекущей строке с отступом от предыдущего
 
-
-container.marginLeft отступ по умолчанию от ЛЕВОГО края фрейма/контейнкра
-container.marginRight отступ по умолчанию от ПРАВОГО края фрейма/контейнкра
-container.marginTop отступ по умолчанию от ВЕРХНЕГО края фрейма/контейнкра
-container.marginBottom отступ по умолчанию от НИЖНЕГО края фрейма/контейнкра
 container.controlMarkup ширины полей контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля редактирования>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
-container.controlMarkupRef ширины полей реф-контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля Сщву>,<ширина поля Name>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
+container.controlMarkupRef ширины полей реф-контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля Code>,<ширина поля Name>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
 container.controlMarkupDate ширины полей контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля редактирования>,<отступ>,<заголовок второй даты>,<поля редактирования второй даты>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
-container.lineSpacing расстоянме между строками
+container.lineSpacing расстояние между строками
 container.controlSpacing отступ между контролами, расположенными в одной строке
-container.lineHeight высота чтроки
+container.lineHeight высота строки
 container.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
 container.rightButtonMode {{all по правой кнопке показывать весь список|personal ... персональный лист}}  показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
 container.showInfo {{no}} 'yes' by def показ кнопки инфо в рефконтролах
+control.style
+control.styleContent
 
+container.marginLeft отступ по умолчанию от ЛЕВОГО края фрейма/контейнера
+container.marginRight отступ по умолчанию от ПРАВОГО края фрейма/контейнера
+container.marginTop отступ по умолчанию от ВЕРХНЕГО края фрейма/контейнера
+container.marginBottom отступ по умолчанию от НИЖНЕГО края фрейма/контейнера
 
 reference.source
 reference.rightButtonMode {{all по правой кнопке показывать весь список|personal ... персональный лист}}  показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
@@ -56,7 +59,7 @@ choice.source Код чойса из метаданных либо\nсписок в формате <val>=<caption>[ru:
 choice.choiceType {{List}} 'Standard' by def.\nЗадается ли чойс списком или именем в метаданных
 choice.choiceMode {{radio группа радиобаттонов|dropMenu "клювик" с выпадающим списком}}
 
-sqlquery.valueColumn колонка занчение из которой нужно отображать(SqlQuery контрол)
+sqlquery.valueColumn колонка значение из которой нужно отображать(SqlQuery контрол)
 sqlquery.displayColumns список колонок:заголовков для отображения(SqlQuery контрол)
 
 form.objectType
@@ -69,21 +72,13 @@ design.caption_ru
 design.locationRef
 design.location
 design.visible {{yes}} 'no' by def
+design.styleContent
 
-design.marginLeft отступ по умолчанию от ЛЕВОГО края фрейма/контейнкра
-design.marginRight отступ по умолчанию от ПРАВОГО края фрейма/контейнкра
-design.marginTop отступ по умолчанию от ВЕРХНЕГО края фрейма/контейнкра
-design.marginBottom отступ по умолчанию от НИЖНЕГО края фрейма/контейнкра
-design.controlMarkup ширины полей контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля редактирования>,<ширина поля Name для рефконтролов>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
-design.controlMarkupDate ширины полей контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля редактирования>,<отступ>,<заголовок второй даты>,<поля редактирования второй даты>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
-design.controlMarkupRef ширины полей реф-контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля Сщву>,<ширина поля Name>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
-design.lineSpacing расстоянме между строками
-design.controlSpacing отступ между контролами, расположенными в одной строке
-design.lineHeight высота чтроки
-design.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
-design.rightButtonMode {{all по правой кнопке показывать весь список|personal ... персональный лист}}  показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
-design.showInfo {{no}} 'yes' by def показ кнопки инфо в рефконтролах
-
+design.marginLeft отступ по умолчанию от ЛЕВОГО края фрейма/контейнера
+design.marginRight отступ по умолчанию от ПРАВОГО края фрейма/контейнера
+design.marginTop отступ по умолчанию от ВЕРХНЕГО края фрейма/контейнера
+design.marginBottom отступ по умолчанию от НИЖНЕГО края фрейма/контейнера
+design.lineSpacing расстояние между строками
 
 string.id
 value.lang
@@ -95,11 +90,27 @@ column.caption_ru
 column.alignment {{Center|Right}} Left by def
 column.format {{0.###############|0.|+0.|0.##|0.##K|0.##M|0.##Y|0.##KMY|0.##%|0.00|0.00K|0.00M|0.00Y|0.00KMY|0.00%|0.00##|0.0000%|+0.0000%|0.0000####|0.############|DD.MM.YY|DD.MM.YYYY|DD/MM/YYYY|DDMMYYhh:mm:ss|DDMMMYYhh:mm:ss|hh:mm|icon|color|bar|sbar|checkbox}}
 column.width
-column.regexPattern Регулярное вырадение(vbscript) для обработки подстроки поиска по этому полю.\nЕсли выражение по шаблону будет найдено, то будет произведена замена\nна выражение из regexReplace
-column.regexReplace Строка для замены по регллярному выражению из regexPattern
+column.regexPattern Регулярное выражение(vbscript) для обработки подстроки поиска по этому полю.\nЕсли выражение по шаблону будет найдено, то будет произведена замена\nна выражение из regexReplace
+column.regexReplace Строка для замены по регулярному выражению из regexPattern
 
 lookup.code {{@@atrium_lookupList}}
 lookup.object
+
+anchor.name
+anchor.xPos
+
+block.name
+block.width
+block.height
+block.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
+block.xPot
+
+content.name
+content.type {{label|link|button|boolean|datetime|datefilter|date|integer|float|text|choicemult|choice|reference}}
+content.markup Длины полей через запятую, например 90,12,15,24,85
+
+
+
 
 
 

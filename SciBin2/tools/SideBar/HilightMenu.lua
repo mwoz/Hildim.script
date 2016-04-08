@@ -56,7 +56,7 @@ return {
 {'Reso&urce', visible = false, action = function() return scite.SetLexer('rc') end, check = "editor.LexerLanguage == 'resource'"},
 {'Ruby', visible = false, action = function() return scite.SetLexer('rb') end, check = "editor.LexerLanguage == 'ruby'"},
 {'Shell', visible = false, action = function() return scite.SetLexer('sh') end, check = "editor.LexerLanguage == 'shell'"},
-{'S&QL', action = function() return scite.SetLexer('sql') end, check = "editor.LexerLanguage == 'sql'"},
+{'S&QL', action = function() return scite.SetLexer('sql') end, check = "editor.LexerLanguage == 'mssql'"},
 {'Specman', visible = false, action = function() return scite.SetLexer('e') end, check = "editor.LexerLanguage == 'specman'"},
 {'&TCL', visible = false, action = function() return scite.SetLexer('tcl') end, check = "editor.LexerLanguage == 'tcl'"},
 {'&VB', action = function() return scite.SetLexer('vb') end, check = "editor.LexerLanguage == 'vb'"},

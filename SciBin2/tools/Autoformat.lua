@@ -489,3 +489,11 @@ end)
 AddEventHandler("OnSwitchFile", function() iChangedLine = -1 end)
 AddEventHandler("OnOpen", function() iChangedLine = -1 end)
 AddEventHandler("OnSave", function() iChangedLine = -1 end)
+
+menuhandler:InsertItem('MainWindowMenu', 'Edit¦s1',
+    {'Vbs/VbScript',  visible_ext='form,rform,cform,incl,vbs,wsf,bas,frm,cls,ctl,pag,dsr,dob',{
+        {'Format Block',  ru = 'Форматировать блок', action=IndentBlockUp, key = 'Ctrl+]'},
+        {'Format Line',  ru = 'Форматировать строку', action=FormatSelectedStrings, key = 'Ctrl+['},
+        {'Autformating Lines',  ru = 'Автоформатирование строк', check_iuprops='autoformat.line', key = 'Ctrl+Shift+['},
+
+    }})

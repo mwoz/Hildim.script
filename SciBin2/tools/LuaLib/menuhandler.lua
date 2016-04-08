@@ -53,7 +53,11 @@ function s:PopMnu(smnu, x, y)
                (not m[i].visible_ext or string.find(','..m[i].visible_ext..',',','..props["FileExt"]..',')) then
                 if m[i][2] then
                     if type(m[i][2]) == 'table' then
-                        table.insert(t, iup.submenu{title = s:get_title(m[i]), CreateMenu(m[i][2])})
+                        if m[i].plane then
+                            CreateItems(m[i][2],t)
+                        else
+                            table.insert(t, iup.submenu{title = s:get_title(m[i]), CreateMenu(m[i][2])})
+                        end
                     elseif type(m[i][2]) == 'function' then
                         if m[i].plane then
                             CreateItems(m[i][2](),t)
@@ -71,8 +75,15 @@ function s:PopMnu(smnu, x, y)
                     --доступность
                     if not getParam(m[i].active, true) then titem.active = 'NO' end
 
-                    if m[i].check_idm then
-                        if tonumber(props[m[i].check_idm]) == m[i].idm then
+                    if m[i].check_iuprops then
+                        if tonumber(_G.iuprops[m[i].check_iuprops]) == 1 then
+                            titem.value = 'ON'
+                            m[i].action = "_G.iuprops['"..m[i].check_iuprops.."'] = 0"
+                        else
+                            m[i].action = "_G.iuprops['"..m[i].check_iuprops.."'] = 1"
+                        end
+                    elseif m[i].check_idm then
+                        if tonumber(props[m[i].check_idm]) == m[i].action then
                             titem.value = 'ON'
                             titem.active = 'NO'
                             titem.image = 'IMAGE_PinPush'
@@ -84,6 +95,7 @@ function s:PopMnu(smnu, x, y)
                     if not titem.active then --'экшны обрабатываем только для активных меню
                         titem.action = GetAction(m[i])
                     end
+
                     table.insert(t, iup.item(titem))
                 end
             end
@@ -105,12 +117,12 @@ function s:ContinuePopUp()
 end
 
 local function InsertItem(mnu, path, t)
-    local _,_, sItm = path:find('^([^/]+)/')
+    local _,_, sItm = path:find('^([^¦]+)¦')
     if sItm then
         for i = 1, #mnu do
             if mnu[i][1]==sItm then
                 if mnu[i][2] then
-                    InsertItem(mnu[i][2], path:gsub('^[^/]+/', ''), t)
+                    InsertItem(mnu[i][2], path:gsub('^[^¦]+¦', ''), t)
                 end
                 return
             end
@@ -118,7 +130,7 @@ local function InsertItem(mnu, path, t)
         table.insert(mnu, {})
         table.insert(mnu[#mnu], sItm)
         table.insert(mnu[#mnu], {})
-        InsertItem(mnu[#mnu][2], path:gsub('^[^/]+/', ''), t)
+        InsertItem(mnu[#mnu][2], path:gsub('^[^¦]+¦', ''), t)
     else
         for i = 1, #mnu do
             if mnu[i][1]==path then
@@ -137,6 +149,7 @@ function s:InsertItem(id, path, t)
 end
 
 function s:RegistryHotKeys()
+
     if not sys_Menus then return end
     local idm_loc = IDM_GANERETED
     local tKeys = {}
@@ -144,21 +157,22 @@ function s:RegistryHotKeys()
 
     local function DropDown(path, mnu)
         for i = 1, #mnu do
-            local lp = path..'/'..mnu[i][1]
+            local lp = path..'¦'..mnu[i][1]
             if mnu[i].key and not mnu[i].key_external then
-                local id = mnu[i].idm or idm_loc
+                local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
                 tKeys[mnu[i].key] = id
                 sys_KeysToMenus[id] = lp
-                if not mnu[i].idm then idm_loc = idm_loc + 1 end
+                if type(mnu[i].action) ~= 'number' then idm_loc = idm_loc + 1 end
             end
             if mnu[i][2] and type(mnu[i][2]) == 'table' then DropDown(lp, mnu[i][2])end
         end
 
     end
-
+--debug_prnArgs(sys_Menus)
     for ups,submnu in pairs(sys_Menus) do
         DropDown(ups,submnu)
     end
+--debug_prnArgs(tKeys)
    scite.RegistryHotKeys(tKeys)
 end
 
@@ -166,11 +180,11 @@ function s:OnHotKey(cmd)
     local path = sys_KeysToMenus[cmd]
     local strFld
     local function DropDown(path, mnu)
-        _,_, strFld = path:find('^([^/]+)/')
+        _,_, strFld = path:find('^([^¦]+)¦')
         for i = 1, #mnu do
             if strFld then
                 if mnu[i][1] == strFld then
-                    DropDown(path:gsub('^[^/]+/', ''), mnu[i][2])
+                    DropDown(path:gsub('^[^¦]+¦', ''), mnu[i][2])
                     return
                 end
             else
@@ -181,8 +195,8 @@ function s:OnHotKey(cmd)
         end
     end
 
-    _,_, strFld = path:find('^([^/]+)/')
-    DropDown(path:gsub('^[^/]+/', ''), sys_Menus[strFld])
+    _,_, strFld = path:find('^([^¦]+)¦')
+    DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
 
 end
 
