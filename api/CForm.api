@@ -420,5 +420,9 @@ noobj.String
 noobj.Stringtable
 noobj.Sql
 noobj.Value
+noobj.Styles
+noobj.Anchor
+noobj.Block
+noobj.Content
 
 

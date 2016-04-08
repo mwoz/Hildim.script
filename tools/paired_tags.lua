@@ -314,10 +314,10 @@ AddEventHandler("OnSwitchFile", OnSwitchFile_local)
 AddEventHandler("OnOpen", OnSwitchFile_local)
 
 require "menuhandler"
-menuhandler:InsertItem('MainWindowMenu', 'Edit/s1',
-    {'Xml Tags',  ru ='Теги Xml', visible_ext='xml,form,rform,cform',{
-        {'Close Incomplete Tag', ru='Закрыть незакрытый тэг', action=CloseIncompleteTag, key='Alt+Shift+>',},
-        {'Close Unpaired Tag', ru='Закрыть непарный тэг', action=CloseUnbodyTag, key='Alt+Shift+W',},
+menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦l1',
+    {'Xml',  plane=1,{
+        {'Close Incomplete Tag', ru='Закрыть незакрытый тэг', action=CloseIncompleteTag, key='Ctrl+>',},
+        {'Close Unpaired Tag', ru='Закрыть непарный тэг', action=CloseUnbodyTag, key='Ctrl+Shift+>',},
         {'Tag Highlighting', ru='Подсветка тэгов', check_iuprops='pariedtag.on'},
     }}
 )

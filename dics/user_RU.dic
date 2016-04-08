@@ -1,15 +1,12 @@
-355
+353
 Альфабанк/IIIhIiIk
 БД
 ВТБ
 ДУ
 Запл
 ММВБ
-Мультиинстансовый/CCCDCOSa
 НКД
 ОФБУ
-Переустанавливать/BBLLNN
-Получ
 автоапдейт/IIIhIiIk
 автодополнение/IIIw
 автозакрытие/IIIw
@@ -83,7 +80,7 @@
 инстанс/IIIhIiIk
 инстр
 интерест/IIIhIiIk
-инфо/
+инфо
 исламический/CCSaZZ
 итем/IIIhIiIk
 йелд/IIIhIiIk
@@ -110,11 +107,10 @@
 корсчёт/IIIhIiIk
 корсчет/IIIhIiIk
 кэйс/IIIhIiIk
-кэш
-кэше/IIIhIiIk
+кэш/IIIhIiIk
+кэширование/IIIw
 кэшировать/BbLLNn
 кэшфлоу
-л
 лайвсёрч/IIIhIiIk
 лайтвизард/IIIhIiIk
 линк/IIIhIiIk
@@ -146,6 +142,7 @@
 мулти
 мультивалютный/CCCDCOSa
 мультиинсерт/IIIhIiIk
+мультиинстансовый/CCCDCOSa
 мультиоконный/CCCOCcSa
 мультиселект/IIIhIiIk
 мэпировать/BbLLNn
@@ -183,6 +180,7 @@
 пересохранить/BBLLNN
 переустанавливаться/BBLLNN
 переустанавливающий/CCSaYY
+переустанавливать/BBLLNN
 переустановить/BBLLNn
 перечитаться/BBLLNN
 пивот/IIIhIiIk

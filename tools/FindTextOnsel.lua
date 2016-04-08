@@ -664,3 +664,19 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         end
     end
 end)
+require "menuhandler"
+
+-- menuhandler:InsertItem('MainWindowMenu', 'Search¦##', {'Find Next Word/Selection', ru='Следующее слово/выделение', action=Find_FindInDialog, key='Ctrl+F3',})
+-- menuhandler:InsertItem('MainWindowMenu', 'Search¦##', {'Prevous Word/Selection', ru='Предыдущее слово/выделение', action=function() FindNextWrd(2) end, key='Ctrl+Shift+F3',})
+
+menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+{'FindTextOnSel', plane=1,{
+    {'s_FindTextOnSel', separator=1},
+    {'Find Next Word/Selection', ru='Следующее слово/выделение', action=Find_FindInDialog, key='Ctrl+F3',},
+    {'Prevous Word/Selection', ru='Предыдущее слово/выделение', action=function() FindNextWrd(2) end, key='Ctrl+Shift+F3',},
+}})
+menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦xxx',
+{'FindTextOnSel', plane=1,{
+    {'s_FindTextOnSel', separator=1},
+    {'Move Controls...',  ru = 'Переместить контролы...', action=template_MoveControls, key = 'Alt+M', active='editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)'},
+}})

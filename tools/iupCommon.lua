@@ -69,22 +69,25 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
 
         local msg = ''
         local notSaved = {}
-        DoForBuffers(function(i)
-            if i then
-                if editor.Modify and i ~= cur and (cmd ~= 9134 or props['FilePath']:from_utf8(1251):find('Безымянный')) and not props['FileNameExt']:find('^%^') then
-                    msg = msg..'  '..props['FilePath']:from_utf8(1251)..'\n'
-                    table.insert(notSaved, i)
-                end
-            else
-                return msg
+
+        local maxN = scite.buffers.GetCount() - 1
+        for i = 0,maxN do
+            local pth = scite.buffers.NameAt(i):from_utf8(1251)
+            local _,_,fnExt = pth:find('([^\\]*)$')
+            if not scite.buffers.SavedAt(i) and i ~= cur and (cmd ~= 9134 or pth:find('Безымянный')) and not fnExt:find('^%^') then
+                msg = msg..pth:gsub('(.+)[\\]([^\\]*)$', '%2(%1)')..'\n'
+                table.insert(notSaved, i)
             end
-        end)
-        local result = 7
+        end
+
+
+        local result = 2
         if msg ~= '' then
-            msg = 'Некоторые файлы не сохранены:\n'..msg..'Сохранить все?'
-            result = shell.msgbox(msg, "Close", 3) --YESNOCANCEL Yes - 6, NO - 7 CANCEL - 2
-            if result == 2 then return true end
-            if result == 6 then
+            msg = msg..'Сохранить все?'
+            result = tonumber(iup.Alarm('Некоторые файлы не сохранены:', msg, 'Да', 'Нет', 'Отмена'))
+            --result = shell.msgbox(msg, "Close", 3) --YESNOCANCEL Yes - 6, NO - 7 CANCEL - 2
+            if result == 3 then return true end
+            if result == 1 then
                 for _,j in ipairs(notSaved) do
                     scite.buffers.SetDocumentAt(j)
                     scite.MenuCommand(IDM_SAVE)

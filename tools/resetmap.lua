@@ -26,6 +26,22 @@ local function AddObjectFromFile(filename)
         end
     end
 end
+
+local function AddDEFFromFile(filename)
+    local j = 0
+    local fname = filename:lower()
+    for line in io.lines(fname) do
+        j = j + 1
+        if line == nil then break end
+        local s,e,w
+        s,e,w = line:lower():find("define%(([%w_]+)")
+        if s~=nil then
+            msg_SqlObjectMap:SetPathValue(w.."\\file", fname:lower())
+            msg_SqlObjectMap:SetPathValue(w.."\\line", j)
+        end
+    end
+end
+
 local function dir(strPath)
     local p = strPath
     local files = shell.findfiles(p.."*")
@@ -37,8 +53,14 @@ local function dir(strPath)
         if filenameT.isdirectory then
             if filename ~= '.' and filename ~= '..' then dir(p..filename.."\\") end
         else
-           if filename:lower():find('%.m$') or filename:lower():find('%.sql$') then
-               AddObjectFromFile(p..filename)
+            local _,_,ext = filename:find('%.(%w+)$')
+            if ext then
+                ext = ext:lower()
+                local f = AddObjectFromFile
+                if ext == 'h' then f = AddDEFFromFile end
+                if ext == 'h' or ext == 'sql' or ext == 'm' then
+                    f(p..filename)
+                end
             end
         end
     end
