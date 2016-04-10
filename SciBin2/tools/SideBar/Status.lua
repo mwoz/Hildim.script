@@ -218,7 +218,7 @@ local function FindTab_Init()
         end
     end
     local sTip='Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
-    zbox_s = iup.zbox{
+    zbox_s = iup.zbox{name = "Spelling_zbox",
         iup.button{image='IMAGE_CheckSpelling2';impress='IMAGE_CheckSpelling'; tip=sTip;canfocus="NO";
             map_cb=(function(_) if _G.iuprops["spell.autospell"] == "1" then zbox_s.valuepos=1 else zbox_s.valuepos=0 end end);
             action=(function(_) _G.iuprops["spell.autospell"] = "1"; zbox_s.valuepos=1 end);

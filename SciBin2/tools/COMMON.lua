@@ -3,7 +3,25 @@
 ---------------------------------------------------
 -- Общие функции, использующиеся во многих скриптах
 ---------------------------------------------------
-
+--Функция - создатель классов
+function class()
+    local c = {}
+    c.__index = c
+    c.__gc = function()
+        if c.destroy then
+            c.destroy()
+        end
+    end
+    local mt = {}
+    mt.__call = function(_, ...)
+        self = setmetatable({}, c)
+        if c.init then
+            c.init(self, ...)
+        end
+        return self
+    end
+    return setmetatable(c, mt)
+end
 -- Пути поиска подключаемых lua-библиотек и модулей
 package.path  = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.lua;"..package.path
 package.cpath = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.dll;"..package.cpath
@@ -322,7 +340,6 @@ end
 --Выполнение действия для всех документов
 function DoForBuffers(func, ...)
     BlockEventHandler"OnSwitchFile"
-    BlockEventHandler"OnClose"
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
     local curBuf = scite.buffers.GetCurrent()
@@ -334,7 +351,6 @@ function DoForBuffers(func, ...)
     scite.buffers.SetDocumentAt(curBuf)
     UnBlockEventHandler"OnUpdateUI"
     UnBlockEventHandler"OnNavigation"
-    UnBlockEventHandler"OnClose"
     UnBlockEventHandler"OnSwitchFile"
     return func(nil)
 end
@@ -376,6 +392,39 @@ AddEventHandler("OnOpen", function()
 	EditorInitMarkStyles()
 	SetMarginTypeN()
 end, 'RunOnce')
+
+local s = class()
+function s:lop()
+    for i = #self.data, self.maxN + 1, -1 do
+        table.remove(self.data,i)
+    end
+end
+
+function s:init(t)
+    self.maxN   = t[1]
+    self.data = t[2] or {}
+    self:lop()
+end
+function s:ins(v)
+    for i = #self.data, 1, -1 do
+        if self.data[i] == v then table.remove(self.data, i) end
+    end
+    table.insert(self.data, 1, v)
+    self:lop()
+end
+function s:tostr()
+    local res = '{'
+    for i = 1,  #self.data do
+        if i > 1 then res = res..', ' end
+        local l = self.data[i]
+        if type(l) == 'string' then l = l:gsub('\\','\\\\'):gsub("'", "\\039") end
+        res = res..'"'..l..'"'
+    end
+    return res..'}'
+end
+
+_G.oStack = s
+
 
 -- Расширение IUP
 dofile (props["SciteDefaultHome"].."\\tools\\iupCommon.lua")

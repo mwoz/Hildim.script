@@ -238,7 +238,7 @@ local function OpenFile(filename)
 		filename = filename:gsub('\\','\\\\')
 		scite.Perform ("loadsession:"..filename)
 	else
-		scite.Open(filename)
+		scite.Open(filename:to_utf8(1251))
 	end
     if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='ON' then mybar_Switch(m_prevSel+1)
     elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='1' then mybar_Switch(1)

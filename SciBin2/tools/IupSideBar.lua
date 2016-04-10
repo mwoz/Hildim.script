@@ -450,7 +450,6 @@ local function InitStatusBar()
 end
 
 require "menuhandler"
-local hhh
 local function InitMenuBar()
     if not _G.sys_Menus then return end
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
@@ -459,35 +458,17 @@ local function InitMenuBar()
 
     local mnu = sys_Menus.MainWindowMenu
 
-    local fnt = iup.GetGlobal("DEFAULTFONT"):gsub(',', ',Underline,')
-    local clr_normal = '15 60 175'
-    local clr_hgl = '206 202 33'
-    local hb = {gap='10',margin='10x3', name="MenuBar", maxsize="x30"}
+    local hb = { alignment = 'ACENTER',expand ='HORIZONTAL' }
     for i = 1, #mnu do
         if mnu[i][1] ~='_HIDDEN_' then
-
-            table.insert(hb, iup.label{title = menuhandler:get_title(mnu[i]), font= fnt,fgcolor = clr_normal, button_cb=
-                function(h,but, pressed, x, y, status)
-                    if but == 49 and pressed == 0 then --righ
-                        hhh = h
-                        local pos = loadstring('return {'..iup.GetAttribute(h, "SCREENPOSITION")..'}')()
-                        local sz = loadstring('return {'..iup.GetAttribute(h, "RASTERSIZE"):gsub('x', ',')..'}')()
-                        menuhandler:PopMnu(mnu[i][2],pos[1],pos[2] + sz[2])
-                    end
-                end, enterwindow_cb =
-                function(h)
-                    iup.SetAttribute(h, 'FGCOLOR', clr_hgl)
-                end, leavewindow_cb =
-                function(h)
-                    iup.SetAttribute(h, 'FGCOLOR', clr_normal)
-                    -- if hhh then iup.SetAttribute(h, 'FGCOLOR', '255 255 255'); hhh = nil end
-                end
-            })
-            if i < #mnu then table.insert(hb, iup.label{title='|',fgcolor = clr_normal}) end
+            table.insert(hb,menuhandler:GreateMenuLabel(mnu[i]))
+            if i == #mnu - 1 then table.insert(hb,iup.fill{})
+            elseif i < #mnu - 1 then table.insert(hb, iup.label{separator = "VERTICAL",maxsize='x18'}) end
         end
     end
 
-    local tTlb = {iup.hbox(hb)};
+
+    local tTlb = {iup.vbox{name="MenuBar",expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL", minsize = 'x3'}}};
 
     tTlb.control = "YES"
     tTlb.sciteid="iupmenubar"
@@ -606,6 +587,3 @@ AddEventHandler("OnLayOutNotify", function(cmd)
     end
 end)
 
-AddEventHandler("OnHotKey", function(cmd)
-    menuhandler:OnHotKey(cmd)
-end)

@@ -1,23 +1,13 @@
 local sys_KeysToMenus = {}
+local labels = {}
 local waited_mnu, w_x, w_y = nil,nil, nil
-function class()
-    local c = {}
-    c.__index = c
-    c.__gc = function()
-        if c.destroy then
-            c.destroy()
-        end
-    end
-    local mt = {}
-    mt.__call = function(_, ...)
-        self = setmetatable({}, c)
-        if c.init then
-            c.init(self, ...)
-        end
-        return self
-    end
-    return setmetatable(c, mt)
-end
+local activeLabel = nil
+local reselectedItem = nil
+local clr_hgl = '15 60 175'
+-- local clr_hgl = '206 206 00'
+--local clr_select = '205 43 202'
+local clr_select = '0 0 0'
+local clr_normal = '70 70 70'
 
 local s = class()
 
@@ -32,6 +22,11 @@ local function GetAction(mnu)
     if mnu.action then
         if type(mnu.action) == 'number' then return function() scite.MenuCommand(mnu.action) end end
         return mnu.action
+    elseif mnu.check_idm then
+    elseif mnu.check_prop then
+        return "CheckChange('"..mnu.check_prop.."', true)"
+    elseif mnu.check_iuprops then
+        return "_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)
     else
         return function() debug_prnArgs('Error in menu format!!',mnu) end
     end
@@ -76,12 +71,9 @@ function s:PopMnu(smnu, x, y)
                     if not getParam(m[i].active, true) then titem.active = 'NO' end
 
                     if m[i].check_iuprops then
-                        if tonumber(_G.iuprops[m[i].check_iuprops]) == 1 then
-                            titem.value = 'ON'
-                            m[i].action = "_G.iuprops['"..m[i].check_iuprops.."'] = 0"
-                        else
-                            m[i].action = "_G.iuprops['"..m[i].check_iuprops.."'] = 1"
-                        end
+                        if tonumber(_G.iuprops[m[i].check_iuprops]) == 1 then titem.value = 'ON' end
+                    elseif m[i].check_prop then
+                        if props[m[i].check_prop] == '1' then titem.value = 'ON' end
                     elseif m[i].check_idm then
                         if tonumber(props[m[i].check_idm]) == m[i].action then
                             titem.value = 'ON'
@@ -106,14 +98,38 @@ function s:PopMnu(smnu, x, y)
         CreateItems(m,t)
         return iup.menu(t)
     end
-
     waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
     scite.PostCommand(POST_CONTINUESHOWMENU,0)
 end
 
+function s:OnMouseHook(x,y)
+    for i = 1, #labels do
+        local _, _,left, top = iup.GetAttribute(labels[i],'SCREENPOSITION'):find('(%d+),(%d+)')
+        local _, _,width, height = iup.GetAttribute(labels[i],'NATURALSIZE'):find('(%d+)x(%d+)')
+        left, top, width, height = tonumber(left), tonumber(top), tonumber(width), tonumber(height)
+        if i == 1 and (top > y or y > top + height) then return end
+        if left <= x and x <= left + width then
+            if activeLabel ~= labels[i] then
+                scite.SwitchMouseHook(false)
+                reselectedItem = {id = i, x = left, y = top + height}
+            end
+            return
+        end
+    end
+end
+
 function s:ContinuePopUp()
-    waited_mnu:popup(w_x, w_y)
-    waited_mnu, w_x, w_y = nil,nil, nil
+    iup.SetAttribute(activeLabel, 'FGCOLOR', clr_select)
+    scite.SwitchMouseHook(true)
+    waited_mnu:popup(w_x , w_y)
+    scite.SwitchMouseHook(false)
+    iup.SetAttribute(activeLabel, 'FGCOLOR', clr_normal)
+    activeLabel, waited_mnu, w_x, w_y = nil,nil, nil, nil
+    if reselectedItem then
+        activeLabel = labels[reselectedItem.id]
+        s:PopMnu(_G.sys_Menus.MainWindowMenu[reselectedItem.id +1][2],reselectedItem.x,reselectedItem.y)
+        reselectedItem = nil
+    end
 end
 
 local function InsertItem(mnu, path, t)
@@ -151,7 +167,7 @@ end
 function s:RegistryHotKeys()
 
     if not sys_Menus then return end
-    local idm_loc = IDM_GANERETED
+    local idm_loc = IDM_GENERATED
     local tKeys = {}
     sys_KeysToMenus = {}
 
@@ -161,6 +177,7 @@ function s:RegistryHotKeys()
             if mnu[i].key and not mnu[i].key_external then
                 local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
                 tKeys[mnu[i].key] = id
+                if not id then print(mnu[i].key) end
                 sys_KeysToMenus[id] = lp
                 if type(mnu[i].action) ~= 'number' then idm_loc = idm_loc + 1 end
             end
@@ -198,6 +215,37 @@ function s:OnHotKey(cmd)
     _,_, strFld = path:find('^([^¦]+)¦')
     DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
 
+end
+
+function s:GreateMenuLabel(item)
+    local l =  iup.label{title = menuhandler:get_title(item), padding = '11x3', font= fnt,fgcolor = clr_normal, button_cb=
+            function(h,but, pressed, x, y, status)
+                if but == 49 and pressed == 0 then
+                    activeLabel = h
+                    local pos = loadstring('return {'..iup.GetAttribute(h, "SCREENPOSITION")..'}')()
+                    local sz = loadstring('return {'..iup.GetAttribute(h, "RASTERSIZE"):gsub('x', ',')..'}')()
+                    menuhandler:PopMnu(item[2],pos[1],pos[2] + sz[2])
+                end
+            end, enterwindow_cb =
+            function(h)
+                iup.SetAttribute(h, 'FGCOLOR', clr_hgl)
+            end, leavewindow_cb =
+            function(h)
+                local cl = clr_normal
+                if h == activeLabel then cl = clr_select end
+                iup.SetAttribute(h, 'FGCOLOR', cl)
+            end
+        }
+    table.insert(labels, l)
+    return l
+end
+
+function event_MenuHotKey(cmd)
+    menuhandler:OnHotKey(cmd)
+end
+
+function event_MenuMouseHook(x, y)
+    menuhandler:OnMouseHook(x, y)
 end
 
 _G.menuhandler = s

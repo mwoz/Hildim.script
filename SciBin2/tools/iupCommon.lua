@@ -25,6 +25,34 @@ if not bSuc then
 end
 iuprops_read_ok = true
 
+rfl = oStack{15, iuprops['resent.files.list']}
+function rfl:GetMenu()
+    local t = {}
+
+    local maxN = scite.buffers.GetCount() - 1
+    local k = 1
+    for i = 1,  #self.data do
+        local bSet = true
+        for j = 0,maxN do
+            if self.data[i] == scite.buffers.NameAt(j):from_utf8(1251) then
+                bSet = false
+                break
+            end
+        end
+        if bSet then
+            local l = {}
+            local s = ''
+            if k < 11 then s = '&'..k..'.' end
+            l[1] = s..self.data[i]
+            l.action = "scite.Open'"..self.data[i]:to_utf8(1251):gsub('\\','\\\\').."'"
+            table.insert(t,l)
+            k = k + 1
+        end
+    end
+    return t
+end
+iuprops['resent.files.list'] = rfl
+
 _G.iuprops['pariedtag.on'] = _G.iuprops['pariedtag.on'] or 1
 props['autoformat.line'] = _G.iuprops['autoformat.line']
 props['spell.autospell'] = _G.iuprops['spell.autospell']
@@ -35,11 +63,14 @@ local function SaveIup()
     if not iuprops_read_ok then return end
     local t = {}
     for n,v in pairs(_G.iuprops) do
+
         local tp = type(v)
         if tp == 'nil' then v = 'nil'
         elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
         elseif tp == 'string' then
             v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
+        elseif tp == 'table' and v.tostr then
+            v = v:tostr()
         else
             iup.Message('Error', "Type "..tp.." can't be saved")
         end
@@ -79,7 +110,6 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
                 table.insert(notSaved, i)
             end
         end
-
 
         local result = 2
         if msg ~= '' then
@@ -132,7 +162,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         end
         if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
         else return true end
-    elseif cmd == 9117 then  --перезагрузка скрипта
+    elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
         iup.DestroyDialogs();
         SaveIup()
         scite.PostCommand(POST_SCRIPTRELOAD_OLD,0)
@@ -152,12 +182,20 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
                 iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
             end
         end
+    elseif cmd == IDM_CLOSE then
+        iuprops['resent.files.list']:ins(props["FilePath"])
     end
 end)
 AddEventHandler("OnSave", function(cmd, source)
     if props["ext.lua.startup.script"] == props["FilePath"] then
         scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
+end)
+AddEventHandler("OnClose", function(source)
+    if not source:find('^\\\\') then
+        if not shell.fileexists(source:from_utf8(1251)) then return end
+    end
+    iuprops['resent.files.list']:ins(source:from_utf8(1251))
 end)
 
 --Расширение iup.TreeAddNodes - позволяет в табличном представлении дерева задавать свойство userdata
@@ -449,7 +487,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                 end
             end
         elseif wp == POST_SCRIPTRELOAD_OLD then   --перезагрузка скрипта
-            print("Reload22...")
+            print("Reload IDM...")
             scite.ReloadStartupScript()
             OnSwitchFile("")
             print("...Ok")
