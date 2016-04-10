@@ -457,4 +457,22 @@ AddEventHandler("OnContextMenu", OnContextMenu_local)
 AddEventHandler("OnMenuCommand", OnMenuCommand_local)
 AddEventHandler("OnIdle", OnIdle_local)
 
+local function ResetAutoSpell()
+    CheckChange('spell.autospell', true)
+    local h = iup.GetDialogChild(iup.GetLayout(), "Spelling_zbox")
+    if h then
+        h.valuepos = Iif(_G.iuprops["spell.autospell"]..'' == "1", 1, 0)
+        iup.Redraw(h,1)
+        iup.Update(h)
+    end
+end
 
+menuhandler:InsertItem('MainWindowMenu', 'Tools¦s1',
+    {'Spelling', ru='Орфография',{
+        {'Close Incomplete Tag', ru='Проверять автоматически', action=ResetAutoSpell, check="tonumber(_G.iuprops['spell.autospell']) == 1", key='Ctrl+Alt+F12',},
+        {'s1', separator=1,},
+        {'Check Selection', ru='Проверить выделенный фрагмент', action=spell_Selected, key='Ctrl+F12',},
+        {'Check Selection, By Highlighting', ru='Проверить фрагмент с учетом подсветки', action=spell_ByLex,},
+        {'List Errors', ru='Показать список ошибок', action = spell_ErrorList, key='Ctrl+Shift+F12'},
+    }}
+)

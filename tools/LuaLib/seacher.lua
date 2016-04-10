@@ -1,29 +1,6 @@
 
-
-function class()
-    local c = {}
-    c.__index = c
-    c.__gc = function()
-        if c.destroy then
-            c.destroy()
-        end
-    end
-    local mt = {}
-    mt.__call = function(_, ...)
-        self = setmetatable({}, c)
-        if c.init then
-            c.init(self, ...)
-        end
-        return self
-    end
-    return setmetatable(c, mt)
-end
-
 local s = class()
 
---[[function s:__tostring()
-    return "Lua module: simple [" .. self.name .. "]"
-end]]
 function s:destroy()
     print("simple:destroy()")
 end
