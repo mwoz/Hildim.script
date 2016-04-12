@@ -247,7 +247,7 @@ function Toggle_ToggleSubfolders(bShow)
     end
 end
 
-function Find_FindInDialog()
+function Find_FindInDialog(ud)
     local sText = editor:GetSelText()
     local wholeWord = false
     if (sText == '') then
@@ -669,11 +669,14 @@ require "menuhandler"
 -- menuhandler:InsertItem('MainWindowMenu', 'Search¦##', {'Find Next Word/Selection', ru='Следующее слово/выделение', action=Find_FindInDialog, key='Ctrl+F3',})
 -- menuhandler:InsertItem('MainWindowMenu', 'Search¦##', {'Prevous Word/Selection', ru='Предыдущее слово/выделение', action=function() FindNextWrd(2) end, key='Ctrl+Shift+F3',})
 
-menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
 {'FindTextOnSel', plane=1,{
     {'s_FindTextOnSel', separator=1},
-    {'Find Next Word/Selection', ru='Следующее слово/выделение', action=Find_FindInDialog, key='Ctrl+F3',},
-    {'Prevous Word/Selection', ru='Предыдущее слово/выделение', action=function() FindNextWrd(2) end, key='Ctrl+Shift+F3',},
+    {'Marks', ru='Метки', action=function() ActivateFind(3) end, key='Ctrl+F3',},
+    {'Find Next Word/Selection', ru='Слово/выделение - в диалог поиска', action=Find_FindInDialog, key='Ctrl+F3',},
+    {'Next Word/Selection', ru='Следующее слово/выделение', action=function() FindNextWrd(2) end, key='Alt+F3',},
+    {'Prevous Word/Selection', ru='Предыдущее слово/выделение', action=function() FindNextWrd(2) end, key='Alt+Shift+F3',},
+    {'Find All Word/Selection(Ctrl+Alt+Click)', ru='Найти все слова/выделения(Ctrl+Alt+Click)', action=FindSelToConcole, key='Alt+Shift+F',},
 }})
 menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦xxx',
 {'FindTextOnSel', plane=1,{

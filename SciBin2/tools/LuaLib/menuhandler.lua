@@ -20,7 +20,9 @@ end
 
 local function GetAction(mnu)
     if mnu.action then
-        if type(mnu.action) == 'number' then return function() scite.MenuCommand(mnu.action) end end
+        local tp = type(mnu.action)
+        if tp == 'number' then return function() scite.MenuCommand(mnu.action) end end
+        if tp == 'string' then return assert(loadstring('return '..mnu.action)) end
         return mnu.action
     elseif mnu.check_idm then
     elseif mnu.check_prop then
@@ -30,6 +32,24 @@ local function GetAction(mnu)
     else
         return function() debug_prnArgs('Error in menu format!!',mnu) end
     end
+end
+
+local function FindMenuItem(path)
+    local strFld
+    local function DropDown(path, mnu)
+        _,_, strFld = path:find('^([^¦]+)¦')
+        for i = 1, #mnu do
+            if strFld then
+                if mnu[i][1] == strFld then
+                    return DropDown(path:gsub('^[^¦]+¦', ''), mnu[i][2])
+                end
+            elseif mnu[i][1] == path then
+                return mnu[i]
+            end
+        end
+    end
+    _,_, strFld = path:find('^([^¦]+)¦')
+    return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
 end
 
 function s:PopMnu(smnu, x, y)
@@ -43,49 +63,52 @@ function s:PopMnu(smnu, x, y)
             return v
         end
         for i = 1, #m do
+            local itm
+            if m[i].link then itm = FindMenuItem('MainWindowMenu¦'..m[i].link)
+            else itm = m[i] end
 
-            if getParam(m[i].visible,true) and
-               (not m[i].visible_ext or string.find(','..m[i].visible_ext..',',','..props["FileExt"]..',')) then
-                if m[i][2] then
-                    if type(m[i][2]) == 'table' then
-                        if m[i].plane then
-                            CreateItems(m[i][2],t)
+            if getParam(itm.visible,true) and
+               (not itm.visible_ext or string.find(','..itm.visible_ext..',',','..props["FileExt"]..',')) then
+                if itm[2] then
+                    if type(itm[2]) == 'table' then
+                        if itm.plane then
+                            CreateItems(itm[2],t)
                         else
-                            table.insert(t, iup.submenu{title = s:get_title(m[i]), CreateMenu(m[i][2])})
+                            table.insert(t, iup.submenu{title = s:get_title(itm), CreateMenu(itm[2])})
                         end
-                    elseif type(m[i][2]) == 'function' then
-                        if m[i].plane then
-                            CreateItems(m[i][2](),t)
+                    elseif type(itm[2]) == 'function' then
+                        if itm.plane then
+                            CreateItems(itm[2](),t)
                         else
-                            local t2 = m[i][2]()
-                            table.insert(t, iup.submenu{title = s:get_title(m[i]), CreateMenu(t2)})
+                            local t2 = itm[2]()
+                            table.insert(t, iup.submenu{title = s:get_title(itm), CreateMenu(t2)})
                             if #t2 == 0 then t[#t].active = 'NO' end
                         end
                     end
-                elseif m[i].separator then
+                elseif itm.separator then
                     table.insert(t, iup.separator{})
                 else --вставка пункта меню - только видимые
 
-                    local titem = {title = s:get_title(m[i])} --заголовок
+                    local titem = {title = s:get_title(itm)} --заголовок
                     --доступность
-                    if not getParam(m[i].active, true) then titem.active = 'NO' end
+                    if not getParam(itm.active, true) then titem.active = 'NO' end
 
-                    if m[i].check_iuprops then
-                        if tonumber(_G.iuprops[m[i].check_iuprops]) == 1 then titem.value = 'ON' end
-                    elseif m[i].check_prop then
-                        if props[m[i].check_prop] == '1' then titem.value = 'ON' end
-                    elseif m[i].check_idm then
-                        if tonumber(props[m[i].check_idm]) == m[i].action then
+                    if itm.check_iuprops then
+                        if tonumber(_G.iuprops[itm.check_iuprops]) == 1 then titem.value = 'ON' end
+                    elseif itm.check_prop then
+                        if props[itm.check_prop] == '1' then titem.value = 'ON' end
+                    elseif itm.check_idm then
+                        if tonumber(props[itm.check_idm]) == itm.action then
                             titem.value = 'ON'
                             titem.active = 'NO'
                             titem.image = 'IMAGE_PinPush'
                         end
-                    elseif getParam(m[i].check, false) then
+                    elseif getParam(itm.check, false) then
                         titem.value = 'ON'
                     end
 
                     if not titem.active then --'экшны обрабатываем только для активных меню
-                        titem.action = GetAction(m[i])
+                        titem.action = GetAction(itm)
                     end
 
                     table.insert(t, iup.item(titem))
@@ -119,17 +142,22 @@ function s:OnMouseHook(x,y)
 end
 
 function s:ContinuePopUp()
-    iup.SetAttribute(activeLabel, 'FGCOLOR', clr_select)
+    if activeLabel then iup.SetAttribute(activeLabel, 'FGCOLOR', clr_select) end
     scite.SwitchMouseHook(true)
     waited_mnu:popup(w_x , w_y)
     scite.SwitchMouseHook(false)
-    iup.SetAttribute(activeLabel, 'FGCOLOR', clr_normal)
+    if activeLabel then iup.SetAttribute(activeLabel, 'FGCOLOR', clr_normal) end
     activeLabel, waited_mnu, w_x, w_y = nil,nil, nil, nil
     if reselectedItem then
         activeLabel = labels[reselectedItem.id]
         s:PopMnu(_G.sys_Menus.MainWindowMenu[reselectedItem.id +1][2],reselectedItem.x,reselectedItem.y)
         reselectedItem = nil
     end
+end
+
+function s:ContextMenu(element)
+    local _,_,x,y = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+    s:PopMnu(_G.sys_Menus[element], x, y)
 end
 
 local function InsertItem(mnu, path, t)
@@ -173,15 +201,17 @@ function s:RegistryHotKeys()
 
     local function DropDown(path, mnu)
         for i = 1, #mnu do
-            local lp = path..'¦'..mnu[i][1]
-            if mnu[i].key and not mnu[i].key_external then
-                local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
-                tKeys[mnu[i].key] = id
-                if not id then print(mnu[i].key) end
-                sys_KeysToMenus[id] = lp
-                if type(mnu[i].action) ~= 'number' then idm_loc = idm_loc + 1 end
+            if not mnu[i].link then
+                local lp = path..'¦'..mnu[i][1]
+                if mnu[i].key and not mnu[i].key_external then
+                    local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
+                    tKeys[mnu[i].key] = id
+                    if not id then print(mnu[i].key) end
+                    sys_KeysToMenus[id] = lp
+                    if type(mnu[i].action) ~= 'number' then idm_loc = idm_loc + 1 end
+                end
+                if mnu[i][2] and type(mnu[i][2]) == 'table' then DropDown(lp, mnu[i][2])end
             end
-            if mnu[i][2] and type(mnu[i][2]) == 'table' then DropDown(lp, mnu[i][2])end
         end
 
     end
@@ -194,27 +224,7 @@ function s:RegistryHotKeys()
 end
 
 function s:OnHotKey(cmd)
-    local path = sys_KeysToMenus[cmd]
-    local strFld
-    local function DropDown(path, mnu)
-        _,_, strFld = path:find('^([^¦]+)¦')
-        for i = 1, #mnu do
-            if strFld then
-                if mnu[i][1] == strFld then
-                    DropDown(path:gsub('^[^¦]+¦', ''), mnu[i][2])
-                    return
-                end
-            else
-                if mnu[i][1] == path then
-                    GetAction(mnu[i])()
-                end
-            end
-        end
-    end
-
-    _,_, strFld = path:find('^([^¦]+)¦')
-    DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
-
+    GetAction(FindMenuItem(sys_KeysToMenus[cmd]))()
 end
 
 function s:GreateMenuLabel(item)
