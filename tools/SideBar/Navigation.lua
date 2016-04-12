@@ -69,20 +69,16 @@ local function Navigation_Go(item)
 	currentItem = item
 end
 
-local function Navigation_OnKey(key, shift, ctrl, alt, char)
-	if editor.Focus and alt then
-        local newItem
-		if key == 188 or key == 37 then -- '<'
-			if currentItem >= tonumber(list_navigation.numlin) then return end
-			newItem = currentItem + 1
-		elseif key == 190 or key == 39 then -- '>'
-			if currentItem == 1 then return end
-			newItem = currentItem - 1
-		else
-			return
-		end
-		Navigation_Go(newItem)
-	end
+local function walk_Navigation(bBack)
+    local newItem
+    if bBack then -- '<'
+        if currentItem >= tonumber(list_navigation.numlin) then return end
+        newItem = currentItem + 1
+    else
+        if currentItem == 1 then return end
+        newItem = currentItem - 1
+    end
+    Navigation_Go(newItem)
 end
 --++++++++++++++++++++++
 
@@ -125,10 +121,17 @@ local function FuncBmkTab_Init()
         handle = list_navigation;
         id = myId;
         tab = tab1;
-        OnKey = Navigation_OnKey;
-       OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
+        OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
 		OnNavigation = OnNavigate;
         }
 end
 
 FuncBmkTab_Init()
+
+menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+    {'Navigation', ru='Навигация', plane = 1,{
+        {'s_Navigation', separator=1,},
+        {'Navigate Backward', ru='Навигация: Назад', action=function() walk_Navigation(true) end, key='Alt+Left',},
+        {'Navigate Forward', ru='Навигация: Назад', action=function() walk_Navigation(false) end, key='Alt+Right',},
+    }}
+)

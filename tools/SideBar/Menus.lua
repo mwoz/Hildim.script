@@ -46,9 +46,33 @@ if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\LanguagesMenu.
 if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua") then tHilight = assert(loadfile(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua")) end
 
 _G.sys_Menus = {}
-local function IsSelection()
-    return editor.SelectionStart<editor.SelectionEnd
+local function scintilla()
+    if editor.Focus then return editor end
+    if output.Focus then return output end
+    return findrez
 end
+local function IsSelection()
+    return scintilla().SelectionStart<scintilla().SelectionEnd
+end
+
+_G.sys_Menus.OUTPUT = {
+    {link='Edit¦Conventional¦Cu&t'},
+    {link='Edit¦Conventional¦&Copy'},
+    {link='Edit¦Conventional¦&Paste'},
+    {link='Edit¦Conventional¦&Delete'},
+    {'s1', separator=1},
+    {link='Tools¦Clear &Output'},
+    {link='Tools¦&Previous Message'},
+    {link='Tools¦&Next Message'},
+    {'s2', separator=1},
+    {'Input Mode', ru = 'Режим ввода', {
+        {'Display Mode', ru = 'Отобразить(press Enter)', action = function() output:DocumentEnd(); output:ReplaceSel('\n###?') end},
+        {'Command Line Mode', ru = 'Режим командной строки', action = function() output:DocumentEnd();output:ReplaceSel('\\n###c') end},
+        {'LUA Mode', ru = 'Режим консоли LUA', action = function() output:DocumentEnd();output:ReplaceSel('\\n###l') end},
+        {'IDM command Mode', ru = 'Режим команд IDM', action = function() output:DocumentEnd();output:ReplaceSel('\\n###i') end},
+        {'Switch OFF', ru = 'Отключить', action = function() output:DocumentEnd();output:ReplaceSel('\\n####') end},
+    }}
+}
 
 _G.sys_Menus.MainWindowMenu = {
     {'_HIDDEN_', {
@@ -91,8 +115,8 @@ _G.sys_Menus.MainWindowMenu = {
     },},
     {'Edit', ru='Правка',{
         {'Conventional',  ru = 'Стандартные', {
-            {'&Undo', ru = 'Отменить', key = 'Ctrl+Z',key_external = 1, action = IDM_UNDO, active=function() return editor:CanUndo() end},
-            {'&Redo', ru = 'Повторить', key = 'Ctrl+Y',key_external = 1, action = IDM_REDO, active=function() return editor:CanRedo() end},
+            {'&Undo', ru = 'Отменить', key = 'Ctrl+Z',key_external = 1, action = IDM_UNDO, active=function() return scintilla():CanUndo() end},
+            {'&Redo', ru = 'Повторить', key = 'Ctrl+Y',key_external = 1, action = IDM_REDO, active=function() return scintilla():CanRedo() end},
             {'s1',  separator=1},
             {'Cu&t', ru = 'Вырезать', key = 'Ctrl+X',key_external = 1, action = IDM_CUT, active=IsSelection},
             {'&Copy', ru = 'Копировать', key = 'Ctrl+C',key_external = 1, action = IDM_COPY, active=IsSelection},
@@ -130,6 +154,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'F&ind in Files...', ru = 'Найти в файлах', key = 'Ctrl+Shift+F', action = IDM_FINDINFILES},
         {'R&eplace...', ru = 'Заменить', key = 'Ctrl+H', action = IDM_REPLACE},
         {'s1', separator=1},
+        {'&Go to definition(Shift+Click)', ru = 'Перейти к описанию(Shift+Click)', key = 'F12', action = "menu_GoToObjectDefenition()"},
         {'&Go to...', ru = 'Перейти на позицию...', key = 'Ctrl+G', action = IDM_GOTO},
         {'Next Book&mark', ru = 'Следующая закладка', key = 'F2', action = IDM_BOOKMARK_NEXT},
         {'Pre&vious Bookmark', ru = 'Предыдущая закладка', key = 'Shift+F2', action = IDM_BOOKMARK_PREV},
@@ -137,8 +162,13 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Clear All Bookmarks', ru = 'Очистить все закладки', action = IDM_BOOKMARK_CLEARALL},
     },},
     {'View', ru='Вид',{
-        {'Toggle &current fold', ru = 'Свернуть/Развернуть текущий блок текста', action = IDM_EXPAND},
-        {'Toggle &all folds', ru = 'Свернуть/Развернуть все блоки текста', action = IDM_TOGGLE_FOLDALL},
+        {'Folding', ru='Складка', plane=1, {
+            {'Toggle &current fold', ru = 'Свернуть/Развернуть текущий блок', action = IDM_EXPAND},
+            {'Toggle &all folds', ru = 'Свернуть/Развернуть все блоки', action = IDM_TOGGLE_FOLDALL},
+            {'Toggle &recurse current fold', ru = 'Свернуть/Развернуть рекурсивно текущий блок', action = IDM_TOGGLE_FOLDRECURSIVE},
+            {'Collapse Subfolders', ru = 'Свернуть подблоки', key='Ctrl+Shift++', action = "Toggle_ToggleSubfolders(false)"},
+            {'Expand Subfolders', ru = 'Развернуть подблоки', key='Ctrl+Shift+-', action = "Toggle_ToggleSubfolders(true)"},
+        }},
         {'s2', separator=1},
         --[[{'Full Scree&n', ru = 'Полноэкранный режим', key = 'F11', action = IDM_FULLSCREEN},]]
         --[[{'&Tool Bar', ru = 'Панель инструментов', action = IDM_VIEWTOOLBAR,},]]

@@ -505,6 +505,13 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     end
 end)
 
+AddEventHandler("OnContextMenu", function(lp, wp, source)
+    if source == "OUTPUT" then
+        menuhandler:ContextMenu(source)
+        return ""
+    end
+end)
+
 --”ничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
     local hMainLayout = iup.GetLayout()
