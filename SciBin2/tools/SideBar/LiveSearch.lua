@@ -12,7 +12,7 @@ wholeWord = false
 
 local txt_search
 local btn_search
-function sidebar_Find()
+local function sidebar_Find()
     iup.SetFocus(txt_search)
     txt_search.selection = '1:100'
 end
@@ -123,4 +123,6 @@ end
 
 FindTab_Init()
 
+menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+{'Live Search', ru="Живой поиск", key='Alt+F', action=sidebar_Find,})
 

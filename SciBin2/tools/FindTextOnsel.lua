@@ -525,18 +525,8 @@ AddEventHandler("OnClick", function(shift, ctrl, alt)
         FindSelToConcole()
     end
 end)
-AddEventHandler("OnContextMenu", function(lp, wp, source)       --сшибка err
-    if source ~= "FINDREZ" then return end
-    local mnu = ''
-    if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
-        mnu = mnu..'Открыть файлы|60000|Закрыть файлы|60003|Закрыть не найденные|60004|||'
-    end
-    mnu = mnu..'[MAIN]||'..Iif(_G.iuprops['findrez.clickonlynumber'], '^', '')..'DblClick только по номеру|60001|'..
-                           Iif(_G.iuprops['findrez.groupbyfile'], '^', '')..'Группировать по имени файла|60002|'
-    return mnu:to_utf8(1251)
-end)
 
-AddEventHandler("OnMenuCommand", function(msg, source)
+local function MyMenuCommand(msg)
     local function fndFiles()
         local t = {}
         if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
@@ -565,7 +555,7 @@ AddEventHandler("OnMenuCommand", function(msg, source)
         if not bFounded then scite.MenuCommand(IDM_CLOSE) end
     end
 
-    if msg == 60000 then
+    if msg == 1 then
         if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
             local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
             while true do
@@ -579,20 +569,14 @@ AddEventHandler("OnMenuCommand", function(msg, source)
             end
         end
         return true
-    elseif msg == 60001 then
-        _G.iuprops['findrez.clickonlynumber'] = not _G.iuprops['findrez.clickonlynumber']
-        return true
-    elseif msg == 60002 then
-        _G.iuprops['findrez.groupbyfile'] = not _G.iuprops['findrez.groupbyfile']
-        return true
-    elseif msg == 60003 then
+    elseif msg == 2 then
         DoForBuffers(CloseIfFound, fndFiles(), true)
         return true
-    elseif msg == 60004 then
+    elseif msg == 3 then
         DoForBuffers(CloseIfFound, fndFiles(), false)
         return true
     end
-end)
+end
 
 AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
     if not findrez.Focus then return end
@@ -666,13 +650,11 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
 end)
 require "menuhandler"
 
--- menuhandler:InsertItem('MainWindowMenu', 'Search¦##', {'Find Next Word/Selection', ru='Следующее слово/выделение', action=Find_FindInDialog, key='Ctrl+F3',})
--- menuhandler:InsertItem('MainWindowMenu', 'Search¦##', {'Prevous Word/Selection', ru='Предыдущее слово/выделение', action=function() FindNextWrd(2) end, key='Ctrl+Shift+F3',})
-
+menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',
+    {'Marks', ru='Метки', action=function() ActivateFind(3) end, key='Ctrl+M',})
 menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
 {'FindTextOnSel', plane=1,{
     {'s_FindTextOnSel', separator=1},
-    {'Marks', ru='Метки', action=function() ActivateFind(3) end, key='Ctrl+F3',},
     {'Find Next Word/Selection', ru='Слово/выделение - в диалог поиска', action=Find_FindInDialog, key='Ctrl+F3',},
     {'Next Word/Selection', ru='Следующее слово/выделение', action=function() FindNextWrd(2) end, key='Alt+F3',},
     {'Prevous Word/Selection', ru='Предыдущее слово/выделение', action=function() FindNextWrd(2) end, key='Alt+Shift+F3',},
@@ -682,4 +664,12 @@ menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦xxx',
 {'FindTextOnSel', plane=1,{
     {'s_FindTextOnSel', separator=1},
     {'Move Controls...',  ru = 'Переместить контролы...', action=template_MoveControls, key = 'Alt+M', active='editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)'},
+}})
+
+menuhandler:InsertItem('FINDREZ', '',
+{'Open Files', plane=1, visible="findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER" ,{
+    {'s_OpenFiles', separator=1},
+    {'Open Files',  ru = 'Открыть файлы', action=function() MyMenuCommand(1) end, },
+    {'Close Files',  ru = 'Закрыть файлы', action=function() MyMenuCommand(2) end, },
+    {'Close If Not Found',  ru = 'Закрыть не найденные', action=function() MyMenuCommand(3) end, },
 }})

@@ -43,8 +43,8 @@ container.lineHeight высота строки
 container.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
 container.rightButtonMode {{all по правой кнопке показывать весь список|personal ... персональный лист}}  показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
 container.showInfo {{no}} 'yes' by def показ кнопки инфо в рефконтролах
-control.style
-control.styleContent
+container.style
+container.styleContent
 
 container.marginLeft отступ по умолчанию от ЛЕВОГО края фрейма/контейнера
 container.marginRight отступ по умолчанию от ПРАВОГО края фрейма/контейнера
@@ -103,7 +103,7 @@ block.name
 block.width
 block.height
 block.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
-block.xPot
+block.xPos
 
 content.name
 content.type {{label|link|button|boolean|datetime|datefilter|date|integer|float|text|choicemult|choice|reference}}

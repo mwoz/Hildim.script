@@ -190,7 +190,7 @@ end
 
 
 local sPel, pUser, curLine
-local function OnUserListSelection_local(tp,str)
+local function ApplyVariant(str)
     if  tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
     local function saveDic(newWord,pUser)
         local text    = ''
@@ -215,101 +215,100 @@ local function OnUserListSelection_local(tp,str)
         file:flush()
         file:close()
     end
-    if tp == 800 then
-        local s = scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos)
-        local e = scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)
-        if str == cADDBYZXAMPLE then
-            local dlg = _G.dialogs["spell"]
-            if dlg == nil then
-                local txt_sorse = iup.text{size='70x0'}
-                local txt_example = iup.text{value="", size="70x0"}
-                local btn_ok = iup.button  {title="OK"}
-                iup.SetHandle("BTN_OK",btn_ok)
+    local s = scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos)
+    local e = scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)
+    if str == cADDBYZXAMPLE then
+        local dlg = _G.dialogs["spell"]
+        if dlg == nil then
+            local txt_sorse = iup.text{size='70x0'}
+            local txt_example = iup.text{value="", size="70x0"}
+            local btn_ok = iup.button  {title="OK"}
+            iup.SetHandle("BTN_OK",btn_ok)
 
-                local btn_esc = iup.button  {title="Cancel"}
-                iup.SetHandle("BTN_ESC",btn_esc)
+            local btn_esc = iup.button  {title="Cancel"}
+            iup.SetHandle("BTN_ESC",btn_esc)
 
-                local vbox = iup.vbox{ iup.hbox{iup.label{title="Вставить:", gap=3},txt_sorse,iup.label{title="Образец:"}, txt_example}, iup.hbox{btn_ok,btn_esc,gap=200},gap=2,margin="4x4" }
-                local result = false
+            local vbox = iup.vbox{ iup.hbox{iup.label{title="Вставить:", gap=3},txt_sorse,iup.label{title="Образец:"}, txt_example}, iup.hbox{btn_ok,btn_esc,gap=200},gap=2,margin="4x4" }
+            local result = false
 
-                local dlg = iup.scitedialog{vbox; title="Добавление по образцу",defaultenter="BTN_OK",defaultesc="BTN_ESC",maxbox="NO",minbox ="NO",resize ="NO", sciteparent="SCITE", sciteid="spell",
-                show_cb =(function(h, state)
-                    if state == 0 then
-                        local s = scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos)
-                        local e = scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)
+            local dlg = iup.scitedialog{vbox; title="Добавление по образцу",defaultenter="BTN_OK",defaultesc="BTN_ESC",maxbox="NO",minbox ="NO",resize ="NO", sciteparent="SCITE", sciteid="spell",
+            show_cb =(function(h, state)
+                if state == 0 then
+                    local s = scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos)
+                    local e = scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)
 
-                        local word = ProbabblyFromUT(editor:textrange(s,e))
-                        txt_sorse.value = word
+                    local word = ProbabblyFromUT(editor:textrange(s,e))
+                    txt_sorse.value = word
 
-                        txt_example.value = ''
-                        if word:byte() >=160 then
-                            sPel = sRu
-                            pUser = pUserRu
-                        else
-                            sPel = sEn
-                            pUser = pUserEn
-                        end
-                        curLine = editor:LineFromPosition(s)
-                    end
-                end) }
-
-                function btn_ok:action()                        -- о вазможная комманда      coow
-                    local bOk = false
-                    local ex = txt_example.value
-                    if #ex > 0 then
-                        if(sPel:spell(ex)) then
-                            local t = sPel:stem(ex)
-                            for _,v in ipairs(t) do
-                                if(ex == v) then bOk = true; break end
-                            end
-                            if bOk then
-                                local word = txt_sorse.value
-                                local strFlag = sPel:add_with_affix(word,ex)
-                                saveDic(word..'/'..strFlag,pUser)
-                                SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
-                            end
-                        end
-                    end
-
-                    if bOk then
-                        dlg:hide()
-                        --[[iup.Destroy(dlg)]]
+                    txt_example.value = ''
+                    if word:byte() >=160 then
+                        sPel = sRu
+                        pUser = pUserRu
                     else
-                        txt_example.value = '<bAd>'
+                        sPel = sEn
+                        pUser = pUserEn
+                    end
+                    curLine = editor:LineFromPosition(s)
+                end
+            end) }
+
+            function btn_ok:action()                        -- о вазможная комманда      coow
+                local bOk = false
+                local ex = txt_example.value
+                if #ex > 0 then
+                    if(sPel:spell(ex)) then
+                        local t = sPel:stem(ex)
+                        for _,v in ipairs(t) do
+                            if(ex == v) then bOk = true; break end
+                        end
+                        if bOk then
+                            local word = txt_sorse.value
+                            local strFlag = sPel:add_with_affix(word,ex)
+                            saveDic(word..'/'..strFlag,pUser)
+                            SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
+                        end
                     end
                 end
 
-                function btn_esc:action() --фрейм
+                if bOk then
                     dlg:hide()
-                    txt_sorse.value = 'sdsdsds'
-                    --[[iup.Destroy(dlg)]];
+                    --[[iup.Destroy(dlg)]]
+                else
+                    txt_example.value = '<bAd>'
                 end
-            else
-                dlg:show();
             end
-        elseif str == cADDYODIC then
-            local word = ProbabblyFromUT(editor:textrange(s,e))
-            --EditorClearMarks(mark,s,e-s)
-            local sPel, pUser
-            if word:byte() >=160 then
-                sPel = sRu
-                pUser = pUserRu
-            else
-                sPel = sEn
-                pUser = pUserEn
-            end
-            sPel:add_word(word)
-            saveDic(word,pUser)
-            curLine = editor:LineFromPosition(s)
-            SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
 
+            function btn_esc:action() --фрейм
+                dlg:hide()
+                txt_sorse.value = 'sdsdsds'
+                --[[iup.Destroy(dlg)]];
+            end
         else
-            editor.TargetStart = s
-            editor.TargetEnd = e
-            editor:ReplaceTarget(str)
+            dlg:show();
         end
-        return true
+    elseif str == cADDYODIC then
+        local word = ProbabblyFromUT(editor:textrange(s,e))
+        --EditorClearMarks(mark,s,e-s)
+        local sPel, pUser
+        if word:byte() >=160 then
+            sPel = sRu
+            pUser = pUserRu
+        else
+            sPel = sEn
+            pUser = pUserEn
+        end
+        sPel:add_word(word)
+        saveDic(word,pUser)
+        curLine = editor:LineFromPosition(s)
+        SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
+
+    else
+        editor.TargetStart = s
+        editor.TargetEnd = e
+        editor:ReplaceTarget(str)
     end
+    return true
+
 end                                      --fghgfhgtgh
 
 local spellStart, spellEnd
@@ -324,11 +323,6 @@ local function OnColorise_local(s,e)
 end
 
 function spell_ErrorList()
---[[    local iPos = scite.SendEditor(SCI_INDICATOREND, mark, 1)
-    print(editor:textrange(editor:WordStartPosition(iPos, true),
-							editor:WordEndPosition(iPos, true)))
-    print(scite.SendEditor(SCI_INDICATOREND, mark, editor:WordEndPosition(iPos, true)), iPos)
-    print(scite.SendEditor(SCI_INDICATOREND, mffrk, editor.TextLength-20), editor.TextLength)]]
     local prLine = editor:LineFromPosition(editor.CurrentPos)
     local fLine = editor.FirstVisibleLine
     editor:DocumentEnd()
@@ -385,7 +379,6 @@ local function ListErrors()
     scite.SendFindRez(SCI_REPLACESEL, '>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]..'\n')
 end
 
-
 local function OnIdle_local()
     if spellEnd then
         if not bReset then
@@ -404,7 +397,7 @@ function spell_Selected()
     SpellRange(editor.SelectionStart, editor.SelectionEnd)
 end
 
-function spell_ByLex()
+function spell_ByLex()      --ашибка eror  дочеринм
     local s,e = editor.SelectionStart,editor.SelectionEnd
     if s==e then s,e = 0,editor.TextLength end
     _G.iuprops["spell.autospell"] = 0
@@ -413,48 +406,39 @@ function spell_ByLex()
     SpellLexer(s,e)
 end
 
-local function OnContextMenu_local(lp, wp, source)       --ашибка eror  дочеринм
-    if source ~= "EDITOR" then return end
-	if scite.SendEditor(SCI_INDICATORVALUEAT, mark, editor.CurrentPos) == 1 then
-        local word = ProbabblyFromUT(editor:textrange(scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos), scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)))
+local function FillVariantsMenu()
+    local lst = {}
 
-        local s
-        if word:byte() >=192 then
-            s = sRu
-        else
-            s = sEn
-        end
-        local t = s:suggest(word)
-        local found = false
-        local str = ''
-        local cmd = constFirstSpell
-        tblVariants = {}
-        for _,v in ipairs(t) do
-            table.insert(tblVariants, cmd, v)
-            if s == sRu then v = shell.to_utf8(v) end
-            str = str..v..'|'..cmd..'|'
-            cmd = cmd + 1
-        end
-        if cmd > 0 then str = str..'||' end
-        str = str..cADDYODIC..'|'..constAddToDic..'|'..cADDBYZXAMPLE..'|'..constWithExample..'|||'
-        str = str..'Context Menu...|POPUPBEGIN|[MAIN]Context Menu...|POPUPEND|'
-        current_poslst = editor.CurrentPos
-        return str
+    local word = ProbabblyFromUT(editor:textrange(scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos), scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)))
+
+    local s
+    if word:byte() >=192 then     --eror
+        s = sRu
+    else
+        s = sEn
     end
+    local t = s:suggest(word)
+    tblVariants = {}
+    for _,v in ipairs(t) do
+        --if s == sRu then v = shell.to_utf8(v) end
+        table.insert(lst, {v, action = function() ApplyVariant(v) end})
+    end
+    if #t > 0 then end table.insert(lst,{'sSpell1', separator=1})
+    current_poslst = editor.CurrentPos
+    return lst
 end
+
 local function OnMenuCommand_local(msg, source)
     if msg < constFirstSpell then return end
     if msg == constAddToDic then str = cADDYODIC
     elseif msg == constWithExample then str = cADDBYZXAMPLE
     else str = tblVariants[msg] end
-    OnUserListSelection_local(800,str)
+    OnUserListSelection_local(str)
 end
 
 AddEventHandler("OnColorized", OnColorise_local)
 AddEventHandler("OnOpen", OnSwitch_local)
 AddEventHandler("OnSwitchFile", OnSwitch_local)
-AddEventHandler("OnContextMenu", OnContextMenu_local)
-AddEventHandler("OnMenuCommand", OnMenuCommand_local)
 AddEventHandler("OnIdle", OnIdle_local)
 
 local function ResetAutoSpell()
@@ -467,6 +451,16 @@ local function ResetAutoSpell()
     end
 end
 
+menuhandler:InsertItem('EDITOR', 's0',
+    {'Spelling Variants', plane = 1,
+     visible = function() return scite.SendEditor(SCI_INDICATORVALUEAT, mark, editor.CurrentPos) == 1 end,
+     bottom={"Context Menu", ru="Контекстное меню"}, {
+        {'list', plane = 1, FillVariantsMenu},
+        {cADDYODIC, action=function() ApplyVariant(cADDYODIC) end,},
+        {cADDBYZXAMPLE, action=function() ApplyVariant(cADDBYZXAMPLE) end,},
+        {'sSpell2', separator=1},
+    }}
+)
 menuhandler:InsertItem('MainWindowMenu', 'Tools¦s1',
     {'Spelling', ru='Орфография',{
         {'Close Incomplete Tag', ru='Проверять автоматически', action=ResetAutoSpell, check="tonumber(_G.iuprops['spell.autospell']) == 1", key='Ctrl+Alt+F12',},

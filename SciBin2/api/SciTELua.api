@@ -373,6 +373,8 @@ ReloadStartupScript()\n reload startup script
 
 props[string] = text_value
 
+#$editor=output
+#$editor=findrez
 editor:AddRefDocument(int doc)\n Create a new document object. Starts with reference count of 1 and not selected into editor. Extend life of document.
 editor:AddSelection(int, int) = int
 editor:AddStyledText(int length, cells c)\n Add array of cells to document.
