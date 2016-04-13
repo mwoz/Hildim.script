@@ -3,7 +3,7 @@ local labels = {}
 local waited_mnu, w_x, w_y = nil,nil, nil
 local activeLabel = nil
 local reselectedItem = nil
-local clr_hgl = '15 60 175'
+local clr_hgl = '15 60 195'
 -- local clr_hgl = '206 206 00'
 --local clr_select = '205 43 202'
 local clr_select = '0 0 0'
@@ -29,6 +29,8 @@ local function GetAction(mnu)
         return "CheckChange('"..mnu.check_prop.."', true)"
     elseif mnu.check_iuprops then
         return "_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)
+    elseif mnu.check_boolean then
+        return "_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"
     else
         return function() debug_prnArgs('Error in menu format!!',mnu) end
     end
@@ -52,8 +54,9 @@ local function FindMenuItem(path)
     return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
 end
 
-function s:PopMnu(smnu, x, y)
+function s:PopMnu(smnu, x, y, bToolBar)
     local CreateMenu, CreateItems
+    local bPrevSepar = false
     CreateItems = function(m,t)
         local function getParam(p, bDef)
             local v,tp = bDef, type(p)
@@ -71,13 +74,13 @@ function s:PopMnu(smnu, x, y)
                (not itm.visible_ext or string.find(','..itm.visible_ext..',',','..props["FileExt"]..',')) then
                 if itm[2] then
                     if type(itm[2]) == 'table' then
-                        if itm.plane then
+                        if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
                             CreateItems(itm[2],t)
                         else
-                            table.insert(t, iup.submenu{title = s:get_title(itm), CreateMenu(itm[2])})
+                            table.insert(t, iup.submenu{title = s:get_title(itm), CreateMenu(itm[2], itm.radio)})
                         end
                     elseif type(itm[2]) == 'function' then
-                        if itm.plane then
+                        if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
                             CreateItems(itm[2](),t)
                         else
                             local t2 = itm[2]()
@@ -85,8 +88,17 @@ function s:PopMnu(smnu, x, y)
                             if #t2 == 0 then t[#t].active = 'NO' end
                         end
                     end
+                    if itm.bottom then
+                        local tBtm = {itm.bottom[1], ru = itm.bottom.ru, {}}
+                        for j = i + 1,  #m do
+                            table.insert(tBtm[2], m[j])
+                        end
+
+                        table.insert(t, iup.submenu{title = s:get_title(tBtm), CreateMenu(tBtm[2])})
+                        break
+                    end
                 elseif itm.separator then
-                    table.insert(t, iup.separator{})
+                    if not bPrevSepar then table.insert(t, iup.separator{}) end
                 else --вставка пункта меню - только видимые
 
                     local titem = {title = s:get_title(itm)} --заголовок
@@ -94,14 +106,15 @@ function s:PopMnu(smnu, x, y)
                     if not getParam(itm.active, true) then titem.active = 'NO' end
 
                     if itm.check_iuprops then
+                        titem.radio = 'YES'
                         if tonumber(_G.iuprops[itm.check_iuprops]) == 1 then titem.value = 'ON' end
+                    elseif itm.check_boolean then
+                        if _G.iuprops[itm.check_boolean] then titem.value = 'ON' end
                     elseif itm.check_prop then
                         if props[itm.check_prop] == '1' then titem.value = 'ON' end
-                    elseif itm.check_idm then
-                        if tonumber(props[itm.check_idm]) == itm.action then
+                    elseif m.check_idm then
+                        if tonumber(props[m.check_idm]) == itm.action then
                             titem.value = 'ON'
-                            titem.active = 'NO'
-                            titem.image = 'IMAGE_PinPush'
                         end
                     elseif getParam(itm.check, false) then
                         titem.value = 'ON'
@@ -113,16 +126,22 @@ function s:PopMnu(smnu, x, y)
 
                     table.insert(t, iup.item(titem))
                 end
+                bPrevSepar = (itm.separator ~= nil)
             end
         end
     end
     CreateMenu = function(m)
         local t = {}
         CreateItems(m,t)
+        if m.radio then t.radio = 'YES' end
         return iup.menu(t)
     end
-    waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
-    scite.PostCommand(POST_CONTINUESHOWMENU,0)
+    if bToolBar then
+        waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
+        scite.PostCommand(POST_CONTINUESHOWMENU,0)
+    else
+        CreateMenu(smnu):popup(x,y)
+    end
 end
 
 function s:OnMouseHook(x,y)
@@ -150,14 +169,13 @@ function s:ContinuePopUp()
     activeLabel, waited_mnu, w_x, w_y = nil,nil, nil, nil
     if reselectedItem then
         activeLabel = labels[reselectedItem.id]
-        s:PopMnu(_G.sys_Menus.MainWindowMenu[reselectedItem.id +1][2],reselectedItem.x,reselectedItem.y)
+        s:PopMnu(_G.sys_Menus.MainWindowMenu[reselectedItem.id +1][2],reselectedItem.x,reselectedItem.y, true)
         reselectedItem = nil
     end
 end
 
-function s:ContextMenu(element)
-    local _,_,x,y = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
-    s:PopMnu(_G.sys_Menus[element], x, y)
+function s:ContextMenu(x, y, element)
+    s:PopMnu(_G.sys_Menus[element], x, y, false)
 end
 
 local function InsertItem(mnu, path, t)
@@ -188,7 +206,12 @@ end
 
 function s:InsertItem(id, path, t)
     if sys_Menus then
-        InsertItem(sys_Menus[id], path, t)
+        if id == 'MainWindowMenu' then
+            InsertItem(sys_Menus[id], path, t)
+        else
+            path = '*¦'..path
+            InsertItem({{'*', sys_Menus[id]}}, path, t)
+        end
     end
 end
 
@@ -234,7 +257,7 @@ function s:GreateMenuLabel(item)
                     activeLabel = h
                     local pos = loadstring('return {'..iup.GetAttribute(h, "SCREENPOSITION")..'}')()
                     local sz = loadstring('return {'..iup.GetAttribute(h, "RASTERSIZE"):gsub('x', ',')..'}')()
-                    menuhandler:PopMnu(item[2],pos[1],pos[2] + sz[2])
+                    menuhandler:PopMnu(item[2],pos[1],pos[2] + sz[2], true)
                 end
             end, enterwindow_cb =
             function(h)

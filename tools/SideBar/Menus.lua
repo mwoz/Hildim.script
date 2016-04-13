@@ -15,6 +15,9 @@
     отмечено
     - check_idm prop, который нужно сравнить с idm
     - check  - строка с логическим выражением, возвращающим true или false
+    - check_prop
+    - check_iuprops
+    - check_boolean
     действие
     - idm - идентификатор меню скайта
     - action
@@ -55,6 +58,26 @@ local function IsSelection()
     return scintilla().SelectionStart<scintilla().SelectionEnd
 end
 
+_G.sys_Menus.TABBAR = {
+    {link='File¦&Close'},
+    {link='File¦C&lose All'},
+    {'Close All But Curent',  ru = 'Зарыть все, кроме текущей', action=function() core_CloseFilesSet(9132) end, },
+    {'Close All Temporally',  ru = 'Зарыть все временные', action=function() core_CloseFilesSet(9134) end, },
+    {'s1', separator=1},
+    {link='File¦&Save'},
+    {link='File¦Save &As...'},
+    {link='File¦Save a Cop&y...'},
+    {'s1', separator=1},
+    {'Move Tab Left', ru = 'Переместить влево', action = IDM_MOVETABLEFT,},
+    {'Move Tab Right', ru = 'Переместить вправо', action = IDM_MOVETABRIGHT,},
+    {'Copy to Clipboard', ru='Копировать в буфер',{
+        {'All Text', ru='Весь текст', action = function() CopyPathToClipboard("text") end,},
+        {'Path/FileName', ru='Путь/Имя файла', action = function() CopyPathToClipboard("all") end,},
+        {'Path', ru='Путь', action = function() CopyPathToClipboard("path") end,},
+        {'FileName', ru='Имя файла', action = function() CopyPathToClipboard("name") end,},
+    }},
+    {link='File¦Encoding'},
+}
 _G.sys_Menus.OUTPUT = {
     {link='Edit¦Conventional¦Cu&t'},
     {link='Edit¦Conventional¦&Copy'},
@@ -66,12 +89,36 @@ _G.sys_Menus.OUTPUT = {
     {link='Tools¦&Next Message'},
     {'s2', separator=1},
     {'Input Mode', ru = 'Режим ввода', {
-        {'Display Mode', ru = 'Отобразить(press Enter)', action = function() output:DocumentEnd(); output:ReplaceSel('\n###?') end},
+        {'Display Mode', ru = 'Отобразить(press Enter)', action = function() output:DocumentEnd();output:ReplaceSel('\\n###?') end},
         {'Command Line Mode', ru = 'Режим командной строки', action = function() output:DocumentEnd();output:ReplaceSel('\\n###c') end},
         {'LUA Mode', ru = 'Режим консоли LUA', action = function() output:DocumentEnd();output:ReplaceSel('\\n###l') end},
         {'IDM command Mode', ru = 'Режим команд IDM', action = function() output:DocumentEnd();output:ReplaceSel('\\n###i') end},
         {'Switch OFF', ru = 'Отключить', action = function() output:DocumentEnd();output:ReplaceSel('\\n####') end},
     }}
+}
+
+_G.sys_Menus.FINDREZ = {
+    {link='Edit¦Conventional¦Cu&t'},
+    {link='Edit¦Conventional¦&Copy'},
+    {link='Edit¦Conventional¦&Paste'},
+    {link='Edit¦Conventional¦&Delete'},
+    {'s1', separator=2},
+    {link='Tools¦Clear &Find Result'},
+    {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findrez.clickonlynumber'},
+    {'Group By Name', ru='Группировать по имени файла', check_boolean='findrez.groupbyfile'},
+}
+
+_G.sys_Menus.EDITOR = {
+    {'s0', link='Edit¦Conventional¦&Undo'},
+    {link='Edit¦Conventional¦&Redo'},
+    {'s1', separator=1},
+    {link='Edit¦Conventional¦Cu&t'},
+    {link='Edit¦Conventional¦&Copy'},
+    {link='Edit¦Conventional¦&Paste'},
+    {link='Edit¦Conventional¦&Delete'},
+    {'s1', separator=2},
+    {link='Edit¦Conventional¦Select &All'},
+    {link='View¦Folding', plane=0},
 }
 
 _G.sys_Menus.MainWindowMenu = {
@@ -86,13 +133,14 @@ _G.sys_Menus.MainWindowMenu = {
         {'Recent Files', ru = 'Недавние файлы', visible="iuprops['resent.files.list']~=nil", function() return iuprops['resent.files.list']:GetMenu() end},
         {'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+R', action = IDM_REVERT},
         {'&Close', ru = 'Закрыть', key = 'Ctrl+W', action = IDM_CLOSE},
+        {'C&lose All', ru = 'Закрыть все', action = IDM_CLOSEALL},
         {'&Save', ru = 'Сохранить', key = 'Ctrl+S', action = IDM_SAVE},
         {'Save &As...', ru = 'Сохранить как...', key = 'Ctrl+Shift+S', action = IDM_SAVEAS},
         {'Save a Cop&y...', ru = 'Сохранить копию...', key = 'Ctrl+Shift+P', action = IDM_SAVEACOPY},
         {'Copy Pat&h',  action = IDM_COPYPATH},
-        {'Encoding', ru='Кодировка',{
-            {'&Code Page Property', ru='Заданная настройкой codepage', action = IDM_ENCODING_DEFAULT, check_idm='editor.unicode.mode'},
-            {'UTF-16 &Big Endian',  action = IDM_ENCODING_UCS2BE, check_idm='editor.unicode.mode', check='tonumber(props["editor.unicode.mode"])==IDM_ENCODING_UCS2BE'},
+        {'Encoding', ru='Кодировка',{check_idm='editor.unicode.mode', radio = 1,
+            {'&Code Page Property', ru='Заданная настройкой codepage', action = IDM_ENCODING_DEFAULT},
+            {'UTF-16 &Big Endian',  action = IDM_ENCODING_UCS2BE},
             {'UTF-16 &Little Endian',  action = IDM_ENCODING_UCS2LE},
             {'UTF-8 &with BOM', ru='UTF-8 с заголовком', action = IDM_ENCODING_UTF8},
             {'&UTF-8',  action = IDM_ENCODING_UCOOKIE},
@@ -153,6 +201,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'Find Previou&s', ru = 'Предыдущее совпадение', key = 'Shift+F3', action = IDM_FINDNEXTBACK},
         {'F&ind in Files...', ru = 'Найти в файлах', key = 'Ctrl+Shift+F', action = IDM_FINDINFILES},
         {'R&eplace...', ru = 'Заменить', key = 'Ctrl+H', action = IDM_REPLACE},
+        {'s0', separator=1},
         {'s1', separator=1},
         {'&Go to definition(Shift+Click)', ru = 'Перейти к описанию(Shift+Click)', key = 'F12', action = "menu_GoToObjectDefenition()"},
         {'&Go to...', ru = 'Перейти на позицию...', key = 'Ctrl+G', action = IDM_GOTO},
@@ -196,6 +245,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Next Message', ru = 'Следующее сообщение', key = 'F4', action = IDM_NEXTMSG},
         {'&Previous Message', ru = 'Предыдущее сообщение', key = 'Shift+F4', action = IDM_PREVMSG},
         {'Clear &Output', ru = 'Очистить окно консоли', key = 'Shift+F5', action = IDM_CLEAROUTPUT},
+        {'Clear &Find Result', ru = 'Очистить результаты поиска', action = "findrez:SetText('')"},
         {'&Switch Pane', ru = 'Редактирование/Консоль', key = 'Ctrl+F6', action = IDM_SWITCHPANE},
     },},
     {'Options', ru='Настройки',{
@@ -206,7 +256,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'Wrap Find &Result', ru = 'Перенос по словам в результатах поиска', action = IDM_WRAPFINDRES, check = "props['findrez.wrap']=='1'"},
         {'&Read-Only', ru = 'Только для чтения', action = IDM_READONLY},
         {'s2', separator=1},
-        {'Line End Characters', ru='Символы перевода строк',{
+        {'Line End Characters', ru='Символы перевода строк',{radio = 1,
             {'CR &+ LF',  action = IDM_EOL_CRLF, check = "editor.EOLMode==SC_EOL_CRLF"},
             {'&CR',  action = IDM_EOL_CR, check = "editor.EOLMode==SC_EOL_CR"},
             {'&LF',  action = IDM_EOL_LF, check = "editor.EOLMode==SC_EOL_LF"},
@@ -232,8 +282,8 @@ _G.sys_Menus.MainWindowMenu = {
         {'Open Lua Startup Scr&ipt', ru = 'Открыть файл автозагрузки скрипта', action = IDM_OPENLUAEXTERNALFILE},
         {'Edit properties', ru='Свойства лексера',tLangs},
     },},
-    {'Language', ru='Подсветка',{
-        {'tHilight', tHilight, plane = 1},
+    {'Language', ru='Подсветка', {radio = 1,
+        {'tHilight', tHilight, plane = 1,},
         {'s1', separator=1},
     },},
     {'Buffers', ru='Вкладки',{

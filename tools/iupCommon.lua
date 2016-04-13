@@ -5,8 +5,6 @@ POST_CONTINUESTARTUP = 3
 POST_SCRIPTRELOAD_OLD = 4
 POST_CONTINUESHOWMENU = 6
 
-
-
 _G.iuprops = {}
 local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
@@ -92,76 +90,80 @@ local function SaveLayOut()
     return res
 end
 
+function core_CloseFilesSet(cmd)
+    local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
+    if cmd ==  9132 then cur = scite.buffers.GetCurrent() end
+
+    local msg = ''
+    local notSaved = {}
+
+    local maxN = scite.buffers.GetCount() - 1
+    for i = 0,maxN do
+        local pth = scite.buffers.NameAt(i):from_utf8(1251)
+        local _,_,fnExt = pth:find('([^\\]*)$')
+        if not scite.buffers.SavedAt(i) and i ~= cur and (cmd ~= 9134 or pth:find('Безымянный')) and not fnExt:find('^%^') then
+            msg = msg..pth:gsub('(.+)[\\]([^\\]*)$', '%2(%1)')..'\n'
+            table.insert(notSaved, i)
+        end
+    end
+
+    local result = 2
+    if msg ~= '' then
+        msg = msg..'Сохранить все?'
+        result = tonumber(iup.Alarm('Некоторые файлы не сохранены:', msg, 'Да', 'Нет', 'Отмена'))
+        --result = shell.msgbox(msg, "Close", 3) --YESNOCANCEL Yes - 6, NO - 7 CANCEL - 2
+        if result == 3 then return true end
+        if result == 1 then
+            for _,j in ipairs(notSaved) do
+                scite.buffers.SetDocumentAt(j)
+                scite.MenuCommand(IDM_SAVE)
+            end
+            if cmd == 9134 then return end
+        end
+    end
+    if cmd == IDM_QUIT then ClearAllEventHandler() end
+    local nf,spathes = false,'',''
+    local sposes
+    local slayout = ''
+    if cmd == IDM_QUIT then sposes = '' end
+    local curBuf = scite.buffers.GetCurrent()
+    DoForBuffers(function(i)
+        if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
+            scite.SendEditor(SCI_SETSAVEPOINT)
+            if not props['FileNameExt']:from_utf8(1251):find('Безымянный') and not props['FileNameExt']:find('^%^') then
+                spathes = spathes..'•'..props['FilePath']:from_utf8(1251)
+                local ml,bk = 0,''
+                while true do
+                    ml = editor:MarkerNext(ml, 2)
+                    if (ml == -1) then break end
+                    bk = bk..'¦'..ml
+                    ml = ml + 1
+                end
+                if sposes then
+                    sposes = sposes..'•'..editor.FirstVisibleLine..bk
+                    slayout = slayout..'•'..SaveLayOut()
+                end
+                nf = true
+            else
+                if i <= curBuf then curBuf = curBuf - 1 end
+            end
+            scite.MenuCommand(IDM_CLOSE)
+        end
+    end)
+    if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
+    if nf and cmd == IDM_QUIT then
+        _G.iuprops['buffers'] = spathes;
+        _G.iuprops['buffers.pos'] = sposes
+        _G.iuprops['buffers.layouts'] = slayout
+    end
+    if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
+    else return true end
+end
+
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
-        local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
-        if cmd ==  9132 then cur = scite.buffers.GetCurrent() end
-
-        local msg = ''
-        local notSaved = {}
-
-        local maxN = scite.buffers.GetCount() - 1
-        for i = 0,maxN do
-            local pth = scite.buffers.NameAt(i):from_utf8(1251)
-            local _,_,fnExt = pth:find('([^\\]*)$')
-            if not scite.buffers.SavedAt(i) and i ~= cur and (cmd ~= 9134 or pth:find('Безымянный')) and not fnExt:find('^%^') then
-                msg = msg..pth:gsub('(.+)[\\]([^\\]*)$', '%2(%1)')..'\n'
-                table.insert(notSaved, i)
-            end
-        end
-
-        local result = 2
-        if msg ~= '' then
-            msg = msg..'Сохранить все?'
-            result = tonumber(iup.Alarm('Некоторые файлы не сохранены:', msg, 'Да', 'Нет', 'Отмена'))
-            --result = shell.msgbox(msg, "Close", 3) --YESNOCANCEL Yes - 6, NO - 7 CANCEL - 2
-            if result == 3 then return true end
-            if result == 1 then
-                for _,j in ipairs(notSaved) do
-                    scite.buffers.SetDocumentAt(j)
-                    scite.MenuCommand(IDM_SAVE)
-                end
-                if cmd == 9134 then return end
-            end
-        end
-        if cmd == IDM_QUIT then ClearAllEventHandler() end
-        local nf,spathes = false,'',''
-        local sposes
-        local slayout = ''
-        if cmd == IDM_QUIT then sposes = '' end
-        local curBuf = scite.buffers.GetCurrent()
-        DoForBuffers(function(i)
-            if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
-                scite.SendEditor(SCI_SETSAVEPOINT)
-                if not props['FileNameExt']:from_utf8(1251):find('Безымянный') and not props['FileNameExt']:find('^%^') then
-                    spathes = spathes..'•'..props['FilePath']:from_utf8(1251)
-                    local ml,bk = 0,''
-                    while true do
-                        ml = editor:MarkerNext(ml, 2)
-                        if (ml == -1) then break end
-                        bk = bk..'¦'..ml
-                        ml = ml + 1
-                    end
-                    if sposes then
-                        sposes = sposes..'•'..editor.FirstVisibleLine..bk
-                        slayout = slayout..'•'..SaveLayOut()
-                    end
-                    nf = true
-                else
-                    if i <= curBuf then curBuf = curBuf - 1 end
-                end
-                scite.MenuCommand(IDM_CLOSE)
-            end
-        end)
-        if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
-        if nf and cmd == IDM_QUIT then
-            _G.iuprops['buffers'] = spathes;
-            _G.iuprops['buffers.pos'] = sposes
-            _G.iuprops['buffers.layouts'] = slayout
-        end
-        if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
-        else return true end
+         return core_CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
         iup.DestroyDialogs();
         SaveIup()
@@ -506,10 +508,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
 end)
 
 AddEventHandler("OnContextMenu", function(lp, wp, source)
-    if source == "OUTPUT" then
-        menuhandler:ContextMenu(source)
-        return ""
-    end
+    menuhandler:ContextMenu(lp, wp, source)
+    return ""
 end)
 
 --Уничтожение диалогов при выключении или перезагрузке

@@ -13,86 +13,34 @@ function vss_SetCurrentProject(dir)
     if ierr ~= 0 then print(strerr) end
     return ierr == 0
 end
-local VSSContectMenuU =
-	"||"..
-	"VSS|POPUPBEGIN|"..
-	"Check Out|9151|"..
-	"Get Latest Version|9154|"..
-	"Diff|9155|"..
-	"History|9157|"..
-	"VSS|POPUPEND|"
-local VSSContectMenuC =
-	"||"..
-	"VSS|POPUPBEGIN|"..
-	"Check In|9152|"..
-	"Undo Check Out|9153|"..
-	"Get Latest Version|9154|"..
-	"Diff|9155|"..
-	"History|9157|"..
-	"VSS|POPUPEND|"
-local VSSContectMenuN =
-	"||"..
-	"VSS|POPUPBEGIN|"..
-	"Add|9156|"..
-	"VSS|POPUPEND|"
-
-local function update_vss_menu()
-	local menu = props["user.tabcontext.menu.*"]
-    local isVSS = false
-    local filedir = props["FileDir"]
-	-- test SVN context
-	isVSS = shell.fileexists(filedir.."\\mssccprj.scc")
-    -- no VSS context
-    if string.find(menu,"||VSS|") then
-        props["user.tabcontext.menu.*"] = string.gsub(menu, "||VSS|.*", "")
-        menu = props["user.tabcontext.menu.*"]
-    end
-    if isVSS then
-        local VSSContectMenu
-		vss_SetCurrentProject()
-        local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Status '..props['FileNameExt'],nil,true,true)
-        if ierr == 0 then -- не взят
-            VSSContectMenu = VSSContectMenuU
-        elseif ierr == 1 then --взят
-            VSSContectMenu = VSSContectMenuC
-        elseif ierr == 100 then --новый
-            VSSContectMenu = VSSContectMenuN
-        else
-            print(strerr)
-            return
-        end
-		props["user.tabcontext.menu.*"] = menu..VSSContectMenu
-    end
-end
 
 local function reset_err(ierr, strerr)
 	if ierr==0 then
 		scite.MenuCommand(IDM_REVERT)
-		update_vss_menu()
 	else
 		print(strerr)
 	end
 end
 
-function vss_add()
+local function vss_add()
 	if vss_SetCurrentProject() then
 		reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Add "'..props['FileDir']..'\\'..props['FileNameExt']..'" -C-',nil,true,true))
 	end
 end
 
-function vss_getlatest()
+local function vss_getlatest()
 	if vss_SetCurrentProject() then
 		reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Get '..props['FileNameExt'],nil,true,true))
 	end
 end
 
-function vss_undocheckout()
+local function vss_undocheckout()
 	if vss_SetCurrentProject() then
 		reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Undocheckout '..props['FileNameExt']..' -G-',nil,false,true))
 	end
 end
 
-function vss_checkout()
+local function vss_checkout()
 	if vss_SetCurrentProject() then
 		local ierr, strerr=shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'],nil,true,true)
 		local stropt = ""
@@ -114,7 +62,7 @@ function vss_checkout()
 	end
 end
 
-function vss_diff()
+local function vss_diff()
 	if vss_SetCurrentProject() then
 		local ierr, strerr=shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'],nil,true,true)
 		if ierr==1 then
@@ -136,21 +84,51 @@ function vss_diff()
 	end
 end
 
-function vss_checkin()
+local function vss_checkin()
 	if vss_SetCurrentProject() then
 		reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Checkin '..props['FileNameExt']..' -C-',nil,true,true))
 	end
 end
 
-function vss_hist()
+local function vss_hist()
 	if vss_SetCurrentProject() then
 		local _, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" History '..props['FileNameExt'],nil,true,true)
 		print(strerr)
 	end
 end
 
--- Добавляем свой обработчик события OnOpen
-AddEventHandler("OnOpen", update_vss_menu)
+local function CreateVSSMenu()
+    local t = {}
 
--- Добавляем свой обработчик события OnSwitchFile
-AddEventHandler("OnSwitchFile", update_vss_menu)
+    local VSSContectMenu
+    vss_SetCurrentProject()
+    local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Status '..props['FileNameExt'],nil,true,true)
+    if ierr == 0 then -- не взят
+        t = {
+            {'Check Out', action = vss_checkout ,},
+            {'Get Latest Version', action = vss_getlatest ,},
+            {'Diff', action = vss_diff ,},
+            {'History', action = vss_hist ,},
+        }
+    elseif ierr == 1 then --взят
+        t = {
+            {'Check In', action = vss_checkin ,},
+            {'Undo Check Out', action = vss_undocheckout ,},
+            {'Get Latest Version', action = vss_getlatest ,},
+            {'Diff', action = vss_diff ,},
+            {'History', action = vss_hist ,},
+        }
+    elseif ierr == 100 then --новый
+        t = {
+            {'Add', action = vss_add ,},
+        }
+    else
+        print(strerr)
+    end
+
+    return t
+end
+
+menuhandler:InsertItem('TABBAR', '',
+    {'VSS', visible=function() return shell.fileexists(props["FileDir"].."\\mssccprj.scc") end, CreateVSSMenu})
+
