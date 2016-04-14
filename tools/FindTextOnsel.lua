@@ -653,7 +653,7 @@ require "menuhandler"
 menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',
     {'Marks', ru='Метки', action=function() ActivateFind(3) end, key='Ctrl+M',})
 menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-{'FindTextOnSel', plane=1,{
+{'Search', ru='Поиск', plane=1,{
     {'s_FindTextOnSel', separator=1},
     {'Find Next Word/Selection', ru='Слово/выделение - в диалог поиска', action=Find_FindInDialog, key='Ctrl+F3',},
     {'Next Word/Selection', ru='Следующее слово/выделение', action=function() FindNextWrd(2) end, key='Alt+F3',},

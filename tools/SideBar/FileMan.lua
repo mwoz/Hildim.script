@@ -39,12 +39,13 @@ end
 ----------------------------------------------------------
 -- tab0:list_dir   File Manager
 ----------------------------------------------------------
-function FileMan_ListFILLByMask(strMask)
+local FileMan_ListFILL
+local function FileMan_ListFILLByMask(strMask)
     file_mask = strMask
     FileMan_ListFILL()
 end
 
-function FileMan_ListFILL()
+FileMan_ListFILL = function()
     memo_path.value = current_path
 	if current_path == '' then return end
 
@@ -152,7 +153,7 @@ local function FileMan_GetSelectedItem(idx)
 	return list_dir:getcell(idx, 2), list_dir:getcell(idx, 4), tonumber(list_dir:getcell(idx, 3))
 end
 
-function FileMan_ChangeDir()
+local function FileMan_ChangeDir()
     local d = iup.filedlg{dialogtype='DIR',  parentdialog='SCITE'}
     d:popup()
     local newPath = d.value
@@ -180,7 +181,7 @@ local function FileMan_FileExecWithSciTE(cmd, mode)
 	props["command.mode.0.*"] = p1
 end
 
-function FileMan_FileExec(params)
+local function FileMan_FileExec(params)
 	if params == nil then params = '' end
 	local filename = FileMan_GetSelectedItem()
 	if filename == '' then return end
@@ -213,7 +214,7 @@ function FileMan_FileExec(params)
 	end
 end
 
-function FileMan_FileExecWithParams()
+local function FileMan_FileExecWithParams()
 	if scite.ShowParametersDialog('Exec "'..FileMan_GetSelectedItem()..'". Please set params:') then
 		local params = ''
 		for p = 1, 4 do
@@ -259,12 +260,18 @@ local function FileMan_OpenItem()
         memo_mask.value = ''
 		FileMan_ListFILLByMask(memo_mask.value)
 	else
+        local _,_,ext = dir_or_file:find('%.(.*)$')
+        ext = ext:lower()
+        if string.find('.exe.lnk.doc.xsl.pdf.chm.', '.'..ext..'.') then
+            FileMan_FileExec()
+            return
+        end
         prev_filename = current_path..dir_or_file
 		OpenFile(prev_filename)
 	end
 end
 
-function FileMan_OpenSelectedItems()
+local function FileMan_OpenSelectedItems()
 	local si = list_getvaluenum(list_favorites)
     local dir_or_file, attr = FileMan_GetSelectedItem(si)
     if attr ~= 'd' then
@@ -313,7 +320,7 @@ function Favorites_ListFILL()
     list_favorites.redraw = "ALL"
 end
 
-function Favorites_OpenList()
+local function Favorites_OpenList()
 	local favorites_file = io.open(favorites_filename)
     list_fav_table = {}
 	if favorites_file then
@@ -342,7 +349,7 @@ local function Favorites_SaveList()
 	end
 end
 
-function Favorites_AddFile()
+local function Favorites_AddFile()
 	local fname, attr = FileMan_GetSelectedItem()
 	if fname == '' then return end
 	fname = current_path..fname
@@ -421,7 +428,7 @@ local function FileMan_Rename()
     iup.SetAttribute(list_dir, 'EDIT_MODE', 'YES')
 end
 
-function Favorites_AddCurrentBuffer()
+local function Favorites_AddCurrentBuffer()
 	list_fav_table[#list_fav_table+1] = {props['FilePath'], false}
 	Favorites_ListFILL()
     Favorites_SaveList()
@@ -439,7 +446,7 @@ function Favorites_Clear()
 	Favorites_ListFILL()
 end
 
-function Favorites_DeleteItem()
+local function Favorites_DeleteItem()
 	local idx = list_getvaluenum(list_favorites)
 	if idx == nil then return end
 	iup.SetAttribute(list_favorites, "DELLIN", idx)

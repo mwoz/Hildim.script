@@ -98,7 +98,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
                         break
                     end
                 elseif itm.separator then
-                    if not bPrevSepar then table.insert(t, iup.separator{}) end
+                    if not bPrevSepar and i > 1 and i < #m then table.insert(t, iup.separator{}) end
                 else --вставка пункта меню - только видимые
 
                     local titem = {title = s:get_title(itm)} --заголовок

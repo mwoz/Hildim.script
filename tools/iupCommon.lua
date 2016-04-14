@@ -185,7 +185,12 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             end
         end
     elseif cmd == IDM_CLOSE then
-        iuprops['resent.files.list']:ins(props["FilePath"])
+        local source = props["FilePath"]
+        if source:find('^%^') then return end
+        if not source:find('^\\\\') then
+            if not shell.fileexists(source:from_utf8(1251)) then return end
+        end
+        iuprops['resent.files.list']:ins(source)
     end
 end)
 AddEventHandler("OnSave", function(cmd, source)
@@ -194,6 +199,7 @@ AddEventHandler("OnSave", function(cmd, source)
     end
 end)
 AddEventHandler("OnClose", function(source)
+    if source:find('^%^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8(1251)) then return end
     end

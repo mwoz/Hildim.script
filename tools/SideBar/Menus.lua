@@ -58,6 +58,17 @@ local function IsSelection()
     return scintilla().SelectionStart<scintilla().SelectionEnd
 end
 
+local function ResetReadOnly()
+    local attr = shell.getfileattr(props['FilePath'])
+    if shell.bit_and(attr, 1) == 1 then
+        attr = attr - 1
+    else
+        attr = attr + 1
+    end
+    shell.setfileattr(props['FilePath'], attr)
+    scite.MenuCommand(IDM_REVERT)
+end
+
 _G.sys_Menus.TABBAR = {
     {link='File¦&Close'},
     {link='File¦C&lose All'},
@@ -65,6 +76,7 @@ _G.sys_Menus.TABBAR = {
     {'Close All Temporally',  ru = 'Çàðûòü âñå âðåìåííûå', action=function() core_CloseFilesSet(9134) end, },
     {'s1', separator=1},
     {link='File¦&Save'},
+    {link='Buffers¦&Save All'},
     {link='File¦Save &As...'},
     {link='File¦Save a Cop&y...'},
     {'s1', separator=1},
@@ -77,6 +89,7 @@ _G.sys_Menus.TABBAR = {
         {'FileName', ru='Èìÿ ôàéëà', action = function() CopyPathToClipboard("name") end,},
     }},
     {link='File¦Encoding'},
+    {link='Options¦&Read-Only'},
 }
 _G.sys_Menus.OUTPUT = {
     {link='Edit¦Conventional¦Cu&t'},
@@ -116,9 +129,13 @@ _G.sys_Menus.EDITOR = {
     {link='Edit¦Conventional¦&Copy'},
     {link='Edit¦Conventional¦&Paste'},
     {link='Edit¦Conventional¦&Delete'},
+    {link='Edit¦Conventional¦Duplicat&e'},
     {'s1', separator=2},
     {link='Edit¦Conventional¦Select &All'},
+    {link='Search¦Search', plane=0},
     {link='View¦Folding', plane=0},
+    {link='Search¦Toggle Bookmar&k'},
+    {link='Search¦&Go to definition(Shift+Click)'},
 }
 
 _G.sys_Menus.MainWindowMenu = {
@@ -137,7 +154,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Save', ru = 'Ñîõðàíèòü', key = 'Ctrl+S', action = IDM_SAVE},
         {'Save &As...', ru = 'Ñîõðàíèòü êàê...', key = 'Ctrl+Shift+S', action = IDM_SAVEAS},
         {'Save a Cop&y...', ru = 'Ñîõðàíèòü êîïèþ...', key = 'Ctrl+Shift+P', action = IDM_SAVEACOPY},
-        {'Copy Pat&h',  action = IDM_COPYPATH},
+        --[[{'Copy Pat&h',  action = IDM_COPYPATH},]]
         {'Encoding', ru='Êîäèðîâêà',{check_idm='editor.unicode.mode', radio = 1,
             {'&Code Page Property', ru='Çàäàííàÿ íàñòðîéêîé codepage', action = IDM_ENCODING_DEFAULT},
             {'UTF-16 &Big Endian',  action = IDM_ENCODING_UCS2BE},
@@ -254,7 +271,7 @@ _G.sys_Menus.MainWindowMenu = {
         Vertical &Split',  action = IDM_SPLITVERTICAL},]]
         {'&Wrap', ru = 'Ïåðåíîñ ïî ñëîâàì', action = IDM_WRAP, check = "props['wrap']=='1'"},
         {'Wrap Find &Result', ru = 'Ïåðåíîñ ïî ñëîâàì â ðåçóëüòàòàõ ïîèñêà', action = IDM_WRAPFINDRES, check = "props['findrez.wrap']=='1'"},
-        {'&Read-Only', ru = 'Òîëüêî äëÿ ÷òåíèÿ', action = IDM_READONLY},
+        {'&Read-Only', ru = 'Òîëüêî äëÿ ÷òåíèÿ', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
         {'s2', separator=1},
         {'Line End Characters', ru='Ñèìâîëû ïåðåâîäà ñòðîê',{radio = 1,
             {'CR &+ LF',  action = IDM_EOL_CRLF, check = "editor.EOLMode==SC_EOL_CRLF"},
@@ -292,7 +309,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'Move Tab &Left', ru = 'Ïåðåìåñòèòü âëåâî', action = IDM_MOVETABLEFT},
         {'Move Tab &Right', ru = 'Ïåðåìåñòèòü âïðàâî', action = IDM_MOVETABRIGHT},
         {'&Close All', ru = 'Çàêðûòü âñå', action = IDM_CLOSEALL},
-        {'&Save All', ru = 'Ñîõðàíèòü âñå', action = IDM_SAVEALL},
+        {'&Save All', ru = 'Ñîõðàíèòü âñå', key = 'Ctrl+Alt+S', action = IDM_SAVEALL},
         {'s2', separator=1},
         {'l1', windowsList, plane = 1},
     },},
