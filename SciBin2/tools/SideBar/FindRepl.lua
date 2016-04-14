@@ -303,10 +303,14 @@ end
 function ActivateFind(nTab)
     Ctrl("tabFinrRepl").valuepos = nTab
 
+    local wnd = editor
+    if output.Focus then wnd = output
+    elseif findrez.Focus then wnd = findrez end
+
     local s
-    if editor.SelectionStart == editor.SelectionEnd then s = GetCurrentWord()
-    else s = editor:GetSelText() end
-    if editor.CodePage ~= 0 then s = s:from_utf8(1251) end
+    if wnd.SelectionStart == wnd.SelectionEnd then s = GetCurrentWord()
+    else s = wnd:GetSelText() end
+    if wnd.CodePage ~= 0 then s = s:from_utf8(1251) end
     s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
@@ -318,7 +322,7 @@ function ActivateFind(nTab)
         oDeattFnd.DetachRestore = true; oDeattFnd.detach = 1
     end
 
-    if nTab ~= 2 then Ctrl("numStyle").value = editor.StyleAt[editor.SelectionStart] end
+    if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart] end
 
     if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
     else iup.SetFocus(Ctrl('cmbFindWhat')) end
