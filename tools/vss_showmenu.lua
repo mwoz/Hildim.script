@@ -1,4 +1,6 @@
 require 'shell'
+local bLocalDir = false
+
 function vss_SetCurrentProject(dir)
     local d = dir or props['FileDir']
     if not shell.fileexists(d..'\\'..'mssccprj.scc') then
@@ -99,7 +101,6 @@ end
 
 local function CreateVSSMenu()
     local t = {}
-
     local VSSContectMenu
     vss_SetCurrentProject()
     local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Status '..props['FileNameExt'],nil,true,true)
@@ -125,13 +126,16 @@ local function CreateVSSMenu()
     else
         print(strerr)
     end
-
     return t
 end
 
-menuhandler:InsertItem('TABBAR', '',
-    {'VSS', visible=function() return shell.fileexists(props["FileDir"].."\\mssccprj.scc") end, CreateVSSMenu})
+local function OnSwitch_local()
+    if props['FileDir']:find('^\\\\') then bLocalDir = false
+    else shell.set_curent_dir(props['FileDir'])  bLocalDir = true end
+end
 
-AddEventHandler("OnSwitchFile", function()
-    shell.set_curent_dir(props['FileDir'])
-end)
+menuhandler:InsertItem('TABBAR', '',
+    {'VSS', visible=function() return bLocalDir and shell.fileexists(props["FileDir"].."\\mssccprj.scc") end, CreateVSSMenu})
+
+AddEventHandler("OnSwitchFile", OnSwitch_local)
+AddEventHandler("OnOpen", OnSwitch_local)

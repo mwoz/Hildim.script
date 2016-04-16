@@ -241,7 +241,7 @@ local function SmartBraces( char )
 				-- если следующий символ закрывающаяся скобка
 				-- и мы ее вводим, то ввод проглатываем
 				local nextsymbol = string.format( "%c", editor.CharAt[editor.CurrentPos] )
-				if	( GetIndexFindCharInProps( 'braces.close.*', nextsymbol ) ~= nil )
+				if	( GetIndexFindCharInProps( 'braces.close.*', nextsymbol ) ~= nil)
 					and
 					( nextsymbol == char )
 				then
@@ -253,7 +253,9 @@ local function SmartBraces( char )
 				-- то сразу вставляем закрывающуюся скобку
 				if	( char == braceOpen )
 					and
-				( nextIsEOL( editor.CurrentPos ) or nextIs( editor.CurrentPos, braceClose ) or nextIs( editor.CurrentPos, prevBrClose ) or nextIs( editor.CurrentPos, ' ' ) or nextIs( editor.CurrentPos, '\t' ) )
+				( nextIsEOL( editor.CurrentPos ) or --nextIs( editor.CurrentPos, braceClose ) or
+                  nextIs( editor.CurrentPos, prevBrClose ) or nextIs( editor.CurrentPos, ' ' ) or
+                  nextIs( editor.CurrentPos, '\t' ) or (string.find('}])', nextsymbol) and editor:BraceMatch(editor.CurrentPos) > 0))
 				then
 					local virtSpace = scite.SendEditor(SCI_GETSELECTIONNANCHORVIRTUALSPACE, 0)
 					local isUndo = false

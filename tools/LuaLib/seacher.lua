@@ -140,7 +140,8 @@ function s:FindNext(fireEvent)
 
 		local start = self.e.TargetStart
 		local fin = self.e.TargetEnd
-        self.e:EnsureVisible(start, fin)
+        self.e:EnsureVisibleEnforcePolicy(self.e:LineFromPosition(start))
+        -- self.e:EnsureVisible(start, fin)
 		-- EnsureRangeVisible;
 
         self.e:SetSel(start, fin)

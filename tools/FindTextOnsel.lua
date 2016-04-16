@@ -597,6 +597,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
                 return
             end
         end
+        editor:EnsureVisibleEnforcePolicy(p)
         p = editor:PositionFromLine(p)
         editor:SetSel(p, p)
         iup.PassFocus()
