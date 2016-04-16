@@ -132,3 +132,6 @@ end
 menuhandler:InsertItem('TABBAR', '',
     {'VSS', visible=function() return shell.fileexists(props["FileDir"].."\\mssccprj.scc") end, CreateVSSMenu})
 
+AddEventHandler("OnSwitchFile", function()
+    shell.set_curent_dir(props['FileDir'])
+end)
