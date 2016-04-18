@@ -60,7 +60,6 @@ local function AddObjectFromFile(filename)
 end
 
 local function AddDEFFromFile(filename)
-print(99)
     local j = 0
     local fname = filename:lower()
     for line in io.lines(fname) do
@@ -94,9 +93,14 @@ local function sql_FillMapFile_tread()
 
 end
 
-function sql_FillMapFile()
+function sql_FillMapFile(bInTread)
 --Считываем мессадж с объектами из сорсов и сохраняем его в файле
     --local strPath="f:\\Projects\\Radius\\Modules\\;f:\\Projects\\Sql\\"
+    if bInTread then
+        sql_FillMapFile_tread()
+        return
+    end
+
     local strPath=props["sys.SqlObjects.folders"]
 
     local dirName
@@ -677,6 +681,11 @@ local function local_OnUpdateUI()
         strObjToShow = nil
     end
 end
+
+menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
+    {'Reload Sql Map', ru='Перезагрузить мэп Sql-объектов',visible_ext='form,rform,cform,m,sql,h', action=function() sql_FillMapFile_tread() end})
+menuhandler:InsertItem('MainWindowMenu', 'Edit¦s1',
+    {'Insert Execute...', ru='Вставить вызов процедуры...',visible_ext='form,rform,cform,m,sql,h', action=sql_ExecCmd})
 
 AddEventHandler("OnOpen", local_OnOpen)
 AddEventHandler("OnSwitchFile", local_OnOpen)

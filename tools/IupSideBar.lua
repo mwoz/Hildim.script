@@ -587,3 +587,10 @@ AddEventHandler("OnLayOutNotify", function(cmd)
     end
 end)
 
+menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx',
+{'Sidebar', {
+    {'S1', key = 'Ctrl+1',  action=function() sidebar_Switch(1) end, },
+    {'S2', key = 'Ctrl+2',  action=function() sidebar_Switch(2) end, },
+    {'S3', key = 'Ctrl+3',  action=function() sidebar_Switch(3) end, },
+    {'S4', key = 'Ctrl+4',  action=function() sidebar_Switch(4) end, },
+}})

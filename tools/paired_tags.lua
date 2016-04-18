@@ -200,6 +200,7 @@ local function PairedTagsFinder()
 
 	if tag_start == nil
 		or editor.CharAt[tag_start] ~= 60 -- [<]
+        or editor.CharAt[tag_start + 1] == 63 --[?]
 		or (editor.StyleAt[tag_start] ~= styleBracket and editor.StyleAt[tag_start] ~= styleBracket )
 		then
 			t.tag_start = nil

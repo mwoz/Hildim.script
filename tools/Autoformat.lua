@@ -21,6 +21,7 @@ local errmark = props["autoformat.err.mark"]
 
 -- 3 таблицы wrdBeginIndent wrdEndIndent wrdMidleInent -  в каждой строке - таблица
 -- в первой колонке которой шаблон конструкции, а во второй - индекс, по которому они связаны друг с другом
+
 local wrdBeginIndent = {
                         {"^(%s*)If%s.+%sThen%W%s*(%'?)(.*)$",1},
                         {"^(%s*)For%s.+%sTo%W",2},
@@ -113,7 +114,7 @@ local function FindUp(stek,nLine,poses)
         if not bIsComment then
             for j=1,table.maxn(wrdEndIndent) do
                 s,_e = CheckPattern(strUpLine,wrdEndIndent[j][1])
-                if s ~=nil then  --нашли строку уменьшаюшьую отступ
+                if s ~=nil then  --нашли строку уменьшающую отступ
                     table.insert(poses,{string.len(s), _e, nLine,table.maxn(stek) })
                     table.insert(stek,wrdEndIndent[j][2])
                     bIsFound = true
@@ -407,17 +408,46 @@ local function OnUpdateUI_local()
     end
 end
 
-function IndentBlockUp()
+local function IndentBlockUp()
     local current_pos = editor.CurrentPos
     local cur_line = editor:LineFromPosition(current_pos)
+    local current_line_real = cur_line
     local startLine = editor:PositionFromLine(cur_line)
-    local strLine =  editor:textrange(startLine,current_pos)
+    local pos_in_line = current_pos - startLine
+    local strLine =  editor:textrange(startLine,editor.LineEndPosition[cur_line])
+    local checked = false
+    local curLevel = 0
+    repeat
+        for j=1,table.maxn(wrdEndIndent) do
+            if CheckPattern(strLine..'    ',wrdEndIndent[j][1]) then --нашли какой-то конец блока
+                curLevel = curLevel - 1
+                if curLevel < 0 then
+                    checked = true
+                end
+                break
+            end
+        end
+        if not checked then         --сдвигаемся на строку вниз
+            for j=1,table.maxn(wrdBeginIndent) do
+                if CheckPattern(strLine..'    ',wrdBeginIndent[j][1]) then --начало блока - увеличиваем счетчик блоков
+                    curLevel = curLevel + 1
+                    break
+                end
+            end
+            cur_line = cur_line + 1
+            if editor.LineCount <= cur_line then break end
+            startLine = editor:PositionFromLine(cur_line)
+            current_pos = editor.LineEndPosition[cur_line]
+            strLine = editor:textrange(startLine,current_pos)
+        end
+    until checked
     nextIndent = nil
     local _,_,strSep,strOut = string.find(strLine,"^(%s*)(%S.*)")
-    if strOut == nil  then
+    if strOut == nil or not checked  then
         nextIndent = strSep
         return
     end
+
     local bIsError,poses
     bIsError,strSep,poses = ParseStructure(strSep,strOut..' ',current_pos,cur_line)
     if poses ~=nil then
@@ -468,9 +498,9 @@ function IndentBlockUp()
     else
         print('No Strcture', strSep,strOut,current_pos,cur_line)
     end
-    current_pos = editor:PositionFromLine(cur_line)
+    current_pos = editor:PositionFromLine(current_line_real) + pos_in_line
     editor:SetSel(current_pos,current_pos)
-    editor:LineEnd()
+    --editor:LineEnd()
 end
 
 ------------------------------------------------------
