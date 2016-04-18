@@ -200,12 +200,13 @@ _G.sys_Menus.MainWindowMenu = {
         {'Insert Special Char', ru = 'Вставить спецсимвол', action = function() SpecialChar() end},
         {'Sorting of lines A… z / z… A', ru = 'Сортировать строки A… z / z… A', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SortText.lua')"},
 
-        {'S&how Calltip', ru = 'Подсказать подсказку', key = 'Ctrl+Shift+Space', action = IDM_SHOWCALLTIP},
+        {'S&how Calltip', ru = 'Подсказать подсказку', key = 'Ctrl+?', action = function() ShowTipManualy() end,},
         -- {'Complete S&ymbol', ru = 'Завершить слово(из API и текста)', key = 'Ctrl+I', action = IDM_COMPLETE},
         {'Complete S&ymbol', ru = 'Завершить слово(из API)', key = 'Ctrl++', action= function() ShowListManualy() end},
         {'Complete &Word', ru = 'Завершить слово(из текста)', key = 'Ctrl+Enter', action = IDM_COMPLETEWORD},
-        {'Expand Abbre&viation', ru = 'Вставить сокращение', key = 'Ctrl+B', action = IDM_ABBREV},
-        {'&Insert Abbreviation', ru = 'Расшифровать сокращение', key = 'Ctrl+Shift+R', action = IDM_INS_ABBREV},
+        {'Expand Abbre&viation', ru = 'Вставить сокращение (%SEL%=выделение)', key = 'Ctrl+B', action = IDM_ABBREV},
+        {'Expand Abbre&viation', ru = 'Вставить сокращение (%SEL%=клипбоард)', key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV},
+        --[[{'&Insert Abbreviation', ru = 'Расшифровать сокращение', key = 'Ctrl+Shift+R', action = IDM_INS_ABBREV},]]
         {'Block Co&mment or Uncomment', ru = 'Закомментировать и раскомментировать текст', key = 'Ctrl+Q', action = IDM_BLOCK_COMMENT},
         {'Bo&x Comment', ru = 'Блочный комментарий', key = 'Ctrl+Shift+B', action = IDM_BOX_COMMENT},
         {'Stream Comme&nt', ru = 'Потоковый комментарий', key = 'Ctrl+Shift+Q', action = IDM_STREAM_COMMENT},
@@ -259,6 +260,13 @@ _G.sys_Menus.MainWindowMenu = {
             {'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', action = function() scite.PostCommand(POST_SCRIPTRELOAD,0) end,},
         },},
         {'s1', separator=1},
+        {'Utils', ru='Утилиты',{
+            {'Lpeg Tester', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\lpegTester.lua')",},
+            {'Replace spaces (TABs <-> Spaces)', ru ='Заменить табы на пробелы', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\IndentTabToSpace.lua')",},
+            {'4->3 Tab size Indent', ru ='Отступ 4->3', action=function() For2ThreeTabIndent() end,},
+        },},
+        {'ASCII Table', ru = 'Таблица ASCII символов', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ASCIITable.lua')"},
+        {'s2', separator=1},
         {'&Next Message', ru = 'Следующее сообщение', key = 'F4', action = IDM_NEXTMSG},
         {'&Previous Message', ru = 'Предыдущее сообщение', key = 'Shift+F4', action = IDM_PREVMSG},
         {'Clear &Output', ru = 'Очистить окно консоли', key = 'Shift+F5', action = IDM_CLEAROUTPUT},
@@ -297,6 +305,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
         --[[{'Open A&bbreviations File', ru = 'Открыть файл настроек сокращений', action = IDM_OPENABBREVPROPERTIES},]]
         {'Open Lua Startup Scr&ipt', ru = 'Открыть файл автозагрузки скрипта', action = IDM_OPENLUAEXTERNALFILE},
+        {'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = function() do_LexerColors() end},
         {'Edit properties', ru='Свойства лексера',tLangs},
     },},
     {'Language', ru='Подсветка', {radio = 1,

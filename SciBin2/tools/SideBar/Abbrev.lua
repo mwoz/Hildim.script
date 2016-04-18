@@ -678,10 +678,6 @@ local function TryInsAbbrev(bClip)
     print("Error Abbrev not found in: '"..lBegin.."'")
 end
 
-function TryInsAbbrevClp()
-    TryInsAbbrev(true)
-end
-
 ----------------------------------------------------------
 -- list_bookmarks   Bookmarks
 ----------------------------------------------------------
@@ -807,7 +803,11 @@ local function Abbreviations_Init()
         OnSwitchFile = Abbreviations_ListFILL;
         OnSave = Abbreviations_ListFILL;
         OnOpen = Abbreviations_ListFILL;
-        OnMenuCommand = (function(msg) if msg == IDM_ABBREV then TryInsAbbrev(false) return true;end end);
+        OnMenuCommand = (function(msg)
+            if msg == IDM_ABBREV then TryInsAbbrev(false) return true;
+            elseif msg == IDM_INS_ABBREV then TryInsAbbrev(true) return true;
+            end
+        end);
         on_SelectMe = (function()  Abbreviations_ListFILL();end)
         }
 end

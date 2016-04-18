@@ -293,4 +293,10 @@ function NormaliseKeyWordsCase()
     editor:EndUndoAction()
 
 end
-
+require "menuhandler"
+menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦l1',
+    {'Sort Xml Tags In Node', ru='Упорядочить тэги в ноде', action=SortFormXML, key='Ctrl+Shift+S',}
+)
+menuhandler:InsertItem('MainWindowMenu', 'Edit¦l1',
+    {'Set KeyWords To StandartCase', ru='Ключевые слова в стандартный кэйс', action=NormaliseKeyWordsCase, key='Alt+Shift+L',}
+)

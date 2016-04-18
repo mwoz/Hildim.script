@@ -104,6 +104,7 @@ block.width
 block.height
 block.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
 block.xPos
+block.buttonHeight
 
 content.name
 content.type {{label|link|button|boolean|datetime|datefilter|date|integer|float|text|choicemult|choice|reference}}
