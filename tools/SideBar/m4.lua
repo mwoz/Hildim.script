@@ -9,17 +9,20 @@
 _G["SqlMap"] = nil
 
 
-local function RunBatch(filePath)
-    if props["output.hook"] == 'Y' then return end
+function RunBatch(filePath)
+    --if props["output.hook"] == 'Y' then return end
 	if editor.Lexer == SCLEX_MSSQL then
 		local inc =props["sys.calcsybase.dir"].."\\BuildM4\\"..iup.GetAttribute(cmb_listCalc, cmb_listCalc.value)
         local vbRun = props["SciteDefaultHome"].."\\tools\\RunSql.vbs"
         --local vbRun = props["sys.calcsybase.dir"].."\\RunSql.vbs"
-        cmd = 'cscript //nologo "'..vbRun..'" "'..filePath..'" "'..props["sybase.projects.dir"]..'\\" "'..inc..'"'
+        cmd = 'cscript //nologo "'..vbRun..'" "'..filePath..'" "'..props["sybase.projects.dir"]..'\\" "'..inc..'"\n'
 
         props["output.hook"] = 'Y'
+        output:SetSel(output.TextLength, output.TextLength)
+        output:ReplaceSel(cmd)
+        scite.RunInConcole()
 
-		local p0 = props["command.1.*"]
+--[[		local p0 = props["command.1.*"]
 		local p1 = props["command.mode.1.*"]
 		props["command.name.1.*"] = 'tmp'
 		props["command.1.*"] = cmd
@@ -27,7 +30,7 @@ local function RunBatch(filePath)
         scite.MenuCommand(9001)
 
 		props["command.1.*"] = p0
-		props["command.mode.1.*"] = p1
+		props["command.mode.1.*"] = p1]]
 	end
 end
 -- Возвращает текущий символ перевода строки

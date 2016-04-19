@@ -58,7 +58,7 @@ function formenjine_RunTemplate(strName)
     if _G.iuprops["precompiller.radiususername"] ~= '' then
         strSubj = strSubj..'.'.._G.iuprops["precompiller.radiususername"]
     end
-    if strName:find('^xtm%.') or strName:find('^control%.') or strName:find('^debug%.') then strName = '' end
+    if strName:find('^xtm%.') or strName:find('^lst%.') or strName:find('^control%.') or strName:find('^debug%.') then strName = '' end
     msg2:Subjects(strSubj)
     -- msg:SetPathValue("TemplPath",precomp_strRootDir.."..\\tmp\\debug.xml")
     msg2:SetPathValue("Run",strName)

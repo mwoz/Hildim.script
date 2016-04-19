@@ -210,6 +210,7 @@ function sql_ResetMap()
     end
     props['script.blockrestart'] = ''
     _G.iuprops['sqlobject.mapreloadtime'] = os.date():sub(0,8)
+    print('Map Reloaded')
 end
 
 local function local_OnSave()
@@ -744,7 +745,6 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         end
     elseif id_msg == SCN_NOTYFY_OUTPUTEXIT then
         if luaForRun then
-            print('Map Reloaded')
             local s = luaForRun
             luaForRun = nil
             _G["SqlMap"] = nil
