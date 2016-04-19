@@ -51,6 +51,7 @@ local function  CreateToolBar()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\m4.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\mb.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\templates.lua")
+   --
     --local tolsp2=iup.split{TabBar_obj.Tabs.m4.handle, TabBar_obj.Tabs.mb.handle, orientation="VERTICAL",minmax="300:700"}
     local tolsp1=iup.hbox{
                             TabBar_obj.Tabs.mb.handle,
@@ -111,7 +112,7 @@ local function  CreateBox()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Navigation.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua")
-
+    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\solution.lua")
     -- Creates boxes
     local sb_elements = {}
     function Pane(t)
@@ -468,7 +469,7 @@ local function InitMenuBar()
     end
 
 
-    local tTlb = {iup.vbox{name="MenuBar",expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL", minsize = 'x3'}}};
+    local tTlb = {iup.vbox{name="MenuBar",expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL"}}};
 
     tTlb.control = "YES"
     tTlb.sciteid="iupmenubar"

@@ -593,6 +593,7 @@ function Splash_Screen()
     iup.label{
       padding = "30x30",
       title = "!!!WAIT!!!",
+      --image = "d:\\Users\\Voznesenskiy.SYSTEMATICA\\Pictures\\i1.bmp",
       font = "Arial, 33", background= "IMAGE_search";
     }, background= "IMAGE_search";
   }; maxbox="NO",minbox ="NO",resize ="NO", menubox = "NO", border = "NO",opacity= "123",

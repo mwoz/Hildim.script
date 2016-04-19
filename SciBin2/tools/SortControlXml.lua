@@ -88,6 +88,7 @@ local alltagsmeta = {
 'length',
 'object',
 'codeName',
+'assetObjects',
 'mandatory',
 'default',
 'permissionGet',
@@ -107,6 +108,11 @@ local alltagsmeta = {
 -- EXTERNALREF only:
 'table',
 'field',
+-- DISPLAY only:
+'caption',
+'caption_ru',
+'tooltip',
+'tooltip_ru',
 '$$$$'}
 
 local tgControls={
@@ -202,7 +208,7 @@ function SortFormXML()
     if t_xml then
         local strObjType = t_xml[0]
         if strObjType == "Template" then
-            editor:ReplaceSel(SortXML(alltagsmeta, 'ExternalRef',(SortXML(alltagsmeta, 'Check',(SortXML(alltagsmeta, 'Index',(SortXML(alltagsmeta, 'Template',SortXML(alltagsmeta, 'Table', SortXML(alltagsmeta, 'Field', editor:GetSelText()))))))))))
+            editor:ReplaceSel(SortXML(alltagsmeta, 'Display',SortXML(alltagsmeta, 'ExternalRef',(SortXML(alltagsmeta, 'Check',(SortXML(alltagsmeta, 'Index',(SortXML(alltagsmeta, 'Template',SortXML(alltagsmeta, 'Table', SortXML(alltagsmeta, 'Field', editor:GetSelText())))))))))))
         elseif strObjType == "template" then
             editor:ReplaceSel(SortXML(alltags, 'option', SortXML(alltags, 'control', editor:GetSelText())))
         elseif strObjType == "Form" then

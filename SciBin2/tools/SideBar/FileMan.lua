@@ -195,14 +195,14 @@ local function FileMan_FileExec(params)
 		return cmd
 	end
 	-- Lua
-	if string.match(props['file.patterns.lua'], file_ext) then
+	if string.match(props['file.patterns.lua'], file_ext.."$") then
 		dofile(current_path..filename)
 	-- Batch
-	elseif string.match(props['file.patterns.batch'], file_ext) then
+	elseif string.match(props['file.patterns.batch'], file_ext.."$") then
 		FileMan_FileExecWithSciTE(CommandBuild('batch'))
 		return
 	-- WSH
-	elseif string.match(props['file.patterns.wscript']..props['file.patterns.wsh'], file_ext) then
+	elseif string.match(props['file.patterns.wscript']..props['file.patterns.wsh'], file_ext.."$") then
 		FileMan_FileExecWithSciTE(CommandBuild('wscript'))
 	-- Other
 	else

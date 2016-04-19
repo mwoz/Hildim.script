@@ -657,6 +657,7 @@ local function InsertAbbreviation(expan,dInd,curSel)
 end
 
 local function TryInsAbbrev(bClip)
+    if not abbr_table then return end
     local curSel
     if bClip then
         local cpb = iup.clipboard{};

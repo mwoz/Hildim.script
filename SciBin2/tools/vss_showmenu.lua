@@ -107,21 +107,21 @@ local function CreateVSSMenu()
     if ierr == 0 then -- не взят
         t = {
             {'Check Out', action = vss_checkout ,},
-            {'Get Latest Version', action = vss_getlatest ,},
-            {'Diff', action = vss_diff ,},
-            {'History', action = vss_hist ,},
+            {'Get Latest Version', ru='Получить последнюю версию', action = vss_getlatest ,},
+            {'Diff', ru='Показать различия', action = vss_diff ,},
+            {'History', ru='Показать историю', action = vss_hist ,},
         }
     elseif ierr == 1 then --взят
         t = {
             {'Check In', action = vss_checkin ,},
-            {'Undo Check Out', action = vss_undocheckout ,},
+            {'Undo Check Out', ru='Отменить Check In', action = vss_undocheckout ,},
             {'Get Latest Version', action = vss_getlatest ,},
-            {'Diff', action = vss_diff ,},
-            {'History', action = vss_hist ,},
+            {'Diff', ru='Показать различия', action = vss_diff ,},
+            {'History', ru='Показать историю', action = vss_hist ,},
         }
     elseif ierr == 100 then --новый
         t = {
-            {'Add', action = vss_add ,},
+            {'Add', ru='Добавить в Source Safe', action = vss_add ,},
         }
     else
         print(strerr)
