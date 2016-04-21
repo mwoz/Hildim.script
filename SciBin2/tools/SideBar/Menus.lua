@@ -90,6 +90,7 @@ _G.sys_Menus.TABBAR = {
     }},
     {link='File¦Encoding'},
     {link='Options¦&Read-Only'},
+    {'slast', separator=1},
 }
 _G.sys_Menus.OUTPUT = {
     {link='Edit¦Conventional¦Cu&t'},

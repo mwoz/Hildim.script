@@ -363,7 +363,7 @@ end
 local function OnChar_local(char)
     if not editor.Focus then return end
     if string.byte(char) == 13 then
-        if props["autoformat.line"]=="1" then doAutoformat(editor.CurrentPos - 1) end
+        if (_G.iuprops['autoformat.line'] or 0)==1 then doAutoformat(editor.CurrentPos - 1) end
         editor:ReplaceSel(nextIndent)
         return
     end
@@ -382,8 +382,6 @@ local function OnChar_local(char)
     end
     iChangedLine = -1
 
-    -- local current_pos = editor.CurrentPos - 1
-    -- if props["autoformat.line"]=="1" then doAutoformat(current_pos) end
 
     return true
 end
@@ -392,7 +390,7 @@ local function OnUpdateUI_local()
     if not editor.Focus then return end
     local s = editor.SelectionStart
     local e = editor.SelectionEnd
-    if iChangedLine > -1 and s == e and props["autoformat.line"]=="1" then
+    if iChangedLine > -1 and s == e and (_G.iuprops['autoformat.line'] or 0)==1 then
         local l = editor:LineFromPosition(s)
         if l ~= iChangedLine then
             local iline = editor.FirstVisibleLine
@@ -408,7 +406,7 @@ local function OnUpdateUI_local()
     end
 end
 
-local function IndentBlockUp()
+function IndentBlockUp()
     local current_pos = editor.CurrentPos
     local cur_line = editor:LineFromPosition(current_pos)
     local current_line_real = cur_line

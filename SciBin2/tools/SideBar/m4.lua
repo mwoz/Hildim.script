@@ -21,16 +21,6 @@ function RunBatch(filePath)
         output:SetSel(output.TextLength, output.TextLength)
         output:ReplaceSel(cmd)
         scite.RunInConcole()
-
---[[		local p0 = props["command.1.*"]
-		local p1 = props["command.mode.1.*"]
-		props["command.name.1.*"] = 'tmp'
-		props["command.1.*"] = cmd
-		props["command.mode.1.*"] = 'subsystem:console'
-        scite.MenuCommand(9001)
-
-		props["command.1.*"] = p0
-		props["command.mode.1.*"] = p1]]
 	end
 end
 -- Возвращает текущий символ перевода строки

@@ -985,7 +985,7 @@ local function OnChar_local(char)
             return r or result
         end
     end
-    if calltipinfo[1] ~= 0  then --будем считать,  что разделители параметров - только запятые
+    if calltipinfo[1] and calltipinfo[1] ~= 0  then --будем считать,  что разделители параметров - только запятые
         if calltipinfo[table.maxn(calltipinfo)][3] > 0 and bResetCallTip then
             ResetCallTipParams()
             result = true

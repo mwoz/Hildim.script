@@ -26,11 +26,11 @@ local function GetAction(mnu)
         return mnu.action
     elseif mnu.check_idm then
     elseif mnu.check_prop then
-        return "CheckChange('"..mnu.check_prop.."', true)"
+        return assert(loadstring("CheckChange('"..mnu.check_prop.."', true)"))
     elseif mnu.check_iuprops then
-        return "_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)
+        return assert(loadstring("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)))
     elseif mnu.check_boolean then
-        return "_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"
+        return assert(loadstring("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
     else
         return function() debug_prnArgs('Error in menu format!!',mnu) end
     end
@@ -55,6 +55,7 @@ local function FindMenuItem(path)
 end
 
 function s:PopMnu(smnu, x, y, bToolBar)
+--debug_prnArgs(smnu)
     local CreateMenu, CreateItems
     local bPrevSepar = false
     CreateItems = function(m,t)
@@ -123,7 +124,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
                     if not titem.active then --'экшны обрабатываем только для активных меню
                         titem.action = GetAction(itm)
                     end
-
+                    --debug_prnArgs(titem)
                     table.insert(t, iup.item(titem))
                 end
                 bPrevSepar = (itm.separator ~= nil)
@@ -136,6 +137,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
         if m.radio then t.radio = 'YES' end
         return iup.menu(t)
     end
+
     if bToolBar then
         waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
         scite.PostCommand(POST_CONTINUESHOWMENU,0)
@@ -144,19 +146,49 @@ function s:PopMnu(smnu, x, y, bToolBar)
     end
 end
 
+local function GetItemPos(i)
+    local _, _,left, top = iup.GetAttribute(labels[i],'SCREENPOSITION'):find('(%d+),(%d+)')
+    local _, _,width, height = iup.GetAttribute(labels[i],'NATURALSIZE'):find('(%d+)x(%d+)')
+    return tonumber(left), tonumber(top), tonumber(width), tonumber(height)
+end
+
 function s:OnMouseHook(x,y)
-    for i = 1, #labels do
-        local _, _,left, top = iup.GetAttribute(labels[i],'SCREENPOSITION'):find('(%d+),(%d+)')
-        local _, _,width, height = iup.GetAttribute(labels[i],'NATURALSIZE'):find('(%d+)x(%d+)')
-        left, top, width, height = tonumber(left), tonumber(top), tonumber(width), tonumber(height)
-        if i == 1 and (top > y or y > top + height) then return end
-        if left <= x and x <= left + width then
-            if activeLabel ~= labels[i] then
-                scite.SwitchMouseHook(false)
-                reselectedItem = {id = i, x = left, y = top + height}
+--вызывается при активированном меню:
+--при движении мыши - x,y - координаты курсора
+--при нажатии кнопок влево.вправо y - -1/1, x = -100
+--при нажатии кнопки Alt - оба параметра - -100
+    local left, top, width, height
+    if x>-100 and y>-100 then
+        for i = 1, #labels do
+            left, top, width, height = GetItemPos(i)
+            if i == 1 and (top > y or y > top + height) then return end
+            if left <= x and x <= left + width then
+                if activeLabel ~= labels[i] then
+                    scite.SwitchMouseHook(false)
+                    reselectedItem = {id = i, x = left, y = top + height}
+                end
+                return
             end
-            return
         end
+    elseif y>-100 then
+        for i = 1, #labels do
+            if activeLabel == labels[i] then
+                i = i + y
+                if i > 0 and i <= #labels then
+                    left, top, width, height = GetItemPos(i)
+                    scite.SwitchMouseHook(false)
+                    reselectedItem = {id = i, x = left, y = top + height}
+                    end
+                return
+            end
+        end
+    elseif not waited_mnu then   --нажали Alt
+        left, top, width, height = GetItemPos(1)
+
+        reselectedItem = {id = 1, x = left, y = top + height}
+        s:PopMnu(_G.sys_Menus.MainWindowMenu[2][2],left,top + height, true)
+
+
     end
 end
 
@@ -279,6 +311,11 @@ end
 
 function event_MenuMouseHook(x, y)
     menuhandler:OnMouseHook(x, y)
+end
+
+function s:PopUp(strPath)
+--Показывает сабменю в позиции мыши
+    s:PopMnu(FindMenuItem(strPath)[2], iup.MOUSEPOS,iup.MOUSEPOS, false)
 end
 
 _G.menuhandler = s
