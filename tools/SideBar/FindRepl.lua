@@ -435,6 +435,7 @@ local function create_dialog_FindReplace()
     iup.button{
       image = "IMAGE_search",
       title = " далее",
+      bgcolor = "255 255 255",
       name = "btnFind",
       action = FindNext,
       padding = "5x0"
@@ -475,7 +476,6 @@ local function create_dialog_FindReplace()
         title = "Подсчитать",
         action = GetCount,
       },
-
       --normalizesize = "HORIZONTAL",
       gap = "3",
       alignment = "ABOTTOM",

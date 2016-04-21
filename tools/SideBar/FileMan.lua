@@ -26,7 +26,7 @@ local function ReplaceWithoutCase(text, s_find, s_rep)
 	until false
 end
 
-local function GetExtImage(strName)
+function GetExtImage(strName)
     local _, _, ext = strName:find('%.([^%.]+)$')
     if ext=='inc' or ext=='incl' then return 'IMAGE_Library'
     elseif ext=='xml' or ext=='form' then return 'IMAGE_Frame'
@@ -657,6 +657,26 @@ local function FileManTab_Init()
         OnSave = function()OnSwitch(false,false) end;
         OnOpen = function()OnSwitch(false,true) end;
         OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir.restoretab']=memo_path.value end);
+        OpenDir = (function(newPath)
+            for i=1, SideBar_Plugins.fileman.Bar_obj.TabCtrl.count do
+                if iup.GetAttributeId(SideBar_Plugins.fileman.Bar_obj.TabCtrl,'TABTITLE',i) == SideBar_Plugins.fileman.id then
+                    SideBar_Plugins.fileman.Bar_obj.TabCtrl.valuepos = i
+                    break
+                end
+                print(newPath)
+
+                if newPath:match('[\\/]$') then
+                    current_path = newPath
+                else
+                    current_path = newPath..'\\'
+                end
+                FileMan_ListFILL()
+
+                for s,tbs in pairs(SideBar_Plugins) do
+                    if tbs.tabs_OnSelect and SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == tbs.id and s ~= 'fileman' then tbs.tabs_OnSelect() end
+                end
+            end
+        end),
         tabs_OnSelect = function()
             if SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_Plugins.fileman.id then
                 m_prevSel = SideBar_Plugins.fileman.Bar_obj.TabCtrl.valuepos
@@ -669,24 +689,4 @@ end
 
 FileManTab_Init()
 
---[[local function reset_err(ierr, strerr, sName)
-	if ierr==0 then
-	else
-		print(sName, strerr)
-	end
-end
 
-function Ren_VSS()
-    local o1,o2 = 'xml', 'inc'
-    local n1,n2 = 'form', 'incl'
-    if vss_SetCurrentProject(current_path) then
-        for i = 2, list_dir.numlin do
-            local sName = list_dir:getcell(i, 2)
-            if list_dir:getcell(i, 4) ~= 'd' and (sName:find('%.'..o1..'$') or sName:find('%.'..o2..'$')) then
-                local nName = sName:gsub('^(.*%.)'..o1..'$', '%1'..n1):gsub('^(.*%.)'..o2..'$', '%1'..n2)
-                reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Rename '..sName..' '..nName,nil,true,true), sName)
-            end
-        end
-    end
-    print('OK')
-end]]

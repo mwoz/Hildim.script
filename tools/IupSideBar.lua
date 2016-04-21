@@ -151,8 +151,7 @@ local function  CreateBox()
             h.size="1x1"
         end)
         t.tabchange_cb = (function(_,new_tab, old_tab)
-            --сначала найдем активный таб и установим его в SideBar_obj
-
+            --сначала найдем активный таб и установим его в SideBar_ob
             for _,tbs in pairs(SideBar_Plugins) do
                 if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
                 if tbs.id == new_tab.tabtitle then

@@ -134,7 +134,7 @@ local function OnSwitch_local()
     else shell.set_curent_dir(props['FileDir'])  bLocalDir = true end
 end
 
-menuhandler:InsertItem('TABBAR', '',
+menuhandler:InsertItem('TABBAR', 'slast',
     {'VSS', visible=function() return bLocalDir and shell.fileexists(props["FileDir"].."\\mssccprj.scc") end, CreateVSSMenu})
 
 AddEventHandler("OnSwitchFile", OnSwitch_local)
