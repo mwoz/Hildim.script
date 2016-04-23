@@ -463,10 +463,10 @@ menuhandler:InsertItem('EDITOR', 's0',
 )
 menuhandler:InsertItem('MainWindowMenu', 'Tools¦s1',
     {'Spelling', ru='Орфография',{
-        {'Close Incomplete Tag', ru='Проверять автоматически', action=ResetAutoSpell, check="tonumber(_G.iuprops['spell.autospell']) == 1", key='Ctrl+Alt+F12',},
+        {'Auto Spell Check', ru='Проверять автоматически', action=ResetAutoSpell, check="tonumber(_G.iuprops['spell.autospell']) == 1", key='Ctrl+Alt+F12',},
         {'s1', separator=1,},
-        {'Check Selection', ru='Проверить выделенный фрагмент', action=spell_Selected, key='Ctrl+F12',},
+        {'Check Selection', ru='Проверить выделенный фрагмент', action=spell_Selected, key='Ctrl+F12', image = 'IMAGE_CheckSpelling',},
         {'Check Selection, By Highlighting', ru='Проверить фрагмент с учетом подсветки', action=spell_ByLex,},
-        {'List Errors', ru='Показать список ошибок', action = spell_ErrorList, key='Ctrl+Shift+F12'},
+        {'List Errors', ru='Показать список ошибок', action = spell_ErrorList, key='Ctrl+Shift+F12', image = 'report__exclamation_µ'},
     }}
 )

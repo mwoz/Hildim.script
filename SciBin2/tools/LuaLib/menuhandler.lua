@@ -74,6 +74,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
             if getParam(itm.visible,true) and
                (not itm.visible_ext or string.find(','..itm.visible_ext..',',','..props["FileExt"]..',')) then
                 if itm[2] then
+
                     if type(itm[2]) == 'table' then
                         if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
                             CreateItems(itm[2],t)
@@ -103,6 +104,9 @@ function s:PopMnu(smnu, x, y, bToolBar)
                 else --вставка пункта меню - только видимые
 
                     local titem = {title = s:get_title(itm)} --заголовок
+                    if itm.image then
+                        titem.image = itm.image
+                    end
                     --доступность
                     if not getParam(itm.active, true) then titem.active = 'NO' end
 
@@ -174,11 +178,11 @@ function s:OnMouseHook(x,y)
         for i = 1, #labels do
             if activeLabel == labels[i] then
                 i = i + y
-                if i > 0 and i <= #labels then
+                if i <=0 then i = #labels
+                elseif i > #labels then i = 1 end
                     left, top, width, height = GetItemPos(i)
                     scite.SwitchMouseHook(false)
                     reselectedItem = {id = i, x = left, y = top + height}
-                    end
                 return
             end
         end

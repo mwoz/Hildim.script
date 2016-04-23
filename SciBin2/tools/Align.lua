@@ -122,4 +122,4 @@ function do_Align()
 end
 
 menuhandler:InsertItem('MainWindowMenu', 'Edit¦xxx',
-{'Alignment...',  ru = 'Выровнять строки по символу...', action=do_Align, key = 'Alt+A', active='editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)'})
+{'Alignment...',  ru = 'Выровнять строки по символу...', action=do_Align, key = 'Alt+A', active='editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)', image = 'edit_column_µ'})

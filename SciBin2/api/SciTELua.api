@@ -155,56 +155,24 @@ setlocale (locale [, category])\n  set current locale of program, returns name o
 time ([table])\n  returns current time (usually seconds) or time as represented by table
 tmpname ()\n  returns a string with a filename for a temporary file (dangerous! tmpfile is better)
 
-shell.msgbox
-shell.inputbox
-shell.getfileattr
-shell.setfileattr
-shell.exec
-shell.findfiles
-shell.fileexists
-msgbox (<Text>, <Title>, <Options>)\n Message Box. Return select button  /extern lib "shell"/
-inputbox (<Title>, <Prompt>, <Default>, <funcCheck>, <minWidth>)\n Input Box. Return input string  /extern lib "shell"/
-getfileattr (<FileName>)\n return File Attribute as number  /extern lib "shell"/
-setfileattr (<FileName>, <FileAttr>)\n Set File Attribute  /extern lib "shell"/
-exec (strCommand, [strOperation], [boolNoShow], [bWaitOnReturn])\n /extern lib "shell"/
-findfiles (<FileMask>)\n return list of files by mask  /extern lib "shell"/
-fileexists (<FileName>)\n return true if file or folder exists  /extern lib "shell"/
-
-gui.window
-gui.panel
-gui.set_panel
-gui.tabbar
-gui.list
-gui.memo
-gui.pass_focus
-gui.toolbar
-gui.open_dlg
-gui.save_dlg
-gui.select_dir_dlg
-gui.colour_dlg
-gui.files
-gui.chdir
-gui.message
-gui.prompt_value
-gui.run
-window ("title")\n create new top-level windows  /extern lib "gui"/
-panel (width)\n create panel  /extern lib "gui"/
-set_panel (panel_name, "right")\n panel attached to the left or the right side of the editor pane  /extern lib "gui"/
-set_panel ()\n remove the panel and hide it  /extern lib "gui"/
-tabbar (win_name)\n create tabbar control from window or panel  /extern lib "gui"/
-list (true)\n create standard list view (with caption\n true|false)  /extern lib "gui"/
-memo ()\n creates a Windows Rich Text control  /extern lib "gui"/
-pass_focus ()\n pass keyboard focus to editor  /extern lib "gui"/
-toolbar ("title", {"icon1.bmp:item1 caption|func1", "FILEOPEN:Open|IDM_OPEN"}, icons_size, "c:\\Path to icons\\button")
-open_dlg (caption,filter)\n standard Open File Dialog to the user, with the specified caption and filter  /extern lib "gui"/
-save_dlg (caption,filter)\n standard Save File Dialog to the user, with the specified caption and filter  /extern lib "gui"/
-select_dir_dlg (caption)\n standard Open Folder Dialog to the user, with the specified caption  /extern lib "gui"/
-colour_dlg (default_colour)\n open the Windows Colour choser  /extern lib "gui"/
-files (path_with_mask, true)\n list of files (nil/false) or folders (true)  /extern lib "gui"/
-chdir (dir)\n change current dir  /extern lib "gui"/
-message (msg,kind)\n message box with the desired message text  /extern lib "gui"/
-prompt_value (prompt,default)\n ask the user to enter a single string value  /extern lib "gui"/
-run (program_or_document, parameters)\n launch a program or open a document  /extern lib "gui"/
+shell.msgbox (<Text>, <Title>, <Options>)\n Message Box. Return select button  /extern lib "shell"/
+shell.inputbox (<Title>, <Prompt>, <Default>, <funcCheck>, <minWidth>) \n Input Box. Return input string
+shell.getfileattr(<FileName>) \n return File Attribute as number  /extern lib "shell"/
+shell.setfileattr(<FileName>, <FileAttr>) \n Set File Attribute  /extern lib "shell"/
+shell.exec(strCommand, [strOperation], [boolNoShow], [bWaitOnReturn])\n /extern lib "shell"/
+shell.findfiles(<FileMask>) \n return list of files by mask  /extern lib "shell"/
+shell.fileexists(<FileName>) \n return true if file or folder exists  /extern lib "shell"/
+shell.to_utf8
+shell.from_utf8
+shell.get_clipboard
+shell.set_clipboard
+shell.bit_or
+shell.bit_and
+shell.delete_file
+shell.rename_file
+shell.activate_proc_wnd
+shell.set_curent_dir
+shell.datetime
 
 pairs (t)\n  returns the next function and table t plus a nil, iterates over all key-value pairs
 pcall (f, arg1, arg2, ...)\n  protected mode call, catches errors, returns status code first (true=success)

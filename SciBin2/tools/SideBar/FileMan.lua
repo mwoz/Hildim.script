@@ -522,6 +522,7 @@ local function memoNav(key)
         if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
             current_path = memo_path.value:gsub('[\\/][^\\/]*$','')..'\\'
             FileMan_OpenItem()
+            memo_path.caretpos = memo_path.count
         end
     elseif key == 65307 then --escape
         iup.PassFocus()

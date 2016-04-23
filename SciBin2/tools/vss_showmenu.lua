@@ -106,17 +106,17 @@ local function CreateVSSMenu()
     local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Status '..props['FileNameExt'],nil,true,true)
     if ierr == 0 then -- не взят
         t = {
-            {'Check Out', action = vss_checkout ,},
+            {'Check Out', action = vss_checkout, image = 'arrow_curve_270_µ'  ,},
             {'Get Latest Version', ru='Получить последнюю версию', action = vss_getlatest ,},
-            {'Diff', ru='Показать различия', action = vss_diff ,},
+            {'Diff', ru='Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
             {'History', ru='Показать историю', action = vss_hist ,},
         }
     elseif ierr == 1 then --взят
         t = {
-            {'Check In', action = vss_checkin ,},
-            {'Undo Check Out', ru='Отменить Check In', action = vss_undocheckout ,},
+            {'Check In', action = vss_checkin, image = 'arrow_curve_090_µ' ,},
+            {'Undo Check Out', ru='Отменить Check In', action = vss_undocheckout,},
             {'Get Latest Version', action = vss_getlatest ,},
-            {'Diff', ru='Показать различия', action = vss_diff ,},
+            {'Diff', ru='Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
             {'History', ru='Показать историю', action = vss_hist ,},
         }
     elseif ierr == 100 then --новый
