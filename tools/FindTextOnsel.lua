@@ -652,7 +652,7 @@ end)
 require "menuhandler"
 
 menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',
-    {'Marks', ru='Метки', action=function() ActivateFind(3) end, key='Ctrl+M',})
+    {'Marks', ru='Метки', action=function() ActivateFind(3) end, key='Ctrl+M', image = 'marker_µ',})
 menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
 {'Search', ru='Поиск', plane=1,{
     {'s_FindTextOnSel', separator=1},

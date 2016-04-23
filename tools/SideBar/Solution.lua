@@ -1,10 +1,12 @@
 local tree_func
 local is_chanjed = false
+local defpath = props["SciteDefaultHome"].."\\data\\home\\default.solution"
+local CLR_ACTIVE = "30 180 30"
 
 local function SaveSolution()
     if not is_chanjed then return false end
 
-    local tOut = {branchname = "Solution"}
+    local tOut = {branchname = iup.GetAttributeId(tree_sol, "TITLE", 0)}
     local tStack = {tOut}
     for i = 1,  iup.GetAttribute(tree_sol, "TOTALCHILDCOUNT0") do
         local depth = tonumber(iup.GetAttributeId(tree_sol, "DEPTH", i))
@@ -12,6 +14,7 @@ local function SaveSolution()
         if iup.GetAttributeId(tree_sol, "KIND", i) == 'BRANCH' then
             local brn = {branchname = iup.GetAttributeId(tree_sol, "TITLE", i)}
             if iup.GetAttributeId(tree_sol, "STATE", i) == "COLLAPSED" then brn.state = "COLLAPSED" end
+            if iup.GetAttributeId(tree_sol, "COLOR", i) == CLR_ACTIVE then brn.active = "YES" end
             table.insert(tStack[#tStack], brn)
             table.insert(tStack, brn)
         else
@@ -23,6 +26,7 @@ local function SaveSolution()
     local function tostr(t)
         str = str..'{branchname="'..t.branchname..'",\n'
 
+        if t.active then str = str..'active="YES",\n' end
         if t.state then str = str..'state="COLLAPSED",\n' end
         for i = 1,  #t do
             if t[i].branchname then
@@ -39,7 +43,7 @@ local function SaveSolution()
 
     tostr(tOut)
     assert(loadstring('return '..str))
-    local path = props["SciteDefaultHome"].."\\data\\home\\default.solution"
+    local path = _G.iuprops['solution.current'] or defpath
     local f = io.open(path, "w")
     f:write(str)
     f:flush()
@@ -89,9 +93,8 @@ local function Add()
     end
 end
 
-local function AddCurent()
+local function AddCurentIn(val)
    if shell.fileexists(props["FilePath"]) then
-       local val = tree_sol.value
        iup.SetAttributeId(tree_sol, "ADDLEAF", val, props['FileName']:from_utf8(1251))
        iup.SetAttributeId(tree_sol, "IMAGE", val, GetExtImage(props['FileNameExt']))
        tree_sol:SetUserId(val + 1, props['FilePath']:from_utf8(1251))
@@ -100,6 +103,20 @@ local function AddCurent()
        iup.Alarm("Добавдение файла в проект", "Файл еще не сохранен на диск", "OK"
        )
    end
+end
+
+local function AddCurent()
+   AddCurentIn(tree_sol.value)
+end
+
+local function AddToActive()
+    local nActive = 0
+    for i = 0, iup.GetAttribute(tree_sol, "TOTALCHILDCOUNT0") do
+        if iup.GetAttributeId(tree_sol, "KIND", i) == 'BRANCH' then
+        if iup.GetAttributeId(tree_sol, "COLOR", i) == CLR_ACTIVE then nActive = i; break end
+        end
+    end
+    AddCurentIn(nActive)
 end
 
 local function exec(filename)
@@ -149,9 +166,17 @@ local function AddAll(val)
     is_chanjed = true
 end
 
+local function ActivateProject()
+    for i = 0, iup.GetAttribute(tree_sol, "TOTALCHILDCOUNT0") do
+        if iup.GetAttributeId(tree_sol, 'KIND', i) == 'BRANCH' then iup.SetAttributeId(tree_sol, 'COLOR',i, '0 0 0') end
+    end
+    iup.SetAttributeId(tree_sol, 'COLOR',tree_sol.value, CLR_ACTIVE)
+    is_chanjed = true
+end
+
 local function SaveAsNew()
     local y,m,d,ch,mn,sec = shell.datetime()
-    local title = 'New '..y..'-'..m..'-'..d..' '..ch..' '..mn
+    local title = 'New '..y..'-'..m..'-'..d..' '..ch..':'..mn
     iup.SetAttributeId(tree_sol, "ADDBRANCH", 0, title)
     AddAll(1)
     is_chanjed = true
@@ -162,7 +187,7 @@ local started
 local function Initialize()
     if started then return end
     started = true
-    local path = props["SciteDefaultHome"].."\\data\\home\\default.solution"
+    local path = _G.iuprops['solution.current'] or defpath
     local f =io.open(path)
     local str
     if f then
@@ -172,21 +197,54 @@ local function Initialize()
         str = '{branchname = "Solution"}'
     end
     local tree_nodes = assert(loadstring('return '..str))()
-
+    local bSetActive = false
     local function enrich(t)
         for i = 1,  #t do
             if t[i].branchname then
-                enrich(t[i], str)
-                str = str..', '
+                if not bSetActive and t[i].active == 'YES' then t[i].color = CLR_ACTIVE; bSetActive = true end
+                enrich(t[i])
+                --str = str..', '
             elseif t[i].leafname then
                 t[i].image = GetExtImage(t[i].userid)
             end
         end
-        str = str..'}'
+        --str = str..'}'
     end
     enrich(tree_nodes)
+    if not bSetActive then tree_nodes.color = CLR_ACTIVE end
+    tree_nodes.imageexpanded = 'tree_µ'
     iup.TreeAddNodes(tree_sol, tree_nodes)
 
+end
+
+local function OpenSol()
+    is_chanjed = true
+    SaveSolution()
+    local d = iup.filedlg{dialogtype='OPEN',  parentdialog='SCITE', extfilter='Solutions|*.solution;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    if filename then
+        _G.iuprops['solution.current'] = filename
+        iup.SetAttributeId(tree_sol, "DELNODE", 0, "CHILDREN")
+        started = false
+        Initialize()
+    end
+end
+
+local function SaveSolAs()
+    is_chanjed = true
+    SaveSolution()
+    local d = iup.filedlg{dialogtype='SAVE',  parentdialog='SCITE', extfilter='Solutions|*.solution;', directory=props["SciteDefaultHome"].."\\data\\home\\"}
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    if filename then
+        filename = filename:gsub('%.solution$', '')..'.solution'
+        _G.iuprops['solution.current'] = filename
+        is_chanjed = true
+        SaveSolution()
+    end
 end
 
 local function Solution_Init()
@@ -226,11 +284,17 @@ local function Solution_Init()
                 iup.PassFocus()
             end
         end)
+        tree_sol.branchclose_cb = function(h) if h.value=='0' then return -1 end end
         tree_sol.rename_cb = function() is_chanjed = true return -4 end
         tree_sol.dragdrop_cb = function() is_chanjed = true return -4 end
         tree_sol.killfocus_cb = SaveSolution
         tree_sol.tips_cb = function(h, x, y, status)
-            h.tip = h:GetUserId(iup.ConvertXYToPos(h,x,y))
+            local n = iup.ConvertXYToPos(h,x,y)
+            if n == 0 then
+                h.tip = _G.iuprops['solution.current'] or defpath
+            else
+                h.tip = h:GetUserId(n)
+            end
         end
         tree_sol.dropfiles_cb = function(h, filename, num, x, y)
             local val = iup.ConvertXYToPos(h,x,y)
@@ -253,9 +317,14 @@ end
 
 menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
 {'Solution_sidebar',  plane=1,{
+    {'Solution', ru='Рабочая область', {
+        {'Save as', ru = 'Сохранить как', action=SaveSolAs},
+        {'Open', ru = 'Открыть', action=OpenSol},
+    }},
     {'Insert Project', ru='Новый  проект', action=InsertProject},
     {'Delete Project', ru='Удалить  проект', action=function() DeleteNode(0) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
     {'Open All Projects Files', ru='Открыть все файлы проекта', action=OpenAll, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
+    {'Set As Active Project', ru='Установить активным', action=ActivateProject, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and iup.GetAttribute(tree_sol, "COLOR") ~= CLR_ACTIVE end},
 
     {'s_FindTextOnSel', separator=1},
     {'Add...', ru='Добавить...', action=Add},
@@ -266,8 +335,12 @@ menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в S
     {'Go To Directory', ru='Перейти в директорию', action =function() SideBar_Plugins.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$','')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" and (SideBar_Plugins.fileman ~= nil) end},
 }})
 
-menuhandler:InsertItem('TABBAR', 'slast',
-    {'Save As New Project', ru='Сохранить как новый проект', action=SaveAsNew}
+menuhandler:InsertItem('TABBAR', 'slast', {'project',plane = 1, {
+    {'Save As New Project', ru='Сохранить как новый проект', action=SaveAsNew},
+    {'Add To Active Project', ru='Добавить в активный проект', action=AddToActive},
+}})
+menuhandler:InsertItem('TABBAR', 'si',
+    {'Save As New Project', ru='Закрыть и добавить в активный проект', action=function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
 )
 
 Solution_Init()

@@ -124,5 +124,5 @@ end
 FindTab_Init()
 
 menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-{'Live Search', ru="Живой поиск", key='Alt+F', action=sidebar_Find,})
+{'Live Search', ru="Живой поиск", key='Alt+F', action=sidebar_Find, image = 'binocular__pencil_µ',})
 
