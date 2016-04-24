@@ -1,4 +1,3 @@
-local tree_func
 local is_chanjed = false
 local defpath = props["SciteDefaultHome"].."\\data\\home\\default.solution"
 local CLR_ACTIVE = "30 180 30"

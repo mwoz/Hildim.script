@@ -340,6 +340,13 @@ iup.list = function(t)
     return cmb
 end
 
+iup.scitedeatach = function(dtb)
+    local oldPos = iup.GetGlobal('CURSORPOS')
+    iup.SetGlobal('CURSORPOS', (_G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100')..'x'..(_G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100'));
+    dtb.detach = 1
+    iup.SetGlobal('CURSORPOS', oldPos)
+end
+
 iup.scitedetachbox = function(t)
     local dtb = t.HANDLE or iup.detachbox(t)
     dtb.sciteid = t.sciteid
@@ -350,13 +357,15 @@ iup.scitedetachbox = function(t)
     dtb.Split_CloseVal = t.Split_CloseVal
     dtb.Dlg_Resize_Cb = t.Dlg_Resize_Cb
     dtb.On_Detach = t.On_Detach
+    dtb.barsize = Iif(_G.iuprops['detach.manual.disable'] == 1,0,5)
 
     dtb.detachPos = (function()
-        local oldPos = iup.GetGlobal('CURSORPOS')
-        iup.SetGlobal('CURSORPOS', (_G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100')..'x'..(_G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100'));
         dtb.DetachRestore = true
+        iup.scitedeatach(dtb)
+--[[        local oldPos = iup.GetGlobal('CURSORPOS')
+        iup.SetGlobal('CURSORPOS', (_G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100')..'x'..(_G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100'));
         dtb.detach = 1
-        iup.SetGlobal('CURSORPOS', oldPos)
+        iup.SetGlobal('CURSORPOS', oldPos)]]
     end)
 
     dtb.detached_cb=(function(h, hNew, x, y)
@@ -400,7 +409,7 @@ iup.scitedetachbox = function(t)
                     h.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
                     iup.ShowXY(h, h.x,h.y)
                 end
-                if dtb.Split_h then
+                if t.Split_h then
                     if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value end
                     dtb.Split_h.value = dtb.Split_CloseVal
                     dtb.Split_h.barsize = "0"
@@ -411,7 +420,7 @@ iup.scitedetachbox = function(t)
                 _G.iuprops['dialogs.'..dtb.sciteid..'.y']= h.y
                 dtb.visible = 'YES'
                 _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = h.rastersize
-                if dtb.Split_h then
+                if t.Split_h then
                     dtb.Split_h.value = _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue']
                     dtb.Split_h.barsize = "3"
                 end

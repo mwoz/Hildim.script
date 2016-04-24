@@ -933,6 +933,8 @@ local function Finc_Init()
         layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'COLLAPSED'
         SaveLayoutToProp()
     end)
+    tree_func.branchclose_cb = function(h) if h.value=='0' then return -1 end end
+    iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
 
     SideBar_Plugins.functions = {   -- iup.vbox{   };
         handle = tree_func;

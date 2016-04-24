@@ -17,7 +17,6 @@ function s:get_title(t)
     return s
 end
 
-
 local function GetAction(mnu)
     if mnu.action then
         local tp = type(mnu.action)
@@ -58,6 +57,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
 --debug_prnArgs(smnu)
     local CreateMenu, CreateItems
     local bPrevSepar = false
+    local bShoIcons = (_G.iuprops['menus.show.icons'] == 1)
     CreateItems = function(m,t)
         local function getParam(p, bDef)
             local v,tp = bDef, type(p)
@@ -104,8 +104,12 @@ function s:PopMnu(smnu, x, y, bToolBar)
                 else --вставка пункта меню - только видимые
 
                     local titem = {title = s:get_title(itm)} --заголовок
-                    if itm.image then
-                        titem.image = itm.image
+                    if bShoIcons and itm.image then
+                        -- if itm.check_iuprops or itm.check_boolean or itm.check_prop or itm.check_idm or itm.check then
+                            -- titem.titleimage = itm.image
+                        -- else        -- пока не работает
+                            titem.image = itm.image
+                        -- end
                     end
                     --доступность
                     if not getParam(itm.active, true) then titem.active = 'NO' end
