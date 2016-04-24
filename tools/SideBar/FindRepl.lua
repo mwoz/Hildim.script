@@ -319,7 +319,7 @@ function ActivateFind(nTab)
         if Ctrl("zPin").valuepos == '0' then SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos = 0; SideBar_Plugins.functions.OnSwitchFile()
         elseif SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos ~= 0 then oDeattFnd.detachPos() end
     elseif (iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize == '0' and _G.iuprops['bottombar.win']~='1') then
-        oDeattFnd.DetachRestore = true; oDeattFnd.detach = 1
+        oDeattFnd.DetachRestore = true; iup.scitedeatach(oDeattFnd)
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart] end

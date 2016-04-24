@@ -44,6 +44,16 @@ local function windowsList()
     return t
 end
 
+local function ResetFontSize()
+    local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса",
+                    function(h,i) return 1 end,
+                    'Размер%i[5,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
+    if ret then
+        props['iup.defaultfontsize'] = size
+        iup.Alarm('Шрифт интефейса', 'Изменения будут применены после перезапуска программы', 'OK')
+    end
+end
+
 local tHilight, tLangs = {},{}
 if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\LanguagesMenu.lua") then tLangs = assert(loadfile(props["SciteDefaultHome"].."\\tools\\SideBar\\LanguagesMenu.lua")) end
 if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua") then tHilight = assert(loadfile(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua")) end
@@ -286,7 +296,7 @@ _G.sys_Menus.MainWindowMenu = {
         },},
         {'Output', ru='Окно консоли',{
             {'Wrap Out&put', ru = 'Перенос по словам в консоли', action = IDM_WRAPOUTPUT, check = "props['output.wrap']=='1'"},
-            {'Clear Before Execute', ru = 'Очишать перед выполнением', check_prop = "clear.before.execute"},
+            {'Clear Before Execute', ru = 'Очищать перед выполнением', check_prop = "clear.before.execute"},
             {'Recode OEM to ANSI', ru = 'Перекодировать OEM в ANSI', check_prop = "output.code.page.oem2ansi"},
         },},
         {'&Convert Line End Characters', ru = 'Конвертировать символы перевода строк', action = IDM_EOL_CONVERT},
@@ -295,13 +305,14 @@ _G.sys_Menus.MainWindowMenu = {
         {'Use &Monospaced Font', ru = 'Использовать моноширинные шрифты', action = IDM_MONOFONT},
         {'s2', separator=1},
         {'Reload Session', ru = 'Восстанавливать открытые файлы', action = "CheckChange('session.reload', true)", check="props['session.reload']=='1'"},
+        {'Show Menu Icons', ru = 'Отображать иконки в меню', check_iuprops = 'menus.show.icons'},
+        {'Interface Font Size', ru = 'Размер шрифта интерфейса', action = ResetFontSize},
+        {'Disable manually', ru = 'Запретить ручное открепление панелей', check_iuprops = 'detach.manual.disable'},
+
         {'s3', separator=1},
-        -- {'Open Local &Options File', ru = 'Открыть файл локальных настроек', action = IDM_OPENLOCALPROPERTIES},
-        -- {'Open &Directory Options File', ru = 'Открыть файл настроек каталога', action = IDM_OPENDIRECTORYPROPERTIES},
         {'Windows Integration', ru = 'Настройка интеграции с Windows', action="shell.exec(props['SciteDefaultHome']..'\\\\tools\\\\SciTE_WinIntegrator.hta')"},
         {'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
         {'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
-        --[[{'Open A&bbreviations File', ru =  'Открыть файл настроек сокращений', action = IDM_OPENABBREVPROPERTIES},]]
         {'Open Lua Startup Scr&ipt', ru = 'Открыть файл автозагрузки скрипта', action = IDM_OPENLUAEXTERNALFILE},
         {'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = function() do_LexerColors() end},
         {'Edit properties', ru='Свойства лексера',tLangs},
