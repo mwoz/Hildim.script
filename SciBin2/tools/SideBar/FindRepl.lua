@@ -898,14 +898,6 @@ local function FuncBmkTab_Init()
                 iup.SetFocus(Ctrl("cmbFindWhat"))
             end
         end);
-        OnSideBarClouse=(function()
-            if Ctrl('chkInBottom').value == 'ON' then
-                iup.Reparent(oDeattFnd, SideBar_Plugins.findrepl.handle, nil)
-            end
-        end)
---[[		OnSave = OnSwitch;
-        OnSwitchFile = OnSwitch;
-        OnOpen = OnSwitch;]]
         }
     SideBar_Plugins.findrepl.OnCreate = (function()
             local hMainLayout = iup.GetLayout()

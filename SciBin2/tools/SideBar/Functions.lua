@@ -669,16 +669,19 @@ end
 
 function Functions_SortByOrder()
 	_sort = 'order'
+    _G.iuprops['sidebar.functions.sort'] = _sort
 	Functions_ListFILL()
 end
 
 function Functions_SortByName()
 	_sort = 'name'
+    _G.iuprops['sidebar.functions.sort'] = _sort
 	Functions_ListFILL()
 end
 
 function Functions_ToggleParams ()
 	_show_params = not _show_params
+    _G.iuprops['sidebar.functions.params'] = Iif(_show_params,1,0)
 	Functions_ListFILL()
 end
 
@@ -686,6 +689,10 @@ function Functions_ToggleFlags ()
 	_show_flags = not _show_flags
 	if not _show_flags then
 		_group_by_flags = false
+        _G.iuprops['sidebar.functions.flags'] = 0
+        _G.iuprops['sidebar.functions.group'] = 1
+    else
+        _G.iuprops['sidebar.functions.flags'] = 1
 	end
 	Functions_ListFILL()
 end
@@ -816,9 +823,12 @@ end
 
 function Functions_ToggleGroup()
 	_group_by_flags = not _group_by_flags
-
 	if _group_by_flags then
 		_show_flags = true
+        _G.iuprops['sidebar.functions.group'] = 1
+        _G.iuprops['sidebar.functions.flags'] = 1
+    else
+        _G.iuprops['sidebar.functions.group'] = 1
 	end
 
     Functions_GetNames()
@@ -848,20 +858,6 @@ local function _OnDoubleClick(shift, ctrl, alt)
 	end
 end
 
-
-------+++++++
-local function OnMyClouse()
-    _G.iuprops["sidebar.functions.tree_func.size"]=tree_func.size
-    local p
-    if _show_flags then p=1 else p=0 end
-    _G.iuprops['sidebar.functions.flags'] = p
-    if _show_params then p=1 else p=0 end
-    _G.iuprops['sidebar.functions.params'] = p
-    if _group_by_flags then p=1 else p=0 end
-    _G.iuprops['sidebar.functions.group'] = p
-    _G.iuprops['sidebar.functions.sort'] = _sort
-end
-
 local function SaveLayoutToProp()
     local i,s, prp
     prp = ""
@@ -886,7 +882,7 @@ local function Finc_Init()
        layout[w] = 'COLLAPSED'
     end
     local line = nil                                                                                              --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_func = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_func.size"]}
+    tree_func = iup.tree{minsize = '0x5'}
         --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
         tree_func.size = nil
 
@@ -944,7 +940,6 @@ local function Finc_Init()
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
 		OnNavigation = OnNavigate;
-        OnSideBarClouse = OnMyClouse;
         tabs_OnSelect = OnSwitch;
         on_SelectMe = function() iup.SetFocus(tree_func); iup.Flush();end
         }

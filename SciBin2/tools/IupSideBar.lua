@@ -15,6 +15,7 @@ local vFindRepl
 local hMainLayout = iup.GetLayout()
 local BottomBar, ConsoleBar, FindRepl
 local pane_curObj
+local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
 iup.SetGlobal("DEFAULTFONTSIZE", Iif(props['iup.defaultfontsize']=='', "10", props['iup.defaultfontsize']))
 iup.SetGlobal("TXTHLCOLOR", "200 200 200")
@@ -209,19 +210,11 @@ local function  CreateBox()
                 end
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state="OPEN";
             end);
-            show_cb=(function(h,state)
-                if state == 0 then
-                   h.size = '1x1'
-                elseif state == 4 then
+            Dlg_Show_Cb=(function(h,state)
+                if state == 4 then
                     for _,tbs in pairs(SideBar_Plugins) do
                         if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
                     end
-                    for i = 1, #tEvents do
-                        for _,tbs in pairs(SideBar_Plugins) do
-                           if tbs[tEvents[i]] then RemoveEventHandler(tEvents[i],tbs[tEvents[i]]) end
-                        end
-                    end
-                    Bar_obj.Active = false
                 end
             end);
             k_any=(function(_,key)
@@ -267,7 +260,6 @@ local function  CreateBox()
     end
 
 end
-local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
 local function RestoreNamedValues(h, root)
     if not h then return end
