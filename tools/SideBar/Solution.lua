@@ -171,6 +171,7 @@ local function ActivateProject()
     end
     iup.SetAttributeId(tree_sol, 'COLOR',tree_sol.value, CLR_ACTIVE)
     is_chanjed = true
+    SaveSolution()
 end
 
 local function SaveAsNew()
@@ -338,7 +339,7 @@ menuhandler:InsertItem('TABBAR', 'slast', {'project',plane = 1, {
     {'Save As New Project', ru='Сохранить как новый проект', action=SaveAsNew},
     {'Add To Active Project', ru='Добавить в активный проект', action=AddToActive},
 }})
-menuhandler:InsertItem('TABBAR', 'si',
+menuhandler:InsertItem('TABBAR', 's1',
     {'Save As New Project', ru='Закрыть и добавить в активный проект', action=function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
 )
 
