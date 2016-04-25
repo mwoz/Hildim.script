@@ -13,7 +13,7 @@ local vSys
 local vFileMan
 local vFindRepl
 local hMainLayout = iup.GetLayout()
-local BottomBar, ConsoleBar, FindRepl
+local ConsoleBar, FindRepl, FindResBar
 local pane_curObj
 local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
@@ -330,34 +330,67 @@ local function InitSideBar()
     end
     SideBar_Plugins.findrepl.OnCreate()
 
-    BottomBar = iup.scitedetachbox{
-        HANDLE = iup.GetDialogChild(hMainLayout, "BottomBar");
-        sciteid = 'bottombar';Split_h = iup.GetDialogChild(hMainLayout, "BottomBarSplit");Split_CloseVal = "1000";
-        Dlg_Title = "BottomBar /Close For Attach/";
-        Dlg_Close_Cb = (function(h)
-            if _G.iuprops['concolebar.win']=='1' then
-                iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
-                iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = "3"
-                iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
-                _G.iuprops['concolebar.win']='0'
-                iup.GetDialogChild(hMainLayout, "ConsoleDetach").restore = 1
-                _G.dialogs['concolebar'] = nil
-            end
-        end);
-        Dlg_Resize_Cb = (function(h,width, height)
-            if _G.iuprops['concolebar.win']=='1' then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "0" end
-        end);
-     }
+    local bSplitter = iup.GetDialogChild(hMainLayout, "BottomSplit")
+
+    local function toggleOf()
+        if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '3' then
+           iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
+           iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
+           _G.iuprops["sidebarctrl.BottomBarSplit.value"] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
+            iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
+        end
+    end
+    local function toggleOn()
+        if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
+           iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
+           iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
+           iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops["sidebarctrl.BottomBarSplit.value"] or '900'
+        end
+    end
 
     ConsoleBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach");
-        sciteid = 'concolebar';Split_h = iup.GetDialogChild(hMainLayout, "BottomSplit");Split_CloseVal = "0";
+        sciteid = 'concolebar';Split_h = bSplitter;Split_CloseVal = "0";
         Dlg_Title = "ConsoleBar /Close For Attach/"; Dlg_Show_Cb = nil;
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Resize_Cb = (function(h,width, height)
         end);
-     }
+        Dlg_Show_Cb = (function(h, state)
+            if state == 0 and _G.iuprops['findresbar.win']=='1' then
+                 _G.iuprops['dialogs.concolebar.splitvalue'] =  _G.iuprops['dialogs.findresbar.splitvalue']
+                toggleOf()
+             end
+        end);
+        Dlg_BeforeShow_Cb = (function(h, state)
+            if state == 4 and _G.iuprops['findresbar.win']=='1' then
+                toggleOn()
+                _G.iuprops['dialogs.concolebar.splitvalue'] = '1000'
+            end
+        end);
+    }
+
+    FindResBar = iup.scitedetachbox{
+        HANDLE = iup.GetDialogChild(hMainLayout, "FindResDetach");
+        sciteid = 'findresbar';Split_h = bSplitter;Split_CloseVal = "1000";
+        Dlg_Title = "FindResBar /Close For Attach/"; Dlg_Show_Cb = nil;
+        Dlg_Close_Cb = (function(h)
+        end);
+        Dlg_Resize_Cb = (function(h,width, height)
+        end);
+        Dlg_Show_Cb = (function(h, state)
+            if state == 0 and _G.iuprops['concolebar.win']=='1' then
+                 _G.iuprops['dialogs.findresbar.splitvalue'] =  _G.iuprops['dialogs.concolebar.splitvalue']
+                toggleOf()
+            end
+        end);
+        Dlg_BeforeShow_Cb = (function(h, state)
+            if state == 4 and _G.iuprops['concolebar.win']=='1' then
+                toggleOn()
+                _G.iuprops['dialogs.findresbar.splitvalue'] = '0'
+            end
+        end);
+    }
 
 end
 
@@ -559,8 +592,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             navigation_Unblock()
             if SideBar_obj.win and SideBar_obj.handle then SideBar_obj.handle.DetachRestore = true; iup.scitedeatach(SideBar_obj.handle) end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
             if LeftBar_obj.win and LeftBar_obj.handle then LeftBar_obj.handle.DetachRestore = true; iup.scitedeatach(LeftBar_obj.handle) end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
-            if _G.iuprops['bottombar.win']=='1' then BottomBar.DetachRestore = true;iup.scitedeatach(BottomBar) end
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;iup.scitedeatach(ConsoleBar) end
+            if _G.iuprops['findresbar.win']=='1' then ConsoleBar.DetachRestore = true;iup.scitedeatach(FindResBar) end
             if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos() end
             menuhandler:RegistryHotKeys()
             scite.EnsureVisible()

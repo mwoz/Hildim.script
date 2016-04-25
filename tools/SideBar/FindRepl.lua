@@ -318,7 +318,7 @@ function ActivateFind(nTab)
     elseif Ctrl("chkInBottom").value == 'OFF'  then
         if Ctrl("zPin").valuepos == '0' then SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos = 0; SideBar_Plugins.functions.OnSwitchFile()
         elseif SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos ~= 0 then oDeattFnd.detachPos() end
-    elseif (iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize == '0' and _G.iuprops['bottombar.win']~='1') then
+    elseif (iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize == '0' --[[and _G.iuprops['bottombar.win']~='1']]) then
         oDeattFnd.DetachRestore = true; iup.scitedeatach(oDeattFnd)
     end
 
