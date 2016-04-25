@@ -608,7 +608,7 @@ AddEventHandler("OnLayOutNotify", function(cmd)
     if cmd == "SHOW_FINDRES" then
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
     elseif cmd == "SHOW_OUTPUT" then
-        if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 and _G.dialogs['concolebar'] == nil  then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
+        if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 and _G.dialogs['concolebar'] == nil  then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
     end
 end)
 
