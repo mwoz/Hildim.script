@@ -94,8 +94,8 @@ end
 
 local function AddCurentIn(val)
    if shell.fileexists(props["FilePath"]) then
-       iup.SetAttributeId(tree_sol, "ADDLEAF", val, props['FileName']:from_utf8(1251))
-       iup.SetAttributeId(tree_sol, "IMAGE", val, GetExtImage(props['FileNameExt']))
+       iup.SetAttributeId(tree_sol, "ADDLEAF", val, props['FileNameExt']:from_utf8(1251))
+       iup.SetAttributeId(tree_sol, "IMAGE", val + 1, GetExtImage(props['FileNameExt']))
        tree_sol:SetUserId(val + 1, props['FilePath']:from_utf8(1251))
        is_chanjed = true
    else

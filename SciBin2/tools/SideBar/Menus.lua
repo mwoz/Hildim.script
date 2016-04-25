@@ -133,7 +133,7 @@ _G.sys_Menus.FINDREZ = {
     {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findrez.clickonlynumber'},
     {'Group By Name', ru='Группировать по имени файла', check_boolean='findrez.groupbyfile'},
     {'s2', separator=1},
-    {'Detach', ru = 'Отсоединить', action=function() iup.scitedeatach(iup.GetDialogChild(iup.GetLayout(), "FindResDetach")) end, visible=function() return _G.iuprops['concolebar.win']~='1' end}
+    {'Detach', ru = 'Отсоединить', action=function() iup.scitedeatach(iup.GetDialogChild(iup.GetLayout(), "FindResDetach")) end, visible=function() return _G.iuprops['findrez.win']~='1' end}
 
 }
 

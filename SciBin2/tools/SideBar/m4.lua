@@ -15,7 +15,7 @@ function RunBatch(filePath)
 		local inc =props["sys.calcsybase.dir"].."\\BuildM4\\"..iup.GetAttribute(cmb_listCalc, cmb_listCalc.value)
         local vbRun = props["SciteDefaultHome"].."\\tools\\RunSql.vbs"
         --local vbRun = props["sys.calcsybase.dir"].."\\RunSql.vbs"
-        cmd = 'cscript //nologo "'..vbRun..'" "'..filePath..'" "'..props["sybase.projects.dir"]..'\\" "'..inc..'"\n'
+        cmd = 'cscript //nologo "'..vbRun..'" "'..filePath..'" "'..props["sybase.projects.dir"]..'\\" "'..inc..'" "'..props['m4.output.dir']..'"\n'
 
         props["output.hook"] = 'Y'
         output:SetSel(output.TextLength, output.TextLength)
