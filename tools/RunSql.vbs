@@ -55,7 +55,7 @@ Sub Main()
         strFolder = strFolder & "\" & oFso.GetExtensionName(m_DefHFile)
         If Not oFso.FolderExists(strFolder) Then  oFso.CreateFolder(strFolder)
 
-        strFolder = strFolder & "\" & Year(Now) & "-" & Right("0" & Month(Now),2) & "-" & Right("0" & Day(Now),2)
+        strFolder = strFolder & "\" & Year(Now) & "." & Right("0" & Month(Now),2) & "." & Right("0" & Day(Now),2)
         If Not oFso.FolderExists(strFolder) Then  oFso.CreateFolder(strFolder)
 
         strOutPath = strFolder & "\" & oFso.GetBaseName(m_SourceFilePath) & ".sql"
@@ -213,7 +213,11 @@ m_DefHFile = ""
 'Строка с именами файлов, которые должны быть проинклюжены. Может переопределяться кастомным файлом
 m_strIncSql = "Radius\Modules\common_macros.h,Radius\Modules\radius_modules.h"
 'Директория, в которой будет размещена папка FromM4 с результатами компиляции. Может переопределяться кастомным файлом
-m_strFromM4RootPath = "%USERPROFILE%\Desktop"
+m_strFromM4RootPath = objArgs(3)
+If m_strFromM4RootPath = "" Then
+    m_strFromM4RootPath = "%USERPROFILE%\Desktop"
+End If
+
 ' Мода - (compile,build) - может переопределяться в кастомном файле
 m_mode = "compile"
 'База данных. Должна переопределяться в кастомном файле для m_mode = "compile"

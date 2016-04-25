@@ -167,8 +167,8 @@ local function _OnUpdateUI()
 end
 local function GoToPos()
     OnNavigation("Go")
-    local line = tonumber(txtLine.value) - 1
-    local col = tonumber(txtCol.value) - 1
+    local line = (tonumber(txtLine.value) or 0) - 1
+    local col = (tonumber(txtCol.value) or 0) - 1
     local lineStart = editor:PositionFromLine(line)
     local ln = editor:PositionFromLine(line + 1) - 2 - lineStart
     if ln > col then
@@ -184,10 +184,10 @@ end
 local zbox_s;
 local function FindTab_Init()
     local sTip = '(Ctrl+G) Нажмите Enter для перехода на позицию'
-    txtCol = iup.text{size='25x'; mask='[0-9]*', tip=sTip,
+    txtCol = iup.text{size='25x'; mask='[0-9]*', tip=sTip, killfocus_cb = GoToPos,
              k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
-    txtLine = iup.text{size='25x'; mask='[0-9]*', tip=sTip,
-             k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
+    txtLine = iup.text{size='25x'; mask='[0-9]*', tip=sTip, killfocus_cb = GoToPos,
+             k_any=(function(_,c) if c == iup.K_CR then iup.PassFocus() end end)}
     txtSel = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR'), canfocus  = "NO"}
     lblCode = iup.label{size='50x'}
     lblSel = iup.text{size = '200x0'; readonly='YES',canfocus="NO", bgcolor=iup.GetGlobal('DLGBGCOLOR'),
