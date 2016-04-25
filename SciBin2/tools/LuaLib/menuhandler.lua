@@ -17,21 +17,33 @@ function s:get_title(t)
     return s
 end
 
+local function getParam(p, bDef)
+    local v,tp = bDef, type(p)
+    if tp == 'boolean' then v = p
+    elseif tp == 'function' then v = p()
+    elseif tp == 'string' then v = assert(loadstring('return '..p))() end
+    return v
+end
+
 local function GetAction(mnu)
-    if mnu.action then
-        local tp = type(mnu.action)
-        if tp == 'number' then return function() scite.MenuCommand(mnu.action) end end
-        if tp == 'string' then return assert(loadstring('return '..mnu.action)) end
-        return mnu.action
-    elseif mnu.check_idm then
-    elseif mnu.check_prop then
-        return assert(loadstring("CheckChange('"..mnu.check_prop.."', true)"))
-    elseif mnu.check_iuprops then
-        return assert(loadstring("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)))
-    elseif mnu.check_boolean then
-        return assert(loadstring("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
+    if getParam(mnu.active, true) then
+        if mnu.action then
+            local tp = type(mnu.action)
+            if tp == 'number' then return function() scite.MenuCommand(mnu.action) end end
+            if tp == 'string' then return assert(loadstring('return '..mnu.action)) end
+            return mnu.action
+        elseif mnu.check_idm then
+        elseif mnu.check_prop then
+            return assert(loadstring("CheckChange('"..mnu.check_prop.."', true)"))
+        elseif mnu.check_iuprops then
+            return assert(loadstring("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)))
+        elseif mnu.check_boolean then
+            return assert(loadstring("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
+        else
+            return function() debug_prnArgs('Error in menu format!!',mnu) end
+        end
     else
-        return function() debug_prnArgs('Error in menu format!!',mnu) end
+        return function() end
     end
 end
 
@@ -53,19 +65,14 @@ local function FindMenuItem(path)
     return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
 end
 
+
+
 function s:PopMnu(smnu, x, y, bToolBar)
 --debug_prnArgs(smnu)
     local CreateMenu, CreateItems
     local bPrevSepar = false
     local bShoIcons = (_G.iuprops['menus.show.icons'] == 1)
     CreateItems = function(m,t)
-        local function getParam(p, bDef)
-            local v,tp = bDef, type(p)
-            if tp == 'boolean' then v = p
-            elseif tp == 'function' then v = p()
-            elseif tp == 'string' then v = assert(loadstring('return '..p))() end
-            return v
-        end
         for i = 1, #m do
             local itm
             if m[i].link then itm = FindMenuItem('MainWindowMenu¦'..m[i].link)

@@ -118,7 +118,9 @@ _G.sys_Menus.OUTPUT = {
         {'LUA Mode', ru = 'Режим консоли LUA', action = function() output:DocumentEnd();output:ReplaceSel('\\n###l') end},
         {'IDM command Mode', ru = 'Режим команд IDM', action = function() output:DocumentEnd();output:ReplaceSel('\\n###i') end},
         {'Switch OFF', ru = 'Отключить', action = function() output:DocumentEnd();output:ReplaceSel('\\n####') end},
-    }}
+    }},
+    {'s3', separator=1},
+    {'Detach', ru = 'Отсоединить', action=function() iup.scitedeatach(iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach")) end, visible=function() return _G.iuprops['concolebar.win']~='1' end}
 }
 
 _G.sys_Menus.FINDREZ = {
@@ -130,6 +132,9 @@ _G.sys_Menus.FINDREZ = {
     {link='Tools¦Clear &Find Result'},
     {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findrez.clickonlynumber'},
     {'Group By Name', ru='Группировать по имени файла', check_boolean='findrez.groupbyfile'},
+    {'s2', separator=1},
+    {'Detach', ru = 'Отсоединить', action=function() iup.scitedeatach(iup.GetDialogChild(iup.GetLayout(), "FindResDetach")) end, visible=function() return _G.iuprops['concolebar.win']~='1' end}
+
 }
 
 _G.sys_Menus.EDITOR = {
@@ -256,7 +261,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Line Numbers', ru = 'Нумера строк', action = IDM_LINENUMBERMARGIN, check = "props['line.margin.visible']=='1'"},
         {'&Margin', ru = 'Закладки', action = IDM_SELMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,1)>0"},
         {'&Fold Margin', ru = 'Поле сворачивания блоков текста', action = IDM_FOLDMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,2)>0"},
-        {'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'"},
+        {'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'", active=function() return _G.iuprops['concolebar.win']=='0' or _G.iuprops['findresbar.win']=='0' end},
         --[[{'&Parameters', ru = 'Параметры', key = 'Shift+F8', action = IDM_TOGGLEPARAMETERS},]]
     },},
     {'Tools', ru='Инструменты',{
@@ -307,7 +312,6 @@ _G.sys_Menus.MainWindowMenu = {
         {'Reload Session', ru = 'Восстанавливать открытые файлы', action = "CheckChange('session.reload', true)", check="props['session.reload']=='1'"},
         {'Show Menu Icons', ru = 'Отображать иконки в меню', check_iuprops = 'menus.show.icons'},
         {'Interface Font Size', ru = 'Размер шрифта интерфейса', action = ResetFontSize},
-        {'Disable manually', ru = 'Запретить ручное открепление панелей', check_iuprops = 'detach.manual.disable'},
 
         {'s3', separator=1},
         {'Windows Integration', ru = 'Настройка интеграции с Windows', action="shell.exec(props['SciteDefaultHome']..'\\\\tools\\\\SciTE_WinIntegrator.hta')"},
