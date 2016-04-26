@@ -17,7 +17,9 @@ local ConsoleBar, FindRepl, FindResBar
 local pane_curObj
 local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
-iup.SetGlobal("DEFAULTFONTSIZE", Iif(props['iup.defaultfontsize']=='', "10", props['iup.defaultfontsize']))
+local fntSize = "10"
+if props['iup.defaultfontsize']~='' then if tonumber(props['iup.defaultfontsize']) > 4 then fntSize = props['iup.defaultfontsize'] end end
+iup.SetGlobal("DEFAULTFONTSIZE", fntSize)
 iup.SetGlobal("TXTHLCOLOR", "200 200 200")
                                -- RGB(121, 161, 201)
 iup.PassFocus=(function()
@@ -163,7 +165,7 @@ local function  CreateBox()
         t.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
 
         t.rightclick_cb=(function()
-            if _G.iuprops['sidebar.win'] == '0' then
+            if _G.iuprops[Iif(Bar_Obj == SideBar_obj, 'sidebar.win', 'leftbar.win')] == '0' then
                 local mnu = iup.menu
                 {
                   iup.item{title="Deattach Sidebar",action=(function()
