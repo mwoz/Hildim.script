@@ -46,8 +46,8 @@ end
 
 local function ResetFontSize()
     local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса",
-                    function(h,i) return 1 end,
-                    'Размер%i[5,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
+                    function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 5 then return 0 end return 1 end,
+                    'Размер%i[1,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
     if ret then
         props['iup.defaultfontsize'] = size
         iup.Alarm('Шрифт интефейса', 'Изменения будут применены после перезапуска программы', 'OK')
@@ -162,7 +162,7 @@ _G.sys_Menus.MainWindowMenu = {
     {'File', ru='Файл',{
         {'New', ru='Создать', key = 'Ctrl+N', action = IDM_NEW, image = 'document__plus_µ'},
         {'&Open...', ru = 'Открыть', key = 'Ctrl+O', action = IDM_OPEN, image = 'folder_open_document_µ'},
-        {'Open Selected &Filename', ru = 'Открыть выделенный файл', key = 'Ctrl+Shift+O', action = IDM_OPENSELECTED},
+        {'Open Selected &Filename', ru = 'Открыть выделенный файл', key = 'Ctrl+Shift+O', action = IDM_OPENSELECTED, active = function() return editor:GetSelText():find('%w:[\\/][^"\n\r\t]') end },
         {'Recent Files', ru = 'Недавние файлы', visible="iuprops['resent.files.list']~=nil", function() return iuprops['resent.files.list']:GetMenu() end},
         {'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+R', action = IDM_REVERT},
         {'&Close', ru = 'Закрыть', key = 'Ctrl+W', action = IDM_CLOSE},
