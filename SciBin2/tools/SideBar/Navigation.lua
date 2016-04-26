@@ -131,7 +131,7 @@ FuncBmkTab_Init()
 menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
     {'Navigation', ru='Навигация', plane = 1,{
         {'s_Navigation', separator=1,},
-        {'Navigate Backward', ru='Навигация: Назад', action=function() walk_Navigation(true) end, key='Alt+Left', image = 'navigation_180_µ',},
-        {'Navigate Forward', ru='Навигация: Вперед', action=function() walk_Navigation(false) end, key='Alt+Right', image = 'navigation_µ',},
+        {'Navigate Backward', ru='Навигация: Назад', action=function() walk_Navigation(true) end, key='Alt+Left', active=function() return currentItem ~= 0 and tostring(currentItem) < list_navigation.numlin end, image = 'navigation_180_µ',},
+        {'Navigate Forward', ru='Навигация: Вперед', action=function() walk_Navigation(false) end, key='Alt+Right', active=function() return currentItem > 1 end, image = 'navigation_µ',},
     }}
 )
