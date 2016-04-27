@@ -74,13 +74,6 @@ local function FindTab_Init()
             findrez:ReplaceTarget('<')
         end
     end)
-    txt_search.getfocus_cb = (function(h)
-        if findrez.LineCount > 1000 then
-            findrez.TargetStart = findrez:PositionFromLine(1000)
-            findrez.TargetEnd = findrez.Length
-            findrez:ReplaceTarget('')
-        end
-    end)
     txt_search.k_any = (function(c, key)
         if key == 65364 then  --down
             local line = findrez:LineFromPosition(findrez.CurrentPos) + 1

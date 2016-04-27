@@ -54,6 +54,15 @@ local function ResetFontSize()
     end
 end
 
+local function SetFindresCount()
+    local ret, size = iup.GetParam("Хранить результатов поиска",
+                    function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 3 then return 0 end return 1 end,
+                    'Не более%i[1,30,1]\n', tonumber(_G.iuprops['findres.maxresultcount']) or 10)
+    if ret then
+        _G.iuprops['findres.maxresultcount'] = size
+    end
+end
+
 local tHilight, tLangs = {},{}
 if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\LanguagesMenu.lua") then tLangs = assert(loadfile(props["SciteDefaultHome"].."\\tools\\SideBar\\LanguagesMenu.lua")) end
 if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua") then tHilight = assert(loadfile(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua")) end
@@ -132,6 +141,7 @@ _G.sys_Menus.FINDREZ = {
     {link='Tools¦Clear &Find Result'},
     {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findrez.clickonlynumber'},
     {'Group By Name', ru='Группировать по имени файла', check_boolean='findrez.groupbyfile'},
+    {'Number Of Find Results...', ru='Результатов поиска не более....', action=SetFindresCount},
     {'s2', separator=1},
     {'Detach', ru = 'Отсоединить', action=function() iup.scitedeatach(iup.GetDialogChild(iup.GetLayout(), "FindResDetach")) end, visible=function() return _G.iuprops['findrez.win']~='1' end}
 
