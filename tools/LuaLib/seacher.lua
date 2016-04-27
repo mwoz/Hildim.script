@@ -212,6 +212,20 @@ end
 
 function s:CollapseFindRez()
     scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
+    local j = 0
+    local lMax = _G.iuprops['findres.maxresultcount'] or 10
+    for line = 0, findrez.LineCount do
+        if findrez.StyleAt[findrez:PositionFromLine(line)] == 1 then
+            j = j + 1
+            if j > lMax then
+                findrez.TargetStart = findrez:PositionFromLine(line)
+                findrez.TargetEnd = findrez.Length
+                findrez:ReplaceTarget('')
+                break
+            end
+        end
+    end
+
     for line = 0, findrez.LineCount do
         local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
         if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
