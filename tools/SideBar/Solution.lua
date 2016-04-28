@@ -130,7 +130,7 @@ local function OpenFile(filename)
     local _,_,fnExt = filename:find('([^\\]*)$')
     local _,_,ext = filename:find('([^%.]*)$')
     local filename = tree_sol:GetUserId(tree_sol.value)
-    if string.find('.exe.lnk.doc.xsl.pdf.chm.', '.'..ext..'.') then
+    if string.find('.exe.lnk.doc.xsl.pdf.chm.', '%.'..ext..'%.') then
         exec(filename)
     else
         scite.Open(filename:to_utf8(1251))

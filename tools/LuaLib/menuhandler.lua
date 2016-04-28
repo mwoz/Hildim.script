@@ -162,18 +162,18 @@ function s:PopMnu(smnu, x, y, bToolBar)
 end
 
 local function GetItemPos(i)
-    local _, _,left, top = iup.GetAttribute(labels[i],'SCREENPOSITION'):find('(%d+),(%d+)')
-    local _, _,width, height = iup.GetAttribute(labels[i],'NATURALSIZE'):find('(%d+)x(%d+)')
+    local _, _,left, top = iup.GetAttribute(labels[i],'SCREENPOSITION'):find('(-*%d+),(-*%d+)')
+    local _, _,width, height = iup.GetAttribute(labels[i],'NATURALSIZE'):find('(-*%d+)x(-*%d+)')
     return tonumber(left), tonumber(top), tonumber(width), tonumber(height)
 end
 
 function s:OnMouseHook(x,y)
 --вызывается при активированном меню:
 --при движении мыши - x,y - координаты курсора
---при нажатии кнопок влево.вправо y - -1/1, x = -100
---при нажатии кнопки Alt - оба параметра - -100
+--при нажатии кнопок влево.вправо y - -1/1, x = -70000
+--при нажатии кнопки Alt - оба параметра - -70000
     local left, top, width, height
-    if x>-100 and y>-100 then
+    if x>-65536 and y>-65536 then
         for i = 1, #labels do
             left, top, width, height = GetItemPos(i)
             if i == 1 and (top > y or y > top + height) then return end
@@ -185,7 +185,7 @@ function s:OnMouseHook(x,y)
                 return
             end
         end
-    elseif y>-100 then
+    elseif y>-65536 then
         for i = 1, #labels do
             if activeLabel == labels[i] then
                 i = i + y
