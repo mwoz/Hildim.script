@@ -81,7 +81,7 @@ local function TRyAlignByString()
                 local pos = 1
                 while n > 0 do
                     if not str then break end
-                    pos = str:find(val, pos, 1, true)
+                    pos = str:find(val:gsub('\\r','\r'):gsub('\\n','\n'), pos, 1, true)
                     n = n - 1
                     if pos==nil then break end
                     pos = pos + 1
