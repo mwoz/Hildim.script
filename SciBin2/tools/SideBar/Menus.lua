@@ -168,6 +168,14 @@ _G.sys_Menus.MainWindowMenu = {
     {'_HIDDEN_', {
         {'Ctrl+Tab', key = 'Ctrl+Tab', action = IDM_NEXTFILESTACK},
         {'Ctrl+Shift+Tab', key = 'Ctrl+Shift+Tab', action = IDM_PREVFILESTACK},
+        {'Alt+Up', key = 'Alt+Up', action = function() editor:LineUpRectExtend() end},
+        {'Alt+Down', key = 'Alt+Down', action = function() editor:LineDownRectExtend() end},
+        {'Alt+Left', key = 'Alt+Left', action = function() editor:CharLeftRectExtend() end},
+        {'Alt+Right', key = 'Alt+Right', action = function() editor:CharRightRectExtend() end},
+        {'Alt+Home', key = 'Alt+Home', action = function() editor:VCHomeRectExtend() end},
+        {'Alt+End', key = 'Alt+End', action = function() editor:LineEndRectExtend() end},
+        {'Alt+PageUp', key = 'Alt+PageUp', action = function() editor:PageUpRectExtend() end},
+        {'Alt+PageDown', key = 'Alt+PageDown', action = function() editor:PageDownRectExtend() end},
     },},
     {'File', ru='Файл',{
         {'New', ru='Создать', key = 'Ctrl+N', action = IDM_NEW, image = 'document__plus_µ'},
