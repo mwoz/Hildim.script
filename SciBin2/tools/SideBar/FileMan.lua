@@ -261,7 +261,7 @@ local function FileMan_OpenItem()
 		FileMan_ListFILLByMask(memo_mask.value)
 	else
         local _,_,ext = dir_or_file:find('%.([^%.]*)$')
-        ext = ext:lower()
+        ext = (ext or ''):lower()
         if string.find('.exe.lnk.doc.xsl.pdf.chm.', '%.'..ext..'%.') then
             FileMan_FileExec()
             return
