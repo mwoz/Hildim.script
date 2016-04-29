@@ -4,8 +4,9 @@
 
 ----[[ C O M M O N ]]-------------------------------------------------------
 --Загрузка имэджей
-dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 iup.Load(props["SciteDefaultHome"].."\\tools\\Images.led")
+dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
+--iup.Load(props["SciteDefaultHome"].."\\tools\\Images22.led")
 -- Подключение файла с общими функциями, использующимися во многих скриптах
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 Splash_Screen()
