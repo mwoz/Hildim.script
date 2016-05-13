@@ -130,7 +130,7 @@ local function OpenFile(filename)
     local _,_,fnExt = filename:find('([^\\]*)$')
     local _,_,ext = filename:find('([^%.]*)$')
     local filename = tree_sol:GetUserId(tree_sol.value)
-    if string.find('.exe.lnk.doc.xsl.pdf.chm.', '%.'..(ext or ''):lower()..'%.') then
+    if string.find(',exe,lnk,doc,xsl,pdf,chm,', ','..(ext or ''):lower()..',') then
         exec(filename)
     else
         scite.Open(filename:to_utf8(1251))
@@ -143,7 +143,7 @@ local function OpenAll()
         if iup.GetAttributeId(tree_sol, "KIND", i) ~= 'BRANCH' and iup.GetAttributeId(tree_sol, "PARENT", i) == val then
             local path = tree_sol:GetUserId(i)
             local _,_,ext = path:find('([^%.]*)$')
-            if not string.find('.exe.lnk.doc.xsl.pdf.chm.', '.'..ext..'.') then
+            if not string.find(',exe,lnk,doc,xsl,pdf,chm,', ','..(ext or ''):lower()..',') then
                 scite.Open(path:to_utf8(1251))
             end
         end

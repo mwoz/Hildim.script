@@ -64,8 +64,7 @@ local function SetFindresCount()
 end
 
 local tHilight, tLangs = {},{}
-if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\LanguagesMenu.lua") then tLangs = assert(loadfile(props["SciteDefaultHome"].."\\tools\\SideBar\\LanguagesMenu.lua")) end
-if shell.fileexists(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua") then tHilight = assert(loadfile(props["SciteDefaultHome"].."\\tools\\SideBar\\HilightMenu.lua")) end
+if shell.fileexists(props["SciteDefaultHome"].."\\data\\home\\HilightMenu.lua") then tHilight, tLangs = assert(loadfile(props["SciteDefaultHome"].."\\data\\home\\HilightMenu.lua"))() end
 
 _G.sys_Menus = {}
 local function scintilla()
@@ -337,9 +336,13 @@ _G.sys_Menus.MainWindowMenu = {
         {'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
         {'Open Lua Startup Scr&ipt', ru = 'Открыть файл автозагрузки скрипта', action = IDM_OPENLUAEXTERNALFILE},
         {'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = function() do_LexerColors() end},
-        {'Edit properties', ru='Свойства лексера',tLangs},
+        {"Lexers properties", ru = 'Свойства лексеров', {
+            {'Lexers properties', ru='Свойства лексеров', plane=1 ,tLangs},
+            {'s2', separator=1},
+            {"Select lexers", ru = "Используемые языки", action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\UsedLexers.lua')"},
+        },},
     },},
-    {'Language', ru='Подсветка', {radio = 1,
+    {'Language', ru='Подсветка', {
         {'tHilight', tHilight, plane = 1,},
         {'s1', separator=1},
     },},

@@ -23,7 +23,7 @@ control.mandatory обязательное поле(параметры отчета)
 control.lineSpacing для первого контрола в непервой строке - отступ от предыдущей строки
 control.style
 
-container.type  {{frame|container}} фрейм - только на верхнем уровне. вс остальные контролы только во фреймах
+container.type  {{frame|container}} фрейм - только на верхнем уровне. все остальные контролы только во фреймах
 container.code
 container.caption
 container.caption_ru

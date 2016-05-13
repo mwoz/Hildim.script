@@ -105,7 +105,6 @@ Sub Main()
     Loop
     out.Close
     If m_mode = "build" Then
-
         m_mbaseTempl = Replace(m_mbaseTempl, "{base}", m_base)
         m_mbaseTempl = Replace(m_mbaseTempl, "{user}", m_user)
         m_mbaseTempl = Replace(m_mbaseTempl, "{pwd}", m_pwd)
@@ -122,9 +121,7 @@ Sub Main()
             WScript.Echo "Ошибка при запуске SQL. Файл не найден"
             WScript.Quit
         End If
-
         Do While iCount < 300
-
             If Not oExec.StdOut.AtEndOfStream Then
                 If m_bEncode Then
                     WScript.Echo DOS2Win(oExec.StdOut.ReadAll)
@@ -133,7 +130,6 @@ Sub Main()
                 End If
                 iCount = 0
             End If
-
             If Not oExec.StdErr.AtEndOfStream Then
                 If m_bEncode Then
                     WScript.Echo DOS2Win(oExec.StdOut.ReadAll)
@@ -180,7 +176,9 @@ Function DOS2Win(DOSstr)
         Else ' всё остальное
             wkod = ASC("_")
         End If
+        On Error Resume Next
         WINstr = WINstr & CHR(wkod)
+        On Error Resume Next
     Next
     DOS2Win = WINstr
 End Function
