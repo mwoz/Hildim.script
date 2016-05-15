@@ -8,12 +8,11 @@ local clr_hgl = '15 60 195'
 --local clr_select = '205 43 202'
 local clr_select = '0 0 0'
 local clr_normal = '70 70 70'
-
 local s = class()
 
-function s:get_title(t)
+function s:get_title(t, bShort)
     local s = t['ru'] or t[1]
-    if t.key then s = s..'\t'..t.key end
+    if not bShort and (t.user_hk or t.key) then s = s..'\t'..(t.user_hk or t.key) end
     return s
 end
 
@@ -264,6 +263,9 @@ end
 
 function s:RegistryHotKeys()
 
+    local defpathUsr, tblUsers = props["SciteDefaultHome"].."\\data\\home\\userHotKeys.lua"
+    if shell.fileexists(defpathUsr) then tblUsers = assert(loadfile(defpathUsr))() end
+
     if not sys_Menus then return end
     local idm_loc = IDM_GENERATED
     local tKeys = {}
@@ -273,13 +275,24 @@ function s:RegistryHotKeys()
         for i = 1, #mnu do
             if not mnu[i].link then
                 local lp = path..'¦'..mnu[i][1]
-                if mnu[i].key and not mnu[i].key_external then
-                    local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
+                local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
+                local bSet
+                mnu[i].user_hk = tblUsers[lp]
+                if tblUsers[lp] then
+                    if tblUsers[lp] ~= '' then
+                        tKeys[tblUsers[lp]] = id
+                        bSet = true
+                    end
+                elseif mnu[i].key and not mnu[i].key_external then
                     tKeys[mnu[i].key] = id
+                    bSet = true
+                end
+                if bSet then
                     if not id then print(mnu[i].key) end
                     sys_KeysToMenus[id] = lp
                     if type(mnu[i].action) ~= 'number' then idm_loc = idm_loc + 1 end
                 end
+
                 if mnu[i][2] and type(mnu[i][2]) == 'table' then DropDown(lp, mnu[i][2])end
             end
         end
