@@ -336,6 +336,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
         {'Open Lua Startup Scr&ipt', ru = 'Открыть файл автозагрузки скрипта', action = IDM_OPENLUAEXTERNALFILE},
         {'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = function() do_LexerColors() end},
+        {'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')"},
         {"Lexers properties", ru = 'Свойства лексеров', {
             {'Lexers properties', ru='Свойства лексеров', plane=1 ,tLangs},
             {'s2', separator=1},

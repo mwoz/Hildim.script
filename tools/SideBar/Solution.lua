@@ -336,7 +336,7 @@ menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в S
 }})
 
 menuhandler:InsertItem('TABBAR', 'slast', {'project',plane = 1, {
-    {'Save As New Project', ru='Сохранить как новый проект', action=SaveAsNew},
+    {'Save As New Project', ru='Сохранить все как новый проект', action=SaveAsNew},
     {'Add To Active Project', ru='Добавить в активный проект', action=AddToActive},
 }})
 menuhandler:InsertItem('TABBAR', 's1',
