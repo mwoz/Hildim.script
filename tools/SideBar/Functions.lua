@@ -411,7 +411,7 @@ do
 	do --v----- SQL ------v--
 		-- redefine common patterns
 		--идентификатор может включать точку
-		local IDENTIFIER = (P"["+AZ) * (AZ+N+P"."+P"["+P"]")^0
+		local IDENTIFIER = (P"["+AZ) * (AZ+N+P"."+P"$"+P"["+P"]")^0
 		local STRING = (P'"' * (ANY - P'"')^0*P'"') + (P"'" * (ANY - P"'")^0*P"'")
 		local COMMENT = ((P"--" * (ANY - NL)^0*NL) + block_comment)^1
 		local SC = SPACE
