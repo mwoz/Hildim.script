@@ -277,8 +277,8 @@ function s:RegistryHotKeys()
                 local lp = path..'¦'..mnu[i][1]
                 local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
                 local bSet
-                mnu[i].user_hk = tblUsers[lp]
-                if tblUsers[lp] then
+                if tblUsers then mnu[i].user_hk = tblUsers[lp] end
+                if tblUsers and tblUsers[lp] then
                     if tblUsers[lp] ~= '' then
                         tKeys[tblUsers[lp]] = id
                         bSet = true
