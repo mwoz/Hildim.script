@@ -8,38 +8,40 @@ local function viewMenu(tMnu, tView, path)
     for i,t in ipairs(tMnu) do
         tN = {}
         local tui = {}
-        if t[2] == nil then
-            tN.leafname = menuhandler:get_title(t, true)
-            if t.separator then
-                tN.leafname = '-----------'
-                tui.disabled = true
-            else
-                tui.path = path..'¦'..t[1]
-                local keyStr
-                if t.key_external then
+        if not t.link then
+            if t[2] == nil then
+                tN.leafname = menuhandler:get_title(t, true)
+                if t.separator then
+                    tN.leafname = '-----------'
                     tui.disabled = true
-                    tN.color = "255 92 92"
+                else
+                    tui.path = path..'¦'..t[1]
+                    local keyStr
+                    if t.key_external then
+                        tui.disabled = true
+                        tN.color = "255 92 92"
+                    end
+                    if t.key then
+                        tui.default = t.key
+                        keyStr = t.key
+                    end
+                    if tblUsers and tblUsers[tui.path] then
+                        tN.color = "92 92 255"
+                        tui.user = tblUsers[tui.path]
+                        keyStr = tblUsers[tui.path]
+                    end
+                    if keyStr then tN.leafname = tN.leafname..'  ‹'..keyStr..'›' end
+                    if t.image then tN.image = t.image end
+                    tui.title = menuhandler:get_title(t, true)
                 end
-                if t.key then
-                    tui.default = t.key
-                    keyStr = t.key
-                end
-                if tblUsers[tui.path] then
-                    tN.color = "92 92 255"
-                    tui.user = tblUsers[tui.path]
-                    keyStr = tblUsers[tui.path]
-                end
-                if keyStr then tN.leafname = tN.leafname..'  ‹'..keyStr..'›' end
-                if t.image then tN.image = t.image end
-                tui.title = menuhandler:get_title(t, true)
+            elseif type(t[2]) == 'table' then
+                --tSub = {}
+                tN = {}
+                tN.branchname = menuhandler:get_title(t, true)
+                viewMenu(t[2], tN, path..'¦'..t[1])
+                ---tN[1] = tSub
+                tui.disabled = true
             end
-        elseif type(t[2]) == 'table' then
-            --tSub = {}
-            tN = {}
-            tN.branchname = menuhandler:get_title(t, true)
-            viewMenu(t[2], tN, path..'¦'..t[1])
-            ---tN[1] = tSub
-            tui.disabled = true
         end
         tN.userid = tui
         table.insert(tView, tN)
@@ -210,8 +212,15 @@ local function Show()
     end)
     if shell.fileexists(defpath) then tblUsers = assert(loadfile(defpath))() end
     scite.RegistryHotKeys{}
-    tblView.branchname = 'MainWindowMenu'
-    viewMenu(sys_Menus.MainWindowMenu, tblView, 'MainWindowMenu')
+    tblView.branchname = 'Menus'
+    --viewMenu(sys_Menus.MainWindowMenu, tblView, 'MainWindowMenu')
+
+    for ups,submnu in pairs(sys_Menus) do
+        local tb = {}
+        tb.branchname = ups
+        table.insert(tblView, 0, tb)
+        viewMenu(submnu, tb, ups)
+    end
     iup.TreeAddNodes(tree_hk, tblView)
 
 end
