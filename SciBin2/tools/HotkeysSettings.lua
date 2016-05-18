@@ -163,11 +163,11 @@ local function Show()
             end
             tuid.user = nil
             iup.SetAttributeId(tree_hk, 'TITLE', id, t)
+            iup.SetAttributeId(tree_hk, 'COLOR', id, '0 0 0')
         end
     end
 
-    tree_hk = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],
-        showdragdrop='YES', showrename='YES',}
+    tree_hk = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],}
     tree_hk.selection_cb = function(h,id, status)
         if status == 1 then
             bBlockReset = false

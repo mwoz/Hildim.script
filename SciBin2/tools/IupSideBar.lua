@@ -397,6 +397,7 @@ local function InitSideBar()
 end
 
 local function InitToolBar()
+    --if true then return end
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     TabBar_obj.Tabs = {}
 
@@ -471,8 +472,10 @@ local function InitStatusBar()
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
-    StatusBar_obj.handle.size = TabBar_obj.handle.size
-    StatusBar_obj.size = StatusBar_obj.handle.size
+    if TabBar_obj.handle then
+        StatusBar_obj.handle.size = TabBar_obj.handle.size
+        StatusBar_obj.size = StatusBar_obj.handle.size
+    end
     iup.PassFocus()
 end
 
