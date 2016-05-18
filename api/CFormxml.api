@@ -34,15 +34,10 @@ container.padLeft "padControl;padSize" padControl- контрол, от которого отсчитыв
 container.visible {{no}} 'yes' by def
 container.positionPrevLine {{yes}} 'no' by def \nПри невыставленной позиции контрол остается на\nтекущей строке с отступом от предыдущего
 
-container.controlMarkup ширины полей контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля редактирования>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
-container.controlMarkupRef ширины полей реф-контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля Code>,<ширина поля Name>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
-container.controlMarkupDate ширины полей контролов по умолчанию в формате:\n<ширина заголовка>,<ширина поля редактирования>,<отступ>,<заголовок второй даты>,<поля редактирования второй даты>\nВсе поля обязательные, для скрытия поля выставить его ширину в 0
 container.lineSpacing расстояние между строками
 container.controlSpacing отступ между контролами, расположенными в одной строке
 container.lineHeight высота строки
 container.font "name;size;[bold|italic|underline];.."\nнапример: "Tahoma;8;bold;italic"
-container.rightButtonMode {{all по правой кнопке показывать весь список|personal ... персональный лист}}  показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
-container.showInfo {{no}} 'yes' by def показ кнопки инфо в рефконтролах
 container.style
 container.styleContent
 
@@ -52,8 +47,6 @@ container.marginTop отступ по умолчанию от ВЕРХНЕГО края фрейма/контейнера
 container.marginBottom отступ по умолчанию от НИЖНЕГО края фрейма/контейнера
 
 reference.source
-reference.rightButtonMode {{all по правой кнопке показывать весь список|personal ... персональный лист}}  показ правой кнопки в рефконтролах и действие по ее нажатию. при отсутствии кнопка не отображается
-reference.showInfo {{no}} 'yes' by def показ кнопки инфо в рефконтролах
 
 choice.source Код чойса из метаданных либо\nсписок в формате <val>=<caption>[ru:<caption_ru][;...]
 choice.choiceType {{List}} 'Standard' by def.\nЗадается ли чойс списком или именем в метаданных
@@ -70,7 +63,7 @@ form.menuPath
 design.caption
 design.caption_ru
 design.locationRef
-design.location
+design.location {{CUSTOM_TAB|SEPARATE_TAB|INSIDE_BODY}} - место расположения кастомного окна
 design.visible {{yes}} 'no' by def
 design.styleContent
 
