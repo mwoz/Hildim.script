@@ -32,8 +32,11 @@ local function Show()
         f = io.open(props['SciteDefaultHome']..'\\data\\home\\Languages.properties',"w")
         f:write(t)
         f:close()
+        scite.Perform("reloadproperties:")
+
         dlg:hide()
         dlg:postdestroy()
+        scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
 
     list_lex = iup.matrix{

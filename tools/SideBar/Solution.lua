@@ -286,7 +286,10 @@ local function Solution_Init()
         end)
         tree_sol.branchclose_cb = function(h) if h.value=='0' then return -1 end end
         tree_sol.rename_cb = function() is_chanjed = true return -4 end
-        tree_sol.dragdrop_cb = function() is_chanjed = true return -4 end
+        tree_sol.dragdrop_cb = function(h, drag_id, drop_id, isshift, iscontrol)
+            if iscontrol == 1 then return -1 end
+            is_chanjed = true return -4
+        end
         tree_sol.killfocus_cb = SaveSolution
         tree_sol.tips_cb = function(h, x, y, status)
             local n = iup.ConvertXYToPos(h,x,y)

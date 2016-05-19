@@ -195,7 +195,6 @@ local function Show()
         end
     end
 
-
     local vbox = iup.vbox{
         iup.hbox{iup.vbox{tree_hk}};
         iup.hbox{edit_hk, btn_default, gap='15'},
