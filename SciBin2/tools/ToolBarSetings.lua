@@ -46,7 +46,7 @@ local function Show()
 
     local list_lex, dlg, bBlockReset, tree_btns
     local btn_ok = iup.button  {title="OK"}
-    iup.SetHandle("HK_BTN_OK",btn_ok)
+    iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
 
     local tree_hk = iup.text{size='100x'}
 
@@ -122,7 +122,7 @@ local function Show()
         iup.hbox{iup.vbox{tree_hk},tree_btns};
         iup.hbox{btn_ok},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Настройка горячих клавиш",defaultenter="HK_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title="Настройка пользовательской панели инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='300x600'}
 
 
