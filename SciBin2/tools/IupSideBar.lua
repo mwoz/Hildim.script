@@ -2,7 +2,7 @@ require 'shell'
 SideBar_obj = {}
 LeftBar_obj = {}
 SideBar_Plugins = {}
-TabBar_obj = {}
+local ToolBar_obj = {}
 
 local win_parent --создаем основное окно
 local tbs
@@ -44,27 +44,21 @@ function sidebar_Switch(n)
         end
     end
 
+end
 
-end
---[[function sidebar_Focus()
-    iup.SetFocus(SideBar_obj.TabCtrl)
-end]]
 local function  CreateToolBar()
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\LiveSearch.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\m4.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\mb.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\templates.lua")
-   --
-    --local tolsp2=iup.split{TabBar_obj.Tabs.m4.handle, TabBar_obj.Tabs.mb.handle, orientation="VERTICAL",minmax="300:700"}
-    local tolsp1=iup.hbox{
-                            TabBar_obj.Tabs.mb.handle,
-                            TabBar_obj.Tabs.m4.handle,
-                            TabBar_obj.Tabs.template.handle,
-                            TabBar_obj.Tabs.livesearch.handle,
-                            gap='3',margin='3x0', name="ToolBar", maxsize="x36",
-                        }
-    return tolsp1
+    local str = _G.iuprops["settings.toolbars.layout"]
+    local strTbl = 'return function(h) return iup.hbox{\n'
+    for p in str:gmatch('[^¦]+') do
+        local _,_, pname, pf = p:find('(.-)(¬?)$')
+        local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+        pI.toolbar(ToolBar_obj)
+        strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'--[[]]
+    end
+    strTbl = strTbl..'gap="3",margin="3x0", name="ToolBar", maxsize="x36",} end'
+    return loadstring(strTbl)()(ToolBar_obj)
 end
+
 local function  CreateStatusBar()
     dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Status.lua")
     local tolsp1=iup.hbox{
@@ -399,7 +393,7 @@ end
 local function InitToolBar()
     --if true then return end
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
-    TabBar_obj.Tabs = {}
+    ToolBar_obj.Tabs = {}
 
     tTlb = {CreateToolBar()}
     tTlb.control = "YES"
@@ -408,31 +402,31 @@ local function InitToolBar()
         if state == 0 and props['iuptoolbar.visible'] == '1' and props['iuptoolbar.restarted'] ~= '1' then
            scite.MenuCommand(IDM_VIEWTLBARIUP)
         elseif state == 4 then
-            for _,tbs in pairs(TabBar_obj.Tabs) do
+            for _,tbs in pairs(ToolBar_obj.Tabs) do
                 if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
             end
             for i = 1, #tEvents do
-                for _,tbs in pairs(TabBar_obj.Tabs) do
+                for _,tbs in pairs(ToolBar_obj.Tabs) do
                    if tbs[tEvents[i]] then RemoveEventHandler(tEvents[i],tbs[tEvents[i]]) end
                 end
             end
             props['iuptoolbar.restarted'] = '1'
         end
     end)
-    tTlb.resize_cb=(function(_,x,y) if TabBar_obj.handle ~= nil then TabBar_obj.size = TabBar_obj.handle.size end end)
-    --TabBar_obj.handle = iup.scitedialog(tTlb)
+    tTlb.resize_cb=(function(_,x,y) if ToolBar_obj.handle ~= nil then ToolBar_obj.size = ToolBar_obj.handle.size end end)
+    --ToolBar_obj.handle = iup.scitedialog(tTlb)
     local hTmp= iup.dialog(tTlb)
     local hBx = iup.GetDialogChild(hTmp, 'ToolBar')
     iup.Detach(hBx)
     iup.Destroy(hTmp)
-    TabBar_obj.handle = iup.Insert(vbScite, nil, hBx)
+    ToolBar_obj.handle = iup.Insert(vbScite, nil, hBx)
     iup.Map(hBx)
     for i = 1, #tEvents do
-        for _,tbs in pairs(TabBar_obj.Tabs) do
+        for _,tbs in pairs(ToolBar_obj.Tabs) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
-    TabBar_obj.size = TabBar_obj.handle.size
+    ToolBar_obj.size = ToolBar_obj.handle.size
     iup.PassFocus()
 end
 
@@ -472,8 +466,8 @@ local function InitStatusBar()
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
-    if TabBar_obj.handle then
-        StatusBar_obj.handle.size = TabBar_obj.handle.size
+    if ToolBar_obj.handle then
+        StatusBar_obj.handle.size = ToolBar_obj.handle.size
         StatusBar_obj.size = StatusBar_obj.handle.size
     end
     iup.PassFocus()

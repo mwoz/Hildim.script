@@ -7,7 +7,7 @@
 --local cmb_listCalc
 
 _G["SqlMap"] = nil
-
+local ToolBar_obj
 
 function RunBatch(filePath)
     --if props["output.hook"] == 'Y' then return end
@@ -107,18 +107,19 @@ local function _OnKey(key, shift, ctrl, alt, char)
 end
 
 local function OnSwitch()
-    if TabBar_obj.handle ~= nil then TabBar_obj.handle.size = TabBar_obj.size end
+    if ToolBar_obj.handle ~= nil then ToolBar_obj.handle.size = ToolBar_obj.size end
     if editor.Lexer == SCLEX_MSSQL then
-        TabBar_obj.Tabs.m4.handle.state = 'OPEN'
+        ToolBar_obj.Tabs.m4.handle.state = 'OPEN'
     else
-        TabBar_obj.Tabs.m4.handle.state = 'CLOSE'
+        ToolBar_obj.Tabs.m4.handle.state = 'CLOSE'
     end
 end
 
-local function FindTab_Init()
+local function Init(h)
+    ToolBar_obj = h
     cmb_listCalc = iup.list{dropdown="YES",visibleitems="55", expand='NO',size='120x0', tip='Список доступных вариантов для исполнения в базе (build)\nи компиляции в SQL (compile). \nФайлы нахлдятся в директории Scite\\data\\UserData\\BuildM4'  }
     cmb_listCalc.map_cb = (function(h) h.value=tonumber(_G.iuprops["sidebar.m4.value"] or '1'); end)
-    TabBar_obj.Tabs.m4 = {
+    ToolBar_obj.Tabs.m4 = {
 
         handle = iup.expander{iup.hbox{
                     iup.label{title = "M4:"},
@@ -139,6 +140,10 @@ local function FindTab_Init()
     cmb_listCalc:FillByDir("\\buildm4\\*.vbs", _G.iuprops['sql.compile.file'])
 end
 
-FindTab_Init()
+return {
+    title = 'Шаблоны M4',
+    code = 'm4',
+    toolbar = Init,
+}
 
 
