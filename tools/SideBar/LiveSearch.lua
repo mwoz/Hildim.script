@@ -33,7 +33,7 @@ local function OnSwitch()
     needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
 end
 
-local function FindTab_Init()
+local function Init(ToolBar_obj)
     local tm = iup.timer{time=300}
     local tmConsole = iup.timer{time=600000}
     tmConsole.action_cb = (function()
@@ -96,7 +96,7 @@ local function FindTab_Init()
         end
     end)
     btn_search = iup.button{image = 'IMAGE_search',active='NO', action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
-    TabBar_obj.Tabs.livesearch = {
+    ToolBar_obj.Tabs.livesearch = {
         handle = iup.hbox{
                 iup.button{image = 'IMAGE_AlignObjectsLeft', action=(function() iup.PassFocus();do_Align() end), tip='Диалог выравнивания кода(Alt+A)'};
                 btn_search,
@@ -112,10 +112,16 @@ local function FindTab_Init()
         on_SelectMe = function() cmb_listCalc:set_focus() end
         }
 
+    menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+    {'Live Search', ru="Живой поиск", key='Alt+F', action=sidebar_Find, image = 'binocular__pencil_µ',})
+
 end
 
-FindTab_Init()
+return {
+    title = 'Live Search',
+    code = 'livesearch',
+    toolbar = Init,
+}
 
-menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-{'Live Search', ru="Живой поиск", key='Alt+F', action=sidebar_Find, image = 'binocular__pencil_µ',})
+
 

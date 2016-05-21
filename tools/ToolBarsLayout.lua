@@ -1,7 +1,7 @@
---[[Диалог редактирования горячих клавиш]]
+--[[Диалог редактирования раскладки панелей инструментов]]
 require "menuhandler"
 local tblView = {}, tblUsers
-local defpath = props["SciteDefaultHome"].."\\tools\\ToolBar\\"
+local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 
 
 local function Show()
@@ -14,7 +14,7 @@ local function Show()
         for i = 1,  tonumber(list_tb.numlin) do
             if iup.GetAttributeId2(list_tb, 'TOGGLEVALUE', i, 2) == '1' then
                 if str ~= '' then str = str..'¦' end
-                str = str..list_tb:getcell(i, 1)
+                str = str..list_tb:getcell(i, 4)
                 if iup.GetAttributeId2(list_tb, 'TOGGLEVALUE', i, 3) == '1' then str = str..'¬' end
             end
         end
@@ -24,9 +24,9 @@ local function Show()
     end
 
     list_tb = iup.matrix{
-    numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=4, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255", --togglecentered = 'YES',
-    width0 = 0 ,rasterwidth1 = 200,rasterwidth2= 70,rasterwidth3= 130, }
+    width0 = 0 ,rasterwidth1 = 200,rasterwidth2= 70,rasterwidth3= 130, rasterwidth4= 0, }
     list_tb:setcell(0, 1, "Панель")
     list_tb:setcell(0, 2, "Показать")
     list_tb:setcell(0, 3, "С новой строки")
@@ -47,14 +47,17 @@ local function Show()
         end
         if lBtn and lin ~= droppedLin then
             local curL = list_tb:getcell(lin, 1)
+            local cur4 = list_tb:getcell(lin, 4)
             local cur2 = iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 2)
             local cur3 = iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 3)
 
             list_tb:setcell(lin, 1,list_tb:getcell(droppedLin, 1))
+            list_tb:setcell(lin, 4,list_tb:getcell(droppedLin, 4))
             iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 2, iup.GetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 2))
             iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 3, iup.GetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 3))
 
             list_tb:setcell(droppedLin, 1,curL)
+            list_tb:setcell(droppedLin, 4,cur4)
             iup.SetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 2, cur2)
             iup.SetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 3, cur3)
 
@@ -67,8 +70,8 @@ local function Show()
     list_tb.leavewindow_cb = function()  droppedLin = nil; list_tb.cursor = "ARROW" end
     list_tb.button_cb = function(h, button, pressed, x, y, status)
         local id = iup.ConvertXYToPos(h, x, y)
-        local lin = math.floor(id/4)
-        local col = id % 4
+        local lin = math.floor(id/5)
+        local col = id % 5
         if button == 49 and pressed == 0 and col ==1 then droppedLin = nil; h.cursor = "ARROW"
         elseif col == 2 and pressed == 0 then
             iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 2, Iif(iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 2) == '1', '0','1'))
@@ -105,19 +108,29 @@ local function Show()
             p = p:gsub('¬$', '')
             if table_dir[i].name == p then
                 table.remove(table_dir, i)
-                list_tb:setcell(j, 1, p)
-                iup.SetAttributeId2(list_tb, 'TOGGLEVALUE', j, 2, '1')
-                if bNewLine then iup.SetAttributeId2(list_tb, 'TOGGLEVALUE', j, 3, '1') end
-                j = j + 1
+                local pI = dofile(defpath..p)
+                if pI and pI.toolbar then
+                    list_tb:setcell(j, 1, pI.title)
+                    list_tb:setcell(j, 4, p)
+
+                    iup.SetAttributeId2(list_tb, 'TOGGLEVALUE', j, 2, '1')
+                    if bNewLine then iup.SetAttributeId2(list_tb, 'TOGGLEVALUE', j, 3, '1') end
+                    j = j + 1
+                end
                 break
             end
         end
     end
 
     for i = 1, #table_dir do
-        list_tb:setcell(j, 1, table_dir[i].name)
-        j = j + 1
+        local pI = dofile(defpath..table_dir[i].name)
+        if pI and pI.toolbar then
+            list_tb:setcell(j, 1, pI.title)
+            list_tb:setcell(j, 4, table_dir[i].name)
+            j = j + 1
+        end
     end
+    if #table_dir > 0 then iup.SetAttribute(list_tb, 'DELLIN', ''..j..'-'..(j + #table_dir - 1)) end
     list_tb.redraw = "ALL"
 end
 

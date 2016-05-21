@@ -140,7 +140,7 @@ local function SetSubjProps(h)
     if str:find("%.KPLUS") ~= nil then props['sql.type'] = "SYBASE" else props['sql.type'] = "MSSQL" end
 end
 
-local function FindTab_Init()
+local function Init(h)
     cmb_listMbTrancport = iup.list{dropdown="YES",visibleitems="15", expand='NO',size='70x0', action=listMbTrancport_DoLua, tip='Список доступных мессаджбасов. файлы с их описанием в\nScite\\data\\UserData\\connectmb' }
     cmb_listMbTrancport.map_cb=(function(h) h.value=tonumber(_G.iuprops["sidebar.mb.transport.value"]); if h.value=='0' then h.value='1' ;end; end)
     cmb_Subjects = iup.list{dropdown="YES",visibleitems="15",size='70x0', expand='NO', tip='Mb-префикс Db Adapter-а, используемого для посылки запросов при показе списков полей таблиц и пр.\n(Modullar - кастомная база,Radius  - основная)'}
@@ -153,7 +153,7 @@ local function FindTab_Init()
     cmb_Subjects.action = SetSubjProps
     chk_RunConnect = iup.toggle{title = "Connect",action=listMbTrancport_DoLua, tip='Соединение с мессаджбасом', name='chkRunConnect'}
     btn_Open_Exec = iup.button{image = 'IMAGE_Sub',active='NO', action=(function() sql_ExecCmd() end), tip='Диалог генерации кода запуска\nSQL процедуры(Alt+Shift+E)'}
-    TabBar_obj.Tabs.mb =  {
+    h.Tabs.mb =  {
         handle = iup.hbox{  iup.label{title = "Mb:"},
                             cmb_listMbTrancport,
                             chk_RunConnect,
@@ -168,5 +168,9 @@ local function FindTab_Init()
     _G.iuprops["sidebarctrl.chkRunConnect.value"] = 'OFF'
 end
 
-FindTab_Init()
+return {
+    title = 'Message Bas',
+    code = 'mb',
+    toolbar = Init,
+}
 

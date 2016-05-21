@@ -8,7 +8,7 @@ local txt_BaseNameSuffix
 local txt_RadiusUserName
 -- local cmb_resent
 local chk_DebugMode, btn_FormRun, btn_AddDoc
-
+local ToolBar_obj
 
 function listCalc_addToRecent(strFile)
     cmb_resent.insertitem1 = strFile
@@ -37,17 +37,17 @@ local function SSCtrls()
 end
 
 local function OnSwitch()
-    if TabBar_obj.handle ~= nil then TabBar_obj.handle.size = TabBar_obj.size end
+    if ToolBar_obj.handle ~= nil then ToolBar_obj.handle.size = ToolBar_obj.size end
     if editor.Lexer == SCLEX_FORMENJINE then
-        TabBar_obj.Tabs.template.handle.state = 'OPEN'
+        ToolBar_obj.Tabs.template.handle.state = 'OPEN'
     else
-        TabBar_obj.Tabs.template.handle.state = 'CLOSE'
+        ToolBar_obj.Tabs.template.handle.state = 'CLOSE'
     end
     SSCtrls()
 end
 
-local function FindTab_Init()
-
+local function Init(h)
+    ToolBar_obj = h
 	if _G.iuprops['precompiller.radiususername'] == nil then _G.iuprops['precompiller.radiususername'] = '' end
 	txt_RadiusUserName = iup.text{expand='NO',size='70x0', tip='Имя пользователя Radius\nЕсли у пользователя открыта форма DebugTools,\nто собранный шаблон перезарузится'}
 	txt_RadiusUserName.map_cb=(function(h)h.value = _G.iuprops['precompiller.radiususername'] end)
@@ -62,7 +62,7 @@ local function FindTab_Init()
 
     btn_AddDoc = iup.button{image = 'IMAGE_AddDocument',bgcolor={0,0,0}, action=(function() iup.PassFocus();precomp_PreCompileTemplate();SSCtrls() end), tip='Проверить текущий шаблон XML на наличие\nошибок и добавить его в данный список(F7)\nдля возможной последующей сборки'}
     btn_FormRun = iup.button{image = 'IMAGE_FormRun', action=listCalc_CompileSelectedTemplate, tip='Собрать выбранный шаблон и отправить\nего по мессаджбасу в Radius'}
-    TabBar_obj.Tabs.template =  {
+    ToolBar_obj.Tabs.template =  {
         handle =iup.expander{iup.hbox{   iup.label{title = "User:"},
                             txt_RadiusUserName,
                             chk_DebugMode,
@@ -84,6 +84,10 @@ local function FindTab_Init()
                 }
 end
 
-FindTab_Init()
+return {
+    title = 'Шаблоны  Systematica',
+    code = 'template',
+    toolbar = Init,
+}
 
 
