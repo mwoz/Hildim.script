@@ -46,7 +46,13 @@ local function Show()
 
     local list_lex, dlg, bBlockReset, tree_btns
     local btn_ok = iup.button  {title="OK"}
+    local btn_esc = iup.button  {title="Cancel"}
     iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
+    iup.SetHandle("TOOLBARSETT_BTN_ESC",btn_esc)
+    btn_esc.action = function()
+        dlg:hide()
+        dlg:postdestroy()
+    end
 
     local tree_hk = iup.text{size='100x'}
 
@@ -117,14 +123,12 @@ local function Show()
     tree_btns.dragdatasize_cb = function(ih, typ)  return 1 end
     tree_btns.dragdata_cb = function(ih, typ) return true end
 
-
     local vbox = iup.vbox{
         iup.hbox{iup.vbox{tree_hk},tree_btns};
-        iup.hbox{btn_ok},
+        iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Настройка пользовательской панели инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title="Настройка пользовательской панели инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='300x600'}
-
 
     dlg.show_cb=(function(h,state)
         if state == 4 then

@@ -52,7 +52,13 @@ local function Show()
 
     local list_lex, dlg, bBlockReset
     local btn_ok = iup.button  {title="OK"}
+    local btn_esc = iup.button  {title="Cancel"}
     iup.SetHandle("HK_BTN_OK",btn_ok)
+    iup.SetHandle("HK_BTN_ESC",btn_esc)
+    btn_esc.action = function()
+        dlg:hide()
+        dlg:postdestroy()
+    end
 
     local edit_hk, tree_hk = iup.text{size='100x'}
 
@@ -198,9 +204,9 @@ local function Show()
     local vbox = iup.vbox{
         iup.hbox{iup.vbox{tree_hk}};
         iup.hbox{edit_hk, btn_default, gap='15'},
-        iup.hbox{btn_ok},
+        iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Настройка горячих клавиш",defaultenter="HK_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title="Настройка горячих клавиш",defaultenter="HK_BTN_OK",defaultesc="HK_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='300x600'}
 
     dlg.show_cb=(function(h,state)

@@ -2,69 +2,17 @@
 local tblView = {}, tblUsers
 local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 
-local function settings2tbl(str, side)
-        local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
-        local function piCode(pI)
-            if pI.code == 'findrepl' then
-                return 'Pane{type="FIND"}'
-            else
-                return pI.code
-            end
-            return pI.code
-        end
-        if str == '' then
-            return side..' = function() return nil end'
-        end
-        local tSide = {}
-        local tCur
-
-        for p in str:gmatch('[^¦]+') do
-            local _,_, pname, pf = p:find('(.-)(¬?)$')
-            if pf ~= '' then
-                tCur = {title = pname}
-                table.insert(tSide, tCur)
-            else
-                table.insert(tCur, pname)
-            end
-        end
-
-        local strTabs = side..'= function() return{\n'
-        for i = 1, #tSide do
-            tCur = tSide[i]
-            local pI = dofile(defpath..tCur[1])
---            pI.sidebar()
-            local tabName = tCur.title
-            if #tCur == 1 then
-                strTabs = strTabs..'Pane{"'..pI.code..'", tabtitle = "'..tabName..'"},\n'
-            else
-                local strPrev = '"'..piCode(pI)..'"'
-                local bfixedheigth = pI.fixedheigth
-                for j = 2, #tCur do
-                    pI = dofile(defpath..tCur[j])
---                    pI.sidebar()
-                    print(pI.code, j, tCur[j])
-                    strPrev = 'Pane{'..strPrev..', "'..piCode(pI)..'", '
-                    if bfixedheigth or pI.fixedheigth then
-                        strPrev = strPrev..'type="VBOX", '
-                    else
-                        strPrev = strPrev..' orientation="HORIZONTAL", type="SPLIT", name = "split'..pI.code..'", '
-                    end
-                    if j == #tCur then
-                        strPrev = strPrev..'tabtitle = "'..tabName..'", '
-                    end
-                    strPrev = strPrev..'}'
-                end
-                strTabs = strTabs..strPrev..',\n'
-            end
-        end
-        return strTabs.."} end"
-end
-
 local function Show()
 
     local list_lex, dlg, bBlockReset, tree_right
     local btn_ok = iup.button  {title="OK"}
+    local btn_esc = iup.button  {title="Cancel"}
     iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
+    iup.SetHandle("TOOLBARSETT_BTN_ESC",btn_esc)
+    btn_esc.action = function()
+        dlg:hide()
+        dlg:postdestroy()
+    end
 
     local tree_plugins = iup.text{size='100x'}
 
@@ -84,12 +32,11 @@ local function Show()
             end
             return str
         end
-        -- _G.iuprops["settings.user.leftbar"] = SaveTree(tree_left)
-        -- _G.iuprops["settings.user.rightbar"] = SaveTree(tree_right)
-        print(settings2tbl(SaveTree(tree_left),"tbArgLeft"))
-        print(settings2tbl(SaveTree(tree_right),"tbArgRight"))
+        _G.iuprops["settings.user.leftbar"] = SaveTree(tree_left)
+        _G.iuprops["settings.user.rightbar"] = SaveTree(tree_right)
         dlg:hide()
         dlg:postdestroy()
+        scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
 
     tree_plugins = iup.tree{size = '120x',
@@ -134,14 +81,29 @@ local function Show()
 
     local function rightclick_cb(h, id)
         local sAct = 'NO'
+        local sAct2 = 'NO'
         if tonumber(iup.GetAttribute(h, "COUNT")) > 2 and iup.GetAttributeId(h, "KIND", id) == "BRANCH"
            and iup.GetAttributeId(h, "CHILDCOUNT", id) == '0' then sAct = 'YES' end
+        if iup.GetAttributeId(h, "KIND", id) == "BRANCH"
+           and iup.GetAttributeId(h, "CHILDCOUNT", id) ~= '0' then sAct2 = 'YES' end
         iup.menu
         {
             iup.item{title="Add Tab", action=function()
                 iup.SetAttributeId(h, "ADDBRANCH", 0, "<New Tab>")
             end};
             iup.item{title="Remove Tab", active = sAct, action=function()
+                iup.SetAttributeId(h, "DELNODE", id, "SELECTED")
+            end};
+            iup.item{title="Move Tab", active = sAct2, action=function()
+                local h2
+                if h == tree_right then h2 = tree_left else h2 = tree_right end
+                iup.SetAttributeId(h2, "ADDBRANCH", 0, iup.GetAttributeId(h, "TITLE", id))
+                local chCnt = iup.GetAttributeId(h, "CHILDCOUNT", id)
+                for i = chCnt, 1, -1 do
+                    iup.SetAttributeId(h2, "ADDLEAF", 1, iup.GetAttributeId(h, "TITLE", id + i))
+                    h2:SetUserId(2, h:GetUserId(id + i))
+                    iup.SetAttributeId(h, "DELNODE", id + i, "SELECTED")
+                end
                 iup.SetAttributeId(h, "DELNODE", id, "SELECTED")
             end};
         }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
@@ -190,9 +152,9 @@ local function Show()
 
     local vbox = iup.vbox{
         iup.hbox{tree_left, iup.vbox{tree_plugins},tree_right};
-        iup.hbox{btn_ok},
+        iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Настройка пользовательской панели инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title="Настройка пользовательской панели инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='x400'}
 
 
@@ -202,6 +164,9 @@ local function Show()
         end
     end)
 
+    iup.SetAttributeId(tree_left,"TITLE", 0, "Левая панель")
+    iup.SetAttributeId(tree_right,"TITLE", 0, "Правая панель")
+    iup.SetAttributeId(tree_plugins,"TITLE", 0, "Неиспользуемые элементы")
     iup.SetAttributeId(tree_left,"ADDBRANCH", 0, "<New Tab>")
     iup.SetAttributeId(tree_right,"ADDBRANCH", 0, "<New Tab>")
 

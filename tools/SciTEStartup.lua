@@ -10,7 +10,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 -- Подключение файла с общими функциями, использующимися во многих скриптах
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 Splash_Screen()
-dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Menus.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\Menus.lua")
 
 ----[[ R E A D   O N L Y ]]-------------------------------------------------
 
