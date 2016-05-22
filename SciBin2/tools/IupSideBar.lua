@@ -101,18 +101,9 @@ local function SaveNamedValues(h, root)
 end
 
 local function  CreateBox()
-
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Abbrev.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Bookmark.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FileMan.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Functions.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Navigation.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\FindRepl.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Atrium.lua")
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\solution.lua")
     -- Creates boxes
     local sb_elements = {}
-    function Pane(t)
+    local function Pane(t)
         for i = 1, #t do
             if type(t[i])=='string' then
                 table.insert(sb_elements, SideBar_Plugins[t[i]])
@@ -139,6 +130,7 @@ local function  CreateBox()
         l.tabtitle = t.tabtitle
         return l
     end
+
     local function SideBar(t, Bar_Obj)
         if not t then return end
         t.name="tabMain"
@@ -228,25 +220,79 @@ local function  CreateBox()
         return h
     end
 
-    local plugin = props["SciteDefaultHome"].."\\data\\home\\SideBarLayout.lua"
-    if shell.fileexists(plugin) then dofile(plugin)
-    else dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\SideBarLayout.lua")
+    local function settings2tbl(str, side)
+        local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
+        local function piCode(pI)
+            if pI.code == 'findrepl' then
+                return 'P{type = "FIND"}'
+            else
+                return '"'..pI.code..'"'
+            end
+            return pI.code
+        end
+        if str == '' then
+            return 'return function() return nil end'
+        end
+        local tSide = {}
+        local tCur
+
+        for p in str:gmatch('[^¦]+') do
+            local _,_, pname, pf = p:find('(.-)(¬?)$')
+            if pf ~= '' then
+                tCur = {title = pname}
+                table.insert(tSide, tCur)
+            else
+                table.insert(tCur, pname)
+            end
+        end
+
+        local strTabs = 'return function(P) return{\n'
+        for i = 1, #tSide do
+            tCur = tSide[i]
+            local pI = dofile(defpath..tCur[1])
+            pI.sidebar()
+            local tabName = tCur.title
+            if #tCur == 1 then
+                strTabs = strTabs..'P{"'..pI.code..'", tabtitle = "'..tabName..'"},\n'
+            else
+                local strPrev = piCode(pI)
+                local bfixedheigth = pI.fixedheigth
+                for j = 2, #tCur do
+                    pI = dofile(defpath..tCur[j])
+                    pI.sidebar()
+                    strPrev = 'P{'..strPrev..', '..piCode(pI)..', '
+                    if bfixedheigth or pI.fixedheigth then
+                        strPrev = strPrev..'type="VBOX", '
+                    else
+                        strPrev = strPrev..' orientation="HORIZONTAL", type="SPLIT", name = "split'..pI.code..'", '
+                    end
+                    if j == #tCur then
+                        strPrev = strPrev..'tabtitle = "'..tabName..'", '
+                    end
+                    strPrev = strPrev..'}'
+                end
+                strTabs = strTabs..strPrev..',\n'
+            end
+        end
+        --print(strTabs.."} end")
+        return strTabs.."} end"
     end
 
+    local tbArgLeft = assert(loadstring(settings2tbl(_G.iuprops["settings.user.leftbar"],"tbArgLeft")))()
+    local tbArgRight = assert(loadstring(settings2tbl(_G.iuprops["settings.user.rightbar"],"tbArgRight")))()
+
     pane_curObj = SideBar_obj
-    local tabs =  SideBar(tbArgRight(), SideBar_obj)
-    tbArgRight = nil
+    local tabs =  SideBar(tbArgRight(Pane), SideBar_obj)
 
     if tabs then
         SideBar_obj.TabCtrl = tabs
 
-        vbox = iup.vbox{tabs}       --SideBar_Plugins.livesearch.handle,
+        vbox = iup.vbox{tabs}
         SideBar_obj.handle = SidePane(vbox, 'SideBarSB','sidebar','SourceSplitRight', 'RightBarExpander', '1000', SideBar_obj, 'Right' )
     end
 
     pane_curObj = LeftBar_obj
-    tabs =  SideBar(tbArgLeft(), LeftBar_obj)
-    tbArgLeft = nil
+    tabs =  SideBar(tbArgLeft(Pane), LeftBar_obj)
 
     if tabs then
         LeftBar_obj.TabCtrl = tabs

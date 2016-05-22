@@ -196,7 +196,7 @@ local function FindInBuffers()
     PostAction()
 end
 
-function GoToMarkDown()
+local function GoToMarkDown()
     local iPos = editor.SelectionStart
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
     local nextStart = iPos
@@ -214,7 +214,7 @@ function GoToMarkDown()
     end
     SetInfo(Iif(bMark, '', 'Меток не обнаружено'), Iif(bMark, '', 'E'))
 end
-function GoToMarkUp()
+local function GoToMarkUp()
     local curPos = editor.SelectionStart
     local iPos = 0
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
@@ -300,7 +300,7 @@ local function FolderUp()
 end
 
 --перехватчики команд меню
-function ActivateFind(nTab)
+local function ActivateFind_l(nTab)
     Ctrl("tabFinrRepl").valuepos = nTab
 
     local wnd = editor
@@ -337,7 +337,7 @@ local function FindNextSel(bUp)
         str = editor:GetSelText()
         if str ~= '' then
             local prevUp = findSettings.searchUp
-            ActivateFind(0)
+            ActivateFind_l(0)
 
             ReadSettings()
             OnNavigation("Find")
@@ -834,6 +834,7 @@ local function create_dialog_FindReplace()
 end
 
 local function FuncBmkTab_Init()
+    ActivateFind = ActivateFind_l --глобальная ссылка на нашу функцию
 
     oDeattFnd = iup.scitedetachbox{
         create_dialog_FindReplace();
@@ -880,9 +881,9 @@ local function FuncBmkTab_Init()
     SideBar_Plugins.findrepl = {
         handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};
         OnMenuCommand = (function(msg)
-            if msg == IDM_FIND then return ActivateFind(0)
-            elseif msg == IDM_REPLACE then return ActivateFind(1)
-            elseif msg == IDM_FINDINFILES then return ActivateFind(2)
+            if msg == IDM_FIND then return ActivateFind_l(0)
+            elseif msg == IDM_REPLACE then return ActivateFind_l(1)
+            elseif msg == IDM_FINDINFILES then return ActivateFind_l(2)
             elseif msg == IDM_FINDNEXT then
                 ReadSettings()
                 return FindNextBack(false)
@@ -913,10 +914,17 @@ local function FuncBmkTab_Init()
             end
             SetStaticControls()
     end)
+
+    AddEventHandler("OnFindCompleted", (function()
+        findSettings:MarkResult()
+    end))
 end
 
-FuncBmkTab_Init()
+return {
+    title = 'Find Replace Dialog',
+    code = 'findrepl',
+    sidebar = FuncBmkTab_Init,
+    fixedheigth = true,
+}
 
-AddEventHandler("OnFindCompleted", (function()
-    findSettings:MarkResult()
-end))
+

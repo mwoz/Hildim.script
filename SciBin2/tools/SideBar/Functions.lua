@@ -557,7 +557,7 @@ local function fixname (funcitem)
 	return funcitem[1]..(flag2 or '')..GetParams(funcitem),flag
 end
 
-function getPath(id)
+local function getPath(id)
     if iup.GetAttributeId(tree_func, 'KIND', id) == 'BRANCH' then return '' end
     local id2 = iup.GetAttributeId(tree_func, 'PARENT', id)
     if id2 == nil then return '' end
@@ -667,25 +667,25 @@ local function Functions_ListFILL()
 	currFuncData = -1
 end
 
-function Functions_SortByOrder()
+local function Functions_SortByOrder()
 	_sort = 'order'
     _G.iuprops['sidebar.functions.sort'] = _sort
 	Functions_ListFILL()
 end
 
-function Functions_SortByName()
+local function Functions_SortByName()
 	_sort = 'name'
     _G.iuprops['sidebar.functions.sort'] = _sort
 	Functions_ListFILL()
 end
 
-function Functions_ToggleParams ()
+local function Functions_ToggleParams ()
 	_show_params = not _show_params
     _G.iuprops['sidebar.functions.params'] = Iif(_show_params,1,0)
 	Functions_ListFILL()
 end
 
-function Functions_ToggleFlags ()
+local function Functions_ToggleFlags ()
 	_show_flags = not _show_flags
 	if not _show_flags then
 		_group_by_flags = false
@@ -697,7 +697,7 @@ function Functions_ToggleFlags ()
 	Functions_ListFILL()
 end
 
-function ShowCompactedLine(line_num)
+local function ShowCompactedLine(line_num)
 	local function GetFoldLine(ln)
 		while editor.FoldExpanded[ln] do ln = ln-1 end
 		return ln
@@ -821,7 +821,7 @@ local function OnMySave()
     iup.PassFocus()
 end
 
-function Functions_ToggleGroup()
+local function Functions_ToggleGroup()
 	_group_by_flags = not _group_by_flags
 	if _group_by_flags then
 		_show_flags = true
@@ -835,7 +835,7 @@ function Functions_ToggleGroup()
     Functions_ListFILL()
 end
 
-function menu_GoToObjectDefenition()
+function menu_GoToObjectDefenition()    --TODO!!! - перенести в этот файл создание пункта менб!
 	local handled = false
 	local strFunc = GetCurrentWord()
 	local current_pos = editor.CurrentPos
@@ -946,8 +946,11 @@ local function Finc_Init()
 
 end
 
-Finc_Init()
-
+return {
+    title = 'Functions',
+    code = 'functions',
+    sidebar = Finc_Init,
+}
 
 
 

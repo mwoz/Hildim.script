@@ -284,7 +284,7 @@ end
 local favorites_filename = props['SciteUserHome']..'\\favorites.lst'
 local list_fav_table = {}
 
-function Favorites_ListFILL()
+local function Favorites_ListFILL_l()
     local function getName(s)
 		local fname = s[1]:gsub('.+\\','')
 		if fname == '' then fname = s[1]:gsub('.+\\(.-)\\','%1') end
@@ -357,7 +357,7 @@ local function Favorites_AddFile()
 		fname = fname:gsub('\\\.\.$', '')..'\\'
 	end
 	list_fav_table[#list_fav_table+1] = {fname, false}
-	Favorites_ListFILL()
+	Favorites_ListFILL_l()
 	Favorites_SaveList()
 end
 
@@ -430,20 +430,20 @@ end
 
 local function Favorites_AddCurrentBuffer()
 	list_fav_table[#list_fav_table+1] = {props['FilePath'], false}
-	Favorites_ListFILL()
+	Favorites_ListFILL_l()
     Favorites_SaveList()
 end
 
-function Favorites_AddFileName(fName) --для добавления из других библиотек
+local function Favorites_AddFileName_l(fName) --для добавления из других библиотек
     list_fav_table[#list_fav_table+1] = {fName, true}
 end
 
-function Favorites_Clear()
+local function Favorites_Clear_l()
     if SideBar_Plugins.fileman.Bar_obj.Active  ~= true then return end
     for i = #list_fav_table,1,-1 do
         if list_fav_table[i][2] then table.remove(list_fav_table,i) end
     end
-	Favorites_ListFILL()
+	Favorites_ListFILL_l()
 end
 
 local function Favorites_DeleteItem()
@@ -491,7 +491,7 @@ local function OnSwitch(bForse, bRelist)
     end
     if bRelist then
         Favorites_OpenList()
-        Favorites_ListFILL()
+        Favorites_ListFILL_l()
     end
 end
 
@@ -531,6 +531,9 @@ local function memoNav(key)
 end
 
 local function FileManTab_Init()
+    Favorites_AddFileName = Favorites_AddFileName_l
+    Favorites_ListFILL = Favorites_ListFILL_l
+    Favorites_Clear = Favorites_Clear_l
 
     list_dir = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
@@ -688,6 +691,10 @@ local function FileManTab_Init()
     Favorites_OpenList()
 end
 
-FileManTab_Init()
 
+return {
+    title = 'Files  and Favorites',
+    code = 'fileman',
+    sidebar = FileManTab_Init,
+}
 

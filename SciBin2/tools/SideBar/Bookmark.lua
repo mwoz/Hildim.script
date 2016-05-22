@@ -77,6 +77,18 @@ local function Bookmarks_RefreshTable()
 	Bookmarks_ListFILL()
 end
 
+local function ShowCompactedLine(line_num)
+	local function GetFoldLine(ln)
+		while editor.FoldExpanded[ln] do ln = ln-1 end
+		return ln
+	end
+	while not editor.LineVisible[line_num] do
+		local x = GetFoldLine(line_num)
+		editor:ToggleFold(x)
+		line_num = x - 1
+	end
+end
+
 local function Bookmarks_GotoLine(item)
 	local path = list_bookmarks:getcell(item,3)
     local lin = tonumber(list_bookmarks:getcell(item,4))
@@ -178,5 +190,8 @@ local function AbbreviationsTab_Init()
 
 end
 
-AbbreviationsTab_Init()
-
+return {
+    title = 'Bookmarks',
+    code = 'bookmark',
+    sidebar = AbbreviationsTab_Init,
+}
