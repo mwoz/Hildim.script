@@ -813,5 +813,8 @@ local function Abbreviations_Init()
         }
 end
 
-Abbreviations_Init()
-
+return {
+    title = 'Abbreviations',
+    code = 'abbreviations',
+    sidebar = Abbreviations_Init,
+}

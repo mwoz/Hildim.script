@@ -316,34 +316,39 @@ local function Solution_Init()
         on_SelectMe =Initialize
         }
 
-end
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+    {'Solution_sidebar',  plane=1,{
+        {'Solution', ru='Рабочая область', {
+            {'Save as', ru = 'Сохранить как', action=SaveSolAs},
+            {'Open', ru = 'Открыть', action=OpenSol},
+        }},
+        {'Insert Project', ru='Новый  проект', action=InsertProject},
+        {'Delete Project', ru='Удалить  проект', action=function() DeleteNode(0) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
+        {'Open All Projects Files', ru='Открыть все файлы проекта', action=OpenAll, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
+        {'Set As Active Project', ru='Установить активным', action=ActivateProject, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and iup.GetAttribute(tree_sol, "COLOR") ~= CLR_ACTIVE end},
 
-menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-{'Solution_sidebar',  plane=1,{
-    {'Solution', ru='Рабочая область', {
-        {'Save as', ru = 'Сохранить как', action=SaveSolAs},
-        {'Open', ru = 'Открыть', action=OpenSol},
-    }},
-    {'Insert Project', ru='Новый  проект', action=InsertProject},
-    {'Delete Project', ru='Удалить  проект', action=function() DeleteNode(0) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
-    {'Open All Projects Files', ru='Открыть все файлы проекта', action=OpenAll, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
-    {'Set As Active Project', ru='Установить активным', action=ActivateProject, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and iup.GetAttribute(tree_sol, "COLOR") ~= CLR_ACTIVE end},
+        {'s_FindTextOnSel', separator=1},
+        {'Add...', ru='Добавить...', action=Add},
+        {'Add Curent File', ru='Добавить текущтй файл', action=AddCurent, visible=function() return shell.fileexists(props["FilePath"]) end },
+        {'Add All Opened Files', ru='Добавить все открытые файлы', action=function() AddAll(tree_sol.value) end},
+        {'Remove File', ru='Исключить файл из проекта', action=function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
+        {'s1_FindTextOnSel', separator=1},
+        {'Go To Directory', ru='Перейти в директорию', action =function() SideBar_Plugins.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$','')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" and (SideBar_Plugins.fileman ~= nil) end},
+    }})
 
-    {'s_FindTextOnSel', separator=1},
-    {'Add...', ru='Добавить...', action=Add},
-    {'Add Curent File', ru='Добавить текущтй файл', action=AddCurent, visible=function() return shell.fileexists(props["FilePath"]) end },
-    {'Add All Opened Files', ru='Добавить все открытые файлы', action=function() AddAll(tree_sol.value) end},
-    {'Remove File', ru='Исключить файл из проекта', action=function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
-    {'s1_FindTextOnSel', separator=1},
-    {'Go To Directory', ru='Перейти в директорию', action =function() SideBar_Plugins.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$','')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" and (SideBar_Plugins.fileman ~= nil) end},
-}})
-
-menuhandler:InsertItem('TABBAR', 'slast', {'project',plane = 1, {
-    {'Save As New Project', ru='Сохранить все как новый проект', action=SaveAsNew},
-    {'Add To Active Project', ru='Добавить в активный проект', action=AddToActive},
-}})
-menuhandler:InsertItem('TABBAR', 's1',
-    {'Save As New Project', ru='Закрыть и добавить в активный проект', action=function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
+    menuhandler:InsertItem('TABBAR', 'slast', {'project',plane = 1, {
+        {'Save As New Project', ru='Сохранить все как новый проект', action=SaveAsNew},
+        {'Add To Active Project', ru='Добавить в активный проект', action=AddToActive},
+    }})
+    menuhandler:InsertItem('TABBAR', 's1',
+        {'Save As New Project', ru='Закрыть и добавить в активный проект', action=function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
 )
 
-Solution_Init()
+end
+
+return {
+    title = 'Solution',
+    code = 'solution',
+    sidebar = Solution_Init,
+}
+

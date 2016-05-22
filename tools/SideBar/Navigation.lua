@@ -124,14 +124,18 @@ local function FuncBmkTab_Init()
         OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
 		OnNavigation = OnNavigate;
         }
+
+    menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+        {'Navigation', ru='Навигация', plane = 1,{
+            {'s_Navigation', separator=1,},
+            {'Navigate Backward', ru='Навигация: Назад', action=function() walk_Navigation(true) end, key='Alt+<', active=function() return currentItem ~= 0 and tostring(currentItem) < list_navigation.numlin end, image = 'navigation_180_µ',},
+            {'Navigate Forward', ru='Навигация: Вперед', action=function() walk_Navigation(false) end, key='Alt+>', active=function() return currentItem > 1 end, image = 'navigation_µ',},
+        }}
+    )
 end
 
-FuncBmkTab_Init()
-
-menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
-    {'Navigation', ru='Навигация', plane = 1,{
-        {'s_Navigation', separator=1,},
-        {'Navigate Backward', ru='Навигация: Назад', action=function() walk_Navigation(true) end, key='Alt+<', active=function() return currentItem ~= 0 and tostring(currentItem) < list_navigation.numlin end, image = 'navigation_180_µ',},
-        {'Navigate Forward', ru='Навигация: Вперед', action=function() walk_Navigation(false) end, key='Alt+>', active=function() return currentItem > 1 end, image = 'navigation_µ',},
-    }}
-)
+return {
+    title = 'Navigation',
+    code = 'navigation',
+    sidebar = FuncBmkTab_Init,
+}

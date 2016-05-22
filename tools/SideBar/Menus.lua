@@ -339,6 +339,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')"},
         {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
         {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
+        {'SideBars Settings', ru = 'Настройка боковых панелей...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
         {"Lexers properties", ru = 'Свойства лексеров', {
             {'Lexers properties', ru='Свойства лексеров', plane=1 ,tLangs},
             {'s2', separator=1},

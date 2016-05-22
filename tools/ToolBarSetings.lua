@@ -63,7 +63,7 @@ local function Show()
     end
 
     tree_hk = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],
-        dragsource ='YES',dragtypes = "TEXT",  }
+        dragsource ='YES',dragtypes = "YYYYYYY",  }
 
     local drag_id
     tree_hk.dragbegin_cb = function(h, x, y)
@@ -78,7 +78,7 @@ local function Show()
     tree_hk.dragdata_cb = function(ih, typ) return true end
 
     tree_btns = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],
-        droptarget ='YES', droptypes = "TEXT", dragsource ='YES',dragtypes = "TEXT", showdragdrop = 'YES'}
+        droptarget ='YES', droptypes = "YYYYYYY", dragsource ='YES',dragtypes = "YYYYYYY", showdragdrop = 'YES'}
 
     tree_btns.dropdata_cb = function(h, typ, data, size, x, y)
         local id = iup.ConvertXYToPos(h, x, y)

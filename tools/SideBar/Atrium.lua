@@ -815,17 +815,15 @@ handle =iup.split{
             alignment="ACENTER", gap="3",
         },scrollbar='NO', minsize='x29', maxsize='x29', expand="HORIZONTAL",};
     };
-orientation="HORIZONTAL", name='splitAtrium',layoutdrag = 'NO'};
+    orientation="HORIZONTAL", name='splitAtrium',layoutdrag = 'NO'};
 
-    OnSwitchFile = OnSwitch;
-    OnOpen = OnSwitch;
-    OnDoubleClick = OnDoubleClickLocal
-}
+        OnSwitchFile = OnSwitch;
+        OnOpen = OnSwitch;
+        OnDoubleClick = OnDoubleClickLocal
+    }
+    AddEventHandler("GoToObjectDefenition", OpenChoiceMeta)
+
 end
-
-FindTab_Init()
-
- AddEventHandler("GoToObjectDefenition", OpenChoiceMeta)
 
 local function FieldsSql(objectType, path, condition)
 return [[
@@ -964,3 +962,10 @@ function atrium_lookupList(clbk)
     end)
     ,20,nil)
 end
+
+
+return {
+    title = 'Atrium',
+    code = 'atrium',
+    sidebar = FindTab_Init,
+}
