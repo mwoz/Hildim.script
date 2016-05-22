@@ -8,7 +8,14 @@ local function Show()
 
     local list_tb, dlg, bBlockReset, tree_btns
     local btn_ok = iup.button  {title="OK"}
+    local btn_esc = iup.button  {title="Cancel"}
     iup.SetHandle("HK_BTN_OK",btn_ok)
+    iup.SetHandle("HK_BTN_ESC",btn_esc)
+    btn_esc.action = function()
+        dlg:hide()
+        dlg:postdestroy()
+    end
+
     btn_ok.action = function()
         local str = ''
         for i = 1,  tonumber(list_tb.numlin) do
@@ -21,6 +28,7 @@ local function Show()
         _G.iuprops["settings.toolbars.layout"] = str
         dlg:hide()
         dlg:postdestroy()
+        scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
 
     list_tb = iup.matrix{
@@ -85,9 +93,9 @@ local function Show()
 
     local vbox = iup.vbox{
         iup.hbox{list_tb};
-        iup.hbox{btn_ok},
+        iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Панели инструментов",defaultenter="HK_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title="Панели инструментов",defaultenter="HK_BTN_OK",defaultesc="HK_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='300x200'}
 
 

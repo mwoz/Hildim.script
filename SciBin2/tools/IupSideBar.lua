@@ -60,7 +60,7 @@ local function  CreateToolBar()
 end
 
 local function  CreateStatusBar()
-    dofile (props["SciteDefaultHome"].."\\tools\\SideBar\\Status.lua")
+    dofile (props["SciteDefaultHome"].."\\tools\\Status.lua")
     local tolsp1=iup.hbox{
                             StatusBar_obj.Tabs.statusbar.handle,
                             gap='3',margin='3x0', name="StatusBar", maxsize="x30",
