@@ -173,7 +173,8 @@ local function Show()
         end
     end
 
-    tree_hk = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],}
+    tree_hk = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],imageexpanded0 = 'tree_µ',
+                            branchclose_cb = function(h) if h.value=='0' then return -1 end end}
     tree_hk.selection_cb = function(h,id, status)
         if status == 1 then
             bBlockReset = false

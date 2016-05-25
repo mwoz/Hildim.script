@@ -47,7 +47,7 @@ function sidebar_Switch(n)
 end
 
 local function  CreateToolBar()
-    local str = _G.iuprops["settings.toolbars.layout"]
+    local str = _G.iuprops["settings.toolbars.layout"] or ''
     local strTbl = 'return function(h) return iup.hbox{\n'
     for p in str:gmatch('[^¦]+') do
         local _,_, pname, pf = p:find('(.-)(¬?)$')
@@ -278,8 +278,8 @@ local function  CreateBox()
         return strTabs.."} end"
     end
 
-    local tbArgLeft = assert(loadstring(settings2tbl(_G.iuprops["settings.user.leftbar"],"tbArgLeft")))()
-    local tbArgRight = assert(loadstring(settings2tbl(_G.iuprops["settings.user.rightbar"],"tbArgRight")))()
+    local tbArgLeft = assert(loadstring(settings2tbl(_G.iuprops["settings.user.leftbar"] or '',"tbArgLeft")))()
+    local tbArgRight = assert(loadstring(settings2tbl(_G.iuprops["settings.user.rightbar"] or '',"tbArgRight")))()
 
     pane_curObj = SideBar_obj
     local tabs =  SideBar(tbArgRight(Pane), SideBar_obj)
@@ -370,7 +370,7 @@ local function InitSideBar()
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
-    SideBar_Plugins.findrepl.OnCreate()
+    if SideBar_Plugins.findrepl then SideBar_Plugins.findrepl.OnCreate() end
 
     local bSplitter = iup.GetDialogChild(hMainLayout, "BottomSplit")
 
@@ -634,7 +634,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     if b >= 0 then scite.buffers.SetDocumentAt(b) end
                 end
             end
-            navigation_Unblock()
+            if navigation_Unblock then navigation_Unblock() end
             if SideBar_obj.win and SideBar_obj.handle then SideBar_obj.handle.DetachRestore = true; iup.scitedeatach(SideBar_obj.handle) end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
             if LeftBar_obj.win and LeftBar_obj.handle then LeftBar_obj.handle.DetachRestore = true; iup.scitedeatach(LeftBar_obj.handle) end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
             if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;iup.scitedeatach(ConsoleBar) end
