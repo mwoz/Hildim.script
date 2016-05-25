@@ -4,7 +4,7 @@ local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 
 local function Show()
 
-    local list_lex, dlg, bBlockReset, tree_right
+    local list_lex, dlg, bBlockReset, tree_right, tree_left, tree_plugins
     local btn_ok = iup.button  {title="OK"}
     local btn_esc = iup.button  {title="Cancel"}
     iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
@@ -14,7 +14,23 @@ local function Show()
         dlg:postdestroy()
     end
 
-    local tree_plugins = iup.text{size='100x'}
+    local function ConvertXY2WndPos(h, x, y)
+        local _,_,wx,wy = h.position:find('(%d*),(%d*)')
+        wx = tonumber(wx); wy = tonumber(wy)
+        x = x + wx; y = y + wy
+        local t = {tree_left, tree_plugins, tree_right}
+        for i = 1,  3 do
+            _,_,wx,wy = t[i].position:find('(%d*),(%d*)')
+            local _,_,dx,dy = t[i].rastersize:find('(%d*)x(%d*)')
+            wx = tonumber(wx); wy = tonumber(wy); dx = tonumber(dx); dy = tonumber(dy)
+            if wx <= x and x <= wx + dx and wy <= y and y <= wy + dy then
+                x = x - wx; y = y - wy
+                return t[i], iup.ConvertXYToPos(t[i], x, y)
+            end
+        end
+    end
+
+    tree_plugins = iup.text{size='100x'}
 
     btn_ok.action = function()
         local function SaveTree(h)
@@ -39,38 +55,38 @@ local function Show()
         scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
 
-    tree_plugins = iup.tree{size = '120x',
-        droptarget ='YES', droptypes = "XXXXX", dragsource ='YES',dragtypes = "XXXXX"  }
-    tree_plugins.dragdatasize_cb = function(ih, typ)  return 1 end
-    tree_plugins.dragdata_cb = function(ih, typ) return true end
-
     local dragName, dragPath, drag_id
 
-    local function dropdata_cb(h, typ, data, size, x, y)
-        local id = iup.ConvertXYToPos(h, x, y)
-        if id < 0 then id = 0 end
-        if h:GetUserId(id) == "" then id = 1 end
-        iup.SetAttributeId(h,"ADDLEAF", id, dragName)
-        id = iup.GetAttribute(h, 'LASTADDNODE')
-        h:SetUserId(id, dragPath)
-        drag_id = nil
-        return true
-    end
+    local idSrc
+    local function button_cb(h, button, pressed, x, y, status)
+        if button ~= 49 then return end
+        if pressed == 1 then
+            idSrc = iup.ConvertXYToPos(h, x, y)
+        else
+           local hTarget, idTarget = ConvertXY2WndPos(h, x, y)
+           if hTarget and hTarget ~= h and idSrc > 0 then
+                if idTarget < 0 then idTarget = tonumber(iup.GetAttribute(hTarget, 'COUNT')) - 1 end
+                if iup.GetAttributeId(h, 'KIND', idSrc) == 'BRANCH' then
+                    if hTarget ~= tree_plugins then
+                        if iup.GetAttributeId(hTarget, 'KIND', idTarget) ~= 'BRANCH' then
+                            idTarget = iup.GetAttributeId(hTarget, 'PARENT', idTarget)
+                        end
+                        iup.SetAttributeId(hTarget, "STATE", idTarget, 'COLLAPSED')
+                        iup.SetAttributeId(hTarget, "INSERTBRANCH", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                    end
+                    for i = 1,  iup.GetAttribute(h, "TOTALCHILDCOUNT", idSrc) do
+                        iup.SetAttributeId(hTarget, "ADDLEAF", hTarget.lastaddnode or 0, iup.GetAttributeId(h, 'TITLE', idSrc + i))
+                        hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc + i))
+                    end
+                    iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
+                else
+                    if idTarget == 0 and iup.GetAttributeId(hTarget, "KIND", 1) == 'BRANCH' then return end
 
-    local function dragbegin_cb(h, x, y)
-        local id = iup.ConvertXYToPos(h, x, y)
-        if iup.GetAttributeId(h, 'KIND', id) == 'BRANCH' then return -1 end
-        dragName = iup.GetAttributeId(h, 'TITLE', id)
-        dragPath = h:GetUserId(id)
-        iup.SetAttributeId(h, "DELNODE", id, "SELECTED")
-        drag_id = id
-        return true
-    end
-    local function dragend_cb(h, action)
-        if drag_id then
-            iup.SetAttributeId(h,"ADDLEAF", drag_id - 1, dragName)
-            id = iup.GetAttribute(h, 'LASTADDNODE')
-            h:SetUserId(id, dragPath)
+                    iup.SetAttributeId(hTarget, "ADDLEAF", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                    hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc))
+                    iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
+                end
+            end
         end
     end
 
@@ -80,74 +96,41 @@ local function Show()
     end
 
     local function rightclick_cb(h, id)
-        local sAct = 'NO'
-        local sAct2 = 'NO'
-        if tonumber(iup.GetAttribute(h, "COUNT")) > 2 and iup.GetAttributeId(h, "KIND", id) == "BRANCH"
-           and iup.GetAttributeId(h, "CHILDCOUNT", id) == '0' then sAct = 'YES' end
-        if iup.GetAttributeId(h, "KIND", id) == "BRANCH"
-           and iup.GetAttributeId(h, "CHILDCOUNT", id) ~= '0' then sAct2 = 'YES' end
         iup.menu
         {
             iup.item{title="Add Tab", action=function()
                 iup.SetAttributeId(h, "ADDBRANCH", 0, "<New Tab>")
             end};
-            iup.item{title="Remove Tab", active = sAct, action=function()
-                iup.SetAttributeId(h, "DELNODE", id, "SELECTED")
-            end};
-            iup.item{title="Move Tab", active = sAct2, action=function()
-                local h2
-                if h == tree_right then h2 = tree_left else h2 = tree_right end
-                iup.SetAttributeId(h2, "ADDBRANCH", 0, iup.GetAttributeId(h, "TITLE", id))
-                local chCnt = iup.GetAttributeId(h, "CHILDCOUNT", id)
-                for i = chCnt, 1, -1 do
-                    iup.SetAttributeId(h2, "ADDLEAF", 1, iup.GetAttributeId(h, "TITLE", id + i))
-                    h2:SetUserId(2, h:GetUserId(id + i))
-                    iup.SetAttributeId(h, "DELNODE", id + i, "SELECTED")
-                end
-                iup.SetAttributeId(h, "DELNODE", id, "SELECTED")
-            end};
         }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
     end
 
     local function dragdrop_cb(h,drag_id, drop_id, isshift, iscontrol)
-        if iscontrol == 1 then return -1 end
-        if tonumber(iup.GetAttributeId(h, "DEPTH", drop_id)) > 1 or
-           (tonumber(iup.GetAttributeId(h, "DEPTH", drop_id)) == 1
-            and (iup.GetAttributeId(h, "STATE", drop_id) or 'EXPANDED') == 'EXPANDED') then iup.SetAttributeId(h, "STATE", drop_id, 'COLLAPSED'); return -1 end
+        if iscontrol == 1 or h == tree_plugins then return -1 end
+        if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
+            local iDelta = 0; mDelta = 0
+            local dragCount = tonumber(iup.GetAttributeId(h, 'CHILDCOUNT', drag_id))
+            if  drag_id > drop_id then iDelta = dragCount + 1; mDelta = 1 end
+
+            if  iup.GetAttributeId(h, 'KIND', drop_id) ~= 'BRANCH' then drop_id = iup.GetAttributeId(h, 'PARENT', drop_id) end
+
+            iup.SetAttributeId(h, "STATE", drop_id, 'COLLAPSED')
+            iup.SetAttributeId(h, "INSERTBRANCH", drop_id, iup.GetAttributeId(h, 'TITLE', drag_id))
+
+            for i = 1,  dragCount do
+                iup.SetAttributeId(h, "ADDLEAF", h.lastaddnode , iup.GetAttributeId(h, 'TITLE', drag_id + i + i * mDelta))
+                h:SetUserId(h.lastaddnode, h:GetUserId(drag_id + i + (i + 1) * mDelta))
+            end
+            iup.SetAttributeId(h, 'DELNODE', drag_id + (dragCount + 1) * mDelta, 'SELECTED')
+            return -1
+        end
         return -4
     end
 
-    tree_plugins.dragbegin_cb = dragbegin_cb
-    tree_plugins.dragend_cb = dragend_cb
+    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return -1 end}
 
+    tree_right = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb}
 
-    tree_right = iup.tree{size = '120x', showrename = 'YES',
-        droptarget ='YES', droptypes = "XXXXX", dragsource ='YES',dragtypes = "XXXXX", showdragdrop = 'YES'}
-
-    tree_left = iup.tree{size = '120x', showrename = 'YES',
-        droptarget ='YES', droptypes = "XXXXX", dragsource ='YES',dragtypes = "XXXXX", showdragdrop = 'YES'}
-
-    tree_right.dropdata_cb = dropdata_cb
-    tree_left.dropdata_cb = dropdata_cb
-    tree_plugins.dropdata_cb = dropdata_cb
-
-
-    tree_right.dragdrop_cb = dragdrop_cb
-    tree_left.dragdrop_cb = dragdrop_cb
-
-    tree_right.rightclick_cb = rightclick_cb
-    tree_left.rightclick_cb = rightclick_cb
-
-    tree_right.showrename_cb = showrename_cb
-    tree_left.showrename_cb = showrename_cb
-
-    tree_right.dragbegin_cb = dragbegin_cb
-    tree_left.dragbegin_cb = dragbegin_cb
-
-    tree_right.dragdatasize_cb = function(ih, typ)  return 1 end
-    tree_right.dragdata_cb = function(ih, typ) return true end
-    tree_left.dragdatasize_cb = function(ih, typ)  return 1 end
-    tree_left.dragdata_cb = function(ih, typ) return true end
+    tree_left = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb}
 
 
     local vbox = iup.vbox{

@@ -541,8 +541,11 @@ iup.DestroyDialogs = function()
         _G.dialogs['findrepl'].restore = nil
         _G.dialogs['findrepl'] = nul
     end
-    iup.Detach(iup.GetDialogChild(hMainLayout, "FindReplDetach"))
-    iup.Destroy(iup.GetDialogChild(hMainLayout, "FindReplDetach"))
+    local hFind = iup.GetDialogChild(hMainLayout, "FindReplDetach")
+    if hFind then
+        iup.Detach(hFind)
+        iup.Destroy(hFind)
+    end
     if _G.dialogs['sidebar'] ~= nil then
         _G.dialogs['sidebar'].restore = nil
         _G.dialogs['sidebar'] = nil

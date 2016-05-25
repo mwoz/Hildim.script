@@ -108,7 +108,7 @@ local function Show()
 
     local table_dir = shell.findfiles(defpath..'*.lua')
     iup.SetAttribute(list_tb, "ADDLIN", "1-"..(#table_dir))
-    str = _G.iuprops["settings.toolbars.layout"]
+    str = _G.iuprops["settings.toolbars.layout"] or ''
     local j = 1
     for p in str:gmatch('[^¦]*') do
         for i = 1, #table_dir do
