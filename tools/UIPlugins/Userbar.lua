@@ -16,7 +16,7 @@ local function Init(h)
             if tItem.image then
                 tBtn.image = tItem.image
                 tBtn.tip = menuhandler:get_title(tItem, false):gsub('\t', '  ')
-                tBtn.padding = '5x5'
+                tBtn.padding = '4x4'
             else
                 local strTitle = menuhandler:get_title(tItem, false)
                 tBtn.title = strTitle:gsub('\t.*$', '')
