@@ -1,5 +1,4 @@
 --[[Диалог редактирования раскладки панелей инструментов]]
-require "menuhandler"
 local tblView = {}, tblUsers
 local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 

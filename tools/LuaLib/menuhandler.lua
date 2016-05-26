@@ -24,8 +24,8 @@ local function getParam(p, bDef)
     return v
 end
 
-local function GetAction(mnu)
-    if getParam(mnu.active, true) then
+local function GetAction(mnu, bForse)
+    if bForse or getParam(mnu.active, true) then
         if mnu.action then
             local tp = type(mnu.action)
             if tp == 'number' then return function() scite.MenuCommand(mnu.action) end end
@@ -346,5 +346,11 @@ function s:PopUp(strPath)
     s:PopMnu(FindMenuItem(strPath)[2], iup.MOUSEPOS,iup.MOUSEPOS, false)
 end
 
+function s:GetMenuItem(path)
+    return FindMenuItem(path)
+end
+function s:GetAction(mnu)
+    return GetAction(mnu, true)
+end
 _G.menuhandler = s
 

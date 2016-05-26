@@ -55,7 +55,7 @@ local function  CreateToolBar()
         pI.toolbar(ToolBar_obj)
         strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'--[[]]
     end
-    strTbl = strTbl..'gap="3",margin="3x0", name="ToolBar", maxsize="x36",} end'
+    strTbl = strTbl..'gap="3",margin="3x0", name="ToolBar", maxsize="x36", alignment = "ACENTER",} end'
     return loadstring(strTbl)()(ToolBar_obj)
 end
 
@@ -465,7 +465,7 @@ local function InitToolBar()
     local hBx = iup.GetDialogChild(hTmp, 'ToolBar')
     iup.Detach(hBx)
     iup.Destroy(hTmp)
-    ToolBar_obj.handle = iup.Insert(vbScite, nil, hBx)
+    ToolBar_obj.handle = iup.Insert(vbScite, iup.GetDialogChild(vbScite, 'SciTeTabCtrl'), hBx)
     iup.Map(hBx)
     for i = 1, #tEvents do
         for _,tbs in pairs(ToolBar_obj.Tabs) do
@@ -555,9 +555,10 @@ local function InitMenuBar()
     iup.PassFocus()
 end
 
+InitMenuBar()
 InitSideBar()
 InitToolBar()
-InitMenuBar()
+
 InitStatusBar()
 RestoreNamedValues(hMainLayout, 'sidebarctrl')
 iup.Refresh(hMainLayout)
