@@ -109,10 +109,10 @@ local function Show()
     iup.SetAttribute(list_tb, "ADDLIN", "1-"..(#table_dir))
     str = _G.iuprops["settings.toolbars.layout"] or ''
     local j = 1
-    for p in str:gmatch('[^¦]*') do
+    for p in str:gmatch('[^¦]+') do
+        local bNewLine = p:find('¬$')
+        p = p:gsub('¬$', '')
         for i = 1, #table_dir do
-            local bNewLine = p:find('¬$')
-            p = p:gsub('¬$', '')
             if table_dir[i].name == p then
                 table.remove(table_dir, i)
                 local pI = dofile(defpath..p)
