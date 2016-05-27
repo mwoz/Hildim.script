@@ -347,7 +347,38 @@ function s:PopUp(strPath)
 end
 
 function s:GetMenuItem(path)
-    return FindMenuItem(path)
+
+    local function getActVis(p)
+        local tp = type(p)
+        if tp == 'boolean' then return function() return p end
+        elseif tp == 'function' then return p
+        elseif tp == 'string' then return assert(loadstring('return '..p)) end
+    end
+    local strFld
+    local tblConditions = {}
+    local function DropDown(path, mnu)
+        _,_, strFld = path:find('^([^¦]+)¦')
+        for i = 1, #mnu do
+            if strFld then
+                if mnu[i][1] == strFld then
+                    if mnu[i].visible then
+                        table.insert(tblConditions, getActVis(mnu[i].visible))
+                    elseif mnu[i].visible_ext then
+                        table.insert(tblConditions, function() return string.find(','..mnu[i].visible_ext..',',','..props["FileExt"]..',') end)
+                    end
+                    return DropDown(path:gsub('^[^¦]+¦', ''), mnu[i][2])
+                end
+            elseif mnu[i][1] == path then
+                if mnu[i].active then
+
+                    table.insert(tblConditions, getActVis(mnu[i].active))
+                end
+                return mnu[i]
+            end
+        end
+    end
+    _,_, strFld = path:find('^([^¦]+)¦')
+    return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld]), tblConditions
 end
 function s:GetAction(mnu)
     return GetAction(mnu, true)

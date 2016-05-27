@@ -48,15 +48,18 @@ end
 
 local function  CreateToolBar()
     local str = _G.iuprops["settings.toolbars.layout"] or ''
-    local strTbl = 'return function(h) return iup.hbox{\n'
+    local strTbl = 'return function(h) return iup.vbox{iup.hbox{\n'
     for p in str:gmatch('[^¦]+') do
         local _,_, pname, pf = p:find('(.-)(¬?)$')
+        if pf == '¬' then
+            strTbl = strTbl..'}, iup.hbox{\n'
+        end
         local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
         pI.toolbar(ToolBar_obj)
         strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'--[[]]
     end
-    strTbl = strTbl..'gap="3",margin="3x0", name="ToolBar", maxsize="x36", alignment = "ACENTER",} end'
-    return loadstring(strTbl)()(ToolBar_obj)
+    strTbl = strTbl..'gap="3",margin="3x0", maxsize="x36", alignment = "ACENTER",}, name="ToolBar"} end'
+    return loadstring(strTbl)()
 end
 
 local function  CreateStatusBar()
@@ -441,7 +444,7 @@ local function InitToolBar()
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     ToolBar_obj.Tabs = {}
 
-    tTlb = {CreateToolBar()}
+    tTlb = {CreateToolBar()(ToolBar_obj)}
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
     tTlb.show_cb=(function(h,state)
