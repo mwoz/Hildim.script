@@ -280,6 +280,8 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Fold Margin', ru = 'Поле сворачивания блоков текста', action = IDM_FOLDMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,2)>0"},
         {'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'", active=function() return _G.iuprops['concolebar.win']=='0' or _G.iuprops['findresbar.win']=='0' end},
         --[[{'&Parameters', ru = 'Параметры', key = 'Shift+F8', action = IDM_TOGGLEPARAMETERS},]]
+        {'slast', separator=1},
+
     },},
     {'Tools', ru='Инструменты',{
         {'&Compile', ru = 'Компилировать', key = 'Ctrl+F7', action = IDM_COMPILE, image = 'compile_µ'},

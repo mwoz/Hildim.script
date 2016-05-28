@@ -64,8 +64,6 @@ local function FindMenuItem(path)
     return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
 end
 
-
-
 function s:PopMnu(smnu, x, y, bToolBar)
 --debug_prnArgs(smnu)
     local CreateMenu, CreateItems

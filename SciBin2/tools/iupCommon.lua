@@ -371,7 +371,7 @@ iup.scitedetachbox = function(t)
     end)
 
     dtb.detached_cb=(function(h, hNew, x, y)
-
+        dtb.Dialog = hNew
         if h.On_Detach then h.On_Detach(h, hNew, x, y) end
         hNew.resize ="YES"
         hNew.shrink ="YES"
@@ -389,18 +389,14 @@ iup.scitedetachbox = function(t)
         if h.Split_h then  _G.iuprops['dialogs.'..h.sciteid..'.splitvalue'] = h.Split_h.value end
         hNew.close_cb =(function(h)
             if _G.dialogs[dtb.sciteid] ~= nil then
-
-                if dtb.Dlg_Close_Cb then dtb.Dlg_Close_Cb(h) end
-
-                _G.iuprops[dtb.sciteid..'.win']='0'
-                dtb.restore = nil
-                _G.dialogs[dtb.sciteid] = nil
+                dtb.Dialog:hide()
                 return -1
             end
         end)
         hNew.show_cb=(function(h,state)
             if t.Dlg_BeforeShow_Cb then t.Dlg_BeforeShow_Cb(h, state) end
             if state == 0 then
+
                 if dtb.DetachRestore then
                     dtb.DetachRestore = false
                     firstShow = false
@@ -418,15 +414,6 @@ iup.scitedetachbox = function(t)
                     dtb.Split_h.barsize = "0"
                 end
                 _G.dialogs[dtb.sciteid] = dtb
-            elseif state == 4 then
-                _G.iuprops['dialogs.'..dtb.sciteid..'.x']= h.x
-                _G.iuprops['dialogs.'..dtb.sciteid..'.y']= h.y
-                dtb.visible = 'YES'
-                _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = h.rastersize
-                if t.Split_h then
-                    dtb.Split_h.value = _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue']
-                    dtb.Split_h.barsize = "3"
-                end
             end
             if state == 0 then dtb.visible='YES' end
             if dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(h, state) end
@@ -435,7 +422,57 @@ iup.scitedetachbox = function(t)
             hNew.resize_cb = h.Dlg_Resize_Cb
         end
         if tonumber(_G.iuprops['dialogs.'..h.sciteid..'.x'])== nil or tonumber(_G.iuprops['dialogs.'..h.sciteid..'.y']) == nil then _G.iuprops['dialogs.'..h.sciteid..'.x']=0;_G.iuprops['dialogs.'..h.sciteid..'.y']=0 end
+        hNew.button_cb = function(h, button, pressed, x, y, status) print(h, button, pressed, x, y, status) end
     end)
+    dtb.Attach = function()
+        if _G.dialogs[dtb.sciteid] ~= nil then
+            _G.iuprops['dialogs.'..dtb.sciteid..'.x']= dtb.Dialog.x
+            _G.iuprops['dialogs.'..dtb.sciteid..'.y']= dtb.Dialog.y
+            _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = dtb.Dialog.rastersize
+            if dtb.Dlg_Close_Cb then dtb.Dlg_Close_Cb(h) end
+
+            _G.iuprops[dtb.sciteid..'.win']='0'
+            dtb.restore = nil
+            _G.dialogs[dtb.sciteid] = nil
+
+            dtb.visible = 'YES'
+            if t.Split_h then
+                dtb.Split_h.value = _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue']
+                dtb.Split_h.barsize = "3"
+            end
+
+            dtb.Dialog = nil
+        end
+    end
+    local function cmd_Attach()
+        if _G.iuprops[dtb.sciteid..'.win']=="0" then return end
+        if _G.iuprops[dtb.sciteid..'.win']=="1" and dtb.Dialog.visible == 'NO' then iup.Show(dtb) end
+        dtb.Attach()
+    end
+    local function cmd_PopUp()
+        if _G.iuprops[dtb.sciteid..'.win']=="0" then
+            dtb.detachPos()
+        elseif _G.iuprops[dtb.sciteid..'.win']=="1" and dtb.Dialog.visible == 'NO' then
+            dtb.Dialog:show()
+        end
+
+    end
+    local function cmd_Hide()
+        if _G.iuprops[dtb.sciteid..'.win']=="0" then
+            dtb.detachPos()
+            dtb.Dialog:hide()
+        elseif _G.iuprops[dtb.sciteid..'.win']=="1" and dtb.Dialog.visible == 'YES' then
+            dtb.Dialog:hide()
+        end
+    end
+
+menuhandler:InsertItem('MainWindowMenu', 'View¦slast',
+    {t.Dlg_Title or dtb.sciteid, {radio = 1,
+        {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return _G.iuprops[dtb.sciteid..'.win']=="0" end },
+        {'Pop Up', ru='Всплывающее окно', action=cmd_PopUp, check = function() return _G.iuprops[dtb.sciteid..'.win']=="1" and dtb.Dialog.visible == 'YES' end, },
+        {'Hidden', ru='Скрыто', action=cmd_Hide, check = function() return _G.iuprops[dtb.sciteid..'.win']=="1" and dtb.Dialog.visible == 'NO' end },
+    }})
+
     return dtb
 end
 

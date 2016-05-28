@@ -154,34 +154,38 @@ local function  CreateBox()
         t.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
 
         t.rightclick_cb=(function()
-            if _G.iuprops[Iif(Bar_Obj == SideBar_obj, 'sidebar.win', 'leftbar.win')] == '0' then
-                local mnu = iup.menu
-                {
-                  iup.item{title="Deattach Sidebar",action=(function()
-                      brObj.handle.DetachRestore = true;     --!!!
-                      brObj.handle.detach = 1
-                  end)};
-                  iup.item{title="LayOut Dialog",action=(function()
-                    local f = iup.filedlg{}
-                    iup.SetNativeparent(f, "SCITE")
-                    f:popup()
-                    local path = f.value
-                    f:destroy()
-                     testHandle = nil
-                    if path ~= nil then
-                        local l = io.open(path)
-                        local strLua = l:read('*a')
-                        l:close()
-                        local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
-                        strLua = strLua..'\n testHandle = '..fName..'()'
-                        dostring(strLua)
-                    end
-                    local dlg = iup.LayoutDialog(testHandle)
-                    iup.Show(dlg)
-                  end)};
+            local mnu = iup.menu
+            {
+              --if true then
+                iup.item{title="Deattach Sidebar",action=(function()
+                  brObj.handle.DetachRestore = true;     --!!!
+                  brObj.handle.detach = 1
+                end)};
+              --else
+                iup.item{title="Attach Sidebar",action=(function()
+                  print(brObj.handle.Attach())
+                end)};
+              --end ,
+              iup.item{title="LayOut Dialog",action=(function()
+                local f = iup.filedlg{}
+                iup.SetNativeparent(f, "SCITE")
+                f:popup()
+                local path = f.value
+                f:destroy()
+                 testHandle = nil
+                if path ~= nil then
+                    local l = io.open(path)
+                    local strLua = l:read('*a')
+                    l:close()
+                    local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
+                    strLua = strLua..'\n testHandle = '..fName..'()'
+                    dostring(strLua)
+                end
+                local dlg = iup.LayoutDialog(testHandle)
+                iup.Show(dlg)
+              end)};
 
-                }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
-            end
+            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end)
     return iup.tabs(t)
     end
@@ -190,7 +194,7 @@ local function  CreateBox()
         local h = iup.scitedetachbox{
             hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes";
             sciteid = sSciteId;Split_h = iup.GetDialogChild(hMainLayout, sSplit);Split_CloseVal = sSplit_CloseVal;
-            Dlg_Title = sSide.." Side Bar /Close For Attach/"; Dlg_Show_Cb = nil;
+            Dlg_Title = sSide.." Side Bar"; Dlg_Show_Cb = nil;
             On_Detach = (function(h, hNew, x, y)
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state="CLOSE";
                 --h.visible
@@ -368,12 +372,24 @@ local function InitSideBar()
 
     -- RestoreNamedValues(hMainLayout, 'sidebarctrl')
 
+    if  not SideBar_Plugins.findrepl then
+        dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar()
+        local hTmp= iup.dialog{SideBar_Plugins.findrepl.handle}
+        local hBx = iup.GetDialogChild(hTmp, 'FindReplDetach')
+        iup.Detach(hBx)
+        iup.Insert(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil, hBx)
+        iup.Map(hBx)
+        iup.Destroy(hTmp)
+        iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
+        iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
+    end
+    SideBar_Plugins.findrepl.OnCreate()
+
     for i = 1, #tEvents do
         for _,tbs in pairs(SideBar_Plugins) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
-    if SideBar_Plugins.findrepl then SideBar_Plugins.findrepl.OnCreate() end
 
     local bSplitter = iup.GetDialogChild(hMainLayout, "BottomSplit")
 
@@ -396,7 +412,7 @@ local function InitSideBar()
     ConsoleBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach");
         sciteid = 'concolebar';Split_h = bSplitter;Split_CloseVal = "0";
-        Dlg_Title = "ConsoleBar /Close For Attach/"; Dlg_Show_Cb = nil;
+        Dlg_Title = "Console"; Dlg_Show_Cb = nil;
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Resize_Cb = (function(h,width, height)
@@ -418,7 +434,7 @@ local function InitSideBar()
     FindResBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "FindResDetach");
         sciteid = 'findresbar';Split_h = bSplitter;Split_CloseVal = "1000";
-        Dlg_Title = "FindResBar /Close For Attach/"; Dlg_Show_Cb = nil;
+        Dlg_Title = "Find Results"; Dlg_Show_Cb = nil;
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Resize_Cb = (function(h,width, height)
