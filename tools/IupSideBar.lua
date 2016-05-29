@@ -7,11 +7,7 @@ local ToolBar_obj = {}
 local win_parent --создаем основное окно
 local tbs
 local vbox
-local vFuncNav
-local vAbbrev
-local vSys
-local vFileMan
-local vFindRepl
+
 local hMainLayout = iup.GetLayout()
 local ConsoleBar, FindRepl, FindResBar
 local pane_curObj
@@ -30,6 +26,7 @@ function sidebar_Switch(n)
     if LeftBar_obj.handle then
         leftCount = tonumber(LeftBar_obj.TabCtrl.count)
         if n <= leftCount then
+            if LeftBar_obj.handle.Dialog then LeftBar_obj.handle.ShowDialog() end
             LeftBar_obj.TabCtrl.valuepos = n -1
             for _,tbs in pairs(SideBar_Plugins) do
                 if tbs.tabs_OnSelect and LeftBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
@@ -38,6 +35,7 @@ function sidebar_Switch(n)
         n = n - leftCount
     end
     if SideBar_obj.handle and n > 0 then
+        if SideBar_obj.handle.Dialog then SideBar_obj.handle.ShowDialog() end
         SideBar_obj.TabCtrl.valuepos = n -1
         for _,tbs in pairs(SideBar_Plugins) do
             if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
@@ -134,7 +132,7 @@ local function  CreateBox()
         return l
     end
 
-    local function SideBar(t, Bar_Obj)
+    local function SideBar(t, Bar_Obj, sciteid)
         if not t then return end
         t.name="tabMain"
         t.tip= 'Ctrl+1,2,3,4'
@@ -154,38 +152,7 @@ local function  CreateBox()
         t.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
 
         t.rightclick_cb=(function()
-            local mnu = iup.menu
-            {
-              --if true then
-                iup.item{title="Deattach Sidebar",action=(function()
-                  brObj.handle.DetachRestore = true;     --!!!
-                  brObj.handle.detach = 1
-                end)};
-              --else
-                iup.item{title="Attach Sidebar",action=(function()
-                  print(brObj.handle.Attach())
-                end)};
-              --end ,
-              iup.item{title="LayOut Dialog",action=(function()
-                local f = iup.filedlg{}
-                iup.SetNativeparent(f, "SCITE")
-                f:popup()
-                local path = f.value
-                f:destroy()
-                 testHandle = nil
-                if path ~= nil then
-                    local l = io.open(path)
-                    local strLua = l:read('*a')
-                    l:close()
-                    local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
-                    strLua = strLua..'\n testHandle = '..fName..'()'
-                    dostring(strLua)
-                end
-                local dlg = iup.LayoutDialog(testHandle)
-                iup.Show(dlg)
-              end)};
-
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+            menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid)
         end)
     return iup.tabs(t)
     end
@@ -200,7 +167,7 @@ local function  CreateBox()
                 --h.visible
             end);
             Dlg_Close_Cb = (function(h)
-                if _G.iuprops['findrepl.win']=='1' then
+                if (_G.iuprops['findrepl.win'] or '0')=='1' then
                     _G.FindReplDialog.close_cb(_G.FindReplDialog)
                 end
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state="OPEN";
@@ -289,7 +256,7 @@ local function  CreateBox()
     local tbArgRight = assert(loadstring(settings2tbl(_G.iuprops["settings.user.rightbar"] or '',"tbArgRight")))()
 
     pane_curObj = SideBar_obj
-    local tabs =  SideBar(tbArgRight(Pane), SideBar_obj)
+    local tabs =  SideBar(tbArgRight(Pane), SideBar_obj, 'sidebar')
 
     if tabs then
         SideBar_obj.TabCtrl = tabs
@@ -299,7 +266,7 @@ local function  CreateBox()
     end
 
     pane_curObj = LeftBar_obj
-    tabs =  SideBar(tbArgLeft(Pane), LeftBar_obj)
+    tabs =  SideBar(tbArgLeft(Pane), LeftBar_obj, 'leftbar')
 
     if tabs then
         LeftBar_obj.TabCtrl = tabs
@@ -351,9 +318,7 @@ local function InitSideBar()
     if tonumber(props['sidebar.hide']) == 1 then return end
     -- SideBar_obj.win = false --если установить true - панель будет показана отдельным окном
     SideBar_Plugins = {}
-    SideBar_obj.win = (_G.iuprops['sidebar.win']=='1') --если установить true - панель будет показана отдельным окном
     SideBar_obj.Active = true
-    LeftBar_obj.win = (_G.iuprops['leftbar.win']=='1') --если установить true - панель будет показана отдельным окном
     LeftBar_obj.Active = true
 
     --if true then return end=
@@ -412,19 +377,23 @@ local function InitSideBar()
     ConsoleBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach");
         sciteid = 'concolebar';Split_h = bSplitter;Split_CloseVal = "0";
-        Dlg_Title = "Console"; Dlg_Show_Cb = nil;
+        Dlg_Title = "Console"; Dlg_Show_Cb = nil; MenuEx = "OUTPUT";
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Resize_Cb = (function(h,width, height)
         end);
         Dlg_Show_Cb = (function(h, state)
-            if state == 0 and _G.iuprops['findresbar.win']=='1' then
+            if state == 0 and (_G.iuprops['findresbar.win'] or '0')~='0' then
+                if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
+                    SideBar_Plugins.findrepl.handle_deattach:detachPos()
+                    SideBar_Plugins.findrepl.handle_deattach.HideDialog()
+                end
                  _G.iuprops['dialogs.concolebar.splitvalue'] =  _G.iuprops['dialogs.findresbar.splitvalue']
                 toggleOf()
              end
         end);
-        Dlg_BeforeShow_Cb = (function(h, state)
-            if state == 4 and _G.iuprops['findresbar.win']=='1' then
+        Dlg_BeforeAttach = (function()
+            if _G.iuprops['findresbar.win']~='0' then
                 toggleOn()
                 _G.iuprops['dialogs.concolebar.splitvalue'] = '1000'
             end
@@ -434,19 +403,23 @@ local function InitSideBar()
     FindResBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "FindResDetach");
         sciteid = 'findresbar';Split_h = bSplitter;Split_CloseVal = "1000";
-        Dlg_Title = "Find Results"; Dlg_Show_Cb = nil;
+        Dlg_Title = "Find Results"; Dlg_Show_Cb = nil; MenuEx = "FINDREZ";
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Resize_Cb = (function(h,width, height)
         end);
         Dlg_Show_Cb = (function(h, state)
-            if state == 0 and _G.iuprops['concolebar.win']=='1' then
-                 _G.iuprops['dialogs.findresbar.splitvalue'] =  _G.iuprops['dialogs.concolebar.splitvalue']
+            if state == 0 and (_G.iuprops['concolebar.win'] or '0')~='0' then
+                if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
+                    SideBar_Plugins.findrepl.handle_deattach:detachPos()
+                    SideBar_Plugins.findrepl.handle_deattach.HideDialog()
+                end
+                _G.iuprops['dialogs.findresbar.splitvalue'] =  _G.iuprops['dialogs.concolebar.splitvalue']
                 toggleOf()
             end
         end);
-        Dlg_BeforeShow_Cb = (function(h, state)
-            if state == 4 and _G.iuprops['concolebar.win']=='1' then
+        Dlg_BeforeAttach = (function(h, state)
+            if _G.iuprops['concolebar.win']~='0' then
                 toggleOn()
                 _G.iuprops['dialogs.findresbar.splitvalue'] = '0'
             end
@@ -655,11 +628,12 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                 end
             end
             if navigation_Unblock then navigation_Unblock() end
-            if SideBar_obj.win and SideBar_obj.handle then SideBar_obj.handle.DetachRestore = true; iup.scitedeatach(SideBar_obj.handle) end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
-            if LeftBar_obj.win and LeftBar_obj.handle then LeftBar_obj.handle.DetachRestore = true; iup.scitedeatach(LeftBar_obj.handle) end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
-            if _G.iuprops['concolebar.win']=='1' then ConsoleBar.DetachRestore = true;iup.scitedeatach(ConsoleBar) end
-            if _G.iuprops['findresbar.win']=='1' then ConsoleBar.DetachRestore = true;iup.scitedeatach(FindResBar) end
-            if _G.iuprops['findrepl.win']=='1' then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos() end
+            local bHide
+            if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.DetachRestore = true; iup.scitedeatach(SideBar_obj.handle) if bHide then SideBar_obj.handle.HideDialog() end end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
+            if ((_G.iuprops['leftbar.win'] or '0')~='0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win']=='2');    LeftBar_obj.handle.DetachRestore = true; iup.scitedeatach(LeftBar_obj.handle) if bHide then LefrBar_obj.handle.HideDialog() end end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
+            if (_G.iuprops['concolebar.win'] or '0')~='0'                       then bHide = (_G.iuprops['concolebar.win']=='2'); ConsoleBar.DetachRestore = true;iup.scitedeatach(ConsoleBar) if bHide then ConsoleBar.HideDialog() end end
+            if (_G.iuprops['findresbar.win'] or '0')~='0'                       then bHide = (_G.iuprops['findresbar.win']=='2'); FindResBar.DetachRestore = true;iup.scitedeatach(FindResBar) if bHide then FindResBar.HideDialog() end end
+            if (_G.iuprops['findrepl.win'] or '0')~='0'                         then bHide = (_G.iuprops['findrepl.win']=='2');   local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos() if bHide then h.HideDialog() end end
             menuhandler:RegistryHotKeys()
             scite.EnsureVisible()
             if dlg_SPLASH then dlg_SPLASH:postdestroy() end
@@ -671,9 +645,13 @@ end)
 
 AddEventHandler("OnLayOutNotify", function(cmd)
     if cmd == "SHOW_FINDRES" then
+        if (_G.iuprops['findresbar.win'] or '0')=='1' then return end
+        if (_G.iuprops['findresbar.win'] or '0')=='2' then _G.dialogs['findresbar']:ShowDialog(); return end
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
     elseif cmd == "SHOW_OUTPUT" then
-        if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 and _G.dialogs['concolebar'] == nil  then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
+        if (_G.iuprops['concolebar.win'] or '0')=='1' then return end
+        if (_G.iuprops['concolebar.win'] or '0')=='2' then _G.dialogs['concolebar']:ShowDialog(); return end
+        if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
     end
 end)
 
