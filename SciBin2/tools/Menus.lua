@@ -127,8 +127,7 @@ _G.sys_Menus.OUTPUT = {
         {'IDM command Mode', ru = 'Режим команд IDM', action = function() output:DocumentEnd();output:ReplaceSel('\\n###i') end},
         {'Switch OFF', ru = 'Отключить', action = function() output:DocumentEnd();output:ReplaceSel('\\n####') end},
     }},
-    {'s3', separator=1},
-    {'Detach', ru = 'Отсоединить', action=function() iup.scitedeatach(iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach")) end, visible=function() return _G.iuprops['concolebar.win']~='1' end}
+    {'slast', separator=1},
 }
 
 _G.sys_Menus.FINDREZ = {
@@ -141,8 +140,7 @@ _G.sys_Menus.FINDREZ = {
     {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findrez.clickonlynumber'},
     {'Group By Name', ru='Группировать по имени файла', check_boolean='findrez.groupbyfile'},
     {'Number Of Find Results...', ru='Результатов поиска не более....', action=SetFindresCount},
-    {'s2', separator=1},
-    {'Detach', ru = 'Отсоединить', action=function() iup.scitedeatach(iup.GetDialogChild(iup.GetLayout(), "FindResDetach")) end, visible=function() return _G.iuprops['findrez.win']~='1' end}
+    {'slast', separator=1},
 
 }
 
@@ -165,16 +163,16 @@ _G.sys_Menus.EDITOR = {
 
 _G.sys_Menus.MainWindowMenu = {
     {'_HIDDEN_', {
-        {'Ctrl+Tab', key = 'Ctrl+Tab', action = IDM_NEXTFILESTACK},
-        {'Ctrl+Shift+Tab', key = 'Ctrl+Shift+Tab', action = IDM_PREVFILESTACK},
-        {'Alt+Up', key = 'Alt+Up', action = function() editor:LineUpRectExtend() end},
-        {'Alt+Down', key = 'Alt+Down', action = function() editor:LineDownRectExtend() end},
-        {'Alt+Left', key = 'Alt+Left', action = function() editor:CharLeftRectExtend() end},
-        {'Alt+Right', key = 'Alt+Right', action = function() editor:CharRightRectExtend() end},
-        {'Alt+Home', key = 'Alt+Home', action = function() editor:VCHomeRectExtend() end},
-        {'Alt+End', key = 'Alt+End', action = function() editor:LineEndRectExtend() end},
-        {'Alt+PageUp', key = 'Alt+PageUp', action = function() editor:PageUpRectExtend() end},
-        {'Alt+PageDown', key = 'Alt+PageDown', action = function() editor:PageDownRectExtend() end},
+        {'Next Tab', key = 'Ctrl+Tab', action = IDM_NEXTFILESTACK},
+        {'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = IDM_PREVFILESTACK},
+        {'Block Up', key = 'Alt+Up', action = function() editor:LineUpRectExtend() end},
+        {'Block Down', key = 'Alt+Down', action = function() editor:LineDownRectExtend() end},
+        {'Block Left', key = 'Alt+Left', action = function() editor:CharLeftRectExtend() end},
+        {'Block Right', key = 'Alt+Right', action = function() editor:CharRightRectExtend() end},
+        {'Block Home', key = 'Alt+Home', action = function() editor:VCHomeRectExtend() end},
+        {'Block End', key = 'Alt+End', action = function() editor:LineEndRectExtend() end},
+        {'Block Page Up', key = 'Alt+PageUp', action = function() editor:PageUpRectExtend() end},
+        {'Block Page Down', key = 'Alt+PageDown', action = function() editor:PageDownRectExtend() end},
     },},
     {'File', ru='Файл',{
         {'New', ru='Создать', key = 'Ctrl+N', action = IDM_NEW, image = 'document__plus_µ'},
@@ -278,8 +276,9 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Line Numbers', ru = 'Нумера строк', action = IDM_LINENUMBERMARGIN, check = "props['line.margin.visible']=='1'"},
         {'&Margin', ru = 'Закладки', action = IDM_SELMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,1)>0"},
         {'&Fold Margin', ru = 'Поле сворачивания блоков текста', action = IDM_FOLDMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,2)>0"},
-        {'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'", active=function() return _G.iuprops['concolebar.win']=='0' or _G.iuprops['findresbar.win']=='0' end},
+        {'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'", active=function() return (_G.iuprops['concolebar.win'] or '0')=='0' or (_G.iuprops['findresbar.win'] or '0')=='0' end},
         --[[{'&Parameters', ru = 'Параметры', key = 'Shift+F8', action = IDM_TOGGLEPARAMETERS},]]
+        {'s3', separator=1},
         {'slast', separator=1},
 
     },},

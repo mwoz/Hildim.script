@@ -253,24 +253,6 @@ local function SetStaticControls()
     Ctrl("btnArrowDown").active = Iif(notInFiles, 'YES', 'NO')
 end
 
-local function ReattachFind()
-    local hMainLayout = iup.GetLayout()
-
-    if not SideBar_Plugins.findrepl.Bar_obj then
-        iup.Reparent(oDeattFnd, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
-        iup.GetDialogChild(hMainLayout, "BottomSplit2").value="700"
-        iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
-        iup.GetDialogChild(hMainLayout, "FinReplExp").state="CLOSE";
-    else
-        iup.Reparent(oDeattFnd, SideBar_Plugins.findrepl.handle, nil)
-        iup.Reparent(oDeattFnd, iup.GetDialogChild(hMainLayout, "FinReplScroll"), nil)
-        iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000"
-        iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="0"
-        iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
-    end
-    iup.Refresh(SideBar_Plugins.findrepl.handle)
-end
-
 local function onMapMColorList(h)
     for i = 0, 5 do
         local _,_,r,g,b = props["indic.style."..(i + firstMark - 1)]:find('#(%x%x)(%x%x)(%x%x)')
@@ -314,11 +296,10 @@ local function ActivateFind_l(nTab)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
     if _G.dialogs['findrepl'] then
+        _G.dialogs['findrepl'].ShowDialog()
     elseif SideBar_Plugins.findrepl.Bar_obj then
         if Ctrl("zPin").valuepos == '0' then SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos = 0; SideBar_Plugins.functions.OnSwitchFile()
         elseif SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos ~= 0 then oDeattFnd.detachPos() end
-    elseif (iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize == '0' --[[and _G.iuprops['bottombar.win']~='1']]) then
-        oDeattFnd.DetachRestore = true; iup.scitedeatach(oDeattFnd)
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart] end
@@ -450,12 +431,6 @@ local function create_dialog_FindReplace()
   containers[7] = iup.vbox{
     iup.hbox{
         margin = "0x0",
-        iup.toggle{
-          title = "Íèæíÿÿ ïàíåëü:",
-          name = "chkInBottom",
-          action = ReattachFind,
-          visible = "NO",
-        },
         iup.button{
           action = CloseFind,
           name = 'btn_esc',
@@ -832,7 +807,7 @@ local function create_dialog_FindReplace()
   return containers[2]
 end
 
-local function FuncBmkTab_Init()
+local function Init()
     ActivateFind = ActivateFind_l --ãëîáàëüíàÿ ññûëêà íà íàøó ôóíêöèþ
 
     oDeattFnd = iup.scitedetachbox{
@@ -868,12 +843,7 @@ local function FuncBmkTab_Init()
         }
 
     Ctrl('tabFinrRepl').rightclick_cb = (function()
-       if  (_G.iuprops['findrepl.win'] or '0') =='0' then
-            iup.menu
-            {
-              iup.item{title="Bottom pane",value=Ctrl("chkInBottom").value,action=ReattachFind};
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
-        end
+        menuhandler:PopUp('MainWindowMenu¦View¦findrepl')
     end)
 
 
@@ -899,18 +869,8 @@ local function FuncBmkTab_Init()
             end
         end);
         }
+    SideBar_Plugins.findrepl.handle_deattach = oDeattFnd
     SideBar_Plugins.findrepl.OnCreate = (function()
-            local hMainLayout = iup.GetLayout()
-            if _G.iuprops['sidebarctrl.chkInBottom.value']=='ON' then
-                iup.Reparent(oDeattFnd, iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil)
-                iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
-                iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
-                iup.Refresh(SideBar_Plugins.findrepl.handle)
-                iup.GetDialogChild(hMainLayout, "FinReplExp").state="CLOSE";
-            else
-                --iup.GetDialogChild(hMainLayout, "BottomSplit2").value = "1000"
-                --_G.iuprops['sidebarctrl.chkInBottom.value'] = 'OFF'
-            end
             SetStaticControls()
     end)
 
@@ -922,7 +882,7 @@ end
 return {
     title = 'Find Replace Dialog',
     code = 'findrepl',
-    sidebar = FuncBmkTab_Init,
+    sidebar = Init,
     fixedheigth = true,
 }
 

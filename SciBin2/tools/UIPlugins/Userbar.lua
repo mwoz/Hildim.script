@@ -25,7 +25,6 @@ local function Init(h)
             table.insert(tBar, iup.label{separator = "VERTICAL",maxsize='x22'})
         else
             local tItem, tCond = menuhandler:GetMenuItem(p)
-            --debug_prnArgs(tItem)
             local tBtn = {}
             if tItem.image then
                 tBtn.image = tItem.image
@@ -36,10 +35,6 @@ local function Init(h)
                 tBtn.title = strTitle:gsub('\t.*$', '')
                 tBtn.tip = strTitle:gsub('^.*\t','')
             end
---[[            if tItem.active then
-                table.insert(tActive
-            end]]
-
             local hBtn = iup.flatbutton(tBtn)
             hBtn.flat_action = menuhandler:GetAction(tItem)
             table.insert(tBar, hBtn)
