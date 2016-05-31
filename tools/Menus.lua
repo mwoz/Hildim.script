@@ -266,7 +266,8 @@ _G.sys_Menus.MainWindowMenu = {
         }},
         {'s2', separator=1},
         --[[{'Full Scree&n', ru = 'Полноэкранный режим', key = 'F11', action = IDM_FULLSCREEN},]]
-        --[[{'&Tool Bar', ru = 'Панель инструментов', action = IDM_VIEWTOOLBAR,},]]
+        {'&Tool Bar', ru = 'Панель инструментов', action = IDM_VIEWTOOLBAR, check = function() return iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state == 'OPEN' end},
+        {'Status Bar', ru = 'Панель статуса', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").state = Iif(iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").state == 'OPEN', 'CLOSE', 'OPEN') end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").state == 'OPEN' end},
         {'Tab &Bar', ru = 'Вкладки', action = IDM_VIEWTABBAR, check = "props['tabbar.visible']=='1'"},
         --[[{'&Status Bar', ru = 'Строка состояния', action = IDM_VIEWSTATUSBAR},]]
         {'s2', separator=1},

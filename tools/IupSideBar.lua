@@ -46,7 +46,7 @@ end
 
 local function  CreateToolBar()
     local str = _G.iuprops["settings.toolbars.layout"] or ''
-    local strTbl = 'return function(h) return iup.vbox{iup.hbox{\n'
+    local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "toolbar_expander", iup.vbox{iup.hbox{\n'
     for p in str:gmatch('[^¦]+') do
         local _,_, pname, pf = p:find('(.-)(¬?)$')
         if pf == '¬' then
@@ -56,16 +56,16 @@ local function  CreateToolBar()
         pI.toolbar(ToolBar_obj)
         strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'--[[]]
     end
-    strTbl = strTbl..'gap="3",margin="3x0", maxsize="x36", alignment = "ACENTER",}, name="ToolBar"} end'
+    strTbl = strTbl..'gap="3",margin="3x0", maxsize="x36", alignment = "ACENTER",}, name="ToolBar"}} end'
     return loadstring(strTbl)()
 end
 
 local function  CreateStatusBar()
     dofile (props["SciteDefaultHome"].."\\tools\\Status.lua")
-    local tolsp1=iup.hbox{
+    local tolsp1=iup.expander{barsize = 1, state="OPEN", name = "statusbar_expander",iup.hbox{
                             StatusBar_obj.Tabs.statusbar.handle,
                             gap='3',margin='3x0', name="StatusBar", maxsize="x30",
-                        }
+                        }}
     return tolsp1
 end
 
@@ -335,8 +335,6 @@ local function InitSideBar()
         iup.Map(LeftBar_obj.handle)
     end
 
-    -- RestoreNamedValues(hMainLayout, 'sidebarctrl')
-
     if  not SideBar_Plugins.findrepl then
         dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar()
         local hTmp= iup.dialog{SideBar_Plugins.findrepl.handle}
@@ -454,7 +452,7 @@ local function InitToolBar()
     tTlb.resize_cb=(function(_,x,y) if ToolBar_obj.handle ~= nil then ToolBar_obj.size = ToolBar_obj.handle.size end end)
     --ToolBar_obj.handle = iup.scitedialog(tTlb)
     local hTmp= iup.dialog(tTlb)
-    local hBx = iup.GetDialogChild(hTmp, 'ToolBar')
+    local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander')
     iup.Detach(hBx)
     iup.Destroy(hTmp)
     ToolBar_obj.handle = iup.Insert(vbScite, iup.GetDialogChild(vbScite, 'SciTeTabCtrl'), hBx)
@@ -493,7 +491,7 @@ local function InitStatusBar()
         end
     end)
     local hTmp= iup.dialog(tTlb)
-    local hBx = iup.GetDialogChild(hTmp, 'StatusBar')
+    local hBx = iup.GetDialogChild(hTmp, 'statusbar_expander')
     iup.Detach(hBx)
     iup.Destroy(hTmp)
     StatusBar_obj.handle = iup.Append(vbScite, hBx)
@@ -634,6 +632,13 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             if (_G.iuprops['concolebar.win'] or '0')~='0'                       then bHide = (_G.iuprops['concolebar.win']=='2'); ConsoleBar.DetachRestore = true;iup.scitedeatach(ConsoleBar) if bHide then ConsoleBar.HideDialog() end end
             if (_G.iuprops['findresbar.win'] or '0')~='0'                       then bHide = (_G.iuprops['findresbar.win']=='2'); FindResBar.DetachRestore = true;iup.scitedeatach(FindResBar) if bHide then FindResBar.HideDialog() end end
             if (_G.iuprops['findrepl.win'] or '0')~='0'                         then bHide = (_G.iuprops['findrepl.win']=='2');   local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos() if bHide then h.HideDialog() end end
+
+            if _G.dialogs['findresbar'] and _G.dialogs['concolebar'] then
+                iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
+                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
+            end
+
             menuhandler:RegistryHotKeys()
             scite.EnsureVisible()
             if dlg_SPLASH then dlg_SPLASH:postdestroy() end
@@ -646,11 +651,16 @@ end)
 AddEventHandler("OnLayOutNotify", function(cmd)
     if cmd == "SHOW_FINDRES" then
         if (_G.iuprops['findresbar.win'] or '0')=='1' then return end
-        if (_G.iuprops['findresbar.win'] or '0')=='2' then _G.dialogs['findresbar']:ShowDialog(); return end
+        if (_G.dialogs and _G.iuprops['findresbar.win'] or '0')=='2' then
+            local h = iup.GetFocus()
+            _G.dialogs['findresbar']:ShowDialog();
+            if h.name == 'livesearch_bar' then iup.SetFocus(h); end
+            return
+        end
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
     elseif cmd == "SHOW_OUTPUT" then
         if (_G.iuprops['concolebar.win'] or '0')=='1' then return end
-        if (_G.iuprops['concolebar.win'] or '0')=='2' then _G.dialogs['concolebar']:ShowDialog(); return end
+        if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='2' and _G.dialogs['concolebar'] then _G.dialogs['concolebar']:ShowDialog(); return end
         if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
     end
 end)

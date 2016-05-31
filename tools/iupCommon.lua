@@ -5,6 +5,9 @@ POST_CONTINUESTARTUP = 3
 POST_SCRIPTRELOAD_OLD = 4
 POST_CONTINUESHOWMENU = 6
 
+local old_iup_ShowXY = iup.ShowXY
+
+
 _G.iuprops = {}
 local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
@@ -164,14 +167,13 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
          return core_CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
-    iup.Alarm("1","1","1")
         iup.DestroyDialogs();
-    iup.Alarm("1","2","1")
         SaveIup()
-    iup.Alarm("1","3","1")
         scite.PostCommand(POST_SCRIPTRELOAD_OLD,0)
         --scite.PostCommand(POST_SCRIPTRELOAD,0)
         return true
+    elseif cmd == IDM_VIEWTOOLBAR then
+        iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state = Iif(iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state == 'OPEN', 'CLOSE', 'OPEN')
     elseif cmd == IDM_TOGGLEOUTPUT and ((_G.iuprops['concolebar.win'] or '0')=='0' or _G.iuprops['findresbar.win']=='0') then
         local hMainLayout = iup.GetLayout()
         if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
@@ -361,25 +363,33 @@ iup.scitedetachbox = function(t)
     local function button_cb(h, button, pressed, x, y, status)
         h.value = 0
         if not dtb.Dialog then return end
-        if button == 49 then  bMoved = pressed; sX = x; sY = y end
+        if button == 49 then
+            bMoved = pressed; sX = x; sY = y
+            if bMoved == 0 then
+                _G.iuprops['dialogs.'..dtb.sciteid..'.x']= dtb.Dialog.x
+                _G.iuprops['dialogs.'..dtb.sciteid..'.y']= dtb.Dialog.y
+            end
+        end
     end
 
     local function motion_cb(h, x, y, status)
+    h.value=1
         if not dtb.Dialog then return end
         if bMoved == 1 then
             local _,_,wx,wy = dtb.Dialog.screenposition:find('(%-?%d*),(%-?%d*)')
             local nX, nY = tonumber(wx) + (x - sX), tonumber(wy) + (y - sY)
-            if nX ~= wx or nY ~= wy then iup.ShowXY(dtb.Dialog, nX, nY) end
+            if nX ~= wx or nY ~= wy then old_iup_ShowXY(dtb.Dialog, nX, nY) end
         end
     end
 
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-
+    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', flat_action = function() dtb.Attach() end}
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
-        iup.list{["1"]=t.Dlg_Title, maxsize = "x24", readonly = 'YES', border = 'NO', expand = 'HORIZONTAL', button_cb = button_cb, motion_cb = motion_cb},
-        iup.flatbutton{image = 'ui_toolbar__arrow_µ', flat_action = function() dtb.Attach() end},
+        iup.tree{title0 = t.Dlg_Title, maxsize = 'x20', size = '100x20', expand = 'HORIZONTAL',border = 'NO', fontsize='9', canfocus='NO',markedid0='NO', showdragdrop = 'YES', button_cb = button_cb, motion_cb = motion_cb},
+        --iup.list{["1"]=t.Dlg_Title, maxsize = "x24", readonly = 'YES', border = 'NO', expand = 'HORIZONTAL', button_cb = button_cb, motion_cb = motion_cb, leavewindow_cb = leavewindow_cb, canfocus='NO', bgcolor='240 240 240', },
+        btn_attach,
         iup.flatbutton{image = 'cross_button_µ', flat_action = function() dtb.HideDialog() end},
     }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
     if t[1] then
@@ -458,7 +468,7 @@ iup.scitedetachbox = function(t)
                     iup.ShowXY(h, h.x,h.y)
                 end
                 if t.Split_h then
-                    if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value end
+                    if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value; _G.iuprops['sidebarctrl.'..dtb.Split_h.name..'.value'] = dtb.Split_h.value; end
                     dtb.Split_h.value = dtb.Split_CloseVal
                     dtb.Split_h.barsize = "0"
                 end
@@ -484,6 +494,14 @@ iup.scitedetachbox = function(t)
             _G.iuprops[dtb.sciteid..'.win'] = '1'
             dtb.Dialog:show()
         end
+    end
+    local function FindReplButCondition()
+        return (dtb.sciteid ~= 'findrepl' or get_scId()=='0' or
+                (_G.iuprops['findresbar.win'] or '0')=='0' or (_G.iuprops['concolebar.win'] or '0') =='0' or
+                SideBar_Plugins.findrepl.Bar_obj)
+    end
+    dtb.onSetStaticControls = function()
+        btn_attach.active = Iif(FindReplButCondition(),'YES', 'NO')
     end
     dtb.Attach = function()
         if t.Dlg_BeforeAttach then t.Dlg_BeforeAttach() end
@@ -526,10 +544,29 @@ iup.scitedetachbox = function(t)
             dtb.HideDialog()
         end
     end
+    local function cmd_Switch3()
+        if get_scId()=="0" then
+            cmd_PopUp()
+        elseif get_scId()=="1" then
+            cmd_Hide()
+        else
+            cmd_Attach()
+        end
+    end
+    local function cmd_Switch2()
+        if get_scId()=="1" then
+            cmd_Hide()
+        else
+            cmd_PopUp()
+        end
+    end
     local tSub = {radio = 1,
-        {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return get_scId()=="0" end },
+        {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return get_scId()=="0" end,
+            active=FindReplButCondition},
         {'Pop Up', ru='Всплывающее окно', action=cmd_PopUp, check = function() return get_scId()=="1" end, },
         {'Hidden', ru='Скрыто', action=cmd_Hide, check = function() return get_scId()=="2" end },
+        {'Switch3', ru='Переключить (горячей клавишей) - Закреплено/Всплывающее окно/Скрыто', action=cmd_Switch3, visible = false },
+        {'Switch2', ru='Переключить (горячей клавишей) - Всплывающее окно/Скрыто', action=cmd_Switch2, visible = false },
     }
 
     menuhandler:InsertItem('MainWindowMenu', 'View¦slast',  {dtb.sciteid, ru = t.Dlg_Title, tSub})
@@ -539,7 +576,6 @@ iup.scitedetachbox = function(t)
     return dtb
 end
 
-local old_iup_ShowXY = iup.ShowXY
 iup.ShowXY = function(h,x,y)
     x = tonumber(x)
     y = tonumber(y)
@@ -654,8 +690,12 @@ iup.DestroyDialogs = function()
         _G.dialogs['leftbar'].restore = nil
         _G.dialogs['leftbar'] = nil
     end
-    local storedBS
-    if _G.dialogs['concolebar'] ~= nil and _G.dialogs['findresbar'] ~= nil then  storedBS = _G.iuprops['dialogs.concolebar.splitvalue'] end
+--[[    local storedBS = _G.iuprops['dialogs.concolebar.splitvalue']
+    local storedBS2 = _G.iuprops['dialogs.findresbar.splitvalue']
+    if _G.dialogs['concolebar'] ~= nil and _G.dialogs['findresbar'] ~= nil then
+        iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
+        storedBS = _G.iuprops['dialogs.concolebar.splitvalue']
+    end]]
     if _G.dialogs['concolebar'] ~= nil then
         iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
         iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
@@ -668,7 +708,8 @@ iup.DestroyDialogs = function()
         _G.dialogs['findresbar'].restore = nil
         _G.dialogs['findresbar'] = nil
     end
-    if storedBS then _G.iuprops['dialogs.concolebar.splitvalue'] = storedBS; _G.iuprops['dialogs.findresbar.splitvalue'] = storedBS end
+    -- if storedBS then _G.iuprops['dialogs.concolebar.splitvalue'] = storedBS; end
+    -- if storedBS2 then _G.iuprops['dialogs.concolebar.splitvalue'] = storedBS2;  end
 
     if SideBar_obj.handle then
         iup.Detach(SideBar_obj.handle)
@@ -692,10 +733,10 @@ iup.DestroyDialogs = function()
             dlg:destroy()
         end
     end
-    h = iup.GetDialogChild(hMainLayout, "ToolBar")
+    h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
     if h then tTlb.show_cb(h,4) iup.Detach(h); iup.Destroy(h) end
 
-    local h = iup.GetDialogChild(hMainLayout, "StatusBar")
+    local h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
     if h then iup.Detach(h); iup.Destroy(h) end
 
     local h = iup.GetDialogChild(hMainLayout, "MenuBar")
