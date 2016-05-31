@@ -44,7 +44,7 @@ local function Init(ToolBar_obj)
         end
     end)
     tmConsole.run="YES"
-    txt_search = iup.text{expand='YES', tip='"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
+    txt_search = iup.text{name='livesearch_bar', expand='YES', tip='"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onTimer()
         tm.run="NO"
         local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)

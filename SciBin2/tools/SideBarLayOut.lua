@@ -132,7 +132,6 @@ local function Show()
 
     tree_left = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb}
 
-
     local vbox = iup.vbox{
         iup.hbox{tree_left, iup.vbox{tree_plugins},tree_right};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},

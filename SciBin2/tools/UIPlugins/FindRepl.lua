@@ -251,6 +251,7 @@ local function SetStaticControls()
     Ctrl("chkBackslash").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("btnArrowUp").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("btnArrowDown").active = Iif(notInFiles, 'YES', 'NO')
+    oDeattFnd.onSetStaticControls()
 end
 
 local function onMapMColorList(h)
