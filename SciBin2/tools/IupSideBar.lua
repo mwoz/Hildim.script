@@ -462,6 +462,7 @@ local function InitToolBar()
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
+    hBx.state = (_G.iuprops["layout.toolbar_expander"] or 'OPEN')
     ToolBar_obj.size = ToolBar_obj.handle.size
     iup.PassFocus()
 end
@@ -496,6 +497,7 @@ local function InitStatusBar()
     iup.Destroy(hTmp)
     StatusBar_obj.handle = iup.Append(vbScite, hBx)
     iup.Map(hBx)
+    hBx.state = (_G.iuprops["layout.statusbar_expander"] or 'OPEN')
 
     for i = 1, #tEvents do
         for _,tbs in pairs(StatusBar_obj.Tabs) do
@@ -528,7 +530,7 @@ local function InitMenuBar()
     end
 
 
-    local tTlb = {iup.vbox{name="MenuBar",expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL"}}};
+    local tTlb = {iup.expander{barsize = 1, state="OPEN", name = "MenuBar",iup.vbox{expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL"}}}};
 
     tTlb.control = "YES"
     tTlb.sciteid="iupmenubar"
