@@ -385,12 +385,14 @@ iup.scitedetachbox = function(t)
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', flat_action = function() dtb.Attach() end}
-    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
-        iup.tree{title0 = t.Dlg_Title, maxsize = 'x20', size = '100x20', expand = 'HORIZONTAL',border = 'NO', fontsize='9', canfocus='NO',markedid0='NO', showdragdrop = 'YES', button_cb = button_cb, motion_cb = motion_cb},
-        --iup.list{["1"]=t.Dlg_Title, maxsize = "x24", readonly = 'YES', border = 'NO', expand = 'HORIZONTAL', button_cb = button_cb, motion_cb = motion_cb, leavewindow_cb = leavewindow_cb, canfocus='NO', bgcolor='240 240 240', },
+    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', tip='Attach', flat_action = function() dtb.Attach() end}
+    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+
+        iup.flatbutton{title = t.Dlg_Title, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='10x', alignment='ALEFT',
+        canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
+        leavewindow_cb=function() end,},
         btn_attach,
-        iup.flatbutton{image = 'cross_button_µ', flat_action = function() dtb.HideDialog() end},
+        iup.flatbutton{image = 'cross_button_µ', tip='Hide', flat_action = function() dtb.HideDialog() end},
     }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
     if t[1] then
         local vb = t[1]
@@ -734,9 +736,11 @@ iup.DestroyDialogs = function()
         end
     end
     h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
+    _G.iuprops["layout.toolbar_expander"] = h.state
     if h then tTlb.show_cb(h,4) iup.Detach(h); iup.Destroy(h) end
 
     local h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
+    _G.iuprops["layout.statusbar_expander"] = h.state
     if h then iup.Detach(h); iup.Destroy(h) end
 
     local h = iup.GetDialogChild(hMainLayout, "MenuBar")
