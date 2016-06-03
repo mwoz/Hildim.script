@@ -172,8 +172,8 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         scite.PostCommand(POST_SCRIPTRELOAD_OLD,0)
         --scite.PostCommand(POST_SCRIPTRELOAD,0)
         return true
-    elseif cmd == IDM_VIEWTOOLBAR then
-        iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state = Iif(iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state == 'OPEN', 'CLOSE', 'OPEN')
+    -- elseif cmd == IDM_VIEWTOOLBAR then
+        -- iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state = Iif(iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state == 'OPEN', 'CLOSE', 'OPEN')
     elseif cmd == IDM_TOGGLEOUTPUT and ((_G.iuprops['concolebar.win'] or '0')=='0' or _G.iuprops['findresbar.win']=='0') then
         local hMainLayout = iup.GetLayout()
         if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
@@ -303,6 +303,20 @@ iup.matrix = function(t)
     return mtr
 end
 
+local old_iup_expander = iup.expander
+iup.expander = function(t)
+    local expand = old_iup_expander(t)
+
+    function expand:switch()
+        if expand.state == 'OPEN' then expand.state = 'CLOSE'
+        else expand.state = 'OPEN' end
+    end
+
+    function expand:isOpen() return expand.state == 'OPEN' end
+
+    return expand
+end
+
 local old_iup_list = iup.list
 iup.list = function(t)
     local cmb = old_iup_list(t)
@@ -385,14 +399,14 @@ iup.scitedetachbox = function(t)
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', tip='Attach', flat_action = function() dtb.Attach() end}
+    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', tip='Attach', flat_action = function() dtb.Attach() end}
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
 
         iup.flatbutton{title = t.Dlg_Title, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='10x', alignment='ALEFT',
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
         leavewindow_cb=function() end,},
         btn_attach,
-        iup.flatbutton{image = 'cross_button_µ', tip='Hide', flat_action = function() dtb.HideDialog() end},
+        iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dtb.HideDialog() end},
     }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
     if t[1] then
         local vb = t[1]

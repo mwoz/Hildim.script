@@ -59,6 +59,7 @@ form.objectType
 form.type
 form.procedure
 form.menuPath
+form.presentation
 
 design.caption
 design.caption_ru
