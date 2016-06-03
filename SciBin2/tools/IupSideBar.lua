@@ -134,7 +134,6 @@ local function  CreateBox()
 
     local function SideBar(t, Bar_Obj, sciteid)
         if not t then return end
-        t.name="tabMain"
         t.tip= 'Ctrl+1,2,3,4'
         local brObj = Bar_Obj
         t.map_cb = (function(h)
@@ -650,6 +649,9 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     end
 end)
 
+local bMenu,bToolBar,bStatusBar
+local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
+
 AddEventHandler("OnLayOutNotify", function(cmd)
     if cmd == "SHOW_FINDRES" then
         if (_G.iuprops['findresbar.win'] or '0')=='1' then return end
@@ -664,6 +666,36 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         if (_G.iuprops['concolebar.win'] or '0')=='1' then return end
         if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='2' and _G.dialogs['concolebar'] then _G.dialogs['concolebar']:ShowDialog(); return end
         if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
+    elseif cmd == "FULLSCREEN_ON" then
+        bMenu      = iup.GetDialogChild(iup.GetLayout(), "MenuBar").isOpen()
+        bToolBar   = iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").isOpen()
+        bStatusBar = iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen()
+        if bMenu then       iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch()            end
+        if bToolBar then    iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch()   end
+        if bStatusBar then  iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end
+
+        bSideBar   = ((_G.iuprops['sidebar.win'] or '0')=='0') and SideBar_obj.handle
+        bLeftBar   = ((_G.iuprops['leftbar.win'] or '0')=='0') and LeftBar_obj.handle
+        bconsoleBar=  (_G.iuprops['concolebar.win'] or '0')=='0'
+        bFindResBar=  (_G.iuprops['findresbar.win'] or '0')=='0'
+        bFindRepl  =  (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj
+
+        if bSideBar    then SideBar_obj.handle.detachPos(); SideBar_obj.handle.HideDialog() end
+        if bLeftBar    then LefrBar_obj.handle.detachPos(); LefrBar_obj.handle.HideDialog() end
+        if bFindRepl   then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos(); iup.GetDialogChild(hMainLayout, "FindReplDetach").HideDialog() end
+        if bconsoleBar then ConsoleBar.detachPos(); ConsoleBar.HideDialog() end
+        if bFindResBar then FindResBar.detachPos(); FindResBar.HideDialog() end
+
+    elseif cmd == "FULLSCREEN_OFF" then
+        if bMenu then       iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch()            end
+        if bToolBar then    iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch()   end
+        if bStatusBar then  iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end
+
+        if bSideBar    then SideBar_obj.handle.Attach() end
+        if bLeftBar    then LefrBar_obj.handle.Attach() end
+        if bconsoleBar then ConsoleBar.Attach() end
+        if bFindResBar then FindResBar.Attach() end
+        if bFindRepl   then iup.GetDialogChild(hMainLayout, "FindReplDetach").Attach() end
     end
 end)
 

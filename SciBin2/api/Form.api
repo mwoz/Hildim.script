@@ -1222,7 +1222,7 @@ papp.Str2Caption(str)
 papp.IsValueOneOfTypes( strTypes, strValue )
 papp.IsValueOneOfTypesM( strTypes, strValue )
 papp.MetaDataValue(strObj, strPath)
-papp.MetaDataNls(strObj, strName)
+papp.MetaDataCaption(strObj, bPlural)
 papp.Calc Calc object for calculations
 papp.ObjType2Table
 papp.ObjType2Schema

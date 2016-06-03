@@ -591,6 +591,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
             editor.TargetEnd = editor:PositionFromLine(p + 1)
             local posFind = editor:SearchInTarget(strI)
             if posFind and posFind >= p then
+                editor:EnsureVisibleEnforcePolicy(p)
                 editor:SetSel(posFind, posFind + strI:len())
                 iup.PassFocus()
                 OnNavigation("Go-")
@@ -603,7 +604,6 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         iup.PassFocus()
         OnNavigation("Go-")
     end
-
     local function GetFindTxt(lS, lE)
         local sInd = scite.SendFindRez(SCI_INDICATOREND, 31, lS)
         if lE >= sInd and sInd >= lS then

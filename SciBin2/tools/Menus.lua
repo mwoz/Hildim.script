@@ -265,10 +265,10 @@ _G.sys_Menus.MainWindowMenu = {
             {'Expand Subfolders', ru = 'Развернуть подблоки', key='Ctrl+Shift++', action = "Toggle_ToggleSubfolders(true)"},
         }},
         {'s2', separator=1},
-        --[[{'Full Scree&n', ru = 'Полноэкранный режим', key = 'F11', action = IDM_FULLSCREEN},]]
-        {'&Menu Bar', ru = 'Панель меню', action = function() iup.GetDialogChild(iup.GetLayout(), "MenuBar").state = Iif(iup.GetDialogChild(iup.GetLayout(), "MenuBar").state == 'OPEN', 'CLOSE', 'OPEN') end, check = function() return iup.GetDialogChild(iup.GetLayout(), "MenuBar").state == 'OPEN' end},
-        {'&Tool Bar', ru = 'Панель инструментов', action = IDM_VIEWTOOLBAR, check = function() return iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state == 'OPEN' end},
-        {'Status Bar', ru = 'Панель статуса', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").state = Iif(iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").state == 'OPEN', 'CLOSE', 'OPEN') end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").state == 'OPEN' end},
+        {'Full Scree&n', ru = 'Полноэкранный режим', key = 'F11', action = IDM_FULLSCREEN},
+        {'&Menu Bar', ru = 'Панель меню', action = function() iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "MenuBar").isOpen() end},
+        {'&Tool Bar', ru = 'Панель инструментов', action = function() iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").isOpen() end},
+        {'Status Bar', ru = 'Панель статуса', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen() end},
         {'Tab &Bar', ru = 'Вкладки', action = IDM_VIEWTABBAR, check = "props['tabbar.visible']=='1'"},
         --[[{'&Status Bar', ru = 'Строка состояния', action = IDM_VIEWSTATUSBAR},]]
         {'s2', separator=1},
@@ -278,7 +278,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Line Numbers', ru = 'Нумера строк', action = IDM_LINENUMBERMARGIN, check = "props['line.margin.visible']=='1'"},
         {'&Margin', ru = 'Закладки', action = IDM_SELMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,1)>0"},
         {'&Fold Margin', ru = 'Поле сворачивания блоков текста', action = IDM_FOLDMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,2)>0"},
-        {'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'", active=function() return (_G.iuprops['concolebar.win'] or '0')=='0' or (_G.iuprops['findresbar.win'] or '0')=='0' end},
+        --[[{'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'", active=function() return (_G.iuprops['concolebar.win'] or '0')=='0' or (_G.iuprops['findresbar.win'] or '0')=='0' end},]]
         --[[{'&Parameters', ru = 'Параметры', key = 'Shift+F8', action = IDM_TOGGLEPARAMETERS},]]
         {'s3', separator=1},
         {'slast', separator=1},
