@@ -297,6 +297,25 @@ _G.sys_Menus.MainWindowMenu = {
             {'Lpeg Tester', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\lpegTester.lua')",},
             {'Replace spaces (TABs <-> Spaces)', ru ='Заменить табы на пробелы', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\IndentTabToSpace.lua')",},
             {'4->3 Tab size Indent', ru ='Отступ 4->3', action=function() For2ThreeTabIndent() end,},
+            {'LayOut Dialog', action=(function()
+                    local f = iup.filedlg{}
+                    iup.SetNativeparent(f, "SCITE")
+                    f:popup()
+                    local path = f.value
+                    f:destroy()
+                     testHandle = nil
+                    if path ~= nil then
+                        local l = io.open(path)
+                        local strLua = l:read('*a')
+                        l:close()
+                        local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
+                        strLua = strLua..'\n testHandle = '..fName..'()'
+                        dostring(strLua)
+                    end
+                    local dlg = iup.LayoutDialog(testHandle)
+                    iup.Show(dlg)
+                  end),
+            },
         },},
         {'ASCII Table', ru = 'Таблица ASCII символов', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ASCIITable.lua')"},
         {'s2', separator=1},

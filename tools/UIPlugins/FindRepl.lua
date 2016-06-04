@@ -299,8 +299,14 @@ local function ActivateFind_l(nTab)
     if _G.dialogs['findrepl'] then
         _G.dialogs['findrepl'].ShowDialog()
     elseif SideBar_Plugins.findrepl.Bar_obj then
-        if Ctrl("zPin").valuepos == '0' then SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos = 0; SideBar_Plugins.functions.OnSwitchFile()
-        elseif SideBar_Plugins.findrepl.Bar_obj.TabCtrl.valuepos ~= 0 then oDeattFnd.detachPos() end
+        local tabCtrl = SideBar_Plugins.findrepl.Bar_obj.TabCtrl
+        local ind
+        for i = 0, tabCtrl.count - 1 do
+            if iup.GetAttributeId(tabCtrl, "TABTITLE", i) == SideBar_Plugins.findrepl.id  then ind = i; break end
+        end
+
+        tabCtrl.valuepos = ind; SideBar_Plugins.functions.OnSwitchFile()
+        if _G.iuprops[SideBar_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '2' then SideBar_Plugins.findrepl.Bar_obj.handle.ShowDialog() end
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart] end
@@ -363,26 +369,22 @@ end
 local function create_dialog_FindReplace()
   containers = {}
   containers["zPin"] = iup.zbox{
-    iup.button{
+    iup.flatbutton{
       impress = "IMAGE_Pin",
       visible = "NO",
       image = "IMAGE_PinPush",
-      size = "11x9",
+      --size = "11x9",
       canfocus  = "NO",
-      action = (function(h) containers["zPin"].valuepos = "1" end),
+      flat_action = (function(h) containers["zPin"].valuepos = "1" end),
     },
-    iup.button{
+    iup.flatbutton{
       impress = "IMAGE_PinPush",
       visible = "NO",
       image = "IMAGE_Pin",
       canfocus  = "NO",
-      size = "11x9",
-      action = (function(h) containers["zPin"].valuepos = "0" end),
+      --size = "11x9",
+      flat_action = (function(h) containers["zPin"].valuepos = "0" end),
       },
-    iup.button{           ------------
-      name = "BtnOK",
-      action = DefAction,
-    },
     name = "zPin",
   }
   containers[4] = iup.hbox{
@@ -400,6 +402,12 @@ local function create_dialog_FindReplace()
       k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],
+    iup.button{           ------------
+      name = "BtnOK",
+      action = DefAction,
+      fontsize = 1, margin = '0x0',
+      visible = 'NO'
+    },
     margin = "0x00",
     expand = "HORIZONTAL",
     alignment = "ACENTER",
@@ -795,6 +803,7 @@ local function create_dialog_FindReplace()
     margin = "3x3",
     expandchildren = "YES",
     gap = "3",
+    name = 'vboxFindRepl'
   }
 
 --[[  containers[1] = iup.dialog{
@@ -815,7 +824,7 @@ local function Init()
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";defaultesc="FIND_BTN_ESC";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
-        sciteid = 'findrepl';  Dlg_Title = "Ïîèñê è çàìåíà";
+        sciteid = 'findrepl';  Dlg_Title = "Ïîèñê è çàìåíà"; expand='HORIZONTAL';
         On_Detach = (function(h, hNew, x, y)
             iup.SetHandle("FIND_BTN_ESC",Ctrl('btn_esc'))
             local hMainLayout = iup.GetLayout()
@@ -827,7 +836,6 @@ local function Init()
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="CLOSE";
             end
             popUpFind = hNew
-            _G.iuprops["sidebarctrl.zPin.pinned.value"] = Ctrl("zPin").valuepos
             if _G.iuprops["sidebarctrl.zPin.unpinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.unpinned.value"] end
         end);
         Dlg_Close_Cb = (function(h)
@@ -839,9 +847,14 @@ local function Init()
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
             end
             _G.iuprops["sidebarctrl.zPin.unpinned.value"] = Ctrl("zPin").valuepos
-            if _G.iuprops["sidebarctrl.zPin.pinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.pinned.value"] end
         end);
         }
+    local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')
+    if hboxPane then
+        local pin = Ctrl("zPin")
+        iup.Detach(pin)
+        iup.Insert(hboxPane, iup.GetDialogChild(oDeattFnd, "findrepl_title_btnattach"), pin)
+    end
 
     Ctrl('tabFinrRepl').rightclick_cb = (function()
         menuhandler:PopUp('MainWindowMenu¦View¦findrepl')

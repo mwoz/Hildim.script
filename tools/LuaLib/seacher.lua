@@ -403,11 +403,12 @@ function s:MarkResult()
     local origFind = self.findWhat
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then self.findWhat = self.findWhat:from_utf8(1251) end
     self.style = SCE_SEARCHRESULT_CURRENT_LINE
-
+    local p
     for i = 1, findrez.LineCount - 1 do
         p = findrez:PositionFromLine(i)
         if findrez.StyleAt[p + 1] == SCE_SEARCHRESULT_SEARCH_HEADER then break end
     end
+    if not p then return end
     if p > 0 then
         findrez:SetSel(0,p)
         findrez:Colourise(0,p)
