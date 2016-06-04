@@ -372,12 +372,12 @@ end
 
 iup.scitedetachbox = function(t)
     local dtb
-    local bMoved = 0, sX, sY
+    local bMoved = 0, sX, sY, bRecurs
 
     local function button_cb(h, button, pressed, x, y, status)
         h.value = 0
         if not dtb.Dialog then return end
-        if button == 49 then
+        if button == 49  then
             bMoved = pressed; sX = x; sY = y
             if bMoved == 0 then
                 _G.iuprops['dialogs.'..dtb.sciteid..'.x']= dtb.Dialog.x
@@ -389,18 +389,22 @@ iup.scitedetachbox = function(t)
     local function motion_cb(h, x, y, status)
     h.value=1
         if not dtb.Dialog then return end
-        if bMoved == 1 then
+        if bMoved == 1 and sX and sY and not bRecurs then
             local _,_,wx,wy = dtb.Dialog.screenposition:find('(%-?%d*),(%-?%d*)')
             local nX, nY = tonumber(wx) + (x - sX), tonumber(wy) + (y - sY)
+            bRecurs = true
             if nX ~= wx or nY ~= wy then old_iup_ShowXY(dtb.Dialog, nX, nY) end
+            bRecurs = false
         end
     end
 
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', tip='Attach', flat_action = function() dtb.Attach() end}
-    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() dtb.Attach() end}
+
+    btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
+    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
 
         iup.flatbutton{title = t.Dlg_Title, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='10x', alignment='ALEFT',
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
@@ -498,11 +502,19 @@ iup.scitedetachbox = function(t)
         end
         if tonumber(_G.iuprops['dialogs.'..h.sciteid..'.x'])== nil or tonumber(_G.iuprops['dialogs.'..h.sciteid..'.y']) == nil then _G.iuprops['dialogs.'..h.sciteid..'.x']=0;_G.iuprops['dialogs.'..h.sciteid..'.y']=0 end
         hNew.button_cb = function(h, button, pressed, x, y, status) print(h, button, pressed, x, y, status) end
+        hNew.move_cb = function(h, x, y)
+            _G.iuprops['dialogs.'..dtb.sciteid..'.y']= y
+            _G.iuprops['dialogs.'..dtb.sciteid..'.x']= x
+        end
+        hNew.resize_cb = function(h, x, y)
+            _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = h.rastersize
+        end
     end)
     dtb.HideDialog = function()
         if dtb.Dialog then
             dtb.Dialog:hide()
             _G.iuprops[dtb.sciteid..'.win'] = '2'
+            iup.PassFocus()
         end
     end
     dtb.ShowDialog = function()
@@ -706,12 +718,7 @@ iup.DestroyDialogs = function()
         _G.dialogs['leftbar'].restore = nil
         _G.dialogs['leftbar'] = nil
     end
---[[    local storedBS = _G.iuprops['dialogs.concolebar.splitvalue']
-    local storedBS2 = _G.iuprops['dialogs.findresbar.splitvalue']
-    if _G.dialogs['concolebar'] ~= nil and _G.dialogs['findresbar'] ~= nil then
-        iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
-        storedBS = _G.iuprops['dialogs.concolebar.splitvalue']
-    end]]
+
     if _G.dialogs['concolebar'] ~= nil then
         iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
         iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = "OPEN"
@@ -724,8 +731,6 @@ iup.DestroyDialogs = function()
         _G.dialogs['findresbar'].restore = nil
         _G.dialogs['findresbar'] = nil
     end
-    -- if storedBS then _G.iuprops['dialogs.concolebar.splitvalue'] = storedBS; end
-    -- if storedBS2 then _G.iuprops['dialogs.concolebar.splitvalue'] = storedBS2;  end
 
     if SideBar_obj.handle then
         iup.Detach(SideBar_obj.handle)
@@ -780,3 +785,4 @@ function Splash_Screen()
     end)
 
 end
+

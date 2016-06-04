@@ -124,7 +124,8 @@ local function  CreateBox()
             l = iup.split(t)
         elseif t.type == "FIND" then
             SideBar_Plugins.findrepl.Bar_obj = pane_curObj
-            l =iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',minsize='x250'}, barsize = '0', name="FinReplExp"}
+            table.insert(sb_elements, SideBar_Plugins.findrepl)
+           l =iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',size='x108'}, barsize = '0', name="FinReplExp"}
         elseif t.type == nil then
             l = t[1]
         else print('Unsupported type:'..t.type) end
@@ -135,6 +136,7 @@ local function  CreateBox()
     local function SideBar(t, Bar_Obj, sciteid)
         if not t then return end
         t.tip= 'Ctrl+1,2,3,4'
+        Bar_Obj.sciteid = sciteid
         local brObj = Bar_Obj
         t.map_cb = (function(h)
             h.size="1x1"
@@ -153,7 +155,7 @@ local function  CreateBox()
         t.rightclick_cb=(function()
             menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid)
         end)
-    return iup.tabs(t)
+        return iup.tabs(t)
     end
 
     local function SidePane(hVbox,sName,sSciteId,sSplit,sExpander,sSplit_CloseVal, Bar_obj, sSide)
@@ -166,9 +168,6 @@ local function  CreateBox()
                 --h.visible
             end);
             Dlg_Close_Cb = (function(h)
-                if (_G.iuprops['findrepl.win'] or '0')=='1' then
-                    _G.FindReplDialog.close_cb(_G.FindReplDialog)
-                end
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state="OPEN";
             end);
             Dlg_Show_Cb=(function(h,state)
@@ -334,6 +333,7 @@ local function InitSideBar()
         iup.Map(LeftBar_obj.handle)
     end
 
+    local bs2 = iup.GetDialogChild(hMainLayout, "BottomSplit2")
     if  not SideBar_Plugins.findrepl then
         dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar()
         local hTmp= iup.dialog{SideBar_Plugins.findrepl.handle}
@@ -342,8 +342,14 @@ local function InitSideBar()
         iup.Insert(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil, hBx)
         iup.Map(hBx)
         iup.Destroy(hTmp)
-        iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
+        bs2.barsize="3"
+        if tonumber(bs2.value) > 980 then bs2.value = 800 end
+        iup.GetDialogChild(hMainLayout, "FindPlaceHolder").yautohide = 'NO'
         iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
+
+    else
+        bs2.barsize="0"
+        bs2.value = 1000
     end
     SideBar_Plugins.findrepl.OnCreate()
 
@@ -559,6 +565,9 @@ if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander
 else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '3'   end
 if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000" end
 
+
+
+
 local function RestoreLayOut(strLay)
     strLay = strLay:gsub('^•','')
     for n in strLay:gmatch('%d+') do
@@ -641,6 +650,10 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             end
 
             menuhandler:RegistryHotKeys()
+
+            local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
+            --if frScroll then frScroll.size = iup.GetDialogChild(iup.GetLayout(), "vboxFindRepl").size:gsub('^%d+', '') end
+
             scite.EnsureVisible()
             if dlg_SPLASH then dlg_SPLASH:postdestroy() end
         elseif wp == POST_CONTINUESHOWMENU then
@@ -696,6 +709,16 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         if bconsoleBar then ConsoleBar.Attach() end
         if bFindResBar then FindResBar.Attach() end
         if bFindRepl   then iup.GetDialogChild(hMainLayout, "FindReplDetach").Attach() end
+    end
+end)
+
+AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
+    if key ==  27 and not shift and not ctrl and not alt then
+        if output.Focus then
+            if (_G.iuprops['concolebar.win'] or '0') == '1' then ConsoleBar.HideDialog() end
+        elseif findrez.Focus then
+            if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.HideDialog() end
+        end
     end
 end)
 
