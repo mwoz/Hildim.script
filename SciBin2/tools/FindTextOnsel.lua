@@ -529,13 +529,13 @@ end)
 local function MyMenuCommand(msg)
     local function fndFiles()
         local t = {}
-        if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
-            local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
+        if findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
+            local lineNum = findres:LineFromPosition(findres.CurrentPos) + 1
             while true do
-                local style = findrez.StyleAt[findrez:PositionFromLine(lineNum) + 1]
+                local style = findres.StyleAt[findres:PositionFromLine(lineNum) + 1]
                 if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
                 elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                    local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
+                    local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1)
                     table.insert(t,s)
                 end
                 lineNum = lineNum + 1
@@ -556,13 +556,13 @@ local function MyMenuCommand(msg)
     end
 
     if msg == 1 then
-        if findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
-            local lineNum = findrez:LineFromPosition(findrez.CurrentPos) + 1
+        if findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
+            local lineNum = findres:LineFromPosition(findres.CurrentPos) + 1
             while true do
-                local style = findrez.StyleAt[findrez:PositionFromLine(lineNum) + 1]
+                local style = findres.StyleAt[findres:PositionFromLine(lineNum) + 1]
                 if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
                 elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                    local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1)
+                    local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1)
                     scite.Open(s)
                 end
                 lineNum = lineNum + 1
@@ -579,9 +579,9 @@ local function MyMenuCommand(msg)
 end
 
 AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
-    if not findrez.Focus then return end
-    local style = findrez.StyleAt[findrez.CurrentPos]
-    local lineNum = findrez:LineFromPosition(findrez.CurrentPos)
+    if not findres.Focus then return end
+    local style = findres.StyleAt[findres.CurrentPos]
+    local lineNum = findres:LineFromPosition(findres.CurrentPos)
     local function perfGo(s, p, strI)
         OnNavigation("Go")
         s = s:to_utf8(1251)
@@ -605,24 +605,24 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         OnNavigation("Go-")
     end
     local function GetFindTxt(lS, lE)
-        local sInd = scite.SendFindRez(SCI_INDICATOREND, 31, lS)
+        local sInd = scite.SendFindRes(SCI_INDICATOREND, 31, lS)
         if lE >= sInd and sInd >= lS then
-            local eInd = scite.SendFindRez(SCI_INDICATOREND, 31, sInd)
-            return findrez:textrange(sInd, eInd)
+            local eInd = scite.SendFindRes(SCI_INDICATOREND, 31, sInd)
+            return findres:textrange(sInd, eInd)
         end
     end
 
     if style == SCE_SEARCHRESULT_FILE_HEADER then
-        local s = findrez:textrange(findrez:PositionFromLine(lineNum) + 1, findrez:PositionFromLine(lineNum + 1) -1):to_utf8(1251)
+        local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1):to_utf8(1251)
         if s ~= props['FilePath'] then
             OnNavigation("Go")
             scite.Open(s)
             OnNavigation("Go-")
         end
     elseif style == SCE_SEARCHRESULT_LINE_NUMBER or
-           (not _G.iuprops['findrez.clickonlynumber'] and style == SCE_SEARCHRESULT_CURRENT_LINE) then
-        local lS, lE = findrez:PositionFromLine(lineNum), findrez:PositionFromLine(lineNum + 1) -1
-        local s = findrez:textrange(lS, lE)
+           (not _G.iuprops['findres.clickonlynumber'] and style == SCE_SEARCHRESULT_CURRENT_LINE) then
+        local lS, lE = findres:PositionFromLine(lineNum), findres:PositionFromLine(lineNum + 1) -1
+        local s = findres:textrange(lS, lE)
         local exPath, lHeadPath
         local _,_,p = s:find('^%s+(%d*)')
         if not p then _,_,exPath,p = s:find('^%.\\([^:]*):(%d+)') end
@@ -630,11 +630,11 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
         if not p then return end
         p = tonumber(p) - 1
         for i = lineNum, 0, -1 do
-            style = findrez.StyleAt[findrez:PositionFromLine(i) + 2]
+            style = findres.StyleAt[findres:PositionFromLine(i) + 2]
             if style == SCE_SEARCHRESULT_SEARCH_HEADER then
                 if not exPath then break end
                 if not lHeadPath then
-                    lHeadPath = findrez:textrange(findrez:PositionFromLine(i), findrez:PositionFromLine(i +1) -2)
+                    lHeadPath = findres:textrange(findres:PositionFromLine(i), findres:PositionFromLine(i +1) -2)
                     _,_,lHeadPath = lHeadPath:find(' in "([^"]+)')
                     if exPath ~= '' then _,_,lHeadPath = lHeadPath:find('(.-)[^\\]+$') end
                     lHeadPath = lHeadPath..exPath
@@ -642,7 +642,7 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
                 perfGo(lHeadPath, p, GetFindTxt(lS, lE))
                 break
             elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                local s = findrez:textrange(findrez:PositionFromLine(i) + 1, findrez:PositionFromLine(i + 1) -1)
+                local s = findres:textrange(findres:PositionFromLine(i) + 1, findres:PositionFromLine(i + 1) -1)
                 perfGo(s, p, GetFindTxt(lS, lE))
                 break
             end
@@ -667,8 +667,8 @@ menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦xxx',
     {'Move Controls...',  ru = 'Переместить контролы...', action=template_MoveControls, key = 'Alt+M', active='editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)'},
 }})
 
-menuhandler:InsertItem('FINDREZ', '',
-{'Open Files', plane=1, visible="findrez.StyleAt[findrez.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER" ,{
+menuhandler:InsertItem('FINDRES', '',
+{'Open Files', plane=1, visible="findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER" ,{
     {'s_OpenFiles', separator=1},
     {'Open Files',  ru = 'Открыть файлы', action=function() MyMenuCommand(1) end, },
     {'Close Files',  ru = 'Закрыть файлы', action=function() MyMenuCommand(2) end, },

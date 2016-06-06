@@ -406,7 +406,7 @@ local function InitSideBar()
     FindResBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "FindResDetach");
         sciteid = 'findresbar';Split_h = bSplitter;Split_CloseVal = "1000";
-        Dlg_Title = "Find Results"; Dlg_Show_Cb = nil; MenuEx = "FINDREZ";
+        Dlg_Title = "Find Results"; Dlg_Show_Cb = nil; MenuEx = "FINDRES";
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Resize_Cb = (function(h,width, height)
@@ -716,7 +716,7 @@ AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
     if key ==  27 and not shift and not ctrl and not alt then
         if output.Focus then
             if (_G.iuprops['concolebar.win'] or '0') == '1' then ConsoleBar.HideDialog() end
-        elseif findrez.Focus then
+        elseif findres.Focus then
             if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.HideDialog() end
         end
     end

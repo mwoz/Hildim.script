@@ -47,8 +47,8 @@ function s:Reset(t)
     self.findWhat    = t.findWhat
     self.replaceWhat = t.replaceWhat
     if t.inFindRez then
-        self.e = findrez
-        self.send = scite.SendFindRez
+        self.e = findres
+        self.send = scite.SendFindRes
     else
         self.e = editor
         self.send = scite.SendEditor
@@ -74,7 +74,7 @@ function s:EditorClearMarks(indic_number, start, length)
 		_first_indic, _end_indic = indic_number, indic_number
 	end
 	if start == nil then
-		start, length = 0, findrez.Length
+		start, length = 0, findres.Length
 	end
 	for indic = _first_indic, _end_indic do
 		self.send(SCI_SETINDICATORCURRENT, indic)
@@ -214,24 +214,24 @@ function s:CollapseFindRez()
     scite.MenuCommand(IDM_FINDRESENSUREVISIBLE)
     local j = 0
     local lMax = _G.iuprops['findres.maxresultcount'] or 10
-    for line = 0, findrez.LineCount do
-        if findrez.StyleAt[findrez:PositionFromLine(line)] == 1 then
+    for line = 0, findres.LineCount do
+        if findres.StyleAt[findres:PositionFromLine(line)] == 1 then
             j = j + 1
             if j > lMax then
-                findrez.TargetStart = findrez:PositionFromLine(line)
-                findrez.TargetEnd = findrez.Length
-                findrez:ReplaceTarget('')
+                findres.TargetStart = findres:PositionFromLine(line)
+                findres.TargetEnd = findres.Length
+                findres:ReplaceTarget('')
                 break
             end
         end
     end
 
-    for line = 0, findrez.LineCount do
-        local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
+    for line = 0, findres.LineCount do
+        local level = scite.SendFindRes(SCI_GETFOLDLEVEL, line)
         if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-            scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
-            local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
-            if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
+            scite.SendFindRes(SCI_SETFOLDEXPANDED, line)
+            local lineMaxSubord = scite.SendFindRes(SCI_GETLASTCHILD, line,-1)
+            if line < lineMaxSubord then scite.SendFindRes(SCI_HIDELINES, line + 1, lineMaxSubord) end
         end
     end
 end
@@ -241,7 +241,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
 
     local strLive = Iif(bLive, "/\\", "")
     local needCoding = (self.e.CodePage ~= 0)
-    scite.SendFindRez(SCI_SETSEL,0,0)
+    scite.SendFindRes(SCI_SETSEL,0,0)
     local line, wCount, lCount = -1, 0, 0
     return (function(lenTarget)
         if lenTarget then
@@ -251,35 +251,35 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                 lCount = lCount + 1
                 line = l
                 local lNum
-                if not _G.iuprops['findrez.groupbyfile'] then
+                if not _G.iuprops['findres.groupbyfile'] then
                     if bSearchCapt then lNum = '.\\:'..(l+1)..': '
                     else lNum = props["FilePath"]:from_utf8(1251)..':'..(l+1)..': ' end
                 else
                     lNum = '\t'..(l+1)..': '
                 end
                 if lCount == maxlines then
-                    scite.SendFindRez(SCI_REPLACESEL, lNum..'...\n')
+                    scite.SendFindRes(SCI_REPLACESEL, lNum..'...\n')
                     return lenTarget, false
                 end
                 local str = self.e:GetLine(l):gsub('^[ \t]+', '')
                 if needCoding then str = str:from_utf8(1251) end
-                scite.SendFindRez(SCI_REPLACESEL, lNum..str )
+                scite.SendFindRes(SCI_REPLACESEL, lNum..str )
              end
             return lenTarget, true
         else
-            if bSearchCapt then scite.SendFindRez(SCI_REPLACESEL, '<'..strLive..'\n' ) end
-            scite.SendFindRez(SCI_SETSEL,0,0)
+            if bSearchCapt then scite.SendFindRes(SCI_REPLACESEL, '<'..strLive..'\n' ) end
+            scite.SendFindRes(SCI_SETSEL,0,0)
             local strCapt = ''
             local strSrch = self.findWhat
             if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
-            if bSearchCapt then strCapt = strCapt..'>Search for "'..strSrch..'" in "'..props[Iif(_G.iuprops['findrez.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8(1251)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
+            if bSearchCapt then strCapt = strCapt..'>Search for "'..strSrch..'" in "'..props[Iif(_G.iuprops['findres.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8(1251)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
 
-            if _G.iuprops['findrez.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]:from_utf8(1251)..'\n' end
-            if bSearchCapt or wCount > 0 then  scite.SendFindRez(SCI_REPLACESEL, strCapt) end
+            if _G.iuprops['findres.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]:from_utf8(1251)..'\n' end
+            if bSearchCapt or wCount > 0 then  scite.SendFindRes(SCI_REPLACESEL, strCapt) end
 
-            scite.SendFindRez(SCI_SETSEL,0,0)
-            findrez.CurrentPos = 1
-            if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+            scite.SendFindRes(SCI_SETSEL,0,0)
+            findres.CurrentPos = 1
+            if scite.SendFindRes(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
 
             return wCount, lCount
         end
@@ -397,23 +397,23 @@ function s:ReplaceAll(inSel)
 end
 
 function s:MarkResult()
-    self.e = findrez
-    self.send = scite.SendFindRez
+    self.e = findres
+    self.send = scite.SendFindRes
     local origStyle = self.style
     local origFind = self.findWhat
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then self.findWhat = self.findWhat:from_utf8(1251) end
     self.style = SCE_SEARCHRESULT_CURRENT_LINE
     local p
-    for i = 1, findrez.LineCount - 1 do
-        p = findrez:PositionFromLine(i)
-        if findrez.StyleAt[p + 1] == SCE_SEARCHRESULT_SEARCH_HEADER then break end
+    for i = 1, findres.LineCount - 1 do
+        p = findres:PositionFromLine(i)
+        if findres.StyleAt[p + 1] == SCE_SEARCHRESULT_SEARCH_HEADER then break end
     end
     if not p then return end
     if p > 0 then
-        findrez:SetSel(0,p)
-        findrez:Colourise(0,p)
+        findres:SetSel(0,p)
+        findres:Colourise(0,p)
         self:findWalk(true, self:onMarkOne(31, false))
-        findrez:SetSel(0,0)
+        findres:SetSel(0,0)
     end
 
     self.style = origStyle
@@ -430,9 +430,9 @@ end
 
 function s:FindInBufer()
     local cnt, lin, fil = 0, 0, 0
-    scite.SendFindRez(SCI_SETSEL,0,0)
-    scite.SendFindRez(SCI_REPLACESEL, '<\n')
-    scite.SendFindRez(SCI_SETSEL,0,0)
+    scite.SendFindRes(SCI_SETSEL,0,0)
+    scite.SendFindRes(SCI_REPLACESEL, '<\n')
+    scite.SendFindRes(SCI_SETSEL,0,0)
     return (function(nBuff, maxlines)
         local bCollapse = true
         local bSetEnding = false
@@ -443,10 +443,10 @@ function s:FindInBufer()
             cnt = cnt + c
             lin = lin + l
         else
-            scite.SendFindRez(SCI_SETSEL,0,0)
+            scite.SendFindRes(SCI_SETSEL,0,0)
             local strSrch = self.findWhat
             if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
-            scite.SendFindRez(SCI_REPLACESEL,'>Search for "'..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
+            scite.SendFindRes(SCI_REPLACESEL,'>Search for "'..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
             return cnt
         end
     end)
