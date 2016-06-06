@@ -20,11 +20,11 @@ local needCoding = false
 
 local function Find_onFocus(setfocus)
     if not setfocus then
-        local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)
+        local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
-            findrez.TargetStart = a
-            findrez.TargetEnd = a+3
-            findrez:ReplaceTarget('<')
+            findres.TargetStart = a
+            findres.TargetEnd = a+3
+            findres:ReplaceTarget('<')
         end
     end
 end
@@ -47,11 +47,11 @@ local function Init(ToolBar_obj)
     txt_search = iup.text{name='livesearch_bar', expand='YES', tip='"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     local function Find_onTimer()
         tm.run="NO"
-        local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)
+        local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
-            findrez.TargetStart = 0
-            findrez.TargetEnd = findrez.LineEndPosition[findrez:LineFromPosition(a)]+1
-            findrez:ReplaceTarget('')
+            findres.TargetStart = 0
+            findres.TargetEnd = findres.LineEndPosition[findres:LineFromPosition(a)]+1
+            findres:ReplaceTarget('')
         end
         local str = txt_search.value
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
@@ -67,24 +67,24 @@ local function Init(ToolBar_obj)
 
     txt_search.valuechanged_cb = (Find_onChange)
     txt_search.killfocus_cb = (function(h)
-        local a = findrez:findtext('^</\\', SCFIND_REGEXP, 0)
+        local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
-            findrez.TargetStart = a
-            findrez.TargetEnd = a+3
-            findrez:ReplaceTarget('<')
+            findres.TargetStart = a
+            findres.TargetEnd = a+3
+            findres:ReplaceTarget('<')
         end
     end)
     txt_search.k_any = (function(c, key)
         if key == 65364 then  --down
-            local line = findrez:LineFromPosition(findrez.CurrentPos) + 1
-            findrez:SetSel(findrez:PositionFromLine(line), findrez.LineEndPosition[line])
+            local line = findres:LineFromPosition(findres.CurrentPos) + 1
+            findres:SetSel(findres:PositionFromLine(line), findres.LineEndPosition[line])
         elseif key == 65362 then --up
-            local line = findrez:LineFromPosition(findrez.CurrentPos) - 1
-            findrez:SetSel(findrez:PositionFromLine(line), findrez.LineEndPosition[line])
+            local line = findres:LineFromPosition(findres.CurrentPos) - 1
+            findres:SetSel(findres:PositionFromLine(line), findres.LineEndPosition[line])
 
         elseif key == 13 then  --enter
-            local _,_, n = string.find(findrez:GetSelText(), '^%s*(%d+):')
-            if n==nil then n = string.find(findrez:GetSelText(), ':(%d+):') end
+            local _,_, n = string.find(findres:GetSelText(), '^%s*(%d+):')
+            if n==nil then n = string.find(findres:GetSelText(), ':(%d+):') end
             if n==nil then
                 Find_onChange(c)
                 return

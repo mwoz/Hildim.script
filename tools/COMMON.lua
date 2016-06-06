@@ -239,9 +239,9 @@ local function EditorInitMarkStyles()
 			InitMarkStyle(indic_number, indic_style, indic_color, indic_alpha)
 		end
 	end
-	findrez.IndicStyle[31] = INDIC_ROUNDBOX
-	findrez.IndicFore[31] = encodeRGB2WIN('#54FFB4')
-	findrez.IndicAlpha[31] = 35
+	findres.IndicStyle[31] = INDIC_ROUNDBOX
+	findres.IndicFore[31] = encodeRGB2WIN('#54FFB4')
+	findres.IndicAlpha[31] = 35
 end
 
 ----------------------------------------------------------------------------

@@ -364,19 +364,19 @@ local function ListErrors()
     out = out..'<\r\n'
 
     for line = 0, editor.LineCount do
-        local level = scite.SendFindRez(SCI_GETFOLDLEVEL, line)
+        local level = scite.SendFindRes(SCI_GETFOLDLEVEL, line)
         if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-            scite.SendFindRez(SCI_SETFOLDEXPANDED, line)
-            local lineMaxSubord = scite.SendFindRez(SCI_GETLASTCHILD, line,-1)
-            if line < lineMaxSubord then scite.SendFindRez(SCI_HIDELINES, line + 1, lineMaxSubord) end
+            scite.SendFindRes(SCI_SETFOLDEXPANDED, line)
+            local lineMaxSubord = scite.SendFindRes(SCI_GETLASTCHILD, line,-1)
+            if line < lineMaxSubord then scite.SendFindRes(SCI_HIDELINES, line + 1, lineMaxSubord) end
         end
     end
 
-    scite.SendFindRez(SCI_SETSEL,0,0)
-    scite.SendFindRez(SCI_REPLACESEL, out)
-    if scite.SendFindRez(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
-    scite.SendFindRez(SCI_SETSEL,0,0)
-    scite.SendFindRez(SCI_REPLACESEL, '>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]..'\n')
+    scite.SendFindRes(SCI_SETSEL,0,0)
+    scite.SendFindRes(SCI_REPLACESEL, out)
+    if scite.SendFindRes(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+    scite.SendFindRes(SCI_SETSEL,0,0)
+    scite.SendFindRes(SCI_REPLACESEL, '>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]..'\n')
 end
 
 local function OnIdle_local()

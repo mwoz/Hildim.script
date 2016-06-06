@@ -166,7 +166,7 @@ local function FindInFiles()
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
                    Iif(Ctrl("chkSubFolders").value=='ON', 's','~')..
-                   Iif(_G.iuprops['findrez.groupbyfile'], 'g', '~')
+                   Iif(_G.iuprops['findres.groupbyfile'], 'g', '~')
     scite.PerformGrepEx(params,fWhat,fDir,fFilter)
 
     Ctrl("cmbFindWhat"):SaveHist()
@@ -287,7 +287,7 @@ local function ActivateFind_l(nTab)
 
     local wnd = editor
     if output.Focus then wnd = output
-    elseif findrez.Focus then wnd = findrez end
+    elseif findres.Focus then wnd = findres end
 
     local s
     if wnd.SelectionStart == wnd.SelectionEnd then s = GetCurrentWord()

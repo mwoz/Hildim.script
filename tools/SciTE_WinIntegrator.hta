@@ -219,8 +219,8 @@ function SetAssociations(){
 	}
 	WshShell.RegWrite(reg_backup+'associations', form.associations.value);
 	WshShell.RegWrite('HKCR\\SciTE.File\\', 'SciTE file');
-	WshShell.RegWrite('HKCR\\SciTE.File\\DefaultIcon\\', scite_path + '\\SciTE.exe,1');
-	WshShell.RegWrite('HKCR\\SciTE.File\\shell\\open\\command\\', '"' + scite_path + '\\SciTE.exe" "%1"');
+	WshShell.RegWrite('HKCR\\SciTE.File\\DefaultIcon\\', scite_path + '\\HildiM.exe,1');
+	WshShell.RegWrite('HKCR\\SciTE.File\\shell\\open\\command\\', '"' + scite_path + '\\HildiM.exe" "%1"');
 	return true;
 }
 
@@ -254,7 +254,7 @@ function CheckOpenfor(){
 
 function SetOpenfor(){
 	with (WshShell.CreateShortcut(WshShell.SpecialFolders("SendTo") + "\\SciTE.lnk")){
-		TargetPath = scite_path + '\\SciTE.exe';
+		TargetPath = scite_path + '\\Hildim.exe';
 		Save();
 	}
 	return true;
@@ -285,9 +285,9 @@ function CheckSession(){
 function SetSessions(){
 	WshShell.RegWrite('HKCR\\.session\\', 'SciTE.Session');
 	WshShell.RegWrite('HKCR\\SciTE.Session\\', 'SciTE session file');
-	WshShell.RegWrite('HKCR\\SciTE.Session\\DefaultIcon\\', scite_path + '\\SciTE.exe,2');
+	WshShell.RegWrite('HKCR\\SciTE.Session\\DefaultIcon\\', scite_path + '\\Hildim.exe,2');
 	WshShell.RegWrite('HKCR\\SciTE.Session\\shell\\open\\command\\', 'wscript "' + script_path + '\\' + open_ses_file + '" "%1"');
-	var text = 'var scite = "' + scite_path.replace(/\\/g,'\\\\') + '\\\\SciTE.exe";\n';
+	var text = 'var scite = "' + scite_path.replace(/\\/g,'\\\\') + '\\\\Hildim.exe";\n';
 	text += 'var WshShell = new ActiveXObject("WScript.Shell");\n';
 	text += 'var filename = WScript.Arguments(0);\n';
 	text += 'var opt = \'-check.if.already.open=0 \"-loadsession:\' + filename.replace(\/\\\\\/g,\"\\\\\\\\\") + \'\"\';\n';
@@ -320,7 +320,7 @@ function SetHTML_def(){
 	var current_htmldef = "";
 	try {current_htmldef = WshShell.RegRead('HKLM\\SOFTWARE\\Microsoft\\Internet Explorer\\View Source Editor\\Editor Name\\');} catch(e) {}
 	WshShell.RegWrite(reg_backup+'Source Editor', current_htmldef);
-	WshShell.RegWrite('HKLM\\SOFTWARE\\Microsoft\\Internet Explorer\\View Source Editor\\Editor Name\\', '"' + scite_path + '\\SciTE.exe"');
+	WshShell.RegWrite('HKLM\\SOFTWARE\\Microsoft\\Internet Explorer\\View Source Editor\\Editor Name\\', '"' + scite_path + '\\Hildim.exe"');
 	return true;
 }
 
@@ -339,24 +339,24 @@ function CheckHTML(){
 	form.chk_html.checked = false;
 	form.chk_html.value = false;
 	try {
-		var _html = WshShell.RegRead('HKCR\\.htm\\OpenWithList\\SCITE.EXE\\');
+		var _html = WshShell.RegRead('HKCR\\.htm\\OpenWithList\\Hildim.exe\\');
 		form.chk_html.checked = true;
 		form.chk_html.value = true;
 	} catch(e) {}
 }
 
 function SetHTML(){
-	WshShell.RegWrite('HKCR\\.htm\\OpenWithList\\SCITE.EXE\\', '');
-	WshShell.RegWrite('HKCR\\Applications\\SCITE.EXE\\shell\\edit\\command\\', scite_path + '\\SciTE.exe "%1"');
+	WshShell.RegWrite('HKCR\\.htm\\OpenWithList\\Hildim.exe\\', '');
+	WshShell.RegWrite('HKCR\\Applications\\Hildim.exe\\shell\\edit\\command\\', scite_path + '\\Hildim.exe "%1"');
 	try {WshShell.RegDelete('HKCU\\Software\\Microsoft\\Internet Explorer\\Default HTML Editor\\shell\\edit\\ddeexec\\');} catch(e) {}
-	WshShell.RegWrite('HKCU\\Software\\Microsoft\\Internet Explorer\\Default HTML Editor\\shell\\edit\\command\\', scite_path + '\\SciTE.exe "%1"');
+	WshShell.RegWrite('HKCU\\Software\\Microsoft\\Internet Explorer\\Default HTML Editor\\shell\\edit\\command\\', scite_path + '\\Hildim.exe "%1"');
 	WshShell.RegWrite('HKCU\\Software\\Microsoft\\Internet Explorer\\Default HTML Editor\\Description', 'SciTE - a Scintilla based Text Editor');
-	WshShell.RegWrite('HKCU\\Software\\Microsoft\\Shared\\HTML\\Default Editor\\shell\\edit\\command\\', scite_path + '\\SciTE.exe "%1"');
+	WshShell.RegWrite('HKCU\\Software\\Microsoft\\Shared\\HTML\\Default Editor\\shell\\edit\\command\\', scite_path + '\\Hildim.exe "%1"');
 	return true;
 }
 
 function UnSetHTML(){
-	try{WshShell.RegDelete('HKCR\\.htm\\OpenWithList\\SCITE.EXE\\');} catch(e) {return false;}
+	try{WshShell.RegDelete('HKCR\\.htm\\OpenWithList\\Hildim.exe\\');} catch(e) {return false;}
 	return true;
 }
 
@@ -484,7 +484,7 @@ function About() {
 // =============================================================
 // Инициализация формы
 function CheckSciTE(scite_path){
-	if (fso.FileExists(scite_path + "\\SciTE.exe")){
+	if (fso.FileExists(scite_path + "\\Hildim.exe")){
 		return true;
 	}else{
 		return false;

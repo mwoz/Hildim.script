@@ -70,7 +70,7 @@ _G.sys_Menus = {}
 local function scintilla()
     if editor.Focus then return editor end
     if output.Focus then return output end
-    return findrez
+    return findres
 end
 local function IsSelection()
     return scintilla().SelectionStart<scintilla().SelectionEnd
@@ -130,15 +130,15 @@ _G.sys_Menus.OUTPUT = {
     {'slast', separator=1},
 }
 
-_G.sys_Menus.FINDREZ = {
+_G.sys_Menus.FINDRES = {
     {link='Edit¦Conventional¦Cu&t'},
     {link='Edit¦Conventional¦&Copy'},
     {link='Edit¦Conventional¦&Paste'},
     {link='Edit¦Conventional¦&Delete'},
     {'s1', separator=2},
     {link='Tools¦Clear &Find Result'},
-    {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findrez.clickonlynumber'},
-    {'Group By Name', ru='Группировать по имени файла', check_boolean='findrez.groupbyfile'},
+    {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findres.clickonlynumber'},
+    {'Group By Name', ru='Группировать по имени файла', check_boolean='findres.groupbyfile'},
     {'Number Of Find Results...', ru='Результатов поиска не более....', action=SetFindresCount},
     {'slast', separator=1},
 
@@ -322,7 +322,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Next Message', ru = 'Следующее сообщение', key = 'F4', action = IDM_NEXTMSG},
         {'&Previous Message', ru = 'Предыдущее сообщение', key = 'Shift+F4', action = IDM_PREVMSG},
         {'Clear &Output', ru = 'Очистить окно консоли', key = 'Shift+F5', action = IDM_CLEAROUTPUT},
-        {'Clear &Find Result', ru = 'Очистить результаты поиска', action = "findrez:SetText('')"},
+        {'Clear &Find Result', ru = 'Очистить результаты поиска', action = "findres:SetText('')"},
         {'&Switch Pane', ru = 'Редактирование/Консоль', key = 'Ctrl+F6', action = IDM_SWITCHPANE},
     },},
     {'Options', ru='Настройки',{
@@ -330,7 +330,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'Open Files &Here', ru = 'Открывать одну копию программы', action = IDM_OPENFILESHERE},
         Vertical &Split',  action = IDM_SPLITVERTICAL},]]
         {'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
-        {'Wrap Find &Result', ru = 'Перенос по словам в результатах поиска', action = IDM_WRAPFINDRES, check = "props['findrez.wrap']=='1'"},
+        {'Wrap Find &Result', ru = 'Перенос по словам в результатах поиска', action = IDM_WRAPFINDRES, check = "props['findres.wrap']=='1'"},
         {'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
         {'s2', separator=1},
         {'Line End Characters', ru='Символы перевода строк',{radio = 1,
