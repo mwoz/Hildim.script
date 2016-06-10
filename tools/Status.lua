@@ -229,6 +229,14 @@ local function FindTab_Init()
             button_cb=onSpellContext;
         };
     }
+    local tBtns ={}
+    if _tmpSidebarButtons then
+        for i = 1,  #_tmpSidebarButtons do
+            table.insert(tBtns, _tmpSidebarButtons[i])
+        end
+        _tmpSidebarButtons = nil
+    end
+
     StatusBar_obj.Tabs.statusbar = {
         handle = iup.hbox{
             iup.label{title='Line: '; fontstyle='Bold'};   --sdfds esvdf
@@ -241,6 +249,8 @@ local function FindTab_Init()
             zbox_s;
             expand='HORIZONTAL', minsize='200x', alignment='ACENTER',gap='8',margin='3x0' ,
             lblCode,
+            iup.fill{},
+            iup.hbox(tBtns),
         };
         OnUpdateUI = _OnUpdateUI;
         OnDwellStart = ShowCurrentColour;

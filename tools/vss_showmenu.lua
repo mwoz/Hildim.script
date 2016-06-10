@@ -80,8 +80,10 @@ local function vss_diff()
 			if ierr~=0 then print(strerr) end
 			cmd=string.gsub(string.gsub(props['vsscompare'],'%%bname','"'..tmppath..'\\sstmp"'),'%%yname','"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
 			shell.exec(cmd)
+		elseif strerr == '' then
+            print('No differences')
 		else
-			print(strerr)
+			print(strerr, 22)
 		end
 	end
 end

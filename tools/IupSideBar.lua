@@ -158,9 +158,9 @@ local function  CreateBox()
         return iup.tabs(t)
     end
 
-    local function SidePane(hVbox,sName,sSciteId,sSplit,sExpander,sSplit_CloseVal, Bar_obj, sSide)
+    local function SidePane(hVbox,sName,sSciteId,sSplit,sExpander,sSplit_CloseVal, Bar_obj, sSide, buttonImage)
         local h = iup.scitedetachbox{
-            hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes";
+            hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes"; buttonImage=buttonImage;
             sciteid = sSciteId;Split_h = iup.GetDialogChild(hMainLayout, sSplit);Split_CloseVal = sSplit_CloseVal;
             Dlg_Title = sSide.." Side Bar"; Dlg_Show_Cb = nil;
             On_Detach = (function(h, hNew, x, y)
@@ -260,7 +260,7 @@ local function  CreateBox()
         SideBar_obj.TabCtrl = tabs
 
         vbox = iup.vbox{tabs}
-        SideBar_obj.handle = SidePane(vbox, 'SideBarSB','sidebar','SourceSplitRight', 'RightBarExpander', '1000', SideBar_obj, 'Right' )
+        SideBar_obj.handle = SidePane(vbox, 'SideBarSB','sidebar','SourceSplitRight', 'RightBarExpander', '1000', SideBar_obj, 'Right', 'application_sidebar_right_µ' )
     end
 
     pane_curObj = LeftBar_obj
@@ -270,7 +270,7 @@ local function  CreateBox()
         LeftBar_obj.TabCtrl = tabs
 
         vbox = iup.vbox{tabs}       --SideBar_Plugins.livesearch.handle,
-        LeftBar_obj.handle = SidePane(vbox, 'LeftBarSB','leftbar','SourceSplitLeft', 'LeftBarExpander', '0', LeftBar_obj, 'Left' )
+        LeftBar_obj.handle = SidePane(vbox, 'LeftBarSB','leftbar','SourceSplitLeft', 'LeftBarExpander', '0', LeftBar_obj, 'Left', 'application_sidebar_left_µ' )
     end
 
 end
@@ -378,7 +378,7 @@ local function InitSideBar()
     end
 
     ConsoleBar = iup.scitedetachbox{
-        HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach");
+        HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach"); buttonImage='terminal_µ';
         sciteid = 'concolebar';Split_h = bSplitter;Split_CloseVal = "0";
         Dlg_Title = "Console"; Dlg_Show_Cb = nil; MenuEx = "OUTPUT";
         Dlg_Close_Cb = (function(h)
@@ -404,7 +404,7 @@ local function InitSideBar()
     }
 
     FindResBar = iup.scitedetachbox{
-        HANDLE = iup.GetDialogChild(hMainLayout, "FindResDetach");
+        HANDLE = iup.GetDialogChild(hMainLayout, "FindResDetach"); buttonImage='binocular__pencil_µ';
         sciteid = 'findresbar';Split_h = bSplitter;Split_CloseVal = "1000";
         Dlg_Title = "Find Results"; Dlg_Show_Cb = nil; MenuEx = "FINDRES";
         Dlg_Close_Cb = (function(h)

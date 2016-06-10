@@ -219,7 +219,7 @@ function SetAssociations(){
 	}
 	WshShell.RegWrite(reg_backup+'associations', form.associations.value);
 	WshShell.RegWrite('HKCR\\SciTE.File\\', 'SciTE file');
-	WshShell.RegWrite('HKCR\\SciTE.File\\DefaultIcon\\', scite_path + '\\HildiM.exe,1');
+	WshShell.RegWrite('HKCR\\SciTE.File\\DefaultIcon\\', scite_path + '\\Hildim.exe,1');
 	WshShell.RegWrite('HKCR\\SciTE.File\\shell\\open\\command\\', '"' + scite_path + '\\HildiM.exe" "%1"');
 	return true;
 }

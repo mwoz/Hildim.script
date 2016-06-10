@@ -371,7 +371,7 @@ iup.scitedeatach = function(dtb)
 end
 
 iup.scitedetachbox = function(t)
-    local dtb
+    local dtb, statusBtn
     local bMoved = 0, sX, sY, bRecurs
 
     local function button_cb(h, button, pressed, x, y, status)
@@ -406,11 +406,11 @@ iup.scitedetachbox = function(t)
     btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
 
-        iup.flatbutton{title = t.Dlg_Title, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='10x', alignment='ALEFT',
+        iup.flatbutton{title = t.Dlg_Title, image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='10x', alignment='ALEFT',
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
         leavewindow_cb=function() end,},
         btn_attach,
-        iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dtb.HideDialog() end},
+        iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dtb.HideDialog(); if statusBtn then statusBtn.visible = 'YES' end end},
     }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
     if t[1] then
         local vb = t[1]
@@ -552,9 +552,11 @@ iup.scitedetachbox = function(t)
             dtb.Dialog = nil
         end
     end
+
     local function cmd_Attach()
         if get_scId()=="0" then return end
         dtb.Attach()
+        if statusBtn then statusBtn.visible = 'NO' end
     end
     local function cmd_PopUp()
         if get_scId()=="0" then
@@ -562,7 +564,7 @@ iup.scitedetachbox = function(t)
         elseif get_scId()=="2" then
             dtb.ShowDialog()
         end
-
+        if statusBtn then statusBtn.visible = 'NO' end
     end
     local function cmd_Hide()
         if get_scId()=="0" then
@@ -571,6 +573,7 @@ iup.scitedetachbox = function(t)
         elseif get_scId()=="1" then
             dtb.HideDialog()
         end
+        if statusBtn then statusBtn.visible = 'YES' end
     end
     local function cmd_Switch3()
         if get_scId()=="0" then
@@ -588,6 +591,12 @@ iup.scitedetachbox = function(t)
             cmd_PopUp()
         end
     end
+    if t.buttonImage then
+        if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
+        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_PopUp}
+        table.insert(_tmpSidebarButtons, statusBtn)
+    end
+
     local tSub = {radio = 1,
         {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return get_scId()=="0" end,
             active=FindReplButCondition},
