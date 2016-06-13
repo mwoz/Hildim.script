@@ -388,8 +388,7 @@ local function InitSideBar()
         Dlg_Show_Cb = (function(h, state)
             if state == 0 and (_G.iuprops['findresbar.win'] or '0')~='0' then
                 if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
-                    SideBar_Plugins.findrepl.handle_deattach:detachPos()
-                    SideBar_Plugins.findrepl.handle_deattach.HideDialog()
+                    SideBar_Plugins.findrepl.handle_deattach:detachPos(false)
                 end
                  _G.iuprops['dialogs.concolebar.splitvalue'] =  _G.iuprops['dialogs.findresbar.splitvalue']
                 toggleOf()
@@ -414,8 +413,7 @@ local function InitSideBar()
         Dlg_Show_Cb = (function(h, state)
             if state == 0 and (_G.iuprops['concolebar.win'] or '0')~='0' then
                 if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
-                    SideBar_Plugins.findrepl.handle_deattach:detachPos()
-                    SideBar_Plugins.findrepl.handle_deattach.HideDialog()
+                    SideBar_Plugins.findrepl.handle_deattach:detachPos(false)
                 end
                 _G.iuprops['dialogs.findresbar.splitvalue'] =  _G.iuprops['dialogs.concolebar.splitvalue']
                 toggleOf()
@@ -637,11 +635,11 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             end
             if navigation_Unblock then navigation_Unblock() end
             local bHide
-            if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.DetachRestore = true; iup.scitedeatach(SideBar_obj.handle) if bHide then SideBar_obj.handle.HideDialog() end end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
-            if ((_G.iuprops['leftbar.win'] or '0')~='0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win']=='2');    LeftBar_obj.handle.DetachRestore = true; iup.scitedeatach(LeftBar_obj.handle) if bHide then LefrBar_obj.handle.HideDialog() end end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
-            if (_G.iuprops['concolebar.win'] or '0')~='0'                       then bHide = (_G.iuprops['concolebar.win']=='2'); ConsoleBar.DetachRestore = true;iup.scitedeatach(ConsoleBar) if bHide then ConsoleBar.HideDialog() end end
-            if (_G.iuprops['findresbar.win'] or '0')~='0'                       then bHide = (_G.iuprops['findresbar.win']=='2'); FindResBar.DetachRestore = true;iup.scitedeatach(FindResBar) if bHide then FindResBar.HideDialog() end end
-            if (_G.iuprops['findrepl.win'] or '0')~='0'                         then bHide = (_G.iuprops['findrepl.win']=='2');   local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos() if bHide then h.HideDialog() end end
+            if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.detachPos(not bHide) end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
+            if ((_G.iuprops['leftbar.win'] or '0')~='0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win']=='2');    LeftBar_obj.handle.detachPos(not bHide) end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
+            if (_G.iuprops['concolebar.win'] or '0')~='0'                       then bHide = (_G.iuprops['concolebar.win']=='2'); ConsoleBar.detachPos(not bHide) end
+            if (_G.iuprops['findresbar.win'] or '0')~='0'                       then bHide = (_G.iuprops['findresbar.win']=='2'); FindResBar.detachPos(not bHide)end
+            if (_G.iuprops['findrepl.win'] or '0')~='0'                         then bHide = (_G.iuprops['findrepl.win']=='2');   local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos(not bHide) end
 
             if _G.dialogs['findresbar'] and _G.dialogs['concolebar'] then
                 iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
@@ -671,7 +669,7 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         if (_G.dialogs and _G.iuprops['findresbar.win'] or '0')=='2' then
             local h = iup.GetFocus()
             _G.dialogs['findresbar']:ShowDialog();
-            if h.name == 'livesearch_bar' then iup.SetFocus(h); end
+            if h and h.name == 'livesearch_bar' then iup.SetFocus(h); end
             return
         end
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
@@ -693,11 +691,11 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         bFindResBar=  (_G.iuprops['findresbar.win'] or '0')=='0'
         bFindRepl  =  (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj
 
-        if bSideBar    then SideBar_obj.handle.detachPos(); SideBar_obj.handle.HideDialog() end
-        if bLeftBar    then LefrBar_obj.handle.detachPos(); LefrBar_obj.handle.HideDialog() end
-        if bFindRepl   then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos(); iup.GetDialogChild(hMainLayout, "FindReplDetach").HideDialog() end
-        if bconsoleBar then ConsoleBar.detachPos(); ConsoleBar.HideDialog() end
-        if bFindResBar then FindResBar.detachPos(); FindResBar.HideDialog() end
+        if bSideBar    then SideBar_obj.handle.detachPos(false); end
+        if bLeftBar    then LefrBar_obj.handle.detachPos(false); end
+        if bFindRepl   then iup.GetDialogChild(hMainLayout, "FindReplDetach").detachPos(false); end
+        if bconsoleBar then ConsoleBar.detachPos(false); end
+        if bFindResBar then FindResBar.detachPos(false); end
 
     elseif cmd == "FULLSCREEN_OFF" then
         if bMenu then       iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch()            end

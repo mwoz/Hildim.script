@@ -5,8 +5,8 @@ POST_CONTINUESTARTUP = 3
 POST_SCRIPTRELOAD_OLD = 4
 POST_CONTINUESHOWMENU = 6
 
-local old_iup_ShowXY = iup.ShowXY
 
+local old_iup_ShowXY = iup.ShowXY
 
 _G.iuprops = {}
 local iuprops_read_ok = false
@@ -364,14 +364,12 @@ iup.list = function(t)
 end
 
 iup.scitedeatach = function(dtb)
-    local oldPos = iup.GetGlobal('CURSORPOS')
-    iup.SetGlobal('CURSORPOS', (_G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100')..'x'..(_G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100'));
-    dtb.detach = 1
-    iup.SetGlobal('CURSORPOS', oldPos)
+    dtb.detachhidden = 1
+    iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
 end
 
 iup.scitedetachbox = function(t)
-    local dtb, statusBtn
+    local dtb, statusBtn, cmd_Hide, cmd_Attach
     local bMoved = 0, sX, sY, bRecurs
 
     local function button_cb(h, button, pressed, x, y, status)
@@ -401,7 +399,7 @@ iup.scitedetachbox = function(t)
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() dtb.Attach() end}
+    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() cmd_Attach() end}
 
     btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
@@ -410,7 +408,7 @@ iup.scitedetachbox = function(t)
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
         leavewindow_cb=function() end,},
         btn_attach,
-        iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dtb.HideDialog(); if statusBtn then statusBtn.visible = 'YES' end end},
+        iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() cmd_Hide() end},
     }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
     if t[1] then
         local vb = t[1]
@@ -431,7 +429,7 @@ iup.scitedetachbox = function(t)
 
         iup.Map(hBT)
     end
-    dtb = t.HANDLE or iup.detachbox(t)
+    dtb = t.HANDLE or iup.sc_detachbox(t)
     dtb.sciteid = t.sciteid
     dtb.Dlg_Close_Cb = t.Dlg_Close_Cb
     dtb.Dlg_Show_Cb = t.Dlg_Show_Cb
@@ -442,9 +440,24 @@ iup.scitedetachbox = function(t)
     dtb.On_Detach = t.On_Detach
     dtb.barsize = 0
 
-    dtb.detachPos = (function()
+    dtb.detachPos = (function(bShow)
         dtb.DetachRestore = true
-        iup.scitedeatach(dtb)
+        dtb.detachhidden = 1
+        if bShow then
+            iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
+        else
+            _G.iuprops[dtb.sciteid..'.win']='2'
+            hbTitle.state = 'OPEN'
+            dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
+
+            if t.Split_h then
+                if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value; _G.iuprops['sidebarctrl.'..dtb.Split_h.name..'.value'] = dtb.Split_h.value; end
+                dtb.Split_h.value = dtb.Split_CloseVal
+                dtb.Split_h.barsize = "0"
+            end
+            _G.dialogs[dtb.sciteid] = dtb
+            if statusBtn then statusBtn.visible = 'YES' end
+        end
     end)
 
     dtb.detached_cb=(function(h, hNew, x, y)
@@ -501,7 +514,7 @@ iup.scitedetachbox = function(t)
             hNew.resize_cb = h.Dlg_Resize_Cb
         end
         if tonumber(_G.iuprops['dialogs.'..h.sciteid..'.x'])== nil or tonumber(_G.iuprops['dialogs.'..h.sciteid..'.y']) == nil then _G.iuprops['dialogs.'..h.sciteid..'.x']=0;_G.iuprops['dialogs.'..h.sciteid..'.y']=0 end
-        hNew.button_cb = function(h, button, pressed, x, y, status) print(h, button, pressed, x, y, status) end
+        hNew.button_cb = function(h, button, pressed, x, y, status) end
         hNew.move_cb = function(h, x, y)
             _G.iuprops['dialogs.'..dtb.sciteid..'.y']= y
             _G.iuprops['dialogs.'..dtb.sciteid..'.x']= x
@@ -520,7 +533,7 @@ iup.scitedetachbox = function(t)
     dtb.ShowDialog = function()
         if dtb.Dialog and (_G.iuprops[dtb.sciteid..'.win'] or '0') == '2' then
             _G.iuprops[dtb.sciteid..'.win'] = '1'
-            dtb.Dialog:show()
+            iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
         end
     end
     local function FindReplButCondition()
@@ -534,9 +547,6 @@ iup.scitedetachbox = function(t)
     dtb.Attach = function()
         if t.Dlg_BeforeAttach then t.Dlg_BeforeAttach() end
         if _G.dialogs[dtb.sciteid] ~= nil then
-            _G.iuprops['dialogs.'..dtb.sciteid..'.x']= dtb.Dialog.x
-            _G.iuprops['dialogs.'..dtb.sciteid..'.y']= dtb.Dialog.y
-            _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = dtb.Dialog.rastersize
             if dtb.Dlg_Close_Cb then dtb.Dlg_Close_Cb(h) end
 
             _G.iuprops[dtb.sciteid..'.win']='0'
@@ -553,23 +563,24 @@ iup.scitedetachbox = function(t)
         end
     end
 
-    local function cmd_Attach()
+    cmd_Attach = function ()
         if get_scId()=="0" then return end
         dtb.Attach()
         if statusBtn then statusBtn.visible = 'NO' end
     end
     local function cmd_PopUp()
         if get_scId()=="0" then
-            dtb.detachPos()
+            dtb.detachPos(true)
         elseif get_scId()=="2" then
             dtb.ShowDialog()
         end
         if statusBtn then statusBtn.visible = 'NO' end
     end
-    local function cmd_Hide()
+    cmd_Hide = function ()
+        if get_scId()=="2" then return end
+        if statusBtn then _G.iuprops[t.sciteid..'.visible.state'] = get_scId() end
         if get_scId()=="0" then
-            dtb.detachPos()
-            dtb.HideDialog()
+            dtb.detachPos(false)
         elseif get_scId()=="1" then
             dtb.HideDialog()
         end
@@ -593,7 +604,13 @@ iup.scitedetachbox = function(t)
     end
     if t.buttonImage then
         if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
-        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_PopUp}
+        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=function()
+            if (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "1" then
+                cmd_PopUp()
+            else
+                cmd_Attach()
+            end
+        end}
         table.insert(_tmpSidebarButtons, statusBtn)
     end
 
