@@ -404,7 +404,7 @@ iup.scitedetachbox = function(t)
     btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
 
-        iup.flatbutton{title = t.Dlg_Title, image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='10x', alignment='ALEFT',
+        iup.flatbutton{title = ' '..t.Dlg_Title, image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
         leavewindow_cb=function() end,},
         btn_attach,
@@ -443,19 +443,20 @@ iup.scitedetachbox = function(t)
     dtb.detachPos = (function(bShow)
         dtb.DetachRestore = true
         dtb.detachhidden = 1
+        _G.iuprops[dtb.sciteid..'.win']= Iif(bShow,'1', '2')
+        hbTitle.state = 'OPEN'
+        dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
+
+        if t.Split_h then
+            if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value; _G.iuprops['sidebarctrl.'..dtb.Split_h.name..'.value'] = dtb.Split_h.value; end
+            dtb.Split_h.value = dtb.Split_CloseVal
+            dtb.Split_h.barsize = "0"
+        end
+        _G.dialogs[dtb.sciteid] = dtb
+        dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
         if bShow then
             iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
         else
-            _G.iuprops[dtb.sciteid..'.win']='2'
-            hbTitle.state = 'OPEN'
-            dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
-
-            if t.Split_h then
-                if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value; _G.iuprops['sidebarctrl.'..dtb.Split_h.name..'.value'] = dtb.Split_h.value; end
-                dtb.Split_h.value = dtb.Split_CloseVal
-                dtb.Split_h.barsize = "0"
-            end
-            _G.dialogs[dtb.sciteid] = dtb
             if statusBtn then statusBtn.visible = 'YES' end
         end
     end)
@@ -486,27 +487,6 @@ iup.scitedetachbox = function(t)
         end)
         hNew.show_cb=(function(h,state)
             if bMoved == 1 then return end
-            if state == 0 then
-                _G.iuprops[dtb.sciteid..'.win']='1'
-                hbTitle.state = 'OPEN'
-                if dtb.DetachRestore then
-                    dtb.DetachRestore = false
-                    firstShow = false
-                    h.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
-                    iup.ShowXY(h, _G.iuprops['dialogs.'..dtb.sciteid..'.x'],_G.iuprops['dialogs.'..dtb.sciteid..'.y'])
-                    return
-                elseif firstShow then
-                    firstShow = false
-                    h.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
-                    iup.ShowXY(h, h.x,h.y)
-                end
-                if t.Split_h then
-                    if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value; _G.iuprops['sidebarctrl.'..dtb.Split_h.name..'.value'] = dtb.Split_h.value; end
-                    dtb.Split_h.value = dtb.Split_CloseVal
-                    dtb.Split_h.barsize = "0"
-                end
-                _G.dialogs[dtb.sciteid] = dtb
-            end
             if state == 0 then dtb.visible='YES' end
             if dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(h, state) end
         end)
@@ -568,6 +548,7 @@ iup.scitedetachbox = function(t)
         dtb.Attach()
         if statusBtn then statusBtn.visible = 'NO' end
     end
+
     local function cmd_PopUp()
         if get_scId()=="0" then
             dtb.detachPos(true)
@@ -576,6 +557,7 @@ iup.scitedetachbox = function(t)
         end
         if statusBtn then statusBtn.visible = 'NO' end
     end
+
     cmd_Hide = function ()
         if get_scId()=="2" then return end
         if statusBtn then _G.iuprops[t.sciteid..'.visible.state'] = get_scId() end
@@ -586,31 +568,22 @@ iup.scitedetachbox = function(t)
         end
         if statusBtn then statusBtn.visible = 'YES' end
     end
-    local function cmd_Switch3()
-        if get_scId()=="0" then
-            cmd_PopUp()
-        elseif get_scId()=="1" then
+
+    local function cmd_Switch()
+        if (_G.iuprops[t.sciteid..'.win'] or "0") ~= "2" then
             cmd_Hide()
-        else
+        elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "1" then
+            cmd_PopUp()
+        elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "0" then
             cmd_Attach()
         end
     end
-    local function cmd_Switch2()
-        if get_scId()=="1" then
-            cmd_Hide()
-        else
-            cmd_PopUp()
-        end
-    end
+
+    dtb.Switch = cmd_Switch
+
     if t.buttonImage then
         if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
-        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=function()
-            if (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "1" then
-                cmd_PopUp()
-            else
-                cmd_Attach()
-            end
-        end}
+        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_Switch,}
         table.insert(_tmpSidebarButtons, statusBtn)
     end
 
@@ -619,8 +592,7 @@ iup.scitedetachbox = function(t)
             active=FindReplButCondition},
         {'Pop Up', ru='Всплывающее окно', action=cmd_PopUp, check = function() return get_scId()=="1" end, },
         {'Hidden', ru='Скрыто', action=cmd_Hide, check = function() return get_scId()=="2" end },
-        {'Switch3', ru='Переключить (горячей клавишей) - Закреплено/Всплывающее окно/Скрыто', action=cmd_Switch3, visible = false },
-        {'Switch2', ru='Переключить (горячей клавишей) - Всплывающее окно/Скрыто', action=cmd_Switch2, visible = false },
+        {'Show/Hide', ru='Скрыть/Показать (Горячая клавиша)', action=cmd_Switch, visible = false },
     }
 
     menuhandler:InsertItem('MainWindowMenu', 'View¦slast',  {dtb.sciteid, ru = t.Dlg_Title, tSub})

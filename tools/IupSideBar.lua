@@ -668,14 +668,14 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         if (_G.iuprops['findresbar.win'] or '0')=='1' then return end
         if (_G.dialogs and _G.iuprops['findresbar.win'] or '0')=='2' then
             local h = iup.GetFocus()
-            _G.dialogs['findresbar']:ShowDialog();
+            _G.dialogs['findresbar'].Switch();
             if h and h.name == 'livesearch_bar' then iup.SetFocus(h); end
             return
         end
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
     elseif cmd == "SHOW_OUTPUT" then
         if (_G.iuprops['concolebar.win'] or '0')=='1' then return end
-        if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='2' and _G.dialogs['concolebar'] then _G.dialogs['concolebar']:ShowDialog(); return end
+        if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='2' and _G.dialogs['concolebar'] then _G.dialogs['concolebar'].Switch(); return end
         if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
     elseif cmd == "FULLSCREEN_ON" then
         bMenu      = iup.GetDialogChild(iup.GetLayout(), "MenuBar").isOpen()
@@ -713,9 +713,9 @@ end)
 AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
     if key ==  27 and not shift and not ctrl and not alt then
         if output.Focus then
-            if (_G.iuprops['concolebar.win'] or '0') == '1' then ConsoleBar.HideDialog() end
+            if (_G.iuprops['concolebar.win'] or '0') == '1' then ConsoleBar.Switch() end
         elseif findres.Focus then
-            if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.HideDialog() end
+            if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.Switch() end
         end
     end
 end)
