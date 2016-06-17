@@ -108,8 +108,6 @@ local function Init(ToolBar_obj)
         OnSwitchFile = OnSwitch;
         OnOpen = OnSwitch;
         OnKey = _OnKey;
-		tabs_OnSelect = OnSwitch;
-        on_SelectMe = function() cmb_listCalc:set_focus() end
         }
 
     menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями

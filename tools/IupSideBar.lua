@@ -722,8 +722,11 @@ end)
 
 menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx',
 {'Sidebar', {
-    {'S1', key = 'Ctrl+1',  action=function() sidebar_Switch(1) end, },
-    {'S2', key = 'Ctrl+2',  action=function() sidebar_Switch(2) end, },
-    {'S3', key = 'Ctrl+3',  action=function() sidebar_Switch(3) end, },
-    {'S4', key = 'Ctrl+4',  action=function() sidebar_Switch(4) end, },
+    {'Tab1', key = 'Ctrl+Alt+1',  action=function() sidebar_Switch(1) end, },
+    {'Tab2', key = 'Ctrl+Alt+2',  action=function() sidebar_Switch(2) end, },
+    {'Tab3', key = 'Ctrl+Alt+3',  action=function() sidebar_Switch(3) end, },
+    {'Tab4', key = 'Ctrl+Alt+4',  action=function() sidebar_Switch(4) end, },
+    {'Tab5', key = 'Ctrl+Alt+5',  action=function() sidebar_Switch(5) end, },
+    {'Tab6', key = 'Ctrl+Alt+6',  action=function() sidebar_Switch(6) end, },
+    {'Tab7', key = 'Ctrl+Alt+7',  action=function() sidebar_Switch(7) end, },
 }})

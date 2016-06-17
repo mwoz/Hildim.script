@@ -940,8 +940,8 @@ local function Finc_Init()
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
 		OnNavigation = OnNavigate;
-        tabs_OnSelect = OnSwitch;
-        on_SelectMe = function() iup.SetFocus(tree_func); iup.Flush();end
+        --tabs_OnSelect = OnSwitch;
+        on_SelectMe = function() OnSwitch(); iup.SetFocus(tree_func); iup.Flush();end
         }
 
 end

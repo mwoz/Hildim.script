@@ -87,6 +87,11 @@ local function ResetReadOnly()
     scite.MenuCommand(IDM_REVERT)
 end
 
+local bCanPaste = true
+AddEventHandler("OnDrawClipboard", function(flag)
+    bCanPaste = (flag > 0)
+end)
+
 _G.sys_Menus.TABBAR = {
     {link='File¦&Close'},
     {link='File¦C&lose All'},
@@ -213,7 +218,7 @@ _G.sys_Menus.MainWindowMenu = {
             {'s1',  separator=1},
             {'Cu&t', ru = 'Вырезать', key = 'Ctrl+X',key_external = 1, action = IDM_CUT, active=IsSelection, image = 'scissors_µ'},
             {'&Copy', ru = 'Копировать', key = 'Ctrl+C',key_external = 1, action = IDM_COPY, active=IsSelection, image = 'document_copy_µ'},
-            {'&Paste', ru = 'Вставить', key = 'Ctrl+V',key_external = 1, action = IDM_PASTE, image = 'clipboard_paste_µ'},
+            {'&Paste', ru = 'Вставить', key = 'Ctrl+V',key_external = 1, action = IDM_PASTE, image = 'clipboard_paste_µ', active=function() return bCanPaste end,},
             {'Duplicat&e', ru = 'Дублировать', key = 'Ctrl+D',key_external = 1, action = IDM_DUPLICATE, image = 'yin_yang_µ'},
             {'&Delete', ru = 'Удалить', key = 'Del',key_external = 1, action = IDM_CLEAR, image = 'cross_script_µ'},
             {'Select &All', ru = 'Выбрать все', key = 'Ctrl+A',key_external = 1, action = IDM_SELECTALL},
