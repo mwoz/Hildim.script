@@ -126,7 +126,6 @@ local function Sidebar_Init()
     AddEventHandler("OnDrawClipboard", function(flag)
         lst_clip.marked = nil
         if flag > 0 and not blockResetCB then
-        print(flag)
             local text = clipboard.text
             if not text then return end
             lst_clip.addlin = 0
