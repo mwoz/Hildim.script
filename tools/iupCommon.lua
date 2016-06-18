@@ -153,7 +153,7 @@ function core_CloseFilesSet(cmd)
         end
     end)
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
-    if nf and cmd == IDM_QUIT then
+    if nf and cmd == IDM_QUIT and not _G.iuprops['buffers'] then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
         _G.iuprops['buffers'] = spathes;
         _G.iuprops['buffers.pos'] = sposes
         _G.iuprops['buffers.layouts'] = slayout
@@ -730,6 +730,9 @@ iup.DestroyDialogs = function()
         _G.dialogs['findresbar'] = nil
     end
 
+    local h = iup.GetDialogChild(hMainLayout, "MenuBar")
+    if h then iup.Detach(h); iup.Destroy(h) end
+
     if SideBar_obj.handle then
         iup.Detach(SideBar_obj.handle)
         iup.Destroy(SideBar_obj.handle)
@@ -758,9 +761,6 @@ iup.DestroyDialogs = function()
 
     local h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
     _G.iuprops["layout.statusbar_expander"] = h.state
-    if h then iup.Detach(h); iup.Destroy(h) end
-
-    local h = iup.GetDialogChild(hMainLayout, "MenuBar")
     if h then iup.Detach(h); iup.Destroy(h) end
 
     _G.dialogs = nil

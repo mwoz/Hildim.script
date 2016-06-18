@@ -65,7 +65,7 @@ local function Sidebar_Init()
                     lst_clip.dellin = lin
                     if lin == 1 then clipboard.text = lst_clip:getcell(1, 2) end
                 end)},
-                iup.item{title="Paste Top",action=(function()
+                iup.item{title="Paste All Tops as Restangle",action=(function()
                     local text = ''
                     for i = 1,  lin do
                         text = text..lst_clip:getcell(i, 2)

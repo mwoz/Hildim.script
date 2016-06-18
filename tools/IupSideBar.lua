@@ -135,7 +135,8 @@ local function  CreateBox()
 
     local function SideBar(t, Bar_Obj, sciteid)
         if not t then return end
-        t.tip= 'Ctrl+1,2,3,4'
+        t.tip= 'Ctrl+Alt+1,2,3,4...'
+        t.name = 'sidebartab_'..sciteid
         Bar_Obj.sciteid = sciteid
         local brObj = Bar_Obj
         t.map_cb = (function(h)
@@ -612,7 +613,6 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                         table.insert(l, f)
                     end
                 end
-                _G.iuprops['buffers'] = nil
                 for i = #t,1,-1 do
                     scite.Open(t[i])
                     if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
@@ -650,10 +650,10 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             menuhandler:RegistryHotKeys()
 
             local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
-            --if frScroll then frScroll.size = iup.GetDialogChild(iup.GetLayout(), "vboxFindRepl").size:gsub('^%d+', '') end
 
             scite.EnsureVisible()
             if dlg_SPLASH then dlg_SPLASH:postdestroy() end
+            _G.iuprops['buffers'] = nil
         elseif wp == POST_CONTINUESHOWMENU then
             menuhandler:ContinuePopUp()
         end
