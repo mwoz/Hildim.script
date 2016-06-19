@@ -153,7 +153,7 @@ local function init()
             if bReset then
                 blockResetCB = true
                 clipboard.text = lst_clip:getcell(1, 2)
-                blockResetCB = false
+                if onDraw_cb then onDraw_cb(lst_clip:getcell(1, 1)) end
             end
         end
     end
@@ -181,7 +181,8 @@ local function init()
             iup.SetAttributeId2(lst_clip, 'MARK',1,0, 1)
             lst_clip.redraw = 'ALL'
         end
-        if onDraw_cb then onDraw_cb(caption) end
+        if onDraw_cb and not blockResetCB then onDraw_cb(caption) end
+        blockResetCB = false
     end)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx',

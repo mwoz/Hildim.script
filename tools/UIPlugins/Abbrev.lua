@@ -726,7 +726,7 @@ local function Abbreviations_InsertExpansion()
     iup.PassFocus()
 end
 
-local function Abbreviations_Init()
+local function Init()
     --Ñîáûòèÿ ñïèñêà ôóíêöèé
     list_abbrev = iup.matrix{
     numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
@@ -794,11 +794,46 @@ local function Abbreviations_Init()
 
 	list_abbrev.keypress_cb = (function(_, key, press)
         if press == 0 then return end
-        if key == 13 then  --enter
+        if key == iup.K_CR then  --enter
             Abbreviations_InsertExpansion()
+        elseif k == iup.K_ESC then
+            iup.PassFocus()
         end
 	end)
+end
 
+local function ToolBar_Init(h)
+    Init()
+    local dlg = iup.scitedialog{iup.scrollbox{list_abbrev},sciteparent="SCITE", sciteid="abbrev_popup",dropdown=true,
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+    list_abbrev.killfocus_cb = function()
+        dlg:hide()
+    end
+
+    local box = iup.hbox{
+            iup.flatbutton{title = 'Ñïèñîê ñîêðàùåíèé', flat_action=(function(h)
+                local _, _,left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                dlg:showxy(left,top)
+            end), padding='5x2',},
+            iup.label{separator = "VERTICAL",maxsize='x22', },
+            expand='HORIZONTAL', alignment='ACENTER' , margin = '3x',
+    };
+    h.Tabs.abbreviations = {
+        handle = box;
+        OnSwitchFile = Abbreviations_ListFILL;
+        OnSave = Abbreviations_ListFILL;
+        OnOpen = Abbreviations_ListFILL;
+        OnMenuCommand = (function(msg)
+            if msg == IDM_ABBREV then TryInsAbbrev(false) return true;
+            elseif msg == IDM_INS_ABBREV then TryInsAbbrev(true) return true;
+            end
+        end);
+        on_SelectMe = (function()  Abbreviations_ListFILL();end)
+        }
+end
+
+local function Tab_Init()
+    Init()
     SideBar_Plugins.abbreviations = {
         handle = list_abbrev;
         OnSwitchFile = Abbreviations_ListFILL;
@@ -816,5 +851,7 @@ end
 return {
     title = 'Abbreviations',
     code = 'abbreviations',
-    sidebar = Abbreviations_Init,
+    sidebar = Iif( ('¦'..(_G.iuprops["settings.toolbars.layout"] or '')..'¦'):find('¦Abbrev.lua¦'), nil, Tab_Init),
+    toolbar = Iif( ('¦'..(_G.iuprops["settings.user.rightbar"] or '')..'¦'..(_G.iuprops["settings.user.leftbar"] or '')..'¦'):find('¦Abbrev.lua¦'),  nil, ToolBar_Init)
+
 }

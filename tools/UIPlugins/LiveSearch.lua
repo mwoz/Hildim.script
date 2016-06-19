@@ -95,10 +95,10 @@ local function Init(ToolBar_obj)
             iup.PassFocus()
         end
     end)
-    btn_search = iup.button{image = 'IMAGE_search',active='NO', action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
+    btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
     ToolBar_obj.Tabs.livesearch = {
         handle = iup.hbox{
-                iup.button{image = 'IMAGE_AlignObjectsLeft', action=(function() iup.PassFocus();do_Align() end), tip='Диалог выравнивания кода(Alt+A)'};
+                -- iup.button{image = 'IMAGE_AlignObjectsLeft', action=(function() iup.PassFocus();do_Align() end), tip='Диалог выравнивания кода(Alt+A)'};
                 btn_search,
                 txt_search,
                 expand='HORIZONTAL', minsize='200x'

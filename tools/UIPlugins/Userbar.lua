@@ -25,21 +25,23 @@ local function Init(h)
             table.insert(tBar, iup.label{separator = "VERTICAL",maxsize='x22'})
         else
             local tItem, tCond = menuhandler:GetMenuItem(p)
-            local tBtn = {}
-            if tItem.image then
-                tBtn.image = tItem.image
-                tBtn.tip = menuhandler:get_title(tItem, false):gsub('\t', '  ')
-                tBtn.padding = '4x4'
-            else
-                local strTitle = menuhandler:get_title(tItem, false)
-                tBtn.title = strTitle:gsub('\t.*$', '')
-                tBtn.tip = strTitle:gsub('^.*\t','')
-            end
-            local hBtn = iup.flatbutton(tBtn)
-            hBtn.flat_action = menuhandler:GetAction(tItem)
-            table.insert(tBar, hBtn)
+            if tItem then
+                local tBtn = {}
+                if tItem.image then
+                    tBtn.image = tItem.image
+                    tBtn.tip = menuhandler:get_title(tItem, false):gsub('\t', '  ')
+                    tBtn.padding = '4x4'
+                else
+                    local strTitle = menuhandler:get_title(tItem, false)
+                    tBtn.title = strTitle:gsub('\t.*$', '')
+                    tBtn.tip = strTitle:gsub('^.*\t','')
+                end
+                local hBtn = iup.flatbutton(tBtn)
+                hBtn.flat_action = menuhandler:GetAction(tItem)
+                table.insert(tBar, hBtn)
 
-            if #tCond > 0 then tAllConditions[hBtn] = tCond end
+                if #tCond > 0 then tAllConditions[hBtn] = tCond end
+            end
         end
     end
 

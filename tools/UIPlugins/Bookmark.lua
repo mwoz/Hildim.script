@@ -146,8 +146,7 @@ local function OnSwitch()
     end
 end
 
-local function AbbreviationsTab_Init()
-
+local function Init()
     list_bookmarks = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
@@ -176,11 +175,40 @@ local function AbbreviationsTab_Init()
 
 	list_bookmarks.keypress_cb = (function(_, key, press)
         if press == 0 then return end
-        if key == 13 then  --enter
+        if key == iup.K_CR then  --enter
             Bookmarks_GotoLine()
+        elseif k == iup.K_ESC then
+            iup.PassFocus()
         end
 	end)
+end
 
+local function ToolBar_Init(h)
+    Init()
+    local dlg = iup.scitedialog{iup.scrollbox{list_bookmarks},sciteparent="SCITE", sciteid="bookmarks_popup",dropdown=true,
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+    list_bookmarks.killfocus_cb = function()
+        dlg:hide()
+    end
+
+    local box = iup.hbox{
+            iup.flatbutton{title = '«‡ÍÎ‡‰ÍË', flat_action=(function(h)
+                local _, _,left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                dlg:showxy(left,top)
+            end), padding='5x2',},
+            iup.label{separator = "VERTICAL",maxsize='x22', },
+            expand='HORIZONTAL', alignment='ACENTER' , margin = '3x',
+    };
+    h.Tabs.bookmark = {
+        handle = box;
+        OnSendEditor = _OnSendEditor;
+        OnClose = _OnClose;
+        On_SelectMe = function() Bookmarks_ListFILL() end
+        }
+end
+
+local function Tab_Init()
+    Init()
     SideBar_Plugins.bookmark = {
         handle = list_bookmarks;
         OnSendEditor = _OnSendEditor;
@@ -193,5 +221,8 @@ end
 return {
     title = 'Bookmarks',
     code = 'bookmark',
-    sidebar = AbbreviationsTab_Init,
+    sidebar = Tab_Init,
+    sidebar = Iif( ('¶'..(_G.iuprops["settings.toolbars.layout"] or '')..'¶'):find('¶Bookmark.lua¶'), nil, Tab_Init),
+    toolbar = Iif( ('¶'..(_G.iuprops["settings.user.rightbar"] or '')..'¶'..(_G.iuprops["settings.user.leftbar"] or '')..'¶'):find('¶Bookmark.lua¶'),  nil, ToolBar_Init)
+
 }

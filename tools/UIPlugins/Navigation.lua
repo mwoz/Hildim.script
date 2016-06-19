@@ -2,6 +2,7 @@ local currentItem = 0
 local list_navigation
 local navigation_blockUpdate = true
 local m_lastLin = -2
+local on_nav_cb
 
 function navigation_Unblock()
     navigation_blockUpdate = false
@@ -49,6 +50,7 @@ local function OnNavigate(item)
 	iup.SetAttributeId2(list_navigation, "MARK",1,0, "1")
     list_navigation.redraw = "L1-100"
 	currentItem = 1
+    if on_nav_cb then on_nav_cb() end
 end
 
 local function Navigation_Go(item)
@@ -67,6 +69,7 @@ local function Navigation_Go(item)
 	iup.SetAttributeId2(list_navigation, "MARK",item,0, "1")
     list_navigation.redraw = "L1-100"
 	currentItem = item
+    if on_nav_cb then on_nav_cb() end
 end
 
 local function walk_Navigation(bBack)
@@ -82,12 +85,9 @@ local function walk_Navigation(bBack)
 end
 --++++++++++++++++++++++
 
-local function FuncBmkTab_Init()
-    --Ñîáûòèÿ ñïèñêà ôóíêöèé
-
-
+local function internal_Init()
 	local list_func_height = tonumber(props['sidebar.list_navigation.height']) or 200
-	--if list_func_height <= 0 then list_func_height = 200 end
+
 
     list_navigation = iup.matrix{
     numcol=5, numcol_visible=4,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
@@ -95,7 +95,7 @@ local function FuncBmkTab_Init()
     width0 = 0 ,rasterwidth1 = 250 ,rasterwidth2 = 70 ,rasterwidth3 = 50 ,rasterwidth4 = 40 ,rasterwidth5 = 0,
     }
 
-	list_navigation:setcell(0, 1, "Text")         -- ,size="400x400"
+	list_navigation:setcell(0, 1, "Text")
 	list_navigation:setcell(0, 2, "File")
 	list_navigation:setcell(0, 3, "Item")
 	list_navigation:setcell(0, 4, "Line")
@@ -114,17 +114,14 @@ local function FuncBmkTab_Init()
             end
         end
     end)
+    function list_navigation:k_any(k)
+        if k == iup.K_ESC then
+            iup.PassFocus()
+        end
+    end
 	list_navigation.map_cb = (function(h)
         h.size="1x1"
     end)
-    SideBar_Plugins.navigation = {
-        handle = list_navigation;
-        id = myId;
-        tab = tab1;
-        OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
-		OnNavigation = OnNavigate;
-        }
-
     menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
         {'Navigation', ru='Íàâèãàöèÿ', plane = 1,{
             {'s_Navigation', separator=1,},
@@ -134,8 +131,57 @@ local function FuncBmkTab_Init()
     )
 end
 
+local function Tab_Init()
+    internal_Init()
+    SideBar_Plugins.navigation = {
+        handle = list_navigation;
+        OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
+		OnNavigation = OnNavigate;
+        }
+end
+
+local function ToolBar_Init(h)
+    internal_Init()
+
+    local dlg = iup.scitedialog{iup.scrollbox{list_navigation},sciteparent="SCITE", sciteid="navigation_popup",dropdown=true,
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+    list_navigation.killfocus_cb = function()
+        dlg:hide()
+    end
+
+    local btnForward = iup.flatbutton{image = 'navigation_180_µ', padding = '4x4', active = 'NO',
+        flat_action=function()
+            walk_Navigation(true)
+        end}
+    local btnBackward = iup.flatbutton{image = 'navigation_µ', padding = '4x4', active = 'NO',
+        flat_action=(function() walk_Navigation(false) end)}
+
+    on_nav_cb = function()
+        btnForward.active = Iif(currentItem ~= 0, 'YES', 'NO')
+        btnBackward.active = Iif(currentItem > 1, 'YES', 'NO')
+    end
+
+    local box = iup.hbox{
+            btnForward,
+            iup.flatbutton{title = 'Íàâèãàöèÿ', flat_action=(function(h)
+                local _, _,left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                dlg:showxy(left,top)
+            end), },
+            btnBackward,
+            iup.label{separator = "VERTICAL",maxsize='x22', },
+            expand='HORIZONTAL', alignment='ACENTER', margin = '3x',
+    };
+    h.Tabs.navigation = {
+        handle = box;
+        OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
+		OnNavigation = OnNavigate;
+        }
+end
+
 return {
     title = 'Navigation',
     code = 'navigation',
-    sidebar = FuncBmkTab_Init,
+    sidebar = Iif( ('¦'..(_G.iuprops["settings.toolbars.layout"] or '')..'¦'):find('¦Navigation.lua¦'), nil, Tab_Init),
+    toolbar = Iif( ('¦'..(_G.iuprops["settings.user.rightbar"] or '')..'¦'..(_G.iuprops["settings.user.leftbar"] or '')..'¦'):find('¦Navigation.lua¦'),  nil, ToolBar_Init)
+
 }

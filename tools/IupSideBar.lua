@@ -46,15 +46,17 @@ end
 
 local function  CreateToolBar()
     local str = _G.iuprops["settings.toolbars.layout"] or ''
-    local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "toolbar_expander", iup.vbox{iup.hbox{\n'
+    local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'
+    local i = 0
     for p in str:gmatch('[^¦]+') do
         local _,_, pname, pf = p:find('(.-)(¬?)$')
         if pf == '¬' then
-            strTbl = strTbl..'}, iup.hbox{\n'
+            strTbl = strTbl..'}, '..Iif(i > 0, 'iup.label{separator = "HORIZONTAL"}, ' ,'').. 'iup.hbox{\n'
+            i = i + 1
         end
         local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
         pI.toolbar(ToolBar_obj)
-        strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'--[[]]
+        strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'
     end
     strTbl = strTbl..'gap="3",margin="3x0", maxsize="x36", alignment = "ACENTER",}, name="ToolBar"}} end'
     return loadstring(strTbl)()
