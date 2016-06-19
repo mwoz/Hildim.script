@@ -248,10 +248,10 @@ local function Toolbar_Init(h)
         handle = box
     }
 end
-
 return {
     title = 'Clipboard History',
     code = 'cliphistory',
-    sidebar = Sidebar_Init,
-    toolbar = Toolbar_Init
+    sidebar = Iif( ('¦'..(_G.iuprops["settings.toolbars.layout"] or '')..'¦'):find('¦ClipHist.lua¦'), nil, Sidebar_Init),
+    toolbar = Iif( ('¦'..(_G.iuprops["settings.user.rightbar"] or '')..'¦'..(_G.iuprops["settings.user.leftbar"] or '')..'¦'):find('¦ClipHist.lua¦'),  nil, Toolbar_Init)
+
 }

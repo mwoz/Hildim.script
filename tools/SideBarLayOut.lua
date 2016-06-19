@@ -7,8 +7,8 @@ local function Show()
     local list_lex, dlg, bBlockReset, tree_right, tree_left, tree_plugins
     local btn_ok = iup.button  {title="OK"}
     local btn_esc = iup.button  {title="Cancel"}
-    iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
-    iup.SetHandle("TOOLBARSETT_BTN_ESC",btn_esc)
+    iup.SetHandle("SIDEBARSETT_BTN_OK",btn_ok)
+    iup.SetHandle("SIDEBARSETT_BTN_ESC",btn_esc)
     btn_esc.action = function()
         dlg:hide()
         dlg:postdestroy()
@@ -137,8 +137,8 @@ local function Show()
         iup.hbox{tree_left, iup.vbox{tree_plugins},tree_right};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Настройка пользовательской панели инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='x400'}
+    dlg = iup.scitedialog{vbox; title="Настройка боковых панелей",defaultenter="SIDEBARSETT_BTN_OK",defaultesc="SIDEBARSETT_BTN_ESC",tabsize=editor.TabWidth,
+        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="sidebarlayout", minsize='800x400'}
 
 
     dlg.show_cb=(function(h,state)

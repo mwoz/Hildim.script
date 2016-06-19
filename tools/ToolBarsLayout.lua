@@ -1,101 +1,135 @@
---[[Диалог редактирования раскладки панелей инструментов]]
+--[[Диалог редактирования горячих клавиш]]
 local tblView = {}, tblUsers
 local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 
-
 local function Show()
 
-    local list_tb, dlg, bBlockReset, tree_btns
+    local list_lex, dlg, bBlockReset, tree_right, tree_plugins
     local btn_ok = iup.button  {title="OK"}
     local btn_esc = iup.button  {title="Cancel"}
-    iup.SetHandle("HK_BTN_OK",btn_ok)
-    iup.SetHandle("HK_BTN_ESC",btn_esc)
+    iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
+    iup.SetHandle("TOOLBARSETT_BTN_ESC",btn_esc)
     btn_esc.action = function()
         dlg:hide()
         dlg:postdestroy()
     end
 
-    btn_ok.action = function()
-        local str = ''
-        for i = 1,  tonumber(list_tb.numlin) do
-            if iup.GetAttributeId2(list_tb, 'TOGGLEVALUE', i, 2) == '1' then
-                if str ~= '' then str = str..'¦' end
-                str = str..list_tb:getcell(i, 4)
-                if iup.GetAttributeId2(list_tb, 'TOGGLEVALUE', i, 3) == '1' then str = str..'¬' end
+    local function ConvertXY2WndPos(h, x, y)
+        local _,_,wx,wy = h.position:find('(%d*),(%d*)')
+        wx = tonumber(wx); wy = tonumber(wy)
+        x = x + wx; y = y + wy
+        local t = { tree_plugins, tree_right}
+        for i = 1,  2 do
+            _,_,wx,wy = t[i].position:find('(%d*),(%d*)')
+            local _,_,dx,dy = t[i].rastersize:find('(%d*)x(%d*)')
+            wx = tonumber(wx); wy = tonumber(wy); dx = tonumber(dx); dy = tonumber(dy)
+            if wx <= x and x <= wx + dx and wy <= y and y <= wy + dy then
+                x = x - wx; y = y - wy
+                return t[i], iup.ConvertXYToPos(t[i], x, y)
             end
         end
-        _G.iuprops["settings.toolbars.layout"] = str
+    end
+
+    tree_plugins = iup.text{size='100x'}
+
+    btn_ok.action = function()
+        local function SaveTree(h)
+            local str = ''
+            local suff = '¬'
+            for i = 1,  iup.GetAttribute(h, "TOTALCHILDCOUNT0") do
+                if iup.GetAttributeId(h, "KIND", i) == "BRANCH" then
+                    suff = '¬'
+                else
+                    if str ~= '' then str = str..'¦' end
+                    str = str..h:GetUserId(i)..suff
+                    suff = ''
+                end
+            end
+            return str
+        end
+        _G.iuprops["settings.toolbars.layout"] = SaveTree(tree_right)
         dlg:hide()
         dlg:postdestroy()
         scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
 
-    list_tb = iup.matrix{
-    numcol=4, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255", --togglecentered = 'YES',
-    width0 = 0 ,rasterwidth1 = 200,rasterwidth2= 70,rasterwidth3= 130, rasterwidth4= 0, }
-    list_tb:setcell(0, 1, "Панель")
-    list_tb:setcell(0, 2, "Показать")
-    list_tb:setcell(0, 3, "С новой строки")
+    local dragName, dragPath, drag_id
 
-    list_tb.dropcheck_cb = function(h, lin, col)
-        if col > 1 then return -4
-        else return false end
-    end
-    list_tb.edition_cb = function()  return -1 end
+    local idSrc
+    local function button_cb(h, button, pressed, x, y, status)
+        if button ~= 49 then return end
+        if pressed == 1 then
+            idSrc = iup.ConvertXYToPos(h, x, y)
+        else
+           local hTarget, idTarget = ConvertXY2WndPos(h, x, y)
+           if hTarget and hTarget ~= h and idSrc > 0 then
+                if idTarget < 0 then idTarget = tonumber(iup.GetAttribute(hTarget, 'COUNT')) - 1 end
+                if iup.GetAttributeId(h, 'KIND', idSrc) == 'BRANCH' then
+                    if hTarget ~= tree_plugins then
+                        if iup.GetAttributeId(hTarget, 'KIND', idTarget) ~= 'BRANCH' then
+                            idTarget = iup.GetAttributeId(hTarget, 'PARENT', idTarget)
+                        end
+                        iup.SetAttributeId(hTarget, "STATE", idTarget, 'COLLAPSED')
+                        iup.SetAttributeId(hTarget, "INSERTBRANCH", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                    end
+                    for i = 1,  iup.GetAttribute(h, "TOTALCHILDCOUNT", idSrc) do
+                        iup.SetAttributeId(hTarget, "ADDLEAF", hTarget.lastaddnode or 0, iup.GetAttributeId(h, 'TITLE', idSrc + i))
+                        hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc + i))
+                    end
+                    iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
+                else
+                    if idTarget == 0 and iup.GetAttributeId(hTarget, "KIND", 1) == 'BRANCH' then return end
 
-    local droppedLin = nil
-    list_tb.mousemove_cb = function(h, lin, col)
-        if lin == 0 then return end
-        local lBtn = (shell.async_mouse_state() < 0)
-        if (droppedLin == nil) and lBtn then
-            droppedLin = lin;
-            h.cursor = "RESIZE_NS"
-        end
-        if lBtn and lin ~= droppedLin then
-            local curL = list_tb:getcell(lin, 1)
-            local cur4 = list_tb:getcell(lin, 4)
-            local cur2 = iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 2)
-            local cur3 = iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 3)
-
-            list_tb:setcell(lin, 1,list_tb:getcell(droppedLin, 1))
-            list_tb:setcell(lin, 4,list_tb:getcell(droppedLin, 4))
-            iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 2, iup.GetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 2))
-            iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 3, iup.GetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 3))
-
-            list_tb:setcell(droppedLin, 1,curL)
-            list_tb:setcell(droppedLin, 4,cur4)
-            iup.SetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 2, cur2)
-            iup.SetAttributeId2(h, 'TOGGLEVALUE', droppedLin, 3, cur3)
-
-            droppedLin = lin
-            list_tb.redraw = "ALL"
+                    iup.SetAttributeId(hTarget, "ADDLEAF", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                    hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc))
+                    iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
+                end
+            end
         end
     end
 
-
-    list_tb.leavewindow_cb = function()  droppedLin = nil; list_tb.cursor = "ARROW" end
-    list_tb.button_cb = function(h, button, pressed, x, y, status)
-        local id = iup.ConvertXYToPos(h, x, y)
-        local lin = math.floor(id/5)
-        local col = id % 5
-        if button == 49 and pressed == 0 and col ==1 then droppedLin = nil; h.cursor = "ARROW"
-        elseif col == 2 and pressed == 0 then
-            iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 2, Iif(iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 2) == '1', '0','1'))
-            if iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 2) ~= '1' then iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 3, 0) end
-            iup.SetAttribute(h, 'REDRAW', 'ALL')
-        elseif col == 3 and pressed == 0 and iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 2) == '1' then
-            iup.SetAttributeId2(h, 'TOGGLEVALUE', lin, 3, Iif(iup.GetAttributeId2(h, 'TOGGLEVALUE', lin, 3) == '1', 0,1))
-            list_tb.redraw = "ALL"
-        end
+    local function rightclick_cb(h, id)
+        iup.menu
+        {
+            iup.item{title="Add Tool Bar", action=function()
+                iup.SetAttributeId(h, "ADDBRANCH", 0, "<Bar>")
+            end};
+        }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
     end
+
+    local function dragdrop_cb(h,drag_id, drop_id, isshift, iscontrol)
+        if drop_id == 0 then drop_id = 1 end
+        if iscontrol == 1 or h == tree_plugins then return -1 end
+        if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
+            local iDelta = 0; mDelta = 0
+            local dragCount = tonumber(iup.GetAttributeId(h, 'CHILDCOUNT', drag_id))
+            if  drag_id > drop_id then iDelta = dragCount + 1; mDelta = 1 end
+
+            if  iup.GetAttributeId(h, 'KIND', drop_id) ~= 'BRANCH' then drop_id = iup.GetAttributeId(h, 'PARENT', drop_id) end
+
+            iup.SetAttributeId(h, "STATE", drop_id, 'COLLAPSED')
+            iup.SetAttributeId(h, "INSERTBRANCH", drop_id, iup.GetAttributeId(h, 'TITLE', drag_id))
+
+            for i = 1,  dragCount do
+                iup.SetAttributeId(h, "ADDLEAF", h.lastaddnode , iup.GetAttributeId(h, 'TITLE', drag_id + i + i * mDelta))
+                h:SetUserId(h.lastaddnode, h:GetUserId(drag_id + i + (i + 1) * mDelta))
+            end
+            iup.SetAttributeId(h, 'DELNODE', drag_id + (dragCount + 1) * mDelta, 'SELECTED')
+            return -1
+        end
+        return -4
+    end
+
+    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return -1 end}
+
+    tree_right = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb}
 
     local vbox = iup.vbox{
-        iup.hbox{list_tb};
+        iup.hbox{iup.vbox{tree_plugins},tree_right};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Панели инструментов",defaultenter="HK_BTN_OK",defaultesc="HK_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='300x200'}
+    dlg = iup.scitedialog{vbox; title="Элементы панелей инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
+        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="toolbarlayout", minsize='530x400'}
 
 
     dlg.show_cb=(function(h,state)
@@ -104,41 +138,59 @@ local function Show()
         end
     end)
 
+    iup.SetAttributeId(tree_right,"TITLE", 0, "Панели инстументов")
+    iup.SetAttributeId(tree_plugins,"TITLE", 0, "Неиспользуемые элементы")
+    iup.SetAttributeId(tree_right,"ADDBRANCH", 0, "<Bar>")
+
+    tree_right:SetUserId(0, '')
 
     local table_dir = shell.findfiles(defpath..'*.lua')
-    iup.SetAttribute(list_tb, "ADDLIN", "1-"..(#table_dir))
-    str = _G.iuprops["settings.toolbars.layout"] or ''
-    local j = 1
-    for p in str:gmatch('[^¦]+') do
-        local bNewLine = p:find('¬$')
-        p = p:gsub('¬$', '')
-        for i = 1, #table_dir do
-            if table_dir[i].name == p then
-                table.remove(table_dir, i)
-                local pI = dofile(defpath..p)
-                if pI and pI.toolbar then
-                    list_tb:setcell(j, 1, pI.title)
-                    list_tb:setcell(j, 4, p)
 
-                    iup.SetAttributeId2(list_tb, 'TOGGLEVALUE', j, 2, '1')
-                    if bNewLine then iup.SetAttributeId2(list_tb, 'TOGGLEVALUE', j, 3, '1') end
-                    j = j + 1
+    local j = 0
+    local function RestoreTree(h, str)
+        if str == '' then return end
+        iup.SetAttributeId(h, "DELNODE", 1, "SELECTED")
+        local k = 0
+        local lastBr
+        for p in str:gmatch('[^¦]+') do
+            local _,_, pname, pf = p:find('(.-)(¬?)$')
+            if pf ~= '' or k == 0 then
+                if lastBr then
+                    iup.SetAttributeId(h, "INSERTBRANCH", lastBr, '<Bar>')
+                else
+                    iup.SetAttributeId(h, "ADDBRANCH", k, '<Bar>')
                 end
-                break
+                k = k + 1
+                lastBr = k
+            end
+            local bFound = false
+            for i = 1, #table_dir do
+                if table_dir[i].name == pname then
+                    table.remove(table_dir, i)
+                    bFound = true
+                    break
+                end
+            end
+            if bFound then
+                local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+                iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
+                k = k + 1
+                h:SetUserId(k, pname)
             end
         end
     end
 
+    RestoreTree(tree_right, _G.iuprops["settings.toolbars.layout"] or '')
+
     for i = 1, #table_dir do
         local pI = dofile(defpath..table_dir[i].name)
         if pI and pI.toolbar then
-            list_tb:setcell(j, 1, pI.title)
-            list_tb:setcell(j, 4, table_dir[i].name)
+            iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
             j = j + 1
+            tree_plugins:SetUserId(j, table_dir[i].name)
         end
     end
-    if #table_dir > 0 then iup.SetAttribute(list_tb, 'DELLIN', ''..j..'-'..(j + #table_dir - 1)) end
-    list_tb.redraw = "ALL"
+
 end
 
 Show()
