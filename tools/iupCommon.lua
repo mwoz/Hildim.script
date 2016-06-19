@@ -621,7 +621,7 @@ iup.scitedialog = function(t)
         dlg = iup.dialog(t)
         iup.SetNativeparent(dlg, t.sciteparent)
         _G.dialogs[t.sciteid] = dlg
-        if dlg.resize == 'YES' then dlg.rastersize = props['dialogs.'..t.sciteid..'.rastersize'] end
+        if dlg.resize == 'YES' then dlg.rastersize = _G.iuprops['dialogs.'..t.sciteid..'.rastersize'] end
         if t.sciteparent == "IUPTOOLBAR" then
             dlg:showxy(0,0)
         elseif t.sciteparent == "IUPSTATUSBAR" then
@@ -629,6 +629,9 @@ iup.scitedialog = function(t)
         elseif t.sciteid == "splash" then
             local _,_,x2,y2 = iup.GetGlobal('SCREENSIZE'):find('(%d*)x(%d*)')
             dlg:showxy(tonumber(x2)/2 - 100,tonumber(y2)/2 - 100)
+        elseif t.dropdown then
+            dlg:showxy(-2000, -2000)
+            dlg:hide()
         elseif t.sciteparent == "SCITE" then
             dlg:showxy((tonumber(_G.iuprops['dialogs.'..t.sciteid..'.x']) or 400),(tonumber(_G.iuprops['dialogs.'..t.sciteid..'.y'])) or 300)
         else
@@ -745,11 +748,9 @@ iup.DestroyDialogs = function()
     end
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
-            if (_G.iuprops['sidebar.win'] or '0') == '0' then
-                _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
-                _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
-                _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
-            end
+            _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
+            _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
+            _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
             _G.dialogs[sciteid] = nil
             dlg:hide()
             dlg:destroy()

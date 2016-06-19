@@ -6,26 +6,33 @@ blockReselect = false
 blockResetCB = false
 local droppedLin = nil
 local lin0 = 10
+local onDraw_cb
 
 local function setClipboard(lin)
     if lin <= tonumber(lst_clip.numlin) then
         local text =  iup.GetAttributeId2(lst_clip, "", lin, 2)
-        if iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor then
+        local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
+        lst_clip.addlin = 0
+        lst_clip:setcell(1, 1, lst_clip:getcell(lin + 1, 1))
+        lst_clip:setcell(1, 2, lst_clip:getcell(lin + 1, 2))
+        lst_clip["fgcolor1:1"] = lst_clip["fgcolor"..(lin + 1)..":1"]
+        lst_clip.dellin = lin + 1
+        lst_clip.redraw = "1"
+        if bCol then
             clipboard.text = text
             clipboard.formatdatasize = text:len()
             clipboard.formatdata = text
         else
             clipboard.text = text
         end
-        lst_clip.dellin = lin
         local h = iup.GetFocus()
         if h then h.insert= text
         else scite.MenuCommand(IDM_PASTE) end
+        if onDraw_cb then onDraw_cb(text:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')) end
     end
 end
 
-local function Sidebar_Init()
-
+local function init()
     clipboard = iup.clipboard{}
     clipboard.format = 'MSDEVColumnSelect'
 
@@ -43,12 +50,40 @@ local function Sidebar_Init()
         if blockReselect then return end
         lst_clip.marked = nil
         if clipboard.textavailable == 'YES'  then
-            iup.PassFocus()
+            --iup.PassFocus()
             iup.SetAttributeId2(lst_clip, 'MARK',1,0, 1)
         end
         lst_clip.redraw = 'ALL'
         lst_clip.cursor = "ARROW"
         droppedLin = nil;
+    end
+
+    function lst_clip:k_any(k)
+        if k == iup.K_DOWN then
+            local l = 1
+            if lst_clip.marked then l = tonumber(lst_clip.marked:find('1') or '1') end
+            if l <= tonumber(lst_clip.numlin) then
+                lst_clip.marked = nil
+                iup.SetAttributeId2(lst_clip, 'MARK',l,0, 1)
+                lst_clip.redraw = 'ALL'
+            end
+        elseif k == iup.K_UP then
+            local l = tonumber(lst_clip.numlin)
+            if lst_clip.marked then l = tonumber(lst_clip.marked:find('1') or lst_clip.numlin) - 2 end
+            if l >= 1 then
+                lst_clip.marked = nil
+                iup.SetAttributeId2(lst_clip, 'MARK',l,0, 1)
+                lst_clip.redraw = 'ALL'
+            end
+        elseif k == iup.K_CR then
+            local l = tonumber(lst_clip.marked:find('1') or '0') - 1
+            if l > 0 then
+                iup.PassFocus()
+                setClipboard(l)
+            end
+        elseif k == iup.K_ESC then
+            iup.PassFocus()
+        end
     end
 
     function lst_clip:button_cb(button, pressed, x, y, status)
@@ -125,23 +160,28 @@ local function Sidebar_Init()
 
     AddEventHandler("OnDrawClipboard", function(flag)
         lst_clip.marked = nil
+        local caption = ''
         if flag > 0 and not blockResetCB then
             local text = clipboard.text
             if not text then return end
-            lst_clip.addlin = 0
-            lst_clip["1:1"] = text:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')
-            lst_clip["1:2"] = text
-            if flag == 2 then iup.SetAttributeId2(lst_clip, 'FGCOLOR', 1, 1, colcolor) end
-
-            for i = lst_clip.numlin,  2, -1 do
-                if i > maxlin or text == iup.GetAttributeId2(lst_clip, "", i, 2) then lst_clip.dellin = i end
+            if not lst_clip["1:2"] or lst_clip["1:2"] ~= text then
+                lst_clip.addlin = 0
+                caption = text:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')
+                lst_clip["1:1"] = caption
+                lst_clip["1:2"] = text
+                if flag == 2 then iup.SetAttributeId2(lst_clip, 'FGCOLOR', 1, 1, colcolor) end
+                for i = lst_clip.numlin,  2, -1 do
+                    if i > maxlin or text == iup.GetAttributeId2(lst_clip, "", i, 2) then lst_clip.dellin = i end
+                end
             end
+
             for i = 1,  lst_clip.numlin do
                 iup.SetAttributeId2(lst_clip, "", i, 0, Iif(i==lin0,0,i))
             end
             iup.SetAttributeId2(lst_clip, 'MARK',1,0, 1)
             lst_clip.redraw = 'ALL'
         end
+        if onDraw_cb then onDraw_cb(caption) end
     end)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx',
@@ -157,13 +197,61 @@ local function Sidebar_Init()
         {'C9', key = 'Ctrl+9',  action=function() setClipboard(9) end, },
         {'C0', key = 'Ctrl+0',  action=function() setClipboard(lin0) end, },
     }})
+end
 
+local function Sidebar_Init()
+    init()
     SideBar_Plugins.cliphistory = {
         handle = lst_clip; }
+end
+
+local function Toolbar_Init(h)
+
+    local btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP"}
+    local box = iup.sc_sbox{ iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22'}, maxsize = "900x22",shrink='YES'}
+    onDraw_cb = function(s)
+        btn.title = s
+        iup.Redraw(box, 1)
+    end
+
+    function btn:map_cb(h)
+        local sb = iup.GetChild(box, 0)
+        sb.cursor = "RESIZE_WE"
+        box.value = _G.iuprops["cliphistory.bntwidth"] or "200"
+    end
+    function btn:unmap_cb(h)
+        _G.iuprops["cliphistory.bntwidth"] = box.value
+    end
+
+    init()
+
+    local dlg = iup.scitedialog{iup.scrollbox{lst_clip},sciteparent="SCITE", sciteid="cliphistory_popup",dropdown=true,
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+    lst_clip.killfocus_cb = function()
+        dlg:hide()
+    end
+
+    btn.flat_action = function(h)
+        local _, _,left, top = btn.screenposition:find('(-*%d+),(-*%d+)')
+        local _,_,dx,dy = dlg.rastersize:find('(%d*)x(%d*)')
+        if tonumber(dx) < tonumber(box.value) then
+            dlg.rastersize = box.value..'x'..dy
+        end
+        dlg:showxy(left,top)
+    end
+
+    menuhandler:InsertItem('MainWindowMenu', 'Edit¦s1',
+        {'Clibboard History', ru = 'Èñòîðèÿ áóôåðà îáìåíà', key = 'Alt+V',  action=btn.flat_action, }
+    )
+
+    h.Tabs.cliphistory =  {
+        handle = box
+    }
 end
 
 return {
     title = 'Clipboard History',
     code = 'cliphistory',
     sidebar = Sidebar_Init,
+    toolbar = Toolbar_Init
 }
