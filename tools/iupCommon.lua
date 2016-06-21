@@ -441,7 +441,6 @@ iup.scitedetachbox = function(t)
     dtb.barsize = 0
 
     dtb.detachPos = (function(bShow)
-        dtb.DetachRestore = true
         dtb.detachhidden = 1
         _G.iuprops[dtb.sciteid..'.win']= Iif(bShow,'1', '2')
         hbTitle.state = 'OPEN'
@@ -459,6 +458,7 @@ iup.scitedetachbox = function(t)
         else
             if statusBtn then statusBtn.visible = 'YES' end
         end
+        if not bShow and dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(dtb.Dialog, 0) end
     end)
 
     dtb.detached_cb=(function(h, hNew, x, y)
@@ -577,6 +577,7 @@ iup.scitedetachbox = function(t)
         elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "0" then
             cmd_Attach()
         end
+        if t.onFormSetStaticControls then t.onFormSetStaticControls() end
     end
 
     dtb.Switch = cmd_Switch

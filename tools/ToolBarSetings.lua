@@ -64,6 +64,7 @@ local function Show()
         _G.iuprops["settings.user.toolbar"] = str
         dlg:hide()
         dlg:postdestroy()
+        scite.PostCommand(POST_SCRIPTRELOAD,0)
     end
 
     local function ConvertXY2WndPos(h, x, y)

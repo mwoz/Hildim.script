@@ -77,7 +77,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\InsertSpecialChar.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\ChangeCommentChar.lua")
 
 -- Если при вставке однострочного текста в редакторе несколько курсоров, то вставляем текст после каждого курсора
-dofile (props["SciteDefaultHome"].."\\tools\\multyinsert.lua")
+--dofile (props["SciteDefaultHome"].."\\tools\\multyinsert.lua")
 
 -- Копирование имени файла в буфер Обмена
 dofile (props["SciteDefaultHome"].."\\tools\\CopyPathToClipboard.lua")
@@ -93,7 +93,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\vss_showmenu.lua")
 ----[[ У Т И Л И Т Ы  И  И Н С Т Р У М Е Н Т Ы ]]-----------------------------
 
 -- SideBar: Многофункциональная боковая панель
-dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
+--dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
 -- Автодополнение объектов их методами и свойствами
 dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
 -- Автодополнение объектов их методами и свойствами
@@ -115,6 +115,9 @@ dofile (props["SciteDefaultHome"].."\\tools\\Align.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\Autoformat.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\spell.lua")
 
+
+-- SideBar: Многофункциональная боковая панель
+dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
 
 -- Установка размера символа табуляции в окне консоли
 local tab_width = tonumber(props['output.tabsize'])

@@ -391,7 +391,8 @@ local function InitSideBar()
         Dlg_Show_Cb = (function(h, state)
             if state == 0 and (_G.iuprops['findresbar.win'] or '0')~='0' then
                 if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
-                    SideBar_Plugins.findrepl.handle_deattach:detachPos(false)
+                    SideBar_Plugins.findrepl.handle_deattach.detachPos(false)
+                    _G.iuprops['findrepl.visible.state'] = "1"
                 end
                  _G.iuprops['dialogs.concolebar.splitvalue'] =  _G.iuprops['dialogs.findresbar.splitvalue']
                 toggleOf()
@@ -416,7 +417,8 @@ local function InitSideBar()
         Dlg_Show_Cb = (function(h, state)
             if state == 0 and (_G.iuprops['concolebar.win'] or '0')~='0' then
                 if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
-                    SideBar_Plugins.findrepl.handle_deattach:detachPos(false)
+                    SideBar_Plugins.findrepl.handle_deattach.detachPos(false)
+                    _G.iuprops['findrepl.visible.state'] = "1"
                 end
                 _G.iuprops['dialogs.findresbar.splitvalue'] =  _G.iuprops['dialogs.concolebar.splitvalue']
                 toggleOf()

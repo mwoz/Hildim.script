@@ -824,7 +824,7 @@ local function Init()
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";defaultesc="FIND_BTN_ESC";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
-        sciteid = 'findrepl';  Dlg_Title = "Поиск и замена"; expand='HORIZONTAL';
+        sciteid = 'findrepl';  Dlg_Title = "Поиск и замена"; expand='HORIZONTAL'; buttonImage='IMAGE_search'; onFormSetStaticControls = SetStaticControls;
         On_Detach = (function(h, hNew, x, y)
             iup.SetHandle("FIND_BTN_ESC",Ctrl('btn_esc'))
             local hMainLayout = iup.GetLayout()

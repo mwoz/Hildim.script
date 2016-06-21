@@ -4,8 +4,8 @@ return nil
            --Pane{Pane{'functions', 'navigation', orientation="HORIZONTAL", name="splitFuncNav",  type='SPLIT'},  Pane{type="FIND"}, tabtitle = "Func/Nav", type='VBOX'},
             --Pane{'abbreviations', 'bookmark', orientation="HORIZONTAL", name="splitAbbrev", tabtitle = "Abbrev/Bmk", type="SPLIT"},
            -- Pane{'fileman', tabtitle = "FileMan"},
-           -- Pane{'atrium', tabtitle = "Atrium", type= "VBOX"},
-            --Pane{'bookmark', tabtitle = "Atrium", type= "VBOX"},
+           -- Pane{'atrium', tabtitle = "Atrium", type= "VBOX"},"Atrium type= "VBOX"}, "Atrium type= "VBOX"}, "Atrium type= "VBOX"}, "Atrium
+            --Pane{'bookmark', tabtitle = "Atrium", type= "VBOX"},type= "VBOX"},"Atriumtype= "VBOX"},"Atriumtype= "VBOX"},"Atrium
       -- }
 end
 tbArgRight = function()

@@ -18,6 +18,7 @@ local function setClipboard(lin)
         lst_clip["fgcolor1:1"] = lst_clip["fgcolor"..(lin + 1)..":1"]
         lst_clip.dellin = lin + 1
         lst_clip.redraw = "1"
+        blockResetCB = true
         if bCol then
             clipboard.text = text
             clipboard.formatdatasize = text:len()
@@ -25,6 +26,7 @@ local function setClipboard(lin)
         else
             clipboard.text = text
         end
+
         local h = iup.GetFocus()
         if h then h.insert= text
         else scite.MenuCommand(IDM_PASTE) end
