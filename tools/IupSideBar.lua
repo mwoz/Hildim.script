@@ -569,30 +569,12 @@ else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDi
 if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000" end
 
 
-
-
-local function RestoreLayOut(strLay)
-    strLay = strLay:gsub('^Х','')
-    for n in strLay:gmatch('%d+') do
-        n = tonumber(n)
-        if shell.bit_and(editor.FoldLevel[n],SC_FOLDLEVELHEADERFLAG) ~=0 then
-            local lineMaxSubord = editor:GetLastChild(n,-1)
-            if n < lineMaxSubord then
-                editor.FoldExpanded[n] = false
-                editor:HideLines(n + 1, lineMaxSubord)
-            end
-        end
-    end
-
-end
-
-
-
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == POST_CONTINUESTARTUP then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
             props['session.reload'] = _G.iuprops['session.reload']
-            if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
+            iup.RestoreFiles()
+--[[            if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
                 local bNew = (props['FileName'] ~= '')
                 local t,p,bk,l = {},{},{},{}
                 for f in _G.iuprops['buffers']:gmatch('[^Х]+') do
@@ -636,7 +618,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     local b = tonumber(_G.iuprops['buffers.current'] or -1)
                     if b >= 0 then scite.buffers.SetDocumentAt(b) end
                 end
-            end
+            end]]
             if navigation_Unblock then navigation_Unblock() end
             local bHide
             if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.detachPos(not bHide) end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')

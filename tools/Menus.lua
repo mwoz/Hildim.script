@@ -95,8 +95,8 @@ end)
 _G.sys_Menus.TABBAR = {
     {link='File¦&Close'},
     {link='File¦C&lose All'},
-    {'Close All But Curent',  ru = 'Зарыть все, кроме текущей', action=function() core_CloseFilesSet(9132) end, },
-    {'Close All Temporally',  ru = 'Зарыть все временные', action=function() core_CloseFilesSet(9134) end, },
+    {'Close All But Curent',  ru = 'Зарыть все, кроме текущей', action=function() iup.CloseFilesSet(9132) end, },
+    {'Close All Temporally',  ru = 'Зарыть все временные', action=function() iup.CloseFilesSet(9134) end, },
     {'s1', separator=1},
     {link='File¦&Save'},
     {link='Buffers¦&Save All'},
@@ -206,9 +206,12 @@ _G.sys_Menus.MainWindowMenu = {
             {'As &XML...'  , ru = 'В &XML...', action = IDM_SAVEASXML},
         },},
         {'s1', separator=1},
+        {'Save Session...', ru = 'Сохранить сессию', action = iup.SaveSession,},
+        {'Load Session...', ru = 'Загрузить сессию', action = iup.LoadSession,},
+        {'s2', separator=1},
         {'Page Set&up...', ru = 'Параметры страницы', action = IDM_PRINTSETUP, image = 'layout_design_µ'},
         {'&Print...', ru = 'Печать...', key = 'Ctrl+P', action = IDM_PRINT, image = 'printer_µ'},
-        {'s2', separator=1},
+        {'s3', separator=1},
         {'Exit', ru='Выход', action = IDM_QUIT},
     },},
     {'Edit', ru='Правка',{
@@ -367,6 +370,8 @@ _G.sys_Menus.MainWindowMenu = {
         {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
         {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
         {'SideBars Settings', ru = 'Настройка боковых панелей...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
+        {'Save Configuration', ru = 'Сохранить конфигурацию', action=iup.SaveIuprops},
+        {'Load Configuration', ru = 'Загрузить конфигурацию', action=iup.LoadIuprops},
         {"Lexers properties", ru = 'Свойства лексеров', {
             {'Lexers properties', ru='Свойства лексеров', plane=1 ,tLangs},
             {'s2', separator=1},

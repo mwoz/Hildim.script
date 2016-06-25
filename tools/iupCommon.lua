@@ -4,6 +4,7 @@ POST_CLOSEDIALOG = 2
 POST_CONTINUESTARTUP = 3
 POST_SCRIPTRELOAD_OLD = 4
 POST_CONTINUESHOWMENU = 6
+require 'shell'
 
 
 local old_iup_ShowXY = iup.ShowXY
@@ -11,19 +12,36 @@ local old_iup_ShowXY = iup.ShowXY
 _G.iuprops = {}
 local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
-local text = ''
-if pcall(io.input, file) then
-    text = io.read('*a')
-end
-io.close()
 
-local bSuc, tMsg = pcall(dostring,text)
-if not bSuc then
-    print('ќшибка в файле settings.lua:', tMsg..'\nсохраним текущий settings.lua в settings.lua.bak')
-    io.output(props["scite.userhome"]..'\\settings.lua.bak')
-    io.write(text)
-    io.close()
+if shell.fileexists(file) then
+    local text = ''
+    if pcall(io.input, file) then
+        text = io.read('*a')
+        io.close()
+    end
+    local bSuc, tMsg = pcall(dostring,text)
+    if not bSuc then
+        print('ќшибка в файле settings.lua:', tMsg..'\nсохраним текущий settings.lua в settings.lua.bak')
+        io.output(props["scite.userhome"]..'\\settings.lua.bak')
+        io.write(text)
+        io.close()
+    end
+else
+    props['config.restore'] = props["scite.userhome"]..'\\default.config'
 end
+
+if props['config.restore'] ~= '' then
+    if pcall(io.input, props['config.restore']) then
+        text = io.read('*a')
+        io.close()
+        local bSuc, tMsg = pcall(dostring,text)
+        if not bSuc then
+            print('ќшибка в файле '..props['config.restore'], tMsg)
+        end
+    end
+end
+props['config.restore'] = ''
+
 iuprops_read_ok = true
 
 rfl = oStack{15, iuprops['resent.files.list']}
@@ -92,7 +110,7 @@ local function SaveLayOut()
     return res
 end
 
-function core_CloseFilesSet(cmd)
+iup.CloseFilesSet = function(cmd)
     local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
     if cmd ==  9132 then cur = scite.buffers.GetCurrent() end
 
@@ -127,7 +145,7 @@ function core_CloseFilesSet(cmd)
     local nf,spathes = false,'',''
     local sposes
     local slayout = ''
-    if cmd == IDM_QUIT then sposes = '' end
+    if cmd == IDM_QUIT or cmd == 0 then sposes = '' end
     local curBuf = scite.buffers.GetCurrent()
     DoForBuffers(function(i)
         if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Ѕезым€нный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
@@ -149,11 +167,11 @@ function core_CloseFilesSet(cmd)
             else
                 if i <= curBuf then curBuf = curBuf - 1 end
             end
-            scite.MenuCommand(IDM_CLOSE)
+            if cmd ~= 0 then scite.MenuCommand(IDM_CLOSE) end
         end
     end)
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
-    if nf and cmd == IDM_QUIT and not _G.iuprops['buffers'] then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
+    if nf and ((cmd == IDM_QUIT  and not _G.iuprops['buffers']) or cmd == 0) then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
         _G.iuprops['buffers'] = spathes;
         _G.iuprops['buffers.pos'] = sposes
         _G.iuprops['buffers.layouts'] = slayout
@@ -162,10 +180,127 @@ function core_CloseFilesSet(cmd)
     else return true end
 end
 
+local function RestoreLayOut(strLay)
+    strLay = strLay:gsub('^Х','')
+    for n in strLay:gmatch('%d+') do
+        n = tonumber(n)
+        if shell.bit_and(editor.FoldLevel[n],SC_FOLDLEVELHEADERFLAG) ~=0 then
+            local lineMaxSubord = editor:GetLastChild(n,-1)
+            if n < lineMaxSubord then
+                editor.FoldExpanded[n] = false
+                editor:HideLines(n + 1, lineMaxSubord)
+            end
+        end
+    end
+
+end
+
+iup.RestoreFiles = function()
+    if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
+        local bNew = (props['FileName'] ~= '')
+        local t,p,bk,l = {},{},{},{}
+        for f in _G.iuprops['buffers']:gmatch('[^Х]+') do
+            table.insert(t, f)
+        end
+        local bki
+        if _G.iuprops['buffers.pos'] then
+            for f in _G.iuprops['buffers.pos']:gmatch('[^Х]+') do
+                local i = 0
+                for g in f:gmatch('[^¶]+') do
+                    if i==0 then
+                        table.insert(p, g)
+                        bki = {}
+                        table.insert(bk, bki)
+                    else table.insert(bki, g) end
+                    i = 1
+                end
+            end
+        end
+        if _G.iuprops['buffers.layouts'] then
+            for f in _G.iuprops['buffers.layouts']:gmatch('Х[^Х]*') do
+                table.insert(l, f)
+            end
+        end
+        for i = #t,1,-1 do
+            scite.Open(t[i])
+            if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
+            if bk and bk[i] then
+                for j = 1, #(bk[i]) do
+                    editor:MarkerAdd(tonumber(bk[i][j]), 1)
+                end
+            end
+            if l and l[i] then
+                RestoreLayOut(l[i])
+            end
+        end
+        --scite.EnsureV visible()
+        if bNew then
+            scite.buffers.SetDocumentAt(0)
+        else
+            local b = tonumber(_G.iuprops['buffers.current'] or -1)
+            if b >= 0 then scite.buffers.SetDocumentAt(b) end
+        end
+    end
+end
+
+iup.LoadSession = function()
+    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    if not filename then return end
+    if pcall(io.input, filename) then
+        text = io.read('*a')
+        io.close()
+        local bSuc, tMsg = pcall(dostring,text)
+        if not bSuc then
+            print('ќшибка в файле '..filename, tMsg)
+        end
+        iup.RestoreFiles()
+        _G.iuprops['buffers'] = nil
+    end
+end
+
+iup.SaveSession = function()
+    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+
+    if not filename then return end
+    if not filename:lower():find('%.fileset$') then filename = filename..'.fileset' end
+    if iup.CloseFilesSet(0) then
+
+    local t = {}
+        for n,v in pairs(_G.iuprops) do
+            local _,_,prefix = n:find('([^%.]*)')
+            if prefix == 'buffers' then
+                local tp = type(v)
+                if tp == 'nil' then v = 'nil'
+                elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
+                elseif tp == 'string' then
+                    v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
+                elseif tp == 'table' and v.tostr then
+                    v = v:tostr()
+                else
+                    iup.Message('Error', "Type "..tp.." can't be saved")
+                end
+                table.insert(t, '_G.iuprops["'..n..'"] = '..v)
+            end
+        end
+
+
+        if pcall(io.output, filename) then
+            io.write(table.concat(t,'\n'))
+            io.close()
+        end
+    end
+end
+
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
-         return core_CloseFilesSet(cmd)
+         return iup.CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
         iup.DestroyDialogs();
         SaveIup()
@@ -399,7 +534,7 @@ iup.scitedetachbox = function(t)
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() cmd_Attach() end}
+    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function()print(t.sciteid); cmd_Attach() end}
 
     btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
@@ -584,7 +719,9 @@ iup.scitedetachbox = function(t)
 
     if t.buttonImage then
         if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
-        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_Switch,}
+        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_Switch,
+                                   tip=t.Dlg_Title,}
+        function statusBtn:flat_button_cb(button, pressed, x, y, status) if button==51 and pressed == 1 then menuhandler:PopUp('MainWindowMenu¶View¶'..t.sciteid) end end
         table.insert(_tmpSidebarButtons, statusBtn)
     end
 
@@ -695,6 +832,70 @@ AddEventHandler("OnContextMenu", function(lp, wp, source)
     return ""
 end)
 
+iup.LoadIuprops = function()
+    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    if not filename then return end
+    props['config.restore'] = filename
+    scite.PostCommand(POST_SCRIPTRELOAD,0)
+end
+
+iup.SaveIuprops = function()
+
+    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+
+    local hMainLayout = iup.GetLayout()
+    if not hMainLayout and not filename then return end
+    if not filename:lower():find('%.config$') then filename = filename..'.config' end
+
+    if SideBar_obj and SideBar_obj.handle then SideBar_obj.handle.SaveValues() end
+    if LeftBar_obj and LeftBar_obj.handle then LeftBar_obj.handle.SaveValues() end
+
+    for sciteid, dlg in pairs(_G.dialogs) do
+        if dlg ~= nil and not _G.iuprops[sciteid..'.win'] then
+            _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
+            _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
+            _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
+        end
+    end
+    local h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
+    _G.iuprops["layout.toolbar_expander"] = h.state
+
+    h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
+    _G.iuprops["layout.statusbar_expander"] = h.state
+
+
+    local t = {}
+    for n,v in pairs(_G.iuprops) do
+        local _,_,prefix = n:find('([^%.]*)%.')
+        if prefix == 'sidebarctrl' or prefix == 'concolebar' or prefix == 'dialogs' or prefix == 'findrepl' or prefix == 'findres' or prefix == 'layout' or
+           prefix == 'session' or prefix == 'settings' or prefix == 'sidebar' then
+            local tp = type(v)
+            if tp == 'nil' then v = 'nil'
+            elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
+            elseif tp == 'string' then
+                v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
+            elseif tp == 'table' and v.tostr then
+                v = v:tostr()
+            else
+                iup.Message('Error', "Type "..tp.." can't be saved")
+            end
+            table.insert(t, '_G.iuprops["'..n..'"] = '..v)
+        end
+    end
+
+
+ 	if pcall(io.output, filename) then
+		io.write(table.concat(t,'\n'))
+        io.close()
+ 	end
+end
+
 --”ничтожение диалогов при выключении или перезагрузке
 iup.DestroyDialogs = function()
     local hMainLayout = iup.GetLayout()
@@ -761,7 +962,7 @@ iup.DestroyDialogs = function()
     _G.iuprops["layout.toolbar_expander"] = h.state
     if h then tTlb.show_cb(h,4) iup.Detach(h); iup.Destroy(h) end
 
-    local h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
+    h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
     _G.iuprops["layout.statusbar_expander"] = h.state
     if h then iup.Detach(h); iup.Destroy(h) end
 
