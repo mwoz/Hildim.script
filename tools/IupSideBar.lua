@@ -574,51 +574,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         if wp == POST_CONTINUESTARTUP then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
             props['session.reload'] = _G.iuprops['session.reload']
             iup.RestoreFiles()
---[[            if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
-                local bNew = (props['FileName'] ~= '')
-                local t,p,bk,l = {},{},{},{}
-                for f in _G.iuprops['buffers']:gmatch('[^Х]+') do
-                    table.insert(t, f)
-                end
-                local bki
-                if _G.iuprops['buffers.pos'] then
-                    for f in _G.iuprops['buffers.pos']:gmatch('[^Х]+') do
-                        local i = 0
-                        for g in f:gmatch('[^¶]+') do
-                            if i==0 then
-                                table.insert(p, g)
-                                bki = {}
-                                table.insert(bk, bki)
-                            else table.insert(bki, g) end
-                            i = 1
-                        end
-                    end
-                end
-                if _G.iuprops['buffers.layouts'] then
-                    for f in _G.iuprops['buffers.layouts']:gmatch('Х[^Х]*') do
-                        table.insert(l, f)
-                    end
-                end
-                for i = #t,1,-1 do
-                    scite.Open(t[i])
-                    if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
-                    if bk and bk[i] then
-                        for j = 1, #(bk[i]) do
-                            editor:MarkerAdd(tonumber(bk[i][j]), 1)
-                        end
-                    end
-                    if l and l[i] then
-                        RestoreLayOut(l[i])
-                    end
-                end
-                --scite.EnsureV visible()
-                if bNew then
-                    scite.buffers.SetDocumentAt(0)
-                else
-                    local b = tonumber(_G.iuprops['buffers.current'] or -1)
-                    if b >= 0 then scite.buffers.SetDocumentAt(b) end
-                end
-            end]]
+
             if navigation_Unblock then navigation_Unblock() end
             local bHide
             if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.detachPos(not bHide) end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')

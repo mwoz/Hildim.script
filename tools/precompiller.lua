@@ -163,10 +163,6 @@ end
 
 local function OnSave_local()
     local iLex = editor.Lexer
-    if iLex == SCLEX_LUA then
-        assert(loadstring(editor:GetText()))
-        return
-    end
     if(iLex ~= SCLEX_FORMENJINE) then return end
     if props['FileExt']:lower() == 'cform' then
         OnSaveCForm()

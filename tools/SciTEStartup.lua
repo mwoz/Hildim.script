@@ -76,9 +76,6 @@ dofile (props["SciteDefaultHome"].."\\tools\\InsertSpecialChar.lua")
 -- Подставляет адекватный символ комментария для ini, inf, reg и php файлов
 dofile (props["SciteDefaultHome"].."\\tools\\ChangeCommentChar.lua")
 
--- Если при вставке однострочного текста в редакторе несколько курсоров, то вставляем текст после каждого курсора
---dofile (props["SciteDefaultHome"].."\\tools\\multyinsert.lua")
-
 -- Копирование имени файла в буфер Обмена
 dofile (props["SciteDefaultHome"].."\\tools\\CopyPathToClipboard.lua")
 

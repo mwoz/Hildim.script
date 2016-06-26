@@ -98,7 +98,6 @@ local function Show()
     end
 
     local function dragdrop_cb(h,drag_id, drop_id, isshift, iscontrol)
-        if drop_id == 0 then drop_id = 1 end
         if iscontrol == 1 or h == tree_plugins then return -1 end
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0
@@ -107,8 +106,12 @@ local function Show()
 
             if  iup.GetAttributeId(h, 'KIND', drop_id) ~= 'BRANCH' then drop_id = iup.GetAttributeId(h, 'PARENT', drop_id) end
 
-            iup.SetAttributeId(h, "STATE", drop_id, 'COLLAPSED')
-            iup.SetAttributeId(h, "INSERTBRANCH", drop_id, iup.GetAttributeId(h, 'TITLE', drag_id))
+            if drop_id == 0 then
+                iup.SetAttributeId(h, "ADDBRANCH", drop_id, iup.GetAttributeId(h, 'TITLE', drag_id))
+            else
+                iup.SetAttributeId(h, "STATE", drop_id, 'COLLAPSED')
+                iup.SetAttributeId(h, "INSERTBRANCH", drop_id, iup.GetAttributeId(h, 'TITLE', drag_id))
+            end
 
             for i = 1,  dragCount do
                 iup.SetAttributeId(h, "ADDLEAF", h.lastaddnode , iup.GetAttributeId(h, 'TITLE', drag_id + i + i * mDelta))
@@ -116,6 +119,7 @@ local function Show()
             end
             iup.SetAttributeId(h, 'DELNODE', drag_id + (dragCount + 1) * mDelta, 'SELECTED')
             return -1
+        elseif drop_id == 0 then drop_id = 1
         end
         return -4
     end

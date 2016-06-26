@@ -4,6 +4,7 @@ POST_CLOSEDIALOG = 2
 POST_CONTINUESTARTUP = 3
 POST_SCRIPTRELOAD_OLD = 4
 POST_CONTINUESHOWMENU = 6
+POST_AFTERLUASAVE = 7
 require 'shell'
 
 
@@ -336,11 +337,18 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         iuprops['resent.files.list']:ins(source)
     end
 end)
+
+
 AddEventHandler("OnSave", function(cmd, source)
     if props["ext.lua.startup.script"] == props["FilePath"] then
         scite.PostCommand(POST_SCRIPTRELOAD,0)
+    elseif editor.Lexer == SCLEX_LUA then
+        scite.PostCommand(POST_AFTERLUASAVE,output.TextLength)
+        assert(loadstring(editor:GetText()))
+        return
     end
 end)
+
 AddEventHandler("OnClose", function(source)
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
@@ -823,6 +831,13 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             scite.ReloadStartupScript()
             OnSwitchFile("")
             print("...Ok")
+        elseif wp == POST_AFTERLUASAVE and lp ~= output.TextLength then
+            s,e = output:findtext('\\w.+?\]:',SCFIND_REGEXP, lp)
+            if s then
+                output.TargetStart = s
+                output.TargetEnd = e
+                output:ReplaceTarget(props["FilePath"]..':')
+            end
         end
     end
 end)

@@ -278,7 +278,6 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Tool Bar', ru = 'Панель инструментов', action = function() iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").isOpen() end},
         {'Status Bar', ru = 'Панель статуса', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen() end},
         {'Tab &Bar', ru = 'Вкладки', action = IDM_VIEWTABBAR, check = "props['tabbar.visible']=='1'"},
-        --[[{'&Status Bar', ru = 'Строка состояния', action = IDM_VIEWSTATUSBAR},]]
         {'s2', separator=1},
         {'&Whitespace', ru = 'Пробелы', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},
         {'&End of Line', ru = 'Символы перевода строк', key = 'Ctrl+Shift+9', action = IDM_VIEWEOL, check = "editor.ViewEOL"},
@@ -286,8 +285,6 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Line Numbers', ru = 'Нумера строк', action = IDM_LINENUMBERMARGIN, check = "props['line.margin.visible']=='1'"},
         {'&Margin', ru = 'Закладки', action = IDM_SELMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,1)>0"},
         {'&Fold Margin', ru = 'Поле сворачивания блоков текста', action = IDM_FOLDMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,2)>0"},
-        --[[{'&Output', ru = 'Окно консоли', key = 'F8', action = IDM_TOGGLEOUTPUT, check = "iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').barsize ~= '0'", active=function() return (_G.iuprops['concolebar.win'] or '0')=='0' or (_G.iuprops['findresbar.win'] or '0')=='0' end},]]
-        --[[{'&Parameters', ru = 'Параметры', key = 'Shift+F8', action = IDM_TOGGLEPARAMETERS},]]
         {'s3', separator=1},
         {'slast', separator=1},
 
@@ -334,9 +331,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'&Switch Pane', ru = 'Редактирование/Консоль', key = 'Ctrl+F6', action = IDM_SWITCHPANE},
     },},
     {'Options', ru='Настройки',{
-        --[[{'{'&Always On Top', ru = 'Поверх всех окон', action = IDM_ONTOP},
-        {'Open Files &Here', ru = 'Открывать одну копию программы', action = IDM_OPENFILESHERE},
-        Vertical &Split',  action = IDM_SPLITVERTICAL},]]
+
         {'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
         {'Wrap Find &Result', ru = 'Перенос по словам в результатах поиска', action = IDM_WRAPFINDRES, check = "props['findres.wrap']=='1'"},
         {'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
@@ -361,17 +356,19 @@ _G.sys_Menus.MainWindowMenu = {
         {'Interface Font Size', ru = 'Размер шрифта интерфейса', action = ResetFontSize},
 
         {'s3', separator=1},
+        {'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')"},
+        {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
+        {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
+        {'SideBars Settings', ru = 'Настройка боковых панелей...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
+        {'s3', separator=1},
+        {'Save Configuration', ru = 'Сохранить конфигурацию', action=iup.SaveIuprops},
+        {'Load Configuration', ru = 'Загрузить конфигурацию', action=iup.LoadIuprops},
+        {'s5', separator=1},
         {'Windows Integration', ru = 'Настройка интеграции с Windows', action="shell.exec(props['SciteDefaultHome']..'\\\\tools\\\\SciTE_WinIntegrator.hta')"},
         {'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
         {'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
         {'Open Lua Startup Scr&ipt', ru = 'Открыть файл автозагрузки скрипта', action = IDM_OPENLUAEXTERNALFILE},
         {'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = function() do_LexerColors() end},
-        {'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')"},
-        {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
-        {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
-        {'SideBars Settings', ru = 'Настройка боковых панелей...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
-        {'Save Configuration', ru = 'Сохранить конфигурацию', action=iup.SaveIuprops},
-        {'Load Configuration', ru = 'Загрузить конфигурацию', action=iup.LoadIuprops},
         {"Lexers properties", ru = 'Свойства лексеров', {
             {'Lexers properties', ru='Свойства лексеров', plane=1 ,tLangs},
             {'s2', separator=1},
