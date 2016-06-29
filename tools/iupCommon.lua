@@ -42,6 +42,7 @@ if props['config.restore'] ~= '' then
     end
 end
 props['config.restore'] = ''
+props['script.started'] = 'Y'
 
 iuprops_read_ok = true
 
@@ -983,6 +984,10 @@ iup.DestroyDialogs = function()
 
     _G.dialogs = nil
     --iup.ShowSideBar(-1)
+    for i = 1,  #onDestroy_event do
+       onDestroy_event[i]()
+    end
+    collectgarbage('collect')
 end
 
 function Splash_Screen()

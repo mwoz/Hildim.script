@@ -5,6 +5,7 @@ local sRu= spell(props["SciteDefaultHome"]..'\\dics\\ru_RU.aff',props["SciteDefa
 local sEn= spell(props["SciteDefaultHome"]..'\\dics\\en_US.aff',props["SciteDefaultHome"]..'\\dics\\en_US.dic')
 local pUserRu = props["SciteDefaultHome"]..'\\dics\\user_RU.dic'
 local pUserEn = props["SciteDefaultHome"]..'\\dics\\user_EN.dic'
+
 sRu:add_dic(pUserRu)
 sEn:add_dic(pUserEn)
 assert(sRu, 'dict Ru not loaded')
@@ -440,6 +441,7 @@ AddEventHandler("OnColorized", OnColorise_local)
 AddEventHandler("OnOpen", OnSwitch_local)
 AddEventHandler("OnSwitchFile", OnSwitch_local)
 AddEventHandler("OnIdle", OnIdle_local)
+table.insert(onDestroy_event, function() sRu:destroy(); sEn:destroy(); end)
 
 local function ResetAutoSpell()
     CheckChange('spell.autospell', true)

@@ -8,6 +8,12 @@ local droppedLin = nil
 local lin0 = 10
 local onDraw_cb
 
+local function renum()
+    for i = 1,  lst_clip.numlin do
+        iup.SetAttributeId2(lst_clip, "", i, 0, Iif(i==lin0,0,i))
+    end
+end
+
 local function setClipboard(lin)
     if lin <= tonumber(lst_clip.numlin) then
         local text =  iup.GetAttributeId2(lst_clip, "", lin, 2)
@@ -31,6 +37,8 @@ local function setClipboard(lin)
         if h then h.insert= text
         else scite.MenuCommand(IDM_PASTE) end
         if onDraw_cb then onDraw_cb(text:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')) end
+
+        renum()
     end
 end
 
@@ -175,11 +183,12 @@ local function init()
                 for i = lst_clip.numlin,  2, -1 do
                     if i > maxlin or text == iup.GetAttributeId2(lst_clip, "", i, 2) then lst_clip.dellin = i end
                 end
+            elseif lst_clip["1:2"] and lst_clip["1:2"] == text then
+                blockResetCB = true
             end
 
-            for i = 1,  lst_clip.numlin do
-                iup.SetAttributeId2(lst_clip, "", i, 0, Iif(i==lin0,0,i))
-            end
+            renum()
+
             iup.SetAttributeId2(lst_clip, 'MARK',1,0, 1)
             lst_clip.redraw = 'ALL'
         end
@@ -210,7 +219,7 @@ end
 
 local function Toolbar_Init(h)
 
-    local btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP"}
+    local btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
     local box = iup.sc_sbox{ iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22'}, maxsize = "900x22",shrink='YES'}
     onDraw_cb = function(s)
         btn.title = s
@@ -229,7 +238,7 @@ local function Toolbar_Init(h)
     init()
 
     local dlg = iup.scitedialog{iup.scrollbox{lst_clip},sciteparent="SCITE", sciteid="cliphistory_popup",dropdown=true,
-                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255',}
     lst_clip.killfocus_cb = function()
         dlg:hide()
     end

@@ -359,6 +359,8 @@ udoc.ObjectType Свойство используется для установки режима работы Ref контейнера
 udoc.Locked Доступность контрола для редактирования
 udoc.Query текст запроса(Для контрола SqlQuery)
 udoc.ControlType тип контрола
+#$message=.*%.searchparams
+udoc.SearchParams Мессадж с параметрами поиска
 
 #$message=.app.createmessage(
 app.CreateMessage Возвращает новый объект мессаджа.

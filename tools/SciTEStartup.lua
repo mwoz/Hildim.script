@@ -4,14 +4,17 @@
 
 ----[[ C O M M O N ]]-------------------------------------------------------
 --Загрузка имэджей
-iup.Load(props["SciteDefaultHome"].."\\tools\\Images.led")
-dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
+
+if props['script.started'] ~= 'Y' then
+    iup.Load(props["SciteDefaultHome"].."\\tools\\Images.led")
+    dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
+end
 --iup.Load(props["SciteDefaultHome"].."\\tools\\Images22.led")
 -- Подключение файла с общими функциями, использующимися во многих скриптах
+_G.onDestroy_event = {}
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 Splash_Screen()
 dofile (props["SciteDefaultHome"].."\\tools\\Menus.lua")
-
 ----[[ R E A D   O N L Y ]]-------------------------------------------------
 
 -- Замена стандартной команды "Read-Only"
@@ -37,7 +40,6 @@ dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
 --~ dofile (props["SciteDefaultHome"].."\\tools\\smartcomment.lua")
 
 ----[[ О Т К Р Ы Т Ь  Ф А Й Л ]]----------------------------------------------
-
 -- Замена стандартной команды SciTE "Открыть выделенный файл"
 dofile (props["SciteDefaultHome"].."\\tools\\Open_Selected_Filename.lua")
 
@@ -110,8 +112,8 @@ dofile (props["SciteDefaultHome"].."\\tools\\Align.lua")
 ----[[ Н А С Т Р О Й К И   И Н Т Е Р Ф Е Й С А ]]-----------------------------
 
 dofile (props["SciteDefaultHome"].."\\tools\\Autoformat.lua")
-dofile (props["SciteDefaultHome"].."\\tools\\spell.lua")
 
+dofile (props["SciteDefaultHome"].."\\tools\\spell.lua")
 
 -- SideBar: Многофункциональная боковая панель
 dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
