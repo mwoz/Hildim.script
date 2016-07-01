@@ -9,29 +9,22 @@ local function Show()
         local maxL = tonumber(iup.GetAttribute(list_lex, 'NUMLIN'))
         local f
         local tFiles, tLng = {},{}
+        local strLng = ''
         for i = 0, maxL - 1 do
             if iup.GetAttributeId2(list_lex, 'TOGGLEVALUE', i, 1) == '1' then
+                if strLng ~= '' then strLng = strLng..'¦' end
+                strLng = strLng..list_lex:getcell(i,2)..'•'..list_lex:getcell(i,5)..'•'..list_lex:getcell(i,3)..'•'..list_lex:getcell(i,4)
                 local fName = list_lex:getcell(i,4)
                 tFiles[fName] = true
-                t = t.."{'"..list_lex:getcell(i,2).."', action = function() scite.SetLexer('"..list_lex:getcell(i,5).."') end, check=function() return editor.LexerLanguage == '"..list_lex:getcell(i,3).."' end,},\n"
-            end
+             end
         end
-        t = "return {\n"..t.."},\n{\n"
-        for n,_ in pairs(tFiles) do
-            n = n:gsub('%.[^.]*$', '')..'.properties'
-            t = t..'{"Open '..n..'", action =function() scite.Open(props["SciteDefaultHome"].."\\\\languages\\\\'..n..'") end},\n'
-        end
-        t = t..'}'
-        f = io.open(props['SciteDefaultHome']..'\\data\\home\\HilightMenu.lua',"w")
-        f:write(t)
-        f:close()
-        t = ''
         for n,_ in pairs(tFiles) do
             t = t..'import $(SciteDefaultHome)\\languages\\'..n:gsub('%.[^.]*$', '')..'.properties\n'
         end
         f = io.open(props['SciteDefaultHome']..'\\data\\home\\Languages.properties',"w")
         f:write(t)
         f:close()
+        _G.iuprops['settings.lexers']=strLng
         scite.Perform("reloadproperties:")
 
         dlg:hide()
@@ -96,11 +89,16 @@ local function Show()
 
     end
 
-    if shell.fileexists(props["SciteDefaultHome"].."\\data\\home\\HilightMenu.lua") then
-        local tHilight = assert(loadfile(props["SciteDefaultHome"].."\\data\\home\\HilightMenu.lua"))()
+    if _G.iuprops['settings.lexers'] ~= '' then
+        local tHilight = {}
+
+        for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
+            local _,_, p1 = w:find('([^•]*)')
+            table.insert(tHilight,p1)
+        end
         for j = 1, #tHilight do
             for i = 1, #tbl_lex do
-                if tbl_lex[i].view == tHilight[j][1] then
+                if tbl_lex[i].view == tHilight[j] then
                     tbl_lex[i].checked = true
                     break
                 end

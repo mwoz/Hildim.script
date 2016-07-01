@@ -64,7 +64,6 @@ local function SetFindresCount()
 end
 
 local tHilight, tLangs = {},{}
-if shell.fileexists(props["SciteDefaultHome"].."\\data\\home\\HilightMenu.lua") then tHilight, tLangs = assert(loadfile(props["SciteDefaultHome"].."\\data\\home\\HilightMenu.lua"))() end
 
 _G.sys_Menus = {}
 local function scintilla()
@@ -91,6 +90,18 @@ local bCanPaste = true
 AddEventHandler("OnDrawClipboard", function(flag)
     bCanPaste = (flag > 0)
 end)
+
+
+local t = {}
+for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
+    local _,_, p1,p2,p3,p4 = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
+    t[p4] = true
+    table.insert(tHilight,{p1, action = function() scite.SetLexer(p2) end, check=function() return editor.LexerLanguage == p3 end})
+end
+for n,_ in pairs(t) do
+    table.insert(tLangs, {"Open "..n, action =function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..n) end})
+end
+
 
 _G.sys_Menus.TABBAR = {
     {link='File¦&Close'},

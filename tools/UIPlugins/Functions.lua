@@ -565,7 +565,6 @@ local function getPath(id)
 end
 
 local function Functions_ListFILL()
-	if SideBar_Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_Plugins.functions.id then return end
 	local function SortFuncList(a,b)
 		if _group_by_flags then --Если установлено, сначала сортируем по флагу
 			local fa = fnTryGroupName(GetFlags(a), a[4])
@@ -742,12 +741,10 @@ local function JumpToFuncDefinition(funcname)
 end
 
 local function OnSwitch()
-    if SideBar_Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle == SideBar_Plugins.functions.id then
-        Functions_GetNames()
-		Functions_ListFILL()
-		line_count = editor.LineCount
-        curSelect = -1
-    end
+    Functions_GetNames()
+    Functions_ListFILL()
+    line_count = editor.LineCount
+    curSelect = -1
 end
 
 local curSelect
