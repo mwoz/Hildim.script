@@ -5,6 +5,7 @@ POST_CONTINUESTARTUP = 3
 POST_SCRIPTRELOAD_OLD = 4
 POST_CONTINUESHOWMENU = 6
 POST_AFTERLUASAVE = 7
+POST_RELOADPROPS = 8
 require 'shell'
 
 
@@ -28,16 +29,31 @@ if shell.fileexists(file) then
         io.close()
     end
 else
-    props['config.restore'] = props["scite.userhome"]..'\\default.config'
+    props['config.restore'] = props["SciteDefaultHome"]..'\\tools\\default.config'
 end
 
 if props['config.restore'] ~= '' then
     if pcall(io.input, props['config.restore']) then
+        local l = (_G.iuprops['settings.lexers'] or '')
         text = io.read('*a')
         io.close()
         local bSuc, tMsg = pcall(dostring,text)
         if not bSuc then
             print('ќшибка в файле '..props['config.restore'], tMsg)
+        elseif l ~= _G.iuprops['settings.lexers'] or '' then
+            local t = {}
+            for w in _G.iuprops['settings.lexers']:gmatch('[^¶]+') do
+                local _,_, p4 = w:find('[^Х]*Х[^Х]*Х[^Х]*Х([^Х]*)')
+                t[p4] = true
+            end
+            local str = ''
+            for n,_ in pairs(t) do
+                str = str..'import $(SciteDefaultHome)\\languages\\'..n..'\n'
+            end
+            f = io.open(props['SciteDefaultHome']..'\\data\\home\\Languages.properties',"w")
+            f:write(str)
+            f:close()
+            _G.iuprops['command.reloadprops'] = true
         end
     end
 end
@@ -46,7 +62,7 @@ props['script.started'] = 'Y'
 
 iuprops_read_ok = true
 
-rfl = oStack{15, iuprops['resent.files.list']}
+rfl = oStack{15, _G.iuprops['resent.files.list']}
 function rfl:GetMenu()
     local t = {}
 
@@ -543,7 +559,7 @@ iup.scitedetachbox = function(t)
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function()print(t.sciteid); cmd_Attach() end}
+    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() cmd_Attach() end}
 
     btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
@@ -803,7 +819,7 @@ end
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == POST_CLOSEDIALOG then --закрытие диалога (отложенное)
-            while table.maxn(_G.deletedDialogs) > 0 do
+            while table.maxn(_G.deletedDialogs or {}) > 0 do
                 sciteid = table.remove(_G.deletedDialogs)
                 local dlg = _G.dialogs[sciteid]
                 if dlg ~= nil then
@@ -839,6 +855,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                 output.TargetEnd = e
                 output:ReplaceTarget(props["FilePath"]..':')
             end
+        elseif wp == POST_RELOADPROPS then
+            scite.Perform("reloadproperties:")
         end
     end
 end)

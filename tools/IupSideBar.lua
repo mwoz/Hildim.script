@@ -322,8 +322,6 @@ local function InitSideBar()
     SideBar_obj.Active = true
     LeftBar_obj.Active = true
 
-    --if true then return end=
-
     CreateBox();
 
     if SideBar_obj.handle then
@@ -596,6 +594,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             scite.EnsureVisible()
             if dlg_SPLASH then dlg_SPLASH:postdestroy() end
             _G.iuprops['buffers'] = nil
+            if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS,0) end
         elseif wp == POST_CONTINUESHOWMENU then
             menuhandler:ContinuePopUp()
         end
