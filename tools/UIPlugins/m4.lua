@@ -12,6 +12,7 @@ local ToolBar_obj
 function RunBatch(filePath)
     --if props["output.hook"] == 'Y' then return end
 	if editor.Lexer == SCLEX_MSSQL then
+        scite.MenuCommand(IDM_SAVE)
 		local inc =props["sys.calcsybase.dir"].."\\BuildM4\\"..iup.GetAttribute(cmb_listCalc, cmb_listCalc.value)
         local vbRun = props["SciteDefaultHome"].."\\tools\\RunSql.vbs"
         --local vbRun = props["sys.calcsybase.dir"].."\\RunSql.vbs"

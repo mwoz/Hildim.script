@@ -32,15 +32,6 @@ FindText v7.3.1
 	indic.style.30=#CCCC00
 	indic.style.31=#336600
 
-Дополнительно можно задать дополнительные параметры поиска:
-	# Поиск с учетом регистра
-	findtext.matchcase=1
-	# Отмечать букмарками найденные строки
-	findtext.bookmarks=1
-	# Выводить все найденные строки в консоль
-	findtext.output=1
-	# Показывать подсказку по горячим клавишам
-	findtext.tutorial=1
 --]]----------------------------------------------------
 
 local firstNum = ifnil(tonumber(props['findtext.first.mark']),31)

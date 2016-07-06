@@ -83,16 +83,11 @@ dofile (props["SciteDefaultHome"].."\\tools\\CopyPathToClipboard.lua")
 
 ----[[ Д О П О Л Н И Т Е Л Ь Н Ы Е  М Е Н Ю ]]--------------------------------
 
--- Создает в контекстном меню таба (вкладки) подменю для команд SVN
---dofile (props["SciteDefaultHome"].."\\tools\\svn_menu.lua")
-
 -- Создает в контекстном меню таба (вкладки) подменю для команд VSS
 dofile (props["SciteDefaultHome"].."\\tools\\vss_showmenu.lua")
 
 ----[[ У Т И Л И Т Ы  И  И Н С Т Р У М Е Н Т Ы ]]-----------------------------
 
--- SideBar: Многофункциональная боковая панель
---dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
 -- Автодополнение объектов их методами и свойствами
 dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
 -- Автодополнение объектов их методами и свойствами
@@ -111,6 +106,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\Align.lua")
 
 ----[[ Н А С Т Р О Й К И   И Н Т Е Р Ф Е Й С А ]]-----------------------------
 
+dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\Autoformat.lua")
 
 dofile (props["SciteDefaultHome"].."\\tools\\spell.lua")

@@ -502,26 +502,24 @@ function IndentBlockUp()
 end
 
 ------------------------------------------------------
-
+_G.g_session = {}
+_G.g_session['custom.autoformat.lexers'] = {}
+_G.g_session['custom.autoformat.lexers'][SCLEX_FORMENJINE] = true
+_G.g_session['custom.autoformat.lexers'][SCLEX_VB] = true
 
 AddEventHandler("OnChar", function(char)
-	if props['macro-recording'] ~= '1' and cmpobj_GetFMDefault()  == SCE_FM_VB_DEFAULT then
+	if cmpobj_GetFMDefault()  == SCE_FM_VB_DEFAULT or editor.Lexer == SCLEX_VB then
         if OnChar_local(char) then return true end
     end
 end)
 AddEventHandler("OnUpdateUI", function()
-    if props['macro-recording'] ~= '1' and cmpobj_GetFMDefault()  == SCE_FM_VB_DEFAULT then
+    if cmpobj_GetFMDefault()  == SCE_FM_VB_DEFAULT or editor.Lexer == SCLEX_VB then
         OnUpdateUI_local()
     end
 end)
 AddEventHandler("OnSwitchFile", function() iChangedLine = -1 end)
 AddEventHandler("OnOpen", function() iChangedLine = -1 end)
 AddEventHandler("OnSave", function() iChangedLine = -1 end)
+AddEventHandler("Autoformat_String", FormatSelectedStrings)
+AddEventHandler("Autoformat_Block", IndentBlockUp)
 
-menuhandler:InsertItem('MainWindowMenu', 'Edit¦s1',
-    {'Vbs/VbScript',  visible_ext='form,rform,cform,incl,vbs,wsf,bas,frm,cls,ctl,pag,dsr,dob',{
-        {'Format Block',  ru = 'Форматировать блок', action=IndentBlockUp, key = 'Ctrl+]'},
-        {'Format Line',  ru = 'Форматировать строку', action=FormatSelectedStrings, key = 'Ctrl+['},
-        {'Autformating Lines',  ru = 'Автоформатирование строк', check_iuprops='autoformat.line', key = 'Ctrl+Shift+['},
-
-    }})

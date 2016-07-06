@@ -91,7 +91,6 @@ AddEventHandler("OnDrawClipboard", function(flag)
     bCanPaste = (flag > 0)
 end)
 
-
 local t = {}
 if _G.iuprops['settings.lexers'] then
     for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
@@ -243,7 +242,12 @@ _G.sys_Menus.MainWindowMenu = {
         {'Xml',  ru ='Xml', visible_ext='xml,form,rform,cform',{
             {'Format Xml', ru='Форматировать Xml', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\FormatXml.lua')", image = 'broom_code_µ',},
         }},
-        {'s1', separator=1},
+        {'s1', separator= 1},
+        {'Autoformat', ru = 'Автоформат', {
+            {'Format Block',  ru = 'Форматировать блок', action=function() if Autoformat_Block then Autoformat_Block() end end, key = 'Ctrl+]'},
+            {'Format Line',  ru = 'Форматировать строку', action=function() if Autoformat_String then Autoformat_String() end end, key = 'Ctrl+['},
+            {'Autformating Lines',  ru = 'Автоформатирование строк', check_iuprops='autoformat.line', key = 'Ctrl+Shift+['},
+        }},
         {'Match &Brace', ru = 'Найти парную скобку', key = 'Ctrl+E', action = IDM_MATCHBRACE},
         {'Select t&o Brace', ru = 'Выделить до парноий скобки', key = 'Ctrl+Shift+E', action = IDM_SELECTTOBRACE},
         {'Insert Special Char', ru = 'Вставить спецсимвол', action = function() SpecialChar() end, image = 'edit_symbol_µ'},

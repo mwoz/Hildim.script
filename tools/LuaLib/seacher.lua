@@ -383,7 +383,7 @@ function s:findWalk(inSelection, funcOnFind)
         if inSelection then
             if countSelections == 1 then self.send(SCI_SETSEL, startPosition, endPosition) end
         else
-            if props["find.replace.return.to.start"] ~= '1' then self.e:SetSel(lastMatch, lastMatch) end
+            --if props["find.replace.return.to.start"] ~= '1' then self.e:SetSel(lastMatch, lastMatch) end
         end
 
         self.e:EndUndoAction()
