@@ -76,6 +76,10 @@ local function prnTable2(name)
 	end
 end
 
+local function FoldLevel(deltaL, L)
+    return shell.bit_and(editor.FoldLevel[L or (editor:LineFromPosition(editor.SelectionStart) - deltaL)],SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE
+end
+
 local function CheckPattern(str,pattern)
     local _s,_e,s,c,cc = string.find(str,pattern)
     --зачитали: начало, конец, отступ, комментарий, что-то(не комментарий) за конструкцией
@@ -362,8 +366,9 @@ end
 
 local function OnChar_local(char)
     if not editor.Focus then return end
+    curFold = nil
     if string.byte(char) == 13 then
-        if (_G.iuprops['autoformat.line'] or 0)==1 then doAutoformat(editor.CurrentPos - 1) end
+        if (_G.iuprops['autoformat.line'] or 0) == 1 then doAutoformat(editor.CurrentPos - 1) end
         editor:ReplaceSel(nextIndent)
         return
     end
@@ -373,17 +378,14 @@ local function OnChar_local(char)
         EditorClearMarks(errmark)
         mark = nil
     end
-
-    if cmpobj_GetFMDefault()  ~= SCE_FM_VB_DEFAULT then return end
-
-    if string.byte(char) ~= 13 then
-        iChangedLine = editor:LineFromPosition(editor.SelectionStart)
-        return
+    if string.byte(char) ~= 10 and FoldLevel(-1) == FoldLevel(0) then
+        curFold = FoldLevel(-1)
+        if curFold == 0 then curFold = nil end
     end
-    iChangedLine = -1
 
+    iChangedLine = editor:LineFromPosition(editor.SelectionStart)
+    return
 
-    return true
 end
 
 local function OnUpdateUI_local()
@@ -398,6 +400,17 @@ local function OnUpdateUI_local()
             editor.FirstVisibleLine = iline
             editor:SetSel(s,e)
             iChangedLine = -1
+        elseif curFold and FoldLevel(-1) < FoldLevel(0) then
+            local ts = editor:PositionFromLine(l)
+            editor.TargetStart = ts
+            editor.TargetEnd = editor:findtext('[^ \t\n\r]', SCFIND_REGEXP, ts, editor:PositionFromLine(l + 1))
+            local nl = editor.TargetEnd - ts
+            editor:BeginUndoAction()
+            if nl >= tonumber(props['tabsize']) then
+                nl = nl - tonumber(props['tabsize'])
+                editor:ReplaceTarget(string.rep(' ', nl))
+            end
+            editor:EndUndoAction()
         end
     elseif iChangedLine > -1 then
         if editor:LineFromPosition(s) ~= editor:LineFromPosition(e) then
@@ -520,6 +533,6 @@ end)
 AddEventHandler("OnSwitchFile", function() iChangedLine = -1 end)
 AddEventHandler("OnOpen", function() iChangedLine = -1 end)
 AddEventHandler("OnSave", function() iChangedLine = -1 end)
-AddEventHandler("Autoformat_String", FormatSelectedStrings)
-AddEventHandler("Autoformat_Block", IndentBlockUp)
+AddEventHandler("Format_String", FormatSelectedStrings)
+AddEventHandler("Format_Block", IndentBlockUp)
 

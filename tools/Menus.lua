@@ -244,8 +244,8 @@ _G.sys_Menus.MainWindowMenu = {
         }},
         {'s1', separator= 1},
         {'Autoformat', ru = 'Автоформат', {
-            {'Format Block',  ru = 'Форматировать блок', action=function() if Autoformat_Block then Autoformat_Block() end end, key = 'Ctrl+]'},
-            {'Format Line',  ru = 'Форматировать строку', action=function() if Autoformat_String then Autoformat_String() end end, key = 'Ctrl+['},
+            {'Format Block',  ru = 'Форматировать блок', action=function() if Format_Block then Format_Block() end end, key = 'Ctrl+]'},
+            {'Format Line', ru = 'Форматировать строку', action = function() if Format_String then Format_String() end end, key = 'Ctrl+['},
             {'Autformating Lines',  ru = 'Автоформатирование строк', check_iuprops='autoformat.line', key = 'Ctrl+Shift+['},
         }},
         {'Match &Brace', ru = 'Найти парную скобку', key = 'Ctrl+E', action = IDM_MATCHBRACE},
