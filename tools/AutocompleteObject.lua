@@ -81,9 +81,8 @@ end
 local function useAutocomp()
     if editor.Focus then
         iLex = editor.Lexer
-        if(iLex == SCLEX_LUA or iLex == SCLEX_VB or iLex == SCLEX_VBSCRIPT ) then return true end
         if iLex == SCLEX_FORMENJINE then return cmpobj_GetFMDefault() ~= SCE_FM_SQL_DEFAULT end
-        return false
+        return Ext2Ptrn[props['FileExt']] ~= nil
     end
 end
 -- “ест дл€ распечатки содержимого заданной таблицы
@@ -574,7 +573,6 @@ local function ReCreateStructures(strText,tblFiles)
         autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
         str_vbkwrd = CreateTablesForFile(objects_table,alias_table,props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_vbkwrd ~= nil)
     end
-
     if Favorites_Clear ~= nil then Favorites_Clear() end
     -----------
 
@@ -1087,18 +1085,7 @@ AddEventHandler("OnSwitchFile", function(file)
     if m_ext == SCLEX_FORMENJINE then m_ptrn = (Ext2Ptrn[props['FileExt']] or '&&&&') end
     _G.iuprops["spell.autospell"] = pr
 end)
-require("LuaXml")
 AddEventHandler("OnOpen", function(file)
-    if props['FileExt'] == 'xml' and _G.iuprops['formenjine.old.ext'] == '1' then
-        local t_xml = xml.eval(editor:GetText())
-        if t_xml then
-            local strObjType = t_xml[0]
-            if strObjType ~= 'template' then
-                scite.MenuCommand(1468) --переключение на обычный xml lexer
-                return
-            end
-        end
-    end
 	get_api = true
     ReCreateStructures()
     if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then

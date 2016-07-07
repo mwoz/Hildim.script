@@ -233,4 +233,4 @@ value.text
 menu.anchor
 menu.instance
 menu.recreate {{Y}} N by def.
-
+menu.license

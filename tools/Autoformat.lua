@@ -401,16 +401,17 @@ local function OnUpdateUI_local()
             editor:SetSel(s,e)
             iChangedLine = -1
         elseif curFold and FoldLevel(-1) < FoldLevel(0) then
+            curFold = nil
             local ts = editor:PositionFromLine(l)
             editor.TargetStart = ts
             editor.TargetEnd = editor:findtext('[^ \t\n\r]', SCFIND_REGEXP, ts, editor:PositionFromLine(l + 1))
             local nl = editor.TargetEnd - ts
-            editor:BeginUndoAction()
-            if nl >= tonumber(props['tabsize']) then
+            if nl >= tonumber(props['tabsize']) and editor.StyleAt[editor.TargetEnd + 1] == SCE_FM_VB_KEYWORD then
+                editor:BeginUndoAction()
                 nl = nl - tonumber(props['tabsize'])
                 editor:ReplaceTarget(string.rep(' ', nl))
+                editor:EndUndoAction()
             end
-            editor:EndUndoAction()
         end
     elseif iChangedLine > -1 then
         if editor:LineFromPosition(s) ~= editor:LineFromPosition(e) then

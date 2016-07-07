@@ -401,6 +401,8 @@ textbox.HidePopupList Скрывает всплывающий список.
 textbox.ChangingEventDelay Задержка генерации события Changing в миллисекундах. \nПо умолчанию -1 - событие не генерируется. \nЕсли 0, вызывается по каждому нажатию, которое приводит к изменению текста.\n
 textbox.PrevValue Returns previous value of ctrl(before user edit)
 textbox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
+textbox.NoDataLabelForeColorЦвет NoDataLabel. По умолчанию серый RGB(128, 128, 128)
+textbox.NoDataLabel Устанавливает текст, отображаемый в контроле при пустом значении.\nТекст пропадает при установке фокуса, и появляется при потере фокуса при пустом значении.\nЦвет текста настраивается св-вом NoDataLabelForeColor
 
 #$numberbox=form("num
 #$numberbox=controlscoll%.add(.*"NUMBERBOX
@@ -428,6 +430,8 @@ numberbox.MinValue Минимальное значение, которое может быть установлено. При вво
 numberbox.MaxValue Максимальное значение, которое может быть установлено. При вводе большего числа оно автоматически будет заменено на MaxValue. (по умолчанию - не заданно(NULL))
 numberbox.CaptionFont Set only. Шрифт встроенной в контрол подписи\nНапример: "Verdana;8;Y;N;N"
 numberbox.Format Get\Set number format\nExample: Format = "0.00####"  is same as PrecisionMin=2; PrecisionMax=6;\n\nNote: "K"|"M"|"Y"|"KMY" format specifications are NOT supported for numberbox(ignored if entered).\n
+numberbox.NoDataLabelForeColorЦвет NoDataLabel. По умолчанию серый RGB(128, 128, 128)
+numberbox.NoDataLabel Устанавливает текст, отображаемый в контроле при пустом значении.\nТекст пропадает при установке фокуса, и появляется при потере фокуса при пустом значении.\nЦвет текста настраивается св-вом NoDataLabelForeColor
 
 #$datebox=form("dt
 #$datebox=controlscoll%.add(.*"DATEBOX
