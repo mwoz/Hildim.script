@@ -429,6 +429,7 @@ editor:EncodedFromUTF8(string text)\n = string text
 editor:EndUndoAction()\n End a sequence of actions that is undone and redone as a unit.
 editor:EnsureVisible(int line)\n Ensure a particular line is visible by expanding any header line hiding it.
 editor:EnsureVisibleEnforcePolicy(int line)\n Ensure a particular line is visible by expanding any header line hiding it. Use the currently set visibility policy to determine which range to display.
+editor:ExpandChildren(int line, int level) \n This is used to respond to a change to a line causing its fold level or whether it is a header to change, perhaps when adding or removing a '{'.
 editor:FindColumn(int, int) = int
 editor:FindIndicatorFlash(void, position) = position
 editor:FindIndicatorHide(void, void) = void
@@ -437,6 +438,9 @@ editor:FindText(int flags, findtext ft) = int pos\n Find some text in the docume
 editor:FormFeed()\n Insert a Form Feed character.
 editor:FormFeed(void, void) = void
 editor:FormatRange(bool draw, formatrange fr) = int pos\n On Windows, will draw the document into a display context such as a printer.
+editor:FoldAll(int action)
+editor:FoldChildren(int line, int action)
+editor:FoldLine(int line, int action)
 editor:FreeSubStyles(void, void) = void
 editor:GetCurLine(int length, stringresult text) = string text\n Retrieve the text of the line containing the caret. Returns the index of the caret on the line.
 editor:GetHotspotActiveBack(colour, void) = void

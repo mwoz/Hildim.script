@@ -102,7 +102,7 @@ end
 
 local function checkMiddle(line)
     local l = editor:GetLine(line)
-    return l:find('%s*else[^%w]') or l:find('%s*elseif[^%w]')
+    return l:find('^%s*else[^%w]') or l:find('^%s*elseif[^%w]')
 end
 
 local function Indent(l)
@@ -119,7 +119,7 @@ local function doIndentation(line, bSel)
     if f0 == f1 and checkMiddle(line - 1) then
         for i = line - 2, 0, -1 do
             if FoldLevel(nil, i) < f0 then
-                fn(editor, Indent(LineIndent(nil,i) + (tonumber(props['tabsize']))))
+                fn(editor, Indent(LineIndent(nil, i) + (tonumber(props['tabsize']))))
                 editor.TargetStart = editor:PositionFromLine(line - 1)
                 editor.TargetEnd = editor.TargetStart + LineIndent(nil, line - 1)
                 editor:ReplaceTarget(Indent(LineIndent(nil, i)))
@@ -129,13 +129,13 @@ local function doIndentation(line, bSel)
 
     else
         local d = f0 - f1
-        if d < 0 then d = 0  end
+        if d < 0 then d = 0 end
         if bSel then
             local _, lineEnd = editor:GetLine(line)
             if not lineEnd then return true end
             if editor.CurrentPos - editor:PositionFromLine(line) < lineEnd - 2 then d = 0 end
         elseif f0 > FoldLevel(nil, line + 1) then
-            d = d - (f0 - FoldLevel(nil, line +1))
+            d = d - (f0 - FoldLevel(nil, line + 1))
         end
         if d > 0 then d = 1 end
         --if not bSel and f0 > FoldLevel(nil, line +1) then d = d - (f0 - FoldLevel(nil, line +1)) end

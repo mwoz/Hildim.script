@@ -355,7 +355,6 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
     end
 end)
 
-
 AddEventHandler("OnSave", function(cmd, source)
     if props["ext.lua.startup.script"] == props["FilePath"] then
         scite.PostCommand(POST_SCRIPTRELOAD,0)
@@ -994,7 +993,7 @@ iup.DestroyDialogs = function()
     end
     h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
     _G.iuprops["layout.toolbar_expander"] = h.state
-    if h then tTlb.show_cb(h,4) iup.Detach(h); iup.Destroy(h) end
+    if h then tTlb.show_cb(h, 4) iup.Detach(h); iup.Destroy(h) end
 
     h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
     _G.iuprops["layout.statusbar_expander"] = h.state
@@ -1003,7 +1002,7 @@ iup.DestroyDialogs = function()
     _G.dialogs = nil
     --iup.ShowSideBar(-1)
     for i = 1,  #onDestroy_event do
-       onDestroy_event[i]()
+        onDestroy_event[i]()
     end
     collectgarbage('collect')
 end
@@ -1025,3 +1024,26 @@ function Splash_Screen()
 
 end
 
+AddEventHandler("OnMarginClick", function(margin, modif, line)
+    if margin == 2 and editor.Focus then
+        local curLevel = editor.FoldLevel[line]
+        if shell.bit_and(curLevel, SC_FOLDLEVELHEADERFLAG) == 0 then
+            line = editor.FoldParent[line]
+            curLevel = editor.FoldLevel[line]
+        end
+        if modif > 3 then line = editor.FoldParent[line]; modif = modif - 4 end
+        if modif == 0 then
+            if line == -1 then scite.MenuCommand(IDM_TOGGLE_FOLDALL)
+            else editor:ToggleFold(line) end
+        elseif modif == 1 then
+            CORE.ToggleSubfolders(false, line + 1)
+            return "Y"
+        elseif modif == 2 then
+            editor:FoldChildren(line, 2)
+        elseif modif == 3 then
+            scite.MenuCommand(IDM_TOGGLE_FOLDALL)
+        end
+        CORE.ShowCaretAfterFold()
+        return "Y"
+    end
+end)

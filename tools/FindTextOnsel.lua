@@ -222,29 +222,39 @@ function FindSelToConcole()
     findSettings:FindAll(100, false)
 end
 
-function Toggle_ToggleSubfolders(bShow)
-    local lStart = editor:LineFromPosition(editor.SelectionStart)
+CORE.ToggleSubfolders = function(bShow, line)
+    local action
+    if not line then action = Iif(bShow, 1, 0) end
+    local lStart = line or editor:LineFromPosition(editor.SelectionStart)
     local baseLevel = shell.bit_and(editor.FoldLevel[lStart],SC_FOLDLEVELNUMBERMASK)
     if baseLevel > SC_FOLDLEVELBASE and shell.bit_and(baseLevel,SC_FOLDLEVELHEADERFLAG) == 0 then
-        while (baseLevel <= shell.bit_and(editor.FoldLevel[lStart],SC_FOLDLEVELNUMBERMASK)) and (lStart >=0) do lStart = lStart - 1 end
+        lStart = editor.FoldParent[lStart]
     end
     local lEnd = editor:GetLastChild(lStart, -1)
-
     for l = lStart + 1, lEnd do
         local level = editor.FoldLevel[l]
-        if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and baseLevel  == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-            editor.FoldExpanded[l] = bShow
-            local lineMaxSubord = editor:GetLastChild(l,-1)
-            if l < lineMaxSubord then
-                if bShow then
-                    editor:ShowLines(l + 1, lineMaxSubord)
-                else
-                    editor:HideLines(l + 1, lineMaxSubord)
-                end
-                l = lineMaxSubord
-            end
+        if (shell.bit_and(level, SC_FOLDLEVELHEADERFLAG)~= 0 and baseLevel == shell.bit_and(level, SC_FOLDLEVELNUMBERMASK)) then
+            if not action then action = Iif(editor.FoldExpanded[l], 0, 1) end
+            editor:FoldLine(l, action)
         end
     end
+    CORE.ShowCaretAfterFold()
+end
+
+CORE.ShowCaretAfterFold = function(w)
+    local lineSel = -1
+    if not editor.LineVisible[editor:LineFromPosition(editor.SelectionStart)] or
+        not editor.LineVisible[editor:LineFromPosition(editor.SelectionStart)] then
+        lineSel = editor:LineFromPosition(editor.SelectionStart)
+        repeat
+            lineSel = editor.FoldParent[lineSel]
+        until lineSel <= 0 or editor.LineVisible[lineSel]
+    end
+    if lineSel >= 0 then
+        editor.SelectionStart = editor:PositionFromLine(lineSel)
+        editor.SelectionEnd = editor:PositionFromLine(lineSel)
+    end
+
 end
 
 function Find_FindInDialog(ud)
@@ -252,11 +262,11 @@ function Find_FindInDialog(ud)
     local wholeWord = false
     if (sText == '') then
         sText = GetCurrentWord()
-        wholeWord= true
+        wholeWord = true
     end
-    iup.GetDialogChild(iup.GetLayout(),"cmbFindWhat").value = sText
-    iup.GetDialogChild(iup.GetLayout(),"cmbFindWhat"):SaveHist()
-    iup.GetDialogChild(iup.GetLayout(),"btnFind").action()
+    iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat").value = sText
+    iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat"):SaveHist()
+    iup.GetDialogChild(iup.GetLayout(), "btnFind").action()
 end
 
 function FindNextWrd(ud)
@@ -264,23 +274,23 @@ function FindNextWrd(ud)
     local wholeWord = false
     if (sText == '') then
         sText = GetCurrentWord()
-        wholeWord= true
+        wholeWord = true
     end
     local fs = seacher{
-    wholeWord = wholeWord
-    ,matchCase = false
-    ,wrapFind = true
-    ,backslash = false
-    ,regExp = false
-    ,style = nil
-    ,searchUp = (ud==2)
-    ,replaceWhat = ''
-    ,findWhat = sText
+        wholeWord = wholeWord
+        , matchCase = false
+        , wrapFind = true
+        , backslash = false
+        , regExp = false
+        , style = nil
+        , searchUp = (ud == 2)
+        , replaceWhat = ''
+        , findWhat = sText
     }
     local pos = fs:FindNext(true)
     if wholeWord then
-        editor.SelectionStart = pos +1
-        editor.SelectionEnd = pos +1
+        editor.SelectionStart = pos + 1
+        editor.SelectionEnd = pos + 1
     end
 end
 
@@ -288,21 +298,21 @@ function FindMarkNext()
     local flag1 = 0
     if props['findtext.matchcase'] == '1' then flag1 = SCFIND_MATCHCASE end
     curpos = editor.CurrentPos
-    editor:GotoPos(1+curpos)
+    editor:GotoPos(1 + curpos)
     editor:SearchAnchor()
     local s = editor:SearchNext( SCFIND_WHOLEWORD + flag1, props["findtextsimple.text"])
     if (-1 == s) then
         editor:GotoPos(0)
         editor:SearchAnchor()
         s = editor:SearchNext( SCFIND_WHOLEWORD + flag1, props["findtextsimple.text"])
-        if -1 == s then
+        if - 1 == s then
             editor:GotoPos(curpos)
         end
     end
-    if (s > -1) then
+    if (s > - 1) then
         se = editor.SelectionEnd
         editor:GotoPos(editor.SelectionStart)
-        editor:SetSel(editor.SelectionStart,se)
+        editor:SetSel(editor.SelectionStart, se)
     end
 end
 function FindMarkPrev()

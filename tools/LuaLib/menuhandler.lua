@@ -182,7 +182,7 @@ function s:OnMouseHook(x,y)
                 return
             end
         end
-    elseif y>-65536 then
+    elseif y >- 65536 then
         for i = 1, #labels do
             if activeLabel == labels[i] then
                 i = i + y
@@ -198,19 +198,18 @@ function s:OnMouseHook(x,y)
         left, top, width, height = GetItemPos(1)
 
         reselectedItem = {id = 1, x = left, y = top + height}
-        s:PopMnu(_G.sys_Menus.MainWindowMenu[2][2],left,top + height, true)
-
-
+        activeLabel = labels[reselectedItem.id]
+        scite.PostCommand(POST_CONTINUESHOWMENU,0)
     end
 end
 
 function s:ContinuePopUp()
     if activeLabel then iup.SetAttribute(activeLabel, 'FGCOLOR', clr_select) end
     scite.SwitchMouseHook(true)
-    waited_mnu:popup(w_x , w_y)
+    if waited_mnu then waited_mnu:popup(w_x , w_y) end
     scite.SwitchMouseHook(false)
     if activeLabel then iup.SetAttribute(activeLabel, 'FGCOLOR', clr_normal) end
-    activeLabel, waited_mnu, w_x, w_y = nil,nil, nil, nil
+    activeLabel, waited_mnu, w_x, w_y = nil, nil, nil, nil
     if reselectedItem then
         activeLabel = labels[reselectedItem.id]
         s:PopMnu(_G.sys_Menus.MainWindowMenu[reselectedItem.id +1][2],reselectedItem.x,reselectedItem.y, true)
