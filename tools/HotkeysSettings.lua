@@ -106,7 +106,7 @@ local function Show()
         if modif:find('A') then val = 'Alt+'; bMod = true end
         if modif:find('C') then val = val..'Ctrl+'; bMod = true end
         if modif:find('S') then val = val..'Shift+' end
-        local kStr = iup.KeyCodeToName(k):gsub('^K_',''):gsub('^[mcs]?([A-Z0-9])','%1')
+        local kStr = iup.KeyCodeToName(k):gsub('^K_', ''):gsub('^[mcs]?([A-Z0-9])', '%1')
         kStr = kStr:lower():gsub('^(.)', function(s) return s:upper() end)
         if kStr == 'Pgdn' then kStr = 'PageDown'
         elseif kStr == 'Pgup' then kStr = 'PageUp'
@@ -128,6 +128,8 @@ local function Show()
         elseif kStr == 'Circum' then kStr = '6'
         elseif kStr == 'Ampersand' then kStr = '7'
         elseif kStr == 'Asterisk' then kStr = '8'
+        elseif kStr == 'Bs' or kStr == 'Del' or kStr == 'Sp' or kStr == 'Esc' then kStr = ''
+
         end
         local bSet
         if not string.find(',Lshift,Rshift,Lctrl,Rctrl,Lalt,Ralt,', ','..kStr..',', 1, true ) then val = val..kStr; bSet = true end
