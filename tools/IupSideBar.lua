@@ -553,6 +553,7 @@ local function InitMenuBar()
 end
 
 InitMenuBar()
+dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua") --пока тут
 --Автозагрузка скрытых плагинов
 local str = _G.iuprops["settings.hidden.plugins"] or ''
 local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'

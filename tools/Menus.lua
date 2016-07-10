@@ -390,7 +390,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
         {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
         {'SideBars Settings', ru = 'Настройка боковых панелей...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
-        {'Hidden Plugins', ru = 'Настройка скрытых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')"},
+        {'Hidden Plugins', ru = 'Загрузка фоновых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')"},
         {'s3', separator=1},
         {'Save Configuration', ru = 'Сохранить конфигурацию', action=iup.SaveIuprops},
         {'Load Configuration', ru = 'Загрузить конфигурацию', action=iup.LoadIuprops},
