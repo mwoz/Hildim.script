@@ -1028,6 +1028,7 @@ AddEventHandler("OnMarginClick", function(margin, modif, line)
     if margin == 2 and editor.Focus then
         local curLevel = editor.FoldLevel[line]
         if shell.bit_and(curLevel, SC_FOLDLEVELHEADERFLAG) == 0 then
+            if modif == 0 then return end
             line = editor.FoldParent[line]
             curLevel = editor.FoldLevel[line]
         end
