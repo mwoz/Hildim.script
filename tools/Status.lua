@@ -184,93 +184,93 @@ end
 local zbox_s;
 local function FindTab_Init()
     local sTip = '(Ctrl+G) Нажмите Enter для перехода на позицию'
-    txtCol = iup.text{size='25x'; mask='[0-9]*', tip=sTip, killfocus_cb = GoToPos,
-             k_any=(function(_,c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
-    txtLine = iup.text{size='25x'; mask='[0-9]*', tip=sTip, killfocus_cb = GoToPos,
-             k_any=(function(_,c) if c == iup.K_CR then iup.PassFocus() end end)}
-    txtSel = iup.text{size='25x'; readonly='YES', bgcolor=iup.GetGlobal('DLGBGCOLOR'), canfocus  = "NO"}
-    lblCode = iup.label{size='50x'}
-    lblSel = iup.text{size = '200x0'; readonly='YES',canfocus="NO", bgcolor=iup.GetGlobal('DLGBGCOLOR'),
-        tip='Число вхождений выделенного слова',
-        tips_cb=(function(h,x,y)
-            h.tip='Число вхождений выделенного слова'..Iif(editor.Lexer == SCLEX_FORMENJINE,'\nПоказ цвета под курсором', '')
-        end);
-        button_cb = (function(h, but, pressed, x, y, status)
-            if iup.isdouble(status) and iup.isbutton1(status) then
-                ColorDlg()
-            elseif iup.isbutton3(status) then
-                local mnu = iup.menu
-                {
-                  iup.item{title="Открыть палитру",action=ColorDlg}
-                }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
-              return -1
-            end
-        end)}
-    local function onSpellContext(_,but, pressed, x, y, status)
-        if but == 51 and pressed == 0 then --right
-
+    txtCol = iup.text{size = '25x'; mask = '[0-9]*', tip = sTip, killfocus_cb = GoToPos,
+    k_any =(function(_, c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
+    txtLine = iup.text{size = '25x'; mask = '[0-9]*', tip = sTip, killfocus_cb = GoToPos,
+    k_any =(function(_, c) if c == iup.K_CR then iup.PassFocus() end end)}
+    txtSel = iup.text{size = '25x'; readonly = 'YES', bgcolor = iup.GetGlobal('DLGBGCOLOR'), canfocus = "NO"}
+    lblCode = iup.label{size = '50x'}
+    lblSel = iup.text{size = '200x0'; readonly = 'YES', canfocus = "NO", bgcolor = iup.GetGlobal('DLGBGCOLOR'),
+        tip = 'Число вхождений выделенного слова',
+        tips_cb =(function(h, x, y)
+            h.tip = 'Число вхождений выделенного слова'..Iif(editor.Lexer == SCLEX_FORMENJINE, '\nПоказ цвета под курсором', '')
+    end);
+    button_cb = (function(h, but, pressed, x, y, status)
+        if iup.isdouble(status) and iup.isbutton1(status) then
+            ColorDlg()
+        elseif iup.isbutton3(status) then
             local mnu = iup.menu
             {
-              iup.item{title="Проверить выделенный фрагмент",action=spell_Selected},
-              iup.item{title="Проверить фрагмент с учетом подсветки",action=spell_ByLex},
-              iup.item{title="Показать список ошибок",action=spell_ErrorList},
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+                iup.item{title = "Открыть палитру", action = ColorDlg}
+            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+            return - 1
         end
-    end
-    local sTip='Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
-    zbox_s = iup.zbox{name = "Spelling_zbox",
-        iup.button{image='IMAGE_CheckSpelling2';impress='IMAGE_CheckSpelling'; tip=sTip;canfocus="NO";
-            map_cb=(function(_) if _G.iuprops["spell.autospell"] == "1" then zbox_s.valuepos=1 else zbox_s.valuepos=0 end end);
-            action=(function(_) _G.iuprops["spell.autospell"] = "1"; zbox_s.valuepos=1 end);
-            button_cb=onSpellContext;
-        };
-        iup.button{image='IMAGE_CheckSpelling';impress='IMAGE_CheckSpelling2'; tip=sTip;canfocus="NO";
-            action=(function(_) _G.iuprops["spell.autospell"] = "0"; zbox_s.valuepos=0 end);
-            button_cb=onSpellContext;
-        };
-    }
-    local tBtns ={}
-    if _tmpSidebarButtons then
-        for i = 1,  #_tmpSidebarButtons do
-            table.insert(tBtns, _tmpSidebarButtons[i])
-        end
-        _tmpSidebarButtons = nil
-    end
+end)}
+local function onSpellContext(_, but, pressed, x, y, status)
+    if but == 51 and pressed == 0 then --right
 
-    StatusBar_obj.Tabs.statusbar = {
-        handle = iup.hbox{
-            iup.label{title='Line: '; fontstyle='Bold'};   --sdfds esvdf
-            txtLine;
-            iup.label{title='Colimn: '; fontstyle='Bold'};   --sdfds esvdf
-            txtCol;
-            iup.label{title='Selection: '; fontstyle='Bold'};
-            txtSel;
-            lblSel;
-            zbox_s;
-            expand='HORIZONTAL', minsize='200x', alignment='ACENTER',gap='8',margin='3x0' ,
-            lblCode,
-            iup.fill{},
-            iup.hbox(tBtns),
-        };
-        OnUpdateUI = _OnUpdateUI;
-        OnDwellStart = ShowCurrentColour;
-        OnOpen=OnSwitch;
-        OnSwitchFile=OnSwitch;
-        OnMenuCommand=(function(cmd, source)
-            if cmd == IDM_GOTO then
-                iup.SetFocus(txtLine)
-                return true
-            elseif cmd >= 150 and cmd <= 154 then
-                lblCode.title = UpdateStatusCodePage(cmd)
-            end
-        end);
-        SetFindRes = (function(what,count)
-                            if count > 0 then
-                                if needCoding then what = what:from_utf8(1251) end
-                                lblSel.value=what..'   :'..count..' entry'
-                            else lblSel.value=''
-                    end end)
-        }
+        local mnu = iup.menu
+        {
+            iup.item{title = "Проверить выделенный фрагмент", action = spell_Selected},
+            iup.item{title = "Проверить фрагмент с учетом подсветки", action = spell_ByLex},
+            iup.item{title = "Показать список ошибок", action = spell_ErrorList},
+        }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+    end
+end
+local sTip = 'Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
+zbox_s = iup.zbox{name = "Spelling_zbox",
+    iup.button{image = 'IMAGE_CheckSpelling2';impress = 'IMAGE_CheckSpelling'; tip = sTip;canfocus = "NO";
+        map_cb =(function(_) if _G.iuprops["spell.autospell"] == "1" then zbox_s.valuepos = 1 else zbox_s.valuepos = 0 end end);
+        action =(function(_) _G.iuprops["spell.autospell"] = "1"; zbox_s.valuepos = 1 end);
+        button_cb = onSpellContext;
+    };
+    iup.button{image = 'IMAGE_CheckSpelling';impress = 'IMAGE_CheckSpelling2'; tip = sTip;canfocus = "NO";
+        action =(function(_) _G.iuprops["spell.autospell"] = "0"; zbox_s.valuepos = 0 end);
+        button_cb = onSpellContext;
+    };
+}
+local tBtns ={}
+if _tmpSidebarButtons then
+    for i = 1,  #_tmpSidebarButtons do
+        table.insert(tBtns, _tmpSidebarButtons[i])
+    end
+    _tmpSidebarButtons = nil
+end
+
+StatusBar_obj.Tabs.statusbar = {
+    handle = iup.hbox{
+        iup.label{title = 'Line: '; fontstyle = 'Bold'};   --sdfds esvdf
+        txtLine;
+        iup.label{title = 'Colimn: '; fontstyle = 'Bold'};   --sdfds esvdf
+        txtCol;
+        iup.label{title = 'Selection: '; fontstyle = 'Bold'};
+        txtSel;
+        lblSel;
+        Iif(_G.g_session["spell.runned"], zbox_s, nil);
+        expand = 'HORIZONTAL', minsize = '200x', alignment = 'ACENTER', gap = '8', margin = '3x0' ,
+        lblCode,
+        iup.fill{},
+        iup.hbox(tBtns),
+    };
+    OnUpdateUI = _OnUpdateUI;
+    OnDwellStart = ShowCurrentColour;
+    OnOpen = OnSwitch;
+    OnSwitchFile = OnSwitch;
+    OnMenuCommand =(function(cmd, source)
+        if cmd == IDM_GOTO then
+            iup.SetFocus(txtLine)
+            return true
+        elseif cmd >= 150 and cmd <= 154 then
+            lblCode.title = UpdateStatusCodePage(cmd)
+        end
+end);
+SetFindRes = (function(what, count)
+    if count > 0 then
+        if needCoding then what = what:from_utf8(1251) end
+        lblSel.value = what..'   :'..count..' entry'
+    else lblSel.value = ''
+        end end)
+    }
 
 end
 

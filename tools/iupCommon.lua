@@ -1047,3 +1047,14 @@ AddEventHandler("OnMarginClick", function(margin, modif, line)
         return "Y"
     end
 end)
+
+--Расширения, загружаемые в любом случае
+require "menuhandler"
+_G.g_session = {}
+dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\Open_Selected_Filename.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\ColorSettings.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")

@@ -63,6 +63,20 @@ local function SetFindresCount()
     end
 end
 
+local function CopyPathToClipboard(what)
+    local str
+    if what == 'name' then
+        str=string.from_utf8(props['FileNameExt'],1251)
+    elseif what == 'path' then
+        str=string.from_utf8(props['FileDir'],1251)
+    elseif what=="text" then
+        str = string.from_utf8(editor:GetText(),editor.CodePage)
+    elseif what=="all" then
+        str=string.from_utf8(props['FileDir']..'\\'..props['FileNameExt'],1251)
+    end
+    shell.set_clipboard(str)
+end
+
 local tHilight, tLangs = {},{}
 
 _G.sys_Menus = {}
@@ -250,9 +264,8 @@ _G.sys_Menus.MainWindowMenu = {
         }},
         {'Match &Brace', ru = 'Найти парную скобку', key = 'Ctrl+E', action = IDM_MATCHBRACE},
         {'Select t&o Brace', ru = 'Выделить до парноий скобки', key = 'Ctrl+Shift+E', action = IDM_SELECTTOBRACE},
-        {'Insert Special Char', ru = 'Вставить спецсимвол', action = function() SpecialChar() end, image = 'edit_symbol_µ'},
         {'Sorting of lines A… z / z… A', ru = 'Сортировать строки A… z / z… A', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SortText.lua')"},
-
+        {'s2', separator= 1},
         {'S&how Calltip', ru = 'Показать подсказку', key = 'Ctrl+?', action = function() ShowTipManualy() end, image = 'ui_tooltip_balloon_bottom_µ',},
         -- {'Complete S&ymbol', ru = 'Завершить слово(из API и текста)', key = 'Ctrl+I', action = IDM_COMPLETE},
         {'Complete S&ymbol', ru = 'Завершить слово(из API)', key = 'Ctrl++', action= function() ShowListManualy() end},
@@ -377,6 +390,7 @@ _G.sys_Menus.MainWindowMenu = {
         {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
         {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
         {'SideBars Settings', ru = 'Настройка боковых панелей...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
+        {'Hidden Plugins', ru = 'Настройка скрытых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')"},
         {'s3', separator=1},
         {'Save Configuration', ru = 'Сохранить конфигурацию', action=iup.SaveIuprops},
         {'Load Configuration', ru = 'Загрузить конфигурацию', action=iup.LoadIuprops},

@@ -41,7 +41,6 @@ function sidebar_Switch(n)
             if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
         end
     end
-
 end
 
 local function  CreateToolBar()
@@ -554,6 +553,19 @@ local function InitMenuBar()
 end
 
 InitMenuBar()
+--Автозагрузка скрытых плагинов
+local str = _G.iuprops["settings.hidden.plugins"] or ''
+local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'
+local i = 0
+for p in str:gmatch('[^¦]+') do
+    local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+    if pI then
+        pI.hidden()
+    else
+        pritn('Hidden plugin "'..p..'" not found')
+    end
+end
+
 InitSideBar()
 InitToolBar()
 

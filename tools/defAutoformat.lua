@@ -11,11 +11,13 @@ local strunMin2 = '(\\- [\\d\\w_(]'
 local operStyle = 10
 local keywordStyle = 5
 
+_G.g_session['custom.autoformat.lexers'] = {}
+
 local function FormatString(line)
     local lStart = editor:PositionFromLine(line)
     local lEnd = lStart + editor:GetLine(line):len()
     local lS = lStart
-    local    l
+    local l
 
     while lS and lS < lEnd do
         l, lS = editor:findtext(chLeftSide, SCFIND_REGEXP, lS, lEnd)
@@ -97,7 +99,8 @@ local function LineIndent(deltaL, L)
     local l = editor:PositionFromLine(line)
     local _, ln = editor:GetLine(line)
     local e = editor:findtext('[^ \t\n\r]', SCFIND_REGEXP, l, l + ln - 2) or (l + ln - 2)
-    return (editor:textrange(l, e) or ''):gsub('\t', strTab):len()
+    local strInd = (editor:textrange(l, e) or '')
+    return strInd:gsub('\t', strTab):len(), strInd:len()
 end
 
 local function checkMiddle(line)
@@ -121,7 +124,8 @@ local function doIndentation(line, bSel)
             if FoldLevel(nil, i) < f0 then
                 fn(editor, Indent(LineIndent(nil, i) + (tonumber(props['tabsize']))))
                 editor.TargetStart = editor:PositionFromLine(line - 1)
-                editor.TargetEnd = editor.TargetStart + LineIndent(nil, line - 1)
+                local _, ind = LineIndent(nil, line - 1)
+                editor.TargetEnd = editor.TargetStart + ind
                 editor:ReplaceTarget(Indent(LineIndent(nil, i)))
                 return
             end
@@ -179,12 +183,12 @@ AddEventHandler("OnUpdateUI", function()
             local curS = editor.SelectionStart
             local ls = editor:LineFromPosition(curS)
             local cL = FoldLevel(-1)
-            local curI = LineIndent(0)
+            local curI, curIPos = LineIndent(0)
             for i = ls - 1,0,-1 do
                 if cL == FoldLevel(ls - i) then
                     local newPos = curS - (curI - LineIndent(ls - i))
                     editor.TargetStart = editor:PositionFromLine(ls)
-                    editor.TargetEnd = editor:PositionFromLine(ls) + curI
+                    editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
                     editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
                     editor.SelectionStart = newPos
                     editor.SelectionEnd = newPos
@@ -229,7 +233,8 @@ AddEventHandler("Format_Block", function()
     for i = lineStart, lineEnd do
         FormatString(i - 1)
         editor.TargetStart = editor:PositionFromLine(i)
-        editor.TargetEnd = editor:PositionFromLine(i) + LineIndent(nil, i)
+        local _, ind = LineIndent(nil, i)
+        editor.TargetEnd = editor:PositionFromLine(i) + ind
         doIndentation(i)
     end
     editor:EndUndoAction()
