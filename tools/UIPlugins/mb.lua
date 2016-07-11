@@ -3,6 +3,7 @@
 -- tab0:memo_path   Path and Mask
 ----------------------------------------------------------
 require "mblua"
+dofile (props["SciteDefaultHome"].."\\tools\\Etc\\sqlObjects.lua")
 local myId = "Sybase"
 
 local cmb_Subjects

@@ -15,7 +15,7 @@ _G.g_session['custom.autoformat.lexers'] = {}
 
 local function FormatString(line)
     local lStart = editor:PositionFromLine(line)
-    local lEnd = lStart + editor:GetLine(line):len()
+    local lEnd = lStart + (editor:GetLine(line) or ''):len()
     local lS = lStart
     local l
 
@@ -141,7 +141,7 @@ local function doIndentation(line, bSel)
         elseif f0 > FoldLevel(nil, line + 1) then
             d = d - (f0 - FoldLevel(nil, line + 1))
         end
-        if d > 0 then d = 1 end
+        if d > 0 then d = 1 elseif d < 0 then d = -1 end
         --if not bSel and f0 > FoldLevel(nil, line +1) then d = d - (f0 - FoldLevel(nil, line +1)) end
         fn(editor, Indent(LineIndent(nil, line - 1) + (d *  (tonumber(props['tabsize'])))))
     end

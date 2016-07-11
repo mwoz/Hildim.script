@@ -162,16 +162,22 @@ _G.sys_Menus.OUTPUT = {
 }
 
 _G.sys_Menus.FINDRES = {
-    {link='Edit¦Conventional¦Cu&t'},
-    {link='Edit¦Conventional¦&Copy'},
-    {link='Edit¦Conventional¦&Paste'},
-    {link='Edit¦Conventional¦&Delete'},
-    {'s1', separator=2},
-    {link='Tools¦Clear &Find Result'},
-    {'DblClick Only On Number', ru='DblClick только по номеру', check_boolean='findres.clickonlynumber'},
-    {'Group By Name', ru='Группировать по имени файла', check_boolean='findres.groupbyfile'},
-    {'Number Of Find Results...', ru='Результатов поиска не более....', action=SetFindresCount},
-    {'slast', separator=1},
+    {link = 'Edit¦Conventional¦Cu&t'},
+    {link = 'Edit¦Conventional¦&Copy'},
+    {link = 'Edit¦Conventional¦&Paste'},
+    {link = 'Edit¦Conventional¦&Delete'},
+    {'s1', separator = 2},
+    {link = 'Tools¦Clear &Find Result'},
+    {'DblClick Only On Number', ru = 'DblClick только по номеру', check_boolean = 'findres.clickonlynumber'},
+    {'Group By Name', ru = 'Группировать по имени файла', check_boolean = 'findres.groupbyfile'},
+    {'Number Of Find Results...', ru = 'Результатов поиска не более....', action = SetFindresCount},
+    {'Open Files', plane = 1, visible = "findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER" ,{
+        {'s_OpenFiles', separator = 1},
+        {'Open Files', ru = 'Открыть файлы', action = function() CORE.OpenFoundFiles(1) end, },
+        {'Close Files', ru = 'Закрыть файлы', action = function() CORE.OpenFoundFiles(2) end, },
+        {'Close If Not Found', ru = 'Закрыть не найденные', action = function() CORE.OpenFoundFiles(3) end, },
+    }},
+    {'slast', separator = 1},
 
 }
 
@@ -205,11 +211,11 @@ _G.sys_Menus.MainWindowMenu = {
         {'Block Page Up', key = 'Alt+PageUp', action = function() editor:PageUpRectExtend() end},
         {'Block Page Down', key = 'Alt+PageDown', action = function() editor:PageDownRectExtend() end},
     },},
-    {'File', ru='Файл',{
-        {'New', ru='Создать', key = 'Ctrl+N', action = IDM_NEW, image = 'document__plus_µ'},
+    {'File', ru = 'Файл',{
+        {'New', ru = 'Создать', key = 'Ctrl+N', action = IDM_NEW, image = 'document__plus_µ'},
         {'&Open...', ru = 'Открыть', key = 'Ctrl+O', action = IDM_OPEN, image = 'folder_open_document_µ'},
         {'Open Selected &Filename', ru = 'Открыть выделенный файл', key = 'Ctrl+Shift+O', action = IDM_OPENSELECTED, active = function() return editor:GetSelText():find('%w:[\\/][^"\n\r\t]') end,},
-        {'Recent Files', ru = 'Недавние файлы', visible="iuprops['resent.files.list']~=nil", function() return iuprops['resent.files.list']:GetMenu() end},
+        {'Recent Files', ru = 'Недавние файлы', visible = "iuprops['resent.files.list']~=nil", function() return iuprops['resent.files.list']:GetMenu() end},
         {'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+R', action = IDM_REVERT},
         {'&Close', ru = 'Закрыть', key = 'Ctrl+W', action = IDM_CLOSE},
         {'C&lose All', ru = 'Закрыть все', action = IDM_CLOSEALL},
@@ -217,58 +223,58 @@ _G.sys_Menus.MainWindowMenu = {
         {'Save &As...', ru = 'Сохранить как...', key = 'Ctrl+Shift+S', action = IDM_SAVEAS, image = 'disk__pencil_µ'},
         {'Save a Cop&y...', ru = 'Сохранить копию...', key = 'Ctrl+Shift+P', action = IDM_SAVEACOPY, image = 'disk__plus_µ'},
         --[[{'Copy Pat&h',  action = IDM_COPYPATH},]]
-        {'Encoding', ru='Кодировка',{check_idm='editor.unicode.mode', radio = 1,
-            {'&Code Page Property', ru='Заданная настройкой codepage', action = IDM_ENCODING_DEFAULT},
-            {'UTF-16 &Big Endian',  action = IDM_ENCODING_UCS2BE},
-            {'UTF-16 &Little Endian',  action = IDM_ENCODING_UCS2LE},
-            {'UTF-8 &with BOM', ru='UTF-8 с заголовком', action = IDM_ENCODING_UTF8},
-            {'&UTF-8',  action = IDM_ENCODING_UCOOKIE},
+        {'Encoding', ru = 'Кодировка',{check_idm = 'editor.unicode.mode', radio = 1,
+            {'&Code Page Property', ru = 'Заданная настройкой codepage', action = IDM_ENCODING_DEFAULT},
+            {'UTF-16 &Big Endian', action = IDM_ENCODING_UCS2BE},
+            {'UTF-16 &Little Endian', action = IDM_ENCODING_UCS2LE},
+            {'UTF-8 &with BOM', ru = 'UTF-8 с заголовком', action = IDM_ENCODING_UTF8},
+            {'&UTF-8', action = IDM_ENCODING_UCOOKIE},
         },},
-        {'&Export', ru='Экспорт',{
+        {'&Export', ru = 'Экспорт',{
             {'As &HTML...' , ru = 'В &HTML..', action = IDM_SAVEASHTML},
             {'As &RTF...'  , ru = 'В &RTF...', action = IDM_SAVEASRTF},
             {'As &PDF...'  , ru = 'В &PDF...', action = IDM_SAVEASPDF},
             {'As &LaTeX...', ru = 'В &LaTeX...', action = IDM_SAVEASTEX},
             {'As &XML...'  , ru = 'В &XML...', action = IDM_SAVEASXML},
         },},
-        {'s1', separator=1},
+        {'s1', separator = 1},
         {'Save Session...', ru = 'Сохранить сессию', action = iup.SaveSession,},
         {'Load Session...', ru = 'Загрузить сессию', action = iup.LoadSession,},
-        {'s2', separator=1},
+        {'s2', separator = 1},
         {'Page Set&up...', ru = 'Параметры страницы', action = IDM_PRINTSETUP, image = 'layout_design_µ'},
         {'&Print...', ru = 'Печать...', key = 'Ctrl+P', action = IDM_PRINT, image = 'printer_µ'},
-        {'s3', separator=1},
-        {'Exit', ru='Выход', action = IDM_QUIT},
+        {'s3', separator = 1},
+        {'Exit', ru = 'Выход', action = IDM_QUIT},
     },},
-    {'Edit', ru='Правка',{
-        {'Conventional',  ru = 'Стандартные', {
-            {'&Undo', ru = 'Отменить', key = 'Ctrl+Z',key_external = 1, action = IDM_UNDO, active=function() return scintilla():CanUndo() end, image = 'arrow_return_270_left_µ'},
-            {'&Redo', ru = 'Повторить', key = 'Ctrl+Y',key_external = 1, action = IDM_REDO, active=function() return scintilla():CanRedo() end, image = 'arrow_return_270_µ'},
-            {'s1',  separator=1},
-            {'Cu&t', ru = 'Вырезать', key = 'Ctrl+X',key_external = 1, action = IDM_CUT, active=IsSelection, image = 'scissors_µ'},
-            {'&Copy', ru = 'Копировать', key = 'Ctrl+C',key_external = 1, action = IDM_COPY, active=IsSelection, image = 'document_copy_µ'},
-            {'&Paste', ru = 'Вставить', key = 'Ctrl+V',key_external = 1, action = IDM_PASTE, image = 'clipboard_paste_µ', active=function() return bCanPaste end,},
-            {'Duplicat&e', ru = 'Дублировать', key = 'Ctrl+D',key_external = 1, action = IDM_DUPLICATE, image = 'yin_yang_µ'},
-            {'&Delete', ru = 'Удалить', key = 'Del',key_external = 1, action = IDM_CLEAR, image = 'cross_script_µ'},
-            {'Select &All', ru = 'Выбрать все', key = 'Ctrl+A',key_external = 1, action = IDM_SELECTALL},
-            {'Copy as RT&F', ru = 'Копировать в формате RTF', action = IDM_COPYASRTF, active=IsSelection},
+    {'Edit', ru = 'Правка',{
+        {'Conventional', ru = 'Стандартные', {
+            {'&Undo', ru = 'Отменить', key = 'Ctrl+Z', key_external = 1, action = IDM_UNDO, active = function() return scintilla():CanUndo() end, image = 'arrow_return_270_left_µ'},
+            {'&Redo', ru = 'Повторить', key = 'Ctrl+Y', key_external = 1, action = IDM_REDO, active = function() return scintilla():CanRedo() end, image = 'arrow_return_270_µ'},
+            {'s1', separator = 1},
+            {'Cu&t', ru = 'Вырезать', key = 'Ctrl+X', key_external = 1, action = IDM_CUT, active = IsSelection, image = 'scissors_µ'},
+            {'&Copy', ru = 'Копировать', key = 'Ctrl+C', key_external = 1, action = IDM_COPY, active = IsSelection, image = 'document_copy_µ'},
+            {'&Paste', ru = 'Вставить', key = 'Ctrl+V', key_external = 1, action = IDM_PASTE, image = 'clipboard_paste_µ', active = function() return bCanPaste end,},
+            {'Duplicat&e', ru = 'Дублировать', key = 'Ctrl+D', key_external = 1, action = IDM_DUPLICATE, image = 'yin_yang_µ'},
+            {'&Delete', ru = 'Удалить', key = 'Del', key_external = 1, action = IDM_CLEAR, image = 'cross_script_µ'},
+            {'Select &All', ru = 'Выбрать все', key = 'Ctrl+A', key_external = 1, action = IDM_SELECTALL},
+            {'Copy as RT&F', ru = 'Копировать в формате RTF', action = IDM_COPYASRTF, active = IsSelection},
         }},
-        {'Xml',  ru ='Xml', visible_ext='xml,form,rform,cform',{
-            {'Format Xml', ru='Форматировать Xml', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\FormatXml.lua')", image = 'broom_code_µ',},
+        {'Xml', ru = 'Xml', visible_ext = 'xml,form,rform,cform',{
+            {'Format Xml', ru = 'Форматировать Xml', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\FormatXml.lua')", image = 'broom_code_µ',},
         }},
-        {'s1', separator= 1},
+        {'s1', separator = 1},
         {'Autoformat', ru = 'Автоформат', {
-            {'Format Block',  ru = 'Форматировать блок', action=function() if Format_Block then Format_Block() end end, key = 'Ctrl+]'},
+            {'Format Block', ru = 'Форматировать блок', action = function() if Format_Block then Format_Block() end end, key = 'Ctrl+]'},
             {'Format Line', ru = 'Форматировать строку', action = function() if Format_String then Format_String() end end, key = 'Ctrl+['},
-            {'Autformating Lines',  ru = 'Автоформатирование строк', check_iuprops='autoformat.line', key = 'Ctrl+Shift+['},
+            {'Autformating Lines', ru = 'Автоформатирование строк', check_iuprops = 'autoformat.line', key = 'Ctrl+Shift+['},
         }},
         {'Match &Brace', ru = 'Найти парную скобку', key = 'Ctrl+E', action = IDM_MATCHBRACE},
         {'Select t&o Brace', ru = 'Выделить до парноий скобки', key = 'Ctrl+Shift+E', action = IDM_SELECTTOBRACE},
         {'Sorting of lines A… z / z… A', ru = 'Сортировать строки A… z / z… A', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SortText.lua')"},
-        {'s2', separator= 1},
+        {'s2', separator = 1},
         {'S&how Calltip', ru = 'Показать подсказку', key = 'Ctrl+?', action = function() ShowTipManualy() end, image = 'ui_tooltip_balloon_bottom_µ',},
         -- {'Complete S&ymbol', ru = 'Завершить слово(из API и текста)', key = 'Ctrl+I', action = IDM_COMPLETE},
-        {'Complete S&ymbol', ru = 'Завершить слово(из API)', key = 'Ctrl++', action= function() ShowListManualy() end},
+        {'Complete S&ymbol', ru = 'Завершить слово(из API)', key = 'Ctrl++', action = function() ShowListManualy() end},
         {'Complete &Word', ru = 'Завершить слово(из текста)', key = 'Ctrl+Enter', action = IDM_COMPLETEWORD},
         {'Expand Abbre&viation', ru = 'Вставить сокращение (%SEL%=выделение)', key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
         {'Expand Abbre&viation', ru = 'Вставить сокращение (%SEL%=клипбоард)', key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
@@ -279,14 +285,22 @@ _G.sys_Menus.MainWindowMenu = {
         {'Make &Selection Uppercase', ru = 'Перевести в верхний регистр', key = 'Ctrl+Shift+U', action = IDM_UPRCASE, image = 'edit_uppercase_µ'},
         {'Make Selection &Lowercase', ru = 'Перевести в нижний регистр', key = 'Ctrl+U', action = IDM_LWRCASE, image = 'edit_lowercase_µ'},
     },},
-    {'Search', ru='Поиск',{
+    {'Search', ru = 'Поиск',{
         {'&Find...', ru = 'Найти', key = 'Ctrl+F', action = IDM_FIND, image = 'IMAGE_search'},
         {'Find &Next', ru = 'Найти далее', key = 'F3', action = IDM_FINDNEXT},
         {'Find Previou&s', ru = 'Предыдущее совпадение', key = 'Shift+F3', action = IDM_FINDNEXTBACK},
         {'F&ind in Files...', ru = 'Найти в файлах', key = 'Ctrl+Shift+F', action = IDM_FINDINFILES, image = 'folder_search_result_µ'},
         {'R&eplace...', ru = 'Заменить', key = 'Ctrl+H', action = IDM_REPLACE, image = 'IMAGE_Replace'},
-        {'s0', separator=1},
-        {'s1', separator=1},
+        {'Marks', ru = 'Метки', action = function() CORE.ActivateFind(3) end, key = 'Ctrl+M', image = 'marker_µ',},
+        {'s0', separator = 1},
+        {'Search', ru = 'Поиск', plane = 1,{
+            {'s_FindTextOnSel', separator = 1},
+            {'Find Next Word/Selection', ru = 'Слово/выделение - в диалог поиска', action = Find_FindInDialog, key='Ctrl+F3',},
+            {'Next Word/Selection', ru = 'Следующее слово/выделение', action = function() FindNextWrd(2) end, key='Alt+F3',},
+            {'Prevous Word/Selection', ru = 'Предыдущее слово/выделение', action = function() FindNextWrd(2) end, key ='Alt+Shift+F3',},
+            {'Find All Word/Selection(Ctrl+Alt+Click)', ru = 'Найти все слова/выделения(Ctrl+Alt+Click)', action = FindSelToConcole, key = 'Alt+Shift+F',},
+        }},
+        {'s1', separator = 1},
         {'&Go to definition(Shift+Click)', ru = 'Перейти к описанию(Shift+Click)', key = 'F12', action = "menu_GoToObjectDefenition()"},
         {'&Go to...', ru = 'Перейти на позицию...', key = 'Ctrl+G', action = IDM_GOTO},
         {'Next Book&mark', ru = 'Следующая закладка', key = 'F2', action = IDM_BOOKMARK_NEXT, image = 'bookmark__arrow_µ'},
@@ -294,133 +308,132 @@ _G.sys_Menus.MainWindowMenu = {
         {'Toggle Bookmar&k', ru = 'Добавить/Удалить закладку', key = 'Ctrl+F2', action = IDM_BOOKMARK_TOGGLE, image = 'bookmark_µ'},
         {'&Clear All Bookmarks', ru = 'Очистить все закладки', action = IDM_BOOKMARK_CLEARALL},
     },},
-    {'View', ru='Вид',{
-        {'Folding', ru='Складка', plane=1, {
+    {'View', ru = 'Вид',{
+        {'Folding', ru = 'Складка', plane = 1, {
             {'Toggle &current fold', ru = 'Свернуть/Развернуть текущий блок', action = IDM_EXPAND},
             {'Toggle &all folds', ru = 'Свернуть/Развернуть все блоки', action = IDM_TOGGLE_FOLDALL},
             {'Toggle &recurse current fold', ru = 'Свернуть/Развернуть рекурсивно текущий блок', action = IDM_TOGGLE_FOLDRECURSIVE},
-            {'Collapse Subfolders', ru = 'Свернуть подблоки', key='Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false)"},
-            {'Expand Subfolders', ru = 'Развернуть подблоки', key='Ctrl+Shift++', action = "CORE.ToggleSubfolders(true)"},
+            {'Collapse Subfolders', ru = 'Свернуть подблоки', key = 'Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false)"},
+            {'Expand Subfolders', ru = 'Развернуть подблоки', key = 'Ctrl+Shift++', action = "CORE.ToggleSubfolders(true)"},
         }},
-        {'s2', separator=1},
+        {'s2', separator = 1},
         {'Full Scree&n', ru = 'Полноэкранный режим', key = 'F11', action = IDM_FULLSCREEN},
         {'&Menu Bar', ru = 'Панель меню', action = function() iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "MenuBar").isOpen() end},
         {'&Tool Bar', ru = 'Панель инструментов', action = function() iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").isOpen() end},
         {'Status Bar', ru = 'Панель статуса', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen() end},
         {'Tab &Bar', ru = 'Вкладки', action = IDM_VIEWTABBAR, check = "props['tabbar.visible']=='1'"},
-        {'s2', separator=1},
+        {'s2', separator = 1},
         {'&Whitespace', ru = 'Пробелы', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},
         {'&End of Line', ru = 'Символы перевода строк', key = 'Ctrl+Shift+9', action = IDM_VIEWEOL, check = "editor.ViewEOL"},
         {'&Indentation Guides', ru = 'Направляющие отступа', action = IDM_VIEWGUIDES, check = "props['view.indentation.guides']=='1'"},
         {'&Line Numbers', ru = 'Нумера строк', action = IDM_LINENUMBERMARGIN, check = "props['line.margin.visible']=='1'"},
         {'&Margin', ru = 'Закладки', action = IDM_SELMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,1)>0"},
         {'&Fold Margin', ru = 'Поле сворачивания блоков текста', action = IDM_FOLDMARGIN, check = "scite.SendEditor(SCI_GETMARGINWIDTHN,2)>0"},
-        {'s3', separator=1},
-        {'slast', separator=1},
+        {'s3', separator = 1},
+        {'slast', separator = 1},
 
     },},
-    {'Tools', ru='Инструменты',{
+    {'Tools', ru = 'Инструменты',{
         {'&Compile', ru = 'Компилировать', key = 'Ctrl+F7', action = IDM_COMPILE, image = 'compile_µ'},
         {'&Build', ru = 'Собрать', key = 'F7', action = IDM_BUILD, image = 'building__arrow_µ'},
         {'&Go', ru = 'Выполнить', key = 'F5', action = IDM_GO, image = 'control_µ'},
         {'&Stop Executing', ru = 'Остановить выполнение', key = 'Ctrl+Break', action = IDM_STOPEXECUTE},
-        {'Script', ru='Скрипт автозагрузки',{
-            {'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', action = function() scite.PostCommand(POST_SCRIPTRELOAD,0) end,},
+        {'Script', ru = 'Скрипт автозагрузки',{
+            {'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', action = function() scite.PostCommand(POST_SCRIPTRELOAD, 0) end,},
         },},
-        {'s1', separator=1},
-        {'Utils', ru='Утилиты',{
-            {'Lpeg Tester', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\lpegTester.lua')",},
-            {'Replace spaces (TABs <-> Spaces)', ru ='Заменить табы на пробелы', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\IndentTabToSpace.lua')",},
-            {'4->3 Tab size Indent', ru ='Отступ 4->3', action=function() For2ThreeTabIndent() end,},
-            {'LayOut Dialog', action=(function()
-                    local f = iup.filedlg{}
-                    iup.SetNativeparent(f, "SCITE")
-                    f:popup()
-                    local path = f.value
-                    f:destroy()
-                     testHandle = nil
-                    if path ~= nil then
-                        local l = io.open(path)
-                        local strLua = l:read('*a')
-                        l:close()
-                        local _,_, fName = strLua:find("function (create_dialog_[_%w]+)")
-                        strLua = strLua..'\n testHandle = '..fName..'()'
-                        dostring(strLua)
-                    end
-                    local dlg = iup.LayoutDialog(testHandle)
-                    iup.Show(dlg)
-                  end),
-            },
+        {'s1', separator = 1},
+        {'Utils', ru = 'Утилиты',{
+            {'Lpeg Tester', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\lpegTester.lua')",},
+            {'Replace spaces (TABs <-> Spaces)', ru = 'Заменить табы на пробелы', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\IndentTabToSpace.lua')",},
+            {'4->3 Tab size Indent', ru = 'Отступ 4->3', action = function() For2ThreeTabIndent() end,},
+            {'LayOut Dialog', action =(function()
+                local f = iup.filedlg{}
+                iup.SetNativeparent(f, "SCITE")
+                f:popup()
+                local path = f.value
+                f:destroy()
+                testHandle = nil
+                if path ~= nil then
+                    local l = io.open(path)
+                    local strLua = l:read('*a')
+                    l:close()
+                    local _, _, fName = strLua:find("function (create_dialog_[_%w]+)")
+                    strLua = strLua..'\n testHandle = '..fName..'()'
+                    dostring(strLua)
+                end
+                local dlg = iup.LayoutDialog(testHandle)
+                iup.Show(dlg)
+            end),},
         },},
         {'ASCII Table', ru = 'Таблица ASCII символов', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ASCIITable.lua')"},
-        {'s2', separator=1},
+        {'s2', separator = 1},
         {'&Next Message', ru = 'Следующее сообщение', key = 'F4', action = IDM_NEXTMSG},
         {'&Previous Message', ru = 'Предыдущее сообщение', key = 'Shift+F4', action = IDM_PREVMSG},
         {'Clear &Output', ru = 'Очистить окно консоли', key = 'Shift+F5', action = IDM_CLEAROUTPUT},
         {'Clear &Find Result', ru = 'Очистить результаты поиска', action = "findres:SetText('')"},
         {'&Switch Pane', ru = 'Редактирование/Консоль', key = 'Ctrl+F6', action = IDM_SWITCHPANE},
     },},
-    {'Options', ru='Настройки',{
+    {'Options', ru = 'Настройки',{
 
         {'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
         {'Wrap Find &Result', ru = 'Перенос по словам в результатах поиска', action = IDM_WRAPFINDRES, check = "props['findres.wrap']=='1'"},
         {'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
-        {'s2', separator=1},
-        {'Line End Characters', ru='Символы перевода строк',{radio = 1,
-            {'CR &+ LF',  action = IDM_EOL_CRLF, check = "editor.EOLMode==SC_EOL_CRLF"},
-            {'&CR',  action = IDM_EOL_CR, check = "editor.EOLMode==SC_EOL_CR"},
-            {'&LF',  action = IDM_EOL_LF, check = "editor.EOLMode==SC_EOL_LF"},
+        {'s2', separator = 1},
+        {'Line End Characters', ru = 'Символы перевода строк',{radio = 1,
+            {'CR &+ LF', action = IDM_EOL_CRLF, check = "editor.EOLMode==SC_EOL_CRLF"},
+            {'&CR', action = IDM_EOL_CR, check = "editor.EOLMode==SC_EOL_CR"},
+            {'&LF', action = IDM_EOL_LF, check = "editor.EOLMode==SC_EOL_LF"},
         },},
-        {'Output', ru='Окно консоли',{
+        {'Output', ru = 'Окно консоли',{
             {'Wrap Out&put', ru = 'Перенос по словам в консоли', action = IDM_WRAPOUTPUT, check = "props['output.wrap']=='1'"},
             {'Clear Before Execute', ru = 'Очищать перед выполнением', check_prop = "clear.before.execute"},
             {'Recode OEM to ANSI', ru = 'Перекодировать OEM в ANSI', check_prop = "output.code.page.oem2ansi"},
         },},
         {'&Convert Line End Characters', ru = 'Конвертировать символы перевода строк', action = IDM_EOL_CONVERT},
-        {'s1', separator=1},
+        {'s1', separator = 1},
         {'Change Inden&tation Settings...', ru = 'Изменить настройки отступа', action = IDM_TABSIZE},
         {'Use &Monospaced Font', ru = 'Использовать моноширинные шрифты', action = IDM_MONOFONT},
-        {'s2', separator=1},
-        {'Reload Session', ru = 'Восстанавливать открытые файлы', action = "CheckChange('session.reload', true)", check="props['session.reload']=='1'"},
+        {'s2', separator = 1},
+        {'Reload Session', ru = 'Восстанавливать открытые файлы', action = "CheckChange('session.reload', true)", check = "props['session.reload']=='1'"},
         {'Show Menu Icons', ru = 'Отображать иконки в меню', check_iuprops = 'menus.show.icons'},
         {'Interface Font Size', ru = 'Размер шрифта интерфейса', action = ResetFontSize},
 
-        {'s3', separator=1},
-        {'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')"},
-        {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
-        {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
-        {'SideBars Settings', ru = 'Настройка боковых панелей...', action="dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
+        {'s3', separator = 1},
+        {'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')"},
+        {'User Toolbar...', ru = 'Пользовательская панель инстументов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
+        {'Toolbars Layout', ru = 'Раскладка панелей инстументов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
+        {'SideBars Settings', ru = 'Настройка боковых панелей...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
         {'Hidden Plugins', ru = 'Загрузка фоновых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')"},
-        {'s3', separator=1},
-        {'Save Configuration', ru = 'Сохранить конфигурацию', action=iup.SaveIuprops},
-        {'Load Configuration', ru = 'Загрузить конфигурацию', action=iup.LoadIuprops},
-        {'s5', separator=1},
-        {'Windows Integration', ru = 'Настройка интеграции с Windows', action="shell.exec(props['SciteDefaultHome']..'\\\\tools\\\\SciTE_WinIntegrator.hta')"},
+        {'s3', separator = 1},
+        {'Save Configuration', ru = 'Сохранить конфигурацию', action = iup.SaveIuprops},
+        {'Load Configuration', ru = 'Загрузить конфигурацию', action = iup.LoadIuprops},
+        {'s5', separator = 1},
+        {'Windows Integration', ru = 'Настройка интеграции с Windows', action = "shell.exec(props['SciteDefaultHome']..'\\\\tools\\\\SciTE_WinIntegrator.hta')"},
         {'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
         {'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
         {'Open Lua Startup Scr&ipt', ru = 'Открыть файл автозагрузки скрипта', action = IDM_OPENLUAEXTERNALFILE},
         {'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = function() do_LexerColors() end},
         {"Lexers properties", ru = 'Свойства лексеров', {
-            {'Lexers properties', ru='Свойства лексеров', plane=1 ,tLangs},
-            {'s2', separator=1},
+            {'Lexers properties', ru = 'Свойства лексеров', plane = 1 ,tLangs},
+            {'s2', separator = 1},
             {"Select lexers", ru = "Используемые языки", action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\UsedLexers.lua')"},
         },},
     },},
-    {'Language', ru='Подсветка', {
+    {'Language', ru = 'Подсветка', {
         {'tHilight', tHilight, plane = 1,},
-        {'s1', separator=1},
+        {'s1', separator = 1},
     },},
-    {'Buffers', ru='Вкладки',{
+    {'Buffers', ru = 'Вкладки',{
         {'&Previous', ru = 'Предыдущая', key = 'Shift+F6', action = IDM_PREVFILE},
         {'&Next', ru = 'Следующая', key = 'F6', action = IDM_NEXTFILE},
         {'Move Tab &Left', ru = 'Переместить влево', action = IDM_MOVETABLEFT},
         {'Move Tab &Right', ru = 'Переместить вправо', action = IDM_MOVETABRIGHT},
         {'&Close All', ru = 'Закрыть все', action = IDM_CLOSEALL},
         {'&Save All', ru = 'Сохранить все', key = 'Ctrl+Alt+S', action = IDM_SAVEALL, image = 'disks_µ'},
-        {'s2', separator=1},
+        {'s2', separator = 1},
         {'l1', windowsList, plane = 1},
     },},
-    {'Help', ru='Справка',{
+    {'Help', ru = 'Справка',{
         {'&Help', ru = 'Справка по LUA', key = 'F1', action = IDM_HELP},
         {'&SciTE Help', ru = 'Справка по SciTE', action = IDM_HELP_SCITE},
         {'&About SciTE', ru = 'О программе', action = IDM_ABOUT},

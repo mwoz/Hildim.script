@@ -818,7 +818,7 @@ local function create_dialog_FindReplace()
 end
 
 local function Init()
-    ActivateFind = ActivateFind_l --глобальная ссылка на нашу функцию
+    CORE.ActivateFind = ActivateFind_l --глобальная ссылка на нашу функцию
 
     oDeattFnd = iup.scitedetachbox{
         create_dialog_FindReplace();

@@ -463,3 +463,104 @@ AddEventHandler("OnSwitchFile", OnSwitchFile_local)
 AddEventHandler("OnOpen", OnSwitchFile_local)
 AddEventHandler("OnSave", OnSave_local)
 AddEventHandler("OnBeforeSave", OnBeforeSave_local)
+
+--переход к описанию объекта
+
+function GoToIncludeDef(strSelText)
+    local function recrGoToIncDef(tblFiles, strText, strSelText)
+        local _incStart,_incEnd,incFind,incPath,_start, _end, fName
+        while true do
+            _start, _end, fName = string.find(strText,'#INCLUDE.([%w%.%_]+)',_start)
+            if _start == nil then break end
+            if tblFiles[string.lower(fName)] == nil then
+                tblFiles[string.lower(fName)] = 1
+                local fName2 = get_precomp_tblFiles(string.lower(fName))
+                if fName2 ~= nil then
+                    incPath = props["precomp_strRootDir"]..'\\'..fName2
+                    if shell.fileexists(incPath) then
+                        local incF = io.input(incPath)
+                        local incText = incF:read('*a')
+                        incF:close()
+                        _incStart = nil
+                        _incStart = recrGoToIncDef(tblFiles, incText, strSelText)
+                        if _incStart ~= nil then return _incStart end
+                        _incStart,_incEnd,incFind = string.find(incText,'(\n[ ]*Sub[%s]+'..strSelText..')[^%w_]')
+                        if _incStart ~=nil then break end
+                        _incStart,_incEnd,incFind = string.find(incText,'(\n[ ]*Function[%s]+'..strSelText..')[^%w_]')
+                        if _incStart ~=nil then break end
+                        _incStart,_incEnd,incFind = string.find(incText,'(<\n[ ]*[^%>]-name%=%"'..strSelText..'%"[^%>]*)')
+                        if _incStart ~=nil then break end
+                    else
+                        print('File '..incPath..' not found!')
+                    end
+                else
+                    print('Library '..fName..' not found!')
+                end
+            end
+           _start = _end + 1
+        end
+
+        if _incStart ~=nil then
+            OnNavigation("Def")
+			scite.Open(incPath)
+			_incStart,_incEnd = editor:findtext(incFind)
+			editor:SetSel(_incStart+1,_incEnd)
+            OnNavigation("Def-")
+		end
+        return _incStart
+    end
+
+    local strText
+    if not strSelText or strSelText == '' then strSelText = editor:GetSelText() end
+    if strSelText == '' then return end
+    strText = editor:GetText()
+    local _incStart,_incEnd,incFind,incPath,_start, _end, fName
+    local tblFiles = {}
+
+    return recrGoToIncDef(tblFiles, strText, strSelText)
+
+end
+
+function GoToDef(strSelText)
+    local incText, strNav
+    if not strSelText then strSelText = editor:GetSelText() end
+    if strSelText == '' then return end
+    incText = editor:GetText()
+    local prevLine = editor:GetCurLine()
+    local _selSt= editor.SelectionStart
+    local _selEnd = editor.SelectionEnd
+
+    strNav = "Def"
+    _incStart,_incEnd,incFind = string.find(incText,'\n[ ]*(Sub[ \t]+'..strSelText..')[^%w_]')
+    if _incStart ==nil then _incStart,_incEnd,incFind = string.find(incText,'\n[ ]*(Function[ \t]+'..strSelText..')[^%w_]') end
+    if _incStart ==nil then
+        _incStart,_incEnd,incFind = string.find(incText,'\n[ ]*<([^%>]-name%=%"'..strSelText..'%"[^%>]*)')
+        strNav = "Xml"
+    end
+    if _incStart ==nil then
+        _incStart,_incEnd,incFind = string.find(incText,'\n[ ]*<(string id="'..strSelText..'%"[^%>]*)')
+        strNav = "String"
+    end
+    if _incStart ~=nil then
+        OnNavigation(strNav)
+        iup.SetGlobal('KEYRELEASE','K_RSHIFT')
+        iup.SetGlobal('KEYRELEASE','K_LSHIFT')
+        editor:SetSel(_incStart,_incEnd)
+        if prevLine ~= editor:GetCurLine() then
+            OnNavigation(strNav.."-")
+            return
+        else
+            editor:SetSel(_selSt,_selEnd)
+        end
+    end
+    if GoToIncludeDef() then return end
+    sql_GoToDefinition(strSelText)
+end
+
+AddEventHandler("GoToObjectDefenition", function(txt)
+    if cmpobj_GetFMDefault() ~= -1 then
+        GoToDef(txt)
+        return true
+    end
+    return false
+end)

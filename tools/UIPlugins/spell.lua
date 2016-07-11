@@ -399,7 +399,7 @@ local function Init()
         SpellRange(editor.SelectionStart, editor.SelectionEnd)
     end
 
-    function spell_ByLex()      --ашибка eror  дочеринм
+    function spell_ByLex()
         local s, e = editor.SelectionStart, editor.SelectionEnd
         if s == e then s, e = 0, editor.TextLength end
         _G.iuprops["spell.autospell"] = 0

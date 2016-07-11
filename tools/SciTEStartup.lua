@@ -9,18 +9,11 @@ if props['script.started'] ~= 'Y' then
     iup.Load(props["SciteDefaultHome"].."\\tools\\Images.led")
     dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 end
---iup.Load(props["SciteDefaultHome"].."\\tools\\Images22.led")
--- Подключение файла с общими функциями, использующимися во многих скриптах
+
 _G.onDestroy_event = {}
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 Splash_Screen()
 dofile (props["SciteDefaultHome"].."\\tools\\Menus.lua")
-----[[ R E A D   O N L Y ]]-------------------------------------------------
-
-
-dofile (props["SciteDefaultHome"].."\\tools\\precompiller.lua")
-
-dofile (props["SciteDefaultHome"].."\\tools\\sqlObjects.lua")
 
 -- SideBar: Многофункциональная боковая панель
 dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")

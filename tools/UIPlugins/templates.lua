@@ -2,6 +2,7 @@
 ----------------------------------------------------------
 -- tab0:memo_path   Path and Mask
 ----------------------------------------------------------
+dofile (props["SciteDefaultHome"].."\\tools\\Etc\\precompiller.lua")
 
 local txt_Template
 local txt_BaseNameSuffix
@@ -9,6 +10,127 @@ local txt_RadiusUserName
 -- local cmb_resent
 local chk_DebugMode, btn_FormRun, btn_AddDoc
 local ToolBar_obj
+
+local function template_MoveControls()
+    local dlg2 = _G.dialogs["ctrlmoover"]
+    if dlg2 == nil then
+
+        local txtX2 = iup.text{size='60x0',mask="[+/-]?/d+"}
+        local txtY2 = iup.text{size='60x0',mask="[+/-]?/d+"}
+        local txtH2 = iup.text{size='60x0',mask="[+/-]?/d+"}
+        local txtW2 = iup.text{size='60x0',mask="[+/-]?/d+"}
+        local txtX1 = iup.text{size='60x0',mask="[><]?/d+[><]?/d*"}
+        local txtY1 = iup.text{size='60x0',mask="[><]?/d+[><]?/d*"}
+        local txtH1 = iup.text{size='60x0',mask="[><]?/d+[><]?/d*"}
+        local txtW1 = iup.text{size='60x0',mask="[><]?/d+[><]?/d*"}
+        local txtCp = iup.text{size='60x0',mask="[+/-]?/d+"}
+
+        local flag2 = 0
+
+        local btn_ok = iup.button  {title="OK"}
+        iup.SetHandle("MOVE_BTN_OK",btn_ok)
+        local btn_esc = iup.button  {title="Cancel"}
+        iup.SetHandle("MOVE_BTN_ESC",btn_esc)
+        local btn_clear = iup.button  {title="Clear"}
+        iup.SetHandle("MOVE_BTN_CLEAR",btn_clear)
+
+        local vbox = iup.vbox{
+            iup.hbox{iup.label{title="Left",size='60x0'},iup.label{title="Top",size='60x0'},iup.label{title="Width",size='60x0'},iup.label{title="Height",size='60x0'},iup.label{title="CptWidth",size='60x0'},gap=20, alignment='ACENTER'},
+            iup.hbox{txtX1,txtY1,txtW1,txtH1,gap=20, alignment='ACENTER'},
+            iup.hbox{txtX2,txtY2,txtW2,txtH2,txtCp,gap=20, alignment='ACENTER'},
+            iup.hbox{btn_ok,iup.fill{},btn_clear,btn_esc},gap=2,margin="4x4" }
+
+
+        dlg2 = iup.scitedialog{vbox; title="Êîíòðîë Ìóâåð",defaultenter="MOVE_BTN_OK",defaultesc="MOVE_BTN_ESC",maxbox="NO",minbox ="NO",resize ="NO",
+        sciteparent="SCITE", sciteid="ctrlmoover"}
+
+        function btn_clear:action()
+                txtX2.value = ''
+                txtY2.value = ''
+                txtH2.value = ''
+                txtW2.value = ''
+                txtX1.value = ''
+                txtY1.value = ''
+                txtH1.value = ''
+                txtW1.value = ''
+                txtCp.value = ''
+        end
+
+        function btn_ok:action()
+            local function InpValue(t)
+                str = t.value
+                if str.."" == "" then str = "%d*" end
+                if str:find("[<>]") ~= nil then str = "%d+" end
+                return "("..str..")"
+            end
+            local strtempl = 'position="'..InpValue(txtX1)..';'..InpValue(txtY1)..';'..InpValue(txtW1)..';'..InpValue(txtH1)..'"([^\n]*)'
+            local iLevel = 0
+            local strout = editor:GetSelText():gsub("[^\n]+",function(s)
+                local strrow = s
+                if s:find('<control') then
+                    if iLevel == 0 then
+                        strrow = s:gsub(strtempl,function(s1,s2,s3,s4,tt)
+                            local function f(s,c)
+                                if s=="" then return "" end
+                                if c.value:len() == 0 then return s end
+                                local sval = c.value:sub(2)
+                                if sval == nil then sval = 1 end
+                                local sign = c.value:sub(0,1)
+                                if sign == "-" then return s*1 - sval*1 end
+                                if sign == "+" then return s+sval end
+                                return c.value
+                            end
+                            local function ch(s,c)
+                                if s=="" then return true end
+                                local z1,n1,z2,n2
+                                z1,n1,z2,n2=c.value:match("([><]?)(%d+)([><]?)(%d*)")
+                                if z1 ~= nil  then
+                                    if n1 == nil then n1 = 0 end
+                                    if z1 == "<" and s*1 > n1*1 then return false end
+                                    if z1 == ">" and s*1 < n1*1 then return false end
+                                    if z2.."" ~= "" then
+                                        if n2 == nil then n2 = 0 end
+                                        if z2 == "<" and s*1 > n2*1 then return false end
+                                        if z2 == ">" and s*1 < n2*1 then return false end
+                                    end
+                                end
+                                return true
+                            end
+                            if ch(s1,txtX1) and ch(s2,txtY1) and ch(s3,txtW1) and ch(s4,txtH1) then
+                                local tt2 = tt:gsub('captionwidth="(%d+)"', function(cw)
+                                    return 'captionwidth="'..f(cw,txtCp)..'"'
+                                    end
+                                )
+                                return 'position="'..f(s1,txtX2)..';'..f(s2,txtY2)..';'..f(s3,txtW2)..';'..f(s4,txtH2)..'"'..tt2
+                            else
+                                return 'position="'..s1..';'..s2..';'..s3..';'..s4..'"'..tt
+                            end
+                        end)
+                    end
+                if not s:find('/>') then iLevel = iLevel + 1 end
+                elseif s:find('</control') then
+                    iLevel = iLevel - 1
+                end
+                return strrow
+            end)
+
+            editor:ReplaceSel(strout)
+            dlg2:hide()
+        end
+
+        function btn_esc:action()
+            dlg2:hide()
+        end
+    else
+        dlg2:show()
+    end
+end
+
+menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦xxx',
+{'FindTextOnSel', plane=1,{
+    {'s_FindTextOnSel', separator=1},
+    {'Move Controls...',  ru = 'Ïåðåìåñòèòü êîíòðîëû...', action=template_MoveControls, key = 'Alt+M', active='editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)'},
+}})
 
 function listCalc_addToRecent(strFile)
     cmb_resent.insertitem1 = strFile
@@ -89,5 +211,6 @@ return {
     code = 'template',
     toolbar = Init,
 }
+
 
 

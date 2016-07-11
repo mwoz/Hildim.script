@@ -1058,4 +1058,4 @@ dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\ColorSettings.lua")
---[[dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")]]
+dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")
