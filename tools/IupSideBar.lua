@@ -583,7 +583,9 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == POST_CONTINUESTARTUP then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
             props['session.reload'] = _G.iuprops['session.reload']
+            g_session["blocked.restructure"] = true
             iup.RestoreFiles()
+            g_session["blocked.restructure"] = false
 
             if navigation_Unblock then navigation_Unblock() end
             local bHide

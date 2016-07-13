@@ -495,9 +495,9 @@ local function FillTableFromText(incText,patterns, tblfList)
     end
 end
 
-local function ReCreateStructures(strText,tblFiles)
+local function ReCreateStructures(strText, tblFiles)
     local rootTag
-
+   -- print(debug.traceback())
     if editor:GetLine(0) then _,_,rootTag = (editor:GetLine(0)..''):find('^<(%w+)') end
     rootTag = rootTag or ''
 
@@ -532,7 +532,7 @@ local function ReCreateStructures(strText,tblFiles)
                     else
                         print('File '..incPath..' not found!')
                     end
-                else
+                elseif not g_session["blocked.restructure"] then
                     print('Lib '..fName..' not found!')
                 end
             end
