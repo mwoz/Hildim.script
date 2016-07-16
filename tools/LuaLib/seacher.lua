@@ -357,7 +357,7 @@ function s:findWalk(inSelection, funcOnFind)
                 end
                 local movepastEOL = 0;
                 if lenTarget <= 0 then
-                    local chNext = self.send(SCI_GETCHARAT, wEditor.Call(SCI_GETTARGETEND))
+                    local chNext = self.send(SCI_GETCHARAT, self.send(SCI_GETTARGETEND))
                     if chNext == '\r' or chNext == '\n' then movepastEOL = 1 end
                 end
                 local lenReplaced

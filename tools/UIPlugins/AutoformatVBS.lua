@@ -81,6 +81,15 @@ local function FoldLevel(deltaL, L)
     return shell.bit_and(editor.FoldLevel[L or (editor:LineFromPosition(editor.SelectionStart) - deltaL)], SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE
 end
 
+local function LineIndent(deltaL, L)
+    local line = L or (editor:LineFromPosition(editor.SelectionStart) - deltaL)
+    local l = editor:PositionFromLine(line)
+    local _, ln = editor:GetLine(line)
+    local e = editor:findtext('[^ \t\n\r]', SCFIND_REGEXP, l, l + ln - 2) or (l + ln - 2)
+    local strInd = (editor:textrange(l, e) or '')
+    return strInd:gsub('\t', strTab):len(), strInd:len()
+end
+
 local function CheckPattern(str, pattern)
     local _s, _e, s, c, cc = string.find(str, pattern)
     --зачитали: начало, конец, отступ, комментарий, что-то(не комментарий) за конструкцией
@@ -402,17 +411,24 @@ local function OnUpdateUI_local()
             editor:SetSel(s, e)
             iChangedLine = -1
         elseif curFold and FoldLevel(-1) < FoldLevel(0) then
-            curFold = nil
-            local ts = editor:PositionFromLine(l)
-            editor.TargetStart = ts
-            editor.TargetEnd = editor:findtext('[^ \t\n\r]', SCFIND_REGEXP, ts, editor:PositionFromLine(l + 1))
-            local nl = editor.TargetEnd - ts
-            if nl >= tonumber(props['tabsize']) and editor.StyleAt[editor.TargetEnd + 1] == SCE_FM_VB_KEYWORD then
-                editor:BeginUndoAction()
-                nl = nl - tonumber(props['tabsize'])
-                editor:ReplaceTarget(string.rep(' ', nl))
-                editor:EndUndoAction()
-            end
+                curFold = nil
+                local curS = editor.SelectionStart
+                local ls = editor:LineFromPosition(curS)
+                local cL = FoldLevel(-1)
+                local curI, curIPos = LineIndent(0) --print(ls, cL)
+                for i = ls - 1, 0,- 1 do
+                    --print(i, FoldLevel(ls - i))
+                    if cL >= FoldLevel(ls - i) then
+                        local newPos = curS - (curI - LineIndent(ls - i))
+                        editor.TargetStart = editor:PositionFromLine(ls)
+                        editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
+                        editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
+                        editor.SelectionStart = newPos
+                        editor.SelectionEnd = newPos
+                        return
+                    end
+                end
+
         end
     elseif iChangedLine > - 1 then
         if editor:LineFromPosition(s) ~= editor:LineFromPosition(e) then

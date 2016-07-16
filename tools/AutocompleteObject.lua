@@ -61,6 +61,7 @@ do
         [props['file.patterns.cform']]='$(file.patterns.cform)',
         [props['file.patterns.lua']]='$(file.patterns.lua)',
         [props['file.patterns.xml']]='$(file.patterns.xml)',
+        [props['file.patterns.html']]='$(file.patterns.html)',
     }
     for i,v in pairs(patterns) do
         for ext in (i..';'):gfind("%*%.([^;]+);") do
@@ -299,7 +300,6 @@ local function GetObjectNames(tableObj)
 			table.insert(obj_names, alias_table[i])
 		end
 	end
-
 	for i = 1, table.maxn(declarations) do
 		if (string.upper(tableObj[1]) == string.upper(declarations[i][2])) then
 			if (tableObj[2]=='' and tableObj[3]=='') then
@@ -419,7 +419,7 @@ local function FindDeclaration()
 end
 
 -- „тение api файла в таблицы api_table и alias_table(чтобы потом не опрашивать диск, а все тащить из нее)
-local function CreateTablesForFile(o_tbl,al_tbl,strApis, needKwd)
+local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd)
     local tbl_MethodList, tbl_Method--в первую табличку вставим методы в качестве ключей, чтоб по ней удал€ть дубли - а во вторую - в качестве значений
     if needKwd then
         tbl_MethodList,tbl_Method = {},{}
@@ -532,8 +532,6 @@ local function ReCreateStructures(strText, tblFiles)
                     else
                         print('File '..incPath..' not found!')
                     end
-                elseif not g_session["blocked.restructure"] then
-                    print('Lib '..fName..' not found!')
                 end
             end
             _start = _end + 1
@@ -716,7 +714,8 @@ local function CallTipXml(sMethod)
 end
 
 -- ¬ставл€ет выбранный из раскрывающегос€ списка метод в редактируемую строку
-local function OnUserListSelection_local(tp,str)
+local function OnUserListSelection_local(tp, str)
+    print(tp, str)
 	editor:SetSel(current_poslst, editor.CurrentPos)
     local fmDef = cmpobj_GetFMDefault()
     local s, shift = nil,0
@@ -728,7 +727,7 @@ local function OnUserListSelection_local(tp,str)
         s = str:gsub(' .*','')
     elseif pasteFromXml then
         s = str..'=""'
-    elseif editor.LexerLanguage == 'xml' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
+    elseif editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
         if (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
             shift = 2
             s = str..'/>'
@@ -945,7 +944,6 @@ local function OnChar_local(char)
             bIsListVisible = false
         end
     end
-
 	if IsComment(editor.CurrentPos-2) then return false end  -- ≈сли строка закомметирована, то выходим
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
@@ -959,7 +957,7 @@ local function OnChar_local(char)
 	-- ≈сли введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
 	if not (autocomplete_start_characters == '' and calltip_start_characters == '') then
               -- if get_api then autocom_chars = fPattern(autocomplete_start_characters) end
-        if objectsX_table._fill ~= nil and ( char == ' ' or char == '=' )  then
+        if objectsX_table._fill ~= nil and ( char == ' ' or char == '=' ) then
             if isXmlLine() then
                 if char == ' ' then
                     local r = ListXml()

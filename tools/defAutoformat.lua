@@ -149,9 +149,9 @@ end
 
 AddEventHandler("OnChar", function(char)
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or not editor.Focus then return end
+
 	if (_G.iuprops['autoformat.line'] or 0)== 1  then
         if not editor.Focus then return end
-
         if string.byte(char) == 13 then
             local line = editor:LineFromPosition(editor.SelectionStart)
             editor:BeginUndoAction()
@@ -183,9 +183,9 @@ AddEventHandler("OnUpdateUI", function()
             local curS = editor.SelectionStart
             local ls = editor:LineFromPosition(curS)
             local cL = FoldLevel(-1)
-            local curI, curIPos = LineIndent(0)
-            for i = ls - 1,0,-1 do
-                if cL == FoldLevel(ls - i) then
+            local curI, curIPos = LineIndent(0)  --;print(ls,cL)
+            for i = ls - 1, 0,- 1 do
+                if cL >= FoldLevel(ls - i) then
                     local newPos = curS - (curI - LineIndent(ls - i))
                     editor.TargetStart = editor:PositionFromLine(ls)
                     editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
