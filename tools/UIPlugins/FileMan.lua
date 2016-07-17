@@ -50,6 +50,7 @@ FileMan_ListFILL = function()
 	if current_path == '' then return end
 
     local table_dir = shell.findfiles(current_path..'*')
+    if not table_dir then return end
     table.sort(table_dir, function(a, b)
         if a.isdirectory ~= b.isdirectory then return a.isdirectory end
         if a.isdirectory or not sort_by_tyme then

@@ -1,254 +1,810 @@
+#@ALIGN left|right|top|bottom|middle
+#@ALIGN2 left|right|top|bottom|middle|baseline
+#@ALIGN21 left|right|top|bottom|middle
+#@ALIGN3 left|right|center|justify
+#@ALIGN4 top|middle|bottom|baseline
+#@REL tag|search|prev|prefetch|noreferrer|nofollow|next|license|help|bookmark|author|alternate
+#@SHAPE poly|circle|rect|default
+#@TARGET _top|_self|_parent|_blank
+#@ENCTYPE application/x-www-form-urlencoded|multipart/form-data|text/plain
+#@COLOR rgb(x,x,x)|#xxxxxx|colorname
+
+gl_ob<accesskey Specifies a shortcut key to activate/focus an element
+gl_ob<class Specifies one or more classnames for an element (refers to a class in a style sheet)
+gl_ob<id Specifies a unique id for an element
+gl_ob<lang Specifies the language of the element's content
+gl_ob<style Specifies an inline CSS style for an element
+gl_ob<tabindex Specifies the tabbing order of an element
+gl_ob<title Specifies extra information about an element
+
+##gl_ob<contenteditable Specifies whether the content of an element is editable or not
+##gl_ob<contextmenu Specifies a context menu for an element. The context menu appears when a user right-clicks on the element
+##gl_ob<data-* Used to store custom data private to the page or application
+##gl_ob<dir Specifies the text direction for the content in an element
+##gl_ob<draggable Specifies whether an element is draggable or not
+##gl_ob<dropzone Specifies whether the dragged data is copied, moved, or linked, when dropped
+##gl_ob<hidden Specifies that an element is not yet, or is no longer, relevant
+##gl_ob<spellcheck Specifies whether the element is to have its spelling and grammar checked or not
+##gl_ob<translate Specifies whether the content of an element should be translated or not
+
+ev_nt<onload Fires after the page is finished loading
+ev_nt<onunload Fires once a page has unloaded (or the browser window has been closed)
+
+##ev_nt<onafterprint Script to be run after the document is printed
+##ev_nt<onbeforeprint Script to be run before the document is printed
+##ev_nt<onbeforeunload Script to be run when the document is about to be unloaded
+##ev_nt<onerror Script to be run when an error occurs
+##ev_nt<onhashchange Script to be run when there has been changes to the anchor part of the a URL
+##ev_nt<onmessage Script to be run when the message is triggered
+##ev_nt<onoffline Script to be run when the browser starts to work offline
+##ev_nt<ononline Script to be run when the browser starts to work online
+##ev_nt<onpagehide Script to be run when a user navigates away from a page
+##ev_nt<onpageshow Script to be run when a user navigates to a page
+##ev_nt<onpopstate Script to be run when the window's history changes
+##ev_nt<onresize Fires when the browser window is resized
+##ev_nt<onstorage Script to be run when a Web Storage area is updated
+
+#$a=#$ev_nt
+#$a=#$gl_ob
 a<charset  Not supported in HTML5. \nSpecifies the character-set of a linked document
 a<coords   Not supported in HTML5. \nSpecifies the URL of the page the link goes to
-a<download HTML5. Specifies that the target will be downloaded when a user clicks on the hyperlink
 a<href Specifies the URL of the page the link goes to
 a<hreflang Specifies the language of the linked document
-a<media HTML5. Specifies what media/device the linked document is optimized for
 a<name Not supported in HTML5. \n Specifies the name of an anchor
-a<rel {{tag|search|prev|prefetch|noreferrer|nofollow|next|license|help|bookmark|author|alternate}} Specifies the relationship between the current document and the linked document
+a<rel {{#@REL}} Specifies the relationship between the current document and the linked document
 a<rev Not supported in HTML5. \nSpecifies the relationship between the linked document and the current document
-a<shape {{poly|circle|rect|default}} Not supported in HTML5. \nSpecifies the shape of a link
-a<target {{_top|_self|_parent|_blank}} Specifies where to open the linked document
+a<shape {{#@SHAPE}} Not supported in HTML5. \nSpecifies the shape of a link
+a<target {{#@TARGET}} Specifies where to open the linked document
 a<type Specifies the media type of the linked document
 
+#a<download HTML5. Specifies that the target will be downloaded when a user clicks on the hyperlink
+#a<media HTML5. Specifies what media/device the linked document is optimized for
 
+#$abbr=#$ev_nt
+#$abbr=#$gl_ob
 abbr<
 
 acronym<
 
+#$address=#$ev_nt
+#$address=#$gl_ob
 address<
 
-applet<
+applet<name
+applet<align {{#@ALIGN2}}
+applet<baseline Specifies the alignment of an applet according to surrounding elements
+applet<alt text Specifies an alternate text for an applet
+applet<archive URL Specifies the location of an archive file
+applet<codebase URL Specifies a relative base URL for applets specified in the code attribute
+applet<height pixels Specifies the height of an applet
+applet<hspace pixels Defines the horizontal spacing around an applet
+applet<name name Defines the name for an applet (to use in scripts)
+applet<vspace pixels Defines the vertical spacing around an applet
+applet<width pixels Specifies the width of an applet
 
-area<
+#$area=#$ev_nt
+#$area=#$gl_ob
+area<alt text Specifies an alternate text for the area. Required if the href attribute is present
+area<coords coordinates Specifies the coordinates of the area
+area<download filename Specifies that the target will be downloaded when a user clicks on the hyperlink
+area<href URL Specifies the hyperlink target for the area
+area<hreflang language_code Specifies the language of the target URL
+area<media media query Specifies what media/device the target URL is optimized for
+area<nohref value Not supported in HTML5\narea<Specifies that an area has no associated link
+area<rel {{#@REL}} Specifies the relationship between the current document and the target URL
+area<shape {{#@SHAPE}} Specifies the shape of the area
+area<target {{#@TARGET}} Specifies where to open the target URL
+area<type media_type Specifies the media type of the target URL
 
+#$article=#$ev_nt
+#$article=#$gl_ob
 article<
 
+#$aside=#$ev_nt
+#$aside=#$gl_ob
 aside<
 
-audio<
+#$audio=#$ev_nt
+#$audio=#$gl_ob
+audio<autoplay autoplay Specifies that the audio will start playing as soon as it is ready
+audio<controls controls Specifies that audio controls should be displayed (such as a play/pause button etc)
+audio<loop loop Specifies that the audio will start over again, every time it is finished
+audio<muted muted Specifies that the audio output should be muted
+audio<preload auto
+audio<metadata
+audio<none Specifies if and how the author thinks the audio should be loaded when the page loads
+audio<src URL Specifies the URL of the audio file
 
+#$b=#$ev_nt
+#$b=#$gl_ob
 b<
 
-base<
+#$base=#$gl_ob
+base<href URL Specifies the base URL for all relative URLs in the page
+base<target {{#@TARGET}}
 
-basefont<
+basefont<color color Not supported in HTML5.\nSpecifies the default color for text in a document
+basefont<face font_family Not supported in HTML5.\nSpecifies the default font for text in a document
+basefont<size number Not supported in HTML5.\nSpecifies the default size of text in a document
 
+#$bdi=#$ev_nt
+#$bdi=#$gl_ob
 bdi<
 
-bdo<
+#$bdo=#$ev_nt
+#$bdo=#$gl_ob
+bdo<dir {{ltr|rtl}} Required. Specifies the text direction of the text inside the <bdo> element
 
-big<
-
+#$blockquote=#$ev_nt
+#$blockquote=#$gl_ob
 blockquote<
 
-body<
+#$body=#$ev_nt
+#$body=#$gl_ob
+body<alink color Not supported in HTML5.\nSpecifies the color of an active link in a document
+body<background URL Not supported in HTML5.\nSpecifies a background image for a document
+body<bgcolor color Not supported in HTML5.\nSpecifies the background color of a document
+body<link color Not supported in HTML5.\nSpecifies the color of unvisited links in a document
+body<text color Not supported in HTML5.\nSpecifies the color of the text in a document
+body<vlink color Not supported in HTML5.\nSpecifies the color of visited links in a document
 
+#$br=#$ev_nt
+#$br=#$gl_ob
 br<
 
-button<
+#$button=#$ev_nt
+#$button=#$gl_ob
+button<disabled disabled Specifies that a button should be disabled
+button<name name Specifies a name for the button
+button<type {{button|reset|submit}} Specifies the type of button
+button<value text Specifies an initial value for the button
 
-canvas<
+##button<autofocus autofocus Specifies that a button should automatically get focus when the page loads
+##button<form form_id Specifies one or more forms the button belongs to
+##button<formaction URL Specifies where to send the form-data when a form is submitted. Only for type="submit"
+##button<formenctype {{#@ENCTYPE}} Specifies how form-data should be encoded before sending it to a server. Only for type="submit"
+##button<formmethod {{get|post}} Specifies how to send the form-data (which HTTP method to use). Only for type="submit"
+##button<formnovalidate formnovalidate Specifies that the form-data should not be validated on submission. Only for type="submit"
+##button<formtarget {{#@TARGET}} Specifies where to display the response after submitting the form. Only for type="submit"
 
-caption<
+#$canvas=#$ev_nt
+#$canvas=#$gl_ob
+canvas<height pixels Specifies the height of the canvas
+canvas<width pixels Specifies the width of the canvas
 
-center<
+#$caption=#$ev_nt
+#$caption=#$gl_ob
+caption<align {{#@ALIGN}} Not supported in HTML5.\nDefines the alignment of the caption
 
+#$cite=#$ev_nt
+#$cite=#$gl_ob
 cite<
 
+#$code=#$ev_nt
+#$code=#$gl_ob
 code<
 
-col<
+#$col=#$ev_nt
+#$col=#$gl_ob
+col<align {{#@ALIGN3}} Not supported in HTML5.\nSpecifies the alignment of the content related to a <col> element
+col<char character Not supported in HTML5.\nSpecifies the alignment of the content related to a <col> element to a character
+col<charoff number Not supported in HTML5.\nSpecifies the number of characters the content will be aligned from the character specified by the char attribute
+col<span number Specifies the number of columns a <col> element should span
+col<valign {{#@ALIGN2}} Not supported in HTML5.\nSpecifies the vertical alignment of the content related to a <col> element
+col<width {{%|pixels|relative_length}} Not supported in HTML5.\nSpecifies the width of a <col> element
 
-colgroup<
+#$colgroup=#$ev_nt
+#$colgroup=#$gl_ob
+colgroup<align {{#@ALIGN3}} Not supported in HTML5.\nSpecifies the alignment of the content related to a <col> element
+colgroup<char character Not supported in HTML5.\nSpecifies the alignment of the content related to a <col> element to a character
+colgroup<charoff number Not supported in HTML5.\nSpecifies the number of characters the content will be aligned from the character specified by the char attribute
+colgroup<span number Specifies the number of columns a <col> element should span
+colgroup<valign {{#@ALIGN2}} Not supported in HTML5.\nSpecifies the vertical alignment of the content related to a <col> element
+colgroup<width {{%|pixels|relative_length}} Not supported in HTML5.\nSpecifies the width of a <col> element
 
+#$datalist=#$ev_nt
+#$datalist=#$gl_ob
 datalist<
 
+#$dd=#$ev_nt
+#$dd=#$gl_ob
 dd<
 
-del<
+#$del=#$ev_nt
+#$del=#$gl_ob
+del<cite URL Specifies a URL to a document that explains the reason why the text was deleted
+del<datetime YYYY-MM-DDThh:mm:ssTZD Specifies the date and time of when the text was deleted
 
-details<
+#$details=#$ev_nt
+#$details=#$gl_ob
+details<open open Specifies that the details should be visible (open) to the user
 
+#$dfn=#$ev_nt
+#$dfn=#$gl_ob
 dfn<
 
-dialog<
+#$dialog=#$ev_nt
+#$dialog=#$gl_ob
+dialog<open open Specifies that the dialog element is active and that the user can interact with it
 
-dir<
+dir<compact compact Not supported in HTML5.\nSpecifies that the list should render smaller than normal
 
-div<
+#$div=#$ev_nt
+#$div=#$gl_ob
+div<align {{#@ALIGN3}} Not supported in HTML5.\nSpecifies the alignment of the content inside a <div> element
 
+#$dl=#$ev_nt
+#$dl=#$gl_ob
 dl<
 
+#$dt=#$ev_nt
+#$dt=#$gl_ob
 dt<
 
+#$em=#$ev_nt
+#$em=#$gl_ob
 em<
 
-embed<
+#$embed=#$ev_nt
+#$embed=#$gl_ob
+embed<embed<height pixels Specifies the height of the embedded content
+embed<src URL Specifies the address of the external file to embed
+embed<type media_type Specifies the media type of the embedded content
+embed<width pixels Specifies the width of the embedded content
 
-fieldset<
+#$fieldset=#$ev_nt
+#$fieldset=#$gl_ob
+##fieldset<disabled disabled Specifies that a group of related form elements should be disabled
+##fieldset<form form_id Specifies one or more forms the fieldset belongs to
+##fieldset<name text Specifies a name for the fieldset
 
+#$figcaption=#$ev_nt
+#$figcaption=#$gl_ob
 figcaption<
 
+#$figure=#$ev_nt
+#$figure=#$gl_ob
 figure<
 
-font<
+font<color {{#@COLOR}} Not supported in HTML5.\nSpecifies the color of text
+font<face font_family Not supported in HTML5.\nSpecifies the font of text
+font<size number Not supported in HTML5.\nSpecifies the size of text
 
+#$footer=#$ev_nt
+#$footer=#$gl_ob
 footer<
 
-form<
+#$form=#$ev_nt
+#$form=#$gl_ob
+form<accept file_type Not supported in HTML5.\nSpecifies a comma-separated list of file types  that the server accepts (that can be submitted through the file upload)
+form<accept-charset character_set Specifies the character encodings that are to be used for the form submission
+form<action URL Specifies where to send the form-data when a form is submitted
+form<autocomplete {{on|off}} Specifies whether a form should have autocomplete on or off
+form<enctype {{#@ENCTYPE}} Specifies how the form-data should be encoded when submitting it to the server (only for method="post")
+form<method ((get|post}} Specifies the HTTP method to use when sending form-data
+form<name text Specifies the name of a form
+form<novalidate novalidate Specifies that the form should not be validated when submitted
+form<target {{#@TARGET}} Specifies where to display the response that is received after submitting the form
 
-frame<
+frame<frameborder {{0|1}} Not supported in HTML5\nSpecifies whether or not to display a border around a frame
+frame<longdesc URL Not supported in HTML5\nSpecifies a page that contains a long description of the content of a frame
+frame<marginheight pixels Not supported in HTML5\nSpecifies the top and bottom margins of a frame
+frame<marginwidth pixels Not supported in HTML5\nSpecifies the left and right margins of a frame
+frame<name text Not supported in HTML5\nSpecifies the name of a frame
+frame<noresize noresize Not supported in HTML5\nSpecifies that a frame is not resizable
+frame<scrolling {{yes|no|auto}} Not supported in HTML5\nSpecifies whether or not to display scrollbars in a frame
+frame<src URL Not supported in HTML5\nSpecifies the URL of the document to show in a frame
 
-frameset<
+frameset<cols Not supported in HTML5\nSpecifies the number and size of columns in a frameset
+frameset<rows Not supported in HTML5\nSpecifies the number and size of rows in a frameset
 
-h1<
+#$h1=#$ev_nt
+#$h1=#$gl_ob
+h1<align {{#@ALIGN3}}Not supported in HTML5.\nSpecifies the alignment of a heading
 
-h3<
+#$h2=#$ev_nt
+#$h2=#$gl_ob
+h2<align {{#@ALIGN3}}Not supported in HTML5.\nSpecifies the alignment of a heading
 
-h3<
+#$h3=#$ev_nt
+#$h3=#$gl_ob
+h3<align {{#@ALIGN3}}Not supported in HTML5.\nSpecifies the alignment of a heading
 
-h4<
+#$h4=#$ev_nt
+#$h4=#$gl_ob
+h4<align {{#@ALIGN3}}Not supported in HTML5.\nSpecifies the alignment of a heading
 
-h4<
+#$h5=#$ev_nt
+#$h5=#$gl_ob
+h5<align {{#@ALIGN3}}Not supported in HTML5.\nSpecifies the alignment of a heading
 
-h6<
+#$h6=#$ev_nt
+#$h6=#$gl_ob
+h6<align {{#@ALIGN3}}Not supported in HTML5.\nSpecifies the alignment of a heading
 
-head<
+#$head=#$gl_ob
+head<profile URL Not supported in HTML5.\nSpecifies a URL to a document that contains a set of rules.\nThe rules can be read by browsers to clearly\nunderstand the information in the <meta> tag's content attribute
 
+#$header=#$ev_nt
+#$header=#$gl_ob
 header<
 
-hr<
+#$hr=#$ev_nt
+#$hr=#$gl_ob
+hr<align {{left|center|right}} Not supported in HTML5\nSpecifies the alignment of a <hr> element
+hr<noshade noshade Not supported in HTML5\nSpecifies that a <hr> element should render in one solid color (noshaded), instead of a shaded color
+hr<size pixels Not supported in HTML5\nSpecifies the height of a <hr> element
+hr<width pixels|% Not supported in HTML5\nSpecifies the width of a <hr> element
 
-html<
+#$html=#$gl_ob
+##html<manifest URL Specifies the address of the document's cache manifest (for offline browsing)
+html<xmlns {{http://www.w3.org/1999/xhtml}} Specifies the XML namespace attribute (If you need your content to conform to XHTML)
 
+#$i=#$ev_nt
+#$i=#$gl_ob
 i<
 
-iframe<
+#$iframe=#$ev_nt
+#$iframe=#$gl_ob
+iframe<align {{#@ALIGN21}} Not supported in HTML5\nSpecifies the alignment of an <iframe> according to surrounding elements
+iframe<frameborder {{1|0}} Not supported in HTML5\nSpecifies whether or not to display a border around an <iframe>
+iframe<height pixels Specifies the height of an <iframe>
+iframe<longdesc URL Not supported in HTML5\nSpecifies a page that contains a long description of the content of an <iframe>
+iframe<marginheight pixels Not supported in HTML5\nSpecifies the top and bottom margins of the content of an <iframe>
+iframe<marginwidth pixels Not supported in HTML5\nSpecifies the left and right margins of the content of an <iframe>
+iframe<name text Specifies the name of an <iframe>
+iframe<scrolling {{yes|no|auto}} Not supported in HTML5\nSpecifies whether or not to display scrollbars in an <iframe>
+iframe<src URL Specifies the address of the document to embed in the <iframe>
+iframe<width pixels Specifies the width of an <iframe>
 
-img<
+##iframe<sandbox {{allow-forms|allow-pointer-lock|allow-popups|allow-same-origin|allow-scripts|allow-top-navigation}} Enables an extra set of restrictions for the content in an <iframe>
+##iframe<srcdoc HTML_code Specifies the HTML content of the page to show in the <iframe>
 
-input<
 
-ins<
+#$img=#$ev_nt
+#$img=#$gl_ob
+img<align {{#@ALIGN21}} Not supported in HTML5\nSpecifies the alignment of an image according to surrounding elements
+img<alt text Specifies an alternate text for an image
+img<border pixels Not supported in HTML5\nSpecifies the width of the border around an image
+img<height pixels Specifies the height of an image
+img<hspace pixels Not supported in HTML5\nSpecifies the whitespace on left and right side of an image
+img<ismap ismap Specifies an image as a server-side image-map
+img<longdesc URL Specifies a URL to a detailed description of an image
+img<src URL Specifies the URL of an image
+img<usemap #mapname Specifies an image as a client-side image-map
+img<vspace pixels Not supported in HTML5\nSpecifies the whitespace on top and bottom of an image
+img<width pixels Specifies the width of an image
 
+##crossorigin {{anonymous|use-credentials}} Allow images from third-party sites that allow cross-origin access to be used with canvas
+
+#$input=#$ev_nt
+#$input=#$gl_ob
+input<accept {{file_extension|audio/*|video/*|image/*}} media_type Specifies the types of files that the server accepts (only for type="file")
+input<align  {{#@ALIGN21}} Not supported in HTML5\ninput<Specifies the alignment of an image input (only for type="image")
+input<alt text Specifies an alternate text for images (only for type="image")
+input<checked checked Specifies that an <input> element should be pre-selected when the page loads (for type="checkbox" or type="radio")
+input<dirname inputname.dir Specifies that the text direction will be submitted
+input<disabled disabled Specifies that an <input> element should be disabled
+input<maxlength number Specifies the maximum number of characters allowed in an <input> element
+input<name text Specifies the name of an <input> element
+input<readonly readonly Specifies that an input field is read-only
+input<size number Specifies the width, in characters, of an <input> element
+input<src URL Specifies the URL of the image to use as a submit button (only for type="image")
+input<type {{button|checkbox|color|date|datetime|datetime-local|email|file|hidden|image|month|number|password|radio|range|reset|search|submit|tel|text|time|url|week}} Specifies the type <input> element to display
+input<value text Specifies the value of an <input> element
+
+##input<autocomplete {{on|off}} Specifies whether an <input> element should have autocomplete enabled
+##input<autofocus autofocus Specifies that an <input> element should automatically get focus when the page loads
+##input<form form_id Specifies one or more forms the <input> element belongs to
+##input<formaction URL Specifies the URL of the file that will process the input control when the form is submitted (for type="submit" and type="image")
+##input<formenctype {{#@ENCTYPE}} Specifies how the form-data should be encoded when submitting it to the server (for type="submit" and type="image")
+##input<formmethod get
+##input<post Defines the HTTP method for sending data to the action URL (for type="submit" and type="image")
+##input<formnovalidate formnovalidate Defines that form elements should not be validated when submitted
+##input<formtarget{{#@TARGET}} or framename Specifies where to display the response that is received after submitting the form (for type="submit" and type="image")
+##input<height pixels Specifies the height of an <input> element (only for type="image")
+##input<list datalist_id Refers to a <datalist> element that contains pre-defined options for an <input> element
+##input<max number|date Specifies the maximum value for an <input> element
+##input<min number|date Specifies a minimum value for an <input> element
+##input<multiple multiple Specifies that a user can enter more than one value in an <input> element
+##input<pattern regexp Specifies a regular expression that an <input> element's value is checked against
+##input<placeholder text Specifies a short hint that describes the expected value of an <input> element
+##input<required required Specifies that an input field must be filled out before submitting the form
+##input<step number Specifies the legal number intervals for an input field
+##input<width pixels Specifies the width of an <input> element (only for type="image")
+
+
+#$ins=#$ev_nt
+#$ins=#$gl_ob
+ins<cite URL Specifies a URL to a document that explains the reason why the text was inserted/changed
+ins<datetime YYYY-MM-DDThh:mm:ssTZD Specifies the date and time when the text was inserted/changed
+
+#$kbd=#$ev_nt
+#$kbd=#$gl_ob
 kbd<
 
-keygen<
+#$keygen=#$ev_nt
+#$keygen=#$gl_ob
+keygen<autofocus autofocus Specifies that a <keygen> element should automatically get focus when the page loads
+keygen<challenge challenge Specifies that the value of the <keygen> element should be challenged when submitted
+keygen<disabled disabled Specifies that a <keygen> element should be disabled
+keygen<form form_id Specifies one or more forms the <keygen> element belongs to
+keygen<keytype {{rsa|dsa|ec}} Specifies the security algorithm of the key
+keygen<name name Defines a name for the <keygen> element
 
-label<
+#$label=#$ev_nt
+#$label=#$gl_ob
+label<for element_id Specifies which form element a label is bound to
 
-legend<
+##label<form form_id Specifies one or more forms the label belongs to
 
-li<
+#$legend=#$ev_nt
+#$legend=#$gl_ob
+legend<align {{#@ALIGN}} Not supported in HTML5.\nSpecifies the alignment of the caption
 
-link<
+#$li=#$ev_nt
+#$li=#$gl_ob
+li<type 1|A|a|I|i|disc|square|circle Not supported in HTML5.\nSpecifies which kind of bullet point will be used
+li<value number Specifies the value of a list item. The following list items will increment from that number (only for <ol> lists)
 
+
+#$link=#$ev_nt
+#$link=#$gl_ob
+link<charset char_encoding Not supported in HTML5\nSpecifies the character encoding of the linked document
+link<href URL Specifies the location of the linked document
+link<hreflang language_code Specifies the language of the text in the linked document
+link<media media_query Specifies on what device the linked document will be displayed
+link<rel {{alternate|archives|author|bookmark|external|first|help|icon|last|license|next|nofollow|noreferrer|pingback|prefetch|prev|search|sidebar|stylesheet|tag|up}} Required. Specifies the relationship between the current document and the linked document
+link<rev reversed relationship Not supported in HTML5\nSpecifies the relationship between the linked document and the current document
+link<any Specifies the size of the linked resource. Only for rel="icon"
+link<target {{#@TARGET}} frame_name Not supported in HTML5\nSpecifies where the linked document is to be loaded
+link<type media_type Specifies the media type of the linked document
+
+##link<sizes HeightxWidth
+##link<crossorigin {{anonymous|use-credentials}} Specifies how the element handles cross-origin requests
+
+#$main=#$ev_nt
+#$main=#$gl_ob
 main<
 
+#$map=#$ev_nt
+#$map=#$gl_ob
 map<
 
+#$mark=#$ev_nt
+#$mark=#$gl_ob
 mark<
 
-menu<
+#$menu=#$ev_nt
+#$menu=#$gl_ob
+##menu<label text Specifies a visible label for the menu
+##menu<type list|toolbar context Specifies which type of menu to display
 
-menuitem<
+#$menuitem=#$ev_nt
+#$menuitem=#$gl_ob
+menuitem<checked checked Specifies that the command/menu item should be checked when the page loads. Only for type="radio" or type="checkbox"
+menuitem<command
+menuitem<default default Marks the command/menu item as being a default command
+menuitem<disabled disabled Specifies that the command/menu item should be disabled
+menuitem<icon URL Specifies an icon for the command/menu item
+menuitem<label text Required. Specifies the name of the command/menu item, as shown to the user
+menuitem<radiogroup groupname Specifies the name of the group of commands that will be toggled when the command/menu item itself is toggled. Only for type="radio"
+menuitem<type checkbox|command|radio Specifies the type of command/menu item. Default is "command"
 
-meta<
+#$meter=#$ev_nt
+#$meter=#$gl_ob
+meter<form form_id Specifies one or more forms the <meter> element belongs to
+meter<high number Specifies the range that is considered to be a high value
+meter<low number Specifies the range that is considered to be a low value
+meter<max number Specifies the maximum value of the range
+meter<min number Specifies the minimum value of the range
+meter<optimum number Specifies what value is the optimal value for the gauge
+meter<value number Required. Specifies the current value of the gauge
 
-meter<
-
+#$nav=#$ev_nt
+#$nav=#$gl_ob
 nav<
 
-noframes<
-
+#$noscript=#$gl_ob
 noscript<
 
-object<
 
-ol<
+#$object=#$ev_nt
+#$object=#$gl_ob
+object<align {{#@ALIGN21}} Not supported in HTML5\nSpecifies the alignment of the <object> element according to surrounding elements
+object<archive URL Not supported in HTML5\nA space separated list of URL's to archives. The archives contains resources relevant to the object
+object<border pixels Not supported in HTML5\nSpecifies the width of the border around an <object>
+object<classid class_ID Not supported in HTML5\nDefines a class ID value as set in the Windows Registry or a URL
+object<codebase URL Not supported in HTML5\nDefines where to find the code for the object
+object<codetype media_type Not supported in HTML5\nThe media type of the code referred to by the classid attribute
+object<data URL Specifies the URL of the resource to be used by the object
+object<declare declare Not supported in HTML5\nDefines that the object should only be declared, not created or instantiated until needed
+object<height pixels Specifies the height of the object
+object<hspace pixels Not supported in HTML5\nSpecifies the whitespace on left and right side of an object
+object<name name Specifies a name for the object
+object<standby text Not supported in HTML5\nDefines a text to display while the object is loading
+object<type media_type Specifies the media type of data specified in the data attribute
+object<usemap #mapname Specifies the name of a client-side image map to be used with the object
+object<vspace pixels Not supported in HTML5\nSpecifies the whitespace on top and bottom of an object
+object<width pixels Specifies the width of the object
 
-optgroup<
+##form form_id Specifies one or more forms the object belongs to
 
-option<
 
-output<
+#$ol=#$ev_nt
+#$ol=#$gl_ob
+ol<compact compact Not supported in HTML5\nol<Specifies that the list should render smaller than normal
+ol<start number Specifies the start value of an ordered list
+ol<type {{1|A|a|I|i}} Specifies the kind of marker to use in the list
 
-p<
+##ol<reversed reversed Specifies that the list order should be descending (9,8,7...)
 
-param<
+#$optgroup=#$ev_nt
+#$optgroup=#$gl_ob
+optgroup<disabled disabled Specifies that an option-group should be disabled
+optgroup<label text Specifies a label for an option-group
 
-pre<
+#$option=#$ev_nt
+#$option=#$gl_ob
+option<disabled disabled Specifies that an option should be disabled
+option<label text Specifies a shorter label for an option
+option<selected selected Specifies that an option should be pre-selected when the page loads
+option<value text Specifies the value to be sent to a server
 
-progress<
+#$output=#$ev_nt
+#$output=#$gl_ob
+output<for element_id Specifies the relationship between the result of the calculation, and the elements used in the calculation
+output<form form_id Specifies one or more forms the output element belongs to
+output<name name Specifies a name for the output element
 
-q<
+#$p=#$ev_nt
+#$p=#$gl_ob
+p<align {{#@ALIGN3}} Not supported in HTML5.\nSpecifies the alignment of the text within a paragraph
 
+#$param=#$ev_nt
+#$param=#$gl_ob
+param<name name Specifies the name of a parameter
+param<type media_type Not supported in HTML5\nSpecifies the media type of the parameter
+param<value value Specifies the value of the parameter
+param<valuetype data|ref|object Not supported in HTML5\nSpecifies the type of the value
+
+#$pre=#$ev_nt
+#$pre=#$gl_ob
+pre<width number Not supported in HTML5.\nSpecifies the maximum number of characters per line
+
+#$progress=#$ev_nt
+#$progress=#$gl_ob
+progress<max number Specifies how much work the task requires in total
+progress<value number Specifies how much of the task has been completed
+
+#$q=#$ev_nt
+#$q=#$gl_ob
+q<cite URL Specifies the source URL of the quote
+
+#$rp=#$ev_nt
+#$rp=#$gl_ob
 rp<
 
+#$rt=#$ev_nt
+#$rt=#$gl_ob
 rt<
 
+#$ruby=#$ev_nt
+#$ruby=#$gl_ob
 ruby<
 
+#$s=#$ev_nt
+#$s=#$gl_ob
 s<
 
+#$samp=#$ev_nt
+#$samp=#$gl_ob
 samp<
 
-script<
+#$script=#$gl_ob
+script<async async Specifies that the script is executed asynchronously (only for external scripts)
+script<charset charset Specifies the character encoding used in an external script file
+script<defer defer Specifies that the script is executed when the page has finished parsing (only for external scripts)
+script<src URL Specifies the URL of an external script file
+script<type media_type Specifies the media type of the script
+script<xml:space preserve Not supported in HTML5\nscript<Specifies whether whitespace in code should be preserved
 
+#$section=#$ev_nt
+#$section=#$gl_ob
 section<
 
-select<
 
+#$select=#$ev_nt
+#$select=#$gl_ob
+select<autofocus autofocus Specifies that the drop-down list should automatically get focus when the page loads
+select<disabled disabled Specifies that a drop-down list should be disabled
+select<form form_id Defines one or more forms the select field belongs to
+select<multiple multiple Specifies that multiple options can be selected at once
+select<name name Defines a name for the drop-down list
+select<required required Specifies that the user is required to select a value before submitting the form
+select<size number Defines the number of visible options in a drop-down list
+
+#$small=#$ev_nt
+#$small=#$gl_ob
 small<
 
-source<
+#$source=#$ev_nt
+#$source=#$gl_ob
+source<media media_query Specifies the type of media resource
+source<src URL Specifies the URL of the media file
+source<type media_type Specifies the media type of the media resource
 
+#$span=#$ev_nt
+#$span=#$gl_ob
 span<
 
-strike<
-
+#$strong=#$ev_nt
+#$strong=#$gl_ob
 strong<
 
-style<
+#$style=#$ev_nt
+#$style=#$gl_ob
+style<media media_query Specifies what media/device the media resource is optimized for
+style<type text/css Specifies the media type of the <style> tag
+##style<scoped scoped Specifies that the styles only apply to this element's parent element and that element's child elements
 
+#$sub=#$ev_nt
+#$sub=#$gl_ob
 sub<
 
+#$summary=#$ev_nt
+#$summary=#$gl_ob
 summary<
 
+#$sup=#$ev_nt
+#$sup=#$gl_ob
 sup<
 
-table<
 
-tbody<
+#$table=#$ev_nt
+#$table=#$gl_ob
+table<align {{left|center|right}} Not supported in HTML5\nSpecifies the alignment of a table according to surrounding text
+table<bgcolor {{#@COLOR}} Not supported in HTML5\nSpecifies the background color for a table
+table<border {{1|0}} Specifies whether or not the table is being used for layout purposes
+table<cellpadding pixels Not supported in HTML5\nSpecifies the space between the cell wall and the cell content
+table<cellspacing pixels Not supported in HTML5\nSpecifies the space between cells
+table<frame {{void|above|below|hsides|lhs|rhs|vsides|box|border}} Not supported in HTML5\nSpecifies which parts of the outside borders that should be visible
+table<rules {{none|groups|rows|cols|all}} Not supported in HTML5\nSpecifies which parts of the inside borders that should be visible
+table<sortable sortable Specifies that the table should be sortable
+table<summary text Not supported in HTML5\nSpecifies a summary of the content of a table
+table<width pixels|% Not supported in HTML5\nSpecifies the width of a table
 
-td<
 
-textarea<
+#$tbody=#$ev_nt
+#$tbody=#$gl_ob
+tbody<align {{#@ALIGN3}} char Not supported in HTML5\nAligns the content inside the <tbody> element
+tbody<char character Not supported in HTML5\nAligns the content inside the <tbody> element to a character
+tbody<charoff number Not supported in HTML5\nSets the number of characters the content inside the <tbody> element will be aligned from the character specified by the char attribute
+tbody<valign {{#@ALIGN4}} Not supported in HTML5.\nVertical aligns the content inside the <tbody> element
 
-tfoot<
+#$=#$ev_nt
+#$=#$gl_ob
+td<abbr text Not supported in HTML5\nSpecifies an abbreviated version of the content in a cell
+td<align {{#@ALIGN3}} char Not supported in HTML5\nAligns the content in a cell
+td<axis category_name Not supported in HTML5\nCategorizes cells
+td<bgcolor {{#@COLOR}} Not supported in HTML5\nSpecifies the background color of a cell
+td<char character Not supported in HTML5\nAligns the content in a cell to a character
+td<charoff number  Not supported in HTML5\nSets the number of characters the content will be aligned from the character specified by the char attribute
+td<colspan number Specifies the number of columns a cell should span
+td<headers header_id Specifies one or more header cells a cell is related to
+td<height pixels|% Not supported in HTML5\nSets the height of a cell
+td<nowrap nowrap Not supported in HTML5\nSpecifies that the content inside a cell should not wrap
+td<rowspan number Sets the number of rows a cell should span
+td<scope {{col|colgroup|row|rowgroup}} Not supported in HTML5\nDefines a way to associate header cells and data cells in a table
+td<valign {{#@ALIGN4}} Not supported in HTML5\nVertical aligns the content in a cell
+td<width pixels|% Not supported in HTML5\nSpecifies the width of a cell
 
-th<
 
-thead<
+#$textarea=#$ev_nt
+#$textarea=#$gl_ob
+textarea<autofocus autofocus Specifies that a text area should automatically get focus when the page loads
+textarea<cols number Specifies the visible width of a text area
+textarea<dirname textareaname.dir Specifies that the text direction of the textarea will be submitted
+textarea<disabled disabled Specifies that a text area should be disabled
+textarea<form form_id Specifies one or more forms the text area belongs to
+textarea<maxlength number Specifies the maximum number of characters allowed in the text area
+textarea<name text Specifies a name for a text area
+textarea<placeholder text Specifies a short hint that describes the expected value of a text area
+textarea<readonly readonly Specifies that a text area should be read-only
+textarea<required required Specifies that a text area is required/must be filled out
+textarea<rows number Specifies the visible number of lines in a text area
+textarea<wrap {{hard|soft}} Specifies how the text in a text area is to be wrapped when submitted in a form
 
+#$tfoot=#$ev_nt
+#$tfoot=#$gl_ob
+tfoot<align {{#@ALIGN3}} char Not supported in HTML5\nAligns the content inside the <tfoot> element
+tfoot<char character Not supported in HTML5\nAligns the content inside the <tfoot> element to a character
+tfoot<charoff number Not supported in HTML5\nSets the number of characters the content inside the <tfoot> element will be aligned from the character specified by the char attribute
+tfoot<valign {{#@ALIGN4}} Not supported in HTML5.\nVertical aligns the content inside the <tfoot> element
+
+
+#$th=#$ev_nt
+#$th=#$gl_ob
+th<abbr text Specifies an abbreviated version of the content in a header cell
+th<align  {{#@ALIGN3}}  Not supported in HTML5\nAligns the content in a header cell
+th<axis category_name Not supported in HTML5\nCategorizes header cells
+th<bgcolor {{#@COLOR}} Not supported in HTML5\nSpecifies the background color of a header cell
+th<char character Not supported in HTML5\nAligns the content in a header cell to a character
+th<charoff number  Not supported in HTML5\nSets the number of characters the content will be aligned from the character specified by the char attribute
+th<colspan number Specifies the number of columns a header cell should span
+th<headers header_id Specifies one or more header cells a cell is related to
+th<height pixels|% Not supported in HTML5\nSets the height of a header cell
+th<nowrap nowrap Not supported in HTML5\nSpecifies that the content inside a header cell should not wrap
+th<rowspan number Specifies the number of rows a header cell should span
+th<scope {{col|colgroup|row|rowgroup}} Specifies whether a header cell is a header for a column, row, or group of columns or rows
+th<sorted {{reversed|number|reversed number|number reversed}} Defines the sort direction of a column
+th<valign {{#@ALIGN4}} Not supported in HTML5\nVertical aligns the content in a header cell
+th<width pixels|% Not supported in HTML5\nSpecifies the width of a header cell
+
+#$thead=#$ev_nt
+#$thead=#$gl_ob
+thead<align {{#@ALIGN3}} char Not supported in HTML5\nAligns the content inside the <thead> element
+thead<char character Not supported in HTML5\nAligns the content inside the <thead> element to a character
+thead<charoff number Not supported in HTML5\nSets the number of characters the content inside the <thead> element will be aligned from the character specified by the char attribute
+thead<valign {{#@ALIGN4}} Not supported in HTML5.\nVertical aligns the content inside the <thead> element
+
+
+#$time=#$ev_nt
+#$time=#$gl_ob
 time<
+##time<datetime datetime Represent a machine-readable date/time of the <time> element
 
+#$title=#$gl_ob
 title<
 
-tr<
+#$tr=#$ev_nt
+#$tr=#$gl_ob
+tr<align {{#@ALIGN3}} char Not supported in HTML5\nAligns the content inside the <tr> element
+tr<char character Not supported in HTML5\nAligns the content inside the <tr> element to a character
+tr<charoff number Not supported in HTML5\nSets the number of characters the content inside the <tr> element will be aligned from the character specified by the char attribute
+tr<valign {{#@ALIGN4}} Not supported in HTML5.\nVertical aligns the content inside the <tr> element
+tr<charoff number Not supported in HTML5.\nSets the number of characters the content will be aligned from the character specified by the char attribute
 
-track<
 
+#$track=#$ev_nt
+#$track=#$gl_ob
+track<default default Specifies that the track is to be enabled if the user's preferences do not indicate that another track would be more appropriate
+track<kind {{captions|chapters|descriptions|metadata|subtitles}} Specifies the kind of text track
+track<label text Specifies the title of the text track
+track<src URL Required. Specifies the URL of the track file
+track<srclang language_code Specifies the language of the track text data (required if kind="subtitles")
+
+#$tt=#$ev_nt
+#$tt=#$gl_ob
 tt<
 
+#$u=#$ev_nt
+#$u=#$gl_ob
 u<
 
-ul<
+#$ul=#$ev_nt
+#$ul=#$gl_ob
+ul<compact compact Not supported in HTML5.\nSpecifies that the list should render smaller than normal
+ultype {{disc|square|circle}} Not supported in HTML5.\nSpecifies the kind of marker to use in the list
 
+#$var=#$ev_nt
+#$var=#$gl_ob
 var<
 
-video<
 
+#$video=#$ev_nt
+#$video=#$gl_ob
+video<autoplay autoplay Specifies that the video will start playing as soon as it is ready
+video<controls controls Specifies that video controls should be displayed (such as a play/pause button etc).
+video<height pixels Sets the height of the video player
+video<loop loop Specifies that the video will start over again, every time it is finished
+video<muted muted Specifies that the audio output of the video should be muted
+video<poster URL Specifies an image to be shown while the video is downloading, or until the user hits the play button
+video<preload {{auto|metadata|none}} Specifies if and how the author thinks the video should be loaded when the page loads
+video<src URL Specifies the URL of the video file
+video<width pixels Sets the width of the video player
+
+#$wbr=#$ev_nt
+#$wbr=#$gl_ob
 wbr<
 

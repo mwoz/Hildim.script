@@ -53,6 +53,7 @@ local m_ext, m_ptrn = "", ""
 local bManualTip = false
 local m_tblSubstitution = {}
 local curr_fillup_char = ''
+local inheritors, inheritorsX = {}, {} --таблицы наследования объектов
 
 local Ext2Ptrn = {}
 do
@@ -86,19 +87,6 @@ local function useAutocomp()
         return Ext2Ptrn[props['FileExt']] ~= nil
     end
 end
--- Тест для распечатки содержимого заданной таблицы
-local function prnTable(name)
-	print('> ________________')
-	for i = 1, table.maxn(name) do
-		print(name[i])
-	end
-	print('> ^^^^^^^^^^^^^^^')
-end
-local function prnTable2(name)
-	for i = 1, table.maxn(name) do
-		prnTable(name[i])
-	end
-end
 
 local function GetStrAsTable(str)
     local _start, _end, sVar, sValue,sBrash,sPar = string.find(str, '^#$([%w_]+)=([^%s%(]+)([%(]?[%s]*)([^%s]*)', 1)
@@ -121,8 +109,8 @@ local function TableSort(table_name)
 	return table_name
 end
 
-local function ShowCallTip(pos,str,s,e)
-    local _,_,list = str:find('.-{{(.+)}}')
+local function ShowCallTip(pos, str, s, e)
+    local _, _, list = str:find('.-{{(.+)}}')
     local function ls(l)
         local tl = {}
         for w in l:gmatch('[^|]+') do
@@ -134,7 +122,7 @@ local function ShowCallTip(pos,str,s,e)
         current_poslst = current_pos
         pasteFromXml = false
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
-        editor:UserListShow(constListIdXmlPar,l)
+        editor:UserListShow(constListIdXmlPar, l)
         if str2 then
             calltipinfo['attr'] = {}
             calltipinfo['attr']['pos'] = pos
@@ -144,8 +132,8 @@ local function ShowCallTip(pos,str,s,e)
         end
     end
     if list then
-        local _,_,str2 = str:find'.-{{.+}}(.+)'
-        local _,_,sub = list:find('^(#@%u+)$')
+        local _, _, str2 = str:find'.-{{.+}}(.+)'
+        local _, _, sub = list:find('^(#@%u+)$')
         if sub then list = m_tblSubstitution[sub] end
         if not list:find('|') then
             if list:find('^@@') then
@@ -156,7 +144,7 @@ local function ShowCallTip(pos,str,s,e)
                 end)
                 return
             else
-                calltipinfo={0}
+                calltipinfo ={0}
                 if not bManualTip then
                     editor:SetSel(editor.CurrentPos, editor.CurrentPos)
                     editor:ReplaceSel(list)
@@ -169,20 +157,20 @@ local function ShowCallTip(pos,str,s,e)
             return
         end
     end
-    if not str then calltipinfo={0};return end
+    if not str then calltipinfo ={0};return end
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
-    scite.SendEditor(SCI_CALLTIPSHOW,pos,str)
-    if  s == nil then return end
+    scite.SendEditor(SCI_CALLTIPSHOW, pos, str)
+    if s == nil then return end
     if s > 0 then
-        scite.SendEditor(SCI_CALLTIPSETFOREHLT,0xff0000)
-        scite.SendEditor(SCI_CALLTIPSETHLT,s+1,e)
+        scite.SendEditor(SCI_CALLTIPSETFOREHLT, 0xff0000)
+        scite.SendEditor(SCI_CALLTIPSETHLT, s + 1, e)
     end
-    scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
+    scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)
 end
 
 local function isXmlLine()
 --определяем, является ли текущая строка тэгом xml
-    if editor:PositionFromLine(af_current_line) > current_pos-1 then return false end
+    if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
     return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',',','..editor.StyleAt[editor.SelectionStart]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
 end
 
@@ -268,7 +256,6 @@ function GetInputObject(line)
             if string.find(newLine, '[%w_)]$') ~= nil then
                 inputObject[4] = GetInputObject(newLine)
     end end end
-    -- prnTable(inputObject)
     return inputObject
 end
 
@@ -319,9 +306,9 @@ local function GetObjectNames(tableObj)
 end
 
 local function GetObjectNamesXml()
-    strLine = editor:textrange(editor:PositionFromLine(af_current_line),scite.SendEditor(SCI_GETLINEENDPOSITION,af_current_line))
+    strLine = editor:textrange(editor:PositionFromLine(af_current_line),editor.SelectionStart)
     local names={}
-    local _s,_e,s = string.find(strLine,"<([%w]+)")
+    local _s,_e,s = string.find(strLine,".+<([%w]+)")
     if _s ~= nil then
         table.insert(names,{s,s,'',''})
         _s,_e,s = string.find(strLine,' type="([%w]+)"')
@@ -419,29 +406,36 @@ local function FindDeclaration()
 end
 
 -- Чтение api файла в таблицы api_table и alias_table(чтобы потом не опрашивать диск, а все тащить из нее)
-local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd)
+local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
     local tbl_MethodList, tbl_Method--в первую табличку вставим методы в качестве ключей, чтоб по ней удалять дубли - а во вторую - в качестве значений
     if needKwd then
         tbl_MethodList,tbl_Method = {},{}
     end
 	for api_filename in string.gmatch(strApis, "[^;]+") do
-		if api_filename ~= '' then
-			local api_file = io.open(api_filename)
-			if api_file then
-				for line in api_file:lines() do
-                    if string.find(line,'^#%$') == 1 and al_tbl ~=nil then -- вставляем алиас
-                        local tmp_tbl = GetStrAsTable(line)
-                        if tmp_tbl ~= nil then
-                            table.insert(al_tbl, tmp_tbl)
+        if api_filename ~= '' then
+            local api_file = io.open(api_filename)
+            if api_file then
+                for line in api_file:lines() do
+                    if line:byte() == 35 then --#
+                        if string.find(line, '^#%$') == 1 then -- вставляем алиас
+                            local _, _, inh, parent = line:find("^#%$([%w]+)=#%$([%w_]+)")
+                            if parent then
+                                if not inh_table[inh] then inh_table[inh] = {} end
+                                table.insert(inh_table[inh], parent)
+                            elseif al_tbl ~= nil then
+                                local tmp_tbl = GetStrAsTable(line)
+                                if tmp_tbl ~= nil then
+                                    table.insert(al_tbl, tmp_tbl)
+                                end
+                            end
+                        elseif string.find(line, '^#@%u') == 1 then
+                            local _, _, name, subs = string.find(line, '^(#@%u+) +(.+)')
+                            m_tblSubstitution[name] = subs
                         end
-                    elseif string.find(line,'^#@%u') == 1 then
-                        local _,_,name,subs = string.find(line,'^(#@%u+) +(.+)')
-                        m_tblSubstitution[name] = subs
                     else
-                        --line = string.gsub(line,'[%s(].+$','') -- обрезаем комментарии
-                        local _s,_e,l,c = string.find(line,'^([^%s%(]+)([^%s%(]?.-)$')
+                        local _s, _e, l, c = string.find(line, '^([^%s%(]+)([^%s%(]?.-)$')
                         if _e ~= nil then
-                            local _start, _end, sObj,sMet = string.find(l, '^(.+)'..autocom_chars..'(.+)')
+                            local _start, _end, sObj, sMet = string.find(l, '^(.+)'..autocom_chars..'(.+)')
                             if _start == nil then
                                 sObj = constObjGlobal
                                 sMet = l
@@ -449,11 +443,11 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd)
 
                             local upObj = string.upper(sObj)
                             if o_tbl[upObj] == nil then
-                                if o_tbl._fill==nil then o_tbl._fill=true end
+                                if o_tbl._fill == nil then o_tbl._fill = true end
                                 o_tbl[upObj] = {}
                                 o_tbl[upObj].normalName = sObj
                             end
-                            table.insert(o_tbl[upObj], {sMet,c})
+                            table.insert(o_tbl[upObj], {sMet, c})
                             if needKwd then
                                 if upObj ~= constObjGlobal and tbl_MethodList[sMet] == nil then
                                     tbl_MethodList[sMet] = 1
@@ -462,13 +456,13 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd)
                             end
                         end
                     end
-				end
-				api_file:close()
-			else
-				o_tbl = {}
-			end
-		end
-	end
+                end
+                api_file:close()
+            else
+                o_tbl = {}
+            end
+        end
+    end
     if needKwd then
         return string.lower(table.concat(tbl_Method, ' '))
     end
@@ -569,14 +563,16 @@ local function ReCreateStructures(strText, tblFiles)
         objectsX_table = {}
         fillup_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".fillup.characters"])
         autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
-        str_vbkwrd = CreateTablesForFile(objects_table,alias_table,props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_vbkwrd ~= nil)
+        inheritors = {}
+        str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_vbkwrd ~= nil, inheritors)
     end
     if Favorites_Clear ~= nil then Favorites_Clear() end
     -----------
 
     -----------
     if m_ext ~= editor.Lexer or str_xmlkwrd~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']] or '&&&&') then
-        str_xmlkwrd = CreateTablesForFile(objectsX_table,nil, props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_xmlkwrd~=nil)
+        inheritorsX = {}
+        str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_xmlkwrd~= nil, inheritorsX)
     end
     if editor.Lexer == SCLEX_FORMENJINE then
         RecrReCreateStructures(editor:GetText(),{})
@@ -599,13 +595,28 @@ local function ReCreateStructures(strText, tblFiles)
 	return false
 end
 
+local function EnrichFromInheritors(obj_names, inh_table)
+    local tblobj = {}
+    if inh_table then
+        for i = 1, #obj_names do
+            tblobj[obj_names[i][1]:upper()] = true
+            if inh_table[obj_names[i][1]] then
+                for j = 1,  #inh_table[obj_names[i][1]] do
+                    tblobj[inh_table[obj_names[i][1]][j]:upper()] = true
+                end
+            end
+        end
+    end
+    return tblobj
+end
+
 -- Создание таблицы "методов" заданного "объекта"
-local function CreateMethodsTable(obj_names,ob_tbl,strMetBeg)
+local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
     local retT = {}
     local sB = string.upper(strMetBeg)
     local last = nil
-	for i = 1, table.maxn(obj_names) do
-        local upObj = string.upper(obj_names[i][1])
+    local tblobj = EnrichFromInheritors(obj_names, inh_table)
+    for upObj, _ in pairs(tblobj) do
         if ob_tbl[upObj] ~=nil then
             if ob_tbl[upObj]["last"] ~= nil then last = ob_tbl[upObj]["last"] end
             for j=1,table.maxn(ob_tbl[upObj]) do
@@ -657,57 +668,57 @@ local function ShowUserList(nPos,iId, last)
 	end
 end
 
-local function TryTipFor(sObj,sMet,api_tb,pos)
-
+local function TryTipFor(sObj, sMet, api_tb, pos)
     api_t = api_tb[string.upper(sObj)]
     if api_t == nil then return false end
     local lLen = table.maxn(api_t)
-	for i = 1, lLen do
-		local line = api_t[i][1]
-		-- ищем строки, которые начинаются с заданного "объекта"
-		local _, _end = string.find(string.upper(line), "^"..string.upper(sMet).."$")
-		if _end ~= nil then
-            local s,e,l,p,d  = string.find(api_t[i][2], "^(%s*%()([^%)%(]+%))(.-)$") --если этто функция - найдем параметры
+    for i = 1, lLen do
+        local line = api_t[i][1]
+        -- ищем строки, которые начинаются с заданного "объекта"
+        local _, _end = string.find(string.upper(line), "^"..string.upper(sMet).."$")
+        if _end ~= nil then
+            local s, e, l, p, d = string.find(api_t[i][2], "^(%s*%()([^%)%(]+%))(.-)$") --если это функция - найдем параметры
             if e == nil then
                 l = ''
                 p = ''
                 d = api_t[i][2]
             end
-            local nParams=0
-            local pozes={}
+            local nParams = 0
+            local pozes ={}
             local sParam = 0
             local eParam = 0
             strMethodName = api_t[i][1]
-            if sObj ~= constObjGlobal then strMethodName = sObj.."."..strMethodName end
+            --if sObj ~= constObjGlobal then strMethodName = sObj.."."..strMethodName end
             if l ~= '' then
                 --разобьем на параметры
-                local poz=string.len(strMethodName)
-                table.insert(pozes,poz)
-                sParam=poz
-                for w in string.gmatch(p,"[^%,%)]*[%,%)]") do
-                    poz=poz+string.len(w)
-                    table.insert(pozes,poz)
-                    if nParams==0 then eParam = poz end
-                    nParams=nParams+1
+                local poz = string.len(strMethodName)
+                table.insert(pozes, poz)
+                sParam = poz
+                for w in string.gmatch(p, "[^%,%)]*[%,%)]") do
+                    poz = poz + string.len(w)
+                    table.insert(pozes, poz)
+                    if nParams == 0 then eParam = poz end
+                    nParams = nParams + 1
                 end
             end
             local brk = ''
             if p ~= '' and d ~= '' then brk = '\n' elseif p == '' and d == '' then return false end
-            local str=strMethodName..l..p..brk..string.gsub(d,"\\n","\n")
-            table.insert(calltipinfo,{pos,str,nParams,1,pozes})
+            local str = strMethodName..l..p..brk..string.gsub(d, "\\n", "\n")
+            table.insert(calltipinfo,{pos, str, nParams, 1, pozes})
             calltipinfo[1] = af_current_line
-            ShowCallTip(pos,str,sParam,eParam)
+            ShowCallTip(pos, str, sParam, eParam)
             return true
-		end
-	end
+        end
+    end
     return false
 end
 
 local function CallTipXml(sMethod)
-    local object_names=GetObjectNamesXml()
+    local object_names = GetObjectNamesXml()
     if object_names[1] ~= nil then
-        for i=1,table.maxn(object_names) do
-            if TryTipFor(object_names[i][1],sMethod,objectsX_table,current_pos) then break end
+        local tblobj = EnrichFromInheritors(object_names, inheritorsX)
+        for upObj, _ in pairs(tblobj) do
+            if TryTipFor(upObj, sMethod, objectsX_table, current_pos) then break end
         end
         bManualTip = false
     end
@@ -715,7 +726,6 @@ end
 
 -- Вставляет выбранный из раскрывающегося списка метод в редактируемую строку
 local function OnUserListSelection_local(tp, str)
-    print(tp, str)
 	editor:SetSel(current_poslst, editor.CurrentPos)
     local fmDef = cmpobj_GetFMDefault()
     local s, shift = nil,0
@@ -788,7 +798,7 @@ local function RunAutocomplete(char,pos,word)
 		if obj_names[i][3] ~= '' then bIsConstr = true else bIsProps=true end
 	end
     local last
-	methods_table, last = CreateMethodsTable(obj_names,objects_table,word)
+	methods_table, last = CreateMethodsTable(obj_names, objects_table, word, inheritors)
 
     current_poslst = current_pos
 	return ShowUserList(string.len(word), nil, last)
@@ -803,39 +813,40 @@ local function AutocompleteObject(char)
 	return RunAutocomplete(char,current_pos,'')
 end
 
-local function CallTip(char,pos)
-
-	if get_api == true then
-		ReCreateStructures()
-	end
-	if objects_table._fill == nil then return false end
-    local strLine = editor:textrange(editor:PositionFromLine(af_current_line),pos-1)
+local function CallTip(char, pos)
+    if get_api == true then
+        ReCreateStructures()
+    end
+    if objects_table._fill == nil then return false end
+    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), pos - 1)
     --найдем, что у нас слева - метод или функция
-    local _start, _end, sSep, sMetod = string.find(strLine,"("..autocom_chars.."?)([%w%_]+)$")
+    local _start, _end, sSep, sMetod = string.find(strLine, "("..autocom_chars.."?)([%w%_]+)$")
     if sSep == '' then
-      return TryTipFor(constObjGlobal,sMetod,objects_table,pos)
-    elseif sSep ~=nil then
+        return TryTipFor(constObjGlobal, sMetod, objects_table, pos)
+    elseif sSep ~= nil then
         FindDeclaration()
 
-        strLine = string.sub(strLine,1,_start-1)
+        strLine = string.sub(strLine, 1, _start - 1)
         local input_object = GetInputObject(strLine)
         obj_names = GetObjectNames(input_object)
-        for i=1,table.maxn(obj_names) do
-            if TryTipFor(obj_names[i][1],sMetod,objects_table,pos) then return true end
+        local tblobj = EnrichFromInheritors(obj_names, inheritors)
+        for upObj, _ in pairs(tblobj) do
+            if TryTipFor(upObj, sMetod, objects_table, pos) then return true end
         end
     end
     return false
 end
 
 local function TipXml()
-    local strLine = editor:textrange(editor:PositionFromLine(af_current_line),current_pos-1)
+    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), current_pos - 1)
     --найдем, что у нас слева - метод или функция
-    local _start, _end, sMetod = string.find(strLine,"([%w]+)$")
+    local _start, _end, sMetod = string.find(strLine, "([%w]+)$")
     if _start ~= nil then
-        object_names=GetObjectNamesXml()
+        object_names = GetObjectNamesXml()
         if object_names[1] ~= nil then
-            for i=1,table.maxn(object_names) do
-                if TryTipFor(object_names[i][1],sMetod,apiX_table,current_pos) then break end
+            local tblobj = EnrichFromInheritors(obj_names, inheritorsX)
+            for upObj, _ in pairs(tblobj) do
+                if TryTipFor(upObj, sMetod, apiX_table, current_pos) then break end
             end
         end
     end
@@ -919,9 +930,9 @@ end
 
 local function ListXml()
     if isPosInString() then return false end
-    local object_names=GetObjectNamesXml()
+    local object_names = GetObjectNamesXml()
     if object_names[1] ~= nil then
-        methods_table = CreateMethodsTable(object_names,objectsX_table,'')
+        methods_table = CreateMethodsTable(object_names, objectsX_table, '', inheritorsX)
         current_poslst = current_pos
         pasteFromXml = true
         return ShowUserList(0,constListIdXml)
@@ -992,9 +1003,6 @@ local function OnChar_local(char)
 end
 ------------------------------------------------------
 function ShowTipManualy()
-	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
-	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
-    if calltip_start_characters == '' then return end
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
     if objectsX_table._fill ~= nil then
@@ -1010,6 +1018,10 @@ function ShowTipManualy()
             end
         end
     end
+
+	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
+	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
+    if calltip_start_characters == '' then return end
 
     local cp = current_pos
     repeat

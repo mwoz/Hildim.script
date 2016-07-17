@@ -234,6 +234,7 @@ container.GetTags  Возвращает сообщение с вложенными ссылками на сообщения-теги 
 container.ShareControls True - все контролы контейнера помещаются как в его коллекцию Controls, так и в коллекцию Controls ближайшего родительского контейнера, у которого это свойство равно False (или в Form.Controls, если такого контейнера нет). Разработчик должен обеспечить уникальность имени контролов на уровне родительского контейнера/формы, куда записываются контролы.
 container.RaiseAsyncEvent ( EventName, [EventParam] ) Генерирует событие контрола (асинхронно) с именем EventName и параметром EventParam,\nкоторый передается в процедуру обработчика события <ИмяКонтрола>_<ИмяСобытия>
 #$control=container(
+#$container=#$control
 
 #$formctrl=form("sub
 #$formctrl=controlscoll%.add(.*"FORMCONTAINER
