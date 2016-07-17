@@ -429,7 +429,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                                 end
                             end
                         elseif string.find(line, '^#@%u') == 1 then
-                            local _, _, name, subs = string.find(line, '^(#@%u+) +(.+)')
+                            local _, _, name, subs = string.find(line, '^(#@[%u%d]+) +(.+)')
                             m_tblSubstitution[name] = subs
                         end
                     else
