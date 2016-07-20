@@ -630,8 +630,7 @@ local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
 end
 
 -- Показываем раскрывающийся список "методов"
-local function ShowUserList(nPos,iId, last)
-
+local function ShowUserList(nPos, iId, last)
 	local list_count = table.getn(methods_table)
 	if list_count > 0 then
 		methods_table = TableSort(methods_table)
@@ -652,7 +651,6 @@ local function ShowUserList(nPos,iId, last)
             if iId ~= nil then
                 editor:UserListShow(iId, s)
             else
-                -- scite.SendEditor(SCI_AUTOCSHOW,nPos,s)
                 editor:UserListShow(7, s)
             end
             if iSel ~= 0  then
@@ -675,7 +673,7 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
     for i = 1, lLen do
         local line = api_t[i][1]
         -- ищем строки, которые начинаются с заданного "объекта"
-        local _, _end = string.find(string.upper(line), "^"..string.upper(sMet).."$")
+        local _, _end = string.find(string.upper(line or ''), "^"..string.upper(sMet or '').."$")
         if _end ~= nil then
             local s, e, l, p, d = string.find(api_t[i][2], "^(%s*%()([^%)%(]+%))(.-)$") --если это функция - найдем параметры
             if e == nil then
@@ -726,19 +724,31 @@ end
 
 -- Вставляет выбранный из раскрывающегося списка метод в редактируемую строку
 local function OnUserListSelection_local(tp, str)
-	editor:SetSel(current_poslst, editor.CurrentPos)
+    editor:SetSel(current_poslst, editor.CurrentPos)
     local fmDef = cmpobj_GetFMDefault()
-    local s, shift = nil,0
+    local s, shift = nil, 0
     if tp == constListIdXmlPar then
         if calltipinfo['attr'] then
-            ShowCallTip(calltipinfo['attr']['pos'],calltipinfo['attr']['str'],calltipinfo['attr']['s'],calltipinfo['attr']['e'])
+            ShowCallTip(calltipinfo['attr']['pos'], calltipinfo['attr']['str'], calltipinfo['attr']['s'], calltipinfo['attr']['e'])
         end
-        calltipinfo={0}
-        s = str:gsub(' .*','')
+        calltipinfo ={0}
+        s = str:gsub(' .*', '')
     elseif pasteFromXml then
         s = str..'=""'
     elseif editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
-        if (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
+        local tip, sign
+        for _, t in ipairs(objects_table['NOOBJ']) do
+            if t[1] == str then
+                _, _ , tip, sign = t[2]:find('^%s*(.-)([\\>])%s*$')
+                if not tip then tip = t[2] end
+                break
+            end
+        end
+        if sign == '>' then
+            shift = 1
+            s = str..'>'
+            if curr_fillup_char == '' then curr_fillup_char = '' end
+        elseif ((sign or '1') == '1') == (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
             shift = 2
             s = str..'/>'
             if curr_fillup_char == '/' then curr_fillup_char = '' end
@@ -747,11 +757,16 @@ local function OnUserListSelection_local(tp, str)
             s = str..'></'..str..'>'
             if curr_fillup_char == '>' then curr_fillup_char = '' end
         end
+
+        if (tip or '') ~= '' then
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+            scite.SendEditor(SCI_CALLTIPSHOW, editor.CurrentPos, tip)
+        end
     else
         s = str
     end
 
-	editor:ReplaceSel(s)
+    editor:ReplaceSel(s)
     if pasteFromXml then
         editor.CurrentPos = editor.CurrentPos - 1
         editor:SetSel( editor.CurrentPos, editor.CurrentPos)
@@ -765,24 +780,12 @@ local function OnUserListSelection_local(tp, str)
         if table.maxn(obj_names) > 0 then
             local upObj = string.upper(obj_names[table.maxn(obj_names)][1])
             objects_table[upObj]['last'] = str
-            -- for i = 1, table.maxn(obj_names) do
-                -- local upObj = string.upper(obj_names[i][1])
-                -- if objects_table[upObj] ~=nil then
-                    -- for j=1,table.maxn(objects_table[upObj]) do
-                        -- if objects_table[upObj][j][1] == str then
-                            -- objects_table[upObj]['last'] = str
-                            -- bIsListVisible = false
-                            -- return
-                        -- end
-                    -- end
-                -- end
-            -- end
-            end
+        end
     end
     bIsListVisible = false
- end
+end
 
-local function RunAutocomplete(char,pos,word)
+local function RunAutocomplete(char, pos, word)
 	FindDeclaration()
 
     local input_object = GetInputObject(editor:textrange(editor:PositionFromLine(af_current_line),pos-1))
@@ -855,17 +858,17 @@ end
 
 local function ResetCallTipParams()
     if scite.SendEditor(SCI_AUTOCACTIVE) then return end
-    local tip=calltipinfo[table.maxn(calltipinfo)]
+    local tip = calltipinfo[table.maxn(calltipinfo)]
     local pos = current_pos
-    if tip[1] > current_pos  then
-        if editor:WordEndPosition(current_pos)+1 == tip[1] then
-            ShowCallTip(tip[1],tip[2],0,0)
+    if tip[1] > current_pos then
+        if editor:WordEndPosition(current_pos) + 1 == tip[1] then
+            ShowCallTip(tip[1], tip[2], 0, 0)
             return
         end
     elseif objectsX_table._fill ~= nil then
         if isXmlLine() then --для xml показываем тип, пока он внутри строки, иначе прячем
             if isPosInString() then
-                ShowCallTip(tip[1],tip[2],0,0)
+                ShowCallTip(tip[1], tip[2], 0, 0)
             else
                 HideCallTip()
             end
@@ -873,8 +876,8 @@ local function ResetCallTipParams()
         end
     end
     local strParams = nil -- = editor:textrange(tip[1],current_pos)
-    if tip[1] <= current_pos  then
-        strParams = editor:textrange(tip[1],current_pos)
+    if tip[1] <= current_pos then
+        strParams = editor:textrange(tip[1], current_pos)
     end
     if strParams == nil then
         HideCallTip()
@@ -884,8 +887,8 @@ local function ResetCallTipParams()
     local iParCount = 1
     local ilen = string.len(strParams)
 
-    for i=1,ilen do
-        local ch=string.sub(strParams,i,i)
+    for i = 1, ilen do
+        local ch = string.sub(strParams, i, i)
         if ch == "(" then
             bracets = bracets + 1
         elseif ch == ")" then
@@ -897,7 +900,7 @@ local function ResetCallTipParams()
             HideCallTip()
             return
         end
-        if ch==" " and bracets == 0 and iParCount == tip[3] then
+        if ch == " " and bracets == 0 and iParCount == tip[3] then
             --if string.find( strParams, "$" )
             if string.find(strParams, "[^%,%s]%s%s+$") ~= nil then
                 HideCallTip()
@@ -908,8 +911,8 @@ local function ResetCallTipParams()
 
     calltipinfo[table.maxn(calltipinfo)][4] = iParCount
     local s = tip[5][iParCount]
-    local e = tip[5][iParCount+1]
-    ShowCallTip(tip[1],tip[2],s,e)
+    local e = tip[5][iParCount + 1]
+    ShowCallTip(tip[1], tip[2], s, e)
 end
 
 local function OnUpdateUI_local()
@@ -942,6 +945,7 @@ end
 
 -- ОСНОВНАЯ ПРОЦЕДУРА (обрабатываем нажатия на клавиши)
 local function OnChar_local(char)
+    -- if char~='<' then return end
     if bIsListVisible and not pasteFromXml and fillup_chars ~= '' and string.find(char,fillup_chars) then
     --обеспечиваем вставку выбранного в листе значения вводе одного из завершающих символов(fillup_chars - типа (,. ...)
     --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
@@ -967,13 +971,13 @@ local function OnChar_local(char)
 	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
 	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
 	if not (autocomplete_start_characters == '' and calltip_start_characters == '') then
-              -- if get_api then autocom_chars = fPattern(autocomplete_start_characters) end
         if objectsX_table._fill ~= nil and ( char == ' ' or char == '=' ) then
             if isXmlLine() then
                 if char == ' ' then
                     local r = ListXml()
                     return r or result
                 else
+
                     local r = TipXml()
                     return r or result
                 end
@@ -1006,16 +1010,40 @@ function ShowTipManualy()
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
     if objectsX_table._fill ~= nil then
+        local _s, _e, sMethod
         if isXmlLine() then --для xml показываем тип, пока он внутри строки, иначе прячем
             if isPosInString() then
                 local posLine = editor:PositionFromLine(af_current_line)
-                local str=editor:textrange(posLine,current_pos)
-                local _s,_e,sMethod = string.find(str,'(%w+)="[^"]*$')
+                local str = editor:textrange(posLine, current_pos)
+                _s, _e, sMethod = string.find(str, '(%w+)="[^"]*$')
                 if sMethod == nil then return end
-                bManualTip = true
-                CallTipXml(sMethod)
-                return
+            else
+                local posLine = editor:PositionFromLine(af_current_line)
+                current_pos = editor:WordEndPosition(current_pos, true)
+                local str = editor:textrange(posLine, current_pos)
+                _s, _e, sMethod = string.find(str, '<(%w+)$')
+                if sMethod ~= nil then
+                    local tip, sign
+                    for _, t in ipairs(objects_table['NOOBJ']) do
+                        if t[1] == sMethod then
+                            _, _ , tip, sign = t[2]:find('^%s*(.-)([\\>])%s*$')
+                            if not tip then tip = t[2] end
+                            break
+                        end
+                    end
+                    if (tip or '') == '' then return end
+                    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+                    scite.SendEditor(SCI_CALLTIPSHOW, editor.CurrentPos, tip)
+                    return
+                else
+                    _s, _e, sMethod = string.find(str, ' (%w+)$')
+                    if sMethod == nil then return end
+                end
             end
+            print(sMethod)
+            bManualTip = true
+            CallTipXml(sMethod)
+            return
         end
     end
 

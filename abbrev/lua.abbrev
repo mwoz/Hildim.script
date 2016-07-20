@@ -1,6 +1,6 @@
 1=-- Script Name\n-- Version: 1.0\n-- Author: \n---------------------------------------------------\n-- Description: \n---------------------------------------------------\nlocal text = props['CurrentSelection']\n|
 if=if | then\nend
-for=for i = 1,  #%SEL% do\n\t|\nend
+for=for i = 1,  #%SEL%| do\nend
 while=while x ~= 0 do\n\t\nend\n
 rep=repeat\r\n\t\r\nuntil x == 0\r\n
 onopen=-- Add user event handler OnOpen\nlocal old_OnOpen = OnOpen\nfunction OnOpen(file)\n\tlocal result\n\tif old_OnOpen then result = old_OnOpen(file) end\n\tif |MyFunction(file) then return true end\n\treturn result\nend

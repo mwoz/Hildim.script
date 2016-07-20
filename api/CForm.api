@@ -410,21 +410,21 @@ objsqlo.DataModelMode (R/S/T/M)
 objsqlo.IndexAuto (Y/N)
 
 noobj.Choice
-noobj.Column
+noobj.Column \
 noobj.Container
-noobj.Control
+noobj.Control \
 noobj.Design
 noobj.Form
 noobj.Lookup
 noobj.Reference
 noobj.Sqlquery
-noobj.String
+noobj.String \
 noobj.Stringtable
 noobj.Sql
 noobj.Value
 noobj.Styles
-noobj.Anchor
+noobj.Anchor \
 noobj.Block
-noobj.Content
+noobj.Content \
 
 

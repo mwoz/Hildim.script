@@ -1257,7 +1257,7 @@ objtmp.TemplateName Задает имя шаблона, если оно отличается от дефолтного для да
 objtmp.ParentForm задает родительское окно для открываемой формы\nЕсли задано, открывается как дочерняя форма
 
 
-noobj.control
+noobj.control \
 noobj.form
 noobj.string
 noobj.stringtable
@@ -1265,6 +1265,6 @@ noobj.frame
 noobj.template
 noobj.menu
 noobj.script
-noobj.menuparam
+noobj.menuparam \
 noobj.pane
-noobj.option
+noobj.option \
