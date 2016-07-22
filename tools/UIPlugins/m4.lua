@@ -24,16 +24,6 @@ function RunBatch(filePath)
         scite.RunInConcole()
 	end
 end
--- Возвращает текущий символ перевода строки
-local function GetEOL()
-	local eol = "\r\n"
-	if editor.EOLMode == SC_EOL_CR then
-		eol = "\r"
-	elseif editor.EOLMode == SC_EOL_LF then
-		eol = "\n"
-	end
-	return eol
-end
 
 function listCalc_SmartErrorMapping()
     local lineFrom,lineEnd
@@ -65,7 +55,7 @@ function listCalc_SmartErrorMapping()
     editor:EndUndoAction()
     editor:SetSel(editor:PositionFromLine(lineFrom), scite.SendEditor(SCI_GETLINEENDPOSITION,lineEnd))
     local tmpF = io.open(props["SciteDefaultHome"]..'\\data\\tmpmap.sql', "w")
-    local strText =editor:GetSelText():gsub(GetEOL(),"\n")
+    local strText =editor:GetSelText():gsub(CORE.EOL(),"\n")
 
     _G["SqlMap"] = '?'
     tmpF:write(strText)
@@ -88,7 +78,7 @@ function listCalc_RunBatchWithSciTESel()
 	if editor.Lexer == SCLEX_MSSQL then
 
 		tmpName=props["backup.path"]:gsub('[^\\]*$', "").."tmpsel.m"
-		local strSel = editor:GetSelText():gsub(GetEOL(),"\n")
+		local strSel = editor:GetSelText():gsub(CORE.EOL(),"\n")
 		local tmpFile = io.open(tmpName, "w")
 		tmpFile:write(strSel)
 		tmpFile:close()

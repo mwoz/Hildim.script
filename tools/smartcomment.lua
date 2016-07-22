@@ -29,19 +29,6 @@ Version: 2.7.4
 Обработка комментария в props # ( #~ )
 --]]--------------------------------------------------
 
--- Возвращает текущий символ перевода строки
-local function GetEOL()
-	local eol = "\r\n"
-	if editor.EOLMode == SC_EOL_CR
-	then
-		eol = "\r"
-	elseif editor.EOLMode == SC_EOL_LF
-	then
-		eol = "\n"
-	end
-	return eol
-end
-
 -- сделать текст шаблоном для поиска
 -- (фактически экранирование служебных символов)
 local function MakeFind( text )
@@ -81,7 +68,7 @@ end
 
 -- предыдущий символ позиции конец строки?
 local function prevIsEOL(pos)
-	if string.find(editor:textrange(editor:PositionBefore(pos-string.len(GetEOL())+1), pos),GetEOL())
+	if string.find(editor:textrange(editor:PositionBefore(pos-string.len(CORE.EOL())+1), pos),CORE.EOL())
 	then
 		return true
 	end
@@ -91,7 +78,7 @@ end
 -- последний символ в строке - конец строки?
 local function IsEOLlast(text)
 	-- в луа конец строки всегда один символ
-	if string.find(text,GetEOL(),string.len(text)-1)
+	if string.find(text,CORE.EOL(),string.len(text)-1)
 	then
 		return true
 	end
@@ -115,7 +102,7 @@ local function StrimComment(commentbegin, commentend)
 	if IsEOLlast(text)
 	then
 		b2,e2 = string.find(text, MakeFind(commentend),
-			string.len(text)-string.len(commentend)-string.len(GetEOL()))
+			string.len(text)-string.len(commentend)-string.len(CORE.EOL()))
 	else
 		b2,e2 = string.find(text, MakeFind(commentend),
 			string.len(text)-string.len(commentend))
@@ -132,9 +119,9 @@ local function StrimComment(commentbegin, commentend)
 	if (b and b2)
 	then
 		local add=''
-		if (string.find(text,GetEOL(),string.len(text)-string.len(GetEOL())))
+		if (string.find(text,CORE.EOL(),string.len(text)-string.len(CORE.EOL())))
 		then
-			add = GetEOL()
+			add = CORE.EOL()
 		end
 		text = string.sub(text,e+1,b2-1)
 		editor:ReplaceSel(text..add)
@@ -149,19 +136,19 @@ local function StrimComment(commentbegin, commentend)
 			local eolcount = 0
 			if (prevIsEOL(selend))
 			then
-				editor:insert(selend, commentend..GetEOL())
+				editor:insert(selend, commentend..CORE.EOL())
 				eolcount = eolcount + 1
 			else
 				editor:insert(selend, commentend)
 			end
 			if (prevIsEOL(selbegin))
 			then
-				editor:insert(selbegin, commentbegin..GetEOL())
+				editor:insert(selbegin, commentbegin..CORE.EOL())
 				eolcount = eolcount + 1
 			else
 				editor:insert(selbegin, commentbegin)
 			end
-			editor:SetSel(selbegin, selend+string.len(commentbegin)+string.len(commentend)+string.len(GetEOL())*eolcount)
+			editor:SetSel(selbegin, selend+string.len(commentbegin)+string.len(commentend)+string.len(CORE.EOL())*eolcount)
 		end
 	end
 	editor:EndUndoAction()
@@ -171,7 +158,7 @@ end
 local function BlockComment()
 	local selbegin = editor.SelectionStart
 	editor:BeginUndoAction()
-	if (string.find(editor:textrange(selbegin-string.len(GetEOL()), selbegin),GetEOL()))
+	if (string.find(editor:textrange(selbegin-string.len(CORE.EOL()), selbegin),CORE.EOL()))
 	then
 		scite.MenuCommand(IDM_BLOCK_COMMENT)
 		editor:SetSel(selbegin, editor.SelectionEnd)

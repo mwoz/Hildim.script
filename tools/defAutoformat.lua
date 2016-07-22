@@ -94,15 +94,6 @@ local function FoldLevel(deltaL, L)
     return shell.bit_and(editor.FoldLevel[L or (editor:LineFromPosition(editor.SelectionStart) - deltaL)],SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE
 end
 
-local function LineIndent(deltaL, L)
-    local line = L or (editor:LineFromPosition(editor.SelectionStart) - deltaL)
-    local l = editor:PositionFromLine(line)
-    local _, ln = editor:GetLine(line)
-    local e = editor:findtext('[^ \t\n\r]', SCFIND_REGEXP, l, l + ln - 2) or (l + ln - 2)
-    local strInd = (editor:textrange(l, e) or '')
-    return strInd:gsub('\t', strTab):len(), strInd:len()
-end
-
 local function checkMiddle(line)
     local l = editor:GetLine(line)
     return l:find('^%s*else[^%w]') or l:find('^%s*elseif[^%w]')
@@ -117,40 +108,35 @@ local bDoFold = false
 local function doIndentation(line, bSel)
     local f0, f1 = FoldLevel(nil, line), FoldLevel(nil, line - 1)
     curFold = nil
-    local fn
-    if bSel then fn = editor.ReplaceSel else fn = editor.ReplaceTarget end
     if f0 == f1 and checkMiddle(line - 1) then
         for i = line - 2, 0, -1 do
             if FoldLevel(nil, i) < f0 then
-                fn(editor, Indent(LineIndent(nil, i) + (tonumber(props['tabsize']))))
-                editor.TargetStart = editor:PositionFromLine(line - 1)
-                local _, ind = LineIndent(nil, line - 1)
-                editor.TargetEnd = editor.TargetStart + ind
-                editor:ReplaceTarget(Indent(LineIndent(nil, i)))
+                editor.LineIndentation[line] = editor.LineIndentation[i] + (tonumber(props['tabsize']))
+                editor.LineIndentation[line - 1] = editor.LineIndentation[i]
+                if bSel then editor:VCHome() end
                 return
             end
         end
-
     else
         local d = f0 - f1
         if d < 0 then d = 0 end
         if bSel then
-            local _, lineEnd = editor:GetLine(line)
-            if not lineEnd then return true end
-            if editor.CurrentPos - editor:PositionFromLine(line) < lineEnd - 2 then d = 0 end
+            -- local _, lineEnd = editor:GetLine(line)
+            -- if not lineEnd then return true end
+            -- if editor.CurrentPos - editor:PositionFromLine(line) < lineEnd - 2 then d = 0 end
         elseif f0 > FoldLevel(nil, line + 1) then
             d = d - (f0 - FoldLevel(nil, line + 1))
         end
         if d > 0 then d = 1 elseif d < 0 then d = -1 end
-        --if not bSel and f0 > FoldLevel(nil, line +1) then d = d - (f0 - FoldLevel(nil, line +1)) end
-        fn(editor, Indent(LineIndent(nil, line - 1) + (d *  (tonumber(props['tabsize'])))))
+        editor.LineIndentation[line] = editor.LineIndentation[line - 1] + (d *  (tonumber(props['tabsize'])))
+        if bSel then editor:VCHome() end
     end
 end
 
 AddEventHandler("OnChar", function(char)
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or not editor.Focus then return end
 
-	if (_G.iuprops['autoformat.line'] or 0)== 1  then
+	if (_G.iuprops['autoformat.line'] or 0) == 1 then
         if not editor.Focus then return end
         if string.byte(char) == 13 then
             local line = editor:LineFromPosition(editor.SelectionStart)
@@ -183,13 +169,12 @@ AddEventHandler("OnUpdateUI", function()
             local curS = editor.SelectionStart
             local ls = editor:LineFromPosition(curS)
             local cL = FoldLevel(-1)
-            local curI, curIPos = LineIndent(0)  --;print(ls,cL)
+            local curI, curIPos = editor.LineIndentation[ls]
+
             for i = ls - 1, 0,- 1 do
                 if cL >= FoldLevel(ls - i) then
-                    local newPos = curS - (curI - LineIndent(ls - i))
-                    editor.TargetStart = editor:PositionFromLine(ls)
-                    editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
-                    editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
+                    local newPos = curS - (curI - editor.LineIndentation[i])
+                    editor.LineIndentation[ls] = editor.LineIndentation[i]
                     editor.SelectionStart = newPos
                     editor.SelectionEnd = newPos
                     return
@@ -228,13 +213,9 @@ AddEventHandler("Format_Block", function()
             break
         end
     end
-    local iStart = LineIndent(nil, lineStart)
     editor:BeginUndoAction()
     for i = lineStart, lineEnd do
         FormatString(i - 1)
-        editor.TargetStart = editor:PositionFromLine(i)
-        local _, ind = LineIndent(nil, i)
-        editor.TargetEnd = editor:PositionFromLine(i) + ind
         doIndentation(i)
     end
     editor:EndUndoAction()

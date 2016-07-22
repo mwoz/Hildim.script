@@ -1,117 +1,117 @@
-<a> Defines a hyperlink
-<abbr> Defines an abbreviation or an acronym
-<acronym> Not supported in HTML5. Use <abbr> instead.\nDefines an acronym
-<address> Defines contact information for the author/owner of a document
-<applet> Not supported in HTML5. Use <embed> or <object> instead.\nDefines an embedded applet
-<area> Defines an area inside an image-map
-##<article> Defines an article
-##<aside> Defines content aside from the page content
-##<audio> Defines sound content
-<b> Defines bold text
-<base> Specifies the base URL/target for all relative URLs in a document
-<basefont> Not supported in HTML5. Use CSS instead.\nSpecifies a default color, size, and font for all text in a document
-##<bdi> Isolates a part of text that might be formatted in a different direction from other text outside it
-<bdo> Overrides the current text direction
-<big> Not supported in HTML5. Use CSS instead.\nDefines big text
-<blockquote> Defines a section that is quoted from another source
-<body> Defines the document's body
-<br> Defines a single line break >
-<button> Defines a clickable button
-##<canvas> Used to draw graphics, on the fly, via scripting (usually JavaScript)
-<caption> Defines a table caption
-<center> Not supported in HTML5. Use CSS instead.\nDefines centered text
-<cite> Defines the title of a work
-<code> Defines a piece of computer code
-<col> Specifies column properties for each column within a <colgroup> element
-<colgroup> Specifies a group of one or more columns in a table for formatting
-##<datalist> Specifies a list of pre-defined options for input controls
-<dd> Defines a description/value of a term in a description list
-<del> Defines text that has been deleted from a document
-##<details> Defines additional details that the user can view or hide
-<dfn> Represents the defining instance of a term
-##<dialog> Defines a dialog box or window
-<dir> Not supported in HTML5. Use <ul> instead.\nDefines a directory list
-<div> Defines a section in a document
-<dl> Defines a description list
-<dt> Defines a term/name in a description list
-<em> Defines emphasized text
-##<embed> Defines a container for an external (non-HTML) application
-<fieldset> Groups related elements in a form
-##<figcaption> Defines a caption for a <figure> element
-##<figure> Specifies self-contained content
-<font> Not supported in HTML5. Use CSS instead.\nDefines font, color, and size for text
-<footer> Defines a footer for a document or section
-<form> Defines an HTML form for user input
-#<frame> Not supported in HTML5.\nDefines a window (a frame) in a frameset
-<frameset> Not supported in HTML5.\nDefines a set of frames
-<h1> to <h6> Defines HTML headings
-<head> Defines information about the document
-##<header> Defines a header for a document or section
-<hr> Defines a thematic change in the content
-<html> Defines the root of an HTML document
-<i> Defines a part of text in an alternate voice or mood
-<iframe> Defines an inline frame
-<img> Defines an image >
-<input> Defines an input control
-<ins> Defines a text that has been inserted into a document
-<kbd> Defines keyboard input
-##<keygen> Defines a key-pair generator field (for forms)
-<label> Defines a label for an <input> element
-<legend> Defines a caption for a <fieldset> element
-<li> Defines a list item
-<link> Defines the relationship between a document and an external resource (most used to link to style sheets)
-##<main> Specifies the main content of a document
-<map> Defines a client-side image-map
-##<mark> Defines marked/highlighted text
-<menu> Defines a list/menu of commands
-##<menuitem> Defines a command/menu item that the user can invoke from a popup menu
-<meta> Defines metadata about an HTML document
-##<meter> Defines a scalar measurement within a known range (a gauge)
-##<nav> Defines navigation links
-<noframes> Not supported in HTML5.\nDefines an alternate content for users that do not support frames
-<noscript> Defines an alternate content for users that do not support client-side scripts
-<object> Defines an embedded object
-<ol> Defines an ordered list
-<optgroup> Defines a group of related options in a drop-down list
-<option> Defines an option in a drop-down list
-<output> Defines the result of a calculation
-<p> Defines a paragraph
-<param> Defines a parameter for an object
-<pre> Defines preformatted text
-##<progress> Represents the progress of a task
-<q> Defines a short quotation
-##<rp> Defines what to show in browsers that do not support ruby annotations
-##<rt> Defines an explanation/pronunciation of characters (for East Asian typography)
-##<ruby> Defines a ruby annotation (for East Asian typography)
-<s> Defines text that is no longer correct
-<samp> Defines sample output from a computer program
-<script> Defines a client-side script
-##<section> Defines a section in a document
-<select> Defines a drop-down list
-<small> Defines smaller text
-##<source> Defines multiple media resources for media elements (<video> and <audio>)
-<span> Defines a section in a document
-<strike> Not supported in HTML5. Use <del> or <s> instead.\nDefines strikethrough text
-<strong> Defines important text
-<style> Defines style information for a document
-<sub> Defines subscripted text
-##<summary> Defines a visible heading for a <details> element
-<sup> Defines superscripted text
-<table> Defines a table
-<tbody> Groups the body content in a table
-<td> Defines a cell in a table
-<textarea> Defines a multiline input control (text area)
-<tfoot> Groups the footer content in a table
-<th> Defines a header cell in a table
-<thead> Groups the header content in a table
-##<time> Defines a date/time
-<title> Defines a title for the document
-<tr> Defines a row in a table
-##<track> Defines text tracks for media elements (<video> and <audio>)
-<tt> Not supported in HTML5. Use CSS instead.\nDefines teletype text
-<u> Defines text that should be stylistically different from normal text
-<ul> Defines an unordered list
-<var> Defines a variable
-##<video> Defines a video or movie
-##<wbr> Defines a possible line-break
+noobj<a Defines a hyperlink
+noobj<abbr Defines an abbreviation or an acronym
+noobj<acronym Not supported in HTML5. Use <abbr> instead.\nDefines an acronym
+noobj<address Defines contact information for the author/owner of a document
+noobj<applet Not supported in HTML5. Use <embed> or <object> instead.\nDefines an embedded applet
+noobj<area Defines an area inside an image-map
+##noobj<article Defines an article
+##noobj<aside Defines content aside from the page content
+##noobj<audio Defines sound content
+noobj<b Defines bold text
+noobj<base Specifies the base URL/target for all relative URLs in a document
+noobj<basefont Not supported in HTML5. Use CSS instead.\nSpecifies a default color, size, and font for all text in a document
+##noobj<bdi Isolates a part of text that might be formatted in a different direction from other text outside it
+noobj<bdo Overrides the current text direction
+noobj<big Not supported in HTML5. Use CSS instead.\nDefines big text
+noobj<blockquote Defines a section that is quoted from another source
+noobj<body Defines the document's body
+noobj<br Defines a single line break >
+noobj<button Defines a clickable button
+##noobj<canvas Used to draw graphics, on the fly, via scripting (usually JavaScript)
+noobj<caption Defines a table caption
+noobj<center Not supported in HTML5. Use CSS instead.\nDefines centered text
+noobj<cite Defines the title of a work
+noobj<code Defines a piece of computer code
+noobj<col Specifies column properties for each column within a <colgroup> element
+noobj<colgroup Specifies a group of one or more columns in a table for formatting
+##noobj<datalist Specifies a list of pre-defined options for input controls
+noobj<dd Defines a description/value of a term in a description list
+noobj<del Defines text that has been deleted from a document
+##noobj<details Defines additional details that the user can view or hide
+noobj<dfn Represents the defining instance of a term
+##noobj<dialog Defines a dialog box or window
+noobj<dir Not supported in HTML5. Use <ul> instead.\nDefines a directory list
+noobj<div Defines a section in a document
+noobj<dl Defines a description list
+noobj<dt Defines a term/name in a description list
+noobj<em Defines emphasized text
+##noobj<embed Defines a container for an external (non-HTML) application
+noobj<fieldset Groups related elements in a form
+##noobj<figcaption Defines a caption for a <figure> element
+##noobj<figure Specifies self-contained content
+noobj<font Not supported in HTML5. Use CSS instead.\nDefines font, color, and size for text
+noobj<footer Defines a footer for a document or section
+noobj<form Defines an HTML form for user input
+#<frame Not supported in HTML5.\nDefines a window (a frame) in a frameset
+noobj<frameset Not supported in HTML5.\nDefines a set of frames
+noobj<h1 to <h6> Defines HTML headings
+noobj<head Defines information about the document
+##noobj<header Defines a header for a document or section
+noobj<hr Defines a thematic change in the content
+noobj<html Defines the root of an HTML document
+noobj<i Defines a part of text in an alternate voice or mood
+noobj<iframe Defines an inline frame
+noobj<img Defines an image >
+noobj<input Defines an input control
+noobj<ins Defines a text that has been inserted into a document
+noobj<kbd Defines keyboard input
+##noobj<keygen Defines a key-pair generator field (for forms)
+noobj<label Defines a label for an <input> element
+noobj<legend Defines a caption for a <fieldset> element
+noobj<li Defines a list item
+noobj<link Defines the relationship between a document and an external resource (most used to link to style sheets)
+##noobj<main Specifies the main content of a document
+noobj<map Defines a client-side image-map
+##noobj<mark Defines marked/highlighted text
+noobj<menu Defines a list/menu of commands
+##noobj<menuitem Defines a command/menu item that the user can invoke from a popup menu
+noobj<meta Defines metadata about an HTML document
+##noobj<meter Defines a scalar measurement within a known range (a gauge)
+##noobj<nav Defines navigation links
+noobj<noframes Not supported in HTML5.\nDefines an alternate content for users that do not support frames
+noobj<noscript Defines an alternate content for users that do not support client-side scripts
+noobj<object Defines an embedded object
+noobj<ol Defines an ordered list
+noobj<optgroup Defines a group of related options in a drop-down list
+noobj<option Defines an option in a drop-down list
+noobj<output Defines the result of a calculation
+noobj<p Defines a paragraph
+noobj<param Defines a parameter for an object
+noobj<pre Defines preformatted text
+##noobj<progress Represents the progress of a task
+noobj<q Defines a short quotation
+##noobj<rp Defines what to show in browsers that do not support ruby annotations
+##noobj<rt Defines an explanation/pronunciation of characters (for East Asian typography)
+##noobj<ruby Defines a ruby annotation (for East Asian typography)
+noobj<s Defines text that is no longer correct
+noobj<samp Defines sample output from a computer program
+noobj<script Defines a client-side script
+##noobj<section Defines a section in a document
+noobj<select Defines a drop-down list
+noobj<small Defines smaller text
+##noobj<source Defines multiple media resources for media elements (<video> and <audio>)
+noobj<span Defines a section in a document
+noobj<strike Not supported in HTML5. Use <del> or <s> instead.\nDefines strikethrough text
+noobj<strong Defines important text
+noobj<style Defines style information for a document
+noobj<sub Defines subscripted text
+##noobj<summary Defines a visible heading for a <details> element
+noobj<sup Defines superscripted text
+noobj<table Defines a table
+noobj<tbody Groups the body content in a table
+noobj<td Defines a cell in a table
+noobj<textarea Defines a multiline input control (text area)
+noobj<tfoot Groups the footer content in a table
+noobj<th Defines a header cell in a table
+noobj<thead Groups the header content in a table
+##noobj<time Defines a date/time
+noobj<title Defines a title for the document
+noobj<tr Defines a row in a table
+##noobj<track Defines text tracks for media elements (<video> and <audio>)
+noobj<tt Not supported in HTML5. Use CSS instead.\nDefines teletype text
+noobj<u Defines text that should be stylistically different from normal text
+noobj<ul Defines an unordered list
+noobj<var Defines a variable
+##noobj<video Defines a video or movie
+##noobj<wbr Defines a possible line-break
 

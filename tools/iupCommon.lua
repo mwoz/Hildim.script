@@ -992,12 +992,16 @@ iup.DestroyDialogs = function()
         end
     end
     h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
-    _G.iuprops["layout.toolbar_expander"] = h.state
-    if h then tTlb.show_cb(h, 4) iup.Detach(h); iup.Destroy(h) end
+    if h then
+        _G.iuprops["layout.toolbar_expander"] = h.state
+        tTlb.show_cb(h, 4) iup.Detach(h); iup.Destroy(h)
+    end
 
     h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
-    _G.iuprops["layout.statusbar_expander"] = h.state
-    if h then iup.Detach(h); iup.Destroy(h) end
+    if h then
+        _G.iuprops["layout.statusbar_expander"] = h.state
+        iup.Detach(h); iup.Destroy(h)
+    end
 
     _G.dialogs = nil
     --iup.ShowSideBar(-1)

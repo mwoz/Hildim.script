@@ -59,16 +59,6 @@ local function Init()
     local prevBrClose = nil
     local prevFMDefault = 0
     local isformenjine = false
-    -- Возвращает текущий символ перевода строки
-    local function GetEOL()
-        local eol = "\r\n"
-        if editor.EOLMode == SC_EOL_CR then
-            eol = "\r"
-        elseif editor.EOLMode == SC_EOL_LF then
-            eol = "\n"
-        end
-        return eol
-    end
 
     local function FindCount( text, textToFind )
         local count = 0;
@@ -110,11 +100,11 @@ local function Init()
     -- последний символ в строке - конец строки?
     local function IsEOLlast( text )
         -- в луа конец строки всегда один символ
-    --[[	if string.find( text, GetEOL(), string.len( text ) - 1 ) then
+    --[[	if string.find( text, CORE.EOL(), string.len( text ) - 1 ) then
             return true
         end
         return false]]
-        return (text:sub(-1) == GetEOL())
+        return (text:sub(-1) == CORE.EOL())
     end
 
     -- следующий за позицией текст == text ?
@@ -158,7 +148,7 @@ local function Init()
         local selend = editor.SelectionEnd
         local b, e   = string.find( text, "^%s*"..bracebegin:pattern() )
         local b2, e2 = string.find( text, braceend:pattern().."%s*$" )
-        local add = ( IsEOLlast( text ) and GetEOL() ) or ""
+        local add = ( IsEOLlast( text ) and CORE.EOL() ) or ""
 
         editor:BeginUndoAction()
         if (b and b2) and BracesBalanced( text:sub( e+1, b2-1 ) , bracebegin, braceend ) then

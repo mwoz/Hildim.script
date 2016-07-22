@@ -100,6 +100,11 @@ function ifnil(val, default)
 	end
 end
 
+CORE.EOL = function()
+    if editor.EOLMode == SC_EOL_CR then return "\r"
+    elseif editor.EOLMode == SC_EOL_LF then return "\n" end
+    return "\r\n"
+end
 --------------------------------------------------------
 -- Определение соответствует ли стиль символа стилю комментария
 function IsComment(pos)
