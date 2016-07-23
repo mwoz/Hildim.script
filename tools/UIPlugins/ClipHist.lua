@@ -14,6 +14,11 @@ local function renum()
     end
 end
 
+CLIPHISTORY = {}
+CLIPHISTORY.GetClip = function(i)
+    return iup.GetAttributeId2(lst_clip, "", i, 2)
+end
+
 local function setClipboard(lin)
     if lin <= tonumber(lst_clip.numlin) then
         local text =  iup.GetAttributeId2(lst_clip, "", lin, 2)

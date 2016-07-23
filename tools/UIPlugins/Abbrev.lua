@@ -8,7 +8,12 @@ local prevLexer = -1
 local abbr_table
 local bListModified = false
 
+ABBREV = {}
+
 local function replAbbr(findSt, findEnd, s, dInd)
+
+    s = s:gsub('%%CLIP(%d+)%%', function(i) if CLIPHISTORY then print(i) ; return CLIPHISTORY.GetClip(i)  else return '' end end)
+
     editor:BeginUndoAction()
     editor:SetSel(findSt, findEnd)
     editor:ReplaceSel(s)
@@ -33,176 +38,6 @@ local function replAbbr(findSt, findEnd, s, dInd)
     editor:EndUndoAction()
 end
 
-local function lpegCtrlParser()
-	--@todo: переписать с использованием lpeg.Cf
-    local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
-
-	local PosToLine = function (pos) return editor:LineFromPosition(pos-1) end
-
---v------- common patterns -------v--
-	-- basics
-	local EOF = P(-1)
-	local BOF = P(function(s,i) return (i==1) and 1 end)
-	local NL = P"\n"-- + P"\f" -- pattern matching newline, platform-specific. \f = page break marker
-	local AZ = R('AZ','az')+"_"
-	local N = R'09'
-	local ANY =  P(1)
-	-- simple tokens
-	local IDENTIFIER = AZ * (AZ+N)^0 -- simple identifier, without separators
-
-
-	local cp = Cp() -- pos capture, Carg(1) is the shift value, comes from start_code_pos
-	local cl = cp/PosToLine -- line capture, uses editor:LineFromPosition
---^------- common patterns -------^--
-    local    function addAny(p,l)
-        return p*S(l:lower()..l:upper())
-    end
-    local toAny = Cf(C(P'')*C(P(1))^1,addAny)
-	local function AnyCase(str)
-		return toAny:match(str)
-	end
-
-
-
-		-- redefine common patterns
-		local SPACE = (S(" \t"))^1
-		local SC = SPACE
-		local NL = (P"\r\n")^1*SC^0
-
-        local dig=C(N^1)
-        local pos=Ct(Cg(dig,'x')*P';'*Cg(dig,'y')*P';'*Cg(dig,'w')*P';'*Cg(dig,'h'))
-
-        local attr = Cg(Cmt(SC^1*C(IDENTIFIER)*P'="'*C(P(1-P'"')^0)*P'"',
-            function(i,a,p,v)
-                if p=='position' then
-                    return true,p,pos:match(v,1)
-                elseif p=='tag' then
-                    return true,'isref',v:find('ddx_ContainerType=Ref')
-                else
-                    return true,p,v
-                end end
-            ))
-        local attrs = Cf(Ct("") * attr^1*Cg(Cc('isAttr')*Cc(true))*Cg(Cc('inLine')*cl), rawset)
-	    local attrsl = Cf(Ct("") * attr^1, rawset)
-        local cont=SC^0*AnyCase"<control"
-        local ce=Cf(Ct("")*SC^0*AnyCase"</control"*Cg(Cc('inLine')*cl), rawset)
-        local ctrl = cont*attrsl*P'/>'*NL
-
-		local def = P{Ct(cont*attrs*SC^0*P'>'*(V(1) + (-ce)*(1-NL)^1 + NL)^0*ce) +ctrl}
-		-- resulting pattern, which does the work
-
-		local patt = (def + (1-NL)^1 + NL)^0 * EOF
-    return  lpeg.Ct(patt)
-end
-  local containers = {}
-local function Ctrl(s)
-    return iup.GetDialogChild(containers[2],s)
-end
-local function create_dialog_Ref()
-
-
-  containers[4] = iup.hbox{
-    iup.label{
-      size = "60x0", title = "Left",
-    },
-    iup.label{
-      size = "60x0", title = "Top",
-    },
-    iup.label{
-      size = "60x0", title = "Height",
-    },
-    iup.label{
-      size = "60x0", title = "Dh",
-    },
-    gap = "20",
-    alignment = "ACENTER",
-  }
-
-  containers[5] = iup.hbox{
-    iup.list{
-      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbX", mask = "/d+", dropdown = "YES",
-    },
-    iup.text{
-      size = "60x0", name = "numY", mask = "/d+",
-    },
-    iup.text{
-      size = "60x0", name = "numH", mask = "/d+",
-    },
-    iup.text{
-      size = "60x11", name = "numDh", mask = "/d+",
-    },
-    gap = "20",
-    alignment = "ACENTER",
-  }
-
-  containers[6] = iup.hbox{
-    iup.toggle{
-      title = "btn1", name = "chkBtn1",size = "60x0",
-    },
-    iup.list{
-      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbBtn1", mask = "/d+", dropdown = "YES",
-    },
-    iup.toggle{
-      title = "Code", name = "chkCode", size = "60x0",
-    },
-    iup.list{
-      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbCode", mask = "/d+", dropdown = "YES",
-    },
-    gap = "20",
-  }
-
-  containers[8] = iup.hbox{
-    iup.toggle{
-      title = "Name", name = "chkName",size = "60x0",
-    },
-    iup.list{
-      visibleitems = "15", size = "60x0", editbox = "YES", name = "cmbName", mask = "/d+", dropdown = "YES",
-    },
-    iup.toggle{
-      title = "btn2", name = "chkBtn2", size = "60x0",
-    },
-    iup.toggle{
-      title = "Info", name = "chkInfo",
-    },
-    gap = "20",
-  }
-
-  containers[9] = iup.hbox{
-    iup.button{
-      title = "OK",
-      name = "btnOK"
-    },
-    iup.fill{
-    },
-    iup.button{
-      title = "Clear",
-      action = function()
-        Ctrl("cmbBtn1").value = ""
-        Ctrl("cmbX").value = ""
-        Ctrl("cmbCode").value = ""
-        Ctrl("cmbName").value = ""
-        Ctrl("numDh").value = ""
-        Ctrl("numH").value = ""
-        Ctrl("numY").value = ""
-      end
-    },
-    iup.button{
-      title = "Cancel",
-      name = "btnEsc"
-    },
-  }
-   containers[2] = iup.vbox{
-    containers[4],
-    containers[5],
-    containers[6],
-    containers[8],
-    containers[9],
-    margin = "4x4",
-    gap = "2",
-  }
-  return containers[2]
-end
-
 local function SetModif()
     bListModified = true
     list_abbrev:setcell(0, 1, 'Abbrev*')
@@ -210,176 +45,6 @@ local function SetModif()
     abbr_table = {}
     for i = 1, list_abbrev.count - 1 do
         abbr_table[#abbr_table+1] = {abbr=list_abbrev:getcell(i, 1), exp=list_abbrev:getcell(i, 2)}
-    end
-end
-
-local function refControlPos(findSt, findEnd, s, dInd)
-    tblXml = lpegCtrlParser():match(editor:GetText(),1)
-    local icL = editor:LineFromPosition(editor.CurrentPos)
---debug_prnTb(tblXml,0)
-    local Lines = {}
-    for w in s:gmatch("[^\n]+") do
-       table.insert(Lines,w)
-    end
-    local defSizes = {}
-    for i = 1, 6 do
-        defSizes[i] = {}
-        _,_,defSizes[i].x,defSizes[i].w,defSizes[i].h = Lines[i]:find('position="(%d+);%d+;(%d+);(%d+)"')
-    end
-
-    --debug_prnTb(defSizes, 1)
-    local CtrlX, CtrlBtn1W, CtrlCodeW,CtrlNameW = {},{},{},{}
-    local CtrlX1, CtrlBtn1W1, CtrlCodeW1,CtrlNameW1 = {},{},{},{}
-    CtrlX[defSizes[1].x] = defSizes[1].x
-    CtrlBtn1W[defSizes[2].w] = defSizes[2].w
-    CtrlCodeW[defSizes[3].w] = defSizes[3].w
-    CtrlNameW[defSizes[4].w] = defSizes[4].w
-
-    local iPl,iPY,iPpY, iPX = 0,0,0,0
-    local iTmpX,iTmpY,iTmpYp = 0,0, 0
-
-    for k,v in pairs(tblXml) do
-        if v.inLine then
-            local l = tonumber(v.inLine)
-            if l> iPl and l < icL then
-                iPX = v.position.x + v.position.w
-                iPY = v.position.y + v.position.h
-                iPpY = v.position.y
-                iPl = l
-            end
-        end
-        if v.position then
-            CtrlX[''..v.position.x] = v.position.x
-        end
-        for ind,arg in pairs(v) do
-
-            if arg.inLine and arg.isAttr ~= true then
-                local l = tonumber(arg.inLine)
-                if l> iPl and l < icL then
-                    iPX = iTmpX
-                    iPY = iTmpY
-                    iPpY = iTmpYp
-                    iPl = l
-                end
-            end
-            if arg.position then
-                if arg.isAttr == true then
-                    iTmpX = arg.position.x + arg.position.w
-                    iTmpY = arg.position.y + arg.position.h
-                    iTmpYp = arg.position.y
-                    CtrlX[''..arg.position.x] = arg.position.x
-                elseif arg.name == 'btn1' then
-                    CtrlBtn1W[''..arg.position.w] = tonumber(arg.position.w)
-                elseif arg.name == 'Code' then
-                    CtrlCodeW[''..arg.position.w] = arg.position.w
-                elseif arg.name == 'Name' then
-                    CtrlNameW[''..arg.position.w] = arg.position.w
-                end
-            end
-        end
-    end
-    for s, i in pairs(CtrlX) do table.insert(CtrlX1,(i)) end
-    for s, i in pairs(CtrlBtn1W) do table.insert(CtrlBtn1W1,(i)) end
-    for s, i in pairs(CtrlCodeW) do table.insert(CtrlCodeW1,(i)) end
-    for s, i in pairs(CtrlNameW) do table.insert(CtrlNameW1,(i)) end
-
-    table.sort(CtrlX1)
-    table.sort(CtrlBtn1W1)
-    table.sort(CtrlCodeW1)
-    table.sort(CtrlNameW1)
-
-    local templ = create_dialog_Ref()
-
-    Ctrl('chkBtn1').value = _G.iuprops['abbrev.refdlg.b1'] or 'ON'
-    Ctrl('chkCode').value = _G.iuprops['abbrev.refdlg.b2'] or 'ON'
-    Ctrl('chkName').value = _G.iuprops['abbrev.refdlg.b3'] or 'ON'
-    Ctrl('chkBtn2').value = _G.iuprops['abbrev.refdlg.b4'] or 'ON'
-    Ctrl('chkInfo').value = _G.iuprops['abbrev.refdlg.b5'] or 'ON'
-    Ctrl('numH').value = _G.iuprops['abbrev.refdlg.h'] or 12
-    Ctrl('numDh').value = _G.iuprops['abbrev.refdlg.dh'] or 2
-
-    local bInPrev = (iPl+1==icL)
-    iPY = iPY + Ctrl('numDh').value
-    iPX = iPX + 10
-
-    local iNewX = -1
-    local l = 1
-    for i, s in pairs(CtrlX1) do if tonumber(s) > 0
-        then iup.SetAttribute(Ctrl("cmbX"), l, s);l=l+1 end
-        if iNewX < 0 and iPX <= tonumber(s) then iNewX = tonumber(s) end
-    end
-    if iNewX < 0 then iNewX = iPX end
-    l = 1
-    for i, s in pairs(CtrlBtn1W1) do if tonumber(s) > 0 then iup.SetAttribute(Ctrl("cmbBtn1"), l, s);l=l+1 end end
-    l = 1
-    for i, s in pairs(CtrlCodeW1) do if tonumber(s) > 0 then iup.SetAttribute(Ctrl("cmbCode"), l, s);l=l+1 end end
-    l = 1
-    for i, s in pairs(CtrlNameW1) do if tonumber(s) > 0 then iup.SetAttribute(Ctrl("cmbName"), l, s);l=l+1 end end
-
-    Ctrl("cmbX").value = 1; Ctrl("cmbBtn1").value = CtrlBtn1W1[1]..''; Ctrl("cmbCode").value = CtrlCodeW1[1]; Ctrl("cmbName").value = CtrlNameW1[1]
-    if bInPrev then
-        Ctrl('cmbX').value = iPX..''
-        Ctrl('numY').value = iPpY..''
-    else
-
-        Ctrl('cmbX').value = '10'
-        Ctrl('numY').value = iPY..''
-    end
-    iup.SetHandle("RG_BTN_ESC", Ctrl('btnEsc'))
-    iup.SetHandle("RG_BTN_OK", Ctrl('btnOK'))
-
-    local dlg = iup.scitedialog{templ; title="–еф √ритер",defaultenter="RG_BTN_OK",defaultesc="RG_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="abbreveditor"}
-
-    dlg.show_cb=(function(h,state)
-        if state == 4 then
-            dlg:postdestroy()
-        end
-    end)
-    Ctrl("btnEsc").action = function()
-        dlg:postdestroy()
-    end
-
-    Ctrl("btnOK").action = function()
-        local s = ''
-        local x = 0
-        local h = tonumber(Ctrl('numH').value)
-        if Ctrl('chkBtn1').value == 'ON' then
-            s = s..Lines[2]:gsub('position="(%d+);(%d+);%d+;(%d+)"', 'position="%1;%2;'..Ctrl('cmbBtn1').value..';'..h..'"', 1)
-            x = x + tonumber(Ctrl('cmbBtn1').value)
-        end
-        if Ctrl('chkCode').value == 'ON' then
-            s = s..Lines[3]:gsub('position="(%d+);(%d+);%d+;(%d+)"', 'position="'..x..';%2;'..Ctrl('cmbCode').value..';'..h..'"', 1)
-            x = x + tonumber(Ctrl('cmbCode').value)
-        end
-        if Ctrl('chkName').value == 'ON' then
-            x = x + defSizes[4].x - defSizes[3].x - defSizes[3].w
-            s = s..Lines[4]:gsub('position="(%d+);(%d+);%d+;(%d+)"', 'position="'..x..';%2;'..Ctrl('cmbName').value..';'..h..'"', 1)
-            x = x + tonumber(Ctrl('cmbName').value)
-        end
-        if Ctrl('chkBtn2').value == 'ON' then
-            x = x + defSizes[5].x - defSizes[4].x - defSizes[4].w
-            s = s..Lines[5]:gsub('position="%d+;(%d+);(%d+);(%d+)"', 'position="'..x..';%1;'..h..';'..h..'"', 1)
-            x = x + h
-        end
-        if Ctrl('chkInfo').value == 'ON' then
-            x = x + defSizes[6].x - defSizes[5].x - defSizes[5].w
-            s = s..Lines[6]:gsub('position="%d+;(%d+);(%d+);(%d+)"', 'position="'..x..';%1;%2;'..h..'"', 1)
-            x = x + defSizes[6].w + defSizes[6].x - defSizes[5].x- defSizes[5].w
-        end
-        s = s..Lines[7]:gsub('ЛREFCTLЫ', '')
-
-        s = Lines[1]:gsub('position="%d+;%d+;%d+;%d+"', 'position="'..Ctrl('cmbX').value..';'..Ctrl('numY').value..';'..x..';'..Ctrl('numH').value..'"', 1)..'\n'..s
-        _G.iuprops['abbrev.refdlg.b1'] = Ctrl('chkBtn1').value
-        _G.iuprops['abbrev.refdlg.b2'] = Ctrl('chkCode').value
-        _G.iuprops['abbrev.refdlg.b3'] = Ctrl('chkName').value
-        _G.iuprops['abbrev.refdlg.b4'] = Ctrl('chkBtn2').value
-        _G.iuprops['abbrev.refdlg.b5'] = Ctrl('chkInfo').value
-        _G.iuprops['abbrev.refdlg.h'] = Ctrl('numH').value
-        _G.iuprops['abbrev.refdlg.dh'] = Ctrl('numDh').value
-
-        replAbbr(findSt, findEnd, s, dInd)
-        dlg:postdestroy()
     end
 end
 
@@ -399,7 +64,7 @@ local function EditAbbrev()
     local btn_insert = iup.button  {title="Insert"}
     iup.SetHandle("EDIT_BTN_INS",btn_insert)
 
-    local txt_exp = iup.text{multiline='YES',wordwrap='YES', expand='YES', fontsize='12',value = expan:gsub('\\n', '\n'):gsub('\\r',''):gsub('\\t','\t')}
+    local txt_exp = iup.text{multiline='YES',wordwrap='YES', expand='YES', fontsize='12',value = expan:gsub('\\n', '\n'):gsub('\\r',''):gsub('\\t','\t'):gsub('ђ', '\\')}
     local txt_abr = iup.text{expand='NO', fontsize='12',value =abb, size = '90x0'}
 
     local vbox = iup.vbox{
@@ -408,7 +73,7 @@ local function EditAbbrev()
 
         iup.hbox{btn_upd,btn_insert,iup.fill{},btn_esc, expand='HORIZONTAL'},
         expandchildren ='YES',gap=2,margin="4x4"}
-    local dlg = iup.scitedialog{vbox; title=" онтрол √ритер",defaultenter="MOVE_BTN_OK",defaultesc="MOVE_BTN_ESC",tabsize=editor.TabWidth,
+    local dlg = iup.scitedialog{vbox; title="Edit Abbrev",defaultenter="MOVE_BTN_OK",defaultesc="MOVE_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="abbreveditor", minsize='600x300'}
 
     dlg.show_cb=(function(h,state)
@@ -419,7 +84,7 @@ local function EditAbbrev()
     function btn_insert:action()
         list_abbrev.addlin = ''..l
         list_abbrev:setcell(l + 1, 1, txt_abr.value)
-        list_abbrev:setcell(l + 1, 2, txt_exp.value:gsub('\r','\\r'):gsub('\n','\\n'):gsub('\t','\\t'))
+        list_abbrev:setcell(l + 1, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r','\\r'):gsub('\n','\\n'):gsub('\t','\\t'))
         list_abbrev.redraw = l + 1
         SetModif()
         dlg:postdestroy()
@@ -427,237 +92,109 @@ local function EditAbbrev()
 
     function btn_upd:action()
         list_abbrev:setcell(l, 1, txt_abr.value)
-        list_abbrev:setcell(l, 2, txt_exp.value:gsub('\r','\\r'):gsub('\n','\\n'):gsub('\t','\\t'))
+        list_abbrev:setcell(l, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
         list_abbrev.redraw = l
         SetModif()
         dlg:postdestroy()
     end
 
     function btn_esc:action()
-        dlg:postdestroy()
+        dlg:action()
     end
 end
 
-local function frmControlPos(findSt, findEnd, s, dInd)
-    --показываем диалог позиционировани€ контролов
-    local dlg2 = _G.dialogs["ctrlgreator"]
-    if dlg2 ~= nil then return end --один экземпл€р уже показан
-    local tX, tW, tCpt, tA = {},{},{},{}
-    local tX1, tW1, tCpt1, tA1 = {},{},{}, {}
-    --создаем контролы
-    local txtX2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visibleitems="15"}
-    local txtY2 = iup.text{size='60x0',mask="/d+"}
-    local txtH2 = iup.text{size='60x0',mask="/d+"}
-    local txtW2 = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visibleitems="15"}
-
-    local _,_, ctype = s:find('type="(%l+)"')
-    local txtCp = iup.list{size='60x0',dropdown="YES",editbox="YES",mask="/d+",visibleitems="15"}
-    local function onCmbAll(h)
-        if tA1 == nil then return end
-        if #tA1 == 0 then return end
-        txtX2.value = tA1[tonumber(h.value)][2][1]
-        txtW2.value = tA1[tonumber(h.value)][2][2]
-        txtCp.value = tA1[tonumber(h.value)][2][3]
-    end
-    local cmbAll = iup.list{size='60x0',dropdown="YES",visibleitems="15",valuechanged_cb = onCmbAll}
-    local function onTxtX2(h,text, item, state)
-            local n = tonumber(text)
-            for i, s in pairs(tA1) do if tonumber(s[2][1]) >= n then cmbAll.value=i;break;end end
-        end
-    txtX2.action = onTxtX2
-    local txtDx = iup.text{size='35x0',mask="/d+"}
-    local bDdx = s:find('tag="ddx_Enabled=Y"')
-    local cmbDdx = iup.list{dropdown="YES",visibleitems="5",active=Iif(bDdx, 'YES', 'NO'), value=Iif(bDdx, _G.iuprops['abbrev.ctrldlg.ddx'] or 0, 0)}
-    iup.SetAttribute(cmbDdx, 1, '')
-    iup.SetAttribute(cmbDdx, 2, 'ddx_Enabled')
-    iup.SetAttribute(cmbDdx, 3, 'ddx_MetaBind')
-    --найдем в тексте все контролы и извлечем из них все горизонтальные координаты - дл€ выбора
-    local b,e = 0,-1
-    local body
+--[[
+ttt
+            Select Case
+                Case "local"
+                Case "return"
+                Case "tonumber"
+                Case "tPos1"
+                Case "findEnd"
+                Case Else
+            End Select
+]]
+local function parseParamTemplate(findSt, findEnd, s, dInd, bContinue, ...)
+    if not bContinue then return end
+    local nFind = 1
+    local counter = 0
+    local b = lpeg.P{ lpeg.Cp() * lpeg.P{ "Л" * ((1 - lpeg.S"ЛЫ") + lpeg.V(1))^0 * "Ы" } * lpeg.Cp() + 1 * lpeg.V(1) } --в таблице координаты перед первой и после последней скобки наикратчайшей сбалансированной строки
     while true do
-        b,e,body = editor:findtext('<control \\(.+?\\)>', SCFIND_REGEXP, e + 1)
-        if not b then break end
-        body = editor:textrange(b,e)
-        local xI, wI, cI = 0,0,0
-        --сначала пишем в имена - дл€ избежани€ дублировани€
-        body:gsub('position="(%d+);%d+;(%d+);%d+"', function(x,w) xI=x; wI=w; tX[x] = tonumber(x); tW[w] = tonumber(w) end)
-        body:gsub('captionwidth="(%d+)"', function(cp)
-            cI = cp
-            tCpt[cp] = tonumber(cp)
-            local l = tonumber(cp) + tonumber(xI)
-            tX[''..l] = l
-            l = tonumber(wI) - tonumber(cp)
-            tW[''..l] = l
-        end)
-        if tonumber(xI) > 0 and tonumber(wI) > 0 then tA[xI..','..wI..','..cI] = {xI, wI, cI} end
-    end
-    --перепишем все таблицы по индексам и отсортируем
-    for s, i in pairs(tX) do table.insert(tX1,i) end
-    for s, i in pairs(tW) do table.insert(tW1,i) end
-    for s, i in pairs(tCpt) do table.insert(tCpt1,i) end
-    for i, t in pairs(tA) do table.insert(tA1,{i,t}) end
+        local tPos1, tPos2 = b:match(s, 1)
+        if not tPos1 then
+            replAbbr(findSt, findEnd, s, dInd)
+            return
+        end
+        local sBeg = s:sub(1, tPos1 - 1)
+        local pLong = s:sub(tPos1, tPos2 - 1)
+        local sEnd = s:sub(tPos2, -1)
 
-    table.sort(tX1)
-    table.sort(tW1)
-    table.sort(tCpt1)
-    table.sort(tA1,function(a,b)
-        local ta,tb = a[2], b[2]
-        if ta[1] == tb[1] then
-            if ta[2] == tb[2] then
-                return tonumber(ta[3])<tonumber(tb[3])
-            else
-                return tonumber(ta[2])<tonumber(tb[2])
+        local _, _, mark, nI = pLong:find('^Л([%@%#%?])(%d+)')
+        if not nI or tonumber(nI) > #arg then
+            bContinue = false
+            print("Error: "..pLong)
+            return
+        end
+        nI = tonumber(nI)
+        pLong = pLong:gsub('^..%d+', ''):gsub('Ы$', '')
+        if mark == '@' then
+            pLong = tostring(arg[nI])
+        elseif mark == '#' then
+            if not pLong:find('^//') then
+                print("Error: "..pLong)
+                return
             end
+            pLong = pLong:gsub('^//', '')
+            local res = ''
+            for i = 1, tonumber(arg[nI]) do
+                res = res..pLong:gsub('%[##'..nI..'%]', i)
+            end
+            pLong = res
+        elseif mark == '?' then
+            local _, _, sTrue, sFalse = pLong:find('^//(.-)//(.*)')
+
+            if not sTrue and not sFalse then
+                print("Error: "..pLong)
+                return
+            end
+            pLong = Iif(tonumber(arg[nI]) ~= 0, sTrue, sFalse)
         else
-            return tonumber(ta[1])<tonumber(tb[1])
+            assert(false, 'Internal Error')
         end
-    end)
-
-    --заполним списки комбобоксов
-    local l = 1
-    for i, s in pairs(tX1) do if tonumber(s) > 0 then iup.SetAttribute(txtX2, l, s);l=l+1 end end
-    l = 1
-    for i, s in pairs(tW1) do if tonumber(s) > 0 then iup.SetAttribute(txtW2, l, s);l=l+1 end end
-    l = 1
-    for i, s in pairs(tCpt1) do if tonumber(s) > 0 then iup.SetAttribute(txtCp, l, s);l=l+1 end end
-    for i, s in pairs(tA1) do iup.SetAttribute(cmbAll, i, s[1]) end
-    txtX2.value=1;txtW2.value=1;txtCp.value=1;cmbAll.value=1
-
-
-    local i,str
-    txtH2.value = _G.iuprops['abbrev.ctrldlg.h'] or '11'
-    txtDx.value = _G.iuprops['abbrev.ctrldlg.dh'] or '1'
-    i,i,txtX2.value,txtY2.value,txtW2.value=s:find('position="(%d+);(%d+);(%d+);%d+"')
-    i,i,str=s:find('captionwidth="(%d+)"')
-    local bIsRef = (nil ~= s:find('name="btn1"'))
-    if i == nil and not bIsRef then
-        txtCp.value=''
-        txtCp.active='NO'
-    else
-        txtCp.active='YES'
-        txtCp.value=str
-    end
-
-    --найдем предыдущий контрол и по нему выставим координаты в нашем
-    local icL = editor:LineFromPosition(editor.CurrentPos)
-
-    local onSameLine = true
-    local iDepth = 0
-    for i = icL - 1, 1, -1 do
-        local x,y,w
-        local sl = editor:GetLine(i)
-        if sl:find('^%s+$') then
-            onSameLine = false --считаем, что если предыдуща€ строка пуста, то контрол на новой строке
-        elseif sl:find('<frame ') then
-            break
-        elseif sl:find('</control>') then
-            iDepth = iDepth + 1
-        elseif sl:find('<control ') then
-            if not sl:find('/>') then iDepth = iDepth - 1 end
-            if iDepth == 0 then
-                local _,_,x,y,w,h = sl:find('position="(%d+);(%d+);(%d+);(%d+)"')
-                if onSameLine then
-                    txtY2.value = y
-                    txtX2.value = ''..(tonumber(x or 0) + tonumber(w or 0))
-                else
-                    txtY2.value = '' ..(tonumber(y or 0) + tonumber(h or 0) + tonumber(txtDx.value or 0))
-                end
-                break
-            end
+        s = sBeg..pLong..sEnd
+        counter = counter + 1
+        if counter > 1000 then
+            print("Error: Abbreviation Template is performed more than 1000 times. Perhaps loop...")
+            return
         end
-    end
-    onTxtX2(txtX2,txtX2.value, nil, nil)
-    onCmbAll(cmbAll)
-    ---
-
-    local btn_ok = iup.button  {title="OK"}
-    iup.SetHandle("CREATE_BTN_OK",btn_ok)
-    local btn_esc = iup.button  {title="Cancel"}
-    iup.SetHandle("CREATE_BTN_ESC",btn_esc)
-    local btn_clear = iup.button  {title="Clear"}
-    iup.SetHandle("CREATE_BTN_CLEAR",btn_clear)
-
-    local vbox = iup.vbox{
-        iup.hbox{iup.label{size='60x0'},cmbAll,iup.label{title='dH'},txtDx,iup.fill{}, cmbDdx,gap=20};
-        iup.hbox{gap=20, alignment='ACENTER',
-            iup.label{title="Left",size='60x0'},
-            iup.label{title="Top",size='60x0'},
-            iup.label{title="Width",size='60x0'},
-            iup.label{title="Height",size='60x0'},
-            iup.label{title="CptWidth",size='60x0'}
-        };
-        iup.hbox{txtX2,txtY2,txtW2,txtH2,txtCp,gap=20, alignment='ACENTER'};
-        iup.hbox{btn_ok,iup.fill{},btn_clear,btn_esc},gap=2,margin="4x4" }
-
-    dlg2 = iup.scitedialog{vbox; title=" онтрол √ритер",defaultenter="CREATE_BTN_OK",defaultesc="CREATE_BTN_ESC",maxbox="NO",minbox ="NO",resize ="NO",
-    sciteparent="SCITE", sciteid="ctrlgreator"}
-    dlg2.show_cb=(function(h,state)
-        if state == 4 then
-            dlg2:postdestroy()
-        end
-    end)
-    function btn_clear:action()
-            txtX2.value = ''
-            txtY2.value = ''
-            txtH2.value = ''
-            txtW2.value = ''
-            txtCp.value = ''
-    end
-
-    function btn_ok:action()
-
-        s = s:gsub('position="%d+;%d+;%d+;%d+"', 'position="'..txtX2.value..';'..txtY2.value..';'..txtW2.value..';'..txtH2.value ..'"', 1):gsub('ЛFMCTLЫ', '')
-        local bNoCapt = false
-        if txtCp.active=='YES' then s = s:gsub('captionwidth="%d+"',
-        function()
-            if txtCp.value == '0' then
-                txtCp.value = true
-                return ''
-            end
-            return 'captionwidth="'..txtCp.value..'"'
-        end) end
-        if tonumber(txtCp.value) == 0 and (ctype ~= 'button' and ctype ~= 'label' and ctype ~= 'link' and ctype ~= 'checkbox') then
-            s = s:gsub(' caption=".-"', ''):gsub(' caption_ru=".-"', '')
-        end
-        if bDdx then
-            if cmbDdx.value == '1' then s = s:gsub('tag="ddx_Enabled=Y"', '') end
-            if cmbDdx.value == '3' then s = s:gsub('"ddx_Enabled=', '"ddx_MetaBind=') end
-            if cmbDdx.value ~= '3' then s = s:gsub(' style="F"', '') end
-            _G.iuprops['abbrev.ctrldlg.ddx'] = cmbDdx.value
-        end
-        _G.iuprops['abbrev.ctrldlg.h'] = txtH2.value
-        _G.iuprops['abbrev.ctrldlg.dh'] = txtDx.value
-
-        replAbbr(findSt, findEnd, s, dInd)
-        dlg2:postdestroy()
-    end
-
-    function btn_esc:action()
-        dlg2:postdestroy()
     end
 end
 
-local function InsertAbbreviation(expan,dInd,curSel)
+local function InsertAbbreviation(expan, dInd, curSel)
     local findSt = editor.SelectionStart
     --ћен€ем: вставл€ем наш селекшн, коммент в начале убираем,\r убираем, вставл€ем табы, вставл€ем новые строки
-    local s =(expan:gsub('%%SEL%%', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'))
+    local s =(expan:gsub('%%SEL%%', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', CORE.EOL())):gsub('ђ', '\\')
     local isForm
     s, isForm = s:gsub('Л(%w+)Ы',
-    function(frm)
-        if frm == 'FMCTL' then
-            frmControlPos(findSt, editor.SelectionEnd, s, dInd)
-        elseif frm == 'REFCTL' then
-            refControlPos(findSt, editor.SelectionEnd, s, dInd)
-        else
-            print('Error: unknown abbrev form: '..frm)
-        end
+        function(frm)
+            local strFile = props['AbbrevPath']:gsub('%.abbrev$', '')..'.'..frm..'.lua'
+            if not shell.fileexists(strFile) then print('Error: file for form "Л'..frm..'Ы" ('..strFile..') not exists!') end
+            local form = dofile(strFile)
+            if not frm then print('Error: unknown abbrev form: "Л'..frm..'" ('..strFile..') dos not return function') end
+            form(findSt, editor.SelectionEnd, s, dInd, replAbbr)
     end)
+    if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста     'Л([^%[]%.-[^%]])Ы'
+    s, isForm = s:gsub('Л([^%@%#%?].-)Ы',
+        function(frm)
+            parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(loadstring("return iup.GetParam("..frm..")"))())
+        end
+    )
     if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста
+
     replAbbr(findSt, editor.SelectionEnd, s, dInd)
 end
 
-local function TryInsAbbrev(bClip)
-    if not abbr_table then return end
+local function internal_TryInsAbbrev(bClip, strFull)
     local curSel
     if bClip then
         local cpb = iup.clipboard{};
@@ -666,17 +203,31 @@ local function TryInsAbbrev(bClip)
     else curSel = editor:GetSelText() end
 
     local pos = editor.SelectionStart
-    local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)
-	for i,v in ipairs(abbr_table) do
-        if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
-            if curSel ~= "" then editor:ReplaceSel() end
-            editor.SelectionStart = editor.SelectionStart - v.abbr:len()
-            local dInd = lBegin:len() - v.abbr:len()
-            InsertAbbreviation(v.exp,dInd, curSel)
-            return
+    local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)), pos)
+	for i, v in ipairs(abbr_table) do
+        if not strFull or (strFull:lower() == v.abbr:lower()) then
+            if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
+                if curSel ~= "" then editor:ReplaceSel() end
+                editor.SelectionStart = editor.SelectionStart - v.abbr:len()
+                local dInd = lBegin:len() - v.abbr:len()
+                InsertAbbreviation(v.exp, dInd, curSel)
+                return true
+            end
         end
 	end
-    print("Error Abbrev not found in: '"..lBegin.."'")
+    return false
+end
+
+ABBREV.TryInsAbbrev = function(strFull)
+    if not abbr_table then return end
+    return internal_TryInsAbbrev(false, strFull)
+end
+
+local function TryInsAbbrev(bClip)
+    if not abbr_table then return end
+    if not internal_TryInsAbbrev(bClip, nil) then
+        print("Error Abbrev not found in: '"..lBegin.."'")
+    end
 end
 
 ----------------------------------------------------------
@@ -700,7 +251,7 @@ local function Abbreviations_ListFILL()
 
 	iup.SetAttribute(list_abbrev, "DELLIN", "1-"..list_abbrev.numlin)
 	local abbrev_filename = props['AbbrevPath']
-    abbr_table = ReadAbbrevFile(abbrev_filename)
+    abbr_table = CORE.ReadAbbrevFile(abbrev_filename)
 	if not abbr_table then return end
     iup.SetAttribute(list_abbrev, "ADDLIN", "1-"..#abbr_table)
 	for i,v in ipairs(abbr_table) do
@@ -786,7 +337,7 @@ local function Init()
     end)
 	list_abbrev.tips_cb = (function(h, x, y)
         local s = iup.GetAttribute(h, iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))..':2')
-        h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n')
+        h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'):gsub('ђ', '\\')
     end)
 	list_abbrev.map_cb = (function(h)
         h.size="1x1"

@@ -296,7 +296,7 @@ end
 -- ==============================================================
 --- Читает файлы .abbrev (понимает инструкцию #import)
 -- @return Таблица пар сокращение-расшифровка
-function ReadAbbrevFile(file, abbr_table)
+function CORE.ReadAbbrevFile(file, abbr_table)
 	--[[------------------------------------------
 	Эмулирует чтение файла внутренней функцией редактора
 	Функция предназначена для использования вместо io.lines(filename), а также вместо file:lines()
@@ -335,7 +335,7 @@ function ReadAbbrevFile(file, abbr_table)
 				local import_file = line:match('^import%s+(.+)')
 				-- если обнаружена запись import, то рекурсивно вызываем эту же функцию
 				if import_file then
-					ReadAbbrevFile(file:match('.+\\')..import_file, abbr_table)
+					CORE.ReadAbbrevFile(file:match('.+\\')..import_file, abbr_table)
 				end
 			end
 		end

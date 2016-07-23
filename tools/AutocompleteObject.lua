@@ -724,6 +724,7 @@ end
 
 -- Вставляет выбранный из раскрывающегося списка метод в редактируемую строку
 local function OnUserListSelection_local(tp, str)
+    editor:BeginUndoAction()
     editor:SetSel(current_poslst, editor.CurrentPos)
     local fmDef = cmpobj_GetFMDefault()
     local s, shift = nil, 0
@@ -744,17 +745,25 @@ local function OnUserListSelection_local(tp, str)
                 break
             end
         end
+        editor:ReplaceSel(str)
+        editor:SetSel(editor.CurrentPos, editor.CurrentPos)
+        if ABBREV and ABBREV.TryInsAbbrev('<'..str) then
+            editor:EndUndoAction()
+            editor:AutoCCancel()
+            CallTipXml(str)
+            return
+        end
         if sign == '>' then
             shift = 1
-            s = str..'>'
+            s = '>'
             if curr_fillup_char == '' then curr_fillup_char = '' end
         elseif ((sign or '1') == '1') == (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
             shift = 2
-            s = str..'/>'
+            s = '/>'
             if curr_fillup_char == '/' then curr_fillup_char = '' end
         else
             shift = #str + 3
-            s = str..'></'..str..'>'
+            s = '></'..str..'>'
             if curr_fillup_char == '>' then curr_fillup_char = '' end
         end
 
@@ -783,6 +792,7 @@ local function OnUserListSelection_local(tp, str)
         end
     end
     bIsListVisible = false
+    editor:EndUndoAction()
 end
 
 local function RunAutocomplete(char, pos, word)
@@ -1104,12 +1114,12 @@ AddEventHandler("OnChar", function(char)
 	if props['macro-recording'] ~= '1' and OnChar_local(char) then return true end
 	return result
 end)
-AddEventHandler("OnUserListSelection", function(tp,sel_value)
+AddEventHandler("OnUserListSelection", function(tp, sel_value)
     if not useAutocomp() then return end
 	if tp == constListIdXml or tp == constListId or tp == constListIdXmlPar then
 		if OnUserListSelection_local(tp, sel_value) then return true end
 	end
-    scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
+    scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)
 end)
 AddEventHandler("OnSwitchFile", function(file)
     local pr = _G.iuprops["spell.autospell"]
