@@ -230,7 +230,10 @@ function GetInputObject(line)
 
     local lineLen = string.len(line)
     local inputObject = {"","","",nil}
-    if props["autocomplete."..editor.LexerLanguage..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] then inputObject = {"noobj","","",nil} end
+    if props["autocomplete."..editor.LexerLanguage..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] then
+        inputObject = {"noobj", "", "", nil}
+        return inputObject
+    end
     local char = string.sub(line,lineLen,lineLen)
     local bracketsCounter = 0
     if char == ')' then -- ищем object.metod() :TODO - возможно стоит добавить []
@@ -249,6 +252,7 @@ function GetInputObject(line)
     end
     if bracketsCounter ~= 0 or lineLen <= 0 then return {"","","", nil} end --в строке неправильно расставлены скобки, либо выражение продолженоиз другой строки - вылетаем, нам тут не светит
     local _start, _end, sVar = string.find(line, '(%.?[%w%_]+)$', 1)
+
     if sVar ~= nil then inputObject[1] = sVar end
     if _start ~= nil then
         local newLine = string.sub(line,1,_start - 1)
@@ -747,11 +751,17 @@ local function OnUserListSelection_local(tp, str)
         end
         editor:ReplaceSel(str)
         editor:SetSel(editor.CurrentPos, editor.CurrentPos)
-        if ABBREV and ABBREV.TryInsAbbrev('<'..str) then
-            editor:EndUndoAction()
-            editor:AutoCCancel()
-            CallTipXml(str)
-            return
+        if ABBREV then
+            local isAbbr, _, CancellFromForm = ABBREV.TryInsAbbrev('<'..str)
+            if isAbbr and not CancellFromForm then
+                editor:EndUndoAction()
+                editor:AutoCCancel()
+                CallTipXml(str)
+                return
+            elseif isAbbr then
+                editor:ReplaceSel('<'..str)
+                editor:SetSel(editor.SelectionEnd, editor.SelectionEnd)
+            end
         end
         if sign == '>' then
             shift = 1
@@ -796,7 +806,7 @@ local function OnUserListSelection_local(tp, str)
 end
 
 local function RunAutocomplete(char, pos, word)
-	FindDeclaration()
+    FindDeclaration()
 
     local input_object = GetInputObject(editor:textrange(editor:PositionFromLine(af_current_line),pos-1))
     if input_object[1] =='' then return '' end
@@ -804,6 +814,7 @@ local function RunAutocomplete(char, pos, word)
 	-- Если слева от курсора отсутствует слово, которое можно истолковать как имя объекта, то выходим
     obj_names = GetObjectNames(input_object)
 	if table.maxn(obj_names) == 0 then return false end
+
     --Возможно, среди obj_names есть и свойства и конструкторы( .Fremes .Frames( ) - тогда свойства надо удалить
     local bIsProps = false
     local bIsConstr = false
@@ -956,9 +967,9 @@ end
 -- ОСНОВНАЯ ПРОЦЕДУРА (обрабатываем нажатия на клавиши)
 local function OnChar_local(char)
     -- if char~='<' then return end
-    if bIsListVisible and not pasteFromXml and fillup_chars ~= '' and string.find(char,fillup_chars) then
-    --обеспечиваем вставку выбранного в листе значения вводе одного из завершающих символов(fillup_chars - типа (,. ...)
-    --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
+    if bIsListVisible and not pasteFromXml and fillup_chars ~= '' and string.find(char, fillup_chars) then
+        --обеспечиваем вставку выбранного в листе значения вводе одного из завершающих символов(fillup_chars - типа (,. ...)
+        --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
         if scite.SendEditor(SCI_AUTOCACTIVE) then
             --editor:SetSel(editor:WordStartPosition(editor.CurrentPos), editor.CurrentPos)
             curr_fillup_char = char
@@ -969,7 +980,7 @@ local function OnChar_local(char)
             bIsListVisible = false
         end
     end
-	if IsComment(editor.CurrentPos-2) then return false end  -- Если строка закомметирована, то выходим
+	if IsComment(editor.CurrentPos - 2) then return false end -- Если строка закомметирована, то выходим
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
     local result = false
@@ -998,21 +1009,21 @@ local function OnChar_local(char)
         if string.find(autocomplete_start_characters, char, 1, 1) ~= nil then
             pasteFromXml = false
             if calltipinfo[1] ~= 0 then scite.SendEditor(SCI_CALLTIPCANCEL) end
-            local r=AutocompleteObject(char)
+            local r = AutocompleteObject(char) --Показываем список методов
             if r then bResetCallTip = false end
-            return  r or result
+            return r or result
         elseif string.find(calltip_start_characters, char, 1, 1) ~= nil then
-            local r = CallTip(char,current_pos)
+            local r = CallTip(char, current_pos) --Показываем подсказку
             return r or result
         end
     end
-    if calltipinfo[1] and calltipinfo[1] ~= 0  then --будем считать,  что разделители параметров - только запятые
+    if calltipinfo[1] and calltipinfo[1] ~= 0 then --будем считать,  что разделители параметров - только запятые
         if (calltipinfo[table.maxn(calltipinfo)][3] or 0) > 0 and bResetCallTip then
             ResetCallTipParams()
             result = true
         end
     end
-    if char=='\n' then HideCallTip() end
+    if char == '\n' then HideCallTip() end
     return result
 end
 ------------------------------------------------------

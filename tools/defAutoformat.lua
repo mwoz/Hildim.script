@@ -13,9 +13,7 @@ local stylesMap = {default = {
     ignoredStyle = {[8] = true, [1] = true}
 }}
 
-local CurMap
-
-
+local CurMap = stylesMap.default
 
 
 local operStyle = 10
@@ -24,6 +22,8 @@ local keywordStyle = 5
 _G.g_session['custom.autoformat.lexers'] = {}
 
 local function FormatString(line)
+    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart))]] then return end
+
     local lStart = editor:PositionFromLine(line)
     local lEnd = lStart + (editor:GetLine(line) or ''):len()
     local lS = lStart
@@ -113,9 +113,10 @@ local function Indent(l)
     return string.rep(' ', l)
 end
 
-local bDoFold = false
+local bNewLine = false
 
 local function doIndentation(line, bSel)
+    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart))]] then return end
     local f0, f1 = FoldLevel(nil, line), FoldLevel(nil, line - 1)
     curFold = nil
     if f0 == f1 and checkMiddle(line - 1) then
@@ -130,51 +131,49 @@ local function doIndentation(line, bSel)
     else
         local d = f0 - f1
         if d < 0 then d = 0 end
-        if bSel then
-            -- local _, lineEnd = editor:GetLine(line)
-            -- if not lineEnd then return true end
-            -- if editor.CurrentPos - editor:PositionFromLine(line) < lineEnd - 2 then d = 0 end
-        elseif f0 > FoldLevel(nil, line + 1) then
+        if f0 > FoldLevel(nil, line + 1) then
             d = d - (f0 - FoldLevel(nil, line + 1))
         end
         if d > 0 then d = 1 elseif d < 0 then d = -1 end
         editor.LineIndentation[line] = editor.LineIndentation[line - 1] + (d *  (tonumber(props['indent.size$'])))
-        if bSel then editor:VCHome() end
+        if bSel and editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
     end
 end
 
 AddEventHandler("OnChar", function(char)
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or not editor.Focus then return end
-
+    bNewLine = false
 	if (_G.iuprops['autoformat.line'] or 0) == 1 then
         if not editor.Focus then return end
         if string.byte(char) == 13 then
-            local line = editor:LineFromPosition(editor.SelectionStart)
             editor:BeginUndoAction()
-            FormatString(line - 1)
-            doIndentation(line, true)
-            editor:EndUndoAction()
-            bDoFold = true
-            return true
+            if editor.EOLMode == SC_EOL_CR then
+                curFold = nil
+                bNewLine = true
+            end
         elseif string.byte(char) == 10 then
             curFold = nil
-            if bDoFold then
-                bDoFold = false
-                return true
-            end
+            bNewLine = true
+            if editor.EOLMode == SC_EOL_LF then  editor:BeginUndoAction() end
         elseif FoldLevel(-1) == FoldLevel(0) then
             curFold = FoldLevel(-1)
             if curFold == 0 then curFold = nil end
         end
         curLine = editor:LineFromPosition(editor.SelectionStart)
-        return false
+        return
     end
 end)
 
 AddEventHandler("OnUpdateUI", function()
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] then return end
     if (_G.iuprops['autoformat.line'] or 0) == 1 then
-        if curFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) < FoldLevel(0) then
+        if bNewLine then
+            --editor:BeginUndoAction()
+            FormatString(curLine - 1)
+            doIndentation(curLine, true)
+            editor:EndUndoAction()
+            bNewLine = false
+        elseif curFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) < FoldLevel(0) then
             curFold = nil
             local curS = editor.SelectionStart
             local ls = editor:LineFromPosition(curS)

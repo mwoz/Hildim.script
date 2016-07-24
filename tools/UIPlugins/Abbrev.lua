@@ -125,7 +125,7 @@ local function getParamProxy(...)
 end
 
 local function parseParamTemplate(findSt, findEnd, s, dInd, tMap, bContinue, ...)
-    if not bContinue then return end
+    if not bContinue then return true end
     local nFind = 1
     local counter = 0
     local ballance = lpeg.P{ "Л" * ((1 - lpeg.S"ЛЫ") + lpeg.V(1))^0 * "Ы" }  --находит фрагмент со сбалансированными скобками
@@ -199,14 +199,14 @@ local function InsertAbbreviation(expan, dInd, curSel)
             if not frm then print('Error: unknown abbrev form: "Л'..frm..'" ('..strFile..') dos not return function') end
             form(findSt, editor.SelectionEnd, s, dInd, replAbbr)
     end)
+    local bCancel
     if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста     'Л([^%[]%.-[^%]])Ы'
     s, isForm = s:gsub('Л([^%@%#%?].-)Ы',
         function(frm)
-            parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(loadstring("return function(g) return g("..frm..") end"))()(getParamProxy))
+            bCancel = parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(loadstring("return function(g) return g("..frm..") end"))()(getParamProxy))
         end
     )
-    if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста
-
+    if isForm then return bCancel end
     replAbbr(findSt, editor.SelectionEnd, s, dInd)
 end
 
@@ -226,8 +226,7 @@ local function internal_TryInsAbbrev(bClip, strFull)
                 if curSel ~= "" then editor:ReplaceSel() end
                 editor.SelectionStart = editor.SelectionStart - v.abbr:len()
                 local dInd = lBegin:len() - v.abbr:len()
-                InsertAbbreviation(v.exp, dInd, curSel)
-                return true
+                return true, lBegin, InsertAbbreviation(v.exp, dInd, curSel)
             end
         end
 	end
