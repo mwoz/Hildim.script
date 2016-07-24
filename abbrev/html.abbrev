@@ -14,97 +14,9 @@ hta=<html>\n<head>\n<meta http-equiv=Content-Type Content="text-html; charset=Wi
 xml=<?xml version="1.0" encoding="iso-8859-1"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml">\n<head>\n\t<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />\n\t<title>|</title>\n\t<meta name="generator" content="SciTE" />\n</head>\n<body>\n\n</body>\n</html>
 ##}
 
-<a=<a href="|" title="">%SEL%</a>
-<ab=<abbr>%SEL%|</abbr>
-<ac=<acronym>%SEL%|</acronym>
-<ad=<address>%SEL%|</address>
-<ap=<applet>DEPRECATED|</applet>
-<ar=<area>|
-<b=<b>%SEL%|</b>
-<ba=<base href="|">
-<bf=<basefont>DEPRECATED|
-<bd=<bdo dir="">%SEL%|</bdo>
-<bi=<big>%SEL%|</big>
-<bl=<blockquote cite="">%SEL%|</blockquote>
-<bo=<body>\n\t%SEL%|\n</body>
-#br
-<bu=<button name="" value="" type="">|</button>
-<ca=<caption>%SEL%|</caption>
-<ce=<center>|</center>
-<ci=<cite>%SEL%|</cite>
-<cod=<code>%SEL%|</code>
-<col=<col>|
-<colg=<colgroup>\n\t%SEL%|\n</colgroup>
-<dd=<dd>%SEL%|</dd>
-<de=<del>%SEL%|</del>
-<df=<dfn>%SEL%|</dfn>
-<dir=<dir>DEPRECATED|</dir>
-<div=<div id="">%SEL%|</div>
-<dl=<dl>%SEL%|</dl>
-<dt=<dt>%SEL%|</dt>
-<em=<em>%SEL%|</em>
-<fi=<fieldset>\n<legend>|</legend>\n</fieldset>\n
-<fon=<font class="">%SEL%|</font>
-<fo=<form action="" method ="GET" name="form">\n\t%SEL%|\n</form>
-<fr=<frame src="">|
-<frames=<frameset>%SEL%|</frameset>
-<h1=<h1>%SEL%|</h1>
-<h2=<h2>%SEL%|</h2>
-<h3=<h3>%SEL%|</h3>
-<h4=<h4>%SEL%|</h4>
-<h5=<h5>%SEL%|</h5>
-<h6=<h6>%SEL%|</h6>
-<he=<head>\n\t%SEL%|\n</head>
-#hr
-<ht=<html>\n\t%SEL%|\n</html>
-<i=<i>%SEL%|</i>
-<ifr=<iframe src="">%SEL%|</iframe>
-<im=<img src="%SEL%|" alt="">
-<in=<ins>%SEL%|</ins>
-<inp=<input type="|" name="" value=""></input>
-<is=<isindex>DEPRECATED|
-<kb=<kbd>%SEL%|</kbd>
-<la=<label>%SEL%|</label>
-<le=<legend>%SEL%|</legend>
-<li=<li>%SEL%|</li>
-<lin=<link rel="" href="">|
-<ma=<map>%SEL%|</map>
-<men=<menu>DEPRECATED|</menu>
-<met=<meta content="">%SEL%|</meta>
-<nof=<noframes>%SEL%|</noframes>
-<nos=<noscript>%SEL%|</noscript>
-<ob=<object>%SEL%|</object>
 <ol=<ol>\n<li>%SEL%|\n</ol>
-<optg=<optgroup label="">%SEL%|</optgroup>
-<opt=<option value="">%SEL%|</option>
-<p=<p>%SEL%|</p>
-<pa=<param name="">|
-<pr=<pre>%SEL%|</pre>
-<q=<q>%SEL%|</q>
-<s=<s>%SEL%|</s>
-<sa=<samp>%SEL%|</samp>
-<sc=<script language="JavaScript">%SEL%|\n</script>
-<se=<select>\n\t<option value="">|</option>\n\t<option value=""></option>\n</select>
-<sm=<small>%SEL%|</small>
-<sp=<span id="">%SEL%|</span>
-<stri=<strike>DEPRECATED%SEL%|</strike>
-<str=<strong>%SEL%|</strong>
-<sty=<style type="">%SEL%|<style>
-<sub=<sub>%SEL%|</sub>
-<sup=<sup>%SEL%|</sup>
 <ta=<table width="100%" cellpadding="0" cellspacing="0" border="0">\n\t<tr>\n\t\t<td>\n\t\t\t|\n\t\t</td>\n\t</tr>\n</table>
-<tb=<tbody>|</tbody>
-<td=<td>%SEL%|</td>
-<tex=<textarea>%SEL%|</textarea>
-<tf=<tfoot>%SEL%|</tfoot>
-<th=<th>%SEL%|</th>
-<the=<thead>%SEL%|</thead>
-<ti=<title>%SEL%|</title>
-<tr=<tr>%SEL%|</tr>
-<tt=<tt>%SEL%|</tt>
-<u=<u>DEPRECATED%SEL%|</u>
-<ul=<ul>\n\t<li>|\n</ul>
-<va=<var>%SEL%|</var>
+
 
 & =&nbsp;
 &¦=&brvbar;

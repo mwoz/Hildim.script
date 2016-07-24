@@ -1,12 +1,22 @@
 local curFold
 
 local curLine
-local strTab = string.rep(' ',props['tabsize'])
 
 local chLeftSide = '[\\),<>\\/\\=\\+\\-%\\*]\\s*[\\w\\d\\"\']'
 local chRightSide = '[\\w\\d\\_)\\]}"\']\\s*[<>\\/\\=\\+\\-%\\*]'
 local strunMin = '[,=(] \\- [\\d\\w_(]'
 local strunMin2 = '(\\- [\\d\\w_(]'
+
+local stylesMap = {default = {
+    operStyle = {[10] = true},
+    keywordStyle = {[5] = true},
+    ignoredStyle = {[8] = true, [1] = true}
+}}
+
+local CurMap
+
+
+
 
 local operStyle = 10
 local keywordStyle = 5
@@ -111,7 +121,7 @@ local function doIndentation(line, bSel)
     if f0 == f1 and checkMiddle(line - 1) then
         for i = line - 2, 0, -1 do
             if FoldLevel(nil, i) < f0 then
-                editor.LineIndentation[line] = editor.LineIndentation[i] + (tonumber(props['tabsize']))
+                editor.LineIndentation[line] = editor.LineIndentation[i] + (tonumber(props['indent.size$']))
                 editor.LineIndentation[line - 1] = editor.LineIndentation[i]
                 if bSel then editor:VCHome() end
                 return
@@ -128,7 +138,7 @@ local function doIndentation(line, bSel)
             d = d - (f0 - FoldLevel(nil, line + 1))
         end
         if d > 0 then d = 1 elseif d < 0 then d = -1 end
-        editor.LineIndentation[line] = editor.LineIndentation[line - 1] + (d *  (tonumber(props['tabsize'])))
+        editor.LineIndentation[line] = editor.LineIndentation[line - 1] + (d *  (tonumber(props['indent.size$'])))
         if bSel then editor:VCHome() end
     end
 end

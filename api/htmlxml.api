@@ -785,7 +785,7 @@ u<
 #$ul=#$ev_nt
 #$ul=#$gl_ob
 ul<compact compact Not supported in HTML5.\nSpecifies that the list should render smaller than normal
-ultype {{disc|square|circle}} Not supported in HTML5.\nSpecifies the kind of marker to use in the list
+ul<type {{disc|square|circle}} Not supported in HTML5.\nSpecifies the kind of marker to use in the list
 
 #$var=#$ev_nt
 #$var=#$gl_ob

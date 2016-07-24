@@ -7,6 +7,7 @@ local isEditor = false
 local prevLexer = -1
 local abbr_table
 local bListModified = false
+require"lpeg"
 
 ABBREV = {}
 
@@ -103,31 +104,39 @@ local function EditAbbrev()
     end
 end
 
---[[
-ttt
-            Select Case
-                Case "local"
-                Case "return"
-                Case "tonumber"
-                Case "tPos1"
-                Case "findEnd"
-                Case Else
-            End Select
-]]
-local function parseParamTemplate(findSt, findEnd, s, dInd, bContinue, ...)
+local function getParamProxy(...)
+    local t = {}
+    local arg = {...}
+    local i = 1
+    if type(arg[3]) == 'string' then
+        for p in arg[3]:gmatch("[^\n]+") do
+            if p:find('%%l') or p:find('%%o') then
+                t[i] = {}
+                j = 0
+                for o in p:gmatch('[^|]+') do
+                    t[i][j] = o
+                    j = j + 1
+                end
+            end
+            i = i + 1
+        end
+    end
+    return t, iup.GetParam(...)
+end
+
+local function parseParamTemplate(findSt, findEnd, s, dInd, tMap, bContinue, ...)
     if not bContinue then return end
     local nFind = 1
     local counter = 0
-    local b = lpeg.P{ lpeg.Cp() * lpeg.P{ "Л" * ((1 - lpeg.S"ЛЫ") + lpeg.V(1))^0 * "Ы" } * lpeg.Cp() + 1 * lpeg.V(1) } --в таблице координаты перед первой и после последней скобки наикратчайшей сбалансированной строки
+    local ballance = lpeg.P{ "Л" * ((1 - lpeg.S"ЛЫ") + lpeg.V(1))^0 * "Ы" }  --находит фрагмент со сбалансированными скобками
+    local pYes = lpeg.C(lpeg.P{#lpeg.P('//') + (ballance + 1) * lpeg.V(1) })
     while true do
-        local tPos1, tPos2 = b:match(s, 1)
-        if not tPos1 then
+        local sBeg, pLong, sEnd = (lpeg.C((1 - lpeg.S"ЛЫ")^0) * lpeg.C(ballance) * lpeg.C(lpeg.P(1)^0)):match(s, 1)  --выводит часть до шаблона, шаблон и после
+        --print(tPos1, tPos2)
+        if not pLong then
             replAbbr(findSt, findEnd, s, dInd)
             return
         end
-        local sBeg = s:sub(1, tPos1 - 1)
-        local pLong = s:sub(tPos1, tPos2 - 1)
-        local sEnd = s:sub(tPos2, -1)
 
         local _, _, mark, nI = pLong:find('^Л([%@%#%?])(%d+)')
         if not nI or tonumber(nI) > #arg then
@@ -138,7 +147,12 @@ local function parseParamTemplate(findSt, findEnd, s, dInd, bContinue, ...)
         nI = tonumber(nI)
         pLong = pLong:gsub('^..%d+', ''):gsub('Ы$', '')
         if mark == '@' then
-            pLong = tostring(arg[nI])
+            if tMap[nI] and tMap[nI][arg[nI] + 1] then
+                val = tMap[nI][arg[nI] + 1];
+            else
+                val = tostring(arg[nI])
+            end
+            pLong = val
         elseif mark == '#' then
             if not pLong:find('^//') then
                 print("Error: "..pLong)
@@ -151,7 +165,9 @@ local function parseParamTemplate(findSt, findEnd, s, dInd, bContinue, ...)
             end
             pLong = res
         elseif mark == '?' then
-            local _, _, sTrue, sFalse = pLong:find('^//(.-)//(.*)')
+            local _, _, sTF = pLong:find('^//(.+)')
+
+            local sTrue, sFalse = (pYes * lpeg.P"//" * lpeg.C(lpeg.P(1)^0)):match(sTF)
 
             if not sTrue and not sFalse then
                 print("Error: "..pLong)
@@ -186,7 +202,7 @@ local function InsertAbbreviation(expan, dInd, curSel)
     if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста     'Л([^%[]%.-[^%]])Ы'
     s, isForm = s:gsub('Л([^%@%#%?].-)Ы',
         function(frm)
-            parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(loadstring("return iup.GetParam("..frm..")"))())
+            parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(loadstring("return function(g) return g("..frm..") end"))()(getParamProxy))
         end
     )
     if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста
@@ -215,7 +231,7 @@ local function internal_TryInsAbbrev(bClip, strFull)
             end
         end
 	end
-    return false
+    return false, lBegin
 end
 
 ABBREV.TryInsAbbrev = function(strFull)
@@ -225,7 +241,8 @@ end
 
 local function TryInsAbbrev(bClip)
     if not abbr_table then return end
-    if not internal_TryInsAbbrev(bClip, nil) then
+    local res, lBegin = internal_TryInsAbbrev(bClip, nil)
+    if lBegin then
         print("Error Abbrev not found in: '"..lBegin.."'")
     end
 end
