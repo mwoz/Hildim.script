@@ -1,11 +1,11 @@
 # Ñîêðàùåíèÿ äëÿ SQL by Alex L
 #
-proc=__CMD_DROP_PROC(%SEL%)\n\ncreate procedure %SEL%\n\t|\nas\n\ndeclare\n\nbegin\n\n\t\nend\ngo\n__CMD_CHECK_PROC(%SEL%)\n
-if=if |\nbegin\n\t\nend\n
-ifelse=if |\nbegin\n\t\nend\nelse\nbegin\n\t\nend\n
-sel=select |\nfrom \nwhere \n
-curs=declare %SEL%| cursor for select ... from where\nopen %SEL%\nfetch %SEL% into @var\n\nwhile (@@sqlstatus = 0)\nbegin\n\t\nend\n\nclose %SEL%\ndeallocate cursor %SEL%
-cr=create table %SEL%|\n(\n)\n
-dt=drop table %SEL%|
+proc=__CMD_DROP_PROC(‹‡›)\n\ncreate procedure ‹‡›\n\t¦\nas\n\ndeclare\n\nbegin\n\n\t\nend\ngo\n__CMD_CHECK_PROC(‹‡›)\n
+if=if ¦\nbegin\n\t\nend\n
+ifelse=if ¦\nbegin\n\t\nend\nelse\nbegin\n\t\nend\n
+sel=select ¦\nfrom \nwhere \n
+curs=declare ‹‡›¦ cursor for select ... from where\nopen ‹‡›\nfetch ‹‡› into @var\n\nwhile (@@sqlstatus = 0)\nbegin\n\t\nend\n\nclose ‹‡›\ndeallocate cursor ‹‡›
+cr=create table ‹‡›¦\n(\n)\n
+dt=drop table %SEL%¦
 
 

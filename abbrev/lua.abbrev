@@ -1,8 +1,9 @@
-1=-- Script Name\n-- Version: 1.0\n-- Author: \n---------------------------------------------------\n-- Description: \n---------------------------------------------------\nlocal text = props['CurrentSelection']\n|
-if=if | then\nend
-for=for i = 1,  #%SEL%| do\nend
-while=while  | do\nend
-rep=repeat \nuntil |
-lf=local function |()\nend
-f=function |()\nend
-aeh=AddEventHandler("‹@1›", function() end)‹\n"AddEventHamdler",\nnil,\n'Event: %l|OnBeforeSave|OnChar|OnClear|OnClose|OnColorized|OnContextMenu|OnDoubleClick|OnDwellStart|OnFinalise|OnFindCompleted|OnIdle|OnLayOutNotify|OnMarginClick|OnMenuCommand|OnNavigation|OnOpen|OnSave|OnSavePointLeft|OnSavePointReached|OnSendEditor|OnSwitchFile|OnUpdateUI|OnUserListSelection|¬n',\n0\n›
+1=-- Script Name\n-- Version: 1.0\n-- Author: \n---------------------------------------------------\n-- Description: \n---------------------------------------------------\nlocal text = props['CurrentSelection']\n¦
+if=if ¦ then\nend
+ie=if ¦ then‹#1‡\nelseif false then›‹?2‡‡\nelse›\nend‹\n"AddEventHamdler",\nnil,\n'ElseIf: %i[0,20,1]¬n'..\n'Else: %b¬n',\n0,1\n›
+for=for i = 1,  ‹‡›¦ do\nend
+while=while  ¦ do\nend
+rep=repeat \nuntil ¦
+lf=local function ¦()\nend
+f=function ¦()\nend
+aeh=AddEventHandler("‹@1›", function() end)‹\n"AddEventHamdler",\nnil,\n'Event: %L|OnBeforeSave|OnChar|OnClear|OnClose|OnColorized|OnContextMenu|OnDoubleClick|OnDwellStart|OnFinalise|OnFindCompleted|OnIdle|OnLayOutNotify|OnMarginClick|OnMenuCommand|OnNavigation|OnOpen|OnSave|OnSavePointLeft|OnSavePointReached|OnSendEditor|OnSwitchFile|OnUpdateUI|OnUserListSelection|¬n',\n0\n›

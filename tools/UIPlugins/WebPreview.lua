@@ -83,9 +83,6 @@ local function init()
         return true
     end
 
-    local function ResetWebView()
-    end
-
     local function OnUpdateUI_local(bModified, bSelection, flag)
         if editor.LexerLanguage ~= "hypertext" or (bModified == 0 and bSelection == 0) then return end
         local startBodyOpen = editor:findtext('<body[ /]', SCFIND_REGEXP, 0 , editor.Length)

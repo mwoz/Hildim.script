@@ -7,6 +7,7 @@ blockResetCB = false
 local droppedLin = nil
 local lin0 = 10
 local onDraw_cb
+local bToolBar = false
 
 local function renum()
     for i = 1,  lst_clip.numlin do
@@ -20,7 +21,7 @@ CLIPHISTORY.GetClip = function(i)
 end
 
 local function setClipboard(lin)
-    if lin <= tonumber(lst_clip.numlin) then
+    if lin> 0 and lin <= tonumber(lst_clip.numlin) then
         local text =  iup.GetAttributeId2(lst_clip, "", lin, 2)
         local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
         lst_clip.addlin = 0
@@ -79,7 +80,7 @@ local function init()
             if lst_clip.marked then l = tonumber(lst_clip.marked:find('1') or '1') end
             if l <= tonumber(lst_clip.numlin) then
                 lst_clip.marked = nil
-                iup.SetAttributeId2(lst_clip, 'MARK',l,0, 1)
+                iup.SetAttributeId2(lst_clip, 'MARK', l, 0, 1)
                 lst_clip.redraw = 'ALL'
             end
         elseif k == iup.K_UP then
@@ -102,11 +103,11 @@ local function init()
     end
 
     function lst_clip:button_cb(button, pressed, x, y, status)
-        if iup.isdouble(status) and button == 49 then
+        if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and lst_clip.cursor == "ARROW")) then
             iup.PassFocus(); setClipboard(math.floor(iup.ConvertXYToPos(lst_clip, x, y)/3))
-        elseif button == 49 and pressed == 0 then
+        elseif button == iup.BUTTON1 and pressed == 0 then
             droppedLin = nil; lst_clip.cursor = "ARROW"
-        elseif button == 51 and pressed == 0 then
+        elseif button == iup.BUTTON3 and pressed == 0 then
             local lin = math.floor(iup.ConvertXYToPos(lst_clip, x, y)/3)
             blockReselect = true
 
@@ -125,6 +126,8 @@ local function init()
                     clipboard.formatdatasize = text:len()
                     clipboard.formatdata = text
                     scite.MenuCommand(IDM_PASTE)
+                    blockReselect = false
+                    iup.PassFocus()
                 end)},
                 iup.item{title="Set for Ctrl+0",action=(function()
                     lin0 = lin
@@ -138,14 +141,16 @@ local function init()
 
     function lst_clip:mousemove_cb(lin, col)
         if lin == 0 then return end
-        local prevSel = iup.GetAttributeId2(lst_clip, 'MARK',lin,0)
-        if tonumber(prevSel) ~= lin then
+
+        if iup.GetAttributeId2(lst_clip, 'MARK', lin, 0) ~= '1' then
+
             lst_clip.marked = nil
-            iup.SetAttributeId2(lst_clip, 'MARK',lin,0, 1)
+            iup.SetAttributeId2(lst_clip, 'MARK', lin, 0, 1)
             lst_clip.redraw = 'ALL'
         end
 
         local lBtn = (shell.async_mouse_state() < 0)
+
         if (droppedLin == nil) and lBtn then
             droppedLin = lin;
             lst_clip.cursor = "RESIZE_NS"
@@ -170,6 +175,7 @@ local function init()
                 clipboard.text = lst_clip:getcell(1, 2)
                 if onDraw_cb then onDraw_cb(lst_clip:getcell(1, 1)) end
             end
+            lst_clip.redraw = 'ALL'
         end
     end
 
@@ -223,7 +229,7 @@ local function Sidebar_Init()
 end
 
 local function Toolbar_Init(h)
-
+    bToolBar = true
     local btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
     local box = iup.sc_sbox{ iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22'}, maxsize = "900x22",shrink='YES'}
     onDraw_cb = function(s)
@@ -245,6 +251,7 @@ local function Toolbar_Init(h)
     local dlg = iup.scitedialog{iup.scrollbox{lst_clip},sciteparent="SCITE", sciteid="cliphistory_popup",dropdown=true,
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255',}
     lst_clip.killfocus_cb = function()
+        if blockReselect then return end
         dlg:hide()
     end
 

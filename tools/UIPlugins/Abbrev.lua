@@ -8,12 +8,17 @@ local prevLexer = -1
 local abbr_table
 local bListModified = false
 require"lpeg"
+local bMenuMode = false
+local bToolBar = false
+local showPopUp, editMode
 
 ABBREV = {}
 
 local function replAbbr(findSt, findEnd, s, dInd)
 
-    s = s:gsub('%%CLIP(%d+)%%', function(i) if CLIPHISTORY then print(i) ; return CLIPHISTORY.GetClip(i)  else return '' end end)
+    s = s:gsub('%%CLIP(%d+)%%', function(i) if CLIPHISTORY then return CLIPHISTORY.GetClip(i)  else return '' end end)
+    local cnt = 0
+    s = s:gsub('¶', function(i) cnt = cnt +1; return Iif(cnt==1, '¶', '') end )
 
     editor:BeginUndoAction()
     editor:SetSel(findSt, findEnd)
@@ -29,7 +34,7 @@ local function replAbbr(findSt, findEnd, s, dInd)
         findEnd = findEnd + dInd
     end
 
-    local pos = editor:findtext('|', 0, findSt, findEnd)
+    local pos = editor:findtext('¶', 0, findSt, findEnd)
 
     if pos~=nil then
         editor:SetSel(findSt, findEnd)
@@ -49,8 +54,8 @@ local function SetModif()
     end
 end
 
-local function EditAbbrev()
-
+local function EditAbbrev(bNew)
+    editMode = Iif(bNew, "NEW", "CHANGE")
     local abb,expan
     local l = list_getvaluenum(list_abbrev)
 	if idx == -1 then
@@ -58,70 +63,101 @@ local function EditAbbrev()
     end
 	abb,expan = list_abbrev:getcell(l, 1), list_abbrev:getcell(l,2)
 
-    local btn_upd = iup.button  {title="Save"}
+    local btn_upd = iup.button  {title=Iif(editMode=="CHANGE", "Update", "Insert")}
     iup.SetHandle("EDIT_BTN_UPD",btn_upd)
     local btn_esc = iup.button  {title="Cancel"}
     iup.SetHandle("EDIT_BTN_ESC",btn_esc)
-    local btn_insert = iup.button  {title="Insert"}
-    iup.SetHandle("EDIT_BTN_INS",btn_insert)
 
     local txt_exp = iup.text{multiline='YES',wordwrap='YES', expand='YES', fontsize='12',value = expan:gsub('\\n', '\n'):gsub('\\r',''):gsub('\\t','\t'):gsub('ђ', '\\')}
-    local txt_abr = iup.text{expand='NO', fontsize='12',value =abb, size = '90x0'}
+    local txt_abr = iup.text{expand = 'NO', fontsize = '12', value = abb, size = '90x0'}
+
+    local bCur = iup.flatbutton{title = ' ¶ Cursor', flat_action = function() txt_exp.insert = '¶' end}
+    local bSC = iup.flatbutton{title = ' ЛЗЫ Sel/Clip', flat_action = function() txt_exp.insert = 'ЛЗЫ' end}
+    local bTxt = iup.flatbutton{title = ' Л@1Ы Text', flat_action = function() txt_exp.insert = 'Л@1Ы' end}
+    local bNum = iup.flatbutton{title = ' Л#1ЗЫ Numeric', flat_action = function() txt_exp.insert = 'Л#1З'..(txt_exp.selectedtext or '')..'Ы' end}
+    local bChoise = iup.flatbutton{title = ' Л?1ЗЗЫ Choice', flat_action = function() txt_exp.insert = 'Л?1З'..(txt_exp.selectedtext or '')..'ЗЫ' end}
+    local bForm = iup.flatbutton{title = ' Л...Ы Form', flat_action = function() txt_exp.append = [[Л
+"Title",
+nil,
+"Boolean(0,1): %b\n"..
+"Boolean: %b[No,Yes]\n"..
+"Integer: %i[0,255]\n"..
+"Sep1 %t\n"..
+"String: %s\n"..
+"Options-int: %o|item0|item1|item2|\n"..
+"List-int: %l|item0|item1|item2|item3|item4|item5|item6|\n"..
+"Options-int: %O|item0|item1|item2|\n"..
+"List-int: %L|item0|item1|item2|item3|item4|item5|item6|\n",
+0,0,0,'',0,0,0,0
+Ы]] end}
 
     local vbox = iup.vbox{
-        iup.hbox{txt_abr};
+        iup.hbox{txt_abr, bCur, bSC, bTxt, bNum, bChoise, bForm, gap = '20'};
         iup.hbox{iup.vbox{txt_exp}};
 
-        iup.hbox{btn_upd,btn_insert,iup.fill{},btn_esc, expand='HORIZONTAL'},
-        expandchildren ='YES',gap=2,margin="4x4"}
+        iup.hbox{btn_upd,iup.fill{},btn_esc, expand='HORIZONTAL'},
+        expandchildren ='YES',gap=2,margin="4x4"}                                    --[[txt_exp.insert = 'Л?1З'..'(txt_exp.selectedtext or '')'..'З.....Ы' ]]
     local dlg = iup.scitedialog{vbox; title="Edit Abbrev",defaultenter="MOVE_BTN_OK",defaultesc="MOVE_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="abbreveditor", minsize='600x300'}
 
     dlg.show_cb=(function(h,state)
         if state == 4 then
             dlg:postdestroy()
+            if bToolBar then showPopUp() end
         end
     end)
-    function btn_insert:action()
-        list_abbrev.addlin = ''..l
-        list_abbrev:setcell(l + 1, 1, txt_abr.value)
-        list_abbrev:setcell(l + 1, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r','\\r'):gsub('\n','\\n'):gsub('\t','\\t'))
-        list_abbrev.redraw = l + 1
-        SetModif()
-        dlg:postdestroy()
-    end
 
     function btn_upd:action()
-        list_abbrev:setcell(l, 1, txt_abr.value)
-        list_abbrev:setcell(l, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
-        list_abbrev.redraw = l
+        if editMode == 'CHANGE' then
+            list_abbrev:setcell(l, 1, txt_abr.value)
+            list_abbrev:setcell(l, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
+            list_abbrev.redraw = l
+        else
+            list_abbrev.addlin = ''..l
+            list_abbrev:setcell(l + 1, 1, txt_abr.value)
+            list_abbrev:setcell(l + 1, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
+            list_abbrev.redraw = l + 1
+        end
         SetModif()
         dlg:postdestroy()
+        if bToolBar then showPopUp() end
+        editMode = nil
     end
 
     function btn_esc:action()
-        dlg:action()
+        dlg:postdestroy()
+        if bToolBar then showPopUp() end
     end
+
 end
 
 local function getParamProxy(...)
     local t = {}
     local arg = {...}
     local i = 1
+    local newArg = ''
     if type(arg[3]) == 'string' then
         for p in arg[3]:gmatch("[^\n]+") do
-            if p:find('%%l') or p:find('%%o') then
+            if p:find('%%L') or p:find('%%O') then
                 t[i] = {}
                 j = 0
                 for o in p:gmatch('[^|]+') do
                     t[i][j] = o
                     j = j + 1
                 end
+                p = p:gsub('%%L', '%%l'):gsub('%%O', '%%o')
             end
             i = i + 1
+            newArg = newArg..p..'\n'
         end
+        arg[3] = newArg
     end
-    return t, iup.GetParam(...)
+    local strGp = 'return function(arg) return iup.GetParam('
+    for i = 1,  #arg do
+        strGp = strGp..Iif(i > 1, ', ', '')..'arg['..i..']'
+    end
+    strGp = strGp..') end'
+    return t, assert(loadstring(strGp))()(arg)
 end
 
 local function parseParamTemplate(findSt, findEnd, s, dInd, tMap, bContinue, ...)
@@ -129,7 +165,7 @@ local function parseParamTemplate(findSt, findEnd, s, dInd, tMap, bContinue, ...
     local nFind = 1
     local counter = 0
     local ballance = lpeg.P{ "Л" * ((1 - lpeg.S"ЛЫ") + lpeg.V(1))^0 * "Ы" }  --находит фрагмент со сбалансированными скобками
-    local pYes = lpeg.C(lpeg.P{#lpeg.P('//') + (ballance + 1) * lpeg.V(1) })
+    local pYes = lpeg.C(lpeg.P{#lpeg.P('З') + (ballance + 1) * lpeg.V(1) })
     while true do
         local sBeg, pLong, sEnd = (lpeg.C((1 - lpeg.S"ЛЫ")^0) * lpeg.C(ballance) * lpeg.C(lpeg.P(1)^0)):match(s, 1)  --выводит часть до шаблона, шаблон и после
         --print(tPos1, tPos2)
@@ -154,26 +190,25 @@ local function parseParamTemplate(findSt, findEnd, s, dInd, tMap, bContinue, ...
             end
             pLong = val
         elseif mark == '#' then
-            if not pLong:find('^//') then
+            if not pLong:find('^З') then
                 print("Error: "..pLong)
                 return
             end
-            pLong = pLong:gsub('^//', '')
+            pLong = pLong:gsub('^З', '')
             local res = ''
             for i = 1, tonumber(arg[nI]) do
                 res = res..pLong:gsub('%[##'..nI..'%]', i)
             end
             pLong = res
         elseif mark == '?' then
-            local _, _, sTF = pLong:find('^//(.+)')
+            local _, _, sTF = pLong:find('^З(.+)')
 
-            local sTrue, sFalse = (pYes * lpeg.P"//" * lpeg.C(lpeg.P(1)^0)):match(sTF)
-
-            if not sTrue and not sFalse then
+            local tVals = (lpeg.Ct(lpeg.P{pYes *( lpeg.P('З') * lpeg.V(1)^- 1)})):match(pLong..'З')
+            if not tVals or #tVals < tonumber(arg[nI]) + 2 then
                 print("Error: "..pLong)
                 return
             end
-            pLong = Iif(tonumber(arg[nI]) ~= 0, sTrue, sFalse)
+            pLong = tVals[tonumber(arg[nI])+2] or ''
         else
             assert(false, 'Internal Error')
         end
@@ -189,7 +224,7 @@ end
 local function InsertAbbreviation(expan, dInd, curSel)
     local findSt = editor.SelectionStart
     --ћен€ем: вставл€ем наш селекшн, коммент в начале убираем,\r убираем, вставл€ем табы, вставл€ем новые строки
-    local s =(expan:gsub('%%SEL%%', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', CORE.EOL())):gsub('ђ', '\\')
+    local s =(expan:gsub('ЛЗЫ', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', CORE.EOL())):gsub('ђ', '\\')
     local isForm
     s, isForm = s:gsub('Л(%w+)Ы',
         function(frm)
@@ -201,12 +236,12 @@ local function InsertAbbreviation(expan, dInd, curSel)
     end)
     local bCancel
     if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста     'Л([^%[]%.-[^%]])Ы'
-    s, isForm = s:gsub('Л([^%@%#%?].-)Ы',
+    s, isForm = s:gsub('Л([^%@%#%?З].-)Ы',
         function(frm)
             bCancel = parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(loadstring("return function(g) return g("..frm..") end"))()(getParamProxy))
         end
     )
-    if isForm then return bCancel end
+    if isForm > 0 then return bCancel end
     replAbbr(findSt, editor.SelectionEnd, s, dInd)
 end
 
@@ -220,7 +255,7 @@ local function internal_TryInsAbbrev(bClip, strFull)
 
     local pos = editor.SelectionStart
     local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)), pos)
-	for i, v in ipairs(abbr_table) do
+    for i, v in ipairs(abbr_table) do
         if not strFull or (strFull:lower() == v.abbr:lower()) then
             if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
                 if curSel ~= "" then editor:ReplaceSel() end
@@ -241,7 +276,7 @@ end
 local function TryInsAbbrev(bClip)
     if not abbr_table then return end
     local res, lBegin = internal_TryInsAbbrev(bClip, nil)
-    if lBegin then
+    if not res then
         print("Error Abbrev not found in: '"..lBegin.."'")
     end
 end
@@ -284,62 +319,113 @@ local function Abbreviations_ListFILL()
 end
 
 local function Abbreviations_InsertExpansion()
-	local expansion = iup.GetAttribute(list_abbrev, list_abbrev.focus_cell:gsub(':.*', ':2'))
+    if not list_abbrev.marked then return end
+    local lin = list_abbrev.marked:sub(2):find("1")
+    if not lin then return end
+
+    local expansion = iup.GetAttribute(list_abbrev, lin..':2')
     local sel = editor:GetSelText()
     editor:ReplaceSel('')
     local pos = editor.SelectionStart
-    local dInd = (editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)),pos)):len()
-	InsertAbbreviation(expansion, dInd,sel)
+    local dInd = (editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)), pos)):len()
+	InsertAbbreviation(expansion, dInd, sel)
     iup.PassFocus()
 end
 
 local function Init()
     --—обыти€ списка функций
     list_abbrev = iup.matrix{
-    numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    rasterwidth0 = 0 ,rasterwidth1 = 60 ,rasterwidth2 = 600 ,
-    tip='¬ главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
+        numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
+        resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
+        rasterwidth0 = 0 , rasterwidth1 = 60 , rasterwidth2 = 600 ,
+    tip = '¬ главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
 
 	list_abbrev:setcell(0, 1, "Abbrev")         -- ,size="400x400"
 	list_abbrev:setcell(0, 2, "Expansion")
 
-	list_abbrev.click_cb = (function(h, lin, col, status)
-        if iup.isdouble(status) and iup.isbutton1(status) then
+    list_abbrev.tips_cb = function(h, x, y)
+        local s = iup.GetAttribute(h, iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))..':2')
+        h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'):gsub('ђ', '\\')
+    end
+
+	list_abbrev.map_cb = function(h)
+        h.size = "1x1"
+    end
+
+	list_abbrev.keypress_cb = function(_, key, press)
+        if press == 0 then return end
+        if key == iup.K_CR then --enter
             Abbreviations_InsertExpansion()
-        elseif iup.isbutton3(status) then
-            h.focus_cell = lin..':'..col
+        elseif k == iup.K_ESC then
+            iup.PassFocus()
+        end
+	end
+
+    local droppedLin = nil
+    function list_abbrev:leavewindow_cb()
+        if bMenuMode then return end
+        list_abbrev.marked = nil
+
+        list_abbrev.redraw = 'ALL'
+        list_abbrev.cursor = "ARROW"
+        droppedLin = nil;
+    end
+    function list_abbrev:mousemove_cb(lin, col)
+        if lin == 0 then return end
+
+        if iup.GetAttributeId2(list_abbrev, 'MARK', lin, 0) ~= '1' then
+            list_abbrev.marked = nil
+            iup.SetAttributeId2(list_abbrev, 'MARK', lin, 0, 1)
+            list_abbrev.redraw = 'ALL'
+        end
+
+        local lBtn = (shell.async_mouse_state() < 0)
+        if (droppedLin == nil) and lBtn then
+            droppedLin = lin;
+            list_abbrev.cursor = "RESIZE_NS"
+        end
+        if lBtn and lin ~= droppedLin then
+            local cur1 = list_abbrev:getcell(lin, 1)
+            local cur2 = list_abbrev:getcell(lin, 2)
+
+            list_abbrev:setcell(lin, 1, list_abbrev:getcell(droppedLin, 1))
+            list_abbrev:setcell(lin, 2, list_abbrev:getcell(droppedLin, 2))
+
+            list_abbrev:setcell(droppedLin, 1, cur1)
+            list_abbrev:setcell(droppedLin, 2, cur2)
+
+            droppedLin = lin
+            list_abbrev.redraw = 'ALL'
+            SetModif()
+        end
+    end
+
+    function list_abbrev:button_cb(button, pressed, x, y, status)
+        if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and list_abbrev.cursor == "ARROW")) then
+            --local lin = math.floor(iup.ConvertXYToPos(list_abbrev, x, y) / 3)
+--[[            local col = iup.ConvertXYToPos(list_abbrev, x, y) % 3
+            list_abbrev.focus_cell = lin..':'..col ]]
+            Abbreviations_InsertExpansion()
+        elseif button == iup.BUTTON1 and pressed == 0 then
+            droppedLin = nil; list_abbrev.cursor = "ARROW"
+        elseif button == iup.BUTTON3 and pressed == 0  then
+            bMenuMode = true
+            local lin = math.floor(iup.ConvertXYToPos(list_abbrev, x, y) / 3)
+            local col = iup.ConvertXYToPos(list_abbrev, x, y) % 3
+            list_abbrev.focus_cell = lin..':'..col
             local mnu = iup.menu{
-                iup.item{title="Edit",action=EditAbbrev},
-                iup.item{title="Delete",action=(function()
-                    local msb = iup.messagedlg{buttons='YESNO', value='Delete?'}
-                    msb.popup(msb)
-                    if msb.buttonresponse == '1' then
-                        local l = list_getvaluenum(list_abbrev)
-                        list_abbrev.dellin = ''..l
-                    end
-                    msb:destroy(msb)
-                end)},
-                iup.item{title="Move Up",active=Iif(list_getvaluenum(list_abbrev)<2, 'NO', 'YES'),action=(function()
+                iup.item{title = "New", action = function() bMenuMode = false ;EditAbbrev(true) end},
+                iup.item{title = "Change", action = function() bMenuMode = false ;EditAbbrev(false) end},
+                iup.item{title = "Delete", action =(function()
                     local l = list_getvaluenum(list_abbrev)
-                    local abb,expan = list_abbrev:getcell(l, 1), list_abbrev:getcell(l,2)
-
-                    --
-                    list_abbrev.addlin = ''..(l-2)
-                    --iup.SetAttribute(list_abbrev, "COPYLIN"..(l+1), ''..(l-1))
-                    list_abbrev:setcell(l-1, 1, abb)
-                    list_abbrev:setcell(l-1, 2, expan)
-                    list_abbrev.dellin = ''..(l+1)
-                    list_abbrev.redraw = (l-1)..'-'..l
-                    SetModif()
-
+                    list_abbrev.dellin = ''..l
                 end)},
                 iup.separator{},
-                iup.item{title="Save all",active=Iif(bListModified, 'YES', 'NO'),action=(function()
+                iup.item{title = "Save all", active = Iif(bListModified, 'YES', 'NO'), action =(function()
                     local maxN = tonumber(list_abbrev.numlin)
                     local strOut = ''
                     for i = 1, maxN do
-                        strOut = strOut..list_abbrev:getcell(i, 1)..'='..list_abbrev:getcell(i,2)..'\n'
+                        strOut = strOut..list_abbrev:getcell(i, 1)..'='..list_abbrev:getcell(i, 2)..'\n'
                     end
                     local file = io.open(props["AbbrevPath"], "w")
                     file:write(strOut)
@@ -348,43 +434,32 @@ local function Init()
                     list_abbrev:setcell(0, 1, 'Abbrev')
                     list_abbrev.redraw = 0
                 end)},
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+            bMenuMode = false
         end
-    end)
-	list_abbrev.tips_cb = (function(h, x, y)
-        local s = iup.GetAttribute(h, iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))..':2')
-        h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'):gsub('ђ', '\\')
-    end)
-	list_abbrev.map_cb = (function(h)
-        h.size="1x1"
-    end)
-
-	list_abbrev.keypress_cb = (function(_, key, press)
-        if press == 0 then return end
-        if key == iup.K_CR then  --enter
-            Abbreviations_InsertExpansion()
-        elseif k == iup.K_ESC then
-            iup.PassFocus()
-        end
-	end)
+    end
 end
 
 local function ToolBar_Init(h)
+    bToolBar = true
     Init()
-    local dlg = iup.scitedialog{iup.scrollbox{list_abbrev},sciteparent="SCITE", sciteid="abbrev_popup",dropdown=true,
+    local dlg = iup.scitedialog{iup.scrollbox{list_abbrev}, sciteparent = "SCITE", sciteid = "abbrev_popup", dropdown = true,
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
     list_abbrev.killfocus_cb = function()
-        dlg:hide()
+        if not bMenuMode then dlg:hide() end
     end
 
-    local box = iup.hbox{
-            iup.flatbutton{title = '—писок сокращений', flat_action=(function(h)
+    local fbutton = iup.flatbutton{title = '—писок сокращений', flat_action=(function(h)
                 local _, _,left, top = h.screenposition:find('(-*%d+),(-*%d+)')
                 dlg:showxy(left,top)
-            end), padding='5x2',},
+            end), padding='5x2',}
+
+    local box = iup.hbox{
+            fbutton,
             iup.label{separator = "VERTICAL",maxsize='x22', },
             expand='HORIZONTAL', alignment='ACENTER' , margin = '3x',
     };
+    showPopUp = function() fbutton:flat_action() end
     h.Tabs.abbreviations = {
         handle = box;
         OnSwitchFile = Abbreviations_ListFILL;

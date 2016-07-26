@@ -124,7 +124,7 @@ local function doIndentation(line, bSel)
             if FoldLevel(nil, i) < f0 then
                 editor.LineIndentation[line] = editor.LineIndentation[i] + (tonumber(props['indent.size$']))
                 editor.LineIndentation[line - 1] = editor.LineIndentation[i]
-                if bSel then editor:VCHome() end
+                if bSell and editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
                 return
             end
         end

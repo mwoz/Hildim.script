@@ -1,9 +1,9 @@
 1=<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">\n<html>\n<head>\n\t<meta http-equiv="content-type" content="text/html; charset=windows-1251">\n\t<meta name="description" content="">\n\t<meta name="keywords" content="">\n\t<meta name="generator" content="scite">\n<title></title>\n<style type="text/css">\n\tbody,tr,td {font-family:verdana; font-size:x-small;}\n\ta {color:#000080; text-decoration:none;}\n\ta:hover {color:red;}\n</style>\n<script language="JavaScript">\n</script>\n</head>\n<body>\n</body>\n</html>
 hta=<html>\n<head>\n<meta http-equiv=Content-Type Content="text-html; charset=Windows-1251">\n<meta http-equiv=MSThemeCompatible Content=Yes>\n<hta:application\nid=hta_App\napplicationName=My_Application\nicon=desk.cpl\nmaximizeButton=no\nborder=thin\ninnerBorder=no\nscroll=no\nselection=no\ncontextMenu=no\nsingleinstance=yes\nversion=1.0\n>\n<style type="text/css">\nbody, table {font-family:MS Sans Serif; font-size:8px; background-color:threedface; cursor:default;}\ninput {font-family:MS Sans Serif; font-size:8px;}\na {color:#000080; text-decoration:none;}\na:hover {color:red;}\n</style>\n<title>My Application</title>\n<script language="JavaScript">\n    window.resizeTo(300, 80);\n</script>\n</head><body>\n<form name=fform>\nВведите значение: <input type=text name=ibox value=#FF23DA>\n <input type=button onClick="self.close();" value=OK>\n</form>\n</body></html>
-xml=<?xml version="1.0" encoding="iso-8859-1"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml">\n<head>\n\t<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />\n\t<title>|</title>\n\t<meta name="generator" content="SciTE" />\n</head>\n<body>\n\n</body>\n</html>
-<ol=<ol>‹#1//\n  <li>‹?2//\n    <p‹?3// class="‹@4›"//›></p>\n  //›</li>›\n</ol>‹\n"OL",\nnil,\n'Rows: %i[1,30,1]¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n1,1,0,''\n›
-<ul=<ul>‹#1//\n  <li>‹?2//\n    <p‹?3// class="‹@4›"//›></p>\n  //›</li>›\n</ul>‹\n"UL",\nnil,\n'Rows: %i[1,30,1]¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n1,1,0,''\n›
-<table=<table>‹?3//\n  <tr>‹#1//\n    <th></th>›\n  </tr>//›‹#2//\n  <tr>‹#1//\n    <td>‹?4//\n      <p‹?5// class="‹@6›"//›></p>\n    //›</td>›\n  </tr>›\n</table>‹\n"TABLE",\nnil,\n'Columns: %i[1,30,1]¬n'..\n'Rows: %i[1,100,1]¬n'..\n'Use header: %b¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n2,2,0,0,0,''\n›
+xml=<?xml version="1.0" encoding="iso-8859-1"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml">\n<head>\n\t<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />\n\t<title>¦</title>\n\t<meta name="generator" content="SciTE" />\n</head>\n<body>\n\n</body>\n</html>
+<ol=<ol>‹#1‡\n  <li>‹?2‡‡\n    <p‹?3‡‡ class="‹@4›"›>¦</p>\n  ›¦</li>›\n</ol>‹\n"OL",\nnil,\n'Rows: %i[1,30,1]¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n1,1,0,''\n›
+<ul=<ul>‹#1‡\n  <li>‹?2‡‡\n    <p‹?3‡‡ class="‹@4›"›>¦</p>\n  ›¦</li>›\n</ul>‹\n"UL",\nnil,\n'Rows: %i[1,30,1]¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n1,1,0,''\n›
+<table=<table>‹?3‡‡\n  <tr>‹#1‡\n    <th></th>›\n  </tr>›‹#2‡\n  <tr>‹#1‡\n    <td>‹?4‡‡\n      <p‹?5‡‡ class="‹@6›"›>¦</p>\n    ›¦</td>›\n  </tr>›\n</table>‹\n"TABLE",\nnil,\n'Columns: %i[1,30,1]¬n'..\n'Rows: %i[1,100,1]¬n'..\n'Use header: %b¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n2,2,0,0,0,''\n›
 & =&nbsp;
 &¦=&brvbar;
 &§=&sect;
@@ -28,35 +28,35 @@ xds=<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/
 xdt=<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 xdf=<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
 xd=<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-inc=include "|";
-inco=include_once "|";
-php=<?php | ?>
-req=require "|";
-reqo=require_once "|";
-if=if (|)\n{\n\t%SEL%\n}
-els=else {\n\t%SEL%|\n}
-ife=if (|)\n{\n\t\n}\nelse\n{\n\t\n}
-ifif=if (|)\n{\n\t\n}\nelseif ()\n{\n\t\n}\nelse\n{\n\t\n}
-sw=switch (|) {\n\tcase:\n\t\t\n\t\tbreak;\n\tdefault:\n\t\tbreak;\n}
-fri=for ($i = |; $i < ; $i++)\n{\n\t\n}
-for=for (|; ; )\n{\n\t\n}
-wh=while (|)\n{\n\t\n}
-dow=do\n{\n\t\n}\nwhile (|);
-fe=foreach (| as )\n{\n\t\n}
-each=each (| as )\n{\n\t\n}
+inc=include "¦";
+inco=include_once "¦";
+php=<?php ¦ ?>
+req=require "¦";
+reqo=require_once "¦";
+if=if (¦)\n{\n\t‹‡›\n}
+els=else {\n\t‹‡›¦\n}
+ife=if (¦)\n{\n\t\n}\nelse\n{\n\t\n}
+ifif=if (¦)\n{\n\t\n}\nelseif ()\n{\n\t\n}\nelse\n{\n\t\n}
+sw=switch (¦) {\n\tcase:\n\t\t\n\t\tbreak;\n\tdefault:\n\t\tbreak;\n}
+fri=for ($i = ¦; $i < ; $i++)\n{\n\t\n}
+for=for (¦; ; )\n{\n\t\n}
+wh=while (¦)\n{\n\t\n}
+dow=do\n{\n\t\n}\nwhile (¦);
+fe=foreach (¦ as )\n{\n\t\n}
+each=each (¦ as )\n{\n\t\n}
 gl=global;
 st=static;
 br=break;
 co=continue;
-fnc=function |()\n{\n\t\n\treturn\n}
-class=class |\n{\n\n\tfunction ()\n\t{\n\t\t\n\t\treturn\n\t}\n}
-classe=class | extends \n{\n\n\tfunction ()\n\t{\n\t\t\n\t\treturn\n\t}\n}
-par=parent::|();
-rem=/*\n * |\n */
-ret=return |;
+fnc=function ¦()\n{\n\t\n\treturn\n}
+class=class ¦\n{\n\n\tfunction ()\n\t{\n\t\t\n\t\treturn\n\t}\n}
+classe=class ¦ extends \n{\n\n\tfunction ()\n\t{\n\t\t\n\t\treturn\n\t}\n}
+par=parent::¦();
+rem=/*\n * ¦\n */
+ret=return ¦;
 rt=return true;
 rf=return false;
-ec=echo "|";
-pr=print_r(|);
-dec=declare (|) {\n\t\n}
+ec=echo "¦";
+pr=print_r(¦);
+dec=declare (¦) {\n\t\n}
 def=define
