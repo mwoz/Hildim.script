@@ -338,15 +338,15 @@ local function Init()
         numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
         resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
         rasterwidth0 = 0 , rasterwidth1 = 60 , rasterwidth2 = 600 ,
-    tip = 'В главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
+        tip = 'В главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
 
 	list_abbrev:setcell(0, 1, "Abbrev")         -- ,size="400x400"
 	list_abbrev:setcell(0, 2, "Expansion")
 
-    list_abbrev.tips_cb = function(h, x, y)
+    list_abbrev.tips_cb = (function(h, x, y)
         local s = iup.GetAttribute(h, iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))..':2')
         h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'):gsub('¬', '\\')
-    end
+    end)
 
 	list_abbrev.map_cb = function(h)
         h.size = "1x1"
@@ -362,6 +362,7 @@ local function Init()
 	end
 
     local droppedLin = nil
+    local clickPos = ""
     function list_abbrev:leavewindow_cb()
         if bMenuMode then return end
         list_abbrev.marked = nil
@@ -379,12 +380,18 @@ local function Init()
             list_abbrev.redraw = 'ALL'
         end
 
+        if clickPos == iup.GetGlobal("CURSORPOS") then
+            --При первом клике ложно посылается  mousemove - если установлен тултип. тут отсекаем это сообщение, чтобы нормально сработал клик
+            clickPos = ""
+            return
+        end
+
         local lBtn = (shell.async_mouse_state() < 0)
         if (droppedLin == nil) and lBtn then
             droppedLin = lin;
             list_abbrev.cursor = "RESIZE_NS"
         end
-        if lBtn and lin ~= droppedLin then
+        if lin and lBtn and lin ~= droppedLin then
             local cur1 = list_abbrev:getcell(lin, 1)
             local cur2 = list_abbrev:getcell(lin, 2)
 
@@ -402,10 +409,9 @@ local function Init()
 
     function list_abbrev:button_cb(button, pressed, x, y, status)
         if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and list_abbrev.cursor == "ARROW")) then
-            --local lin = math.floor(iup.ConvertXYToPos(list_abbrev, x, y) / 3)
---[[            local col = iup.ConvertXYToPos(list_abbrev, x, y) % 3
-            list_abbrev.focus_cell = lin..':'..col ]]
             Abbreviations_InsertExpansion()
+        elseif button == iup.BUTTON1 and pressed == 1 then
+            clickPos = iup.GetGlobal("CURSORPOS")
         elseif button == iup.BUTTON1 and pressed == 0 then
             droppedLin = nil; list_abbrev.cursor = "ARROW"
         elseif button == iup.BUTTON3 and pressed == 0  then

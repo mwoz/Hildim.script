@@ -46,10 +46,27 @@ local function CreateUntitledFile()
 	local file_ext = "."..props["FileExt"]
 	if file_ext == "." then file_ext = props["default.file.ext"] end
     local fName = props['scite.new.file']
-    if fName == '' then fName = shell.to_utf8(scite.GetTranslation("Untitled"))..props["untitled.file.number"]..file_ext end
+    if fName == '' then
+        local unNum = 0 --tonumber(props["untitled.file.number"])
+        local maxN = scite.buffers.GetCount() - 1
+        local bNew
+        repeat
+            fName = scite.GetTranslation("Untitled"):to_utf8(1251)..unNum
+            unNum = unNum + 1
+            bNew = true
+            for i = 1, maxN do
+                local _, _, sN = scite.buffers.NameAt(1):from_utf8(1251):find('([^\\]*)$')
+                if sN:gsub('%.[^%.]*$', '') == fName:from_utf8(1251) then
+                    bNew = false
+                    break
+                end
+            end
+            fName = fName..file_ext
+        until bNew and not shell.fileexists(props["FileDir"].."\\".. fName:from_utf8(1251))
+        props["untitled.file.number"] = unNum
+    end
 	props['scite.new.file'] = ''
     local file_path = props["FileDir"].."\\".. fName
-    props["untitled.file.number"] = tonumber(props["untitled.file.number"]) + 1
     local warning_couldnotopenfile_disable = props['warning.couldnotopenfile.disable']
     props['warning.couldnotopenfile.disable'] = 1
     scite.Open(file_path)
@@ -57,8 +74,8 @@ local function CreateUntitledFile()
     unsaved_files[file_path:upper()] = true --сохраняем путь к созданному буферу в таблице
     props['warning.couldnotopenfile.disable'] = warning_couldnotopenfile_disable
     return true
-
 end
+
 AddEventHandler("OnMenuCommand", function(msg, source)
 	if msg == IDM_NEW then
 		return CreateUntitledFile()

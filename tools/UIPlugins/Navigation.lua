@@ -3,6 +3,7 @@ local list_navigation
 local navigation_blockUpdate = true
 local m_lastLin = -2
 local on_nav_cb
+local bToolBar = false
 
 function navigation_Unblock()
     navigation_blockUpdate = false
@@ -99,12 +100,27 @@ local function internal_Init()
 	list_navigation:setcell(0, 2, "File")
 	list_navigation:setcell(0, 3, "Item")
 	list_navigation:setcell(0, 4, "Line")
-	list_navigation.click_cb = (function(_, lin, col, status)
-        if iup.isdouble(status) and iup.isbutton1(status) then
+
+    function list_navigation:leavewindow_cb()
+        list_navigation.marked = nil
+
+        iup.SetAttributeId2(list_navigation, 'MARK',currentItem,0, 1)
+        list_navigation.redraw = 'ALL'
+    end
+	list_navigation.click_cb = function(_, lin, col, status)
+        if (iup.isdouble(status) or bToolBar) and iup.isbutton1(status) then
             Navigation_Go(lin)
         end
-    end)
-    list_navigation.mousemove_cb = (function(_,lin, col)
+    end
+    list_navigation.mousemove_cb = function(_, lin, col)
+        if lin == 0 then return end
+
+        if iup.GetAttributeId2(list_navigation, 'MARK', lin, 0) ~= '1' then
+
+            list_navigation.marked = nil
+            iup.SetAttributeId2(list_navigation, 'MARK', lin, 0, 1)
+            list_navigation.redraw = 'ALL'
+        end
         if m_lastLin ~= lin then
             m_lastLin = lin
             if list_navigation:getcell(lin,5) then
@@ -113,15 +129,15 @@ local function internal_Init()
                 list_navigation.tip = 'История\n(Alt+<)/(Alt+>) - Назад/Вперед'
             end
         end
-    end)
+    end
     function list_navigation:k_any(k)
         if k == iup.K_ESC then
             iup.PassFocus()
         end
     end
-	list_navigation.map_cb = (function(h)
+	list_navigation.map_cb = function(h)
         h.size="1x1"
-    end)
+    end
     menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
         {'Navigation', ru='Навигация', plane = 1,{
             {'s_Navigation', separator=1,},
@@ -141,6 +157,7 @@ local function Tab_Init()
 end
 
 local function ToolBar_Init(h)
+    bToolBar = true
     internal_Init()
 
     local dlg = iup.scitedialog{iup.scrollbox{list_navigation},sciteparent="SCITE", sciteid="navigation_popup",dropdown=true,

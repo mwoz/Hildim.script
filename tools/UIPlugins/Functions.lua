@@ -116,7 +116,7 @@ do
 
 	do --v------- Lua -------v--
 		-- redefine common patterns
-		local IDENTIFIER = IDENTIFIER*(P'.'*IDENTIFIER)^0*(P':'*IDENTIFIER)^-1
+    local IDENTIFIER = IDENTIFIER *(P'.' * IDENTIFIER)^0 *(P':' * IDENTIFIER)^- 1
 		-- LONG BRACKETS
 		local long_brackets = #(P'[' * P'='^0 * P'[') *
 			function (subject, i1)
@@ -141,10 +141,12 @@ do
 		l = Cg(l*SC^1*Cc(true),'LocaleFun')^-1
 		-- create additional captures
 		local I = C(IDENTIFIER)*cl
+		local I2 = (C(IDENTIFIER) /(function(a) local _, _, c = a:find('^(.-)[%.:]'); m__CLASS = c or '~~ROOT' ;return a end)) * cl
 		-- definitions to capture:
-		local funcdef1 = l*f*SC^1*I*SC^0*par -- usual function declaration
-		local funcdef2 = l*I*SC^0*"="*SC^0*f*SC^0*par -- declaration through assignment
-		local def = Ct(funcdef1 + funcdef2)
+		local funcdef1 = l*f*SC^1*I2*SC^0*par -- usual function declaration
+        local funcdef2 = l * I * SC^0 * "=" * SC^0 * P"(" * f * SC^0 * par -- declaration through assignment
+        local aeh = P'AddEventHandler' * Cg(Cc(true),'EventHandler') * (SC + P'(')^0 * S[["']] * I * S[["']]
+		local def = Ct((funcdef1 + funcdef2 + aeh)*(Cc'' / function() return m__CLASS end))
 		-- resulting pattern, which does the work
 		local patt = (def + IGNORED^1 + IDENTIFIER + 1)^0 * (EOF) --+ error'invalid character')
 
@@ -503,7 +505,8 @@ local function Functions_GetNames()
     if lang == "VisualBasic" then
         fnTryGroupName = (function(s,f) if s == 'Sub' or s == 'Function'  or s == 'Property' then return f else return s end end)
     elseif lang == 'Lua' then
-        fnTryGroupName = (function(s) if s == '' then return 'Function' end return s end)
+         --fnTryGroupName = (function(s) if s == '' then return 'Function' end return s end)
+        fnTryGroupName = (function(s, f) if s == '' then return f end return s end)
     else
         fnTryGroupName = (function(s) return s end)
     end
@@ -598,6 +601,7 @@ local function Functions_ListFILL()
     tree_func.delnode0 = "CHILDREN"
     tree_func.title0 = props['FileName']:from_utf8(1251)
     local rootCount = 0
+    --debug_prnArgs(table_functions)
 	for i, a in ipairs(table_functions) do
 		local t,f = fixname(a)
 
@@ -918,14 +922,14 @@ local function Finc_Init()
             iup.PassFocus()
         end
     end)
-    tree_func.branchopen_cb = (function(_,number)
+    tree_func.branchopen_cb = function(_,number)
         layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'EXPANDED'
         SaveLayoutToProp()
-    end)
-    tree_func.branchclose_cb = (function(_,number)
+    end
+    tree_func.branchclose_cb = function(_,number)
         layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'COLLAPSED'
         SaveLayoutToProp()
-    end)
+    end
     tree_func.branchclose_cb = function(h) if h.value=='0' then return -1 end end
     iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
 

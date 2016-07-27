@@ -4,6 +4,7 @@ local tab2
 local Abbreviations_USECALLTIPS = tonumber(props['sidebar.abbrev.calltip']) == 1
 local isEditor = false
 local m_lastLin = -2
+local bToolBar = false
 
 ----------------------------------------------------------
 -- tab1:list_bookmarks   Bookmarks
@@ -154,15 +155,22 @@ local function Init()
 
 	list_bookmarks:setcell(0, 1, "@")         -- ,size="400x400"
 	list_bookmarks:setcell(0, 2, "Bookmarks")
-	list_bookmarks.click_cb = (function(_, lin, col, status)
-        if iup.isdouble(status) and iup.isbutton1(status) then
+	list_bookmarks.click_cb = function(_, lin, col, status)
+        if (iup.isdouble(status) or bToolBar) and iup.isbutton1(status) then
             Bookmarks_GotoLine(lin)
         end
-    end)
-	list_bookmarks.map_cb = (function(h)
+    end
+	list_bookmarks.map_cb = function(h)
         h.size="1x1"
-    end)
-    list_bookmarks.mousemove_cb = (function(_,lin, col)
+    end
+    list_bookmarks.mousemove_cb = function(_, lin, col)
+        if lin == 0 then return end
+        if iup.GetAttributeId2(list_bookmarks, 'MARK', lin, 0) ~= '1' then
+
+            list_bookmarks.marked = nil
+            iup.SetAttributeId2(list_bookmarks, 'MARK', lin, 0, 1)
+            list_bookmarks.redraw = 'ALL'
+        end
         if m_lastLin ~= lin then
             m_lastLin = lin
             if list_bookmarks:getcell(lin,4) then
@@ -171,19 +179,24 @@ local function Init()
                 list_bookmarks.tip = 'Список букмарков'
             end
         end
-    end)
-
-	list_bookmarks.keypress_cb = (function(_, key, press)
+    end
+    function list_bookmarks:leavewindow_cb()
+        -- if blockReselect then return end
+        list_bookmarks.marked = nil
+        list_bookmarks.redraw = 'ALL'
+    end
+	list_bookmarks.keypress_cb = function(_, key, press)
         if press == 0 then return end
         if key == iup.K_CR then  --enter
             Bookmarks_GotoLine()
         elseif k == iup.K_ESC then
             iup.PassFocus()
         end
-	end)
+	end
 end
 
 local function ToolBar_Init(h)
+    bToolBar = true
     Init()
     local dlg = iup.scitedialog{iup.scrollbox{list_bookmarks},sciteparent="SCITE", sciteid="bookmarks_popup",dropdown=true,
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
