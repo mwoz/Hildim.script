@@ -683,3 +683,5 @@ menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx',
     {'Tab6', key = 'Ctrl+Alt+6',  action=function() sidebar_Switch(6) end, },
     {'Tab7', key = 'Ctrl+Alt+7',  action=function() sidebar_Switch(7) end, },
 }})
+
+menuhandler:DoPostponedInsert()

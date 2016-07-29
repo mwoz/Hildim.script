@@ -26,6 +26,8 @@ local function ReplaceWithoutCase(text, s_find, s_rep)
 	until false
 end
 
+FILEMAN = {}
+
 function GetExtImage(strName)
     local _, _, ext = strName:find('%.([^%.]+)$')
     if ext=='inc' or ext=='incl' then return 'IMAGE_Library'
@@ -35,6 +37,33 @@ function GetExtImage(strName)
     elseif ext=='lua' then return 'IMGLEAF'
     else return 'IMGPAPER'
     end
+end
+
+function FILEMAN.RelativePath(sep)
+    local lin = list_dir.marked:sub(2):find("1")
+    local fName = list_dir:getcell(lin, 2)
+    local eDir = props["FileDir"]..'\\'
+    local sRet
+    if eDir == current_path then
+        sRet = fName
+    elseif eDir:find('^'..current_path) then
+        sRet = eDir:gsub('^'..current_path, ''):gsub('[^\\]+', "...")..fName
+    elseif current_path:find('^'..eDir) then
+        sRet = current_path:gsub('^'..eDir, '')..fName
+    else
+        local strBeg = ''
+        for subpath in current_path:gmatch('[^\\]+') do
+            if not (eDir:find(strBeg..subpath..'\\', 1, true) == 1) then break end
+            strBeg = strBeg..subpath..'\\'
+        end
+        if sRet ~= '' then
+        sRet = eDir:sub(#strBeg + 1):gsub('[^\\]+', "...")..current_path:sub(#strBeg + 1)..fName
+        else
+            sRet = current_path..fName
+        end
+    end
+    if sep and type(sep) == 'string' then sRet = sRet:gsub('\\', sep) end
+    return sRet
 end
 ----------------------------------------------------------
 -- tab0:list_dir   File Manager
@@ -531,6 +560,11 @@ local function memoNav(key)
     end
 end
 
+local function GetReadOnly()
+    local lin = list_dir.marked:sub(2):find("1")
+    return shell.bit_and(tonumber(list_dir:getcell(lin, 3) or 0), 1) == 1
+end
+
 local function FileManTab_Init()
     Favorites_AddFileName = Favorites_AddFileName_l
     Favorites_ListFILL = Favorites_ListFILL_l
@@ -565,28 +599,30 @@ local function FileManTab_Init()
             return -1
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
-            local mnu = iup.menu
-            {
-              iup.item{title="Change Dir",action=FileMan_ChangeDir},
-              iup.item{title="Read Only",action=FileMan_ChangeReadOnly, value=Iif(l == 1, 'ON', 'OFF')},
-              iup.item{title="Delete",action=FileMan_Delete},
-              iup.item{title="Rename",action=FileMan_Rename},
-              iup.separator{},
-              iup.item{title="Open with SciTE",action=FileMan_OpenSelectedItems},
-              iup.item{title="Execute",action=(function() FileMan_FileExec(nil) end)},
-              iup.item{title="Exec with Params",action=FileMan_FileExecWithParams},
-              iup.separator{},
-              iup.item{title="Add to Favorites",action=Favorites_AddFile},
-              iup.submenu{title='When open file',
-                  iup.menu{
-                    iup.item{title="Stay Here",action=function() _G.iuprops['sidebarfileman.restoretab']='OFF' end, value=Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='OFF','ON','OFF')},
-                    iup.item{title="Restore First Tab",action=function() _G.iuprops['sidebarfileman.restoretab']='1' end,value=Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='1','ON','OFF')},
-                    iup.item{title="Restore Prev. Tab",action=function() _G.iuprops['sidebarfileman.restoretab']='ON' end,value=Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF')=='ON','ON','OFF')},
-                  }
-              },
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+            menuhandler:PopUp('MainWindowMenu¦_HIDDEN_¦Fileman_sidebar')
         end
     end)
+
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+        {'Fileman_sidebar', plane = 1,{
+            {"Change Dir", ru = "Изменить Директорию", action = FileMan_ChangeDir},
+            {"Read Only", ru = "Только чтение", action = FileMan_ChangeReadOnly, check = GetReadOnly},
+            {"Delete", ru = "Удалить", action = FileMan_Delete},
+            {"Rename", ru = "Переименовать", action = FileMan_Rename},
+            {'s_OpenwithHildiM', separator = 1},
+            {"Open with HildiM", action = FileMan_OpenSelectedItems},
+            {"Execute", ru = "Выполнить", action =(function() FileMan_FileExec(nil) end)},
+            {"Exec with Params", ru = "Выполнить с параметрами", action = FileMan_FileExecWithParams},
+            {'s_AddtoFavorites', separator = 1},
+            {"Add to Favorites", ru = "Добавить в избранное", action = Favorites_AddFile},
+            {'When open file', ru = "После выбора файла",{
+                {"Stay Here", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, value = Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF', 'ON', 'OFF')},
+                {"Restore First Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, value = Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1', 'ON', 'OFF')},
+                {"Restore Prev. Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, value = Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON', 'ON', 'OFF')},
+            }},
+            {"Insert Relative Path", ru = "Вставить относительный путь", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
+    }})
+
     list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(key) end)
     list_dir.value_edit_cb = FileMan_DoRename
     list_dir.edition_cb = FileMan_CheckRename

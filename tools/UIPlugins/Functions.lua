@@ -38,6 +38,7 @@ local line_count = 0
 local layout --имена полей - имена бранчей, значения - true/false, если отсутствует - значит открыто
 layout = {}
 local m__CLASS = '~~ROOT'
+local m_Par1
 local Lang2lpeg = {}
 do
 	local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
@@ -202,11 +203,11 @@ do
 		local IDENTIFIER = P'*'^-1*P'~'^-1*IDENTIFIER
 		IDENTIFIER = IDENTIFIER*(P"::"*IDENTIFIER)^-1
 		-- create flags:
-		type = Cg(type,'')
+		type = (C(type)/function(a) m_Par1 = a end) * Cg('', '')
 		-- create additional captures
-		local I = nokeyword*C(IDENTIFIER)*cl
+		local I = nokeyword *(C(IDENTIFIER) /(function(a) local _, _, c, e = a:find('^(.-)::(.+)'); m__CLASS = c or '~~ROOT'; return e or a end)) * cl
 		-- definitions to capture:
-		local funcdef = nokeyword*Ct((type*SC^1)^-1*I*SC^0*par*SC^0*(#funcbody))
+		local funcdef = nokeyword * Ct((type * SC^1)^- 1 * I * SC^0 *(par / function(a) return ': '..m_Par1..' '..a end ) * SC^0 *(#funcbody) *(Cc'' / function() return m__CLASS end))
 		local classconstr = nokeyword*Ct((type*SC^1)^-1*I*SC^0*par*SC^0*P':'*SC^0*IDENTIFIER*SC^0*(P"("*(1-P")")^0*P")")*SC^0*(#funcbody)) -- this matches smthing like PrefDialog::PrefDialog(QWidget *parent, blabla) : QDialog(parent)
 		-- resulting pattern, which does the work
 		local patt = (classconstr + funcdef + IGNORED^1 + IDENTIFIER + ANY)^0 * EOF
@@ -505,8 +506,9 @@ local function Functions_GetNames()
     if lang == "VisualBasic" then
         fnTryGroupName = (function(s,f) if s == 'Sub' or s == 'Function'  or s == 'Property' then return f else return s end end)
     elseif lang == 'Lua' then
-         --fnTryGroupName = (function(s) if s == '' then return 'Function' end return s end)
         fnTryGroupName = (function(s, f) if s == '' then return f end return s end)
+    elseif lang == 'C++' then
+        fnTryGroupName = (function(s, f) return f end)
     else
         fnTryGroupName = (function(s) return s end)
     end

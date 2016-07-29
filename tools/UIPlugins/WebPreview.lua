@@ -188,6 +188,20 @@ local function init()
             {'New Line', ru = 'Новая строка', action = newLine, key = 'Alt+Enter', active = bHt, },
         }}
     )
+
+    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_¦Fileman_sidebar¦sxxx',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+        {'Web', plane = 1,{
+            {'s_web', separator = 1},
+            {"Link", ru = "Вставить как ссылку", action = function()
+                local strSel = editor:GetSelText()
+                editor:ReplaceSel('<a href="'..FILEMAN.RelativePath()..'">'..strSel..'</a>');
+                iup.PassFocus()
+            end},
+            {"Image", ru = "Вставить как изображение", action = function()
+            editor:ReplaceSel('<img src="'..FILEMAN.RelativePath()..'"/>')
+                iup.PassFocus()
+            end},
+    }})
 end
 
 local function Sidebar_Init()

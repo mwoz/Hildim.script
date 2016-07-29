@@ -98,6 +98,7 @@ local function FormatString(line)
         end
     end
 
+
 end
 
 local function FoldLevel(deltaL, L)
@@ -117,14 +118,21 @@ local bNewLine = false
 
 local function doIndentation(line, bSel)
     if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart))]] then return end
-    local f0, f1 = FoldLevel(nil, line), FoldLevel(nil, line - 1)
+    local dL = 1
+    if bSel then
+        for pl = line - 1, 0, -1 do
+            if editor:LineLength(pl) > 2 then dL = line - pl; break end
+        end
+    end
+    local f0, f1 = FoldLevel(nil, line), FoldLevel(nil, line - dL)
+
     curFold = nil
     if f0 == f1 and checkMiddle(line - 1) then
         for i = line - 2, 0, -1 do
             if FoldLevel(nil, i) < f0 then
                 editor.LineIndentation[line] = editor.LineIndentation[i] + (tonumber(props['indent.size$']))
                 editor.LineIndentation[line - 1] = editor.LineIndentation[i]
-                if bSell and editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
+                if editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
                 return
             end
         end
@@ -134,8 +142,26 @@ local function doIndentation(line, bSel)
         if f0 > FoldLevel(nil, line + 1) then
             d = d - (f0 - FoldLevel(nil, line + 1))
         end
-        if d > 0 then d = 1 elseif d < 0 then d = -1 end
-        editor.LineIndentation[line] = editor.LineIndentation[line - 1] + (d *  (tonumber(props['indent.size$'])))
+        if d > 0 then
+            editor.LineIndentation[line] = editor.LineIndentation[line - dL] + (tonumber(props['indent.size$']))
+        elseif d < 0 then
+            f0 = FoldLevel(nil, line + 1)
+            for i = line - 2, 0, -1 do
+                if FoldLevel(nil, i) <= f0 then
+                    editor.LineIndentation[line] = editor.LineIndentation[i]
+                    return
+                end
+            end
+        elseif bSel and editor:textrange(editor:PositionFromLine(line), editor:PositionFromLine(line) + editor:LineLength(line)):find('^%s*}%s*$') then
+            editor.LineIndentation[line] = editor.LineIndentation[line - dL]
+            editor:NewLine()
+            editor.LineIndentation[line] = editor.LineIndentation[line - dL] + (tonumber(props['indent.size$']))
+            editor:LineUp()
+            editor:LineEnd()
+            return
+        else
+            editor.LineIndentation[line] = editor.LineIndentation[line - dL]
+        end
         if bSel and editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
     end
 end
@@ -164,8 +190,8 @@ AddEventHandler("OnChar", function(char)
     end
 end)
 
-AddEventHandler("OnUpdateUI", function()
-    if _G.g_session['custom.autoformat.lexers'][editor.Lexer] then return end
+AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
+    if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or (bModified == 0 and bSelection == 0) then return end
     if (_G.iuprops['autoformat.line'] or 0) == 1 then
         if bNewLine then
             --editor:BeginUndoAction()

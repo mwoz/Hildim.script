@@ -258,6 +258,17 @@ function s:InsertItem(id, path, t)
     end
 end
 
+local tPostponed = {}
+function s:PostponeInsert(id, path, t)
+    table.insert(tPostponed, {id, path, t})
+end
+
+function s:DoPostponedInsert(id, path, t)
+    for _, t in ipairs(tPostponed) do
+        s:InsertItem(t[1], t[2], t[3])
+    end
+end
+
 function s:RegistryHotKeys()
 
     local defpathUsr, tblUsers = props["SciteDefaultHome"].."\\data\\home\\userHotKeys.lua"

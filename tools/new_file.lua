@@ -28,7 +28,6 @@ Set in a file .properties:
 --]]----------------------------------------------------
 require 'shell'
 
-props["untitled.file.number"] = 0
 local unsaved_files = {}
 
 -- Определяет надо ли файл с текущим расширением создавать и сохранять в UTF-8
@@ -47,15 +46,15 @@ local function CreateUntitledFile()
 	if file_ext == "." then file_ext = props["default.file.ext"] end
     local fName = props['scite.new.file']
     if fName == '' then
-        local unNum = 0 --tonumber(props["untitled.file.number"])
+        local unNum = 0
         local maxN = scite.buffers.GetCount() - 1
         local bNew
         repeat
             fName = scite.GetTranslation("Untitled"):to_utf8(1251)..unNum
             unNum = unNum + 1
             bNew = true
-            for i = 1, maxN do
-                local _, _, sN = scite.buffers.NameAt(1):from_utf8(1251):find('([^\\]*)$')
+            for i = 0, maxN do
+                local _, _, sN = scite.buffers.NameAt(i):from_utf8(1251):find('([^\\]*)$')
                 if sN:gsub('%.[^%.]*$', '') == fName:from_utf8(1251) then
                     bNew = false
                     break
@@ -63,7 +62,6 @@ local function CreateUntitledFile()
             end
             fName = fName..file_ext
         until bNew and not shell.fileexists(props["FileDir"].."\\".. fName:from_utf8(1251))
-        props["untitled.file.number"] = unNum
     end
 	props['scite.new.file'] = ''
     local file_path = props["FileDir"].."\\".. fName
@@ -79,14 +77,15 @@ end
 AddEventHandler("OnMenuCommand", function(msg, source)
 	if msg == IDM_NEW then
 		return CreateUntitledFile()
-	elseif msg == IDM_SAVE then
+    elseif msg == IDM_SAVE then
         if props["FileNameExt"]:find'^%^' and not shell.fileexists(props["FilePath"]) then
             scite.MenuCommand(IDM_SAVEAS)
             return true
         end
-	elseif msg == IDM_SAVEAS then
+    elseif msg == IDM_SAVEAS then
 		unsaved_files[props["FilePath"]:upper()] = nil --удаляем запись о буфере из таблицы
-	end
+    else
+        end
 end)
 
 -- Новый буфер, созданный функцией CreateUntitledFile имеет полное имя, поэтому при сохранении SciTE будет сохранять его молча по заданному пути (без вывода диалогового окна "SaveAs")
