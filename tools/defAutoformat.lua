@@ -250,7 +250,7 @@ AddEventHandler("Format_Block", function()
     end
     editor:BeginUndoAction()
     for i = lineStart, lineEnd do
-        FormatString(i - 1)
+        if i > 0 then FormatString(i - 1) end
         doIndentation(i)
     end
     editor:EndUndoAction()

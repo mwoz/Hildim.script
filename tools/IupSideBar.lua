@@ -565,6 +565,18 @@ for p in str:gmatch('[^¦]+') do
         pritn('Hidden plugin "'..p..'" not found')
     end
 end
+local str = _G.iuprops["settings.commands.plugins"] or ''
+for p in str:gmatch('[^¦]+') do
+    local pI = dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p)
+    if pI and pI.run then
+        local t = {}
+        t[1] = pI.title
+        if pI.key then t.key = pI.key end
+        t.action = function() dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p).run() end
+
+        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools¦xxx', t)
+    end
+end
 
 InitSideBar()
 InitToolBar()

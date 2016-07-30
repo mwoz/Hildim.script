@@ -190,7 +190,7 @@ local function init()
     )
 
     menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_¦Fileman_sidebar¦sxxx',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-        {'Web', plane = 1,{
+        {'Web', plane = 1, visible = bHt ,{
             {'s_web', separator = 1},
             {"Link", ru = "Вставить как ссылку", action = function()
                 local strSel = editor:GetSelText()

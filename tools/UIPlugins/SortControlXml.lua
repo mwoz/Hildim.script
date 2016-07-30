@@ -167,7 +167,7 @@ local tgColumns ={
 
     require("LuaXml")
 
-    function SortXML(tags, fld, sText)
+    local function SortXML(tags, fld, sText)
         local tblIndex = {} --таблицу с индексами в качестве значений и именами в качестве имен полей
         for i = 1, table.maxn(tags) do
             tblIndex[tags[i]] = i
@@ -203,7 +203,7 @@ end
 return strout
 end
 
-function SortFormXML()
+local function SortFormXML()
     local tbl
     local t_xml = xml.eval(editor:GetText())
     if t_xml then
