@@ -343,9 +343,6 @@ _G.sys_Menus.MainWindowMenu = {
 		},},
 		{'s1', separator = 1},
 		{'Utils', ru = 'Утилиты',{
-			{'Lpeg Tester', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\lpegTester.lua')",},
-			{'Replace spaces (TABs <-> Spaces)', ru = 'Заменить табы на пробелы', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\IndentTabToSpace.lua')",},
-			{'4->3 Tab size Indent', ru = 'Отступ 4->3', action = function() For2ThreeTabIndent() end,},
 			{'LayOut Dialog', action =(function()
 				local f = iup.filedlg{}
 				iup.SetNativeparent(f, "SCITE")

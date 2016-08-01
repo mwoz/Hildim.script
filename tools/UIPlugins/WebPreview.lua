@@ -20,6 +20,14 @@ local function init()
     ,replaceWhat = ''
     }
 
+    local TAG = (1 - lpeg.S'<>' - lpeg.P"name")^0
+    local SPS = lpeg.S'\n \t\r\f'^0
+    local ANC = lpeg.P'<' * lpeg.S('aA') * TAG * "name" * SPS * "=" * SPS * '"' * (lpeg.C((1 - lpeg.P'"')^1))
+    local tmPl = lpeg.Ct(lpeg.P{ANC + 1 * lpeg.V(1)}^1)
+    local function GetAnchors(strTxt)
+        return tmPl:match(strTxt, 1)
+    end
+
     local function CreateLuaCOM(ih)
         -- if luacom is loaded, use it to access methods and properties
         -- of the control
@@ -193,8 +201,24 @@ local function init()
         {'Web', plane = 1, visible = bHt ,{
             {'s_web', separator = 1},
             {"Link", ru = "Вставить как ссылку", action = function()
+                local anc = ''
                 local strSel = editor:GetSelText()
-                editor:ReplaceSel('<a href="'..FILEMAN.RelativePath()..'">'..strSel..'</a>');
+                local strPath = FILEMAN.FullPath()
+                local _,_, strExt = strPath:find('([^%.]*)$')
+                strExt = strExt:lower()
+                if strExt == 'htm' or strExt == 'html' then
+                    local f = io.open(strPath)
+                    local tblAnc = GetAnchors(f:read('*a'))
+                    f:close()
+                    if tblAnc then
+                        local bok, res = iup.GetParam('Ahchors',
+                            nil,
+                            "Ahchors: %l|"..table.concat(tblAnc, '|').."|\n", 0
+                        )
+                        if bok then anc = '#'..tblAnc[res + 1] end
+                    end
+                end
+                editor:ReplaceSel('<a href="'..FILEMAN.RelativePath()..anc..'">'..strSel..'</a>');
                 iup.PassFocus()
             end},
             {"Image", ru = "Вставить как изображение", action = function()
@@ -202,6 +226,48 @@ local function init()
                 iup.PassFocus()
             end},
     }})
+    local TAG = (1 - lpeg.S'<>' - lpeg.P"name")^0
+    local SPS = lpeg.S'\n \t\r\f'^0
+    local ANC = lpeg.P'<' * lpeg.S('aA') * TAG * "name" * SPS * "=" * SPS * '"' * (lpeg.C((1 - lpeg.P'"')^1) / '#%0')
+    local tmPl = lpeg.Ct(lpeg.P{ANC + 1 * lpeg.V(1)}^1)
+    local function href()
+        local tClr = tmPl:match(editor:GetText(), 1)
+        if not tClr then return '' end
+        return table.concat(tClr, '|')
+    end
+    WEBPREVIEW = {}
+    function WEBPREVIEW.Ref(flag)
+        return function()
+            local d = iup.filedlg{dialogtype = 'OPEN', parentdialog = 'SCITE',
+                extfilter = Iif(flag == 'H', 'All|*.*;', 'Images|*.bmp;*.gif;*.jpg;*.jpeg;*.png;'),
+                directory = props["FileDir"]
+            }
+            d:popup()
+            local filename = d.value or ''
+            d:destroy()
+            local rel = ""
+            local res = ""
+            if filename ~= '' then
+                local _, _, path, name, ext = filename:find('^(.+)([^\\%.]+%.)([^%.]*)$')
+                rel = CORE.RelativePath(path)..name..ext
+                ext = ext:lower()
+                if ext == 'htm' or ext == 'html' then
+                    local f = io.open(filename)
+                    local tblAnc = GetAnchors(f:read('*a'))
+                    f:close()
+                    res = rel..'#'..table.concat(tblAnc, '|'..rel..'#')
+                end
+                if res ~= '' then res = '|'..res end
+                res = rel..res
+            else
+                local tblAnc = GetAnchors(editor:GetText())
+                res = table.concat(tblAnc, '|#')
+                if res ~= '' then res = '#'..res end
+            end
+            iup.PassFocus()
+            return res
+        end
+    end
 end
 
 local function Sidebar_Init()

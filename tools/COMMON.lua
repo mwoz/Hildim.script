@@ -343,6 +343,31 @@ function CORE.ReadAbbrevFile(file, abbr_table)
 	abbrev_file:close()
 	return abbr_table
 end
+
+function CORE.RelativePath(current_path)
+    local eDir = props["FileDir"]..'\\'
+    local sRet
+    if eDir == current_path then
+        sRet = ''
+    elseif eDir:find('^'..current_path) then
+        sRet = eDir:gsub('^'..current_path, ''):gsub('[^\\]+', "...")
+    elseif current_path:find('^'..eDir) then
+        sRet = current_path:gsub('^'..eDir, '')
+    else
+        local strBeg = ''
+        for subpath in current_path:gmatch('[^\\]+') do
+            if not (eDir:find(strBeg..subpath..'\\', 1, true) == 1) then break end
+            strBeg = strBeg..subpath..'\\'
+        end
+        if sRet ~= '' then
+        sRet = eDir:sub(#strBeg + 1):gsub('[^\\]+', "...")..current_path:sub(#strBeg + 1)
+        else
+            sRet = current_path
+        end
+    end
+    return sRet
+end
+
 --¬ыполнение действи€ дл€ всех документов
 function DoForBuffers(func, ...)
     BlockEventHandler"OnSwitchFile"

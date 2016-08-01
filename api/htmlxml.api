@@ -48,7 +48,7 @@ ev_nt<onunload Fires once a page has unloaded (or the browser window has been cl
 #$a=#$gl_ob
 a<charset  Not supported in HTML5. \nSpecifies the character-set of a linked document
 a<coords   Not supported in HTML5. \nSpecifies the URL of the page the link goes to
-a<href Specifies the URL of the page the link goes to
+a<href {{#@HREF}} Specifies the URL of the page the link goes to
 a<hreflang Specifies the language of the linked document
 a<name Not supported in HTML5. \n Specifies the name of an anchor
 a<rel {{#@REL}} Specifies the relationship between the current document and the linked document
@@ -370,7 +370,7 @@ img<height pixels Specifies the height of an image
 img<hspace pixels Not supported in HTML5\nSpecifies the whitespace on left and right side of an image
 img<ismap ismap Specifies an image as a server-side image-map
 img<longdesc URL Specifies a URL to a detailed description of an image
-img<src URL Specifies the URL of an image
+img<src {{#@SRC}} URL Specifies the URL of an image
 img<usemap #mapname Specifies an image as a client-side image-map
 img<vspace pixels Not supported in HTML5\nSpecifies the whitespace on top and bottom of an image
 img<width pixels Specifies the width of an image
@@ -808,3 +808,7 @@ video<width pixels Sets the width of the video player
 #$wbr=#$gl_ob
 wbr<
 
+#--
+if WEBPREVIEW then
+return {['#@HREF']=WEBPREVIEW.Ref('H'), ['#@SRC']=WEBPREVIEW.Ref('I')}
+else return {} end

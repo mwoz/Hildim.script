@@ -234,3 +234,15 @@ menu.anchor
 menu.instance
 menu.recreate {{Y}} N by def.
 menu.license
+
+#--
+local SPS = lpeg.S'\n \t\r\f'^0
+local XDIG=lpeg.R'09'+lpeg.R'af'+lpeg.R'AF'
+local CLR = lpeg.P'color'*SPS*"="*SPS*'"'*lpeg.P'#'^-1*lpeg.C(XDIG*XDIG*XDIG*XDIG*XDIG*XDIG)*lpeg.P'"'
+local tmPl = lpeg.Ct(lpeg.P{CLR + 1 * lpeg.V(1)}^1)
+local function colors()
+    local tClr = tmPl:match(editor:GetText(), 1)
+    return table.concat(tClr, '|')
+end
+
+return {['#@COLORS']=colors}

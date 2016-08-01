@@ -109,6 +109,26 @@ local function TableSort(table_name)
 	return table_name
 end
 
+
+local ulFromCT_data
+
+AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
+    if wp == POST_SHOWUL then
+        local tl = {}
+        for w in ulFromCT_data:gmatch('[^|]+') do
+            table.insert(tl, w)
+        end
+        tl = TableSort(tl)
+        ulFromCT_data = table.concat(tl, ',')
+        editor.AutoCSeparator = string.byte(',')
+        current_poslst = current_pos
+        pasteFromXml = false
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8(1251) end
+
+        editor:UserListShow(constListIdXmlPar, ulFromCT_data)
+    end
+end)
+
 local function ShowCallTip(pos, str, s, e)
     local _, _, list = str:find('.-{{(.+)}}')
     local function ls(l)
@@ -122,6 +142,7 @@ local function ShowCallTip(pos, str, s, e)
         current_poslst = current_pos
         pasteFromXml = false
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
+
         editor:UserListShow(constListIdXmlPar, l)
         if str2 then
             calltipinfo['attr'] = {}
@@ -134,7 +155,7 @@ local function ShowCallTip(pos, str, s, e)
     if list then
         local _, _, str2 = str:find'.-{{.+}}(.+)'
         local _, _, sub = list:find('^(#@%u+)$')
-        if sub then list = m_tblSubstitution[sub] end
+        if sub then list = m_tblSubstitution[sub]; if type(list) == 'function' then list = list() end end
         if not list:find('|') then
             if list:find('^@@') then
                 strfun = list:gsub('^@@', '')
@@ -153,7 +174,9 @@ local function ShowCallTip(pos, str, s, e)
                 end
             end
         else
-            ls(list)
+            --ls(list)
+            ulFromCT_data = list
+            scite.PostCommand(POST_SHOWUL, 0)
             return
         end
     end
@@ -417,13 +440,18 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
     if needKwd then
         tbl_MethodList,tbl_Method = {},{}
     end
+    local strLua = nil
 	for api_filename in string.gmatch(strApis, "[^;]+") do
         if api_filename ~= '' then
             local api_file = io.open(api_filename)
             if api_file then
                 for line in api_file:lines() do
-                    if line:byte() == 35 then --#
-                        if string.find(line, '^#%$') == 1 then -- вставляем алиас
+                    if strLua then
+                        strLua = strLua..'\n'..line
+                    elseif line:byte() == 35 then --#
+                        if string.find(line, '^#%-%-') == 1 then -- зачитываем луа
+                            strLua = ''
+                        elseif string.find(line, '^#%$') == 1 then -- вставляем алиас
                             local _, _, inh, parent = line:find("^#%$([%w]+)=#%$([%w_]+)")
                             if parent then
                                 if not inh_table[inh] then inh_table[inh] = {} end
@@ -466,6 +494,14 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                 api_file:close()
             else
                 o_tbl = {}
+            end
+        end
+    end
+    if strLua then
+        local tFn = assert(loadstring(strLua))()
+        if tFn and type(tFn) == 'table' then
+            for n, f in pairs(tFn) do
+                m_tblSubstitution[n] = f
             end
         end
     end
@@ -560,7 +596,6 @@ local function ReCreateStructures(strText, tblFiles)
             str_xmlkwrd = ' '
         end
 
-        --print(props["keywords6."..Ext2Ptrn[props['FileExt']]]:len())
     end
     m_tblSubstitution = {}
     if m_ext ~= editor.Lexer or str_vbkwrd ~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']] or '&&&&')  then
@@ -729,7 +764,9 @@ local function CallTipXml(sMethod)
 end
 
 -- Вставляет выбранный из раскрывающегося списка метод в редактируемую строку
+local blockCT = false
 local function OnUserListSelection_local(tp, str)
+
     editor:BeginUndoAction()
     editor:SetSel(current_poslst, editor.CurrentPos)
     local fmDef = cmpobj_GetFMDefault()
@@ -740,6 +777,7 @@ local function OnUserListSelection_local(tp, str)
         end
         calltipinfo ={0}
         s = str:gsub(' .*', '')
+        editor:SetSel(editor.CurrentPos, editor.CurrentPos)
     elseif pasteFromXml then
         s = str..'=""'
     elseif editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
@@ -791,7 +829,9 @@ local function OnUserListSelection_local(tp, str)
     if pasteFromXml then
         editor.CurrentPos = editor.CurrentPos - 1
         editor:SetSel( editor.CurrentPos, editor.CurrentPos)
+        blockCT = true
         CallTipXml(str)
+        blockCT = false
     else
         if shift > 0 then
             editor.CurrentPos = editor.CurrentPos - shift
@@ -880,6 +920,7 @@ local function TipXml()
 end
 
 local function ResetCallTipParams()
+
     if scite.SendEditor(SCI_AUTOCACTIVE) then return end
     local tip = calltipinfo[table.maxn(calltipinfo)]
     local pos = current_pos
@@ -938,7 +979,8 @@ local function ResetCallTipParams()
     ShowCallTip(tip[1], tip[2], s, e)
 end
 
-local function OnUpdateUI_local()
+local function OnUpdateUI_local(bChange, bSelect, flag)
+    if (bChange == 0 and bSelect == 0) or blockCT then return end
     if calltipinfo[1] ~= 0 then
         current_pos = editor.CurrentPos
         af_current_line = editor:LineFromPosition(current_pos)
@@ -1063,7 +1105,6 @@ function ShowTipManualy()
                     if sMethod == nil then return end
                 end
             end
-            print(sMethod)
             bManualTip = true
             CallTipXml(sMethod)
             return
@@ -1127,9 +1168,10 @@ AddEventHandler("OnChar", function(char)
 	if props['macro-recording'] ~= '1' and OnChar_local(char) then return true end
 	return result
 end)
+local bRun = true
 AddEventHandler("OnUserListSelection", function(tp, sel_value)
     if not useAutocomp() then return end
-	if tp == constListIdXml or tp == constListId or tp == constListIdXmlPar then
+	if bRun and(tp == constListIdXml or tp == constListId or tp == constListIdXmlPar) then
 		if OnUserListSelection_local(tp, sel_value) then return true end
 	end
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)

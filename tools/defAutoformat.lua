@@ -117,7 +117,7 @@ end
 local bNewLine = false
 
 local function doIndentation(line, bSel)
-    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart))]] then return end
+    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(line)]] then return end
     local dL = 1
     if bSel then
         for pl = line - 1, 0, -1 do
@@ -133,37 +133,38 @@ local function doIndentation(line, bSel)
                 editor.LineIndentation[line] = editor.LineIndentation[i] + (tonumber(props['indent.size$']))
                 editor.LineIndentation[line - 1] = editor.LineIndentation[i]
                 if editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
+                if f0 == FoldLevel(nil, line + 1) then return else break end
+            end
+        end
+    end
+    local d = f0 - f1
+    if d < 0 then d = 0 end
+    if f0 > FoldLevel(nil, line + 1) then
+        d = d - (f0 - FoldLevel(nil, line + 1))
+    end
+
+    if d > 0 then
+        editor.LineIndentation[line] = editor.LineIndentation[line - dL] + (tonumber(props['indent.size$']))
+    elseif d < 0 then
+        f0 = FoldLevel(nil, line + 1)
+        for i = line - 2, 0, -1 do
+            if FoldLevel(nil, i) <= f0 then
+                editor.LineIndentation[line] = editor.LineIndentation[i]
                 return
             end
         end
+    elseif bSel and editor:textrange(editor:PositionFromLine(line), editor:PositionFromLine(line) + editor:LineLength(line)):find('^%s*}%s*$') then
+        editor.LineIndentation[line] = editor.LineIndentation[line - dL]
+        editor:NewLine()
+        editor.LineIndentation[line] = editor.LineIndentation[line - dL] + (tonumber(props['indent.size$']))
+        editor:LineUp()
+        editor:LineEnd()
+        return
     else
-        local d = f0 - f1
-        if d < 0 then d = 0 end
-        if f0 > FoldLevel(nil, line + 1) then
-            d = d - (f0 - FoldLevel(nil, line + 1))
-        end
-        if d > 0 then
-            editor.LineIndentation[line] = editor.LineIndentation[line - dL] + (tonumber(props['indent.size$']))
-        elseif d < 0 then
-            f0 = FoldLevel(nil, line + 1)
-            for i = line - 2, 0, -1 do
-                if FoldLevel(nil, i) <= f0 then
-                    editor.LineIndentation[line] = editor.LineIndentation[i]
-                    return
-                end
-            end
-        elseif bSel and editor:textrange(editor:PositionFromLine(line), editor:PositionFromLine(line) + editor:LineLength(line)):find('^%s*}%s*$') then
-            editor.LineIndentation[line] = editor.LineIndentation[line - dL]
-            editor:NewLine()
-            editor.LineIndentation[line] = editor.LineIndentation[line - dL] + (tonumber(props['indent.size$']))
-            editor:LineUp()
-            editor:LineEnd()
-            return
-        else
-            editor.LineIndentation[line] = editor.LineIndentation[line - dL]
-        end
-        if bSel and editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
+        editor.LineIndentation[line] = editor.LineIndentation[line - dL]
     end
+    if bSel and editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
+
 end
 
 AddEventHandler("OnChar", function(char)

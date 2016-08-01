@@ -145,7 +145,7 @@ do
 		local I2 = (C(IDENTIFIER) /(function(a) local _, _, c = a:find('^(.-)[%.:]'); m__CLASS = c or '~~ROOT' ;return a end)) * cl
 		-- definitions to capture:
 		local funcdef1 = l*f*SC^1*I2*SC^0*par -- usual function declaration
-        local funcdef2 = l * I * SC^0 * "=" * SC^0 * P"(" * f * SC^0 * par -- declaration through assignment
+        local funcdef2 = l * I2 * SC^0 * "=" * SC^0 * P"("^-1 * f * SC^0 * par -- declaration through assignment
         local aeh = P'AddEventHandler' * Cg(Cc(true),'EventHandler') * (SC + P'(')^0 * S[["']] * I * S[["']]
 		local def = Ct((funcdef1 + funcdef2 + aeh)*(Cc'' / function() return m__CLASS end))
 		-- resulting pattern, which does the work
@@ -878,7 +878,7 @@ local function Functions_Print()
     end
 end
 
-local function Finc_Init()
+local function Func_Init()
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
     local w
     for w in string.gmatch(prp, "[^|]+") do
@@ -889,25 +889,25 @@ local function Finc_Init()
         --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
         tree_func.size = nil
 
-        tree_func.button_cb = (function(_,but, pressed, x, y, status)
+    tree_func.button_cb = function(_, but, pressed, x, y, status)
 
         if but == 51 and pressed == 0 then --right
 
             local mnu = iup.menu
             {
-              iup.submenu
-              {
-                iup.menu
+                iup.submenu
                 {
-                  iup.item{title="Order",value=Iif(_sort == "order", "ON", "OFF"),action=Functions_SortByOrder},
-                  iup.item{title="Name",value=Iif(_sort == "name", "ON", "OFF"),action=Functions_SortByName}
-                }
-                ;title="Sort By"
-              },
-              iup.item{title="Show Parameters",value=Iif(_show_params, "ON", "OFF"),action=Functions_ToggleParams},
-              iup.item{title="Group By Flags",value=Iif(_group_by_flags, "ON", "OFF"),action=Functions_ToggleGroup},
-              iup.item{title="Print",action=Functions_Print},
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+                    iup.menu
+                    {
+                        iup.item{title = "Order", value = Iif(_sort == "order", "ON", "OFF"), action = Functions_SortByOrder},
+                        iup.item{title = "Name", value = Iif(_sort == "name", "ON", "OFF"), action = Functions_SortByName}
+                    }
+                    ;title = "Sort By"
+                },
+                iup.item{title = "Show Parameters", value = Iif(_show_params, "ON", "OFF"), action = Functions_ToggleParams},
+                iup.item{title = "Group By Flags", value = Iif(_group_by_flags, "ON", "OFF"), action = Functions_ToggleGroup},
+                iup.item{title = "Print", action = Functions_Print},
+            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
         elseif but == 49 and iup.isdouble(status) then --dbl left
             line = Functions_GotoLine()
         end
@@ -915,24 +915,24 @@ local function Finc_Init()
             iup.PassFocus()
             line = nil
         end
-    end)
-    tree_func.k_any = (function(_,number)
+    end
+    tree_func.k_any = function(_, number)
         if number == 13 then
             Functions_GotoLine()
             iup.PassFocus()
         elseif number == 65307 then
             iup.PassFocus()
         end
-    end)
-    tree_func.branchopen_cb = function(_,number)
+    end
+    tree_func.branchopen_cb = function(h, number)
         layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'EXPANDED'
         SaveLayoutToProp()
     end
-    tree_func.branchclose_cb = function(_,number)
+    tree_func.branchclose_cb = function(h, number)
+        if h.value == '0' then return - 1 end
         layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'COLLAPSED'
         SaveLayoutToProp()
     end
-    tree_func.branchclose_cb = function(h) if h.value=='0' then return -1 end end
     iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
 
     SideBar_Plugins.functions = {   -- iup.vbox{   };
@@ -952,7 +952,7 @@ end
 return {
     title = 'Functions',
     code = 'functions',
-    sidebar = Finc_Init,
+    sidebar = Func_Init,
 }
 
 

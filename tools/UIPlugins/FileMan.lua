@@ -39,29 +39,15 @@ function GetExtImage(strName)
     end
 end
 
+function FILEMAN.FullPath()
+    local lin = list_dir.marked:sub(2):find("1")
+    return current_path..list_dir:getcell(lin, 2)
+end
+
 function FILEMAN.RelativePath(sep)
     local lin = list_dir.marked:sub(2):find("1")
     local fName = list_dir:getcell(lin, 2)
-    local eDir = props["FileDir"]..'\\'
-    local sRet
-    if eDir == current_path then
-        sRet = fName
-    elseif eDir:find('^'..current_path) then
-        sRet = eDir:gsub('^'..current_path, ''):gsub('[^\\]+', "...")..fName
-    elseif current_path:find('^'..eDir) then
-        sRet = current_path:gsub('^'..eDir, '')..fName
-    else
-        local strBeg = ''
-        for subpath in current_path:gmatch('[^\\]+') do
-            if not (eDir:find(strBeg..subpath..'\\', 1, true) == 1) then break end
-            strBeg = strBeg..subpath..'\\'
-        end
-        if sRet ~= '' then
-        sRet = eDir:sub(#strBeg + 1):gsub('[^\\]+', "...")..current_path:sub(#strBeg + 1)..fName
-        else
-            sRet = current_path..fName
-        end
-    end
+    local sRet = CORE.RelativePath(current_path)..fName
     if sep and type(sep) == 'string' then sRet = sRet:gsub('\\', sep) end
     return sRet
 end

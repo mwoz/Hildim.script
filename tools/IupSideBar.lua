@@ -574,7 +574,7 @@ for p in str:gmatch('[^¦]+') do
         if pI.key then t.key = pI.key end
         t.action = function() dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p).run() end
 
-        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools¦xxx', t)
+        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools¦Utils¦xxx', t)
     end
 end
 
