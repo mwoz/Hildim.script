@@ -144,9 +144,34 @@ local function init()
     web = iup.webbrowser{}
 
     CreateLuaCOM(web)
+
     iup.SetAttribute(web, "TOPMARGIN", 50)
     --iup.SetAttribute(web, "INVOKEFLAG", 268435456)
     iup.SetAttribute(web, "INVOKEFLAG", 400)
+
+    function web:navigate_cb(url)
+        if url:find('^about:') then
+            url = url:gsub('^about:', props['FileDir']..'\\')
+            local fName, strAnc
+            if url:find('#') then
+                _, _, fName, strAnc = url:find('(.-)#([^#]*)')
+            else
+                fName = url
+                strAnc = ''
+            end
+            while fName:find('[^\\]+\\%.%.%.\\') do
+                fName = fName:gsub('[^\\]+\\%.%.%.\\', '')
+            end
+
+            scite.Open(fName)
+            if strAnc ~= '' then
+                local s = editor:findtext('<a[^<>]+name="'..strAnc..'"', SCFIND_REGEXP, 0, editor.Length)
+                if s then editor:SetSel(s, s + 5) end
+            end
+            iup.PassFocus()
+        end
+        return iup.IGNORE
+    end
 
     AddEventHandler("OnUpdateUI", OnUpdateUI_local)
     AddEventHandler("OnSwitchFile", onSwitchLocal)
