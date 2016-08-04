@@ -104,7 +104,7 @@ local function FindNext(h)
     else SetInfo('', '') end
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
-    if Ctrl('tabFinrRepl') then PostAction() end
+    if Ctrl('tabFindRepl').valuepos == '0' then PostAction() end
 end
 
 local function ReplaceOnce(h)
@@ -117,7 +117,6 @@ local function ReplaceOnce(h)
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
-    PostAction()
 end
 
 local function MarkAll(h)
@@ -126,7 +125,6 @@ local function MarkAll(h)
     SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     iup.PassFocus()
-    PostAction()
 end
 
 local function ClearMark(h)
@@ -244,7 +242,7 @@ local function GoToMarkUp()
 end
 
 local function SetStaticControls()
-    local notInFiles = (Ctrl("tabFinrRepl").valuepos ~= '2')
+    local notInFiles = (Ctrl("tabFindRepl").valuepos ~= '2')
     Ctrl("numStyle").active = Iif(Ctrl("chkInStyle").value == 'ON' and notInFiles, 'YES', 'NO')
     Ctrl("chkInStyle").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("chkWrapFind").active = Iif(notInFiles, 'YES', 'NO')
@@ -263,7 +261,7 @@ local function onMapMColorList(h)
 end
 
 local function DefaultAction()
-    local nT = Ctrl("tabFinrRepl").valuepos
+    local nT = Ctrl("tabFindRepl").valuepos
     if nT == '0' then FindNext()
     elseif nT == '1' then ReplaceOnce()
     elseif nT == '2' then  FindInFiles()
@@ -283,7 +281,7 @@ end
 
 --перехватчики команд меню
 local function ActivateFind_l(nTab)
-    Ctrl("tabFinrRepl").valuepos = nTab
+    Ctrl("tabFindRepl").valuepos = nTab
 
     local wnd = editor
     if output.Focus then wnd = output
@@ -692,7 +690,7 @@ local function create_dialog_FindReplace()
     ["tabtitle2"] = "Найти в файлах",
     ["tabtitle3"] = "Метки",
     canfocus  = "NO",
-    name = "tabFinrRepl",
+    name = "tabFindRepl",
     tabchange_cb = SetStaticControls,
 
   }
@@ -856,7 +854,7 @@ local function Init()
         iup.Insert(hboxPane, iup.GetDialogChild(oDeattFnd, "findrepl_title_btnattach"), pin)
     end
 
-    Ctrl('tabFinrRepl').rightclick_cb = (function()
+    Ctrl('tabFindRepl').rightclick_cb = (function()
         menuhandler:PopUp('MainWindowMenu¦View¦findrepl')
     end)
 

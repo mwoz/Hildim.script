@@ -638,13 +638,11 @@ end
 
 local function EnrichFromInheritors(obj_names, inh_table)
     local tblobj = {}
-    if inh_table then
-        for i = 1, #obj_names do
-            tblobj[obj_names[i][1]:upper()] = true
-            if inh_table[obj_names[i][1]] then
-                for j = 1,  #inh_table[obj_names[i][1]] do
-                    tblobj[inh_table[obj_names[i][1]][j]:upper()] = true
-                end
+    for i = 1, #obj_names do
+        tblobj[obj_names[i][1]:upper()] = true
+        if inh_table and inh_table[obj_names[i][1]] then
+            for j = 1,  #inh_table[obj_names[i][1]] do
+                tblobj[inh_table[obj_names[i][1]][j]:upper()] = true
             end
         end
     end
@@ -1131,6 +1129,7 @@ function ShowListManualy()
         ShowListManualySql()
         return
     end
+
     if not isXmlLine() then pasteFromXml = false end
 	if get_api == true then
 		ReCreateStructures()
@@ -1150,8 +1149,8 @@ function ShowListManualy()
     end
     current_poslst = editor:WordStartPosition(current_pos)
     wordpart = editor:textrange(current_poslst,current_pos)
-    char = editor:textrange(current_poslst-1,current_poslst)
-    if string.find(char,autocom_chars) then
+    char = editor:textrange(current_poslst - 1, current_poslst)
+    if string.find(char, autocom_chars) then
         tmpPos=current_poslst
         RunAutocomplete(char,current_poslst,wordpart)
         current_poslst=tmpPos

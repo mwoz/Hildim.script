@@ -2,7 +2,6 @@
 ----------------------------------------------------------
 -- tab0:memo_path   Path and Mask
 ----------------------------------------------------------
-dofile (props["SciteDefaultHome"].."\\tools\\Etc\\precompiller.lua")
 
 local txt_Template
 local txt_BaseNameSuffix
@@ -169,6 +168,26 @@ local function OnSwitch()
 end
 
 local function Init(h)
+
+    TEMPLATES = {}
+    dofile (props["SciteDefaultHome"].."\\tools\\Etc\\precompiller.lua")
+    local SPS = lpeg.S'\n \t\r\f'^0
+    local XDIG = lpeg.R'09' + lpeg.R'af' + lpeg.R'AF'
+    local CLR = lpeg.P'<' * (lpeg.P'control' + lpeg.P'frame') * (1 - lpeg.S'<>'- lpeg.P'color')^1 * lpeg.P'color' * SPS * "=" * SPS * '"' * lpeg.P'#'^- 1 * lpeg.C(XDIG * XDIG * XDIG * XDIG * XDIG * XDIG) *lpeg.P'"'
+    local tmPlClr = lpeg.Ct(lpeg.P{CLR + 1 * lpeg.V(1)}^1)
+    local NAME = lpeg.P'<control' * (1 - lpeg.S'<>'- lpeg.P'name')^1 * lpeg.P'name' * SPS * "=" * SPS * '"' * lpeg.C((1 - lpeg.S'"<>')^1) * lpeg.P'"'
+    local tmPlCtrl = lpeg.Ct(lpeg.P{NAME + 1 * lpeg.V(1)}^1)
+
+    function TEMPLATES.colors()
+        local tClr = tmPlClr:match(editor:GetText(), 1)
+        return table.concat(tClr or {}, '|')
+    end
+
+    function TEMPLATES.controls()
+        local tClr = tmPlCtrl:match(editor:GetText(), 1)
+        return table.concat(tClr or {}, '|')
+    end
+
     ToolBar_obj = h
 	if _G.iuprops['precompiller.radiususername'] == nil then _G.iuprops['precompiller.radiususername'] = '' end
 	txt_RadiusUserName = iup.text{expand='NO',size='70x0', tip='Имя пользователя Radius\nЕсли у пользователя открыта форма DebugTools,\nто собранный шаблон перезарузится'}

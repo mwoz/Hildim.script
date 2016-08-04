@@ -668,12 +668,14 @@ iup.scitedetachbox = function(t)
             dtb.Dialog:hide()
             _G.iuprops[dtb.sciteid..'.win'] = '2'
             iup.PassFocus()
+            if statusBtn then statusBtn.visible = 'YES' end
         end
     end
     dtb.ShowDialog = function()
         if dtb.Dialog and (_G.iuprops[dtb.sciteid..'.win'] or '0') == '2' then
             _G.iuprops[dtb.sciteid..'.win'] = '1'
             iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
+            if statusBtn then statusBtn.visible = 'NO' end
         end
     end
     local function FindReplButCondition()
@@ -700,13 +702,14 @@ iup.scitedetachbox = function(t)
                 dtb.Split_h.barsize = "3"
             end
             dtb.Dialog = nil
+            if statusBtn then statusBtn.visible = 'NO' end
         end
     end
 
     cmd_Attach = function ()
         if get_scId()=="0" then return end
         dtb.Attach()
-        if statusBtn then statusBtn.visible = 'NO' end
+
     end
 
     local function cmd_PopUp()

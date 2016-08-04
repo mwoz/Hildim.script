@@ -1,5 +1,6 @@
 require "mblua"
 require("LuaXml")
+require("comhelper")
 
 local AD_Char = 129
 local AD_VarChar = 200
@@ -42,11 +43,11 @@ local function AtriumCompare(strPath, strContent)
     local _, tmppath=shell.exec('CMD /c set TEMP',nil,true,true)
     tmppath=string.sub(tmppath,6,string.len(tmppath)-2)..'\\atrtmp'
     local f = io.open(tmppath, "w")
-    strContent = strContent:gsub('\r\n','\n')
+    strContent = strContent:gsub('\r\n','\n'):to_utf8(1251)
     f:write(strContent)
     f:flush()
     f:close()
-    cmd=string.gsub(string.gsub(props['vsscompare'],'%%bname','"'..strPath..'"'),'%%yname','"'..tmppath..'"')
+    cmd = string.gsub(string.gsub(props['vsscompare'], '%%bname', '"'..strPath..'"'), '%%yname', '"'..tmppath..'"')
     shell.exec(cmd)
 end
 
@@ -396,8 +397,25 @@ end
 
 function atrium_RunXml()
     if btnRun.active == 'NO' then return end
+    local nline, npos, msg = comhelper.CheckXml()
+
+    if nline ~= nil then
+        print(props["FilePath"].." ("..(nline)..","..npos..")")
+        print(msg)
+        return
+    end
+
     local t_xml = xml.eval(editor:GetText():gsub('^<[?].->\r?\n?',''))
     local strObjType = t_xml[0]
+
+    if strObjType == 'Form' then
+        local er, erCl, erDesc = comhelper.CheckScript(TEMPLATES.GetClearVbs(), true)
+        if er then
+            print(props['FilePath']..'('..er..', '..erCl..') '..erDesc)
+            return
+        end
+    end
+
     if strObjType == 'Template' then
         ApplyMetadata(editor:GetText():gsub('^<[?].->\r?\n?',''))
     elseif strObjType == 'Form' and t_xml['type'] == 'Report' then

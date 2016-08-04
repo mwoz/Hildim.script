@@ -1,8 +1,8 @@
 require "mblua"
 require 'shell'
+require 'comhelper'
 
 local isText = false
-local strStartBasic, strEndBasic
 local precomp_tblFiles = {}
 props["precomp_strRootDir"] = ""
 local precomp_tblAddedtemplates
@@ -104,6 +104,8 @@ local function RereadTemplateFiles()
 end
 
 local function ParseLine(strLine)
+    local strStartBasic = "<!%[CDATA%[''%]"
+    local strEndBasic = "]]>"
     local s,e
 	if isText then
 		s,e = string.find(strLine,strEndBasic,1,true)
@@ -118,6 +120,20 @@ local function ParseLine(strLine)
 		if nil~= s then isText = true end
 		return "'"..strLine
 	end
+end
+
+function TEMPLATES.GetClearVbs()
+
+    local i = 0
+    local lns = {}
+    while true do
+        local ttt
+        local f, g = editor:GetLine(i, ttt)
+        i = i + 1
+        if f == nil then break end
+        table.insert(lns, ParseLine(f))
+    end
+    return table.concat(lns)
 end
 
 local function OnSaveCForm()
@@ -358,7 +374,7 @@ end
 function precomp_PreCompileTemplate()
 --require( "luacom" )
     if editor.Lexer  ~= SCLEX_FORMENJINE then return end
-    local strExt = props["FileExt"]:sub(1, XEXT:len()):lower()   --таким образом можем компилить шаблоны .xml1 и пр - которые не будут подхватыватся обычным сборщиком
+    local strExt = props["FileExt"]:sub(1, XEXT:len()):lower()   --таким образом можем компилить шаблоны .xml1 и пр - которые не будут подхватываться обычным сборщиком
     if strExt ~= XEXT and props["FileExt"]:lower() ~= INCL and props["FileExt"]:lower() ~= 'cform' then return end
     local vbOk = false
     local strXml
@@ -374,23 +390,8 @@ function precomp_PreCompileTemplate()
         end
     end
 
-    strStartBasic = "<!%[CDATA%[''%]"
-    strEndBasic = "]]>"
-
-    local i = 0
-    local tmpF = io.output(props['sys.calcsybase.dir']..'\\tmp.vbs')
-    while true do
-        local ttt
-        local f,g = editor:GetLine(i,ttt)
-        i = i+1
-        if f == nil then break end
-        str = string.gsub(ParseLine(f),'\n','')
-
-        tmpF:write(str)
-    end
-    tmpF:close()
-    er,strOut = shell.exec('cscript /nologo "'..props['sys.calcsybase.dir']..'\\tmp.vbs"', nil, true, true)
-    if er == 0 then
+    local er, erCl, erDesc = comhelper.CheckScript(TEMPLATES.GetClearVbs(), true)
+    if not er then
         strOut = ">>>Check VB  OK: "..props['FilePath']
         if props['FilePath'] == props["SciteDefaultHome"]..'\\data\\USERSCRIPT.'..INCL then
             local msg = mblua.CreateMessage()
@@ -409,7 +410,7 @@ function precomp_PreCompileTemplate()
             vbOk = true
         end
     else
-        strOut = string.gsub(string.gsub(strOut,(props['sys.calcsybase.dir']..'\\tmp.vbs'):gsub('%p','%%%1'),props['FilePath']),'\n','')
+        strOut = props['FilePath']..'('..er..', '..erCl..') '..erDesc
     end
     print( strOut )
     --Проверка XML
@@ -425,7 +426,7 @@ function precomp_PreCompileTemplate()
             j = 0
         end
 
-        local nline,npos, msg = mblua.CheckXML(strXml)
+        local nline, npos, msg = comhelper.CheckXml(strXml)
 
         if nline ~= nil then
             print(props["FilePath"].." ("..(nline+j)..","..npos..")")
