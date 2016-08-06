@@ -88,5 +88,10 @@ end
 
 return {
     title = 'Format CSS',
-    run = Run
+    run = Run,
+    description=[[Приводит выделенную таблицу стилей к виду:
+tag {
+	prop: value;	/* comment */
+	prop: value;	/* comment */
+}]]
 }

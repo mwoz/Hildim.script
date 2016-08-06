@@ -135,6 +135,7 @@ return {
     title = 'Шаблоны M4',
     code = 'm4',
     toolbar = Init,
+    description = [[Компиляция шаблонов M4]]
 }
 
 

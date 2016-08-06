@@ -270,7 +270,6 @@ _G.sys_Menus.MainWindowMenu = {
 		}},
 		{'Match &Brace', ru = 'Найти парную скобку', key = 'Ctrl+E', action = IDM_MATCHBRACE},
 		{'Select t&o Brace', ru = 'Выделить до парноий скобки', key = 'Ctrl+Shift+E', action = IDM_SELECTTOBRACE},
-		{'Sorting of lines A… z / z… A', ru = 'Сортировать строки A… z / z… A', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SortText.lua')"},
 		{'s2', separator = 1},
 		{'S&how Calltip', ru = 'Показать подсказку', key = 'Ctrl+?', action = function() ShowTipManualy() end, image = 'ui_tooltip_balloon_bottom_µ',},
 		-- {'Complete S&ymbol', ru = 'Завершить слово(из API и текста)', key = 'Ctrl+I', action = IDM_COMPLETE},

@@ -719,5 +719,6 @@ return {
     title = 'Files  and Favorites',
     code = 'fileman',
     sidebar = FileManTab_Init,
+    description = [[Встроенный файловый менеджер]]
 }
 

@@ -499,7 +499,9 @@ end
 return {
     title = 'Abbreviations',
     code = 'abbreviations',
-    sidebar = Iif( ('¦'..(_G.iuprops["settings.toolbars.layout"] or '')..'¦'):find('¦Abbrev.lua¦'), nil, Tab_Init),
-    toolbar = Iif( ('¦'..(_G.iuprops["settings.user.rightbar"] or '')..'¦'..(_G.iuprops["settings.user.leftbar"] or '')..'¦'):find('¦Abbrev.lua¦'),  nil, ToolBar_Init)
-
+    sidebar = Tab_Init,
+    toolbar = ToolBar_Init,
+    description = [[Список сокращений. По нажатию горячей клавиши
+перед курсором ищется сокращение из списка
+и заменяется на соответствующий фрагмент текста]]
 }

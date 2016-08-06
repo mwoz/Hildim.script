@@ -328,6 +328,8 @@ return {
     title = 'Html Preview',
     code = 'htmlpreview',
     sidebar = Sidebar_Init,
-    toolbar = Toolbar_Init
+    toolbar = Toolbar_Init,
+    description = [[Предпросмотр HTML кода по мере набора
+Дополнительные инструменты по работе с HTML]]
 
 }

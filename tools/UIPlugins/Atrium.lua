@@ -986,4 +986,6 @@ return {
     title = 'Atrium',
     code = 'atrium',
     sidebar = FindTab_Init,
+    description = [[–абота с метаданными и кастомными
+шаблонами Atrium]]
 }

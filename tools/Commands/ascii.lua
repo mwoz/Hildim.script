@@ -17,5 +17,6 @@ end
 
 return {
     title = 'char HEX  DEC',
-    run = Run
+    run = Run,
+    description =[[Трассировка выделенного текста в коды ASCII]]
 }

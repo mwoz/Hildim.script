@@ -235,7 +235,7 @@ return {
     title = 'Bookmarks',
     code = 'bookmark',
     sidebar = Tab_Init,
-    sidebar = Iif( ('¦'..(_G.iuprops["settings.toolbars.layout"] or '')..'¦'):find('¦Bookmark.lua¦'), nil, Tab_Init),
-    toolbar = Iif( ('¦'..(_G.iuprops["settings.user.rightbar"] or '')..'¦'..(_G.iuprops["settings.user.leftbar"] or '')..'¦'):find('¦Bookmark.lua¦'),  nil, ToolBar_Init)
+    toolbar = ToolBar_Init,
+    description = [[Ñïèñîê çàêëàäîê â îòêğûòûõ ôàéëàõ]]
 
 }

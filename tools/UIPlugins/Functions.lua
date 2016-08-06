@@ -953,6 +953,7 @@ return {
     title = 'Functions',
     code = 'functions',
     sidebar = Func_Init,
+    description = [[Дерево функций открытого файла]]
 }
 
 

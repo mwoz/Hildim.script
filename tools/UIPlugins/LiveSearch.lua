@@ -119,6 +119,8 @@ return {
     title = 'Live Search',
     code = 'livesearch',
     toolbar = Init,
+    description = [[ѕоиск текста по мере набора с выводом
+найденных строк в результатах поиска]]
 }
 
 

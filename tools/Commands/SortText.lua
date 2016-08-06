@@ -3,14 +3,6 @@ SortText.lua
 Authors: Tugarinov Sergey, mozersЩ, Tymur Gubayev
 version 2.1.1
 ------------------------------------------------------
-Sorting selected lines_tbl alphabetically and vice versa
-—ортировка выделенных строк по алфавиту и наоборот
-
-Connection:
-	Set in a file .properties:
-		command.name.37.*=Sorting of lines AЕ z / zЕ A
-		command.37.*=dofile $(SciteDefaultHome)\tools\SortText.lua
-		command.mode.37.*=subsystem:lua,savebefore:no
 --]]--------------------------------------------------
 local function Run()
     local lines_tbl = {} -- “аблица со строками нашего текста
@@ -69,6 +61,9 @@ local function Run()
 end
 
 return {
-    title = 'Sort Text',
-    run = Run
+    title = '—ортировать строки A...z/z...A',
+    run = Run,
+    path = 'Edit¶s2',
+    description = [[Sorting selected lines_tbl alphabetically and vice versa
+—ортировка выделенных строк по алфавиту и наоборот]]
 }

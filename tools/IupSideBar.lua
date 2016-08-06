@@ -219,33 +219,34 @@ local function  CreateBox()
                 table.insert(tCur, pname)
             end
         end
-
         local strTabs = 'return function(P) return{\n'
         for i = 1, #tSide do
             tCur = tSide[i]
-            local pI = dofile(defpath..tCur[1])
-            pI.sidebar()
-            local tabName = tCur.title
-            if #tCur == 1 then
-                strTabs = strTabs..'P{"'..pI.code..'", tabtitle = "'..tabName..'"},\n'
-            else
-                local strPrev = piCode(pI)
-                local bfixedheigth = pI.fixedheigth
-                for j = 2, #tCur do
-                    pI = dofile(defpath..tCur[j])
-                    pI.sidebar()
-                    strPrev = 'P{'..strPrev..', '..piCode(pI)..', '
-                    if bfixedheigth or pI.fixedheigth then
-                        strPrev = strPrev..'type="VBOX", '
-                    else
-                        strPrev = strPrev..' orientation="HORIZONTAL", type="SPLIT", name = "split'..pI.code..'", '
+            if tCur[1] then
+                local pI = dofile(defpath..tCur[1])
+                pI.sidebar()
+                local tabName = tCur.title
+                if #tCur == 1 then
+                    strTabs = strTabs..'P{"'..pI.code..'", tabtitle = "'..tabName..'"},\n'
+                else
+                    local strPrev = piCode(pI)
+                    local bfixedheigth = pI.fixedheigth
+                    for j = 2, #tCur do
+                        pI = dofile(defpath..tCur[j])
+                        pI.sidebar()
+                        strPrev = 'P{'..strPrev..', '..piCode(pI)..', '
+                        if bfixedheigth or pI.fixedheigth then
+                            strPrev = strPrev..'type="VBOX", '
+                        else
+                            strPrev = strPrev..' orientation="HORIZONTAL", type="SPLIT", name = "split'..pI.code..'", '
+                        end
+                        if j == #tCur then
+                            strPrev = strPrev..'tabtitle = "'..tabName..'", '
+                        end
+                        strPrev = strPrev..'}'
                     end
-                    if j == #tCur then
-                        strPrev = strPrev..'tabtitle = "'..tabName..'", '
-                    end
-                    strPrev = strPrev..'}'
+                    strTabs = strTabs..strPrev..',\n'
                 end
-                strTabs = strTabs..strPrev..',\n'
             end
         end
         --print(strTabs.."} end")

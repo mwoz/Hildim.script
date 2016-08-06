@@ -390,8 +390,23 @@ function precomp_PreCompileTemplate()
         end
     end
 
-    local er, erCl, erDesc = comhelper.CheckScript(TEMPLATES.GetClearVbs(), true)
-    if not er then
+    -- local er, erCl, erDesc = comhelper.CheckScript(TEMPLATES.GetClearVbs(), true)
+    -- if not er then
+
+    local i = 0
+    local tmpF = io.output(props['sys.calcsybase.dir']..'\\tmp.vbs')
+    while true do
+        local ttt
+        local f,g = editor:GetLine(i,ttt)
+        i = i+1
+        if f == nil then break end
+        str = string.gsub(ParseLine(f),'\n','')
+
+        tmpF:write(str)
+    end
+    tmpF:close()
+    er,strOut = shell.exec('cscript /nologo "'..props['sys.calcsybase.dir']..'\\tmp.vbs"', nil, true, true)
+    if er == 0 then
         strOut = ">>>Check VB  OK: "..props['FilePath']
         if props['FilePath'] == props["SciteDefaultHome"]..'\\data\\USERSCRIPT.'..INCL then
             local msg = mblua.CreateMessage()
@@ -410,7 +425,8 @@ function precomp_PreCompileTemplate()
             vbOk = true
         end
     else
-        strOut = props['FilePath']..'('..er..', '..erCl..') '..erDesc
+        -- strOut = props['FilePath']..'('..er..', '..erCl..') '..erDesc
+        strOut = string.gsub(string.gsub(strOut,(props['sys.calcsybase.dir']..'\\tmp.vbs'):gsub('%p','%%%1'),props['FilePath']),'\n','')
     end
     print( strOut )
     --Проверка XML

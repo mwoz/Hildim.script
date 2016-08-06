@@ -350,5 +350,7 @@ return {
     title = 'Solution',
     code = 'solution',
     sidebar = Solution_Init,
+    description = [[Дерево проектов. Позволяет сохранять закладки
+к файлам в виде дерева]]
 }
 

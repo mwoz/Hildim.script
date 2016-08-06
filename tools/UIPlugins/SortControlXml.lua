@@ -312,6 +312,7 @@ local function Init()
     )
 end
 return {
-    title = '”пор€дочивание тегов, перевод ключевых слов в стандартный кейс - FormEnjine',
+    title = '”пор€дочивание тегов',
     hidden = Init,
+    description = [[”пор€дочивание тегов, перевод ключевых слов в стандартный кейс - FormEnjine']]
 }

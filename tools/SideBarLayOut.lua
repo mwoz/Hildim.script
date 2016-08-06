@@ -6,14 +6,29 @@ local function Show()
 
     local list_lex, dlg, bBlockReset, tree_right, tree_left, tree_plugins
     local btn_ok = iup.button  {title="OK"}
-    local btn_esc = iup.button  {title="Cancel"}
+    local btn_esc = iup.button  {title = "Cancel"}
+    local clrUsed = '255 0 0'
+    local tTips = {}
     iup.SetHandle("SIDEBARSETT_BTN_OK",btn_ok)
     iup.SetHandle("SIDEBARSETT_BTN_ESC",btn_esc)
     btn_esc.action = function()
         dlg:hide()
         dlg:postdestroy()
     end
-
+    local function CheckInstall(strUi, bUnInstoll)
+        local tPoints = {["settings.toolbars.layout"] = "Tool Bar",
+            ["settings.hidden.plugins"] = "Hidden Plugins",
+        }
+        for s, m in pairs(tPoints) do
+            if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¦') then
+                if bUnInstoll then
+                    local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
+                    _G.iuprops[s] = v
+                end
+                return m
+            end
+        end
+    end
     local function ConvertXY2WndPos(h, x, y)
         local _,_,wx,wy = h.position:find('(%d*),(%d*)')
         wx = tonumber(wx); wy = tonumber(wy)
@@ -30,7 +45,12 @@ local function Show()
         end
     end
 
-    tree_plugins = iup.text{size='100x'}
+    local function onTip(h, x, y)
+        local l = iup.ConvertXYToPos(h, x, y)
+        local t = tTips[h:GetUserId(l)]
+        if t then h.tip = t
+        else h.tip = "" end
+    end
 
     btn_ok.action = function()
         local function SaveTree(h)
@@ -43,6 +63,7 @@ local function Show()
                     end
                 else
                     str = str..h:GetUserId(i)
+                    CheckInstall(h:GetUserId(i), true)
                 end
 
             end
@@ -74,16 +95,20 @@ local function Show()
                         iup.SetAttributeId(hTarget, "STATE", idTarget, 'COLLAPSED')
                         iup.SetAttributeId(hTarget, "INSERTBRANCH", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
                     end
-                    for i = 1,  iup.GetAttribute(h, "TOTALCHILDCOUNT", idSrc) do
+                    for i = 1, iup.GetAttribute(h, "TOTALCHILDCOUNT", idSrc) do
                         iup.SetAttributeId(hTarget, "ADDLEAF", hTarget.lastaddnode or 0, iup.GetAttributeId(h, 'TITLE', idSrc + i))
                         hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc + i))
                     end
                     iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
                 else
+                    local pPlase = CheckInstall(h:GetUserId(idSrc), false)
                     if idTarget == 0 and iup.GetAttributeId(hTarget, "KIND", 1) == 'BRANCH' then return end
 
                     iup.SetAttributeId(hTarget, "ADDLEAF", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
                     hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc))
+                    if pPlase and h == tree_plugins then
+                        print("Plugin '"..h:GetUserId(idSrc).."' is already connected to "..pPlase..". Will be reconnected if you continue")
+                    end
                     iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
                 end
             end
@@ -105,7 +130,7 @@ local function Show()
     end
 
     local function dragdrop_cb(h,drag_id, drop_id, isshift, iscontrol)
-        if iscontrol == 1 or h == tree_plugins then return -1 end
+        if iscontrol == 1 or h == tree_plugins  or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return -1 end
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0
             local dragCount = tonumber(iup.GetAttributeId(h, 'CHILDCOUNT', drag_id))
@@ -131,11 +156,11 @@ local function Show()
         return -4
     end
 
-    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return -1 end}
+    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return -1 end, tips_cb = onTip, tip = 'xxx'}
 
-    tree_right = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb}
+    tree_right = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb, tips_cb = onTip, tip = 'xxx'}
 
-    tree_left = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb}
+    tree_left = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb, tips_cb = onTip, tip = 'xxx'}
 
     local vbox = iup.vbox{
         iup.hbox{tree_left, iup.vbox{tree_plugins},tree_right};
@@ -189,6 +214,7 @@ local function Show()
                 end
                 if bFound then
                     local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+                    if pI then tTips[p] = pI.description end
                     iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
                     k = k + 1
                     h:SetUserId(k, pname)
@@ -202,10 +228,14 @@ local function Show()
 
     for i = 1, #table_dir do
         local pI = dofile(defpath..table_dir[i].name)
+        if pI then tTips[table_dir[i].name] = pI.description end
         if pI and pI.sidebar then
             iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
             j = j + 1
             tree_plugins:SetUserId(j, table_dir[i].name)
+            if CheckInstall(table_dir[i].name, false) then
+                iup.SetAttributeId(tree_plugins, "COLOR", j, clrUsed)
+            end
         end
     end
 

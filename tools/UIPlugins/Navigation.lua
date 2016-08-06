@@ -198,7 +198,8 @@ end
 return {
     title = 'Navigation',
     code = 'navigation',
-    sidebar = Iif( ('¦'..(_G.iuprops["settings.toolbars.layout"] or '')..'¦'):find('¦Navigation.lua¦'), nil, Tab_Init),
-    toolbar = Iif( ('¦'..(_G.iuprops["settings.user.rightbar"] or '')..'¦'..(_G.iuprops["settings.user.leftbar"] or '')..'¦'):find('¦Navigation.lua¦'),  nil, ToolBar_Init)
-
+    sidebar = Tab_Init,
+    toolbar = ToolBar_Init,
+    description = [[Ведет историю ваших перемещений по открытым
+файлам и позволяет быстро перемещаться по ней]]
 }

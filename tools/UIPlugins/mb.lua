@@ -161,5 +161,6 @@ return {
     title = 'Message Bas',
     code = 'mb',
     toolbar = Init,
+    description = [[Подключение к Message Bas Systematica]]
 }
 

@@ -38,5 +38,6 @@ end
 
 return {
     title = 'Indent Tab To Space',
-    run = Run
+    run = Run,
+    description = [[Замена отступов в виде табуляторов на пробелы и наоборот]]
 }

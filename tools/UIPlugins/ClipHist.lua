@@ -275,7 +275,10 @@ end
 return {
     title = 'Clipboard History',
     code = 'cliphistory',
-    sidebar = Iif( ('¦'..(_G.iuprops["settings.toolbars.layout"] or '')..'¦'):find('¦ClipHist.lua¦'), nil, Sidebar_Init),
-    toolbar = Iif( ('¦'..(_G.iuprops["settings.user.rightbar"] or '')..'¦'..(_G.iuprops["settings.user.leftbar"] or '')..'¦'):find('¦ClipHist.lua¦'),  nil, Toolbar_Init)
+    sidebar = Sidebar_Init,
+    toolbar = Toolbar_Init,
+    description = [[Автоматическое запоминание текстовых данных
+из буфера обмена в стек с возможностью их последующей
+быстой вставки в текст]]
 
 }
