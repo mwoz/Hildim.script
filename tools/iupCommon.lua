@@ -1019,11 +1019,11 @@ function Splash_Screen()
     if props['iuptoolbar.restarted'] == '1' then return end
     dlg_SPLASH = iup.scitedialog{iup.hbox{
     iup.label{
-      padding = "30x30",
-      title = "!!!WAIT!!!",
-      --image = "d:\\Users\\Voznesenskiy.SYSTEMATICA\\Pictures\\i1.bmp",
-      font = "Arial, 33", background= "IMAGE_search";
-    }, background= "IMAGE_search";
+      padding = "5x5",
+      --title = "!!!WAIT!!!",
+      image = props["SciteDefaultHome"].."\\tools\\HildiM.bmp",
+      font = "Arial, 33",
+    },
   }; maxbox="NO",minbox ="NO",resize ="NO", menubox = "NO", border = "NO",opacity= "123",
     sciteparent="SCITE", sciteid="splash", resize ="NO"}
     dlg_SPLASH.show_cb=(function(h,state)

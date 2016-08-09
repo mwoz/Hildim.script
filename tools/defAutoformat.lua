@@ -133,7 +133,7 @@ local function doIndentation(line, bSel)
                 editor.LineIndentation[line] = editor.LineIndentation[i] + (tonumber(props['indent.size$']))
                 editor.LineIndentation[line - 1] = editor.LineIndentation[i]
                 if editor.SelectionStart == editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) then editor:VCHome() end
-                if f0 == FoldLevel(nil, line + 1) then return else break end
+                if f0 <= FoldLevel(nil, line + 1) then return else break end
             end
         end
     end
@@ -191,6 +191,7 @@ AddEventHandler("OnChar", function(char)
     end
 end)
 
+local prevFold
 AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or (bModified == 0 and bSelection == 0) then return end
     if (_G.iuprops['autoformat.line'] or 0) == 1 then
@@ -201,26 +202,30 @@ AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
             editor:EndUndoAction()
             bNewLine = false
         elseif curFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) < FoldLevel(0) then
-            curFold = nil
             local curS = editor.SelectionStart
             local ls = editor:LineFromPosition(curS)
             local cL = FoldLevel(-1)
             local curI, curIPos = editor.LineIndentation[ls]
-
             for i = ls - 1, 0,- 1 do
                 if cL >= FoldLevel(ls - i) then
                     local newPos = curS - (curI - editor.LineIndentation[i])
                     editor.LineIndentation[ls] = editor.LineIndentation[i]
                     editor.SelectionStart = newPos
                     editor.SelectionEnd = newPos
+                    prevFold = curI
                     return
                 end
             end
+            curFold = nil
+            return
+        elseif prevFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) == FoldLevel(0) then
+            editor.LineIndentation[curLine] = prevFold
         elseif curLine and (curLine ~= editor:LineFromPosition(editor.SelectionEnd) or curLine ~= editor:LineFromPosition(editor.SelectionStart)) then
             if editor:LineFromPosition(editor.SelectionStart) == editor:LineFromPosition(editor.SelectionEnd) then FormatString(curLine) end
             curLine = nil
         end
         curFold = nil
+        prevFold = nil
     end
 end)
 AddEventHandler("OnSave", function() curLine = nil end)

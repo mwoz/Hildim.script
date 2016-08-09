@@ -398,11 +398,15 @@ local function OnChar_local(char)
 
 end
 
-local function OnUpdateUI_local()
+local prevFold
+local function OnUpdateUI_local(bModified, bSelection, flag)
+    if bModified == 0 and bSelection == 0 then return end
     if not editor.Focus then return end
     local s = editor.SelectionStart
     local e = editor.SelectionEnd
-    if iChangedLine > - 1 and s == e and (_G.iuprops['autoformat.line'] or 0) == 1 then
+    if prevFold and FoldLevel(-1) == FoldLevel(0) then
+        editor.LineIndentation[editor:LineFromPosition(editor.SelectionStart)] = prevFold
+    elseif iChangedLine > - 1 and s == e and (_G.iuprops['autoformat.line'] or 0) == 1 and editor.StyleAt[editor.SelectionStart - 1] == 13 then
         local l = editor:LineFromPosition(s)
         if l ~= iChangedLine then
             local iline = editor.FirstVisibleLine
@@ -411,30 +415,31 @@ local function OnUpdateUI_local()
             editor:SetSel(s, e)
             iChangedLine = -1
         elseif curFold and FoldLevel(-1) < FoldLevel(0) then
-                curFold = nil
-                local curS = editor.SelectionStart
-                local ls = editor:LineFromPosition(curS)
-                local cL = FoldLevel(-1)
-                local curI, curIPos = LineIndent(0) --print(ls, cL)
-                for i = ls - 1, 0,- 1 do
-                    --print(i, FoldLevel(ls - i))
-                    if cL >= FoldLevel(ls - i) then
-                        local newPos = curS - (curI - LineIndent(ls - i))
-                        editor.TargetStart = editor:PositionFromLine(ls)
-                        editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
-                        editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
-                        editor.SelectionStart = newPos
-                        editor.SelectionEnd = newPos
-                        return
-                    end
+            curFold = nil
+            local curS = editor.SelectionStart
+            local ls = editor:LineFromPosition(curS)
+            local cL = FoldLevel(-1)
+            local curI, curIPos = LineIndent(0) --print(ls, cL)
+            for i = ls - 1, 0,- 1 do
+                --print(i, FoldLevel(ls - i))
+                if cL >= FoldLevel(ls - i) then
+                    local newPos = curS - (curI - LineIndent(ls - i))
+                    editor.TargetStart = editor:PositionFromLine(ls)
+                    editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
+                    editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
+                    editor.SelectionStart = newPos
+                    editor.SelectionEnd = newPos
+                    prevFold = curI
+                    return
                 end
-
+            end
         end
     elseif iChangedLine > - 1 then
         if editor:LineFromPosition(s) ~= editor:LineFromPosition(e) then
             iChangedLine = -1
         end
     end
+    prevFold = nil
 end
 
 function IndentBlockUp()
@@ -541,9 +546,9 @@ AddEventHandler("OnChar", function(char)
         if OnChar_local(char) then return true end
     end
 end)
-AddEventHandler("OnUpdateUI", function()
+AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
     if cmpobj_GetFMDefault() == SCE_FM_VB_DEFAULT or editor.Lexer == SCLEX_VB then
-        OnUpdateUI_local()
+        OnUpdateUI_local(bModified, bSelection, flag)
     end
 end)
 AddEventHandler("OnSwitchFile", function() iChangedLine = -1 end)
