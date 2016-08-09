@@ -333,7 +333,7 @@ local function GetObjectNames(tableObj)
 end
 
 local function GetObjectNamesXml()
-    strLine = editor:textrange(editor:PositionFromLine(af_current_line), editor.SelectionStart)
+    strLine = editor:textrange(editor:PositionFromLine(af_current_line), editor:PositionFromLine(af_current_line + 1))
     local names ={}
     local _s, _e, s = string.find(strLine, ".+<([%w]+)")
     if _s ~= nil then

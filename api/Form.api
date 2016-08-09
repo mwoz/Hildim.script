@@ -732,7 +732,7 @@ cubectrl.SetRowBackColor(strRow, strColumn, color) Sets specified color as back 
 cubectrl.SetRowBoldFont(strRow, strColumn, bBold) Sets bold font flag for specified row/column. If strColumn is empty - bold font flag is set for whole row.
 cubectrl.Locked Get/Set property. Disables cube but without changing colors.
 cubectrl.CellPadding Set only property. Specifies top\bottom cell padding(px).
-cubectrl.ShowHeader Set only property. Show\Hide cube header.
+cubectrl.HeaderMode Get/set property. Modifies Cube header mode:\n"S" - Standart - (default) header with label. Filters, totals etc\n"N" - None - no header shown\n"T" - Thin - thin header just to allow columns resize(no label, totals, filters)
 cubectrl.ExtendRows Set only properties. If = true – rows are drawn to the end of cube window instead of end of last cell(last cell color for each row is used for drawing).
 cubectrl.SetRowTextColor(strRow, strColumn, color) Sets specified color as text color for specified row/column. If strColumn is empty - color is set for whole row.
 cubectrl.SetRowBackColor(strRow, strColumn, color) Sets specified color as back color for specified row/column. If strColumn is empty - color is set for whole row.
