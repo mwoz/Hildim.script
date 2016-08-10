@@ -1145,6 +1145,7 @@ udoc.BackColor
 udoc.Query
 udoc.ObjectType
 udoc.SetValueHookLow
+udoc.SearchParams Сабмессадж с парамтерами поиска
 
 app.CreateMessage
 app.Trace(strMsg)

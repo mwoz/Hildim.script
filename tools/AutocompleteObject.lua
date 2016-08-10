@@ -1,7 +1,7 @@
 --[[--------------------------------------------------
 ------------------------------------------------------
 Ввод разделителя, заданного в autocomplete.[lexer].start.characters
-вызывает список свойств и медодов объекта из соответствующего api файла
+вызывает список свойств и методов объекта из соответствующего api файла
 Ввод пробела или разделителя изменяют регистр символов в имени объекта в соответствии с записью в api файле
 (например "ucase" при вводе автоматически заменяется на "UCase")
 Внимание: В скрипте используется функция IsComment (обязательно подключение COMMON.lua)
@@ -764,7 +764,6 @@ end
 -- Вставляет выбранный из раскрывающегося списка метод в редактируемую строку
 local blockCT = false
 local function OnUserListSelection_local(tp, str)
-
     editor:BeginUndoAction()
     editor:SetSel(current_poslst, editor.CurrentPos)
     local fmDef = cmpobj_GetFMDefault()
@@ -775,7 +774,11 @@ local function OnUserListSelection_local(tp, str)
         end
         calltipinfo ={0}
         s = str:gsub(' .*', '')
-        editor:SetSel(editor.CurrentPos, editor.CurrentPos)
+        local sSt = editor.CurrentPos
+        for i = editor.CurrentPos - 1, editor:PositionFromLine(editor:LineFromPosition(editor.CurrentPos)), -1 do
+            if editor.CharAt[i] == 34 then sSt = i + 1 break end -- ["]  =   34
+        end
+        editor:SetSel(sSt, editor.CurrentPos)
     elseif pasteFromXml then
         s = str..'=""'
     elseif editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then

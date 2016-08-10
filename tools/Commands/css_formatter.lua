@@ -23,10 +23,10 @@ Set in a file .properties:
   css.format.sort.props=1
 --]]--------------------------------------------------
 local function Run()
-    local text = props["CurrentSelection"]
+    local text = editor:GetSelText()
     if text == '' then return end
     local t_style = {}
-
+  print(123)
     -- Create table of styles
     for tag, prop_value_comment in string.gmatch(text, "%s*([^{]-)%s*{(.-)}") do
         local t_props = {}

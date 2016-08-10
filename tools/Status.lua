@@ -19,7 +19,7 @@ local function ColorDlg()
     for c, _ in pairs(tc) do
         table.insert(tc2,c)
     end
-    local txtSample, clp, clb,txtOutB,txtOutF,txtT,txtG,txtB
+    local txtSample, clp, clb,txtOutB,txtOutF,txtR,txtG,txtB
     local nTip,nCel, cB,cF = -1,0
     local function StaticControls()
         local prim,sec,r,g,b = iup.GetAttributeId(clp,'CELL',cF),iup.GetAttributeId(clp,'CELL',cB)

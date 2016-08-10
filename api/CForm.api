@@ -420,6 +420,7 @@ noobj.Reference
 noobj.Sqlquery
 noobj.String \
 noobj.Stringtable
+noobj.Script
 noobj.Sql
 noobj.Value
 noobj.Styles

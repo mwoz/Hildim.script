@@ -226,7 +226,8 @@ local function OnSave_local()
                     local startXml = 0
                     local _
                     if not bIsLib then
-                        _,_,strTemplateName = strSource:find('template +name="([^"]+)')
+                        _, _, strTemplateName = strSource:find('template[^>]-name="([^"]+)')
+                        if not strTemplateName then print("Нет имени шаблона"); strTemplateName = '' end
                         startXml = strSource:find("<![CDATA['",1,true)
                         --В 1 строке  будет лежать количество строк от начала скрипта со знаком минус
                         table.insert(precomp_Map,{-getLineCount(string.sub(strSource,1,startXml)),strFull,0})
@@ -331,7 +332,7 @@ function formenjine_Run()
             props['formengine.runafter'] = '1'
             atrium_RunXml()
         else
-            local _,_,strName = editor:GetText():find('<template name="([^"]*)')
+            local _,_,strName = editor:GetText():find('<template[^>]-name="([^"]*)')
             formenjine_RunTemplate(strName or '')
         end
     else
@@ -434,9 +435,14 @@ function precomp_PreCompileTemplate()
         local j
         if strExt == XEXT then
             props["precompiller.xmlname"] = props["FileNameExt"]
-            local s,e=editor:findtext("<?.+?>",SCFIND_REGEXP)
-            j=editor:LineFromPosition(e)+1
-            strXml=string.sub(editor:GetText(),e+3)
+            local s, e = editor:findtext("<\\?.+\\?>", SCFIND_REGEXP)
+            if s then
+                j = editor:LineFromPosition(e) + 1
+                strXml = string.sub(editor:GetText(), e + 3)
+            else
+                strXml = editor:GetText()
+                j = 0
+            end
         else
             strXml=editor:GetText()
             j = 0
