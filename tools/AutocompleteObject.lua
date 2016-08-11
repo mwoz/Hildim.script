@@ -63,8 +63,9 @@ do
         [props['file.patterns.lua']]='$(file.patterns.lua)',
         [props['file.patterns.xml']]='$(file.patterns.xml)',
         [props['file.patterns.html']]='$(file.patterns.html)',
+        ['*.css']='$(file.patterns.css)',
     }
-    for i,v in pairs(patterns) do
+    for i, v in pairs(patterns) do
         for ext in (i..';'):gfind("%*%.([^;]+);") do
             Ext2Ptrn[ext] = v
         end
@@ -84,7 +85,7 @@ local function useAutocomp()
     if editor.Focus then
         iLex = editor.Lexer
         if iLex == SCLEX_FORMENJINE then return cmpobj_GetFMDefault() ~= SCE_FM_SQL_DEFAULT end
-        return Ext2Ptrn[props['FileExt']] ~= nil
+        return Ext2Ptrn[props['FileExt']:lower()] ~= nil
     end
 end
 
@@ -345,6 +346,8 @@ local function GetObjectNamesXml()
             if s == "form" then s = "formbox" end
             table.insert(names,{s, s, '', ''})
         end
+    else
+        table.insert(names,{"noobj", '', '', ''})
     end
     return names
 end
@@ -605,15 +608,15 @@ local function ReCreateStructures(strText, tblFiles)
         fillup_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".fillup.characters"])
         autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
         inheritors = {}
-        str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_vbkwrd ~= nil, inheritors)
+        str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii."..(Ext2Ptrn[props['FileExt']:lower()] or '&&&&')]..';'..props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_vbkwrd ~= nil, inheritors)
     end
     if Favorites_Clear ~= nil then Favorites_Clear() end
     -----------
 
     -----------
-    if m_ext ~= editor.Lexer or str_xmlkwrd~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']] or '&&&&') then
+    if m_ext ~= editor.Lexer or str_xmlkwrd~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']:lower()] or '&&&&') then
         inheritorsX = {}
-        str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')]..';'..props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_xmlkwrd~= nil, inheritorsX)
+        str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix."..(Ext2Ptrn[props['FileExt']:lower()] or '&&&&')]..';'..props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_xmlkwrd~= nil, inheritorsX)
     end
     if editor.Lexer == SCLEX_FORMENJINE then
         RecrReCreateStructures(editor:GetText(),{})
@@ -932,6 +935,7 @@ local function ResetCallTipParams()
         end
     elseif objectsX_table._fill ~= nil then
         if isXmlLine() then --для xml показываем тип, пока он внутри строки, иначе прячем
+            print(234)
             if isPosInString() then
                 ShowCallTip(tip[1], tip[2], 0, 0)
             else
@@ -1003,7 +1007,7 @@ local function ListXml()
     if object_names[1] ~= nil then
         methods_table = CreateMethodsTable(object_names, objectsX_table, '', inheritorsX)
         current_poslst = current_pos
-        pasteFromXml = true
+        pasteFromXml = object_names[1][1] ~= 'noobj'
         return ShowUserList(0,constListIdXml)
     end
     return false
@@ -1029,7 +1033,6 @@ local function OnChar_local(char)
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
     local result = false
-
     local bResetCallTip = true
 	local autocomplete_start_characters = props["autocomplete."..editor.LexerLanguage..".start.characters"]
     if cmpobj_GetFMDefault() == SCE_FM_X_DEFAULT then autocomplete_start_characters = autocomplete_start_characters..'<' end
