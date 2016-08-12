@@ -1,6 +1,6 @@
 ### Данные взяты с книги "Справочник Веб-разработчика" Ю.С.Лукач <http://scite-ru.googlecode.com/files/web-developer.zip>
 
-azimuth \nГоризонтальный угол звука
+azimuth ()Горизонтальный угол звука
 azimuth:30deg
 azimuth:behind
 azimuth:center
@@ -16,65 +16,62 @@ azimuth:right
 azimuth:right-side
 azimuth:rightwards
 
-background \nФон
+background ()Фон
 background:inherit
 
-background-attachment \nПрокрутка фонового образа
+background-attachment ()Прокрутка фонового образа
 background-attachment:inherit
 background-attachment:fixed
 background-attachment:scroll
 
-background-color \nЦвет фона
+background-color ()Цвет фона
 background-color:color
 background-color:inherit
 background-color:transparent
 
-background-image \nГрафический образ фона
+background-image ()Графический образ фона
 background-image:inherit
 background-image:none
 background-image:URI
-URI \nurl(http://mysite.com/bg.gif)
 
-background-position \nПозиция фонового образа
+background-position ()Позиция фонового образа
 background-position:"10%_80%"
 background-position:"2cm_3cm"
 background-position:bottom
-background-position:bottom left
-background-position:center
 background-position:center
 background-position:inherit
 background-position:left
 background-position:right
 background-position:top
 
-background-repeat \nПовтор фонового образа
+background-repeat ()Повтор фонового образа
 background-repeat:inherit
 background-repeat:no-repeat
 background-repeat:repeat
 background-repeat:repeat-x
 background-repeat:repeat-y
 
-border \nСвойства рамки
+border ()Свойства рамки
 border:thick_solid_green
-thick_solid_green \n<размер-рамки> <стиль-рамки> <цвет>
+thick_solid_green ()<размер-рамки> <стиль-рамки> <цвет>
 border:inherit
 
-border-collapse \nЗадание типа рамок
+border-collapse ()Задание типа рамок
 border-collapse:collapse
 border-collapse:inherit
 border-collapse:separate
 
-border-color \nЦвета рамки
+border-color ()Цвета рамки
 border-color:inherit
 border-color:red_green_blue_yellow
-red_green_blue_yellow \n<верх> <право> <низ> <лево>
+red_green_blue_yellow ()<верх> <право> <низ> <лево>
 border-color:transparent
 
-border-spacing \nРасстояние между рамками
+border-spacing ()Расстояние между рамками
 border-spacing:<length>_<length>
 border-spacing:inherit
 
-border-style \nСтиль рамки
+border-style ()Стиль рамки
 border-style:dashed
 border-style:dotted
 border-style:double
@@ -87,7 +84,7 @@ border-style:outset
 border-style:ridge
 border-style:solid
 
-border-top \nСвойства верхней рамки
+border-top ()Свойства верхней рамки
 border-top:#F0F0F0
 border-top:10pt
 border-top:dashed
@@ -102,7 +99,7 @@ border-top:outset
 border-top:ridge
 border-top:solid
 
-border-right \nСвойства правой рамки
+border-right ()Свойства правой рамки
 border-right:#F0F0F0
 border-right:10pt
 border-right:dashed
@@ -117,7 +114,7 @@ border-right:outset
 border-right:ridge
 border-right:solid
 
-border-left \nСвойства левой рамки
+border-left ()Свойства левой рамки
 border-left:#F0F0F0
 border-left:10pt
 border-left:dashed
@@ -132,7 +129,7 @@ border-left:outset
 border-left:ridge
 border-left:solid
 
-border-bottom \nСвойства нижней рамки
+border-bottom ()Свойства нижней рамки
 border-bottom:#F0F0F0
 border-bottom:10pt
 border-bottom:dashed
@@ -147,7 +144,7 @@ border-bottom:outset
 border-bottom:ridge
 border-bottom:solid
 
-border-width \nРазмеры рамки
+border-width ()Размеры рамки
 border-width:<width>{1,4}
 border-width:inherit
 
@@ -215,36 +212,36 @@ border-bottom-style:solid
 border-bottom-width:10pt
 border-bottom-width:inherit
 
-bottom \nНижняя позиция
+bottom ()Нижняя позиция
 bottom:<length>
 bottom:30%
 bottom:auto
 bottom:inherit
 
-caption-side \nРасположение заголовка таблицы
+caption-side ()Расположение заголовка таблицы
 caption-side:bottom
 caption-side:inherit
 caption-side:left
 caption-side:right
 caption-side:top
 
-clear \nУправление обтеканием текста
+clear ()Управление обтеканием текста
 clear:both
 clear:inherit
 clear:left
 clear:none
 clear:right
 
-clip \nОбласть обрезки
+clip ()Область обрезки
 clip:<shape>
 clip:auto
 clip:inherit
 
-color \nЦвет текста
+color ()Цвет текста
 color:<color>
 color:inherit
 
-content \nЗадание содержимого
+content ()Задание содержимого
 content:<counter>
 content:<string>
 content:URI
@@ -255,17 +252,17 @@ content:no-close-quote +
 content:no-open-quote
 content:open-quote
 
-counter-increment \nИзменение значения счетчика
+counter-increment ()Изменение значения счетчика
 counter-increment:<identifier>_<integer>
 counter-increment:inherit
 counter-increment:none
 
-counter-reset \nНачальное значение счетчика
+counter-reset ()Начальное значение счетчика
 counter-reset:<identifier>_<integer>
 counter-reset:inherit
 counter-reset:none
 
-cue \nСигналы до и после
+cue ()Сигналы до и после
 cue:inherit
 cue-after:URI
 cue-after:inherit
@@ -274,7 +271,7 @@ cue-before:URI
 cue-before:inherit
 cue-before:none
 
-cursor \nФорма курсора
+cursor ()Форма курсора
 cursor:URI
 cursor:crosshair
 cursor:default
@@ -294,12 +291,12 @@ cursor:text
 cursor:w-resize
 cursor:wait
 
-direction \nЗадание направления вывода текста
+direction ()Задание направления вывода текста
 direction:inherit
 direction:ltr
 direction:rtl
 
-display \nТипы объемлющих прямоугольников
+display ()Типы объемлющих прямоугольников
 display:block
 display:compact
 display:inherit
@@ -319,7 +316,7 @@ display:table-header-group
 display:table-row
 display:table-row-group
 
-elevation \nВертикальный угол звука
+elevation ()Вертикальный угол звука
 elevation:<angle>
 elevation:above
 elevation:below
@@ -328,20 +325,20 @@ elevation:inherit
 elevation:level
 elevation:lower
 
-empty-cells \nРамки вокруг пустых ячеек
+empty-cells ()Рамки вокруг пустых ячеек
 empty-cells:hide
 empty-cells:inherit
 empty-cells:show
 
-float \nПлавающие элементы
+float ()Плавающие элементы
 float:inherit
 float:left
 float:none
 float:right
 
-font \nСвойства шрифта
+font ()Свойства шрифта
 font:bold_italic_large_Verdana
-bold_italic_large_Verdana \n <weight>_<style>_<size>_<family>
+bold_italic_large_Verdana () <weight>_<style>_<size>_<family>
 font:caption
 font:icon
 font:inherit
@@ -354,11 +351,11 @@ font:small-caps
 font:small-caption
 font:status-bar
 
-font-family \nСемейство шрифтов
+font-family ()Семейство шрифтов
 font-family:Verdana,Arial
 font-family:inherit
 
-font-size \nРазмер шрифта
+font-size ()Размер шрифта
 font-size:12pt
 font-size:150%
 font-size:inherit
@@ -372,12 +369,12 @@ font-size:x-small
 font-size:xx-large
 font-size:xx-small
 
-font-size-adjust \nАспект шрифта
+font-size-adjust ()Аспект шрифта
 font-size-adjust:<number>
 font-size-adjust:inherit
 font-size-adjust:none
 
-font-stretch \nВыключка шрифта
+font-stretch ()Выключка шрифта
 font-stretch:condensed
 font-stretch:expanded
 font-stretch:extra-condensed
@@ -391,18 +388,18 @@ font-stretch:ultra-condensed
 font-stretch:ultra-expanded
 font-stretch:wider
 
-font-style \nСтиль шрифта
+font-style ()Стиль шрифта
 font-style:inherit
 font-style:italic
 font-style:normal
 font-style:oblique
 
-font-variant \nВариант шрифта
+font-variant ()Вариант шрифта
 font-variant:inherit
 font-variant:normal
 font-variant:small-caps
 
-font-weight \nЖирность шрифта
+font-weight ()Жирность шрифта
 font-weight:100
 font-weight:200
 font-weight:300
@@ -418,42 +415,42 @@ font-weight:inherit
 font-weight:lighter
 font-weight:normal
 
-height \nВысота содержимого
+height ()Высота содержимого
 height:<length>
 height:30%
 height:auto
 height:inherit
 
-left \nЛевая позиция
+left ()Левая позиция
 left:auto
 left:<значение>
 left:30%
 
-letter-spacing \nИнтервал между буквами
+letter-spacing ()Интервал между буквами
 letter-spacing:normal
 letter-spacing:<значение>
 
-line-height \nВысота текста
+line-height ()Высота текста
 line-height:normal
 line-height:<значение>
 line-height:<множитель>
 line-height:30%
 line-height:inherit
 
-list-style \nЗадание свойств списка
+list-style ()Задание свойств списка
 list-style:inherit
 
-list-style-image \nГрафический маркер списка
+list-style-image ()Графический маркер списка
 list-style-image:none
 list-style-image:URI
 list-style-image:inherit
 
-list-style-position \nПозиция маркера списка
+list-style-position ()Позиция маркера списка
 list-style-position:outside
 list-style-position:inherit
 list-style-position:inside
 
-list-style-type \nТип маркера списка
+list-style-type ()Тип маркера списка
 list-style-type:disc
 list-style-type:decimal
 list-style-type:circle
@@ -479,68 +476,68 @@ list-style-type:lower-greek
 list-style-type:lower-latin
 list-style-type:upper-latin
 
-margin \nРазмеры границы
+margin ()Размеры границы
 margin:<значение>{1,4}
 margin:auto{1,4}
 
-margin-top \nРазмер верхней границы
+margin-top ()Размер верхней границы
 margin-top:0
 margin-top:<значение>
 margin-top:auto
 
-margin-right \nРазмер правой границы
+margin-right ()Размер правой границы
 margin-right:0
 margin-right:<значение>
 margin-right:auto
 
-margin-bottom \nРазмер нижней границы
+margin-bottom ()Размер нижней границы
 margin-bottom:0
 margin-bottom:<значение>
 margin-bottom:auto
 
-margin-left \nРазмер левой границы
+margin-left ()Размер левой границы
 margin-left:0
 margin-left:<значение>
 margin-left:auto
 
-marker-offset \nПозиция маркера
+marker-offset ()Позиция маркера
 marker-offset:<length>
 marker-offset:auto
 marker-offset:inherit
 
-marks \nПометки
+marks ()Пометки
 marks:crop
 marks:cross
 marks:none
 marks:inherit
 
-max-height \nМаксимальная высота
+max-height ()Максимальная высота
 max-height:<length>
 max-height:30%
 max-height:none
 max-height:inherit
 
-max-width \nМаксимальная ширина
+max-width ()Максимальная ширина
 max-width:<length>
 max-width:30%
 max-width:none
 max-width:inherit
 
-min-height \nМинимальная высота
+min-height ()Минимальная высота
 min-height:<length>
 min-height:30%
 min-height:inherit
 
-min-width \nМинимальная ширина
+min-width ()Минимальная ширина
 min-width:<length>
 min-width:30%
 min-width:inherit
 
-orphans \nКоличество строк в конце страницы
+orphans ()Количество строк в конце страницы
 orphans:<integer>
 orphans:inherit
 
-outline \nСвойства контура
+outline ()Свойства контура
 outline:inherit
 outline-color:<color>
 outline-color:invert
@@ -550,14 +547,14 @@ outline-style:inherit
 outline-width:<border_width>
 outline-width:inherit
 
-overflow \nРеакция на переполнение
+overflow ()Реакция на переполнение
 overflow:visible
 overflow:hidden
 overflow:scroll
 overflow:auto
 overflow:inherit
 
-padding \nРазмеры заполнителя
+padding ()Размеры заполнителя
 padding:<padding-width>{1,4}
 padding:inherit
 padding-top:<padding_width>
@@ -569,11 +566,11 @@ padding-bottom:inherit
 padding-left:<padding_width>
 padding-left:inherit
 
-page \nИмена страниц
+page ()Имена страниц
 page:<identifier>
 page:auto
 
-page-break-after \nРазрыв страницы после элемента
+page-break-after ()Разрыв страницы после элемента
 page-break-after:auto
 page-break-after:always
 page-break-after:avoid
@@ -581,7 +578,7 @@ page-break-after:left
 page-break-after:right
 page-break-after:inherit
 
-page-break-before \nРазрыв страницы перед элементом
+page-break-before ()Разрыв страницы перед элементом
 page-break-before:auto
 page-break-before:always
 page-break-before:avoid
@@ -589,27 +586,27 @@ page-break-before:left
 page-break-before:right
 page-break-before:inherit
 
-page-break-inside \nРазрыв страницы внутри элемента
+page-break-inside ()Разрыв страницы внутри элемента
 page-break-inside:avoid
 page-break-inside:auto
 page-break-inside:inherit
 
-pause \nПаузы до и после
+pause ()Паузы до и после
 pause:<time>
 pause:30%{1,2}
 pause:inherit
 
-pause-after \nПауза после элемента
+pause-after ()Пауза после элемента
 pause-after:<time>
 pause-after:30%
 pause-after:inherit
 
-pause-before \nПауза перед элементом
+pause-before ()Пауза перед элементом
 pause-before:<time>
 pause-before:30%
 pause-before:inherit
 
-pitch \nЧастота звука
+pitch ()Частота звука
 pitch:<frequency>
 pitch:x-low
 pitch:low
@@ -618,46 +615,46 @@ pitch:high
 pitch:x-high
 pitch:inherit
 
-pitch-range \nВариация частоты
+pitch-range ()Вариация частоты
 pitch-range:<number>
 pitch-range:inherit
 
-play-during \nФоновый звук
+play-during ()Фоновый звук
 play-during:URI
 play-during:auto
 play-during:none
 play-during:inherit
 
-position \nСхема позиционирования
+position ()Схема позиционирования
 position:static
 position:relative
 position:absolute
 position:fixed
 position:inherit
 
-quotes \nКавычки
+quotes ()Кавычки
 quotes:<string>_<string>
 quotes:none
 quotes:inherit
 
-richness \nТембр
+richness ()Тембр
 richness:<number>
 richness:inherit
 
-right \nПравая позиция
+right ()Правая позиция
 right:<length>
 right:30%
 right:auto
 right:inherit
 
-size \nРазмер страницы
+size ()Размер страницы
 size:<length>{1,2}
 size:auto
 size:portrait
 size:landscape
 size:inherit
 
-speak \nСпособ произношения
+speak ()Способ произношения
 speak:normal
 speak:none
 speak:spell-out
@@ -666,17 +663,17 @@ speak-header:once
 speak:always
 speak:inherit
 
-speak-numeral \nПроизношение числительных
+speak-numeral ()Произношение числительных
 speak-numeral:digits
 speak-numeral:continuous
 speak-numeral:inherit
 
-speak-punctuation \nПроизношение пунктуации
+speak-punctuation ()Произношение пунктуации
 speak-punctuation:code
 speak-punctuation:none
 speak-punctuation:inherit
 
-speech-rate \nСкорость речи
+speech-rate ()Скорость речи
 speech-rate:<number>
 speech-rate:x-slow
 speech-rate:slow
@@ -687,16 +684,16 @@ speech-rate:faster
 speech-rate:slower
 speech-rate:inherit
 
-stress \nУдарение
+stress ()Ударение
 stress:<number>
 stress:inherit
 
-table-layout \nЗадание ширины столбцов
+table-layout ()Задание ширины столбцов
 table-layout:auto
 table-layout:fixed
 table-layout:inherit
 
-text-align \nВыравнивание текста
+text-align ()Выравнивание текста
 text-align:left
 text-align:right
 text-align:center
@@ -704,7 +701,7 @@ text-align:justify
 text-align:<string>
 text-align:inherit
 
-text-decoration \nУкрашение текста
+text-decoration ()Украшение текста
 text-decoration:none
 text-decoration:underline
 text-decoration:overline
@@ -712,37 +709,37 @@ text-decoration:line-through
 text-decoration:blink
 text-decoration:inherit
 
-text-indent \nКрасная строка
+text-indent ()Красная строка
 text-indent:<length>
 text-indent:30%
 text-indent:inherit
 
-text-shadow \nЗадание тени
+text-shadow ()Задание тени
 text-shadow:none
 text-shadow:<color>
 text-shadow:<length>_<length>_<length>
 text-shadow:inherit
 
-text-transform \nПреобразование текста
+text-transform ()Преобразование текста
 text-transform:capitalize
 text-transform:uppercase
 text-transform:lowercase
 text-transform:none
 text-transform:inherit
 
-top \nВерхняя позиция
+top ()Верхняя позиция
 top:<length>
 top:30%
 top:auto
 top:inherit
 
-unicode-bidi \nУправление двунаправленным алгоритмом Unicode
+unicode-bidi ()Управление двунаправленным алгоритмом Unicode
 unicode-bidi:normal
 unicode-bidi:embed
 unicode-bidi:bidi-override
 unicode-bidi:inherit
 
-vertical-align \nВертикальное выравнивание
+vertical-align ()Вертикальное выравнивание
 vertical-align:baseline
 vertical-align:sub
 vertical-align:super
@@ -755,18 +752,18 @@ vertical-align:30%
 vertical-align:<length>
 vertical-align:inherit
 
-visibility \nВидимость элемента
+visibility ()Видимость элемента
 visibility:visible
 visibility:hidden
 visibility:collapse
 visibility:inherit
 
-voice-family \nГолос
+voice-family ()Голос
 voice-family:<specific-voice>
 voice-family:<generic-voice>
 voice-family:inherit
 
-volume \nГромкость
+volume ()Громкость
 volume:<number>
 volume:30%
 volume:silent
@@ -777,28 +774,28 @@ volume:loud
 volume:x-loud
 volume:inherit
 
-white-space \nОбработка пробелов
+white-space ()Обработка пробелов
 white-space:normal
 white-space:pre
 white-space:nowrap
 white-space:inherit
 
-widows \nКоличество строк в начале страницы
+widows ()Количество строк в начале страницы
 widows:<integer>
 widows:inherit
 
-width \nШирина содержимого
+width ()Ширина содержимого
 width:<length>
 width:30%
 width:auto
 width:inherit
 
-word-spacing \nИнтервал между словами
+word-spacing ()Интервал между словами
 word-spacing:normal
 word-spacing:<length>
 word-spacing:inherit
 
-z-index \nПорядок отображения элементов
+z-index ()Порядок отображения элементов
 z-index:auto
 z-index:<integer>
 z-index:inherit

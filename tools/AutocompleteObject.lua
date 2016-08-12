@@ -85,7 +85,7 @@ local function useAutocomp()
     if editor.Focus then
         iLex = editor.Lexer
         if iLex == SCLEX_FORMENJINE then return cmpobj_GetFMDefault() ~= SCE_FM_SQL_DEFAULT end
-        return Ext2Ptrn[props['FileExt']:lower()] ~= nil
+        return props['pattern.name$'] ~= ''
     end
 end
 
@@ -336,7 +336,7 @@ end
 local function GetObjectNamesXml()
     strLine = editor:textrange(editor:PositionFromLine(af_current_line), editor:PositionFromLine(af_current_line + 1))
     local names ={}
-    local _s, _e, s = string.find(strLine, ".+<([%w]+)")
+    local _s, _e, s = string.find(strLine, ".*<([%w]+)")
     if _s ~= nil then
 
         table.insert(names,{s, s, '', ''})
@@ -583,53 +583,53 @@ local function ReCreateStructures(strText, tblFiles)
     local str_vbkwrd = nil
     local str_xmlkwrd = nil
     if editor.Lexer == SCLEX_FORMENJINE then
-        if props["keywords6."..Ext2Ptrn[props['FileExt']]]:len() < 10 then
+        if props["keywords6$"]:len() < 10 then
             str_vbkwrd = ' '
         else
-            str_vbkwrd = props["keywords6."..Ext2Ptrn[props['FileExt']]]
+            str_vbkwrd = props["keywords6$"]
         end
 
-        if props["keywords4."..Ext2Ptrn[props['FileExt']]]:len() < 10 then
+        if props["keywords4$"]:len() < 10 then
             str_xmlkwrd = ' '
         else
-            str_xmlkwrd = props["keywords4."..Ext2Ptrn[props['FileExt']]]
+            str_xmlkwrd = props["keywords4$"]
         end
-        if m_ptrn ~= (Ext2Ptrn[props['FileExt']] or '&&&&') then
+        if m_ptrn ~= props['pattern.name$'] then
             str_vbkwrd = ' '
             str_xmlkwrd = ' '
         end
 
     end
     m_tblSubstitution = {}
-    if m_ext ~= editor.Lexer or str_vbkwrd ~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']] or '&&&&')  then
+    if m_ext ~= editor.Lexer or str_vbkwrd ~= nil or m_ptrn ~= props['pattern.name$']  then
         alias_table = {}
         objects_table = {}
         objectsX_table = {}
         fillup_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".fillup.characters"])
         autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
         inheritors = {}
-        str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii."..(Ext2Ptrn[props['FileExt']:lower()] or '&&&&')]..';'..props["apii."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_vbkwrd ~= nil, inheritors)
+        str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
     end
     if Favorites_Clear ~= nil then Favorites_Clear() end
     -----------
 
     -----------
-    if m_ext ~= editor.Lexer or str_xmlkwrd~= nil or m_ptrn ~= (Ext2Ptrn[props['FileExt']:lower()] or '&&&&') then
+    if m_ext ~= editor.Lexer or str_xmlkwrd~= nil or m_ptrn ~= props['pattern.name$'] then
         inheritorsX = {}
-        str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix."..(Ext2Ptrn[props['FileExt']:lower()] or '&&&&')]..';'..props["apiix."..(Ext2Ptrn[props['FileExt']] or '&&&&')..'.'..rootTag], str_xmlkwrd~= nil, inheritorsX)
+        str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix$"], str_xmlkwrd~= nil, inheritorsX)
     end
     if editor.Lexer == SCLEX_FORMENJINE then
         RecrReCreateStructures(editor:GetText(),{})
         if str_vbkwrd ~= nil then
-            props["keywords6."..Ext2Ptrn[props['FileExt']]] = str_vbkwrd
+            props["keywords6$"] = str_vbkwrd
             scite.SendEditor(SCI_SETKEYWORDS,5,str_vbkwrd)
         end
         if str_xmlkwrd ~= nil then
-            props["keywords4."..Ext2Ptrn[props['FileExt']]] = str_xmlkwrd
+            props["keywords4$"] = str_xmlkwrd
             scite.SendEditor(SCI_SETKEYWORDS,3,str_xmlkwrd)
         end
         local kw = string.lower(table.concat(tbl_fList,' '))
-        props["keywords16."..Ext2Ptrn[props['FileExt']]] = kw
+        props["keywords16$"] = kw
         scite.SendEditor(3996,15,kw)
         scite.SendEditor(SCI_COLOURISE,0,editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen+2))
     else
@@ -854,7 +854,7 @@ end
 local function RunAutocomplete(char, pos, word)
     FindDeclaration()
 
-    local input_object = GetInputObject(editor:textrange(editor:PositionFromLine(af_current_line),pos-1))
+    local input_object = GetInputObject(editor:textrange(editor:PositionFromLine(af_current_line), pos - 1))
     if input_object[1] =='' then return '' end
 
 	-- ≈сли слева от курсора отсутствует слово, которое можно истолковать как им€ объекта, то выходим
@@ -935,7 +935,6 @@ local function ResetCallTipParams()
         end
     elseif objectsX_table._fill ~= nil then
         if isXmlLine() then --дл€ xml показываем тип, пока он внутри строки, иначе пр€чем
-            print(234)
             if isPosInString() then
                 ShowCallTip(tip[1], tip[2], 0, 0)
             else
@@ -1190,7 +1189,7 @@ AddEventHandler("OnSwitchFile", function(file)
         Favorites_ListFILL()
     end
     m_ext = editor.Lexer
-    if m_ext == SCLEX_FORMENJINE then m_ptrn = (Ext2Ptrn[props['FileExt']] or '&&&&') end
+    if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end
     _G.iuprops["spell.autospell"] = pr
 end)
 AddEventHandler("OnOpen", function(file)
@@ -1200,7 +1199,7 @@ AddEventHandler("OnOpen", function(file)
         Favorites_ListFILL()
     end
     m_ext = editor.Lexer
-    if m_ext == SCLEX_FORMENJINE then m_ptrn = (Ext2Ptrn[props['FileExt']] or '&&&&') end
+    if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end
 end)
 AddEventHandler("OnBeforeSave", function() get_api = true end)
 AddEventHandler("OnUpdateUI", OnUpdateUI_local)

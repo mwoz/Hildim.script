@@ -1,105 +1,104 @@
 
-noobj:azimuth \nГоризонтальный угол звука
-noobj:background \nФон
-noobj:background-attachment \nПрокрутка фонового образа
-noobj:background-color \nЦвет фона
-noobj:background-image \nГрафический образ фона
-noobj:background-position \nПозиция фонового образа
-noobj:background-repeat \nПовтор фонового образа
-noobj:border \nСвойства рамки
-noobj:thick_solid_green \n<размер-рамки> <стиль-рамки> <цвет>
-noobj:border-collapse \nЗадание типа рамок
-noobj:border-color \nЦвета рамки
-noobj:red_green_blue_yellow \n<верх> <право> <низ> <лево>
-noobj:border-spacing \nРасстояние между рамками
-noobj:border-style \nСтиль рамки
-noobj:border-top \nСвойства верхней рамки
-noobj:border-right \nСвойства правой рамки
-noobj:border-left \nСвойства левой рамки
-noobj:border-bottom \nСвойства нижней рамки
-noobj:border-width \nРазмеры рамки
-noobj:bottom \nНижняя позиция
-noobj:caption-side \nРасположение заголовка таблицы
-noobj:clear \nУправление обтеканием текста
-noobj:clip \nОбласть обрезки
-noobj:color \nЦвет текста
-noobj:content \nЗадание содержимого
-noobj:counter-increment \nИзменение значения счетчика
-noobj:counter-reset \nНачальное значение счетчика
-noobj:cue \nСигналы до и после
-noobj:cursor \nФорма курсора
-noobj:direction \nЗадание направления вывода текста
-noobj:display \nТипы объемлющих прямоугольников
-noobj:elevation \nВертикальный угол звука
-noobj:empty-cells \nРамки вокруг пустых ячеек
-noobj:float \nПлавающие элементы
-noobj:font \nСвойства шрифта
-noobj:bold_italic_large_Verdana \n <weight>_<style>_<size>_<family>
-noobj:font-family \nСемейство шрифтов
-noobj:font-size \nРазмер шрифта
-noobj:font-size-adjust \nАспект шрифта
-noobj:font-stretch \nВыключка шрифта
-noobj:font-style \nСтиль шрифта
-noobj:font-variant \nВариант шрифта
-noobj:font-weight \nЖирность шрифта
-noobj:height \nВысота содержимого
-noobj:left \nЛевая позиция
-noobj:letter-spacing \nИнтервал между буквами
-noobj:line-height \nВысота текста
-noobj:list-style \nЗадание свойств списка
-noobj:list-style-image \nГрафический маркер списка
-noobj:list-style-position \nПозиция маркера списка
-noobj:list-style-type \nТип маркера списка
-noobj:margin \nРазмеры границы
-noobj:margin-top \nРазмер верхней границы
-noobj:margin-right \nРазмер правой границы
-noobj:margin-bottom \nРазмер нижней границы
-noobj:margin-left \nРазмер левой границы
-noobj:marker-offset \nПозиция маркера
-noobj:marks \nПометки
-noobj:max-height \nМаксимальная высота
-noobj:max-width \nМаксимальная ширина
-noobj:min-height \nМинимальная высота
-noobj:min-width \nМинимальная ширина
-noobj:orphans \nКоличество строк в конце страницы
-noobj:outline \nСвойства контура
-noobj:overflow \nРеакция на переполнение
-noobj:padding \nРазмеры заполнителя
-noobj:page \nИмена страниц
-noobj:page-break-after \nРазрыв страницы после элемента
-noobj:page-break-before \nРазрыв страницы перед элементом
-noobj:page-break-inside \nРазрыв страницы внутри элемента
-noobj:pause \nПаузы до и после
-noobj:pause-after \nПауза после элемента
-noobj:pause-before \nПауза перед элементом
-noobj:pitch \nЧастота звука
-noobj:pitch-range \nВариация частоты
-noobj:play-during \nФоновый звук
-noobj:position \nСхема позиционирования
-noobj:quotes \nКавычки
-noobj:richness \nТембр
-noobj:right \nПравая позиция
-noobj:size \nРазмер страницы
-noobj:speak \nСпособ произношения
-noobj:speak-numeral \nПроизношение числительных
-noobj:speak-punctuation \nПроизношение пунктуации
-noobj:speech-rate \nСкорость речи
-noobj:stress \nУдарение
-noobj:table-layout \nЗадание ширины столбцов
-noobj:text-align \nВыравнивание текста
-noobj:text-decoration \nУкрашение текста
-noobj:text-indent \nКрасная строка
-noobj:text-shadow \nЗадание тени
-noobj:text-transform \nПреобразование текста
-noobj:top \nВерхняя позиция
-noobj:unicode-bidi \nУправление двунаправленным алгоритмом Unicode
-noobj:vertical-align \nВертикальное выравнивание
-noobj:visibility \nВидимость элемента
-noobj:voice-family \nГолос
-noobj:volume \nГромкость
-noobj:noobj:white-space \nОбработка пробелов
-noobj:widows \nКоличество строк в начале страницы
-noobj:width \nШирина содержимого
-noobj:word-spacing \nИнтервал между словами
-noobj:z-index \nПорядок отображения элементов
+noobj:azimuth
+noobj:background
+noobj:background-attachment
+noobj:background-color
+noobj:background-image
+noobj:background-position
+noobj:background-repeat
+noobj:border
+noobj:thick_solid_green
+noobj:border-collapse
+noobj:border-color
+noobj:red_green_blue_yellow
+noobj:border-spacing
+noobj:border-style
+noobj:border-top
+noobj:border-right
+noobj:border-left
+noobj:border-bottom
+noobj:border-width
+noobj:bottom
+noobj:caption-side
+noobj:clear
+noobj:clip
+noobj:color
+noobj:content
+noobj:counter-increment
+noobj:counter-reset
+noobj:cue
+noobj:cursor
+noobj:direction
+noobj:display
+noobj:elevation
+noobj:empty-cells
+noobj:float
+noobj:font
+noobj:font-family
+noobj:font-size
+noobj:font-size-adjust
+noobj:font-stretch
+noobj:font-style
+noobj:font-variant
+noobj:font-weight
+noobj:height
+noobj:left
+noobj:letter-spacing
+noobj:line-height
+noobj:list-style
+noobj:list-style-image
+noobj:list-style-position
+noobj:list-style-type
+noobj:margin
+noobj:margin-top
+noobj:margin-right
+noobj:margin-bottom
+noobj:margin-left
+noobj:marker-offset
+noobj:marks
+noobj:max-height
+noobj:max-width
+noobj:min-height
+noobj:min-width
+noobj:orphans
+noobj:outline
+noobj:overflow
+noobj:padding
+noobj:page
+noobj:page-break-after
+noobj:page-break-before
+noobj:page-break-inside
+noobj:pause
+noobj:pause-after
+noobj:pause-before
+noobj:pitch
+noobj:pitch-range
+noobj:play-during
+noobj:position
+noobj:quotes
+noobj:richness
+noobj:right
+noobj:size
+noobj:speak
+noobj:speak-numeral
+noobj:speak-punctuation
+noobj:speech-rate
+noobj:stress
+noobj:table-layout
+noobj:text-align
+noobj:text-decoration
+noobj:text-indent
+noobj:text-shadow
+noobj:text-transform
+noobj:top
+noobj:unicode-bidi
+noobj:vertical-align
+noobj:visibility
+noobj:voice-family
+noobj:volume
+noobj:noobj:white-space
+noobj:widows
+noobj:width
+noobj:word-spacing
+noobj:z-index
 

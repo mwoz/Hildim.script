@@ -453,7 +453,7 @@ end
 
 local function Data_OpenNew()
     local sel = list_obj.marked:find('1') - 1
-    local oName = list_obj:getcell(sel,1)
+    local oName = list_obj:getcell(sel, 1)
     if oName == 'system.ObjectTypeForm' or oName == 'system.Report' or oName == 'system.Wizard' then
         oName = oName:gsub('system.','')
         sel = list_data.marked:find('1') - 1
@@ -463,7 +463,7 @@ local function Data_OpenNew()
 
         dbRunSql(sql,function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
-            props['scite.new.file'] = '^'..list_data:getcell(sel,2)..Iif(oName == 'ObjectTypeForm', '.cform', '.rform')
+            props['scite.new.file'] = '^'..list_data:getcell(sel, 2)..Iif(oName == 'ObjectTypeForm', '.cform', Iif(oName == 'Report', '.rform', '.wform'))
             scite.MenuCommand(IDM_NEW)
             if _G.iuprops['atrium.data.win1251'] ~= 'ON' then scite.MenuCommand(IDM_ENCODING_UCS2LE) end
             editor:SetText(ProbablyToUTF(msgReplay:GetPathValue('FormData')))
@@ -484,7 +484,7 @@ end
 local function Data_Unload(bCompare)
     local sel = list_obj.marked:find('1') - 1
     local oName = list_obj:getcell(sel,1)
-    if oName == 'system.ObjectTypeForm' or oName == 'system.Report' then
+    if oName == 'system.ObjectTypeForm' or oName == 'system.Report' or oName == 'system.Wizard' then
         oName = oName:gsub('system.','')
         sel = list_data.marked:find('1') - 1
         local sql = "select f.FormData \n"..
@@ -495,7 +495,7 @@ local function Data_Unload(bCompare)
 
         dbRunSql(sql, function(handle,Opaque,iError,msgReplay)
             if dbCheckError(iError, msgReplay) then return end
-            local strPath = props['FileDir']..'\\'..strName..'.'..Iif(oName == 'ObjectTypeForm', 'cform', 'rform')
+            local strPath = props['FileDir']..'\\'..strName..Iif(oName == 'ObjectTypeForm', '.cform', Iif(oName == 'Report', '.rform', '.wform'))
             if bCompare == true then
                 AtriumCompare(strPath, msgReplay:GetPathValue('FormData'))
             else

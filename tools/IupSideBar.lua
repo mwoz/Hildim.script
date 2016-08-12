@@ -335,6 +335,7 @@ local function InitSideBar()
     end
 
     local bs2 = iup.GetDialogChild(hMainLayout, "BottomSplit2")
+    local bFindInSide
     if  not SideBar_Plugins.findrepl then
         dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar()
         local hTmp= iup.dialog{SideBar_Plugins.findrepl.handle}
@@ -347,13 +348,17 @@ local function InitSideBar()
         if tonumber(bs2.value) > 980 then bs2.value = 800 end
         iup.GetDialogChild(hMainLayout, "FindPlaceHolder").yautohide = 'NO'
         iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
-
+        iup.SetAttribute(hBx, "HELPID", 'findrepl')
     else
         bs2.barsize="0"
         bs2.value = 1000
+        bFindInSide = true
     end
     SideBar_Plugins.findrepl.OnCreate()
-
+    --debug_prnArgs(SideBar_Plugins)
+    for id, tbs in pairs(SideBar_Plugins) do
+        if id ~= 'findrepl' or bFindInSide then iup.SetAttribute(tbs.handle, "HELPID", id) end
+    end
     for i = 1, #tEvents do
         for _,tbs in pairs(SideBar_Plugins) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
@@ -455,6 +460,9 @@ local function InitToolBar()
             props['iuptoolbar.restarted'] = '1'
         end
     end)
+    for id, tbs in pairs(ToolBar_obj.Tabs) do
+        iup.SetAttribute(tbs.handle, "HELPID", id)
+    end
     tTlb.resize_cb=(function(_,x,y) if ToolBar_obj.handle ~= nil then ToolBar_obj.size = ToolBar_obj.handle.size end end)
     --ToolBar_obj.handle = iup.scitedialog(tTlb)
     local hTmp= iup.dialog(tTlb)

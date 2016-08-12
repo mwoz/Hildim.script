@@ -353,6 +353,21 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             if not shell.fileexists(source:from_utf8(1251)) then return end
         end
         iuprops['resent.files.list']:ins(source)
+    elseif cmd == IDM_HELP then
+        local h = iup.GetFocus()
+        local hlp
+        while h do
+            if h.helpid then hlp = h end
+            if h.name or not h.helpid then break end
+            h = iup.GetParent(h)
+        end
+        if hlp then
+            local url = 'file:///'..props['SciteDefaultHome']..'/help/Hildim/ui/'..h.helpid..'.html'
+            if h.name then url = url..'#'..h.name end
+            print(url)
+            shell.exec(url)
+            return true
+        end
     end
 end)
 
@@ -813,6 +828,7 @@ iup.scitedialog = function(t)
             table.insert(_G.deletedDialogs, t.sciteid)
             scite.PostCommand(POST_CLOSEDIALOG,0)
         end
+        iup.SetAttribute(dlg, "HELPID", t.sciteid)
     else
         dlg:show()
     end
