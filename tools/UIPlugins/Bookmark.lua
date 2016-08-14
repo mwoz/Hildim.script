@@ -198,7 +198,7 @@ end
 local function ToolBar_Init(h)
     bToolBar = true
     Init()
-    local dlg = iup.scitedialog{iup.scrollbox{list_bookmarks},sciteparent="SCITE", sciteid="bookmarks_popup",dropdown=true,
+    local dlg = iup.scitedialog{iup.scrollbox{list_bookmarks},sciteparent="SCITE", sciteid="bookmarks",dropdown=true,
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
     list_bookmarks.killfocus_cb = function()
         dlg:hide()

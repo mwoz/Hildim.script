@@ -8,7 +8,7 @@ local function Show()
     local btn_ok = iup.button  {title="OK"}
     local btn_esc = iup.button  {title = "Cancel"}
     local clrUsed = '255 0 0'
-    local tTips = {}
+    local tPlugins = {}
     iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
     iup.SetHandle("TOOLBARSETT_BTN_ESC",btn_esc)
     btn_esc.action = function()
@@ -50,9 +50,25 @@ local function Show()
 
     local function onTip(h, x, y)
         local l = iup.ConvertXYToPos(h, x, y)
-        local t = tTips[h:GetUserId(l)]
-        if t then h.tip = t
+        local t = tPlugins[h:GetUserId(l)]
+        if t then h.tip = t.description
         else h.tip = "" end
+    end
+
+    local helpid
+    local function help_cb(h)
+        local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+        local _, _, xO, yO = dlg.clientoffset:find('(%d+)x(%d+)')
+        local _, _, xH, yH = h.position:find('(%d+),(%d+)')
+
+        local itm = iup.ConvertXYToPos(h, tonumber(xC) - tonumber(dlg.x) - tonumber(xO) - tonumber(xH),
+                              tonumber(yC) - tonumber(dlg.y) - tonumber(yO) - tonumber(yH))
+        local plg = tPlugins[h:GetUserId(tonumber(itm))]
+
+        if plg then
+            helpid = plg.code or h:GetUserId(tonumber(itm)):gsub('%..*$','')
+            if plg.helpfile then helpid = plg.helpfile..':'..helpid end
+        end
     end
 
     btn_ok.action = function()
@@ -84,6 +100,9 @@ local function Show()
         if button ~= 49 then return end
         if pressed == 1 then
             idSrc = iup.ConvertXYToPos(h, x, y)
+        elseif helpid then
+            CORE.HelpUI(helpid, nil)
+            helpid = nil
         else
             local hTarget, idTarget = ConvertXY2WndPos(h, x, y)
             if hTarget and hTarget ~= h and idSrc > 0 then
@@ -130,6 +149,7 @@ local function Show()
     end
 
     local function dragdrop_cb(h, drag_id, drop_id, isshift, iscontrol)
+        print(123)
         if iscontrol == 1 or h == tree_plugins or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return - 1 end
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0
@@ -156,16 +176,16 @@ local function Show()
         return -4
     end
 
-    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return -1 end, tips_cb = onTip, tip = 'xxx'}
+    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return -1 end, tips_cb = onTip, tip = 'xxx'; help_cb = help_cb,}
 
-    tree_right = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, tips_cb = onTip, tip = 'xxx'}
+    tree_right = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, tips_cb = onTip, tip = 'xxx'; help_cb = help_cb,}
 
     local vbox = iup.vbox{
         iup.hbox{iup.vbox{tree_plugins},tree_right};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
     dlg = iup.scitedialog{vbox; title="Элементы панелей инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="toolbarlayout", minsize='530x400'}
+        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="toolbarlayout", minsize='530x400', helpbutton = 'YES'}
 
 
     dlg.show_cb=(function(h,state)
@@ -209,7 +229,7 @@ local function Show()
             end
             if bFound then
                 local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
-                if pI then tTips[p] = pI.description end
+                if pI then tPlugins[pname] = pI end
                 iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
                 k = k + 1
                 h:SetUserId(k, pname)
@@ -221,7 +241,7 @@ local function Show()
 
     for i = 1, #table_dir do
         local pI = dofile(defpath..table_dir[i].name)
-        if pI then tTips[table_dir[i].name] = pI.description end
+        if pI then tPlugins[table_dir[i].name] = pI end
         if pI and pI.toolbar then
             iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
             j = j + 1
@@ -231,7 +251,6 @@ local function Show()
             end
         end
     end
-
 end
 
 Show()

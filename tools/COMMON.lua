@@ -350,7 +350,7 @@ function CORE.RelativePath(current_path)
     if eDir == current_path then
         sRet = ''
     elseif eDir:find('^'..current_path) then
-        sRet = eDir:gsub('^'..current_path, ''):gsub('[^\\]+', "...")
+        sRet = eDir:gsub('^'..current_path, ''):gsub('[^\\]+', "..")
     elseif current_path:find('^'..eDir) then
         sRet = current_path:gsub('^'..eDir, '')
     else
@@ -360,7 +360,7 @@ function CORE.RelativePath(current_path)
             strBeg = strBeg..subpath..'\\'
         end
         if sRet ~= '' then
-        sRet = eDir:sub(#strBeg + 1):gsub('[^\\]+', "...")..current_path:sub(#strBeg + 1)
+        sRet = eDir:sub(#strBeg + 1):gsub('[^\\]+', "..")..current_path:sub(#strBeg + 1)
         else
             sRet = current_path
         end

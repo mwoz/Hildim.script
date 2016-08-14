@@ -15,7 +15,7 @@ local function Run()
             iup.hbox{btn_tst},
         expandchildren = 'YES', gap = 2, margin = "4x4"}
         local dlg = iup.scitedialog{vbox; title = "lpegTester", defaultenter = "MOVE_BTN_OK", defaultesc = "MOVE_BTN_ESC", tabsize = editor.TabWidth,
-        maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "abbreveditor", minsize = '600x300'}
+        maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "lpegtester", minsize = '600x300'}
 
         dlg.show_cb =(function(h, state)
             if state == 4 then

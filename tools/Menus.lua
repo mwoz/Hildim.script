@@ -152,11 +152,12 @@ _G.sys_Menus.OUTPUT = {
 	{link='Tools¦&Next Message'},
 	{'s2', separator=1},
 	{'Input Mode', ru = 'Режим ввода', {
-		{'Display Mode', ru = 'Отобразить(press Enter)', action = function() output:DocumentEnd();output:ReplaceSel('\\n###?') end},
-		{'Command Line Mode', ru = 'Режим командной строки', action = function() output:DocumentEnd();output:ReplaceSel('\\n###c') end},
-		{'LUA Mode', ru = 'Режим консоли LUA', action = function() output:DocumentEnd();output:ReplaceSel('\\n###l') end},
-		{'IDM command Mode', ru = 'Режим команд IDM', action = function() output:DocumentEnd();output:ReplaceSel('\\n###i') end},
-		{'Switch OFF', ru = 'Отключить', action = function() output:DocumentEnd();output:ReplaceSel('\\n####') end},
+		{'Display Mode', ru = 'Отобразить(press Enter)', action = function() output:DocumentEnd();output:ReplaceSel('###?\n') end},
+		{'Command Line Mode', ru = 'Режим командной строки', action = function() output:DocumentEnd();output:ReplaceSel('###c') end},
+		{'LUA Mode', ru = 'Режим консоли LUA', action = function() output:DocumentEnd();output:ReplaceSel('###l') end},
+		{'LUA Mode', ru = 'Значение выражения LUA', action = function() output:DocumentEnd();output:ReplaceSel('###p') end},
+		{'IDM command Mode', ru = 'Режим команд IDM', action = function() output:DocumentEnd();output:ReplaceSel('###i') end},
+		{'Switch OFF', ru = 'Отключить', action = function() output:DocumentEnd();output:ReplaceSel('####') end},
 	}},
 	{'slast', separator=1},
 }

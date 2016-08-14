@@ -54,7 +54,7 @@ local bManualTip = false
 local m_tblSubstitution = {}
 local curr_fillup_char = ''
 local inheritors, inheritorsX = {}, {} --таблицы наследования объектов
-
+local objPatern
 local Ext2Ptrn = {}
 do
     local patterns = {
@@ -224,7 +224,7 @@ end
 
 ------------------------------------------------------
 
-function GetInputObject(line)
+local function GetInputObject(line)
 --получим конструкцию слева от курсора.одного из типов : object, .field, .metod(), function()
     if string.find(line,"[%s=<>%+%*%-&%%/]$") ~=nil or line == '\n' then
         --будем двигаться по строкам вверх в поисках with, sub, function
@@ -275,7 +275,7 @@ function GetInputObject(line)
         line = string.sub(line,1,lineLen)
     end
     if bracketsCounter ~= 0 or lineLen <= 0 then return {"","","", nil} end --в строке неправильно расставлены скобки, либо выражение продолженоиз другой строки - вылетаем, нам тут не светит
-    local _start, _end, sVar = string.find(line, '(%.?[%w%_]+)$', 1)
+    local _start, _end, sVar = string.find(line, objPatern, 1)
 
     if sVar ~= nil then inputObject[1] = sVar end
     if _start ~= nil then
@@ -1042,8 +1042,10 @@ local function OnChar_local(char)
         if objectsX_table._fill ~= nil and ( char == ' ' or char == '=' ) then
             if isXmlLine() then
                 if char == ' ' then
-                    local r = ListXml()
-                    return r or result
+                    if editor.CharAt[editor.SelectionStart] ~= 60 then
+                        local r = ListXml()
+                        return r or result
+                    end
                 else
 
                     local r = TipXml()
@@ -1180,27 +1182,22 @@ AddEventHandler("OnUserListSelection", function(tp, sel_value)
 	end
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)
 end)
+local function OnSwitchLocal()
+	get_api = true
+    ReCreateStructures()
+    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
+        Favorites_ListFILL()
+    end
+    m_ext = editor.Lexer
+    if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end
+    objPatern = Iif(editor.LexerLanguage == 'css', '(%.?[%w%_-]+)$', '(%.?[%w%_]+)$')
+end
 AddEventHandler("OnSwitchFile", function(file)
     local pr = _G.iuprops["spell.autospell"]
-    _G.iuprops["spell.autospell"] = 0
-	get_api = true
-    ReCreateStructures()
-    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
-        Favorites_ListFILL()
-    end
-    m_ext = editor.Lexer
-    if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end
+    OnSwitchLocal()
     _G.iuprops["spell.autospell"] = pr
 end)
-AddEventHandler("OnOpen", function(file)
-	get_api = true
-    ReCreateStructures()
-    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
-        Favorites_ListFILL()
-    end
-    m_ext = editor.Lexer
-    if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end
-end)
+AddEventHandler("OnOpen", OnSwitchLocal)
 AddEventHandler("OnBeforeSave", function() get_api = true end)
 AddEventHandler("OnUpdateUI", OnUpdateUI_local)
 

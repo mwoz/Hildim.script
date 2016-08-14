@@ -44,7 +44,12 @@ noobj<footer Defines a footer for a document or section
 noobj<form Defines an HTML form for user input
 #<frame Not supported in HTML5.\nDefines a window (a frame) in a frameset
 noobj<frameset Not supported in HTML5.\nDefines a set of frames
-noobj<h1 to <h6> Defines HTML headings
+noobj<h1 to Defines HTML heading
+noobj<h2 to Defines HTML heading
+noobj<h3 to Defines HTML heading
+noobj<h4 to Defines HTML heading
+noobj<h5 to Defines HTML heading
+noobj<h6 to Defines HTML heading
 noobj<head Defines information about the document
 ##noobj<header Defines a header for a document or section
 noobj<hr Defines a thematic change in the content

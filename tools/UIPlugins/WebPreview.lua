@@ -9,6 +9,7 @@ local function init()
 </html>]]
     local events_obj
     require "seacher"
+    require "lpeg"
     local findSettings = seacher{
     wholeWord = false
     ,matchCase = false
@@ -19,6 +20,20 @@ local function init()
     ,searchUp = false
     ,replaceWhat = ''
     }
+    local pt_up = lpeg.P'..\\'^0
+    local function repl(a, b)
+        local d = props['FileDir']..'\\'
+        local nUp = (pt_up:match(b, 1) - 1) / 3
+        for i = 1, nUp do
+            d = d:gsub('[^\\]+\\$', "")
+        end
+        if a == ' src="' then a = a..'file:///' end
+        return a..d..b:sub(nUp * 3 + 1)..'"'
+        --print(a, b)
+    end
+    local pt_h = lpeg.Cs((lpeg.P' href="' + lpeg.P' src="')) * lpeg.Cs((1 - lpeg.P'"')^1) * lpeg.P'"'
+    local pt_tg = lpeg.P"<" *((pt_h / repl + (1 - lpeg.P'>'))^0) * lpeg.P">"
+    local pt_all = lpeg.Cs(((1 - lpeg.P"<")^1 + pt_tg)^0)
 
     local TAG = (1 - lpeg.S'<>' - lpeg.P"name")^0
     local SPS = lpeg.S'\n \t\r\f'^0
@@ -104,12 +119,13 @@ local function init()
 
         local str = editor:textrange(startBodyClose + 1, editor.SelectionStart)..Iif(editor.StyleAt[editor.SelectionStart] == 0, '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
         if not pBody then
-            web.html = editor:textrange(0, startBodyClose + 1)..editor:textrange(endBodyOpen, editor.Length)
+            web.html = pt_all:match(editor:textrange(0, startBodyClose + 1)..editor:textrange(endBodyOpen, editor.Length), 1)
             pBody = web.com.document.body
             events_obj = luacom.Connect(web.com.document, body_events)
             iup.PassFocus()
         end
-        pBody.innerHtml = string.to_utf8(str, 1251)
+        --print(pt_all:match(string.to_utf8(str, 1251), 1))
+        pBody.innerHtml = pt_all:match(string.to_utf8(str, 1251), 1)
 
         local cur = web.com.document:getElementById('cursor___')
         if not cur then return end
@@ -122,7 +138,7 @@ local function init()
         if editor.LexerLanguage ~= "hypertext" then
             web.html = strEmpty
         else
-            web.html = editor:GetText()
+            web.html = pt_all:match(editor:GetText(), 1)
             pBody = web.com.document.body
             events_obj = luacom.Connect(pBody, body_events)
             -- events_obj = luacom.Connect(web.com.document, body_events)
@@ -150,6 +166,7 @@ local function init()
     iup.SetAttribute(web, "INVOKEFLAG", 400)
 
     function web:navigate_cb(url)
+        print(123)
         if url:find('^about:') then
             url = url:gsub('^about:', props['FileDir']..'\\')
             local fName, strAnc

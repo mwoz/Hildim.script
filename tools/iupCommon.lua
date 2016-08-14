@@ -316,6 +316,13 @@ iup.SaveSession = function()
     end
 end
 
+function CORE.HelpUI(helpid, anchor)
+    local url = 'file:///'..props['SciteDefaultHome']..'/help/Hildim/ui/'..helpid..'.html'
+    if anchor then url = url..'#'..anchor end
+    print(url)
+    shell.exec(url)
+end
+
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
@@ -362,12 +369,11 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             h = iup.GetParent(h)
         end
         if hlp then
-            local url = 'file:///'..props['SciteDefaultHome']..'/help/Hildim/ui/'..h.helpid..'.html'
-            if h.name then url = url..'#'..h.name end
-            print(url)
-            shell.exec(url)
+            CORE.HelpUI(hlp.helpid, hlp.name)
             return true
         end
+        if output.Focus then CORE.HelpUI("outputpane", nil); return true end
+        if findres.Focus then CORE.HelpUI("findrespane", nil); return true end
     end
 end)
 
@@ -724,7 +730,6 @@ iup.scitedetachbox = function(t)
     cmd_Attach = function ()
         if get_scId()=="0" then return end
         dtb.Attach()
-
     end
 
     local function cmd_PopUp()

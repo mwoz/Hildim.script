@@ -248,7 +248,7 @@ local function Toolbar_Init(h)
 
     init()
 
-    local dlg = iup.scitedialog{iup.scrollbox{lst_clip},sciteparent="SCITE", sciteid="cliphistory_popup",dropdown=true,
+    local dlg = iup.scitedialog{iup.scrollbox{lst_clip},sciteparent="SCITE", sciteid="cliphistory",dropdown=true,
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255',}
     lst_clip.killfocus_cb = function()
         if blockReselect then return end

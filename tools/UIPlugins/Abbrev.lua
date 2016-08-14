@@ -449,7 +449,7 @@ end
 local function ToolBar_Init(h)
     bToolBar = true
     Init()
-    local dlg = iup.scitedialog{iup.scrollbox{list_abbrev}, sciteparent = "SCITE", sciteid = "abbrev_popup", dropdown = true,
+    local dlg = iup.scitedialog{iup.scrollbox{list_abbrev}, sciteparent = "SCITE", sciteid = "abbrev", dropdown = true,
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
     list_abbrev.killfocus_cb = function()
         if not bMenuMode then dlg:hide() end
