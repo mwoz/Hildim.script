@@ -27,12 +27,10 @@ local function init()
         for i = 1, nUp do
             d = d:gsub('[^\\]+\\$', "")
         end
-        if a == ' src="' then a = a..'file:///' end
-        return a..d..b:sub(nUp * 3 + 1)..'"'
-        --print(a, b)
+        return a..'file:///'..d..b:sub(nUp * 3 + 1)..'"'
     end
     local pt_h = lpeg.Cs((lpeg.P' href="' + lpeg.P' src="')) * lpeg.Cs((1 - lpeg.P'"')^1) * lpeg.P'"'
-    local pt_tg = lpeg.P"<" *((pt_h / repl + (1 - lpeg.P'>'))^0) * lpeg.P">"
+    local pt_tg =  (lpeg.P"<a " * ((1 - lpeg.P'>'))^0 * lpeg.P">") + (lpeg.P"<" *((pt_h / repl + (1 - lpeg.P'>'))^0) * lpeg.P">")
     local pt_all = lpeg.Cs(((1 - lpeg.P"<")^1 + pt_tg)^0)
 
     local TAG = (1 - lpeg.S'<>' - lpeg.P"name")^0
@@ -166,7 +164,6 @@ local function init()
     iup.SetAttribute(web, "INVOKEFLAG", 400)
 
     function web:navigate_cb(url)
-        print(123)
         if url:find('^about:') then
             url = url:gsub('^about:', props['FileDir']..'\\')
             local fName, strAnc
