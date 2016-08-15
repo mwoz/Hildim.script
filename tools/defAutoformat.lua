@@ -11,6 +11,10 @@ local stylesMap = {default = {
     operStyle = {[10] = true},
     keywordStyle = {[5] = true},
     ignoredStyle = {[8] = true, [1] = true}
+}, hypertext = {
+    operStyle = {[1] = true},
+    keywordStyle = {[3] = true},
+    ignoredStyle = {[8] = true, [6] = true, [3] = true}
 }}
 
 local CurMap = stylesMap.default
@@ -228,9 +232,13 @@ AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
         prevFold = nil
     end
 end)
-AddEventHandler("OnSave", function() curLine = nil end)
-AddEventHandler("OnSwitchFile", function() curLine = nil end)
-AddEventHandler("OnOpen", function() curLine = nil end)
+local function OnSwitchFile_local()
+    CurMap = stylesMap[editor.LexerLanguage] or stylesMap.default
+    curLine = nil
+end
+AddEventHandler("OnSave", OnSwitchFile_local)
+AddEventHandler("OnSwitchFile", OnSwitchFile_local)
+AddEventHandler("OnOpen", OnSwitchFile_local)
 
 AddEventHandler("Format_String", function()
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] then return end

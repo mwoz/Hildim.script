@@ -78,6 +78,15 @@ local function ReplaceSel(h)
     PostAction()
 end
 
+local function FindSel(h)
+    ReadSettings()
+    local count = findSettings:FindAll(500, false, true)
+    SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
+    Ctrl("cmbFindWhat"):SaveHist()
+    iup.PassFocus()
+    PostAction()
+end
+
 local function FindAll(h)
     ReadSettings()
     local count = findSettings:FindAll(500, false)

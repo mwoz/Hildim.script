@@ -422,8 +422,8 @@ function s:MarkResult()
     self.send = scite.SendEditor
 end
 
-function s:FindAll(maxlines, bLive)
-    local rez = self:findWalk(false, self:onFindAll(maxlines, bLive, true, 'Current', true))
+function s:FindAll(maxlines, bLive, bSel)
+    local rez = self:findWalk((bSel == true), self:onFindAll(maxlines, bLive, true, 'Current', true))
     self:MarkResult()
     return rez
 end

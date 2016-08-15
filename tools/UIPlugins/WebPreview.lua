@@ -115,7 +115,7 @@ local function init()
         local cp = editor.SelectionStart
         if cp < startBodyClose or cp > endBodyOpen then pBody = nil; return end
 
-        local str = editor:textrange(startBodyClose + 1, editor.SelectionStart)..Iif(editor.StyleAt[editor.SelectionStart] == 0, '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
+    local str = editor:textrange(startBodyClose + 1, editor.SelectionStart)..Iif(editor.StyleAt[editor.SelectionStart] == 0 or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
         if not pBody then
             web.html = pt_all:match(editor:textrange(0, startBodyClose + 1)..editor:textrange(endBodyOpen, editor.Length), 1)
             pBody = web.com.document.body
@@ -155,7 +155,7 @@ local function init()
     end
 
 
-    web = iup.webbrowser{}
+    web = iup.webbrowser{help_cb = function() print(444) end}
 
     CreateLuaCOM(web)
 
@@ -195,12 +195,16 @@ local function init()
 
     local function tagAround(st)
         editor:ReplaceSel('<'..st..'>'..editor:GetSelText()..'</'..st..'>')
+        local s = editor.SelectionEnd - #st - 3
+        editor:SetSel(s, s)
     end
     local function setItalics() tagAround"i" end
     local function setBold() tagAround"b" end
     local function setStrike() tagAround"s" end
     local function setUnderlined() tagAround"u" end
-    local function setSpan() local s = editor.SelectionStart + 5; tagAround"span"; editor:SetSel(s, s) end
+    local function setPar() tagAround"p" end
+    --local function setSpan() local s = editor.SelectionStart + 5; tagAround"span"; editor:SetSel(s, s) end
+    local function setSpan() tagAround"span"; end
     local function newLine()
         local cur = web.com.document:getElementById('cursor___')
         if not cur then return end
@@ -231,8 +235,10 @@ local function init()
             {'Bold', ru = 'Жирный', action = setBold, key = 'Alt+B', active = bHt, },
             {'Strike', ru = 'Зачеркнутый', action = setStrike, key = 'Alt+S', active = bHt, },
             {'Underlined', ru = 'Подчеркнутый', action = setUnderlined, key = 'Alt+U', active = bHt, },
-            {'Span', ru = 'Интервал', action = setSpan, key = 'Alt+P', active = bHt, },
+            {'Span', ru = 'Интервал', action = setSpan, key = 'Alt+N', active = bHt, },
+            {'Paragrafh', ru = 'Параграф', action = setPar, key = 'Alt+P', active = bHt, },
             {'New Line', ru = 'Новая строка', action = newLine, key = 'Alt+Enter', active = bHt, },
+            {'Line Break', action = function() editor:ReplaceSel('<br>') end, key = 'Alt+Ctrl+Enter', active = bHt, },
         }}
     )
 
