@@ -288,7 +288,7 @@ local function FileMan_OpenItem()
 end
 
 local function FileMan_OpenSelectedItems()
-	local si = list_getvaluenum(list_favorites)
+	local si = list_getvaluenum(list_dir)
     local dir_or_file, attr = FileMan_GetSelectedItem(si)
     if attr ~= 'd' then
         OpenFile(current_path..dir_or_file)

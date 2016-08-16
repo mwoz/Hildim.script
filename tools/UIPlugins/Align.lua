@@ -1,6 +1,6 @@
 local function Init()
     local function Align()
-        local nSelection = scite.SendEditor(SCI_GETSELECTIONS)
+        local nSelection = editor.Selections
         local tbl_lines = {}
         local tbl_pos = {}
         local maxPos = 0
@@ -49,12 +49,13 @@ local function Init()
             local txt_search = iup.text{size = '50x0'}
             local txt_num = iup.text{value = "1", size = "20x0", mask = "/d+"}
             local btn_ok = iup.button  {title = "OK"}
+            local chk_regex = iup.toggle{title = "RegEx"}
             iup.SetHandle("ALIGN_BTN_OK", btn_ok)
 
             local btn_esc = iup.button  {title = "Cancel"}
             iup.SetHandle("ALIGN_BTN_ESC", btn_esc)
 
-            local vbox = iup.vbox{ iup.hbox{iup.label{title = "Подстрока:", gap = 3}, txt_search, iup.fill{}, iup.label{title = "Позиция:"}, txt_num, alignment = 'ACENTER'}, iup.hbox{btn_ok, iup.fill{}, btn_esc}, gap =2,margin="4x4" }
+            local vbox = iup.vbox{ iup.hbox{iup.label{title = "Подстрока:", gap = 3}, txt_search, iup.fill{},chk_regex, iup.label{title = "Позиция:"},  txt_num, alignment = 'ACENTER'}, iup.hbox{btn_ok, iup.fill{}, btn_esc}, gap =2,margin="4x4" }
             local result = false
             dlg = iup.scitedialog{vbox; title = "Выравнивание", defaultenter = "ALIGN_BTN_OK", defaultesc = "ALIGN_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid="align" }
 
@@ -77,11 +78,14 @@ local function Init()
 
                 for i = linestart, lineend do
                     local str = editor:GetLine(i)
+                    if i == lineend and not str then break end
                     local n = nm
                     local pos = 1
                     while n > 0 do
                         if not str then break end
-                        pos = str:find(val:gsub('\\r', '\r'):gsub('\\n', '\n'), pos, 1, true)
+                        val = txt_search.value:gsub('\\r', '\r'):gsub('\\n', '\n')
+                        if chk_regex.value == 'ON' then val = val:gsub("\\", "%%") end
+                        pos = str:find(val, pos, chk_regex.value == 'OFF')
                         n = n - 1
                         if pos == nil then break end
                         pos = pos + 1

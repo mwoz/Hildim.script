@@ -142,15 +142,15 @@ _G.sys_Menus.TABBAR = {
 	{'slast', separator=1},
 }
 _G.sys_Menus.OUTPUT = {
-	{link='Edit¦Conventional¦Cu&t'},
-	{link='Edit¦Conventional¦&Copy'},
-	{link='Edit¦Conventional¦&Paste'},
-	{link='Edit¦Conventional¦&Delete'},
-	{'s1', separator=1},
-	{link='Tools¦Clear &Output'},
-	{link='Tools¦&Previous Message'},
-	{link='Tools¦&Next Message'},
-	{'s2', separator=1},
+	{link = 'Edit¦Conventional¦Cu&t'},
+	{link = 'Edit¦Conventional¦&Copy'},
+	{link = 'Edit¦Conventional¦&Paste'},
+	{link = 'Edit¦Conventional¦&Delete'},
+	{'s1', separator = 1},
+	{link = 'Tools¦Clear &Output'},
+	{link = 'Tools¦&Previous Message'},
+	{link = 'Tools¦&Next Message'},
+	{'s2', separator = 1},
 	{'Input Mode', ru = 'Режим ввода', {
 		{'Display Mode', ru = 'Отобразить(press Enter)', action = function() output:DocumentEnd();output:ReplaceSel('###?\n') end},
 		{'Command Line Mode', ru = 'Режим командной строки', action = function() output:DocumentEnd();output:ReplaceSel('###c') end},
@@ -159,7 +159,12 @@ _G.sys_Menus.OUTPUT = {
 		{'IDM command Mode', ru = 'Режим команд IDM', action = function() output:DocumentEnd();output:ReplaceSel('###i') end},
 		{'Switch OFF', ru = 'Отключить', action = function() output:DocumentEnd();output:ReplaceSel('####') end},
 	}},
-	{'slast', separator=1},
+    {'Settings', ru = 'Настройки',{
+        {'Wrap Out&put', ru = 'Перенос по словам в консоли', action = IDM_WRAPOUTPUT, check = "props['output.wrap']=='1'"},
+        {'Clear Before Execute', ru = 'Очищать перед выполнением', check_prop = "clear.before.execute"},
+        {'Recode OEM to ANSI', ru = 'Перекодировать OEM в ANSI', check_prop = "output.code.page.oem2ansi"},
+    },},
+	{'slast', separator = 1},
 }
 
 _G.sys_Menus.FINDRES = {
@@ -169,9 +174,12 @@ _G.sys_Menus.FINDRES = {
 	{link = 'Edit¦Conventional¦&Delete'},
 	{'s1', separator = 2},
 	{link = 'Tools¦Clear &Find Result'},
-	{'DblClick Only On Number', ru = 'DblClick только по номеру', check_boolean = 'findres.clickonlynumber'},
-	{'Group By Name', ru = 'Группировать по имени файла', check_boolean = 'findres.groupbyfile'},
-	{'Number Of Find Results...', ru = 'Результатов поиска не более....', action = SetFindresCount},
+    {'Settings', ru = "Настройки" ,{
+        {'DblClick Only On Number', ru = 'DblClick только по номеру', check_boolean = 'findres.clickonlynumber'},
+        {'Group By Name', ru = 'Группировать по имени файла', check_boolean = 'findres.groupbyfile'},
+        {'Wrap Find &Result', ru = 'Перенос по словам в результатах поиска', action = IDM_WRAPFINDRES, check = "props['findres.wrap']=='1'"},
+        {'Number Of Find Results...', ru = 'Результатов поиска не более....', action = SetFindresCount},
+    }},
 	{'Open Files', plane = 1, visible = "findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER" ,{
 		{'s_OpenFiles', separator = 1},
 		{'Open Files', ru = 'Открыть файлы', action = function() CORE.OpenFoundFiles(1) end, },
@@ -373,18 +381,12 @@ _G.sys_Menus.MainWindowMenu = {
 	{'Options', ru = 'Настройки',{
 
 		{'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
-		{'Wrap Find &Result', ru = 'Перенос по словам в результатах поиска', action = IDM_WRAPFINDRES, check = "props['findres.wrap']=='1'"},
 		{'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
 		{'s2', separator = 1},
 		{'Line End Characters', ru = 'Символы перевода строк',{radio = 1,
 			{'CR &+ LF', action = IDM_EOL_CRLF, check = "editor.EOLMode==SC_EOL_CRLF"},
 			{'&CR', action = IDM_EOL_CR, check = "editor.EOLMode==SC_EOL_CR"},
 			{'&LF', action = IDM_EOL_LF, check = "editor.EOLMode==SC_EOL_LF"},
-		},},
-		{'Output', ru = 'Окно консоли',{
-			{'Wrap Out&put', ru = 'Перенос по словам в консоли', action = IDM_WRAPOUTPUT, check = "props['output.wrap']=='1'"},
-			{'Clear Before Execute', ru = 'Очищать перед выполнением', check_prop = "clear.before.execute"},
-			{'Recode OEM to ANSI', ru = 'Перекодировать OEM в ANSI', check_prop = "output.code.page.oem2ansi"},
 		},},
 		{'&Convert Line End Characters', ru = 'Конвертировать символы перевода строк', action = IDM_EOL_CONVERT},
 		{'s1', separator = 1},

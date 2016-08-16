@@ -54,7 +54,11 @@ local function init()
 
 	local pBody
     function body_events:oncontextmenu(e)
-        print(web.com.event)
+            local mnu = iup.menu
+            {
+              iup.item{title = "Help", action = function() CORE.HelpUI("htmlpreview", nil) end}
+            }
+            mnu:popup(iup.MOUSEPOS, iup.MOUSEPOS)
         return true
     end
 
@@ -135,6 +139,7 @@ local function init()
         pBody = nil
         if editor.LexerLanguage ~= "hypertext" then
             web.html = strEmpty
+            luacom.Connect(web.com.document, body_events)
         else
             web.html = pt_all:match(editor:GetText(), 1)
             pBody = web.com.document.body
@@ -151,6 +156,7 @@ local function init()
         pBody = nil
         if editor.LexerLanguage ~= "hypertext" then
             web.html = strEmpty
+            luacom.Connect(web.com.document, body_events)
         end
     end
 
@@ -306,7 +312,7 @@ local function init()
                 res = rel..res
             else
                 local tblAnc = GetAnchors(editor:GetText())
-                res = table.concat(tblAnc, '|#')
+                if tblAnc then res = table.concat(tblAnc, '|#') end
                 if res ~= '' then res = '#'..res end
             end
             iup.PassFocus()

@@ -112,11 +112,11 @@ local function init()
             blockReselect = true
 
             iup.menu{
-                iup.item{title="Delete",action=(function()
+                iup.item{title = "Удалить", action =(function()
                     lst_clip.dellin = lin
                     if lin == 1 then clipboard.text = lst_clip:getcell(1, 2) end
                 end)},
-                iup.item{title="Paste All Tops as Restangle",action=(function()
+                iup.item{title="Вставить верх списка как блок",action=(function()
                     local text = ''
                     for i = 1,  lin do
                         text = text..lst_clip:getcell(i, 2)
@@ -129,7 +129,7 @@ local function init()
                     blockReselect = false
                     iup.PassFocus()
                 end)},
-                iup.item{title="Set for Ctrl+0",action=(function()
+                iup.item{title="Вставлять по Ctrl+0",action=(function()
                     lin0 = lin
                 end), active = Iif(lin >=10, 'YES', 'NO')},
 
