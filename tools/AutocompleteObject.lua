@@ -620,15 +620,15 @@ local function ReCreateStructures(strText, tblFiles)
     if editor.Lexer == SCLEX_FORMENJINE then
         RecrReCreateStructures(editor:GetText(),{})
         if str_vbkwrd ~= nil then
-            props["keywords6$"] = str_vbkwrd
+            props['keywords6.$('..props['pattern.name$']..')'] = str_vbkwrd
             scite.SendEditor(SCI_SETKEYWORDS,5,str_vbkwrd)
         end
         if str_xmlkwrd ~= nil then
-            props["keywords4$"] = str_xmlkwrd
+            props['keywords4.$('..props['pattern.name$']..')'] = str_xmlkwrd
             scite.SendEditor(SCI_SETKEYWORDS,3,str_xmlkwrd)
         end
         local kw = string.lower(table.concat(tbl_fList,' '))
-        props["keywords16$"] = kw
+        props['keywords16.$('..props['pattern.name$']..')'] = kw
         scite.SendEditor(3996,15,kw)
         scite.SendEditor(SCI_COLOURISE,0,editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen+2))
     else

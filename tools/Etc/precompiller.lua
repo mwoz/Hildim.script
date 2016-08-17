@@ -327,8 +327,6 @@ local function OnSave_local()
 end
 
 function formenjine_Run()
-   print(debug.traceback())
-   if true then return end
     if _G['formengine.reloadtemplate'] ~= true then
         if props['FileExt']=='cform' or props['FileExt']=='rform' then
             props['formengine.runafter'] = '1'
