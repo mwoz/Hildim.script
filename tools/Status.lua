@@ -175,8 +175,8 @@ local function GoToPos()
         editor:SetSel(lineStart + col, lineStart + col )
     else
         editor:SetSel(lineStart + ln, lineStart + ln)
-        scite.SendEditor(SCI_SETSELECTIONNANCHORVIRTUALSPACE, 0, col-ln)
-        scite.SendEditor(SCI_SETSELECTIONNCARETVIRTUALSPACE, 0, col-ln)
+        editor.SelectionNAnchorVirtualSpace[0] = col - ln
+        editor.SelectionNCaretVirtualSpace[0] = col - ln
     end
     OnNavigation("Go-")
     iup.PassFocus()

@@ -119,7 +119,7 @@ local function init()
         local cp = editor.SelectionStart
         if cp < startBodyClose or cp > endBodyOpen then pBody = nil; return end
 
-    local str = editor:textrange(startBodyClose + 1, editor.SelectionStart)..Iif(editor.StyleAt[editor.SelectionStart] == 0 or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
+    local str = (editor:textrange(startBodyClose + 1, editor.SelectionStart) or '')..Iif(editor.StyleAt[editor.SelectionStart] == 0 or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
         if not pBody then
             web.html = pt_all:match(editor:textrange(0, startBodyClose + 1)..editor:textrange(endBodyOpen, editor.Length), 1)
             pBody = web.com.document.body
@@ -133,6 +133,7 @@ local function init()
         if not cur then return end
         cur:scrollIntoView(true)
         pBody.scrollTop = pBody.scrollTop - 50
+        pBody.scrollLeft = pBody.scrollLeft - 50
     end
 
     local function onSwitchLocal()
@@ -200,8 +201,12 @@ local function init()
     local function bHt() return editor.LexerLanguage == "hypertext" end
 
     local function tagAround(st)
-        editor:ReplaceSel('<'..st..'>'..editor:GetSelText()..'</'..st..'>')
-        local s = editor.SelectionEnd - #st - 3
+        local isEmpty = editor.SelectionEmpty
+        local vs = editor.SelectionNCaretVirtualSpace[0]
+        local sPos = editor.SelectionStart
+        editor:ReplaceSel(string.rep(' ', vs)..'<'..st..'>'..editor:GetSelText()..'</'..st..'>')
+        if not isEmpty then return end
+        local s = sPos + vs + #st + 2
         editor:SetSel(s, s)
     end
     local function setItalics() tagAround"i" end
@@ -269,7 +274,13 @@ local function init()
                         if bok then anc = '#'..tblAnc[res + 1] end
                     end
                 end
-                editor:ReplaceSel('<a href="'..FILEMAN.RelativePath()..anc..'">'..strSel..'</a>');
+                local vs = editor.SelectionNCaretVirtualSpace[0]
+                local strTg1 = string.rep(' ', vs)..'<a href="'..FILEMAN.RelativePath()..anc..'">'
+                local nPos = editor.SelectionStart + #strTg1
+
+                editor:ReplaceSel(strTg1..strSel..'</a>');
+                if strSel == "" then editor:SetSel(nPos, nPos) end
+
                 iup.PassFocus()
             end},
             {"Image", ru = "Вставить как изображение", action = function()

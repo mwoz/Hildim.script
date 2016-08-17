@@ -118,7 +118,7 @@ if _G.iuprops['settings.lexers'] then
 end
 
 
-_G.sys_Menus.TABBAR = {
+_G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 	{link='File¦&Close'},
 	{link='File¦C&lose All'},
 	{'Close All But Curent',  ru = 'Зарыть все, кроме текущей', action=function() iup.CloseFilesSet(9132) end, },
@@ -141,7 +141,7 @@ _G.sys_Menus.TABBAR = {
 	{link='Options¦&Read-Only'},
 	{'slast', separator=1},
 }
-_G.sys_Menus.OUTPUT = {
+_G.sys_Menus.OUTPUT = {title = "Контекстное меню консоли",
 	{link = 'Edit¦Conventional¦Cu&t'},
 	{link = 'Edit¦Conventional¦&Copy'},
 	{link = 'Edit¦Conventional¦&Paste'},
@@ -167,7 +167,7 @@ _G.sys_Menus.OUTPUT = {
 	{'slast', separator = 1},
 }
 
-_G.sys_Menus.FINDRES = {
+_G.sys_Menus.FINDRES = {title = "Контекстное меню результатов поиска",
 	{link = 'Edit¦Conventional¦Cu&t'},
 	{link = 'Edit¦Conventional¦&Copy'},
 	{link = 'Edit¦Conventional¦&Paste'},
@@ -190,7 +190,7 @@ _G.sys_Menus.FINDRES = {
 
 }
 
-_G.sys_Menus.EDITOR = {
+_G.sys_Menus.EDITOR = {title = "Контекстное меню окна редактора",
 	{'s0', link='Edit¦Conventional¦&Undo'},
 	{link='Edit¦Conventional¦&Redo'},
 	{'s1', separator=1},
@@ -207,7 +207,7 @@ _G.sys_Menus.EDITOR = {
 	{link='Search¦&Go to definition(Shift+Click)'},
 }
 
-_G.sys_Menus.MainWindowMenu = {
+_G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 	{'_HIDDEN_', {
 		{'Next Tab', key = 'Ctrl+Tab', action = IDM_NEXTFILESTACK},
 		{'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = IDM_PREVFILESTACK},
@@ -284,8 +284,8 @@ _G.sys_Menus.MainWindowMenu = {
 		-- {'Complete S&ymbol', ru = 'Завершить слово(из API и текста)', key = 'Ctrl+I', action = IDM_COMPLETE},
 		{'Complete S&ymbol', ru = 'Завершить слово(из API)', key = 'Ctrl++', action = function() ShowListManualy() end},
 		{'Complete &Word', ru = 'Завершить слово(из текста)', key = 'Ctrl+Enter', action = IDM_COMPLETEWORD},
-		{'Expand Abbre&viation', ru = 'Вставить сокращение (%SEL%=выделение)', key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
-		{'Expand Abbre&viation', ru = 'Вставить сокращение (%SEL%=клипбоард)', key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
+		{'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=выделение)', key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
+		{'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=буфер обмена)', key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
 		--[[{'&Insert Abbreviation', ru = 'Расшифровать сокращение', key = 'Ctrl+Shift+R', action = IDM_INS_ABBREV},]]
 		{'Block Co&mment or Uncomment', ru = 'Закомментировать и раскомментировать текст', key = 'Ctrl+Q', action = IDM_BLOCK_COMMENT, image = 'edit_signiture_µ'},
 		{'Bo&x Comment', ru = 'Блочный комментарий', key = 'Ctrl+Shift+B', action = IDM_BOX_COMMENT},

@@ -1,3 +1,9 @@
+-- Version: 1.0
+-- Author:
+---------------------------------------------------
+-- Description:
+---------------------------------------------------
+local text = props['CurrentSelection']
 local myId = "Abbrev/Bmk"
 local list_abbrev
 
@@ -232,7 +238,7 @@ local function InsertAbbreviation(expan, dInd, curSel)
             if not shell.fileexists(strFile) then print('Error: file for form "Л'..frm..'Ы" ('..strFile..') not exists!') end
             local form = dofile(strFile)
             if not frm then print('Error: unknown abbrev form: "Л'..frm..'" ('..strFile..') dos not return function') end
-            form(findSt, editor.SelectionEnd, s, dInd, replAbbr)
+            form(findSt, editor.SelectionEnd, s:gsub('Л.*Ы', ''), dInd, replAbbr)
     end)
     local bCancel
     if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста     'Л([^%[]%.-[^%]])Ы'
@@ -420,14 +426,14 @@ local function Init()
             local col = iup.ConvertXYToPos(list_abbrev, x, y) % 3
             list_abbrev.focus_cell = lin..':'..col
             local mnu = iup.menu{
-                iup.item{title = "New", action = function() bMenuMode = false ;EditAbbrev(true) end},
-                iup.item{title = "Change", action = function() bMenuMode = false ;EditAbbrev(false) end},
-                iup.item{title = "Delete", action =(function()
+                iup.item{title = "—оздать", action = function() bMenuMode = false ;EditAbbrev(true) end},
+                iup.item{title = "»зменить", action = function() bMenuMode = false ;EditAbbrev(false) end},
+                iup.item{title = "”далить", action =(function()
                     local l = list_getvaluenum(list_abbrev)
                     list_abbrev.dellin = ''..l
                 end)},
                 iup.separator{},
-                iup.item{title = "Save all", active = Iif(bListModified, 'YES', 'NO'), action =(function()
+                iup.item{title = "—охранить все", active = Iif(bListModified, 'YES', 'NO'), action =(function()
                     local maxN = tonumber(list_abbrev.numlin)
                     local strOut = ''
                     for i = 1, maxN do

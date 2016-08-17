@@ -3,7 +3,7 @@ hta=<html>\n<head>\n<meta http-equiv=Content-Type Content="text-html; charset=Wi
 xml=<?xml version="1.0" encoding="iso-8859-1"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml">\n<head>\n\t<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />\n\t<title>¦</title>\n\t<meta name="generator" content="SciTE" />\n</head>\n<body>\n\n</body>\n</html>
 <ol=<ol>‹#1‡\n  <li>‹?2‡‡\n    <p‹?3‡‡ class="‹@4›"›>¦</p>\n  ›¦</li>›\n</ol>‹\n"OL",\nnil,\n'Rows: %i[1,30,1]¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n1,1,0,''\n›
 <ul=<ul>‹#1‡\n  <li>‹?2‡‡\n    <p‹?3‡‡ class="‹@4›"›>¦</p>\n  ›¦</li>›\n</ul>‹\n"UL",\nnil,\n'Rows: %i[1,30,1]¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n1,1,0,''\n›
-<table=<table>‹?3‡‡\n  <tr>‹#1‡\n    <th></th>›\n  </tr>›‹#2‡\n  <tr>‹#1‡\n    <td>‹?4‡‡\n      <p‹?5‡‡ class="‹@6›"›>¦</p>\n    ›¦</td>›\n  </tr>›\n</table>‹\n"TABLE",\nnil,\n'Columns: %i[1,30,1]¬n'..\n'Rows: %i[1,100,1]¬n'..\n'Use header: %b¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n2,2,0,0,0,''\n›
+<table=<table>‹?3‡‡\n  <tr>‹#1‡\n    <th></th>›\n  </tr>›‹#2‡\n  <tr>‹#1‡\n    <td>‹?4‡‡\n      <p‹?5‡‡ class="‹@6›"›>&nbsp;¦</p>\n    ›¦</td>›\n  </tr>›\n</table>‹\n"TABLE",\nnil,\n'Columns: %i[1,30,1]¬n'..\n'Rows: %i[1,100,1]¬n'..\n'Use header: %b¬n'..\n'Use P: %b¬n'..\n'Use P class: %b¬n'..\n'Use P className: %s¬n',\n2,2,0,0,0,''\n›
 & =&nbsp;
 &¦=&brvbar;
 &§=&sect;

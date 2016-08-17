@@ -51,8 +51,8 @@ end
 local function Show()
 
     local list_lex, dlg, bBlockReset
-    local btn_ok = iup.button  {title="OK"}
-    local btn_esc = iup.button  {title="Cancel"}
+    local btn_ok = iup.button  {title="OK", help_cb = help_cb}
+    local btn_esc = iup.button  {title="Cancel", help_cb = help_cb}
     iup.SetHandle("HK_BTN_OK",btn_ok)
     iup.SetHandle("HK_BTN_ESC",btn_esc)
     btn_esc.action = function()
@@ -60,7 +60,11 @@ local function Show()
         dlg:postdestroy()
     end
 
-    local edit_hk, tree_hk = iup.text{size='100x'}
+    local function help_cb()
+        CORE.HelpUI("HotkeysSetup", nil)
+    end
+
+    local edit_hk, tree_hk = iup.text{size='100x', help_cb = help_cb}
 
     btn_ok.action = function()
         local str = ''
@@ -176,7 +180,7 @@ local function Show()
     end
 
     tree_hk = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],imageexpanded0 = 'tree_µ',
-                            branchclose_cb = function(h) if h.value=='0' then return -1 end end}
+                            branchclose_cb = function(h) if h.value == '0' then return - 1 end end, help_cb = help_cb}
     tree_hk.selection_cb = function(h,id, status)
         if status == 1 then
             bBlockReset = false
@@ -210,7 +214,7 @@ local function Show()
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
     dlg = iup.scitedialog{vbox; title="Настройка горячих клавиш",defaultenter="HK_BTN_OK",defaultesc="HK_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="HotkeysSetup", minsize='300x600'}
+        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="HotkeysSetup", minsize='300x600', helpbutton = 'YES'}
 
     dlg.show_cb=(function(h,state)
         if state == 4 then
@@ -225,7 +229,7 @@ local function Show()
 
     for ups,submnu in pairs(sys_Menus) do
         local tb = {}
-        tb.branchname = ups
+        tb.branchname = submnu.title --ups
         table.insert(tblView, 0, tb)
         viewMenu(submnu, tb, ups)
     end

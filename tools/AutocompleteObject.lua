@@ -251,10 +251,9 @@ local function GetInputObject(line)
             nLine = nLine-1
         end
     end
-
     local lineLen = string.len(line)
     local inputObject = {"","","",nil}
-    if props["autocomplete."..editor.LexerLanguage..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] then
+    if props["autocomplete."..editor.LexerLanguage..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] or editor.CharAt[editor.SelectionStart] == 60 then
         inputObject = {"noobj", "", "", nil}
         return inputObject
     end
@@ -984,7 +983,9 @@ local function ResetCallTipParams()
 end
 
 local function OnUpdateUI_local(bChange, bSelect, flag)
+    --print(1234, flag)     262401
     if (bChange == 0 and bSelect == 0) or blockCT then return end
+
     if calltipinfo[1] ~= 0 then
         current_pos = editor.CurrentPos
         af_current_line = editor:LineFromPosition(current_pos)
