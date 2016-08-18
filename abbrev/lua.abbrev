@@ -7,3 +7,4 @@ rep=repeat \nuntil ¦
 lf=local function ¦()\nend
 f=function ¦()\nend
 aeh=AddEventHandler("‹@1›", function() end)‹\n"AddEventHamdler",\nnil,\n'Event: %L|OnBeforeSave|OnChar|OnClear|OnClose|OnColorized|OnContextMenu|OnDoubleClick|OnDwellStart|OnFinalise|OnFindCompleted|OnIdle|OnLayOutNotify|OnMarginClick|OnMenuCommand|OnNavigation|OnOpen|OnSave|OnSavePointLeft|OnSavePointReached|OnSendEditor|OnSwitchFile|OnUpdateUI|OnUserListSelection|¬n',\n0\n›
+fake=--some text /==INPUT==/some text‹fake›

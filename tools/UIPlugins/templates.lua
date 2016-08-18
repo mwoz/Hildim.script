@@ -229,6 +229,7 @@ return {
     title = 'Шаблоны  Systematica',
     code = 'template',
     toolbar = Init,
+    hlpdevice = 'sysm',
     description = [[Работа с FormEnjine шаблонами]]
 }
 

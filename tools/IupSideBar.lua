@@ -55,6 +55,9 @@ local function  CreateToolBar()
         end
         local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
         pI.toolbar(ToolBar_obj)
+        local id = pI.code
+        if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
+        iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
         strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'
     end
     strTbl = strTbl..'gap="3",margin="3x0", maxsize="x36", alignment = "ACENTER",}, name="ToolBar"}} end'
@@ -211,7 +214,7 @@ local function  CreateBox()
         local tCur
 
         for p in str:gmatch('[^¦]+') do
-            local _,_, pname, pf = p:find('(.-)(¬?)$')
+            local _, _, pname, pf = p:find('(.-)(¬?)$')
             if pf ~= '' then
                 tCur = {title = pname}
                 table.insert(tSide, tCur)
@@ -220,11 +223,16 @@ local function  CreateBox()
             end
         end
         local strTabs = 'return function(P) return{\n'
+
         for i = 1, #tSide do
             tCur = tSide[i]
             if tCur[1] then
                 local pI = dofile(defpath..tCur[1])
-                pI.sidebar()
+                pI.sidebar(defpath..tCur[1])
+                --debug_prnArgs()
+                local id = pI.code
+                if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
+                iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
                 local tabName = tCur.title
                 if #tCur == 1 then
                     strTabs = strTabs..'P{"'..pI.code..'", tabtitle = "'..tabName..'"},\n'
@@ -234,6 +242,9 @@ local function  CreateBox()
                     for j = 2, #tCur do
                         pI = dofile(defpath..tCur[j])
                         pI.sidebar()
+                        local id = pI.code
+                        if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
+                        iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
                         strPrev = 'P{'..strPrev..', '..piCode(pI)..', '
                         if bfixedheigth or pI.fixedheigth then
                             strPrev = strPrev..'type="VBOX", '
@@ -355,10 +366,7 @@ local function InitSideBar()
         bFindInSide = true
     end
     SideBar_Plugins.findrepl.OnCreate()
-    --debug_prnArgs(SideBar_Plugins)
-    for id, tbs in pairs(SideBar_Plugins) do
-        if id ~= 'findrepl' or bFindInSide then iup.SetAttribute(tbs.handle, "HELPID", id) end
-    end
+
     for i = 1, #tEvents do
         for _,tbs in pairs(SideBar_Plugins) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
@@ -460,9 +468,7 @@ local function InitToolBar()
             props['iuptoolbar.restarted'] = '1'
         end
     end)
-    for id, tbs in pairs(ToolBar_obj.Tabs) do
-        iup.SetAttribute(tbs.handle, "HELPID", id)
-    end
+
     tTlb.resize_cb=(function(_,x,y) if ToolBar_obj.handle ~= nil then ToolBar_obj.size = ToolBar_obj.handle.size end end)
     --ToolBar_obj.handle = iup.scitedialog(tTlb)
     local hTmp= iup.dialog(tTlb)

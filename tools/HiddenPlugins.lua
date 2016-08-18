@@ -99,7 +99,7 @@ local function Run(flag)
             local plg = tPlugins[h:GetUserId(tonumber(itm))]
             if plg then
                 helpid = plg.code or h:GetUserId(tonumber(itm)):gsub('%..*$','')
-                if plg.helpfile then helpid = plg.helpfile..':'..helpid end
+                if plg.hlpdevice then helpid = plg.hlpdevice..'::'..helpid end
             end
         end
 

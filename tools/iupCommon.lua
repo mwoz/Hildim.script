@@ -317,7 +317,11 @@ iup.SaveSession = function()
 end
 
 function CORE.HelpUI(helpid, anchor)
-    local url = 'file:///'..props['SciteDefaultHome']..'/help/Hildim/ui/'..helpid..'.html'
+    local dv, fl = 'Hildim', helpid
+    local _, _, d, f = helpid:find('(.*)::(.*)')
+    if d then dv, fl = d, f end
+
+    local url = 'file:///'..props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html'
     if anchor then url = url..'#'..anchor end
     print(url)
     shell.exec(url)
@@ -833,6 +837,8 @@ iup.scitedialog = function(t)
             table.insert(_G.deletedDialogs, t.sciteid)
             scite.PostCommand(POST_CLOSEDIALOG,0)
         end
+        local id = t.sciteid
+        if t.hlpdevice then id = t.hlpdevice..'::'..id end
         iup.SetAttribute(dlg, "HELPID", t.sciteid)
     else
         dlg:show()

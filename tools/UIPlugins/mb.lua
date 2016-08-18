@@ -144,13 +144,13 @@ local function Init(h)
     btn_Open_Exec = iup.button{image = 'IMAGE_Sub',active='NO', action=(function() sql_ExecCmd() end), tip='Диалог генерации кода запуска\nSQL процедуры(Alt+Shift+E)'}
     h.Tabs.mb =  {
         handle = iup.hbox{  iup.label{title = "Mb:"},
-                            cmb_listMbTrancport,
-                            chk_RunConnect,
-                            iup.label{title = "Adapter:"},
-                            cmb_Subjects,
-                            btn_Open_Exec,
-                            alignment="ACENTER"};
-            minsize='200x', OnSideBarClouse=(function() _G.iuprops["sidebar.mb.transport.value"]=cmb_listMbTrancport.value;_G.iuprops["sidebar.mb.subject.value"]=cmb_Subjects.value; end)
+            cmb_listMbTrancport,
+            chk_RunConnect,
+            iup.label{title = "Adapter:"},
+            cmb_Subjects,
+            btn_Open_Exec,
+        alignment = "ACENTER"};
+        minsize = '200x', OnSideBarClouse =(function() _G.iuprops["sidebar.mb.transport.value"] = cmb_listMbTrancport.value;_G.iuprops["sidebar.mb.subject.value"] = cmb_Subjects.value; end)
 
     }
     cmb_listMbTrancport:FillByDir("\\connectmb\\*.lua", _G.iuprops['mbTrancport.file'])
@@ -161,6 +161,7 @@ return {
     title = 'Message Bas',
     code = 'mb',
     toolbar = Init,
+    hlpdevice = 'sysm',
     description = [[Подключение к Message Bas Systematica]]
 }
 
