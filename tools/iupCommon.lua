@@ -321,10 +321,15 @@ function CORE.HelpUI(helpid, anchor)
     local _, _, d, f = helpid:find('(.*)::(.*)')
     if d then dv, fl = d, f end
 
-    local url = 'file:///'..props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html'
-    if anchor then url = url..'#'..anchor end
-    print(url)
-    shell.exec(url)
+    if shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'.chm') then
+        local strCmd = props['SciteDefaultHome']..'/help/'..dv..'.chm::ui/'..fl..'.html'
+        if anchor then strCmd = strCmd..'#'..anchor end
+        scite.ExecuteHelp(strCmd, 0)
+    elseif shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html') then
+        local url = 'file:///'..props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html'
+        if anchor then url = url..'#'..anchor end
+        shell.exec(url)
+    else print(dv..'/ui/'..fl..'.html'..' - file not found') end
 end
 
 AddEventHandler("OnMenuCommand", function(cmd, source)
@@ -914,7 +919,7 @@ iup.SaveIuprops = function()
     d:destroy()
 
     local hMainLayout = iup.GetLayout()
-    if not hMainLayout and not filename then return end
+    if not hMainLayout or not filename then return end
     if not filename:lower():find('%.config$') then filename = filename..'.config' end
 
     if SideBar_obj and SideBar_obj.handle then SideBar_obj.handle.SaveValues() end

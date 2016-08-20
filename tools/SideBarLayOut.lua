@@ -110,8 +110,13 @@ local function Show()
                         if iup.GetAttributeId(hTarget, 'KIND', idTarget) ~= 'BRANCH' then
                             idTarget = iup.GetAttributeId(hTarget, 'PARENT', idTarget)
                         end
-                        iup.SetAttributeId(hTarget, "STATE", idTarget, 'COLLAPSED')
-                        iup.SetAttributeId(hTarget, "INSERTBRANCH", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                        if tonumber(idTarget) > 0 then
+                            iup.SetAttributeId(hTarget, "STATE", idTarget, 'COLLAPSED')
+                            iup.SetAttributeId(hTarget, "INSERTBRANCH", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                        else
+                            iup.SetAttributeId(hTarget, "ADDBRANCH", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                        end
+
                     end
                     for i = 1, iup.GetAttribute(h, "TOTALCHILDCOUNT", idSrc) do
                         iup.SetAttributeId(hTarget, "ADDLEAF", hTarget.lastaddnode or 0, iup.GetAttributeId(h, 'TITLE', idSrc + i))
@@ -147,7 +152,7 @@ local function Show()
         }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
     end
 
-    local function dragdrop_cb(h,drag_id, drop_id, isshift, iscontrol)
+    local function dragdrop_cb(h, drag_id, drop_id, isshift, iscontrol)
         if iscontrol == 1 or h == tree_plugins  or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return -1 end
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0

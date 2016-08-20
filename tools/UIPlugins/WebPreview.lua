@@ -63,6 +63,7 @@ local function init()
     end
 
     function body_events:ondblclick()
+        OnNavigation("Html")
         if editor.LexerLanguage ~= "hypertext" then return end
         local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
         local _, _, xP, yP = web.screenposition:find('(%d+),(%d+)')
@@ -103,6 +104,7 @@ local function init()
         endPosition = editor:findtext('</', SCFIND_REGEXP, startPosition + 1, endPosition) + 2
         editor:SetSel(startPosition, startPosition)
         editor:SetSel(startPosition, endPosition)
+        OnNavigation("Html-")
         web.com.document:ExecCommand("Unselect", false, nil);
         iup.PassFocus()
         return true

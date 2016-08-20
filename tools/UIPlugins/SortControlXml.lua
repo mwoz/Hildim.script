@@ -202,8 +202,8 @@ local function Init()
         )
         return strout
     end
-
-    local function SortFormXML()
+    SORTFORMXML = {}
+    function SORTFORMXML.SortFormXML()
         local tbl
         local t_xml = xml.eval(editor:GetText())
         if t_xml then
@@ -302,7 +302,7 @@ local function Init()
     end
     require "menuhandler"
     menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦l1',
-        {'Sort Xml Tags In Node', ru = 'Упорядочить тэги в ноде', action = SortFormXML, key = 'Ctrl+Shift+S', image = 'tag__arrow_µ',}
+        {'Sort Xml Tags In Node', ru = 'Упорядочить тэги в ноде', action = SORTFORMXML.SortFormXML, key = 'Ctrl+Shift+S', image = 'tag__arrow_µ',}
     )
     menuhandler:InsertItem('MainWindowMenu', 'Edit¦l1',
         {'Set KeyWords To StandartCase', ru = 'Ключевые слова в стандартный кэйс', action = NormaliseKeyWordsCase, key='Alt+Shift+L',}

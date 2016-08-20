@@ -656,11 +656,13 @@ local function OnDoubleClickLocal(shift, ctrl, alt)
 end
 local function FindTab_Init()
     cmb_Action = iup.list{name = 'cmb_Action', dropdown = "YES", visibleitems = "15", size = '70x0', expand = 'NO', tip = 'Сохранение/Удаление объекта'}
+    iup.SetAttribute(cmb_Action, 'HISTTORIZED', "NO")
     iup.SetAttribute(cmb_Action, 1, "insupd")
     iup.SetAttribute(cmb_Action, 2, "delete")
     cmb_Action.value = 1
     chk_ign = iup.toggle{name = 'chk_ign', title = "Ign. Id-s", tip = 'Игнорироапть Id объекта при вставке\n(вставить копию)'}
     cmb_mask = iup.list{name='cmb_mask',dropdown="YES",visibleitems="15",size='30x0', expand='NO', tip='program scripts|schema scripts|schema+program'}
+    iup.SetAttribute(cmb_mask, 'HISTTORIZED', "NO")
     iup.SetAttribute(cmb_mask, 1, "P")
     iup.SetAttribute(cmb_mask, 2, "S")
     iup.SetAttribute(cmb_mask, 3, "SP")
@@ -672,13 +674,14 @@ local function FindTab_Init()
 
 
     cmb_syscust = iup.list{name = 'cmb_syscust', dropdown = "YES", visibleitems = "15", size = '70x0', expand = 'NO', tip = 'Сохранение/Удаление объекта'}
+    iup.SetAttribute(cmb_syscust, 'HISTTORIZED', "NO")
     iup.SetAttribute(cmb_syscust, 1, "%")
     iup.SetAttribute(cmb_syscust, 2, "system")
     iup.SetAttribute(cmb_syscust, 3, "custom")
     cmb_syscust.value = 1
 
-
     txt_objmask = iup.list{name = 'txt_objmask', editbox = "YES", dropdown = "YES", visibleitems = "15", expand = 'HORIZONTAL', tip = 'Маска метаданных'}
+    iup.SetAttribute(txt_objmask, 'HISTTORIZED', "NO")
     iup.SetAttribute(txt_objmask, 1, "Choice")
     iup.SetAttribute(txt_objmask, 2, "ObjectTypeForm")
     iup.SetAttribute(txt_objmask, 3, "Report")
@@ -693,6 +696,7 @@ local function FindTab_Init()
     end)
 
     cmb_RefDepth = iup.list{name = 'cmb_RefDepth', dropdown = "YES", visibleitems = "15", size = '20x0', expand = 'NO', tip = 'Reference Repth'}
+    iup.SetAttribute(cmb_RefDepth, 'HISTTORIZED', "NO")
     iup.SetAttribute(cmb_RefDepth, 1, "0")
     iup.SetAttribute(cmb_RefDepth, 2, "1")
     iup.SetAttribute(cmb_RefDepth, 3, "2")
@@ -700,6 +704,7 @@ local function FindTab_Init()
     cmb_RefDepth.value = 1
 
     cmb_apDept = iup.list{name = 'cmb_apDept', dropdown = "YES", visibleitems = "15", size = '20x0', expand = 'NO', tip = 'Reference Repth'}
+    iup.SetAttribute(cmb_apDept, 'HISTTORIZED', "NO")
     iup.SetAttribute(cmb_apDept, 1, "0")
     iup.SetAttribute(cmb_apDept, 2, "1")
     iup.SetAttribute(cmb_apDept, 3, "2")
@@ -740,8 +745,6 @@ local function FindTab_Init()
                     iup.item{title="Поиск",action=function() GetEHXml('S') end,},
                   }
               },
-              iup.separator{},
-              iup.item{title="Добавить XML заголовок",value=_G.iuprops['atrium.metadata.xmlcapt'],action=(function() _G.iuprops['atrium.metadata.xmlcapt']=Iif(_G.iuprops['atrium.metadata.xmlcapt']=='ON','OFF','ON') end)},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
     end
     local function obj_resel(old_l)
@@ -750,6 +753,7 @@ local function FindTab_Init()
     list_obj:SetCommonCB(nil,obj_resel,nil,obj_mnu)
 
     txt_datamask = iup.text{name = 'txt_datamask', expand = 'HORIZONTAL', tip = 'Маска кода объекта,\nвыбранного в верхнем гриде'}
+    iup.SetAttribute(txt_datamask, 'HISTTORIZED', "NO")
     txt_datamask.k_any = (function(h,k) if k == iup.K_CR then SelectData() end end)
     list_data = iup.matrix{name='list_data',
     numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
@@ -785,7 +789,7 @@ local function FindTab_Init()
     list_data:SetCommonCB(Data_OpenNew,nil,nil,dat_mnu)
 
 
-    cmb_dataShem = iup.list{dropdown="YES",visibleitems="15",size='40x0', expand='NO', tip='Сохранение/Удаление объекта'}
+    cmb_dataShem = iup.list{name = 'cmb_dataShem', dropdown = "YES", visibleitems = "15", size = '40x0', expand = 'NO', tip = 'Сохранение/Удаление объекта'}
     iup.SetAttribute(cmb_dataShem, 1, "%")
     iup.SetAttribute(cmb_dataShem, 2, "system")
     iup.SetAttribute(cmb_dataShem, 3, "custom")

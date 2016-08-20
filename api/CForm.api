@@ -409,6 +409,17 @@ objsqlo.Timeout в секундах
 objsqlo.DataModelMode (R/S/T/M)
 objsqlo.IndexAuto (Y/N)
 
+#$objtmp=app%.objtemplate(
+#$objtmp=app%.objtemplate
+
+objtmp.OpenObj(vIdx, strTemplate, bReplace) метод открытия формы объекта\nvIdxProp - либо msgPropertyBag, либо Id/Code объекта, либо Null\nstrObjectType_Code - код типа объекта\nbReplace = True/False/Null, при Null - используем False, но еще проверяем CheckCtrl\n
+objtmp.InstanceName задает инстанс открываемой формы
+objtmp.bActivateTab активировать ли таб при открытии формы
+objtmp.RandomInstance признак открытия формы в новом уникальном инстансе
+objtmp.TemplateName Задает имя шаблона, если оно отличается от дефолтного для данного объекта
+objtmp.ParentForm задает родительское окно для открываемой формы\nЕсли задано, открывается как дочерняя форма
+objtmp.Presentation задает имя презентации для карточки объекта
+
 noobj.Choice
 noobj.Column \
 noobj.Container

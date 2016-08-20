@@ -155,6 +155,10 @@ local function Init(h)
     }
     cmb_listMbTrancport:FillByDir("\\connectmb\\*.lua", _G.iuprops['mbTrancport.file'])
     _G.iuprops["sidebarctrl.chkRunConnect.value"] = 'OFF'
+
+    menuhandler:InsertItem('MainWindowMenu', 'Help¦slast',
+        {"HildiM for Systematica", ru = "HildiM for Systematica", action = function() scite.ExecuteHelp(props['SciteDefaultHome']..'/help/Sysm.chm', 0) end}
+    )
 end
 
 return {

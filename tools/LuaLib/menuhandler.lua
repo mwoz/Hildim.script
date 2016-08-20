@@ -9,6 +9,7 @@ local clr_hgl = '15 60 195'
 local clr_select = '0 0 0'
 local clr_normal = '70 70 70'
 local s = class()
+local r_button
 
 function s:get_title(t, bShort)
     local s = t['ru'] or t[1]
@@ -62,6 +63,12 @@ local function FindMenuItem(path)
     end
     _,_, strFld = path:find('^([^¦]+)¦')
     return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
+end
+
+local function r_button_state()
+    local rez = r_button or 0
+    r_button = 0
+    return rez
 end
 
 function s:PopMnu(smnu, x, y, bToolBar)
@@ -134,7 +141,13 @@ function s:PopMnu(smnu, x, y, bToolBar)
                     end
 
                     if not titem.active then --'экшны обрабатываем только для активных меню
-                        titem.action = GetAction(itm)
+                        titem.action = function()
+                            if r_button_state() > 0 then
+                                scite.ExecuteHelp(props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html#'..itm[1], 0)
+                            else
+                                GetAction(itm)()
+                            end
+                        end
                     end
                     --debug_prnArgs(titem)
                     table.insert(t, iup.item(titem))
@@ -347,6 +360,7 @@ end
 
 function event_MenuMouseHook(x, y)
     menuhandler:OnMouseHook(x, y)
+    _, _, r_button = shell.async_mouse_state()
 end
 
 function s:PopUp(strPath)

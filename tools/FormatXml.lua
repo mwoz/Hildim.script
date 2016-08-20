@@ -21,6 +21,6 @@ else
 end
 editor:SetText(strFrm)
 editor:SetSel(0, editor.Length)
-SortFormXML()
+if SORTFORMXML then SORTFORMXML.SortFormXML() end
 editor:SetSel(0, 0)
 if h then editor:ReplaceSel(h..'\r\n') end

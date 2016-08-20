@@ -79,7 +79,7 @@ local function SaveNamedValues(h, root)
     repeat
         child = iup.GetNextChild(h, child)
         if child then
-            if (child.value or child.valuepos or child.focusitem or child.size) and child.name then
+            if (child.value or child.valuepos or child.focusitem or child.size) and child.name and (iup.GetAttribute(child, 'HISTTORIZED') ~= 'NO') then
                 local _,_,cType = tostring(child):find('IUP%((%w+)')
                 local val = child.value
                 if cType == 'list' and child.dropdown == "YES" then
@@ -295,7 +295,8 @@ local function RestoreNamedValues(h, root)
     repeat
         child = iup.GetNextChild(h, child)
         if child then
-            if child.name then
+            -- print(child.name, (iup.GetAttribute(child, 'HISTTORIZED') ~= 'NO'))
+            if child.name and (iup.GetAttribute(child, 'HISTTORIZED') ~= 'NO') then
                 local _,_,cType = tostring(child):find('IUP%((%w+)')
                 local val = _G.iuprops[root..'.'..child.name..'.value']
                 if cType == 'list' and child.dropdown == "YES" then

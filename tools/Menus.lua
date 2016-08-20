@@ -435,9 +435,10 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'l1', windowsList, plane = 1},
 	},},
 	{'Help', ru = 'Справка',{
-		{'&Help', ru = 'Справка по LUA', key = 'F1', action = IDM_HELP},
-		{'&SciTE Help', ru = 'Справка по SciTE', action = IDM_HELP_SCITE},
-		{'&About SciTE', ru = 'О программе', action = IDM_ABOUT},
+		{'&Help', ru = 'Контекстная справка', key = 'F1', action = IDM_HELP},
+		{'H&ildiM Help', ru = 'Справка по HildiM', action = function() scite.ExecuteHelp(props['SciteDefaultHome']..'/help/HildiM.chm', 0) end},
+		{'slast', separator = 1},
+        {'&About HildiM', ru = 'О программе', action = IDM_ABOUT},
 	},},
 }
 
