@@ -25,7 +25,7 @@ function Run()
 end
 
 return {
-    title = 'char HEX  DEC',
+    title = 'Таблица ASCII символов',
     run = Run,
-    description =[[Трассировка выделенного текста в коды ASCII]]
+    description =[[Таблица ASCII символов в новой вкладке]]
 }

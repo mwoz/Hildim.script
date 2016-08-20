@@ -41,8 +41,7 @@ local function FormatString(line)
             editor:ReplaceTarget" "
         end
     end
-
-    local lEnd = lStart + editor:GetLine(line):len()
+    local lEnd = lStart + (editor:GetLine(line) or ''):len()
     local lS = lStart
 
     while lS and lS < lEnd do
@@ -54,7 +53,7 @@ local function FormatString(line)
         end
     end
 
-    lEnd = lStart + editor:GetLine(line):len()
+    lEnd = lStart + (editor:GetLine(line) or ''):len()
     lS = lStart
 
     while lS and lS < lEnd do
@@ -66,7 +65,7 @@ local function FormatString(line)
         end
     end
 
-    lEnd = lStart + editor:GetLine(line):len()
+    lEnd = lStart + (editor:GetLine(line) or ''):len()
     lS = lStart
 
     while lS and lS < lEnd do
@@ -78,7 +77,7 @@ local function FormatString(line)
         end
     end
 
-    lEnd = lStart + editor:GetLine(line):len()
+    lEnd = lStart + (editor:GetLine(line) or ''):len()
     lS = lStart
 
     while lS and lS < lEnd do
@@ -90,7 +89,7 @@ local function FormatString(line)
         end
     end
 
-    lEnd = lStart + editor:GetLine(line):len()
+    lEnd = lStart + (editor:GetLine(line) or ''):len()
     lS = lStart
 
     while lS and lS < lEnd do
