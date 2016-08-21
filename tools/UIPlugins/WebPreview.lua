@@ -100,8 +100,9 @@ local function init()
         local startPosition = 0
         for i = 0, counter do
             startPosition = editor:findtext(findSettings.findWhat, SCFIND_REGEXP, startPosition + 1, endPosition)
+            startPosition = editor:findtext('>', 0, startPosition + 1, endPosition) + 1
         end
-        endPosition = editor:findtext('</', SCFIND_REGEXP, startPosition + 1, endPosition) + 2
+        endPosition = editor:findtext('</', SCFIND_REGEXP, startPosition + 1, endPosition)
         editor:SetSel(startPosition, startPosition)
         editor:SetSel(startPosition, endPosition)
         OnNavigation("Html-")

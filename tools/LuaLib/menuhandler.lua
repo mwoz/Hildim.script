@@ -143,7 +143,8 @@ function s:PopMnu(smnu, x, y, bToolBar)
                     if not titem.active then --'экшны обрабатываем только для активных меню
                         titem.action = function()
                             if r_button_state() > 0 then
-                                scite.ExecuteHelp(props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html#'..itm[1], 0)
+                                --print((props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html#'..itm[1]))
+                                scite.ExecuteHelp((props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html#'..itm[1]):to_utf8(1251), 0)
                             else
                                 GetAction(itm)()
                             end

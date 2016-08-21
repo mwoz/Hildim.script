@@ -144,8 +144,8 @@ local function Run(flag)
             iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren = 'YES', gap = 2, margin = "4x4"}
         dlg = iup.scitedialog{vbox; title = sTitle, defaultenter = "TOOLBARSETT_BTN_OK", defaultesc = "TOOLBARSETT_BTN_ESC", tabsize = editor.TabWidth,
-        maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "commandsplugin", minsize = '530x400', helpbutton = 'YES'}
-
+        maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE",
+        sciteid = "commandsplugin", minsize = '530x400', helpbutton = Iif(flag ~= 'Commands', 'YES', 'NO')}
 
         dlg.show_cb =(function(h, state)
             if state == 4 then

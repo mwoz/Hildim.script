@@ -295,8 +295,8 @@ _VERSION ()\n returns version of Lua
 trace(s)\n in SciTE, writes s to the output pane (no prefix, no newlines)
 dostring(s)\n executes s as a Lua string, like Lua 4's dostring
 
-#editor=output
-#editor=findres
+#$editor=output
+#$editor=findres
 
 editor:textrange
 editor:findtext
@@ -317,7 +317,7 @@ scite.ConstantName
 scite.MenuCommand
 scite.SendEditor
 scite.SendOutput
-scite.SendFindRez
+scite.SendFindRes
 scite.ShowParametersDialog
 scite.Perform
 scite.ReloadStartupScript
@@ -334,7 +334,7 @@ ConstantName(number)\n returns the symbolic name of a Scintilla / SciTE constant
 MenuCommand(IDM_constant)\n run specifed menu command
 SendEditor(SCI_constant, ...)\n sends a message to the editor pane
 SendOutput(SCI_constant, ...)\n sends a message to the output pane
-SendFindRez(SCI_constant, ...)\n sends a message to the FindRez pane
+SendFindRes(SCI_constant, ...)\n sends a message to the FindRez pane
 ShowParametersDialog(text)\n show parametrs dialog with message (txt) and return result action (only SciTE-Ru)
 Perform("action")\n execute commands of SciTE Director Interface (only SciTE-Ru)
 ReloadStartupScript()\n reload startup script

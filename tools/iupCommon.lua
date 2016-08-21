@@ -7,6 +7,7 @@ POST_CONTINUESHOWMENU = 6
 POST_AFTERLUASAVE = 7
 POST_RELOADPROPS = 8
 POST_SHOWUL = 9
+POST_EDITORFOCUS = 10
 require 'shell'
 
 
@@ -324,12 +325,33 @@ function CORE.HelpUI(helpid, anchor)
     if shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'.chm') then
         local strCmd = props['SciteDefaultHome']..'/help/'..dv..'.chm::ui/'..fl..'.html'
         if anchor then strCmd = strCmd..'#'..anchor end
+        print(strCmd)
         scite.ExecuteHelp(strCmd, 0)
     elseif shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html') then
         local url = 'file:///'..props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html'
         if anchor then url = url..'#'..anchor end
         shell.exec(url)
     else print(dv..'/ui/'..fl..'.html'..' - file not found') end
+end
+
+function CORE.SwitchPane(bForward)
+    if bForward then
+        if editor.Focus then
+            iup.SetFocus(iup.GetDialogChild(iup.GetLayout(), "FindRes"))
+        elseif findres.Focus then
+            iup.SetFocus(iup.GetDialogChild(iup.GetLayout(), "Run"))
+        else
+            iup.PassFocus()
+        end
+    else
+        if editor.Focus then
+            iup.SetFocus(iup.GetDialogChild(iup.GetLayout(), "Run"))
+        elseif output.Focus then
+            iup.SetFocus(iup.GetDialogChild(iup.GetLayout(), "FindRes"))
+        else
+            iup.PassFocus()
+        end
+    end
 end
 
 AddEventHandler("OnMenuCommand", function(cmd, source)
@@ -892,6 +914,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             end
         elseif wp == POST_RELOADPROPS then
             scite.Perform("reloadproperties:")
+        elseif wp == POST_EDITORFOCUS then
+            editor.Focus = true
         end
     end
 end)
@@ -1093,7 +1117,6 @@ end)
 require "menuhandler"
 _G.g_session = {}
 dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
-dofile (props["SciteDefaultHome"].."\\tools\\Open_Selected_Filename.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")

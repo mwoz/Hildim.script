@@ -90,15 +90,20 @@ CORE.ShowCaretAfterFold = function(w)
 end
 
 CORE.Find_FindInDialog = function(ud)
+    local tmpUD = Iif(ud, "1", "0")
+    local curUD = iup.GetDialogChild(iup.GetLayout(), "zUpDown").valuepos
     local sText = editor:GetSelText()
-    local wholeWord = false
+    local wholeWord = 'OFF'
     if (sText == '') then
         sText = GetCurrentWord()
-        wholeWord = true
+        wholeWord = 'ON'
     end
+    iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value = wholeWord
+    iup.GetDialogChild(iup.GetLayout(), "zUpDown").valuepos = tmpUD
     iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat").value = sText
     iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat"):SaveHist()
     iup.GetDialogChild(iup.GetLayout(), "btnFind").action()
+    iup.GetDialogChild(iup.GetLayout(), "zUpDown").valuepos = curUD
 end
 
 CORE.FindNextWrd = function(ud)

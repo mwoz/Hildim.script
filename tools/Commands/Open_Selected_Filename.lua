@@ -39,14 +39,22 @@ local function OpenSelectedFilename()
         if scite_prop1 ~= nil then
             return props[scite_prop1]..scite_prop2
         end
+        -- Example: props["SciteDefaultHome"].."\\tools\\ascii.lua"   f:\Program Files (x86)\HildiM\api\csstags.api
+        local pattern_full = '^[A-Za-z]:'
+        if string.find(text, pattern_full) then
+            return text
+        end
+        return props['FileDir']..'\\'..text
     end
 
     local function GetSelText()
         local text
-        if editor.Focus then
-            text = editor:GetSelText()
-        else
+        if findres.Focus then
+            text = findres:GetSelText()
+        elseif output.Focus then
             text = output:GetSelText()
+        else
+            text = editor:GetSelText()
         end
         if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then
             return text
@@ -60,6 +68,7 @@ local function OpenSelectedFilename()
 	local filename = GetOpenFilePath(text)
 	if filename == nil then return end
 	filename = string.gsub(filename, '\\\\', '\\')
+    if not shell.fileexists(filename) then print('Файл не найден: '..filename); return end
 	scite.Open (shell.to_utf8(filename))
 	return true
 end

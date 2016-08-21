@@ -476,7 +476,7 @@ local function InitToolBar()
     local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander')
     iup.Detach(hBx)
     iup.Destroy(hTmp)
-    ToolBar_obj.handle = iup.Insert(vbScite, iup.GetDialogChild(vbScite, 'SciTeTabCtrl'), hBx)
+    ToolBar_obj.handle = iup.Insert(vbScite, iup.GetDialogChild(vbScite, 'TabbarExpander'), hBx)
     iup.Map(hBx)
     for i = 1, #tEvents do
         for _,tbs in pairs(ToolBar_obj.Tabs) do

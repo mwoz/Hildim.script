@@ -16,11 +16,7 @@ version 1.4.4
 Параметр select.and.open.include - определяет список дополнительных папок для
 поиска, папки перечисляются через символ ;
 
-Подключение:
-Добавить в SciTEStartup.lua строку:
-  dofile (props["SciteDefaultHome"].."\\tools\\Select_And_Open_Filename.lua")
-Для срабатывания по клику мыши добавить в файл настроек:
-  select.and.open.by.click=1
+!!!TODO!!! Сделать диалог настроек
 --]]----------------------------------------------------------------------------
 require 'shell'
 local function init()
@@ -69,14 +65,24 @@ local function init()
 
     local function Select_And_Open_File(immediately)
         local sci
-        if editor.Focus then
-            sci = editor
-        else
+        if findres.Focus then
+            sci = findres
+        elseif output.Focus then
             sci = output
+        else
+            sci = editor
         end
         local filename = sci:GetSelText()
+        local isFile, foropen
 
-        if filename == '' then
+        if filename ~= '' then
+            local pattern_full = '^[A-Za-z]:'
+            foropen = filename
+            if not string.find(filename, pattern_full) then
+                foropen = props['FileDir']..'\\'..filename
+            end
+            isFile = shell.fileexists(foropen)
+        else
             loadIncludes(props['select.and.open.include'])
 
             -- try to select file name near current position
@@ -96,7 +102,7 @@ local function init()
                 local dir = props["FileDir"].."\\"
                 filename = string.gsub(sci:GetSelText(), '\\\\', '\\')
                 foropen = dir..filename
-                local isFile = shell.fileexists(foropen)
+                isFile = shell.fileexists(foropen)
 
                 -- look at includes
                 if not isFile then
@@ -129,29 +135,21 @@ local function init()
                     end
                     isFile = shell.fileexists(foropen)
                 end
-
-                if isFile then
-                    for_open = foropen
-                    if immediately then
-                        launch_open()
-                    end
-                    return true
-                end
             end
-
+        end
+        if isFile then
+            for_open = foropen
+            if immediately then
+                launch_open()
+            end
+            return true
         end
     end
-
-    AddEventHandler("OnMenuCommand", function(msg, source)
-        if msg == IDM_OPENSELECTED then
-            return Select_And_Open_File(true)
-        end
-    end)
 
     AddEventHandler("OnMouseButtonUp", launch_open)
 
     AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
-        if ctrl and props["select.and.open.by.click"] == "1" then
+        if ctrl --[[and props["select.and.open.by.click"] == "1"]] then
             local sci
             if editor.Focus then
                 sci = editor
@@ -163,10 +161,13 @@ local function init()
             return Select_And_Open_File(false)
         end
     end)
+    menuhandler:InsertItem('MainWindowMenu', 'File¦&Revert',
+    {'Select And Open Filename', ru = 'Выделить и открыть файл', action = function() Select_And_Open_File(true) end, key = 'Ctrl+Shift+O',})
+
 end
 
 return {
     title = 'Выделить и открыть файл',
-    hidden = Init,
+    hidden = init,
     description = [[Расширение команды "Открыть выделенный файл" для случая когда выделения нет.]]
 }
