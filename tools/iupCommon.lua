@@ -325,7 +325,7 @@ function CORE.HelpUI(helpid, anchor)
     if shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'.chm') then
         local strCmd = props['SciteDefaultHome']..'/help/'..dv..'.chm::ui/'..fl..'.html'
         if anchor then strCmd = strCmd..'#'..anchor end
-        print(strCmd)
+        --print(strCmd)
         scite.ExecuteHelp(strCmd, 0)
     elseif shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html') then
         local url = 'file:///'..props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html'
