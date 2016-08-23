@@ -536,6 +536,7 @@ iup.list = function(t)
         local current_path = props["sys.calcsybase.dir"]..pathmask
 
         local files = shell.findfiles(current_path)
+        if not files then return end
         table.sort(files, function(a, b) return a.name:lower() < b.name:lower() end)
         if files then
             local i, filename
