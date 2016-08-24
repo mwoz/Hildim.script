@@ -100,6 +100,21 @@ local function ResetReadOnly()
 	scite.MenuCommand(IDM_REVERT)
 end
 
+local function RunSettings()
+    for s, _ in pairs(dialogs) do
+        if s == 'commandsplugin' or s == 'sidebarlayout' or s == 'LexersSetup' or s == 'toolbarlayout' or s == 'usertb' or s == 'HotkeysSetup' then return false end
+    end
+    return true
+end
+
+local function IsOpenTemporaly()
+    local maxN = scite.buffers.GetCount() - 1
+    for i = 0, maxN do
+        if scite.buffers.NameAt(i):find('\\%^[^\\]+$') then return true end
+    end
+    return false
+end
+
 local bCanPaste = true
 AddEventHandler("OnDrawClipboard", function(flag)
 	bCanPaste = (flag > 0)
@@ -122,7 +137,7 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 	{link='File¦&Close'},
 	{link='File¦C&lose All'},
 	{'Close All But Curent',  ru = 'Зарыть все, кроме текущей', action=function() iup.CloseFilesSet(9132) end, },
-	{'Close All Temporally',  ru = 'Зарыть все временные', action=function() iup.CloseFilesSet(9134) end, },
+	{'Close All Temporally',  ru = 'Зарыть все временные', action=function() iup.CloseFilesSet(9134) end, visible=IsOpenTemporaly },
 	{'s1', separator=1},
 	{link='File¦&Save'},
 	{link='Buffers¦&Save All'},
@@ -399,8 +414,8 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Interface Font Size', ru = 'Размер шрифта интерфейса', action = ResetFontSize},
 
 		{'s3', separator = 1},
-		{'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')"},
-		{'Plugins', ru = 'Плагины',{
+		{'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')", active = RunSettings},
+		{'Plugins', ru = 'Плагины', visible = RunSettings,{
             {'Toolbars Layout', ru = 'Раскладка панелей инструментов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
             {'SideBars Settings', ru = 'Настройка боковых панелей...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
             {'Hidden Plugins', ru = 'Подключение фоновых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Hidden')"},
@@ -418,7 +433,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{"Lexers properties", ru = 'Свойства лексеров', {
 			{'Lexers properties', ru = 'Свойства лексеров', plane = 1 ,tLangs},
 			{'s2', separator = 1},
-			{"Select lexers", ru = "Используемые языки", action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\UsedLexers.lua')"},
+			{"Select lexers", ru = "Используемые языки", action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\UsedLexers.lua')", active = RunSettings},
 		},},
 	},},
 	{'Language', ru = 'Подсветка', {
