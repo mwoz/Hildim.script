@@ -30,6 +30,8 @@ if shell.fileexists(file) then
         io.write(text)
         io.close()
     end
+elseif shell.fileexists(props["SciteDefaultHome"]..'\\data\\home\\default.config') then
+    props['config.restore'] = props["SciteDefaultHome"]..'\\data\\home\\default.config'
 else
     props['config.restore'] = props["SciteDefaultHome"]..'\\tools\\default.config'
 end
