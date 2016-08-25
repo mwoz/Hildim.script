@@ -143,7 +143,7 @@ local function ShowCallTip(pos, str, s, e)
         current_poslst = current_pos
         pasteFromXml = false
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
-
+        editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
         editor:UserListShow(constListIdXmlPar, l)
         if str2 then
             calltipinfo['attr'] = {}
@@ -175,8 +175,8 @@ local function ShowCallTip(pos, str, s, e)
                 end
             end
         else
-            --ls(list)
             ulFromCT_data = list
+            editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
             scite.PostCommand(POST_SHOWUL, 0)
             return
         end
@@ -855,7 +855,6 @@ local function RunAutocomplete(char, pos, word)
 
     local input_object = GetInputObject(editor:textrange(editor:PositionFromLine(af_current_line), pos - 1))
     if input_object[1] =='' then return '' end
-
 	-- Если слева от курсора отсутствует слово, которое можно истолковать как имя объекта, то выходим
     obj_names = GetObjectNames(input_object)
 	if table.maxn(obj_names) == 0 then return false end
@@ -1001,11 +1000,11 @@ local function OnUpdateUI_local(bChange, bSelect, flag)
     end
 end
 
-local function ListXml()
+local function ListXml(s)
     if isPosInString() then return false end
     local object_names = GetObjectNamesXml()
     if object_names[1] ~= nil then
-        methods_table = CreateMethodsTable(object_names, objectsX_table, '', inheritorsX)
+        methods_table = CreateMethodsTable(object_names, objectsX_table, s or '', inheritorsX)
         current_poslst = current_pos
         pasteFromXml = object_names[1][1] ~= 'noobj'
         return ShowUserList(0,constListIdXml)
@@ -1137,34 +1136,52 @@ function ShowListManualy()
         ShowListManualySql()
         return
     end
-
-    if not isXmlLine() then pasteFromXml = false end
+    pasteFromXml = (isXmlLine() ~= false)
 	if get_api == true then
 		ReCreateStructures()
 	end
 	if objects_table._fill == nil then return false end
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
-    char = editor:textrange(current_pos-1,current_pos)
-    if string.find(char,"%s") then
-        methods_table = CreateMethodsTable({{constObjGlobal,constObjGlobal,'',''}},objects_table,'')
+    char = editor:textrange(current_pos - 1, current_pos)
+    if pasteFromXml then
+        for i = current_pos, 0,- 1 do
+            char = editor:textrange(i - 1, i)
+            if char == ' ' then
+                ListXml(editor:textrange(i, current_pos))
+                current_poslst = i
+                return
+            elseif char == '<' then
+                pasteFromXml = false
+                local word = editor:textrange(i , current_pos)
+                methods_table, last = CreateMethodsTable({{'noobj','noobj','',''}}, objects_table, word, inheritors)
+
+                ShowUserList(string.len(word), nil, last)
+                current_poslst = i
+                return
+            elseif not string.find(char, "[%w_]") then
+                return
+            end
+        end
+    elseif string.find(char, "%s") then
+        methods_table = CreateMethodsTable({{constObjGlobal, constObjGlobal, '', ''}}, objects_table, '')
         current_poslst = current_pos
         ShowUserList(0)
         return
-    elseif string.find(char,autocom_chars) then
-        RunAutocomplete(char,current_pos,'')
+    elseif string.find(char, autocom_chars) then
+        RunAutocomplete(char, current_pos, '')
         return
     end
     current_poslst = editor:WordStartPosition(current_pos)
-    wordpart = editor:textrange(current_poslst,current_pos)
+    wordpart = editor:textrange(current_poslst, current_pos)
     char = editor:textrange(current_poslst - 1, current_poslst)
     if string.find(char, autocom_chars) then
-        tmpPos=current_poslst
-        RunAutocomplete(char,current_poslst,wordpart)
-        current_poslst=tmpPos
+        tmpPos = current_poslst
+        RunAutocomplete(char, current_poslst, wordpart)
+        current_poslst = tmpPos
         return
     else
-        methods_table = CreateMethodsTable({{constObjGlobal,constObjGlobal,'',''}},objects_table,wordpart)
+        methods_table = CreateMethodsTable({{constObjGlobal, constObjGlobal, '', ''}}, objects_table, wordpart)
         ShowUserList(string.len(wordpart))
         return
     end

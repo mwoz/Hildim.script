@@ -797,7 +797,7 @@ local function  _OnUpdateUI()
                         if iup.GetAttribute(tree_func, "STATE"..pId) == 'EXPANDED' then pId = i end
                         currFuncData = fData
                         iup.SetAttribute(tree_func, "MARKED"..pId, "YES")
-                        iup.SetAttribute(tree_func, "COLOR"..pId, "30 180 30")
+                        iup.SetAttribute(tree_func, "COLOR"..pId, "0 180 180")
                         if curSelect > -1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0");--[[iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") ]]end
                         curSelect = pId
                         tree_func.topitem="YES"
@@ -806,7 +806,7 @@ local function  _OnUpdateUI()
                 end
                 -- мы находимся над первой функцией - пометим корневую папку
                 iup.SetAttribute(tree_func, "MARKED0", "YES")
-                iup.SetAttribute(tree_func, "COLOR0", "30 180 30")
+                iup.SetAttribute(tree_func, "COLOR0", "0 180 180")
                 iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0")
                 curSelect = 0
                 currFuncData=-1
