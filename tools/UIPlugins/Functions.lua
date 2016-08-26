@@ -797,7 +797,7 @@ local function  _OnUpdateUI()
                         if iup.GetAttribute(tree_func, "STATE"..pId) == 'EXPANDED' then pId = i end
                         currFuncData = fData
                         iup.SetAttribute(tree_func, "MARKED"..pId, "YES")
-                        iup.SetAttribute(tree_func, "COLOR"..pId, "0 180 180")
+                        iup.SetAttribute(tree_func, "COLOR"..pId, "0 0 255")
                         if curSelect > -1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0");--[[iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") ]]end
                         curSelect = pId
                         tree_func.topitem="YES"
@@ -806,7 +806,7 @@ local function  _OnUpdateUI()
                 end
                 -- мы находимся над первой функцией - пометим корневую папку
                 iup.SetAttribute(tree_func, "MARKED0", "YES")
-                iup.SetAttribute(tree_func, "COLOR0", "0 180 180")
+                iup.SetAttribute(tree_func, "COLOR0", "0 0 255")
                 iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0")
                 curSelect = 0
                 currFuncData=-1
@@ -888,7 +888,6 @@ local function Func_Init()
     tree_func = iup.tree{minsize = '0x5'}
         --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
         tree_func.size = nil
-
     tree_func.button_cb = function(_, but, pressed, x, y, status)
 
         if but == 51 and pressed == 0 then --right

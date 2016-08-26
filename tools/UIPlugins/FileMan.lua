@@ -559,11 +559,13 @@ local function FileManTab_Init()
     list_dir = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0, rasterwidth4= 0 }
+    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0, rasterwidth4= 0}
 
     list_dir.map_cb = (function(h)
         h.size="1x1"
     end)
+    --list_dir.
+    --list_dir.hlcolor = ""
 
     list_dir:setcell(0, 2, "Name")
   	list_dir.click_cb = (function(h, lin, col, status)

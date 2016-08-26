@@ -16,7 +16,7 @@ local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUp
 local fntSize = "10"
 if props['iup.defaultfontsize']~='' then if tonumber(props['iup.defaultfontsize']) > 4 then fntSize = props['iup.defaultfontsize'] end end
 iup.SetGlobal("DEFAULTFONTSIZE", fntSize)
-iup.SetGlobal("TXTHLCOLOR", "200 200 200")
+iup.SetGlobal("TXTHLCOLOR", "222 222 222")
                                -- RGB(121, 161, 201)
 iup.PassFocus=(function()
     iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))

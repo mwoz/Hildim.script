@@ -385,7 +385,6 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 				iup.Show(dlg)
 			end),},
 		},},
-		{'ASCII Table', ru = 'Таблица ASCII символов', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ASCIITable.lua')"},
 		{'s2', separator = 1},
 		{'&Next Message', ru = 'Следующее сообщение', key = 'F4', action = IDM_NEXTMSG},
 		{'&Previous Message', ru = 'Предыдущее сообщение', key = 'Shift+F4', action = IDM_PREVMSG},
