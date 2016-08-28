@@ -132,6 +132,7 @@ end)
 
 local function ShowCallTip(pos, str, s, e)
     local _, _, list = str:find('.-{{(.+)}}')
+
     local function ls(l)
         local tl = {}
         for w in l:gmatch('[^|]+') do
@@ -155,7 +156,7 @@ local function ShowCallTip(pos, str, s, e)
     end
     if list then
         local _, _, str2 = str:find'.-{{.+}}(.+)'
-        local _, _, sub = list:find('^(#@%u+)$')
+        local _, _, sub = list:find('^(#@[%u%d]+)$')
         if sub then list = m_tblSubstitution[sub]; if type(list) == 'function' then list = list() end end
         if not list:find('|') then
             if list:find('^@@') then
@@ -777,9 +778,15 @@ local function OnUserListSelection_local(tp, str)
         calltipinfo ={0}
         s = str:gsub(' .*', '')
         local sSt = editor.CurrentPos
+        local isX = isXmlLine()
         for i = editor.CurrentPos - 1, editor:PositionFromLine(editor:LineFromPosition(editor.CurrentPos)), -1 do
-            if editor.CharAt[i] == 34 then sSt = i + 1 break end -- ["]  =   34
+            if editor.CharAt[i] == 34 or
+                (not isX and (editor.CharAt[i] == 40 or editor.CharAt[i] == 44)) then
+                sSt = i + 1
+                break -- ["]  =   34 [,]  =   44 [(]  =   40
+            end
         end
+
         editor:SetSel(sSt, editor.CurrentPos)
     elseif pasteFromXml then
         s = str..'=""'
