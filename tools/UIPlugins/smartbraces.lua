@@ -299,7 +299,7 @@ local function Init()
                         if not isUndo then editor:BeginUndoAction() end
                         editor:InsertText( editor.CurrentPos, braceClose )
                         editor:EndUndoAction()
-                        g_isPastedBraceClose = true
+                        g_isPastedBraceClose = editor.CurrentPos
                     end
                     prevBrClose = braceClose --и запомним, чтобы в при вводе открывающей скобки другого типа тоже вставлять парную
                     -- если мы ставим закрывающуюся скобку
@@ -376,7 +376,7 @@ local function Init()
     -- Перехватываем функцию редактора OnKey
     AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
         if ( editor.Focus and scite.SendEditor(SCI_GETSELECTIONS) == 1) then
-            if ( key == 8 and g_isPastedBraceClose == true ) then -- VK_BACK (08)
+            if ( key == 8 and g_isPastedBraceClose == editor.CurrentPos - 1 ) then -- VK_BACK (08)
                 g_isPastedBraceClose = false
                 editor:BeginUndoAction()
                 editor:CharRight()

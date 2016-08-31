@@ -131,7 +131,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
 end)
 
 local function ShowCallTip(pos, str, s, e)
-    local _, _, list = str:find('.-{{(.+)}}')
+    local s1, _, list = str:find('{{(.+)}}')
 
     local function ls(l)
         local tl = {}
@@ -154,26 +154,20 @@ local function ShowCallTip(pos, str, s, e)
             calltipinfo['attr']['e'] = e
         end
     end
-    if list then
+
+    if s1 and list and (e > s1 or e == 0) then
         local _, _, str2 = str:find'.-{{.+}}(.+)'
         local _, _, sub = list:find('^(#@[%u%d]+)$')
-        if sub then list = m_tblSubstitution[sub]; if type(list) == 'function' then list = list() end end
+
+        if sub then list = m_tblSubstitution[sub]; if type(list) == 'function' then list = list(function(strList)  ls(strList) end) end end
+        if not list then return end
         if not list:find('|') then
-            if list:find('^@@') then
-                strfun = list:gsub('^@@', '')
-                local callback = loadstring('return '..strfun)()
-                callback(function(strList)
-                    ls(strList)
-                end)
-                return
-            else
-                calltipinfo ={0}
-                if not bManualTip then
-                    editor:SetSel(editor.CurrentPos, editor.CurrentPos)
-                    editor:ReplaceSel(list)
-                    if str2 then str = str2
-                    else return end
-                end
+            calltipinfo ={0}
+            if not bManualTip then
+                editor:SetSel(editor.CurrentPos, editor.CurrentPos)
+                editor:ReplaceSel(list)
+                if str2 then str = str2
+                else return end
             end
         else
             ulFromCT_data = list
@@ -183,6 +177,7 @@ local function ShowCallTip(pos, str, s, e)
         end
     end
     if not str then calltipinfo ={0};return end
+
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
     scite.SendEditor(SCI_CALLTIPSHOW, pos, str)
     if s == nil then return end
@@ -501,6 +496,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
         end
     end
     if strLua then
+
         local tFn = assert(loadstring(strLua))()
         if tFn and type(tFn) == 'table' then
             for n, f in pairs(tFn) do
@@ -655,7 +651,7 @@ end
 -- Создание таблицы "методов" заданного "объекта"
 local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
     local retT = {}
-    local sB = string.upper(strMetBeg)
+    local sB = string.upper(strMetBeg:gsub('[^%w_.:]',''))
     local last = nil
     local tblobj = EnrichFromInheritors(obj_names, inh_table)
     for upObj, _ in pairs(tblobj) do
@@ -813,18 +809,20 @@ local function OnUserListSelection_local(tp, str)
                 editor:SetSel(editor.SelectionEnd, editor.SelectionEnd)
             end
         end
-        if sign == '>' then
-            shift = 1
-            s = '>'
-            if curr_fillup_char == '' then curr_fillup_char = '' end
-        elseif ((sign or '1') == '1') == (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
-            shift = 2
-            s = '/>'
-            if curr_fillup_char == '/' then curr_fillup_char = '' end
-        else
-            shift = #str + 3
-            s = '></'..str..'>'
-            if curr_fillup_char == '>' then curr_fillup_char = '' end
+        if isXmlLine() then
+            if sign == '>' then
+                shift = 1  ;print"1"
+                s = '>'
+                if curr_fillup_char == '' then curr_fillup_char = '' end
+            elseif ((sign or '1') == '1') == (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
+                shift = 2      ;print"2"
+                s = '/>'
+                if curr_fillup_char == '/' then curr_fillup_char = '' end
+            else
+                shift = #str + 3   ;print"3"
+                s = '></'..str..'>'
+                if curr_fillup_char == '>' then curr_fillup_char = '' end
+            end
         end
 
         if (tip or '') ~= '' then
@@ -989,7 +987,6 @@ local function ResetCallTipParams()
 end
 
 local function OnUpdateUI_local(bChange, bSelect, flag)
-    --print(1234, flag)     262401
     if (bChange == 0 and bSelect == 0) or blockCT then return end
 
     if calltipinfo[1] ~= 0 then
@@ -1128,14 +1125,17 @@ function ShowTipManualy()
     if calltip_start_characters == '' then return end
 
     local cp = current_pos
-    repeat
-        char = editor:textrange(cp-1,cp)
-        cp = cp-1
-    until string.find(calltip_start_characters,char,1,true) == nil
+    if false then
+    else
+        repeat
+            char = editor:textrange(cp - 1, cp)
+            cp = cp - 1
+        until string.find(calltip_start_characters, char, 1, true) == nil
 
-    pos=editor:WordEndPosition(cp)+1
-    char = editor:textrange(pos-1,pos)
-    CallTip(char,pos)
+        pos = editor:WordEndPosition(cp) + 1
+        char = editor:textrange(pos - 1, pos)
+        CallTip(char, pos)
+    end
 end
 
 function ShowListManualy()

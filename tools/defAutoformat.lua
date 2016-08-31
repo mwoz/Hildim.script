@@ -204,7 +204,7 @@ AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
             doIndentation(curLine, true)
             editor:EndUndoAction()
             bNewLine = false
-        elseif curFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) < FoldLevel(0) then
+        elseif (bModified == 1 and bSelection == 0) and curFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) < FoldLevel(0) then
             local curS = editor.SelectionStart
             local ls = editor:LineFromPosition(curS)
             local cL = FoldLevel(-1)
