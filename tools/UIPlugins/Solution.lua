@@ -42,11 +42,15 @@ local function SaveSolution()
 
     tostr(tOut)
     assert(loadstring('return '..str))
+    if _G.iuprops['solution.current'] and not shell.fileexists(_G.iuprops['solution.current']) then _G.iuprops['solution.current'] = nil end
     local path = _G.iuprops['solution.current'] or defpath
+
     local f = io.open(path, "w")
-    f:write(str)
-    f:flush()
-    f:close()
+    if f then
+        f:write(str)
+        f:flush()
+        f:close()
+    end
     is_chanjed = false
 end
 

@@ -130,9 +130,14 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     end
 end)
 
-local function ShowCallTip(pos, str, s, e)
-    local s1, _, list = str:find('{{(.+)}}')
+local function isXmlLine()
+--определ€ем, €вл€етс€ ли текуща€ строка тэгом xml
+    if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
+    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',',','..editor.StyleAt[editor.SelectionStart]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
+end
 
+local function ShowCallTip(pos, str, s, e, reshow)
+    local s1, _, list = str:find('{{(.-)}}', s)
     local function ls(l)
         local tl = {}
         for w in l:gmatch('[^|]+') do
@@ -146,22 +151,31 @@ local function ShowCallTip(pos, str, s, e)
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
         editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
         editor:UserListShow(constListIdXmlPar, l)
-        if str2 then
-            calltipinfo['attr'] = {}
-            calltipinfo['attr']['pos'] = pos
-            calltipinfo['attr']['str'] = str2
-            calltipinfo['attr']['s'] = s
-            calltipinfo['attr']['e'] = e
+    end
+    local function IsWordCharParam()
+        for i = editor.CurrentPos, 0, -1 do
+            local ch = editor.CharAt[i]
+            if ch == 44 or ch == 40 then return true end --, [,]  =  44   [(]  =   40
+            if editor.WordChars:find(string.char(ch), 1, true) then return false end
         end
     end
-
-    if s1 and list and (e > s1 or e == 0) then
+    if s1 and list and (e > s1 or e == 0) and not reshow and
+        (not calltipinfo['attr'] or (calltipinfo['attr']['enter'] or s) ~= s or IsWordCharParam()) then
         local _, _, str2 = str:find'.-{{.+}}(.+)'
         local _, _, sub = list:find('^(#@[%u%d]+)$')
 
-        if sub then list = m_tblSubstitution[sub]; if type(list) == 'function' then list = list(function(strList)  ls(strList) end) end end
+        if str2 or true then
+            calltipinfo['attr'] = {}
+            calltipinfo['attr']['pos'] = pos
+            calltipinfo['attr']['str'] = str
+            calltipinfo['attr']['s'] = s
+            calltipinfo['attr']['e'] = e
+        end
+        if sub then list = m_tblSubstitution[sub]
+            if type(list) == 'function' then list = list(function(strList) ls(strList) end) end
+        end
         if not list then return end
-        if not list:find('|') then
+        if not list:find('|') and isXmlLine() then
             calltipinfo ={0}
             if not bManualTip then
                 editor:SetSel(editor.CurrentPos, editor.CurrentPos)
@@ -179,19 +193,13 @@ local function ShowCallTip(pos, str, s, e)
     if not str then calltipinfo ={0};return end
 
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
-    scite.SendEditor(SCI_CALLTIPSHOW, pos, str)
+    scite.SendEditor(SCI_CALLTIPSHOW, pos, str) --:gsub('[{}#@]', '_'))
     if s == nil then return end
     if s > 0 then
         scite.SendEditor(SCI_CALLTIPSETFOREHLT, 0xff0000)
         scite.SendEditor(SCI_CALLTIPSETHLT, s + 1, e)
     end
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)
-end
-
-local function isXmlLine()
---определ€ем, €вл€етс€ ли текуща€ строка тэгом xml
-    if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
-    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',',','..editor.StyleAt[editor.SelectionStart]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
 end
 
 local function isPosInString()
@@ -532,7 +540,6 @@ end
 
 local function ReCreateStructures(strText, tblFiles)
     local rootTag
-   -- print(debug.traceback())
     if editor:GetLine(0) then _,_,rootTag = (editor:GetLine(0)..''):find('^<(%w+)') end
     rootTag = rootTag or ''
 
@@ -685,18 +692,18 @@ local function ShowUserList(nPos, iId, last)
 		local s = table.concat(methods_table, sep)
 		if s ~= '' then
             editor.AutoCSeparator = string.byte(sep)
-            scite.SendEditor(SCI_AUTOCSETMAXHEIGHT,maxListsItems)
-            if iId ~= nil then
-                editor:UserListShow(iId, s)
-            else
-                editor:UserListShow(7, s)
-            end
-            if iSel ~= 0  then
+            scite.SendEditor(SCI_AUTOCSETMAXHEIGHT, maxListsItems)
+
+            if nPos > 0 then editor.CurrentPos = editor.CurrentPos - nPos end
+            editor:UserListShow(iId or 7, s)
+            if nPos > 0 then editor.CurrentPos = editor.CurrentPos + nPos end
+
+            if iSel ~= 0 then
                 m_last = last
             end
             bIsListVisible = true
 			return true
-		else
+        else
 			return false
 		end
 	else
@@ -762,6 +769,7 @@ end
 
 -- ¬ставл€ет выбранный из раскрывающегос€ списка метод в редактируемую строку
 local blockCT = false
+local ResetCallTipParams
 local function OnUserListSelection_local(tp, str)
     editor:BeginUndoAction()
     editor:SetSel(current_poslst, editor.CurrentPos)
@@ -769,9 +777,10 @@ local function OnUserListSelection_local(tp, str)
     local s, shift = nil, 0
     if tp == constListIdXmlPar then
         if calltipinfo['attr'] then
-            ShowCallTip(calltipinfo['attr']['pos'], calltipinfo['attr']['str'], calltipinfo['attr']['s'], calltipinfo['attr']['e'])
+            ShowCallTip(calltipinfo['attr']['pos'], calltipinfo['attr']['str'], calltipinfo['attr']['s'], calltipinfo['attr']['e'], true)
+            calltipinfo['attr']['enter'] = calltipinfo['attr']['s']
         end
-        calltipinfo ={0}
+        --calltipinfo ={0}
         s = str:gsub(' .*', '')
         local sSt = editor.CurrentPos
         local isX = isXmlLine()
@@ -811,15 +820,15 @@ local function OnUserListSelection_local(tp, str)
         end
         if isXmlLine() then
             if sign == '>' then
-                shift = 1  ;print"1"
+                shift = 1
                 s = '>'
                 if curr_fillup_char == '' then curr_fillup_char = '' end
             elseif ((sign or '1') == '1') == (iup.GetGlobal('SHIFTKEY') == 'ON' and curr_fillup_char ~= '>') or curr_fillup_char == ' ' or curr_fillup_char == '/' then
-                shift = 2      ;print"2"
+                shift = 2
                 s = '/>'
                 if curr_fillup_char == '/' then curr_fillup_char = '' end
             else
-                shift = #str + 3   ;print"3"
+                shift = #str + 3
                 s = '></'..str..'>'
                 if curr_fillup_char == '>' then curr_fillup_char = '' end
             end
@@ -926,7 +935,7 @@ local function TipXml()
     return false
 end
 
-local function ResetCallTipParams()
+ResetCallTipParams = function()
 
     if scite.SendEditor(SCI_AUTOCACTIVE) then return end
     local tip = calltipinfo[table.maxn(calltipinfo)]
@@ -1011,7 +1020,7 @@ local function ListXml(s)
         methods_table = CreateMethodsTable(object_names, objectsX_table, s or '', inheritorsX)
         current_poslst = current_pos
         pasteFromXml = object_names[1][1] ~= 'noobj'
-        return ShowUserList(0,constListIdXml)
+        return ShowUserList((s or ''):len(),constListIdXml)
     end
     return false
 end
@@ -1071,6 +1080,7 @@ local function OnChar_local(char)
         end
     end
     if calltipinfo[1] and calltipinfo[1] ~= 0 then --будем считать,  что разделители параметров - только зап€тые
+
         if (calltipinfo[table.maxn(calltipinfo)][3] or 0) > 0 and bResetCallTip then
             ResetCallTipParams()
             result = true
