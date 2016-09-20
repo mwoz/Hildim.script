@@ -200,15 +200,16 @@ do
 		local type = P"static "^-1*P"const "^-1*P"enum "^-1*P'*'^-1*IDENTIFIER*P'*'^-1
 		local funcbody = P"{"*(ESCANY-P"}")^0*P"}"
 		-- redefine common patterns
-		local IDENTIFIER = P'*'^-1*P'~'^-1*IDENTIFIER
+		local IDENTIFIER = P'~'^- 1 * IDENTIFIER      --P'*'^-1*
 		IDENTIFIER = IDENTIFIER*(P"::"*IDENTIFIER)^-1
 		-- create flags:
 		type = (C(type)/function(a) m_Par1 = a end) * Cg('', '')
 		-- create additional captures
-		local I = nokeyword *(C(IDENTIFIER) /(function(a) local _, _, c, e = a:find('^(.-)::(.+)'); m__CLASS = c or '~~ROOT'; return e or a end)) * cl
+        local m_Name
+		local I = nokeyword *(C(IDENTIFIER) /(function(a) local _, _, c, e = a:find('^(.-)::(.+)'); m__CLASS = c or '~~ROOT' ;m_Name = e; return e or a end)) * cl
 		-- definitions to capture:
-		local funcdef = nokeyword * Ct((type * SC^1)^- 1 * I * SC^0 *(par / function(a) return ': '..m_Par1..' '..a end ) * SC^0 *(#funcbody) *(Cc'' / function() return m__CLASS end))
-		local classconstr = nokeyword*Ct((type*SC^1)^-1*I*SC^0*par*SC^0*P':'*SC^0*IDENTIFIER*SC^0*(P"("*(1-P")")^0*P")")*SC^0*(#funcbody)) -- this matches smthing like PrefDialog::PrefDialog(QWidget *parent, blabla) : QDialog(parent)
+		local funcdef =     nokeyword * Ct((type * SC^1)^- 1 * I * SC^0 *(par / function(a) return ': '..m_Par1..' '..a end ) * SC^0 *(#funcbody) *(Cc'' / function() return m__CLASS end))
+		local classconstr = nokeyword * Ct((type * SC^1)^- 1 * I * SC^0 * par * SC^0 * P':' * SC^0 * IDENTIFIER * SC^0 *(P"(" *(1 - P")")^0 * P")") * SC^0 *(#funcbody)*(Cc'' / function() return m_Name end)) -- this matches smthing like PrefDialog::PrefDialog(QWidget *parent, blabla) : QDialog(parent)
 		-- resulting pattern, which does the work
 		local patt = (classconstr + funcdef + IGNORED^1 + IDENTIFIER + ANY)^0 * EOF
 
@@ -508,7 +509,7 @@ local function Functions_GetNames()
     elseif lang == 'Lua' then
         fnTryGroupName = (function(s, f) if s == '' then return f end return s end)
     elseif lang == 'C++' then
-        fnTryGroupName = (function(s, f) return f end)
+        fnTryGroupName = (function(s, f) return f or '~~ROOT' end)
     else
         fnTryGroupName = (function(s) return s end)
     end
@@ -574,7 +575,7 @@ local function Functions_ListFILL()
 		if _group_by_flags then --Если установлено, сначала сортируем по флагу
 			local fa = fnTryGroupName(GetFlags(a), a[4])
 			local fb = fnTryGroupName(GetFlags(b), b[4])
-			if fa ~=fb then return fa < fb end
+			if fa ~= fb then return fa < fb end
 		end
 		if _sort == 'order' then
 			return a[2] < b[2]

@@ -117,7 +117,7 @@ local function Init()
         elseif ierr == 1 then --взят
             t = {
                 {'Check In', action = vss_checkin, image = 'arrow_curve_090_µ' ,},
-                {'Undo Check Out', ru = 'Отменить Check In', action = vss_undocheckout,},
+                {'Undo Check Out', ru = 'Отменить Check Out', action = vss_undocheckout,},
                 {'Get Latest Version', action = vss_getlatest ,},
                 {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
                 {'History', ru = 'Показать историю', action = vss_hist ,},

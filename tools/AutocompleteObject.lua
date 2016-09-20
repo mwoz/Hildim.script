@@ -676,6 +676,7 @@ end
 
 -- ѕоказываем раскрывающийс€ список "методов"
 local function ShowUserList(nPos, iId, last)
+    calltipinfo['attr'] = nil
 	local list_count = table.getn(methods_table)
 	if list_count > 0 then
 		methods_table = TableSort(methods_table)
@@ -1091,6 +1092,7 @@ local function OnChar_local(char)
 end
 ------------------------------------------------------
 function ShowTipManualy()
+    calltipinfo['attr'] = nil
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
     if objectsX_table._fill ~= nil then
