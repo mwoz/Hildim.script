@@ -193,7 +193,7 @@ iup.CloseFilesSet = function(cmd)
         end
     end)
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
-    if nf and ((cmd == IDM_QUIT  and not _G.iuprops['buffers']) or cmd == 0) then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
+    if nf and ((cmd == IDM_QUIT  ) or cmd == 0) then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
         _G.iuprops['buffers'] = spathes;
         _G.iuprops['buffers.pos'] = sposes
         _G.iuprops['buffers.layouts'] = slayout
@@ -218,7 +218,7 @@ local function RestoreLayOut(strLay)
 end
 
 iup.RestoreFiles = function()
-    if _G.iuprops['buffers'] ~= nil and _G.iuprops['session.reload'] == '1' then
+    if props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1' then
         local bNew = (props['FileName'] ~= '')
         local t,p,bk,l = {},{},{},{}
         for f in _G.iuprops['buffers']:gmatch('[^Х]+') do

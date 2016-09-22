@@ -604,9 +604,9 @@ local function FileManTab_Init()
             {'s_AddtoFavorites', separator = 1},
             {"Add to Favorites", ru = "Добавить в избранное", action = Favorites_AddFile},
             {'When open file', ru = "После выбора файла",{
-                {"Stay Here", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, value = Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF', 'ON', 'OFF')},
-                {"Restore First Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, value = Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1', 'ON', 'OFF')},
-                {"Restore Prev. Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, value = Iif((_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON', 'ON', 'OFF')},
+                {"Stay Here", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF'"},
+                {"Restore First Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1'"},
+                {"Restore Prev. Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON'"},
             }},
             {"Insert Relative Path", ru = "Вставить относительный путь", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
     }})

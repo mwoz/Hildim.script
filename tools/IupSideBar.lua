@@ -633,7 +633,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
 
             scite.EnsureVisible()
             if dlg_SPLASH then dlg_SPLASH:postdestroy() end
-            _G.iuprops['buffers'] = nil
+            props['session.started'] = '1'
             if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS,0) end
         elseif wp == POST_CONTINUESHOWMENU then
             menuhandler:ContinuePopUp()
