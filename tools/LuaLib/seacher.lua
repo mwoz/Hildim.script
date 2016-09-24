@@ -116,7 +116,7 @@ function s:FindNext(fireEvent)
 
 	local flags = Iif(self.wholeWord, SCFIND_WHOLEWORD, 0) +
 	        Iif(self.matchCase, SCFIND_MATCHCASE, 0) +
-	        Iif(self.regExp, SCFIND_REGEXP, 0) +
+	        Iif(self.regExp, SCFIND_REGEXP + SCFIND_CXX11REGEX, 0) +
 	        Iif(props["find.replace.regexp.posix"]=='1', SCFIND_POSIX, 0)
 
 	self.send(SCI_SETSEARCHFLAGS, flags)
@@ -312,7 +312,7 @@ function s:findWalk(inSelection, funcOnFind)
     --local replaceTarget, replaceLen = self:UnSlashAsNeeded(self.replaceWhat)
 	local flags = Iif(self.wholeWord, SCFIND_WHOLEWORD, 0) +
 	        Iif(self.matchCase, SCFIND_MATCHCASE, 0) +
-	        Iif(self.regExp, SCFIND_REGEXP, 0) +
+	        Iif(self.regExp, SCFIND_REGEXP + SCFIND_CXX11REGEX, 0) +
 	        Iif(props["find.replace.regexp.posix"]=='1', SCFIND_POSIX, 0)
 	self.send(SCI_SETSEARCHFLAGS, flags)
 	local posFind = self:FindInTarget(findTarget, findLen, startPosition, endPosition);

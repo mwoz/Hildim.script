@@ -164,11 +164,6 @@ local function FindInFiles()
     local fWhat = Ctrl("cmbFindWhat").value:to_utf8(1251)
     local fFilter = Ctrl("cmbFilter").value
     local fDir = Ctrl("cmbFolders").value
-    if Ctrl("chkRegExp").value =='ON' then
-        fWhat = fWhat:gsub('\\\\', 'Х')
-        fWhat = fWhat:gsub('\\([^abfnrtv])','%%%1')
-        fWhat = fWhat:gsub('Х', '\\')
-    end
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
@@ -252,10 +247,12 @@ end
 
 local function SetStaticControls()
     local notInFiles = (Ctrl("tabFindRepl").valuepos ~= '2')
+    local notRE = (Ctrl("chkRegExp").value == 'OFF')
     Ctrl("numStyle").active = Iif(Ctrl("chkInStyle").value == 'ON' and notInFiles, 'YES', 'NO')
     Ctrl("chkInStyle").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("chkWrapFind").active = Iif(notInFiles, 'YES', 'NO')
-    Ctrl("chkBackslash").active = Iif(notInFiles, 'YES', 'NO')
+    Ctrl("chkWholeWord").active = Iif(notRE, 'YES', 'NO')
+    Ctrl("chkBackslash").active = Iif(notInFiles and notRE, 'YES', 'NO')
     Ctrl("btnArrowUp").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("btnArrowDown").active = Iif(notInFiles, 'YES', 'NO')
     oDeattFnd.onSetStaticControls()
@@ -745,7 +742,7 @@ local function create_dialog_FindReplace()
       title = "—лово целиком",
       name = "chkWholeWord",
       map_cb = (function(h)  h.value = _G["dialogs.findreplace."..h.name] end),
-      ldestroy_cb = (function(h)  _G["dialogs.findreplace."..h.name] = h.value end),
+      ldestroy_cb = (function(h) _G["dialogs.findreplace."..h.name] = h.value end),
     },
     iup.toggle{
       title = "”читывать регистр",
@@ -781,6 +778,7 @@ local function create_dialog_FindReplace()
     iup.toggle{
       title = "–егул€рные выражени€",
       name = "chkRegExp",
+      action = SetStaticControls,
     },
     containers[28],
     iup.label{
