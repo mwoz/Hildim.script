@@ -42,6 +42,14 @@ local function ReadSettings()
         ,findWhat = self:encode(cv("cmbFindWhat"))
         ,replaceWhat = self:encode(cv("cmbReplaceWhat"))
     }
+    if Ctrl("chkRegExp").value == 'ON' then
+        local err = scite.CheckRegexp(Ctrl("cmbFindWhat").value)
+        if err then
+            print(err)
+            SetInfo('regex_error', 'E')
+            return true
+        end
+    end
 end
 
 --Хендлеры контролов диалога
@@ -59,7 +67,7 @@ local function CloseFind()
 end
 
 local function ReplaceAll(h)
-    ReadSettings()
+    if ReadSettings() then return end
     local count = findSettings:ReplaceAll(false)
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
@@ -69,7 +77,7 @@ local function ReplaceAll(h)
 end
 
 local function ReplaceSel(h)
-    ReadSettings()
+    if ReadSettings() then return end
     local count = findSettings:ReplaceAll(true)
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
@@ -79,7 +87,7 @@ local function ReplaceSel(h)
 end
 
 local function FindSel(h)
-    ReadSettings()
+    if ReadSettings() then return end
     local count = findSettings:FindAll(500, false, true)
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
@@ -88,7 +96,7 @@ local function FindSel(h)
 end
 
 local function FindAll(h)
-    ReadSettings()
+    if ReadSettings() then return end
     local count = findSettings:FindAll(500, false)
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
@@ -97,7 +105,7 @@ local function FindAll(h)
 end
 
 local function GetCount(h)
-    ReadSettings()
+    if ReadSettings() then return end
     local count = findSettings:Count()
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
@@ -105,7 +113,7 @@ local function GetCount(h)
 end
 
 local function FindNext(h)
-    ReadSettings()
+    if ReadSettings() then return end
     OnNavigation("Find")
     local pos = findSettings:FindNext(true)
     OnNavigation("Find-")
@@ -117,7 +125,7 @@ local function FindNext(h)
 end
 
 local function ReplaceOnce(h)
-    ReadSettings()
+    if ReadSettings() then return end
     OnNavigation("Repl")
     local pos = findSettings:ReplaceOnce()
     OnNavigation("Repl-")
@@ -129,7 +137,7 @@ local function ReplaceOnce(h)
 end
 
 local function MarkAll(h)
-    ReadSettings()
+    if ReadSettings() then return end
     local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
     SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
@@ -147,7 +155,7 @@ local function ClearMarkAll(h)
 end
 
 local function BookmarkAll(h)
-    ReadSettings()
+    if ReadSettings() then return end
     local count = findSettings:BookmarkAll(Ctrl("chkMarkInSelection").value == "ON")
     SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
@@ -156,7 +164,7 @@ local function BookmarkAll(h)
 end
 
 local function FindInFiles()
-    ReadSettings()
+    if ReadSettings() then return end
 
     if Ctrl("cmbFindWhat").value == '' then return end
     if Ctrl("cmbFilter").value == '' then Ctrl("cmbFilter").value = '*.*' end
@@ -179,7 +187,7 @@ local function FindInFiles()
 end
 
 local function ReplaceInBuffers()
-    ReadSettings()
+    if ReadSettings() then return end
     local count = DoForBuffers(findSettings:ReplaceInBufer())
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
@@ -189,7 +197,7 @@ local function ReplaceInBuffers()
 end
 
 local function FindInBuffers()
-    ReadSettings()
+    if ReadSettings() then return end
     findSettings:CollapseFindRez()
     local count = DoForBuffers(findSettings:FindInBufer(), 100)
     SetInfo('Всего найдено: '..count, Iif(count == 0, 'E', ''))
@@ -330,7 +338,7 @@ local function FindNextSel(bUp)
             local prevUp = findSettings.searchUp
             ActivateFind_l(0)
 
-            ReadSettings()
+            if ReadSettings() then return end
             OnNavigation("Find")
             findSettings.searchUp = bUp
             local pos = findSettings:FindNext(true)

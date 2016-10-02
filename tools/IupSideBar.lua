@@ -632,9 +632,12 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
 
             scite.EnsureVisible()
-            if dlg_SPLASH then dlg_SPLASH:postdestroy() end
+            if dlg_SPLASH then scite.PostCommand(POST_CONTINUESTARTUP2, 0) end
+
             props['session.started'] = '1'
             if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS,0) end
+        elseif wp == POST_CONTINUESTARTUP2 then
+            if dlg_SPLASH then dlg_SPLASH:postdestroy()end
         elseif wp == POST_CONTINUESHOWMENU then
             menuhandler:ContinuePopUp()
         end

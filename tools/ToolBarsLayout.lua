@@ -149,7 +149,6 @@ local function Show()
     end
 
     local function dragdrop_cb(h, drag_id, drop_id, isshift, iscontrol)
-        print(123)
         if iscontrol == 1 or h == tree_plugins or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return - 1 end
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0

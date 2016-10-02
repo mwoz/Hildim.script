@@ -130,10 +130,11 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     end
 end)
 
-local function isXmlLine()
+local function isXmlLine(cp)
 --определяем, является ли текущая строка тэгом xml
+    cp = cp or editor.SelectionStart
     if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
-    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',',','..editor.StyleAt[editor.SelectionStart]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
+    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
 end
 
 local function ShowCallTip(pos, str, s, e, reshow)
@@ -175,7 +176,11 @@ local function ShowCallTip(pos, str, s, e, reshow)
             if type(list) == 'function' then list = list(function(strList) ls(strList) end) end
         end
         if not list then return end
-        if not list:find('|') and isXmlLine() then
+        local cp = editor.CurrentPos
+        for i = cp, 1, -1 do
+            if editor.CharAt[i] == 32 then cp = i; break end
+        end
+        if not list:find('|') and isXmlLine(cp) then
             calltipinfo ={0}
             if not bManualTip then
                 editor:SetSel(editor.CurrentPos, editor.CurrentPos)
