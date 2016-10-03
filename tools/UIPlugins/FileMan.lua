@@ -61,10 +61,10 @@ local function FileMan_ListFILLByMask(strMask)
 end
 
 FileMan_ListFILL = function()
-    memo_path.value = current_path
+    memo_path.value = current_path:from_utf8(1251)
 	if current_path == '' then return end
 
-    local table_dir = shell.findfiles(current_path..'*')
+    local table_dir = shell.findfiles(current_path:from_utf8(1251)..'*')
     if not table_dir then return end
     table.sort(table_dir, function(a, b)
         if a.isdirectory ~= b.isdirectory then return a.isdirectory end

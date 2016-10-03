@@ -223,7 +223,7 @@ iup.RestoreFiles = function()
         local bNew = (props['FileName'] ~= '')
         local t,p,bk,l = {},{},{},{}
         for f in _G.iuprops['buffers']:gmatch('[^•]+') do
-            table.insert(t, f)
+            table.insert(t, f:to_utf8(1251))
         end
         local bki
         if _G.iuprops['buffers.pos'] then
