@@ -5,6 +5,7 @@ local Abbreviations_USECALLTIPS = tonumber(props['sidebar.abbrev.calltip']) == 1
 local isEditor = false
 local m_lastLin = -2
 local bToolBar = false
+local _Plugins
 
 ----------------------------------------------------------
 -- tab1:list_bookmarks   Bookmarks
@@ -104,7 +105,7 @@ local function Bookmarks_GotoLine(item)
 	--end
 end
 local function  _OnUpdateUI()
-    if SideBar_Plugins.bookmark.Bar_obj.ActiveTab == myId then
+    if _Plugins.bookmark.Bar_obj.ActiveTab == myId then
         if (editor.Focus) then
             local line_count_new = editor.LineCount
             local def_line_count = line_count_new - line_count
@@ -141,7 +142,7 @@ end
 
 local function OnSwitch()
     isEditor = true
-    if SideBar_Plugins.bookmark.Bar_obj.ActiveTab == myId then
+    if _Plugins.bookmark.Bar_obj.ActiveTab == myId then
         Abbreviations_ListFILL()
         Bookmarks_ListFILL()
     end
@@ -220,9 +221,10 @@ local function ToolBar_Init(h)
         }
 end
 
-local function Tab_Init()
+local function Tab_Init(h)
+    _Plugins = h
     Init()
-    SideBar_Plugins.bookmark = {
+    h.bookmark = {
         handle = list_bookmarks;
         OnSendEditor = _OnSendEditor;
         OnClose = _OnClose;

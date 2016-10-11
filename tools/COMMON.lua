@@ -41,7 +41,7 @@ function GetCurrentWord()
 	return editor:textrange(editor:WordStartPosition(current_pos, true),
 							editor:WordEndPosition(current_pos, true))
 end
-
+function OnNavigation() end
 --------------------------------------------------------
 --- Returns current hotspot's text
 function GetCurrentHotspot ()

@@ -3,6 +3,7 @@ local containers
 local oDeattFnd
 local firstMark = tonumber(props["findtext.first.mark"])
 local popUpFind
+local _Plugins
 
 local findSettings = seacher{}
 
@@ -168,10 +169,10 @@ local function FindInFiles()
 
     if Ctrl("cmbFindWhat").value == '' then return end
     if Ctrl("cmbFilter").value == '' then Ctrl("cmbFilter").value = '*.*' end
-    if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir'] end
+    if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir']:from_utf8(1251) end
     local fWhat = Ctrl("cmbFindWhat").value:to_utf8(1251)
     local fFilter = Ctrl("cmbFilter").value
-    local fDir = Ctrl("cmbFolders").value
+    local fDir = Ctrl("cmbFolders").value:to_utf8(1251)
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
@@ -310,15 +311,15 @@ local function ActivateFind_l(nTab)
 
     if _G.dialogs['findrepl'] then
         _G.dialogs['findrepl'].ShowDialog()
-    elseif SideBar_Plugins.findrepl.Bar_obj then
-        local tabCtrl = SideBar_Plugins.findrepl.Bar_obj.TabCtrl
+    elseif _Plugins.findrepl.Bar_obj then
+        local tabCtrl = _Plugins.findrepl.Bar_obj.TabCtrl
         local ind
         for i = 0, tabCtrl.count - 1 do
-            if iup.GetAttributeId(tabCtrl, "TABTITLE", i) == SideBar_Plugins.findrepl.id  then ind = i; break end
+            if iup.GetAttributeId(tabCtrl, "TABTITLE", i) == _Plugins.findrepl.id  then ind = i; break end
         end
 
-        tabCtrl.valuepos = ind; SideBar_Plugins.functions.OnSwitchFile()
-        if _G.iuprops[SideBar_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '2' then SideBar_Plugins.findrepl.Bar_obj.handle.ShowDialog() end
+        tabCtrl.valuepos = ind; _Plugins.functions.OnSwitchFile()
+        if _G.iuprops[_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '2' then _Plugins.findrepl.Bar_obj.handle.ShowDialog() end
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart] end
@@ -326,7 +327,7 @@ local function ActivateFind_l(nTab)
     if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
     else iup.SetFocus(Ctrl('cmbFindWhat')) end
 
-    if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir'] end
+    if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir']:from_utf8(1251) end
     SetStaticControls()
     return true
 end
@@ -830,7 +831,8 @@ local function create_dialog_FindReplace()
   return containers[2]
 end
 
-local function Init()
+local function Init(h)
+    _Plugins = h
     CORE.ActivateFind = ActivateFind_l --глобальная ссылка на нашу функцию
 
     oDeattFnd = iup.scitedetachbox{
@@ -841,7 +843,7 @@ local function Init()
         On_Detach = (function(h, hNew, x, y)
             iup.SetHandle("FIND_BTN_ESC",Ctrl('btn_esc'))
             local hMainLayout = iup.GetLayout()
-             if not SideBar_Plugins.findrepl.Bar_obj then
+             if not _Plugins.findrepl.Bar_obj then
                 _G.iuprops['sidebarctrl.BottomSplit2.value'] = iup.GetDialogChild(hMainLayout, "BottomSplit2").value
                 iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="0"
                 iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000"
@@ -853,7 +855,7 @@ local function Init()
         end);
         Dlg_Close_Cb = (function(h)
             local hMainLayout = iup.GetLayout()
-            if not SideBar_Plugins.findrepl.Bar_obj then
+            if not _Plugins.findrepl.Bar_obj then
                 iup.GetDialogChild(hMainLayout, "BottomSplit2").value = _G.iuprops['sidebarctrl.BottomSplit2.value']
                 iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize="3"
             else
@@ -874,7 +876,7 @@ local function Init()
     end)
 
 
-    SideBar_Plugins.findrepl = {
+    _Plugins.findrepl = {
         handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};
         OnMenuCommand = (function(msg)
             if msg == IDM_FIND then return ActivateFind_l(0)
@@ -891,13 +893,13 @@ local function Init()
             end
         end);
         tabs_OnSelect = (function()
-            if SideBar_Plugins.findrepl.Bar_obj and SideBar_Plugins.findrepl.Bar_obj.TabCtrl.value_handle.tabtitle == SideBar_Plugins.findrepl.id and not _G.dialogs['findrepl'] then
+            if _Plugins.findrepl.Bar_obj and _Plugins.findrepl.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.findrepl.id and not _G.dialogs['findrepl'] then
                 iup.SetFocus(Ctrl("cmbFindWhat"))
             end
         end);
         }
-    SideBar_Plugins.findrepl.handle_deattach = oDeattFnd
-    SideBar_Plugins.findrepl.OnCreate = (function()
+    _Plugins.findrepl.handle_deattach = oDeattFnd
+    _Plugins.findrepl.OnCreate = (function()
             SetStaticControls()
     end)
 

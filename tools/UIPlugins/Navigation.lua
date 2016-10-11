@@ -145,14 +145,14 @@ local function internal_Init()
             {'Navigate Forward', ru='Навигация: Вперед', action=function() walk_Navigation(false) end, key='Alt+>', active=function() return currentItem > 1 end, image = 'navigation_µ',},
         }}
     )
+    AddEventHandler("OnMenuCommand", function(msg) if msg == 2316 then OnNavigation("Home") elseif msg == 2318 then OnNavigation("End") end end)
+    OnNavigation = OnNavigate;
 end
 
-local function Tab_Init()
+local function Tab_Init(h)
     internal_Init()
-    SideBar_Plugins.navigation = {
+    h.navigation = {
         handle = list_navigation;
-        OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
-		OnNavigation = OnNavigate;
         }
 end
 
@@ -190,8 +190,6 @@ local function ToolBar_Init(h)
     };
     h.Tabs.navigation = {
         handle = box;
-        OnMenuCommand=(function(msg) if msg==2316 then OnNavigation("Home") elseif msg==2318 then OnNavigation("End") end end);
-		OnNavigation = OnNavigate;
         }
 end
 

@@ -5,7 +5,8 @@ local _show_params = tonumber(_G.iuprops['sidebar.functions.params']) == 1
 local _group_by_flags = tonumber(_G.iuprops['sidebar.functions.group']) == 1
 local _sort = _G.iuprops['sidebar.functions.sort']
 if _sort == '' then _sort = 'name' end
-local  i
+local i
+local _Plugins
 
 local fnTryGroupName
 
@@ -758,7 +759,7 @@ local curSelect
 curSelect = -1
 
 local function  _OnUpdateUI()
-    if SideBar_Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle == SideBar_Plugins.functions.id then
+    if _Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.functions.id then
         if editor.Focus then
             local line_count_new = editor.LineCount
             local def_line_count = line_count_new - line_count
@@ -879,7 +880,8 @@ local function Functions_Print()
     end
 end
 
-local function Func_Init()
+local function Func_Init(h)
+    _Plugins = h
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
     local w
     for w in string.gmatch(prp, "[^|]+") do
@@ -935,7 +937,7 @@ local function Func_Init()
     end
     iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
 
-    SideBar_Plugins.functions = {   -- iup.vbox{   };
+    h.functions = {   -- iup.vbox{   };
         handle = tree_func;
         OnSwitchFile = OnSwitch;
         OnSave = OnMySave;

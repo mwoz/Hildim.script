@@ -251,7 +251,7 @@ local function SaveSolAs()
     end
 end
 
-local function Solution_Init()
+local function Solution_Init(h)
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
     local w
    -- for w in string.gmatch(prp, "[^|]+") do
@@ -313,7 +313,7 @@ local function Solution_Init()
             SaveSolution()
         end
 
-    SideBar_Plugins.solution = {   -- iup.vbox{   };
+    h.solution = {   -- iup.vbox{   };
         handle = tree_sol;
         OnSwitchFile = Initialize,
         OnOpen = Initialize,
@@ -337,7 +337,7 @@ local function Solution_Init()
         {'Add All Opened Files', ru='Добавить все открытые файлы', action=function() AddAll(tree_sol.value) end},
         {'Remove File', ru='Исключить файл из проекта', action=function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
         {'s1_FindTextOnSel', separator=1},
-        {'Go To Directory', ru='Перейти в директорию', action =function() SideBar_Plugins.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$','')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" and (SideBar_Plugins.fileman ~= nil) end},
+        {'Go To Directory', ru='Перейти в директорию', action =function() h.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$','')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" and (h.fileman ~= nil) end},
     }})
 
     menuhandler:InsertItem('TABBAR', 'slast', {'project',plane = 1, {

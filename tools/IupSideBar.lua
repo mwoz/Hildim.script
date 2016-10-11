@@ -228,7 +228,7 @@ local function  CreateBox()
             tCur = tSide[i]
             if tCur[1] then
                 local pI = dofile(defpath..tCur[1])
-                pI.sidebar(defpath..tCur[1])
+                pI.sidebar(SideBar_Plugins)
                 --debug_prnArgs()
                 local id = pI.code
                 if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
@@ -241,7 +241,7 @@ local function  CreateBox()
                     local bfixedheigth = pI.fixedheigth
                     for j = 2, #tCur do
                         pI = dofile(defpath..tCur[j])
-                        pI.sidebar()
+                        pI.sidebar(SideBar_Plugins)
                         local id = pI.code
                         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                         iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
@@ -349,7 +349,7 @@ local function InitSideBar()
     local bs2 = iup.GetDialogChild(hMainLayout, "BottomSplit2")
     local bFindInSide
     if  not SideBar_Plugins.findrepl then
-        dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar()
+        dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar(SideBar_Plugins)
         local hTmp= iup.dialog{SideBar_Plugins.findrepl.handle}
         local hBx = iup.GetDialogChild(hTmp, 'FindReplDetach')
         iup.Detach(hBx)

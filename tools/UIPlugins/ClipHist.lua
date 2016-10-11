@@ -222,9 +222,9 @@ local function init()
     }})
 end
 
-local function Sidebar_Init()
+local function Sidebar_Init(h)
     init()
-    SideBar_Plugins.cliphistory = {
+    h.cliphistory = {
         handle = lst_clip; }
 end
 

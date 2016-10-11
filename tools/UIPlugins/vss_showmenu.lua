@@ -65,6 +65,46 @@ local function Init()
         end
     end
 
+    local function vss_checkoutundif()
+        if vss_SetCurrentProject() then
+            local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
+            if ierr == 1 then
+
+                local _, tmppath = shell.exec('CMD /c set TEMP', nil, true, true)
+                tmppath = string.sub(tmppath, 6, string.len(tmppath) - 2)
+                local cmd = '"'..props['vsspath']..'\\ss.exe" Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
+                ierr, strerr = shell.exec(cmd, nil, true, true)
+                if ierr~= 0 then print(strerr) end
+                ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\sstmp"', nil, true, true)
+                if ierr~= 0 then print(strerr) end
+                ierr, strerr = shell.exec('CMD /c rename "'..tmppath..'\\'..props['FileNameExt']..'" sstmp', nil, true, true)
+                if ierr~= 0 then print(strerr) end
+                cmd = string.gsub(string.gsub(props['vsscompare'], '%%bname', '"'..tmppath..'\\sstmp"'), '%%yname', '"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
+                shell.exec(cmd)
+            elseif strerr == '' then
+                local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
+                local stropt = ""
+                if ierr == 1 then
+                    local rez = shell.msgbox("Файл отличается от базы.\nЗаменить существующий файл?","CheckOut",3)
+                    if rez ~= 2 then
+                        print(rez)
+                        if rez == 7 then
+                            stropt = " -G-"
+                        end
+                        ierr = 0
+                    end
+                end
+                if ierr == 0 then
+                    reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Checkout '..props['FileNameExt']..stropt, nil, true, true))
+                elseif ierr ~= 1 then
+                    print(strerr)
+                end
+            else
+                print(strerr, 22)
+            end
+        end
+    end
+
     local function vss_diff()
         if vss_SetCurrentProject() then
             local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
@@ -113,6 +153,8 @@ local function Init()
                 {'Get Latest Version', ru = 'Получить последнюю версию', action = vss_getlatest ,},
                 {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
                 {'History', ru = 'Показать историю', action = vss_hist ,},
+                {'s', separator = 1},
+                {'Check Out Undiff', action = vss_checkoutundif ,},
             }
         elseif ierr == 1 then --взят
             t = {

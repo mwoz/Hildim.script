@@ -335,10 +335,10 @@ local function init()
     end
 end
 
-local function Sidebar_Init()
+local function Sidebar_Init(h)
 
     init()
-    SideBar_Plugins.htmlpreview = {
+    h.htmlpreview = {
         handle = web;
     }
 end

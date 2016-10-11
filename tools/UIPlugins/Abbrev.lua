@@ -486,9 +486,9 @@ local function ToolBar_Init(h)
         }
 end
 
-local function Tab_Init()
+local function Tab_Init(h)
     Init()
-    SideBar_Plugins.abbreviations = {
+    h.abbreviations = {
         handle = list_abbrev;
         OnSwitchFile = Abbreviations_ListFILL;
         OnSave = Abbreviations_ListFILL;

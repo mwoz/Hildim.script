@@ -14,6 +14,7 @@ local sort_by_tyme = _G.iuprops['sidebar.fileman.timesort']
 local chkByTime
 local bListOpened = false
 local m_prevSel = 0
+local _Plugins
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
 	local i, j = 1
@@ -244,9 +245,9 @@ local function FileMan_FileExecWithParams()
 end
 
 local function mybar_Switch(n)
-    SideBar_Plugins.fileman.Bar_obj.TabCtrl.valuepos = n -1
-    for _,tbs in pairs(SideBar_Plugins) do
-        if tbs.tabs_OnSelect and SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
+    _Plugins.fileman.Bar_obj.TabCtrl.valuepos = n -1
+    for _,tbs in pairs(_Plugins) do
+        if tbs.tabs_OnSelect and _Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
     end
 end
 
@@ -455,7 +456,7 @@ local function Favorites_AddFileName_l(fName) --для добавления из других библиот
 end
 
 local function Favorites_Clear_l()
-    if SideBar_Plugins.fileman.Bar_obj.Active  ~= true then return end
+    if _Plugins.fileman.Bar_obj.Active  ~= true then return end
     for i = #list_fav_table,1,-1 do
         if list_fav_table[i][2] then table.remove(list_fav_table,i) end
     end
@@ -486,7 +487,7 @@ end
 local function OnSwitch(bForse, bRelist)
     if prev_filename:upper() == props['FilePath']:upper() then return end
     prev_filename = ''
-    if bForse or (SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == SideBar_Plugins.fileman.id) then
+    if bForse or (_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.fileman.id) then
         if bForse then iup.SetFocus(memo_mask) end
         local path = props['FileDir']
         if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
@@ -551,7 +552,8 @@ local function GetReadOnly()
     return shell.bit_and(tonumber(list_dir:getcell(lin, 3) or 0), 1) == 1
 end
 
-local function FileManTab_Init()
+local function FileManTab_Init(h)
+    _Plugins = h
     Favorites_AddFileName = Favorites_AddFileName_l
     Favorites_ListFILL = Favorites_ListFILL_l
     Favorites_Clear = Favorites_Clear_l
@@ -675,7 +677,7 @@ local function FileManTab_Init()
     -- end)
 
 
-    SideBar_Plugins.fileman =  {
+    _Plugins.fileman =  {
         handle = iup.vbox{
                    iup.scrollbox{iup.vbox{iup.hbox{iup.label{title = "Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
                    iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"}},
@@ -687,9 +689,9 @@ local function FileManTab_Init()
         OnOpen = function()OnSwitch(false,true) end;
         OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir.restoretab']=memo_path.value end);
         OpenDir = (function(newPath)
-            for i=1, SideBar_Plugins.fileman.Bar_obj.TabCtrl.count do
-                if iup.GetAttributeId(SideBar_Plugins.fileman.Bar_obj.TabCtrl,'TABTITLE',i) == SideBar_Plugins.fileman.id then
-                    SideBar_Plugins.fileman.Bar_obj.TabCtrl.valuepos = i
+            for i=1, _Plugins.fileman.Bar_obj.TabCtrl.count do
+                if iup.GetAttributeId(_Plugins.fileman.Bar_obj.TabCtrl,'TABTITLE',i) == _Plugins.fileman.id then
+                    _Plugins.fileman.Bar_obj.TabCtrl.valuepos = i
                     break
                 end
                 print(newPath)
@@ -701,14 +703,14 @@ local function FileManTab_Init()
                 end
                 FileMan_ListFILL()
 
-                for s,tbs in pairs(SideBar_Plugins) do
-                    if tbs.tabs_OnSelect and SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == tbs.id and s ~= 'fileman' then tbs.tabs_OnSelect() end
+                for s,tbs in pairs(_Plugins) do
+                    if tbs.tabs_OnSelect and _Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == tbs.id and s ~= 'fileman' then tbs.tabs_OnSelect() end
                 end
             end
         end),
         tabs_OnSelect = function()
-            if SideBar_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle ~= SideBar_Plugins.fileman.id then
-                m_prevSel = SideBar_Plugins.fileman.Bar_obj.TabCtrl.valuepos
+            if _Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle ~= _Plugins.fileman.id then
+                m_prevSel = _Plugins.fileman.Bar_obj.TabCtrl.valuepos
             end
             OnSwitch(true,false)
         end;
