@@ -90,10 +90,14 @@ local function useAutocomp()
 end
 
 local function GetStrAsTable(str)
-    local _start, _end, sVar, sValue,sBrash,sPar = string.find(str, '^#$([%w_]+)=([^%s%(]+)([%(]?[%s]*)([^%s]*)', 1)
+    local _start, _end, sVar, sValue, sBrash, sPar = string.find(str, '^#$([%w_]+)=([^%s%(&]+)([%(&]?[%s]*)([^%s]*)', 1)
     if _start ~=nil and sValue ~= nil then --строку разбили на объект, алиас, скобку и параметр - вставляем, как таблицу
-        string.gsub(sPar,'^[%s]*','')
-        return {sVar, sValue,sBrash,sPar}
+        if sBrash == '&' then
+            if loadstring('return '..sPar)() then return {sVar, sValue, '', ''} end
+        else
+            string.gsub(sPar, '^[%s]*', '')
+            return {sVar, sValue, sBrash, sPar}
+        end
     end
     return nil
 end
@@ -468,7 +472,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                                 if not inh_table[inh] then inh_table[inh] = {} end
                                 table.insert(inh_table[inh], parent)
                             elseif al_tbl ~= nil then
-                                local tmp_tbl = GetStrAsTable(line)
+                                debug_prnArgs(tmp_tbl)
                                 if tmp_tbl ~= nil then
                                     table.insert(al_tbl, tmp_tbl)
                                 end
@@ -1033,7 +1037,6 @@ end
 
 -- ОСНОВНАЯ ПРОЦЕДУРА (обрабатываем нажатия на клавиши)
 local function OnChar_local(char)
-    -- if char~='<' then return end
     if bIsListVisible and not pasteFromXml and fillup_chars ~= '' and string.find(char, fillup_chars) then
         --обеспечиваем вставку выбранного в листе значения вводе одного из завершающих символов(fillup_chars - типа (,. ...)
         --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
@@ -1047,14 +1050,13 @@ local function OnChar_local(char)
             bIsListVisible = false
         end
     end
-	if IsComment(editor.CurrentPos - 2) then return false end -- Если строка закомметирована, то выходим
+	if IsComment(editor.CurrentPos - 2) then return false end -- Если строка закомментирована, то выходим
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
     local result = false
     local bResetCallTip = true
 	local autocomplete_start_characters = props["autocomplete."..editor.LexerLanguage..".start.characters"]
     if cmpobj_GetFMDefault() == SCE_FM_X_DEFAULT then autocomplete_start_characters = autocomplete_start_characters..'<' end
-
 	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
 	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
 	if not (autocomplete_start_characters == '' and calltip_start_characters == '') then

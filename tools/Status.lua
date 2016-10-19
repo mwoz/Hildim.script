@@ -239,9 +239,9 @@ end
 
 StatusBar_obj.Tabs.statusbar = {
     handle = iup.hbox{
-        iup.label{title = 'Line: '; fontstyle = 'Bold'};   --sdfds esvdf
+        iup.label{title = 'Line: '; fontstyle = 'Bold'};
         txtLine;
-        iup.label{title = 'Colimn: '; fontstyle = 'Bold'};   --sdfds esvdf
+        iup.label{title = 'Colimn: '; fontstyle = 'Bold'};
         txtCol;
         iup.label{title = 'Selection: '; fontstyle = 'Bold'};
         txtSel;
@@ -259,6 +259,7 @@ StatusBar_obj.Tabs.statusbar = {
     OnMenuCommand =(function(cmd, source)
         if cmd == IDM_GOTO then
             iup.SetFocus(txtLine)
+            txtLine.selectionpos = '0:'..txtLine.value:len()
             return true
         elseif cmd >= 150 and cmd <= 154 then
             lblCode.title = UpdateStatusCodePage(cmd)
