@@ -472,7 +472,6 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                                 if not inh_table[inh] then inh_table[inh] = {} end
                                 table.insert(inh_table[inh], parent)
                             elseif al_tbl ~= nil then
-                                debug_prnArgs(tmp_tbl)
                                 if tmp_tbl ~= nil then
                                     table.insert(al_tbl, tmp_tbl)
                                 end
