@@ -90,16 +90,15 @@ local function useAutocomp()
 end
 
 local function GetStrAsTable(str)
-    local _start, _end, sVar, sValue, sBrash, sPar = string.find(str, '^#$([%w_]+)=([^%s%(&]+)([%(&]?[%s]*)([^%s]*)', 1)
+    local _start, _end, sVar, sSign, sFnc, sValue, sBrash, sPar = string.find(str, '^#$((.)([^=]+))=([^%s%(&]+)([%(&]?[%s]*)([^%s]*)', 1)
     if _start ~=nil and sValue ~= nil then --строку разбили на объект, алиас, скобку и параметр - вставляем, как таблицу
-        if sBrash == '&' then
-            if loadstring('return '..sPar)() then return {sVar, sValue, '', ''} end
-        else
-            string.gsub(sPar, '^[%s]*', '')
-            return {sVar, sValue, sBrash, sPar}
+        if sSign == '=' then
+            sVar = loadstring('return '..sFnc)() --выполняем строку между знаками равенства, как функцию, возвращаемая строка - имя объекта
+            if not sVar then return nil end
         end
+        string.gsub(sPar, '^[%s]*', '')
+        return {sVar, sValue, sBrash, sPar}
     end
-    return nil
 end
 
 -- Сортирует таблицу по алфавиту и удаляет дубликаты
@@ -472,6 +471,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                                 if not inh_table[inh] then inh_table[inh] = {} end
                                 table.insert(inh_table[inh], parent)
                             elseif al_tbl ~= nil then
+                                local tmp_tbl = GetStrAsTable(line)
                                 if tmp_tbl ~= nil then
                                     table.insert(al_tbl, tmp_tbl)
                                 end
