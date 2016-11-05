@@ -876,6 +876,8 @@ local function Functions_Print()
     for i,v in ipairs(table_functions) do
         if type(v) == 'table' and ( v.Property or v.Function or v.Sub) then
             print(v[4]..' '..v[1]..v[3])
+        elseif type(v) == 'table' then
+            print(v[1])
         end
     end
 end

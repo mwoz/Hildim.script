@@ -805,10 +805,10 @@ local function OnUserListSelection_local(tp, str)
     elseif pasteFromXml then
         s = str..'=""'
     elseif editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
-        local tip, sign
+        local tip, sign, txt
         for _, t in ipairs(objects_table['NOOBJ']) do
             if t[1] == str then
-                _, _ , tip, sign = t[2]:find('^%s*(.-)([\\>])%s*$')
+                _, _ , tip, sign, txt = t[2]:find('^%s*(.-)([\\>])(.-)%s*$')
                 if not tip then tip = t[2] end
                 break
             end
@@ -828,7 +828,13 @@ local function OnUserListSelection_local(tp, str)
             end
         end
         if isXmlLine() then
-            if sign == '>' then
+            if txt and #txt > 1 then
+                txt = txt:gsub('\\n', '\n'):gsub('\\r', '\r')
+                local _, _, nodeBg, nodeEnd = txt:find('([^|]*)|?(.*)')
+                shift = #str + 3 + #nodeEnd
+                s = '>'..nodeBg..nodeEnd..'</'..str..'>'
+                if curr_fillup_char == '>' then curr_fillup_char = '' end
+            elseif sign == '>' then
                 shift = 1
                 s = '>'
                 if curr_fillup_char == '' then curr_fillup_char = '' end
