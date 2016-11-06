@@ -37,7 +37,7 @@ local function Init(h)
                     tBtn.tip = strTitle:gsub('^.*\t','')
                 end
                 local hBtn = iup.flatbutton(tBtn)
-                hBtn.flat_action = menuhandler:GetAction(tItem)
+                hBtn.flat_action = function() menuhandler:GetAction(tItem)(); iup.PassFocus() end
                 table.insert(tBar, hBtn)
 
                 if #tCond > 0 then tAllConditions[hBtn] = tCond end

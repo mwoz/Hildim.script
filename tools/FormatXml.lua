@@ -1,10 +1,13 @@
 require("comhelper")
 
---:from_utf8(1251):from_utf8(1251)local _,_, h = editor:GetText():find('^(<%?[^\n]*%?>)')
+--:from_utf8(1251):from_utf8(1251)
+local patt = '^(<%?[^\n]-%?>.-\n)'
 --xml.setIndent(editor.Indent)
 -- debug_prnTb(xml.eval(editor:GetText()),1)
 local strFrm = editor:GetText()
---if h then strFrm = strFrm:gsub(h, '') end
+local _, _, h = strFrm:find(patt)
+strFrm = strFrm:gsub(patt, '')
+--if h then strFrm = strFrm:gsub(patt, '') end
 if props['FileExt'] == 'form' then
     local function clb(node, indent, prevIndent)
         if node.nodeTypeString == 'element' and node.nodeName == 'value' and not node.firstChild then
@@ -64,9 +67,8 @@ else
     strFrm = comhelper.FormatXml(strFrm:from_utf8(1251), 3, ',,,', ',,,', ',,,', nil)
     strFrm = strFrm:gsub('>%s+</Field>', '></Field>')
 end
-
+if h then strFrm = h..strFrm end
 editor:SetText(strFrm)
 editor:SetSel(0, editor.Length)
 --if SORTFORMXML then SORTFORMXML.SortFormXML() end
 editor:SetSel(0, 0)
-if h then editor:ReplaceSel(h..'\r\n') end

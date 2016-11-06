@@ -1,3 +1,4 @@
+
 ### Источник: Справочник "Некоторые объекты Automation" <http://www.script-coding.info/wsh_chm.zip>
 
 # Строковые функции
@@ -188,7 +189,7 @@ vbDecimal 14 Переменная имеет подтип Decimal.
 vbByte 17 Переменная имеет подтип Byte.
 vbArray 8192 Переменная является массивом.
 
-#$regex=new regex
+#$regex=regexp
 regex.Pattern Sets or returns the regular expression pattern being searched for.
 regex.Global Sets or returns a Boolean value that indicates if a pattern should match all occurrences in an entire search string or just the first one.
 regex.IgnoreCase  True | False - Sets or returns a Boolean value that indicates if a pattern search is case-sensitive or not.
@@ -196,7 +197,7 @@ regex.Execute(string) Executes a regular expression search against a specified s
 regex.Test Executes a regular expression search against a specified string and returns a Boolean value that indicates if a pattern match was found.
 regex.Replace(string1, string2)  Replaces text found in a regular expression search. string1 \nRequired. String1 is the text string in which the text replacement is to occur. \nstring2 \nRequired. String2 is the replacement text string.
 
-#$matches=regex.Execute(
+#$matches=regex.execute(
 matches.count
 match.Length
 match.FirstIndex
@@ -209,4 +210,3 @@ err.Number
 err.Source
 err.Raise(number, source, description, helpfile, helpcontext)
 err.Clear()
-

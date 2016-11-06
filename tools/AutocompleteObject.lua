@@ -71,6 +71,102 @@ do
         end
     end
 end
+
+local INCL_DEF, PATT
+do
+    local INCL = lpeg.P'#INCLUDE(' * lpeg.C((1 - lpeg.S')\n')^1)
+    INCL_DEF = lpeg.Ct((lpeg.P{INCL + 1 * lpeg.V(1)} )^1)
+
+    local m__CLASS = '~~ROOT'
+	local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt, B = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt, lpeg.B
+
+	local function AnyCase(str)
+		local res = P'' --empty pattern to start with
+		local ch, CH
+		for i = 1, #str do
+			ch = str:sub(i,i):lower()
+			CH = ch:upper()
+			res = res * S(CH..ch)
+		end
+		assert(res:match(str))
+		return res
+	end
+
+	local PosToLine = function (pos) return 1 end
+
+
+	local EOF = P(-1)
+	local BOF = P(function(s,i) return (i==1) and 1 end)
+	local NL = P"\n"-- + P"\f" -- pattern matching newline, platform-specific. \f = page break marker
+	local AZ = R('AZ','az')+"_"
+	local N = R'09'
+	local ANY =  P(1)
+	local ESCANY = P'\\'*ANY + ANY
+	local SINGLESPACE = S'\n \t\f'
+	local SPACE = SINGLESPACE^1
+
+	-- simple tokens
+	local IDENTIFIER = AZ * (AZ+N)^0 -- simple identifier, without separators
+
+	local Str1 = P'"' * ( ESCANY - (S'"'+NL) )^0 * (P'"' + NL)--NL == error'unfinished string')
+	local Str2 = P"'" * ( ESCANY - (S"'"+NL) )^0 * (P"'" + NL)--NL == error'unfinished string')
+	local STRING = Str1 + Str2
+
+	-- special captures
+	local cp = Cp() -- pos capture, Carg(1) is the shift value, comes from start_code_pos
+	local cl = cp/PosToLine -- line capture, uses editor:LineFromPosition
+	local par = Cg(C(   (P"("*(1-P")")^0*P")")^-1      ), 'params') -- captures parameters in parentheses
+	--local par = C(   P"("*(1-P")")^0*P")" + (P'  ')      ) -- captures parameters in parentheses
+
+
+    local SPACE = (S(" \t")+P"_"*S(" \t")^0*(P"\n"))^1
+    local SC = SPACE
+    local BR = P'"'
+    local NL = (P"\n")^1*SC^0
+    local STRING = P'"' * (ANY - (P'"' + P"\n"))^0*P'"'
+    local COMMENT = (P"'" + P"REM ") * (ANY - P"\n")^0
+    local IGNORED = SPACE + COMMENT + STRING
+    local I = Cg(C(IDENTIFIER),'ID')
+    -- define local patterns
+    local f = AnyCase"function"
+    local p = AnyCase"property"
+        local let = AnyCase"let"
+        local get = AnyCase"get"
+        local set = AnyCase"set"
+        local public = AnyCase"public"
+        local private = AnyCase"private"
+    local s = AnyCase"sub"
+
+    --local restype = P' '^1 * P"'"^-1* P' '^0 * (P"As"+P"as")*SPACE*Cg(C(AZ^1),'type')
+    local restype = P' '^0 * P"'"^- 1 * P' '^0 * (P"As" + P"as")* P' '^1 * Cg(C(AZ^1 ), 'output')
+
+    let = Cg(let * Cc(true), 'LET')
+    get = Cg(get*Cc(true),'GET')
+    set = Cg(set*Cc(true),'SET')
+    private = Cg(private * Cc(true), 'PRIVATE')
+    public = Cg(public*Cc(true),'PUBLIC')
+    p = Cg(p*Cc(true),'Property')
+    p = NL*((private+public)*SC^1)^0*p*SC^1*(let+get+set)
+    s = NL*((private+public)*SC^1)^0*Cg(s*Cc(true),'Sub')
+    f = NL*((private+public)*SC^1)^0*Cg(f*Cc(true),'Function')
+    local ec = NL*AnyCase"end"*SC^1*(AnyCase"class") / (function(a,b) m__CLASS = '~~ROOT'; end)
+    local DESCLINE = S' \t'^0 * Cg(C((P'\n' * S' \t'^0 * (#P"'") *(1 - S'\n')^0)^0)/function(a) return (a or ''):gsub('^ *\n *', ''):gsub("'", ''):gsub('\n *', '\\n'):gsub(' +', ' ') end, 'comment')
+
+    local e = NL*AnyCase"end"*SC^1*(AnyCase"sub"+AnyCase"function"+AnyCase"property")
+    local body = (IGNORED^1 + IDENTIFIER + 1 - f - s - p - e)^0 * e
+
+    -- definitions to capture:
+    f = f*SC^1*I*SC^0*par
+    p = p*SC^1*I*SC^0*par
+    s = s*SC^1*I*SC^0*par
+
+    local class = (AnyCase"class")*SC^1*(I / function(a,b) m__CLASS = a; end)
+    local def = Ct(((f + s + p)*(restype)^-1)*DESCLINE*( Cg(Cc('')/function() return m__CLASS end, 'CLASS') ))*body +class + ec
+    -- resulting pattern, which does the work
+
+    PATT = (def + IGNORED^1 + IDENTIFIER + (1-NL)^1 + NL)^0 * EOF
+
+end
 ------------------------------------------------------
 function cmpobj_GetFMDefault()
     if(editor.Lexer  ~= SCLEX_FORMENJINE) then return -1 end
@@ -526,21 +622,26 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
     return nil
 end
 
-local function FillTableFromText(incText,patterns, tblfList)
-    local lenP = table.maxn(patterns)
-    for i=1,lenP do
-        for w,p,pos in string.gmatch(incText,patterns[i]) do
-            local step = pos
-            while true do
-                local _s,_e,c =  string.find(incText,"^%s*%'([^\n]*)",step)
-                if _e == nil then break end
-                if c ~= nil then p = p.."\n"..c end
-                step = _e  + 1
-            end
-            tblins = objects_table[constObjGlobal]
-            if tblins ~= nil then
-                table.insert(tblins, {w,p})
-                table.insert(tblfList,w)
+
+local function FillTableFromText(tblfList, tStruct)
+    tblins = objects_table[constObjGlobal]
+    if tblins then
+        for i = 1,  #tStruct do
+            if tStruct[i].CLASS == '~~ROOT' then
+                table.insert(tblins, {tStruct[i].ID, (tStruct[i].params or '')..'\n'..tStruct[i].comment})
+                table.insert(tblfList, tStruct[i].ID)
+                if alias_table and tStruct[i].output then
+                    table.insert(alias_table, {
+                        tStruct[i].output:lower(),
+                        tStruct[i].ID:lower(), '(', ''
+                    })
+                    if tStruct[i].params == '()' or tStruct[i].params == '' then
+                        table.insert(alias_table, {
+                            tStruct[i].output:lower(),
+                            tStruct[i].ID:lower(), '', ''
+                        })
+                    end
+                end
             end
         end
     end
@@ -553,19 +654,16 @@ local function ReCreateStructures(strText, tblFiles)
 
     local tbl_fList= {}
     local function RecrReCreateStructures(strTxt,tblFiles)
-        local _incStart,_incEnd,incFind,incPath,_start, _end, fName
-        local patterns = {"\n%s*Sub[%s]([%w%_]+)([^\n%']+)()",
-                          "\n%s*Function[%s]([%w%_]+)([^\n%']+)()",
-                          "\nDim%s*([%w%_]+)([^\n]+)()",
-                          "\nConst%s*([%w%_]+)([^\n]+)()"
-                        }
+        local _incStart,_incEnd,incFind,incPath, fName
 
-        FillTableFromText(strTxt,patterns, tbl_fList)
-        while true do     --получим список всех доступных функций
-            _start, _end, fName = string.find(strTxt,"\n%'?#INCLUDE.([%w%.%_]+)",_start)
-            if _start == nil then
-                return
-            end
+        local tblIncl = (INCL_DEF:match(strTxt or '', 1) or {})
+        local t = lpeg.Ct(PATT):match(strTxt, 1) or {}
+
+        FillTableFromText(tbl_fList, t)
+        for idx = 1, #tblIncl do
+        --while true do     --получим список всех доступных функций
+            fName = tblIncl[idx]
+
             if tblFiles[string.lower(fName)] == nil then
                 tblFiles[string.lower(fName)] = 1
                 local fName2 = get_precomp_tblFiles(string.lower(fName))
@@ -584,9 +682,7 @@ local function ReCreateStructures(strText, tblFiles)
                     end
                 end
             end
-            _start = _end + 1
         end
-
     end
 
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
