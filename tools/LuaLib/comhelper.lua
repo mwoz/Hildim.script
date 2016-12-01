@@ -69,7 +69,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
                             if (lMin or #s) >= #s then lMin = #s end
                             if lMin == 0 then break end
                         end
-                        if true then
+                        if false then
                             oChild.text = oChild.text:gsub('\n([ ]*)([^\n\r\t ])', function(p, s)
                                 return '\n'..string.rep(' ',#p + #ni - 1 - lMin + lenInd )..s
                             end
@@ -83,7 +83,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
                             if (lMin or #s) >= #s then lMin = #s end
                             if lMin == 0 then break end
                         end
-                        if true then
+                        if false then
                             oChild.text = oChild.text:gsub('\n([ ]*)([^\n\r\t ])', function(p, s)
                                 return '\n'..string.rep(' ',#p + #indent - 2 - lMin + lenInd )..s
                             end

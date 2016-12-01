@@ -414,23 +414,25 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
             editor.FirstVisibleLine = iline
             editor:SetSel(s, e)
             iChangedLine = -1
-        elseif curFold and FoldLevel(-1) < FoldLevel(0) then
+        elseif curFold and FoldLevel(-1) < FoldLevel(0)  then
             curFold = nil
-            local curS = editor.SelectionStart
-            local ls = editor:LineFromPosition(curS)
-            local cL = FoldLevel(-1)
-            local curI, curIPos = LineIndent(0) --print(ls, cL)
-            for i = ls - 1, 0,- 1 do
-                --print(i, FoldLevel(ls - i))
-                if cL >= FoldLevel(ls - i) then
-                    local newPos = curS - (curI - LineIndent(ls - i))
-                    editor.TargetStart = editor:PositionFromLine(ls)
-                    editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
-                    editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
-                    editor.SelectionStart = newPos
-                    editor.SelectionEnd = newPos
-                    prevFold = curI
-                    return
+            if editor.CharAt[editor.CurrentPos] == 13 then
+                local curS = editor.SelectionStart
+                local ls = editor:LineFromPosition(curS)
+                local cL = FoldLevel(-1)
+                local curI, curIPos = LineIndent(0) --print(ls, cL)
+                for i = ls - 1, 0,- 1 do
+                    --print(i, FoldLevel(ls - i))
+                    if cL >= FoldLevel(ls - i) then
+                        local newPos = curS - (curI - LineIndent(ls - i))
+                        editor.TargetStart = editor:PositionFromLine(ls)
+                        editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
+                        editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
+                        editor.SelectionStart = newPos
+                        editor.SelectionEnd = newPos
+                        prevFold = curI
+                        return
+                    end
                 end
             end
         end

@@ -205,18 +205,20 @@ AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
             editor:EndUndoAction()
             bNewLine = false
         elseif (bModified == 1 and bSelection == 0) and curFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) < FoldLevel(0) then
-            local curS = editor.SelectionStart
-            local ls = editor:LineFromPosition(curS)
-            local cL = FoldLevel(-1)
-            local curI, curIPos = editor.LineIndentation[ls]
-            for i = ls - 1, 0,- 1 do
-                if cL >= FoldLevel(ls - i) then
-                    local newPos = curS - (curI - editor.LineIndentation[i])
-                    editor.LineIndentation[ls] = editor.LineIndentation[i]
-                    editor.SelectionStart = newPos
-                    editor.SelectionEnd = newPos
-                    prevFold = curI
-                    return
+            if editor.CharAt[editor.CurrentPos] == 13 then
+                local curS = editor.SelectionStart
+                local ls = editor:LineFromPosition(curS)
+                local cL = FoldLevel(-1)
+                local curI, curIPos = editor.LineIndentation[ls]
+                for i = ls - 1, 0,- 1 do
+                    if cL >= FoldLevel(ls - i) then
+                        local newPos = curS - (curI - editor.LineIndentation[i])
+                        editor.LineIndentation[ls] = editor.LineIndentation[i]
+                        editor.SelectionStart = newPos
+                        editor.SelectionEnd = newPos
+                        prevFold = curI
+                        return
+                    end
                 end
             end
             curFold = nil

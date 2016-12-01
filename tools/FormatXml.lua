@@ -40,9 +40,7 @@ if props['FileExt'] == 'form' then
     ',,,', 'form', clb):from_utf8(1251)
 
     strFrm = strFrm:gsub('>%s+</form>', '></form>')
---[[    strFrm = strFrm:gsub(' +<script', '<script')
-    strFrm = strFrm:gsub(' +(</?string)', '%1')
-    strFrm = strFrm:gsub(' +(</?value)', '    %1') ]]
+
     strFrm = strFrm:gsub('%]%]>%s+</', ']]></')
     strFrm = strFrm:gsub('>%s+<value><!%[CDATA%[', '><value><![CDATA[')
     strFrm = strFrm:gsub('%]%]></value>%s+<', ']]></value><')
@@ -59,10 +57,6 @@ elseif props['FileExt'] == 'cform' or props['FileExt'] == 'rform' or props['File
     strFrm = strFrm:gsub('%]%]>%s+</', ']]></')
     strFrm = strFrm:gsub('>%s+<!%[CDATA%[', '><![CDATA[')
 
---[[    strFrm = strFrm:gsub(' +<Script', '<Script')
-    strFrm = strFrm:gsub(' +<ConditionScript', '<ConditionScript')
-    strFrm = strFrm:gsub(' +<Query', '<Query')
-    strFrm = strFrm:gsub(' +(</?String)', '%1')]]
 else
     strFrm = comhelper.FormatXml(strFrm:from_utf8(1251), 3, ',,,', ',,,', ',,,', nil)
     strFrm = strFrm:gsub('>%s+</Field>', '></Field>')
@@ -70,5 +64,5 @@ end
 if h then strFrm = h..strFrm end
 editor:SetText(strFrm)
 editor:SetSel(0, editor.Length)
---if SORTFORMXML then SORTFORMXML.SortFormXML() end
+
 editor:SetSel(0, 0)

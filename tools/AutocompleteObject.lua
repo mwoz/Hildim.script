@@ -213,7 +213,7 @@ end
 local ulFromCT_data
 
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
-    if wp == POST_SHOWUL then
+    if wp == POST_SHOWUL and #ulFromCT_data > 0 then
         local tl = {}
         for w in ulFromCT_data:gmatch('[^|]+') do
             table.insert(tl, w)
@@ -224,7 +224,6 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         current_poslst = current_pos
         pasteFromXml = false
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8(1251) end
-
         editor:UserListShow(constListIdXmlPar, ulFromCT_data)
     end
 end)
@@ -250,6 +249,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
         pasteFromXml = false
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
         editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
+   print(l, 1)
         editor:UserListShow(constListIdXmlPar, l)
     end
     local function IsWordCharParam()
@@ -441,21 +441,28 @@ local function GetObjectNames(tableObj)
 end
 
 local function GetObjectNamesXml()
-    strLine = editor:textrange(editor:PositionFromLine(af_current_line), editor:PositionFromLine(af_current_line + 1))
+    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), editor.CurrentPos)-- editor:PositionFromLine(af_current_line + 1))
     local names ={}
-    local _s, _e, s = string.find(strLine, ".*<([%w]+)")
-    if _s ~= nil then
+    local i = 0
+    repeat
+        local _s, _e, s, p = string.find(strLine, ".*<([%w]*)([^>]*)$") --".*<([%w]+)")
+        if _s ~= nil and s ~= '' then
 
-        table.insert(names,{s, s, '', ''})
-        _s, _e, s = string.find(strLine, ' type="([%w]+)"')
-        if _s ~= nil then
-            s = s:lower()
-            if s == "form" then s = "formbox" end
             table.insert(names,{s, s, '', ''})
-        end
-    else
-        table.insert(names,{"noobj", '', '', ''})
-    end
+            strLine = editor:textrange(editor:PositionFromLine(af_current_line - i), editor:PositionFromLine(af_current_line + 1) - 2)
+            _s, _e, s = string.find(strLine, ' type="([%w]+)"')
+            if _s ~= nil then
+                s = s:lower()
+                if s == "form" then s = "formbox" end
+                table.insert(names,{s, s, '', ''})
+            end
+            return names
+        elseif strLine:find('[<>]') then return names end
+            --table.insert(names,{"noobj", '', '', ''})
+        --end
+        i = i + 1
+        strLine = editor:textrange(editor:PositionFromLine(af_current_line - i), editor:PositionFromLine(af_current_line - i + 1) - 2)
+    until af_current_line - i == 0
     return names
 end
 
@@ -924,10 +931,12 @@ local function OnUserListSelection_local(tp, str)
             end
         end
         if isXmlLine() then
-            if txt and #txt > 1 then
-                txt = txt:gsub('\\n', '\n'):gsub('\\r', '\r')
+            if txt and #txt > 1 and ((iup.GetGlobal('SHIFTKEY') == 'OFF' and curr_fillup_char ~= '/') or curr_fillup_char == '>') then
+                local pl = string.rep(' ', editor.LineIndentation[editor:LineFromPosition(editor.SelectionStart)])
+                txt = txt:gsub('\\n', '\n'):gsub('\\r', '\r'):gsub('\\b', pl):gsub('\\t', string.rep(' ', editor.TabWidth))
                 local _, _, nodeBg, nodeEnd = txt:find('([^|]*)|?(.*)')
                 shift = #str + 3 + #nodeEnd
+                if #nodeEnd == 0 then shift = #str + 4 + #nodeBg end
                 s = '>'..nodeBg..nodeEnd..'</'..str..'>'
                 if curr_fillup_char == '>' then curr_fillup_char = '' end
             elseif sign == '>' then
@@ -1169,7 +1178,6 @@ local function OnChar_local(char)
                         return r or result
                     end
                 else
-
                     local r = TipXml()
                     return r or result
                 end
