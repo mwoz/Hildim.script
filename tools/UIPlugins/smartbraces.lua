@@ -353,9 +353,9 @@ local function Init()
                     props['braces.open.*'] = props['braces.open.fm.x']
                     props['braces.close.*'] = props['braces.close.fm.x']
                 else
-                    if props['braces.open.'..editor.LexerLanguage] ~= nil then
-                        props['braces.open.*'] = props['braces.open.'..editor.LexerLanguage]
-                        props['braces.close.*'] = props['braces.close.'..editor.LexerLanguage]
+                    if props['braces.open.'..editor_LexerLanguage()] ~= nil then
+                        props['braces.open.*'] = props['braces.open.'..editor_LexerLanguage()]
+                        props['braces.close.*'] = props['braces.close.'..editor_LexerLanguage()]
                     else
                         props['braces.open.*'] = props['braces.open.def']
                         props['braces.close.*'] = props['braces.close.def']
@@ -363,9 +363,9 @@ local function Init()
                 end
             end
         else
-            if props['braces.open.'..editor.LexerLanguage] ~= "" then
-                props['braces.open.*'] = props['braces.open.'..editor.LexerLanguage]
-                props['braces.close.*'] = props['braces.close.'..editor.LexerLanguage]
+            if props['braces.open.'..editor_LexerLanguage()] ~= "" then
+                props['braces.open.*'] = props['braces.open.'..editor_LexerLanguage()]
+                props['braces.close.*'] = props['braces.close.'..editor_LexerLanguage()]
             else
                 props['braces.open.*'] = props['braces.open.def']
                 props['braces.close.*'] = props['braces.close.def']

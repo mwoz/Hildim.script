@@ -95,6 +95,7 @@ local function ZogLexer(styler) -- by Philippe Lhoste
 end
 
 AddEventHandler("OnStyle", function(styler)
+    print(styler.language)
   if styler.language == "script_zog" then
     ZogLexer(styler)
   end

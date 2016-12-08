@@ -299,7 +299,7 @@ local function RestoreNamedValues(h, root)
             if child.name and (iup.GetAttribute(child, 'HISTTORIZED') ~= 'NO') then
                 local _,_,cType = tostring(child):find('IUP%((%w+)')
                 local val = _G.iuprops[root..'.'..child.name..'.value']
-                if cType == 'list' and child.dropdown == "YES" then
+                if cType == 'list' and child.dropdown == "YES" and child.editbox == "YES" then
                     local s = _G.iuprops[root..'.'..child.name..'.hist']
                     if s then
                         local i = 1

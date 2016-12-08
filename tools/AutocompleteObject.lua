@@ -232,7 +232,7 @@ local function isXmlLine(cp)
 --определяем, является ли текущая строка тэгом xml
     cp = cp or editor.SelectionStart
     if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
-    return string.find(','..props["autocomplete."..editor.LexerLanguage..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
+    return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
 end
 
 local function ShowCallTip(pos, str, s, e, reshow)
@@ -361,7 +361,7 @@ local function GetInputObject(line)
     end
     local lineLen = string.len(line)
     local inputObject = {"","","",nil}
-    if props["autocomplete."..editor.LexerLanguage..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] or editor.CharAt[editor.SelectionStart] == 60 then
+    if props["autocomplete."..editor_LexerLanguage()..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] or editor.CharAt[editor.SelectionStart] == 60 then
         inputObject = {"noobj", "", "", nil}
         return inputObject
     end
@@ -544,10 +544,10 @@ local function FindDeclaration()
     declarations = {}
 	local text_all = GetActualText()
 
-    local pattern = props["autocomplete."..editor.LexerLanguage..".setobj.pattern"]
+    local pattern = props["autocomplete."..editor_LexerLanguage()..".setobj.pattern"]
 	if pattern == nil or pattern == '' then pattern = '([%w%.%_]+)%s*=%s*([^%c]+)' end
     FindDeclarationByPattern(text_all, pattern)
-    pattern = props["autocomplete."..editor.LexerLanguage..".setobj.pattern2"]
+    pattern = props["autocomplete."..editor_LexerLanguage()..".setobj.pattern2"]
 	if pattern ~= nil and pattern ~= '' then FindDeclarationByPattern(text_all, pattern) end
 end
 
@@ -719,8 +719,8 @@ local function ReCreateStructures(strText, tblFiles)
         alias_table = {}
         objects_table = {}
         objectsX_table = {}
-        fillup_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".fillup.characters"])
-        autocom_chars = fPattern(props["autocomplete."..editor.LexerLanguage..".start.characters"])
+        fillup_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".fillup.characters"])
+        autocom_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".start.characters"])
         inheritors = {}
         str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
     end
@@ -907,7 +907,7 @@ local function OnUserListSelection_local(tp, str)
         editor:SetSel(sSt, editor.CurrentPos)
     elseif pasteFromXml then
         s = str..'=""'
-    elseif editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
+    elseif editor_LexerLanguage() == 'xml' or editor_LexerLanguage() == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
         local tip, sign, txt
         for _, t in ipairs(objects_table['NOOBJ']) do
             if t[1] == str then
@@ -1165,9 +1165,9 @@ local function OnChar_local(char)
     af_current_line = editor:LineFromPosition(current_pos)
     local result = false
     local bResetCallTip = true
-	local autocomplete_start_characters = props["autocomplete."..editor.LexerLanguage..".start.characters"]
+	local autocomplete_start_characters = props["autocomplete."..editor_LexerLanguage()..".start.characters"]
     if cmpobj_GetFMDefault() == SCE_FM_X_DEFAULT then autocomplete_start_characters = autocomplete_start_characters..'<' end
-	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
+	local calltip_start_characters = props["calltipex."..editor_LexerLanguage()..".parameters.start"]
 	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
 	if not (autocomplete_start_characters == '' and calltip_start_characters == '') then
         if objectsX_table._fill ~= nil and ( char == ' ' or char == '=' ) then
@@ -1248,7 +1248,7 @@ function ShowTipManualy()
         end
     end
 
-	local calltip_start_characters = props["calltipex."..editor.LexerLanguage..".parameters.start"]
+	local calltip_start_characters = props["calltipex."..editor_LexerLanguage()..".parameters.start"]
 	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
     if calltip_start_characters == '' then return end
 
@@ -1343,7 +1343,7 @@ local function OnSwitchLocal()
     end
     m_ext = editor.Lexer
     if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end
-    objPatern = Iif(editor.LexerLanguage == 'css', '(%.?[%w%_-]+)$', '(%.?[%w%_]+)$')
+    objPatern = Iif(editor_LexerLanguage() == 'css', '(%.?[%w%_-]+)$', '(%.?[%w%_]+)$')
 end
 AddEventHandler("OnSwitchFile", function(file)
     local pr = _G.iuprops["spell.autospell"]

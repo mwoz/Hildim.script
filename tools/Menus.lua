@@ -125,7 +125,7 @@ if _G.iuprops['settings.lexers'] then
 	for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
 		local _,_, p1,p2,p3,p4 = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
 		t[p4] = true
-		table.insert(tHilight,{p1, action = function() scite.SetLexer(p2) end, check=function() return editor.LexerLanguage == p3 end})
+		table.insert(tHilight,{p1, action = function() scite.SetLexer(p2) end, check=function() return editor_LexerLanguage() == p3 end})
 	end
 	for n,_ in pairs(t) do
 		table.insert(tLangs, {"Open "..n, action =function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..n) end})
@@ -301,9 +301,9 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=выделение)', key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
 		{'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=буфер обмена)', key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
 		{'Comment or Uncomment', ru = 'Закомментировать и раскомментировать текст', key = 'Ctrl+Q', action = CORE.xComment, image = 'edit_signiture_µ'},
-		{'Block Co&mment', ru = 'Блочный комментарий', action = IDM_BLOCK_COMMENT, visible = "props['comment.stream.start.'..editor.LexerLanguage]~='' and props['comment.block.'..editor.LexerLanguage]~=''"},
-		{'Stream Comme&nt', ru = 'Потоковый комментарий', key = 'Ctrl+Shift+Q', action = IDM_STREAM_COMMENT, visible = "props['comment.stream.start.'..editor.LexerLanguage]~='' and props['comment.block.'..editor.LexerLanguage]~=''"},
-		{'Bo&x Comment', ru = 'Бокс - комментарий', key = 'Ctrl+Shift+B', action = IDM_BOX_COMMENT, visible = "props['comment.box.start.'..editor.LexerLanguage]~=''"},
+		{'Block Co&mment', ru = 'Блочный комментарий', action = IDM_BLOCK_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},
+		{'Stream Comme&nt', ru = 'Потоковый комментарий', key = 'Ctrl+Shift+Q', action = IDM_STREAM_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},
+		{'Bo&x Comment', ru = 'Бокс - комментарий', key = 'Ctrl+Shift+B', action = IDM_BOX_COMMENT, visible = "props['comment.box.start.'..editor_LexerLanguage()]~=''"},
 		{'Make &Selection Uppercase', ru = 'Перевести в верхний регистр', key = 'Ctrl+U', action = IDM_UPRCASE, image = 'edit_uppercase_µ'},
 		{'Make Selection &Lowercase', ru = 'Перевести в нижний регистр', key = 'Ctrl+Shift+U', action = IDM_LWRCASE, image = 'edit_lowercase_µ'},
 	},},

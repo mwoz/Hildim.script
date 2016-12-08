@@ -10,7 +10,7 @@ local function Show()
         local f
         local tFiles, tLng = {},{}
         local strLng = ''
-        for i = 0, maxL - 1 do
+        for i = 0, maxL  do
             if iup.GetAttributeId2(list_lex, 'TOGGLEVALUE', i, 1) == '1' then
                 if strLng ~= '' then strLng = strLng..'¦' end
                 strLng = strLng..list_lex:getcell(i,2)..'•'..list_lex:getcell(i,5)..'•'..list_lex:getcell(i,3)..'•'..list_lex:getcell(i,4)
@@ -65,7 +65,7 @@ local function Show()
         local f = io.open(props['SciteDefaultHome']..'\\languages\\'..table_dir[i].name)
         local s = f:read('*a')
         f:close()
-        for filePtrn, lexLng in s:gmatch('\n? *lexer%.%$%(file%.patterns%.([%w_]+)%)=(%w+)') do
+        for filePtrn, lexLng in s:gmatch('\n? *lexer%.%$%(file%.patterns%.([%w_]+)%)=([%w_]+)') do
             local tbl_l = {}
             tbl_l.name = table_dir[i].name
             tbl_l.lexer = lexLng

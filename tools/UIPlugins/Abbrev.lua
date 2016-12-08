@@ -20,6 +20,15 @@ local showPopUp, editMode
 
 ABBREV = {}
 
+local function abrPath()
+    if not editor.LexerLanguage then
+        if editor_LexerLanguage():find('script_') then
+            return props['SciteDefaultHome']..'\\abbrev\\'..editor_LexerLanguage()..'.abbrev'
+        end
+    end
+    return props['AbbrevPath']
+end
+
 local function replAbbr(findSt, findEnd, s, dInd)
 
     s = s:gsub('%%CLIP(%d+)%%', function(i) if CLIPHISTORY then return CLIPHISTORY.GetClip(i)  else return '' end end)
@@ -67,7 +76,7 @@ local function EditAbbrev(bNew)
 	if idx == -1 then
         abb,expan = 0,0
     end
-	abb,expan = list_abbrev:getcell(l, 1), list_abbrev:getcell(l,2)
+	abb,expan = list_abbrev:getcell(l, 1) or '', list_abbrev:getcell(l,2) or ''
 
     local btn_upd = iup.button  {title=Iif(editMode=="CHANGE", "Update", "Insert")}
     iup.SetHandle("EDIT_BTN_UPD",btn_upd)
@@ -234,7 +243,7 @@ local function InsertAbbreviation(expan, dInd, curSel)
     local isForm
     s, isForm = s:gsub('‹(%w+)›',
         function(frm)
-            local strFile = props['AbbrevPath']:gsub('%.abbrev$', '')..'.'..frm..'.lua'
+            local strFile = abrPath():gsub('%.abbrev$', '')..'.'..frm..'.lua'
             if not shell.fileexists(strFile) then print('Error: file for form "‹'..frm..'›" ('..strFile..') not exists!') end
             local form = dofile(strFile)
             if not frm then print('Error: unknown abbrev form: "‹'..frm..'" ('..strFile..') dos not return function') end
@@ -261,6 +270,7 @@ local function internal_TryInsAbbrev(bClip, strFull)
 
     local pos = editor.SelectionStart
     local lBegin = editor:textrange(editor:PositionFromLine(editor:LineFromPosition(pos)), pos)
+    --debug_prnArgs(abbr_table)
     for i, v in ipairs(abbr_table) do
         if not strFull or (strFull:lower() == v.abbr:lower()) then
             if lBegin:sub(-v.abbr:len()):lower() == v.abbr:lower() then
@@ -307,7 +317,7 @@ local function Abbreviations_ListFILL()
     prevLexer = editor.Lexer
 
 	iup.SetAttribute(list_abbrev, "DELLIN", "1-"..list_abbrev.numlin)
-	local abbrev_filename = props['AbbrevPath']
+	local abbrev_filename = abrPath()
     abbr_table = CORE.ReadAbbrevFile(abbrev_filename)
 	if not abbr_table then return end
     iup.SetAttribute(list_abbrev, "ADDLIN", "1-"..#abbr_table)
@@ -439,7 +449,7 @@ local function Init()
                     for i = 1, maxN do
                         strOut = strOut..list_abbrev:getcell(i, 1)..'='..list_abbrev:getcell(i, 2)..'\n'
                     end
-                    local file = io.open(props["AbbrevPath"], "w")
+                    local file = io.open(abrPath(), "w")
                     file:write(strOut)
                     file:close()
                     bListModified = false

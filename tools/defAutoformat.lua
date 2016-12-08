@@ -234,7 +234,7 @@ AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
     end
 end)
 local function OnSwitchFile_local()
-    CurMap = stylesMap[editor.LexerLanguage] or stylesMap.default
+    CurMap = stylesMap[editor_LexerLanguage()] or stylesMap.default
     curLine = nil
 end
 AddEventHandler("OnSave", OnSwitchFile_local)

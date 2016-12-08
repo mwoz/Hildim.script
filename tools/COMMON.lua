@@ -42,6 +42,9 @@ function GetCurrentWord()
 							editor:WordEndPosition(current_pos, true))
 end
 function OnNavigation() end
+function editor_LexerLanguage()
+    return editor.LexerLanguage or 'script_'..props['FileExt']
+end
 --------------------------------------------------------
 --- Returns current hotspot's text
 function GetCurrentHotspot ()
