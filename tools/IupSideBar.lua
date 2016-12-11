@@ -79,10 +79,10 @@ local function SaveNamedValues(h, root)
     repeat
         child = iup.GetNextChild(h, child)
         if child then
-            if (child.value or child.valuepos or child.focusitem or child.size) and child.name and (iup.GetAttribute(child, 'HISTTORIZED') ~= 'NO') then
+            if (child.value or child.valuepos or child.focusitem or child.size) and child.name and (iup.GetAttribute(child, 'HISTORIZED') ~= 'NO') then
                 local _,_,cType = tostring(child):find('IUP%((%w+)')
                 local val = child.value
-                if cType == 'list' and child.dropdown == "YES" then
+                if cType == 'list' and (child.dropdown == "YES" or iup.GetAttribute(child, 'HISTORIZED') == 'YES') then
                     local hist = {}
                     for i = 1, child.count do
                         if i > tonumber(child.visibleitems  or 15) then break end
@@ -295,11 +295,10 @@ local function RestoreNamedValues(h, root)
     repeat
         child = iup.GetNextChild(h, child)
         if child then
-            -- print(child.name, (iup.GetAttribute(child, 'HISTTORIZED') ~= 'NO'))
-            if child.name and (iup.GetAttribute(child, 'HISTTORIZED') ~= 'NO') then
+            if child.name and (iup.GetAttribute(child, 'HISTORIZED') ~= 'NO') then
                 local _,_,cType = tostring(child):find('IUP%((%w+)')
                 local val = _G.iuprops[root..'.'..child.name..'.value']
-                if cType == 'list' and child.dropdown == "YES" and child.editbox == "YES" then
+                if cType == 'list' and child.dropdown == "YES" and (child.editbox == "YES" or iup.GetAttribute(child, 'HISTORIZED') == 'YES') then
                     local s = _G.iuprops[root..'.'..child.name..'.hist']
                     if s then
                         local i = 1
@@ -615,8 +614,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
 
             if navigation_Unblock then navigation_Unblock() end
             local bHide
-            if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.detachPos(not bHide) end ;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')
-            if ((_G.iuprops['leftbar.win'] or '0')~='0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win']=='2');    LeftBar_obj.handle.detachPos(not bHide) end ;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')
+            if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')]]
+            if ((_G.iuprops['leftbar.win'] or '0')~='0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win']=='2');    LeftBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')]]
             if (_G.iuprops['concolebar.win'] or '0')~='0'                       then bHide = (_G.iuprops['concolebar.win']=='2'); ConsoleBar.detachPos(not bHide) end
             if (_G.iuprops['findresbar.win'] or '0')~='0'                       then bHide = (_G.iuprops['findresbar.win']=='2'); FindResBar.detachPos(not bHide)end
             if (_G.iuprops['findrepl.win'] or '0')~='0'                         then bHide = (_G.iuprops['findrepl.win']=='2');   local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos(not bHide) end
@@ -658,7 +657,7 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         end
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
     elseif cmd == "SHOW_OUTPUT" then
-        if (_G.iuprops['concolebar.win'] or '0')=='1' then return end
+        if (_G.iuprops['concolebar.win'] or '0')=='1' or (_G.iuprops['concolebar.autoshow'] or 0) == 0 then return end
         if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='2' and _G.dialogs['concolebar'] then _G.dialogs['concolebar'].Switch(); return end
         if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
     elseif cmd == "FULLSCREEN_ON" then

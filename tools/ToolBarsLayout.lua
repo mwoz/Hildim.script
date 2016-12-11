@@ -124,15 +124,16 @@ local function Show()
                     local pPlase = CheckInstall(h:GetUserId(idSrc), false)
 
                     if idTarget == 0 and iup.GetAttributeId(hTarget, "KIND", 1) == 'BRANCH' then return end
+                    local capt = iup.GetAttributeId(h, 'TITLE', idSrc)
 
-                    iup.SetAttributeId(hTarget, "ADDLEAF", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
+                    iup.SetAttributeId(hTarget, "ADDLEAF", idTarget, capt)
                     hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc))
 
                     iup.SetAttributeId(hTarget, "COLOR", hTarget.lastaddnode, iup.GetAttributeId(h, 'COLOR', idSrc))
 
                     iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
                     if pPlase and hTarget ~= tree_plugins then
-                        print("Plugin '"..h:GetUserId(idSrc).."' is already connected to "..pPlase..". Will be reconnected if you continue")
+                        print("Plugin '"..capt.."' is already connected to "..pPlase..". Will be reconnected if you continue")
                     end
                 end
             end

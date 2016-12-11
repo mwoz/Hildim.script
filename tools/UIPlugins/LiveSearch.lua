@@ -45,7 +45,7 @@ local function Init(ToolBar_obj)
     end)
     tmConsole.run="YES"
     txt_search = iup.text{name='livesearch_bar', expand='YES', tip='"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
-    iup.SetAttribute(txt_search, 'HISTTORIZED', "NO")
+    iup.SetAttribute(txt_search, 'HISTORIZED', "NO")
     local function Find_onTimer()
         tm.run="NO"
         local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)

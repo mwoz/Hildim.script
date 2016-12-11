@@ -936,16 +936,11 @@ iup.LoadIuprops = function()
     d:destroy()
     if not filename then return end
     props['config.restore'] = filename
+    _G.iuprops['current.config.restore'] = filename
     scite.PostCommand(POST_SCRIPTRELOAD,0)
 end
 
-iup.SaveIuprops = function()
-
-    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
-    d:popup()
-    local filename = d.value
-    d:destroy()
-
+local function SaveIuprops_local(filename)
     local hMainLayout = iup.GetLayout()
     if not hMainLayout or not filename then return end
     if not filename:lower():find('%.config$') then filename = filename..'.config' end
@@ -991,6 +986,19 @@ iup.SaveIuprops = function()
 		io.write(table.concat(t,'\n'))
         io.close()
  	end
+end
+
+iup.SaveIuprops = function()
+
+    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    SaveIuprops_local(filename)
+end
+
+iup.SaveCurIuprops = function()
+    if _G.iuprops['current.config.restore']..'' ~= '' then SaveIuprops_local(_G.iuprops['current.config.restore']) end
 end
 
 --”ничтожение диалогов при выключении или перезагрузке
