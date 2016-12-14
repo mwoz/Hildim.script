@@ -11,6 +11,7 @@ local _Plugins
 -- tab1:list_bookmarks   Bookmarks
 ----------------------------------------------------------
 local table_bookmarks = {}
+BOOKMARK = {}
 
 local function GetBufferNumber()
 	local buf = props['BufferNumber']
@@ -18,8 +19,9 @@ local function GetBufferNumber()
 	return buf
 end
 
-local function Bookmark_Add(line_number)
+function BOOKMARK.Add(line_number)
 	local line_text = editor:GetLine(line_number)
+
 	if line_text == nil then line_text = '' end
 	line_text = line_text:gsub('^%s+', ''):gsub('%s+', ' ')
 	if line_text == '' then
@@ -29,7 +31,7 @@ local function Bookmark_Add(line_number)
 		if a.FilePath == props['FilePath'] and a.LineNumber == line_number then
 		return end
 	end
-	local bmk = {}
+    local bmk = {}
 	bmk.FilePath = props['FilePath']
 	bmk.BufferNumber = GetBufferNumber()
 	bmk.LineNumber = line_number
@@ -69,11 +71,25 @@ local function Bookmarks_ListFILL()
     list_bookmarks.redraw = "L1-100"
 end
 
+
+function BOOKMARK.Restore()
+    DoForBuffers(function(i)
+        local ml = 0
+        while true do
+            ml = editor:MarkerNext(ml, 2)
+            if (ml == -1) then break end
+            BOOKMARK.Add(ml)
+            ml = ml + 1
+        end
+    end)
+    Bookmarks_ListFILL()
+end
+
 local function Bookmarks_RefreshTable()
 	Bookmark_Delete()
 	for i = 0, editor.LineCount do
 		if editor:MarkerGet(i) == 2 then
-			Bookmark_Add(i)
+			BOOKMARK.Add(i)
 		end
 	end
 	Bookmarks_ListFILL()
@@ -92,7 +108,8 @@ local function ShowCompactedLine(line_num)
 end
 
 local function Bookmarks_GotoLine(item)
-	local path = list_bookmarks:getcell(item,3)
+	local path = list_bookmarks:getcell(item, 3)
+    if not path then return end
     local lin = tonumber(list_bookmarks:getcell(item,4))
 
 	--if pos then
@@ -121,7 +138,7 @@ end
 
 local function _OnSendEditor(id_msg, wp, lp)
 	if id_msg == SCI_MARKERADD then
-		if lp == 1 then Bookmark_Add(wp) Bookmarks_ListFILL() end
+		if lp == 1 then BOOKMARK.Add(wp) Bookmarks_ListFILL() end
 	elseif id_msg == SCI_MARKERDELETE then
 		if lp == 1 then Bookmark_Delete(wp) Bookmarks_ListFILL() end
 	elseif id_msg == SCI_MARKERDELETEALL then

@@ -67,16 +67,39 @@ props['script.started'] = 'Y'
 
 iuprops_read_ok = true
 
-rfl = oStack{15, _G.iuprops['resent.files.list']}
+local function RestoreLayOut(strLay)
+    strLay = strLay:gsub('^Х', '')
+    for n in strLay:gmatch('%d+') do
+        n = tonumber(n)
+        if shell.bit_and(editor.FoldLevel[n],SC_FOLDLEVELHEADERFLAG) ~=0 then
+            local lineMaxSubord = editor:GetLastChild(n,- 1)
+            if n < lineMaxSubord then
+                editor.FoldExpanded[n] = false
+                editor:HideLines(n + 1, lineMaxSubord)
+            end
+        end
+    end
+
+end
+
+rfl = oStack{50, _G.iuprops['resent.files.list']}
 function rfl:GetMenu()
     local t = {}
+    local function OpenMenu(i)
+        return function()
+            scite.Open(self.data.lst[i])
+        end
+    end
 
     local maxN = scite.buffers.GetCount() - 1
     local k = 1
-    for i = 1,  #self.data do
+    local ts = self.data.lst
+    local cnt = #ts
+    if cnt > (_G.iuprops['resent.files.list.length'] or 10) then cnt = (_G.iuprops['resent.files.list.length'] or 10) end
+    for i = 1, cnt do
         local bSet = true
         for j = 0,maxN do
-            if self.data[i] == scite.buffers.NameAt(j):from_utf8(1251) then
+            if ts[i] == scite.buffers.NameAt(j):from_utf8(1251) then
                 bSet = false
                 break
             end
@@ -85,14 +108,59 @@ function rfl:GetMenu()
             local l = {}
             local s = ''
             if k < 11 then s = '&'..k..'.' end
-            l[1] = s..self.data[i]
-            l.action = "scite.Open'"..self.data[i]:to_utf8(1251):gsub('\\','\\\\').."'"
+            l[1] = s..ts[i]
+            l.action = OpenMenu(i)
             table.insert(t,l)
             k = k + 1
         end
     end
+    table.insert(t,{'s0', separator = 1})
+    table.insert(t,{'Recent List Settings', ru = "—войства списка недавних файлов", action = function()
+        res, loc, len, bClear = iup.GetParam('Recent List Settings',
+            nil,
+            "Location in File menu: %o|Submenu|Bottom|\n"..
+            "Length: %i[5,30,1]\n"..
+            "Clear Now: %b\n",
+            _G.iuprops['resent.files.list.location'] or 0,
+            _G.iuprops['resent.files.list.length'] or 10,
+            0
+        )
+        if res then
+            _G.iuprops['resent.files.list.location'] = loc
+            _G.iuprops['resent.files.list.length'] = len
+            if bClear == 1 then
+                self.data.lst = {}
+                self.data.pos = {}
+                self.data.layout = {}
+                self.data.bmk = {}
+            end
+        end
+    end})
     return t
 end
+
+function rfl:check(fname)
+    local str = fname:upper()
+    local res = '{lst={'
+    for i = 1,  #self.data.lst do
+        if self.data.lst[i]:upper() == str then
+            editor.FirstVisibleLine = (self.data.pos[i] or 0)
+            RestoreLayOut(self.data.layout[i] or '')
+            editor.FirstVisibleLine = (self.data.pos[i] or 0)
+            local bk = self.data.bmk[i] or ''
+            for g in bk:gmatch('[^¶]+') do
+                editor:MarkerAdd(tonumber(g), 1)
+                if BOOKMARK then BOOKMARK.Add(tonumber(g)) end
+            end
+            table.remove(self.data.lst, i)
+            table.remove(self.data.pos, i)
+            table.remove(self.data.layout, i)
+            table.remove(self.data.bmk, i)
+            return
+        end
+    end
+end
+
 iuprops['resent.files.list'] = rfl
 
 _G.iuprops['pariedtag.on'] = _G.iuprops['pariedtag.on'] or 1
@@ -131,6 +199,17 @@ local function SaveLayOut()
         if shell.bit_and(editor.FoldLevel[l],SC_FOLDLEVELHEADERFLAG) ~=0 and not editor.FoldExpanded[l] then res = res..','..l end
     end
     return res
+end
+
+iup.GetBookmarkLst = function()
+    local ml, bk = 0, ''
+    while true do
+        ml = editor:MarkerNext(ml, 2)
+        if (ml == -1) then break end
+        bk = bk..'¶'..ml
+        ml = ml + 1
+    end
+    return bk
 end
 
 iup.CloseFilesSet = function(cmd)
@@ -175,13 +254,7 @@ iup.CloseFilesSet = function(cmd)
             scite.SendEditor(SCI_SETSAVEPOINT)
             if not props['FileNameExt']:from_utf8(1251):find('Ѕезым€нный') and not props['FileNameExt']:find('^%^') then
                 spathes = spathes..'Х'..props['FilePath']:from_utf8(1251)
-                local ml,bk = 0,''
-                while true do
-                    ml = editor:MarkerNext(ml, 2)
-                    if (ml == -1) then break end
-                    bk = bk..'¶'..ml
-                    ml = ml + 1
-                end
+                local bk = iup.GetBookmarkLst()
                 if sposes then
                     sposes = sposes..'Х'..editor.FirstVisibleLine..bk
                     slayout = slayout..'Х'..SaveLayOut()
@@ -201,21 +274,6 @@ iup.CloseFilesSet = function(cmd)
     end
     if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
     else return true end
-end
-
-local function RestoreLayOut(strLay)
-    strLay = strLay:gsub('^Х','')
-    for n in strLay:gmatch('%d+') do
-        n = tonumber(n)
-        if shell.bit_and(editor.FoldLevel[n],SC_FOLDLEVELHEADERFLAG) ~=0 then
-            local lineMaxSubord = editor:GetLastChild(n,-1)
-            if n < lineMaxSubord then
-                editor.FoldExpanded[n] = false
-                editor:HideLines(n + 1, lineMaxSubord)
-            end
-        end
-    end
-
 end
 
 iup.RestoreFiles = function()
@@ -250,6 +308,7 @@ iup.RestoreFiles = function()
             if bk and bk[i] then
                 for j = 1, #(bk[i]) do
                     editor:MarkerAdd(tonumber(bk[i][j]), 1)
+                    if BOOKMARK then BOOKMARK.Add(tonumber(bk[i][j])) end
                 end
             end
             if l and l[i] then
@@ -294,7 +353,7 @@ iup.SaveSession = function()
     if not filename:lower():find('%.fileset$') then filename = filename..'.fileset' end
     if iup.CloseFilesSet(0) then
 
-    local t = {}
+        local t = {}
         for n,v in pairs(_G.iuprops) do
             local _,_,prefix = n:find('([^%.]*)')
             if prefix == 'buffers' then
@@ -393,7 +452,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         if not source:find('^\\\\') then
             if not shell.fileexists(source:from_utf8(1251)) then return end
         end
-        iuprops['resent.files.list']:ins(source)
+        iuprops['resent.files.list']:ins(source:from_utf8(1251), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst())
     elseif cmd == IDM_HELP then
         local h = iup.GetFocus()
         local hlp
@@ -426,7 +485,17 @@ AddEventHandler("OnClose", function(source)
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8(1251)) then return end
     end
-    iuprops['resent.files.list']:ins(source:from_utf8(1251))
+    iuprops['resent.files.list']:ins(source:from_utf8(1251), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst())
+    if scite.buffers.GetCount() == 1 and editor.ReadOnly then scite.MenuCommand(IDM_READONLY) end
+end)
+
+AddEventHandler("OnOpen", function(source)
+    if source:find('^%^') then return end
+    if not source:find('^\\\\') then
+        if not shell.fileexists(source:from_utf8(1251)) then return end
+    end
+    iuprops['resent.files.list']:check(source:from_utf8(1251))
+    if props['session.started'] ~= '1' and props['session.reload'] ~= '1' then print('') end --??почему-то этот вывод ликвидирует по€вление звездочки в названии при открытии из оболочки
 end)
 
 --–асширение iup.TreeAddNodes - позвол€ет в табличном представлении дерева задавать свойство userdata
@@ -897,6 +966,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         elseif wp == POST_SCRIPTRELOAD_OLD then   --перезагрузка скрипта
             print("Reload IDM...")
             scite.ReloadStartupScript()
+            --if BOOKMARK then BOOKMARK.Restore() end
             OnSwitchFile("")
             print("...Ok")
 --[[        elseif wp == POST_STARTUPSCRIPTSAVED then   --перезагрузка скрипта
@@ -907,6 +977,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             --scite.PostCommand(1,0)
             print("Reload...")
             scite.ReloadStartupScript()
+            if BOOKMARK then BOOKMARK.Restore() end
             OnSwitchFile("")
             print("...Ok")
         elseif wp == POST_AFTERLUASAVE and lp ~= output.TextLength then
@@ -1046,11 +1117,13 @@ iup.DestroyDialogs = function()
     if SideBar_obj.handle then
         iup.Detach(SideBar_obj.handle)
         iup.Destroy(SideBar_obj.handle)
+        iup.GetDialogChild(hMainLayout, "RightBarExpander").state = "OPEN"
         SideBar_obj.handle = nil
     end
     if LeftBar_obj.handle then
         iup.Detach(LeftBar_obj.handle)
         iup.Destroy(LeftBar_obj.handle)
+        iup.GetDialogChild(hMainLayout, "LeftBarExpander").state = "OPEN"
         LeftBar_obj.handle = nil
     end
     for sciteid, dlg in pairs(_G.dialogs) do

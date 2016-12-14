@@ -19,12 +19,12 @@ local function Show()
     local function CheckInstall(strUi, bUnInstoll)
         local tPoints = {["settings.hidden.plugins"] = "Hidden Plugins",
             ["settings.user.rightbar"] = "Right User Bar",
-            ["settings.user.rightbar"] = "Left User Bar",
+            ["settings.user.leftbar"] = "Left User Bar",
         }
         for s, m in pairs(tPoints) do
-            if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¦') then
+            if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
                 if bUnInstoll then
-                    local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
+                    local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
                     _G.iuprops[s] = v
                 end
                 return m
@@ -172,6 +172,14 @@ local function Show()
             iup.SetAttributeId(h, 'DELNODE', drag_id + (dragCount + 1) * mDelta, 'SELECTED')
             return -1
         elseif drop_id == 0 then drop_id = 1
+        end
+        if iup.GetAttributeId(h, 'KIND', drop_id) == 'BRANCH' then
+            mDelta = Iif(drag_id > drop_id, 1, 0)
+            iup.SetAttributeId(h, "STATE", drop_id, 'EXPANDED')
+            iup.SetAttributeId(h, "ADDLEAF", drop_id , iup.GetAttributeId(h, 'TITLE', drag_id))
+            h:SetUserId(h.lastaddnode, h:GetUserId(drag_id + mDelta))
+            iup.SetAttributeId(h, 'DELNODE', drag_id + mDelta, 'SELECTED')
+            return - 1
         end
         return -4
     end

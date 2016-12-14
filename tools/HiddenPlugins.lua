@@ -40,12 +40,12 @@ local function Run(flag)
         local function CheckInstall(strUi, bUnInstoll)
             local tPoints = {["settings.toolbars.layout"] = "Tool Bar",
                 ["settings.user.rightbar"] = "Right User Bar",
-                ["settings.user.rightbar"] = "Left User Bar",
+                ["settings.user.leftbar"] = "Left User Bar",
             }
             for s, m in pairs(tPoints) do
-                if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¦') then
+                if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
                     if bUnInstoll then
-                        local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
+                        local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
                         _G.iuprops[s] = v
                     end
                     return m

@@ -212,7 +212,6 @@ local function  CreateBox()
         end
         local tSide = {}
         local tCur
-
         for p in str:gmatch('[^¦]+') do
             local _, _, pname, pf = p:find('(.-)(¬?)$')
             if pf ~= '' then

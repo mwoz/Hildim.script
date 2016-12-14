@@ -20,9 +20,9 @@ local function Show()
             ["settings.hidden.plugins"] = "Hidden Plugins",
         }
         for s, m in pairs(tPoints) do
-            if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¦') then
+            if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
                 if bUnInstoll then
-                    local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
+                    local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
                     _G.iuprops[s] = v
                 end
                 return m
@@ -154,6 +154,7 @@ local function Show()
 
     local function dragdrop_cb(h, drag_id, drop_id, isshift, iscontrol)
         if iscontrol == 1 or h == tree_plugins  or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return -1 end
+
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0
             local dragCount = tonumber(iup.GetAttributeId(h, 'CHILDCOUNT', drag_id))
@@ -175,6 +176,14 @@ local function Show()
             iup.SetAttributeId(h, 'DELNODE', drag_id + (dragCount + 1) * mDelta, 'SELECTED')
             return -1
         elseif drop_id == 0 then drop_id = 1
+        end
+        if iup.GetAttributeId(h, 'KIND', drop_id) == 'BRANCH' then
+            mDelta = Iif(drag_id > drop_id, 1, 0)
+            iup.SetAttributeId(h, "STATE", drop_id, 'EXPANDED')
+            iup.SetAttributeId(h, "ADDLEAF", drop_id , iup.GetAttributeId(h, 'TITLE', drag_id))
+            h:SetUserId(h.lastaddnode, h:GetUserId(drag_id + mDelta))
+            iup.SetAttributeId(h, 'DELNODE', drag_id + mDelta, 'SELECTED')
+            return - 1
         end
         return -4
     end

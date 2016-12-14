@@ -429,32 +429,65 @@ end, 'RunOnce')
 
 local s = class()
 function s:lop()
-    for i = #self.data, self.maxN + 1, -1 do
-        table.remove(self.data,i)
+    for i = #self.data.lst, self.maxN + 1, -1 do
+        table.remove(self.data.lst,i)
+        table.remove(self.data.pos, i)
+        table.remove(self.data.layout,i)
+        table.remove(self.data.bmk, i)
     end
 end
 
 function s:init(t)
-    self.maxN   = t[1]
+    self.maxN = t[1]
     self.data = t[2] or {}
+    if not t[2].lst then
+        tn = {}; tn.lst = t[2]; tn.pos = {}; tn.layout = {}; tn.bmk = {}
+        for i = 1,  #t[2] do
+            tn.pos[i] = 0
+            tn.layout[i] = ''
+            tn.bmk[i] = ''
+        end
+        self.data = tn
+    else
+        self.data = t[2]
+        if not self.data.pos then self.data.pos = {} end
+        if not self.data.layout then self.data.layout = {} end
+        if not self.data.bmk then self.data.bmk = {} end
+    end
     self:lop()
 end
-function s:ins(v)
-    for i = #self.data, 1, -1 do
-        if self.data[i] == v then table.remove(self.data, i) end
+function s:ins(v, p, l, b)
+    for i = #self.data.lst, 1, -1 do
+        if self.data.lst[i] == v then table.remove(self.data.lst, i) end
     end
-    table.insert(self.data, 1, v)
+    table.insert(self.data.lst, 1, v)
+    table.insert(self.data.pos, 1, p)
+    table.insert(self.data.layout, 1, l)
+    table.insert(self.data.bmk, 1, b)
     self:lop()
 end
 function s:tostr()
-    local res = '{'
-    for i = 1,  #self.data do
+    local res = '{lst={'
+    for i = 1,  #self.data.lst do
         if i > 1 then res = res..', ' end
-        local l = self.data[i]
-        if type(l) == 'string' then l = l:gsub('\\','\\\\'):gsub("'", "\\039") end
-        res = res..'"'..l..'"'
+        res = res..'"'..self.data.lst[i]:gsub('\\','\\\\'):gsub("'", "\\039")..'"'
     end
-    return res..'}'
+    res = res..'}; pos={'
+    for i = 1,  #self.data.lst do
+        if i > 1 then res = res..', ' end
+        res = res..(self.data.pos[i] or 0)
+    end
+    res = res..'}; layout={'
+    for i = 1,  #self.data.lst do
+        if i > 1 then res = res..', ' end
+        res = res..'"'..(self.data.layout[i] or '')..'"'
+    end
+    res = res..'}; bmk={'
+    for i = 1,  #self.data.lst do
+        if i > 1 then res = res..', ' end
+        res = res..'"'..(self.data.bmk[i] or '')..'"'
+    end
+    return res..'}}'
 end
 
 _G.oStack = s
