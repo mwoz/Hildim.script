@@ -426,24 +426,27 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         scite.PostCommand(POST_SCRIPTRELOAD_OLD,0)
         --scite.PostCommand(POST_SCRIPTRELOAD,0)
         return true
-    -- elseif cmd == IDM_VIEWTOOLBAR then
-        -- iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state = Iif(iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").state == 'OPEN', 'CLOSE', 'OPEN')
-    elseif cmd == IDM_TOGGLEOUTPUT and ((_G.iuprops['concolebar.win'] or '0')=='0' or _G.iuprops['findresbar.win']=='0') then
+    elseif cmd == IDM_TOGGLEOUTPUT then
         local hMainLayout = iup.GetLayout()
-        if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
+        local bHidden = (tonumber(iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize) == 0)
+        if bHidden then
+            local l =  (_G.iuprops['bottombar.layout'] or 700500)
+            local v2 = l % 1000
+            local v = math.floor(l / 1000)
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
             iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
-            if (_G.iuprops['concolebar.win'] or '0') =='0' then iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = 'OPEN' end
-            if (_G.iuprops['findresbar.win'] or '0')=='0' then iup.GetDialogChild(hMainLayout, "FindResExpander").state = 'OPEN' end
+            if v > 0 then iup.GetDialogChild(hMainLayout, "ConsoleDetach").Attach() end
+            if v < 1000 then iup.GetDialogChild(hMainLayout, "FindResDetach").Attach() end
+            if v2 < 1000 and v2 ~= 0 then iup.GetDialogChild(hMainLayout, "FindReplDetach").Attach() end
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops["sidebarctrl.BottomBarSplit.value"] or '900'
-
+            if v2 < 1000 and v2 ~= 0 then iup.GetDialogChild(hMainLayout, "BottomSplit2").value = v2 end
+            iup.GetDialogChild(hMainLayout, "BottomSplit").value = v
         else
-            iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
-            if (_G.iuprops['concolebar.win'] or '0')=='0' then iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = 'CLOSE' end
-            if (_G.iuprops['findresbar.win'] or '0')=='0' then iup.GetDialogChild(hMainLayout, "FindResExpander").state = 'CLOSE' end
-            iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
+            _G.iuprops['bottombar.layout'] = iup.GetDialogChild(hMainLayout, "BottomSplit").value * 1000 + iup.GetDialogChild(hMainLayout, "BottomSplit2").value
 
-           _G.iuprops["sidebarctrl.BottomBarSplit.value"] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
+            iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
+            if (_G.iuprops['concolebar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "ConsoleDetach").cmdHide() end
+            if (_G.iuprops['findresbar.win'] or '0')=='0' then iup.GetDialogChild(hMainLayout, "FindResDetach").cmdHide() end
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
         end
     elseif cmd == IDM_CLOSE then
@@ -855,6 +858,7 @@ iup.scitedetachbox = function(t)
         end
         if statusBtn then statusBtn.visible = 'YES' end
     end
+    dtb.cmdHide = function() cmd_Hide() end
 
     local function cmd_Switch()
         if (_G.iuprops[t.sciteid..'.win'] or "0") ~= "2" then
@@ -1078,6 +1082,14 @@ iup.DestroyDialogs = function()
     if not hMainLayout then return end
     if SideBar_obj and SideBar_obj.handle then SideBar_obj.handle.SaveValues() end
     if LeftBar_obj and LeftBar_obj.handle then LeftBar_obj.handle.SaveValues() end
+
+    if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
+        iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
+        iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
+        if (_G.iuprops['concolebar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = 'OPEN' end
+        if (_G.iuprops['findresbar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "FindResExpander").state = 'OPEN' end
+        iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops["sidebarctrl.BottomBarSplit.value"] or '900'
+    end
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
