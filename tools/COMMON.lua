@@ -439,8 +439,10 @@ end
 
 function s:init(t)
     self.maxN = t[1]
-    self.data = t[2] or {}
-    if not t[2].lst then
+
+    if not t[2] then
+        self.data = {lst = {}; pos = {}; layout = {}; bmk = {}}
+    elseif not t[2].lst then
         tn = {}; tn.lst = t[2]; tn.pos = {}; tn.layout = {}; tn.bmk = {}
         for i = 1,  #t[2] do
             tn.pos[i] = 0

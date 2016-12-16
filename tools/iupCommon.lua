@@ -280,7 +280,7 @@ iup.RestoreFiles = function()
     if props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1' then
         local bNew = (props['FileName'] ~= '')
         local t,p,bk,l = {},{},{},{}
-        for f in _G.iuprops['buffers']:gmatch('[^Х]+') do
+        for f in (_G.iuprops['buffers'] or ''):gmatch('[^Х]+') do
             table.insert(t, f:to_utf8(1251))
         end
         local bki
@@ -432,6 +432,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         if bHidden then
             local l =  (_G.iuprops['bottombar.layout'] or 700500)
             local v2 = l % 1000
+            if SideBar_Plugins.findrepl.Bar_obj then v2 = 0 end
             local v = math.floor(l / 1000)
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
             iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
@@ -446,7 +447,8 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
 
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
             if (_G.iuprops['concolebar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "ConsoleDetach").cmdHide() end
-            if (_G.iuprops['findresbar.win'] or '0')=='0' then iup.GetDialogChild(hMainLayout, "FindResDetach").cmdHide() end
+            if (_G.iuprops['findresbar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "FindResDetach").cmdHide() end
+            iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
         end
     elseif cmd == IDM_CLOSE then
@@ -906,6 +908,21 @@ iup.ShowXY = function(h,x,y)
     if y > y2 - 10 then y = 100 end
     return old_iup_ShowXY(h,x,y)
 end
+
+iup.ShowInMouse= function(dlg)
+    local _, _, xS, yS = iup.GetGlobal('SCREENSIZE'):find('(%d*)x(%d*)')
+    local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+    local _, _, xD, yD = dlg.NATURALSIZE:find('(%d+)x(%d+)')
+    xS = tonumber(xS)
+    xC = tonumber(xC)
+    xD = tonumber(xD)
+    yS = tonumber(yS)
+    yC = tonumber(yC)
+    yD = tonumber(yD)
+    if xC + xD > xS then xC = xS - xD end
+    if yC + yD > yS then yC = yS - yD end
+    dlg:showxy(xC, yC)
+end
 ---–асширение iup
 
 _G.dialogs = {}
@@ -967,6 +984,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
                     dlg:destroy()
                 end
             end
+            if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS,0) end
         elseif wp == POST_SCRIPTRELOAD_OLD then   --перезагрузка скрипта
             print("Reload IDM...")
             scite.ReloadStartupScript()

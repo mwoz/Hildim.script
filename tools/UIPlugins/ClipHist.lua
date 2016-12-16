@@ -228,6 +228,16 @@ local function Sidebar_Init(h)
         handle = lst_clip; }
 end
 
+local function createDlg()
+    local dlg = iup.scitedialog{iup.scrollbox{lst_clip}, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true,
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255',}
+    lst_clip.killfocus_cb = function()
+        if blockReselect then return end
+        dlg:hide()
+    end
+    return dlg
+end
+
 local function Toolbar_Init(h)
     bToolBar = true
     local btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
@@ -248,12 +258,7 @@ local function Toolbar_Init(h)
 
     init()
 
-    local dlg = iup.scitedialog{iup.scrollbox{lst_clip},sciteparent="SCITE", sciteid="cliphistory",dropdown=true,
-                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255',}
-    lst_clip.killfocus_cb = function()
-        if blockReselect then return end
-        dlg:hide()
-    end
+    local dlg = createDlg()
 
     btn.flat_action = function(h)
         local _, _,left, top = btn.screenposition:find('(-*%d+),(-*%d+)')
@@ -272,11 +277,22 @@ local function Toolbar_Init(h)
         handle = box
     }
 end
+
+local function Hidden_Init(h)
+    bToolBar = true
+    init()
+    local dlg = createDlg()
+    menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
+        {'Clipboard History', ru = 'История буфера обмена', action = function() iup.ShowInMouse(dlg) end,}
+    )
+end
+
 return {
     title = 'Clipboard History',
     code = 'cliphistory',
     sidebar = Sidebar_Init,
     toolbar = Toolbar_Init,
+    hidden = Hidden_Init,
     description = [[Автоматическое запоминание текстовых данных
 из буфера обмена в стек с возможностью их последующей
 быстой вставки в текст]]
