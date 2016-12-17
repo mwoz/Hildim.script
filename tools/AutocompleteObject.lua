@@ -676,7 +676,7 @@ local function ReCreateStructures(strText, tblFiles)
                 local fName2 = get_precomp_tblFiles(string.lower(fName))
                 if fName2 ~= nil then
                     incPath = props["precomp_strRootDir"]..'\\'..fName2
-                    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
+                    if Favorites_AddFileName ~= nil then -- and StatusBar_obj ~= nil
                         Favorites_AddFileName(incPath)
                     end
                     if shell.fileexists(incPath) then
@@ -1338,7 +1338,7 @@ end)
 local function OnSwitchLocal()
 	get_api = true
     ReCreateStructures()
-    if Favorites_AddFileName ~=nil and StatusBar_obj ~= nil then
+    if Favorites_AddFileName ~=nil then  --  and StatusBar_obj ~= nil
         Favorites_ListFILL()
     end
     m_ext = editor.Lexer

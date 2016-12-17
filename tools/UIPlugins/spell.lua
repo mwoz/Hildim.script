@@ -477,7 +477,40 @@ local function Init()
     _G.g_session["spell.runned"] = true
 end
 
+function Init_status(h)
+    Init()
+    local zbox_s
+    local function onSpellContext(_, but, pressed, x, y, status)
+        if but == 51 and pressed == 0 then --right
+
+            local mnu = iup.menu
+            {
+                iup.item{title = "Проверить выделенный фрагмент", action = spell_Selected},
+                iup.item{title = "Проверить фрагмент с учетом подсветки", action = spell_ByLex},
+                iup.item{title = "Показать список ошибок", action = spell_ErrorList},
+            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+        end
+    end
+    local sTip = 'Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
+    zbox_s = iup.zbox{name = "Spelling_zbox",
+        iup.button{image = 'IMAGE_CheckSpelling2';impress = 'IMAGE_CheckSpelling'; tip = sTip;canfocus = "NO";
+            map_cb =(function(_) if _G.iuprops["spell.autospell"] == "1" then zbox_s.valuepos = 1 else zbox_s.valuepos = 0 end end);
+            action =(function(_) _G.iuprops["spell.autospell"] = "1"; zbox_s.valuepos = 1 end);
+            button_cb = onSpellContext;
+        };
+        iup.button{image = 'IMAGE_CheckSpelling';impress = 'IMAGE_CheckSpelling2'; tip = sTip;canfocus = "NO";
+            action =(function(_) _G.iuprops["spell.autospell"] = "0"; zbox_s.valuepos = 0 end);
+            button_cb = onSpellContext;
+        };
+    }
+    h.Tabs.spell = {
+        handle = zbox_s
+    }
+end
+
 return {
     title = 'Проверка орфографии',
     hidden = Init,
+    code = 'spell',
+    statusbar = Init_status,
 }

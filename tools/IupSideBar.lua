@@ -64,13 +64,28 @@ local function  CreateToolBar()
     return loadstring(strTbl)()
 end
 
-local function  CreateStatusBar()
-    dofile (props["SciteDefaultHome"].."\\tools\\Status.lua")
-    local tolsp1=iup.expander{barsize = 1, state="OPEN", name = "statusbar_expander",iup.hbox{
-                            StatusBar_obj.Tabs.statusbar.handle,
-                            gap='3',margin='3x0', name="StatusBar", maxsize="x30",
-                        }}
-    return tolsp1
+local StatusBar_obj = {}
+local function CreateStatusBar()
+    local str = _G.iuprops["settings.status.layout"] or 'PositionStatus.lua¦Selection_Color.lua¦CodibgStatus.lua'
+    local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "statusbar_expander",iup.hbox{\n'
+    local i = 0
+    for p in str:gmatch('[^¦]+') do
+
+        local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+        pI.statusbar(StatusBar_obj)
+        local id = pI.code
+        if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
+        iup.SetAttribute(StatusBar_obj.Tabs[pI.code].handle, "HELPID", id)
+        strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'
+    end
+    strTbl = strTbl..'iup.fill{},'
+    if _tmpSidebarButtons then
+        for i = 1,  #_tmpSidebarButtons do
+            strTbl = strTbl..'_tmpSidebarButtons['..i..'],'
+        end
+    end
+    strTbl = strTbl..'gap="3",margin="3x0", name="StatusBar", maxsize="x30", alignment = "ACENTER",}} end'
+    return loadstring(strTbl)()
 end
 
 local function SaveNamedValues(h, root)
@@ -469,7 +484,7 @@ local function InitToolBar()
     end)
 
     tTlb.resize_cb=(function(_,x,y) if ToolBar_obj.handle ~= nil then ToolBar_obj.size = ToolBar_obj.handle.size end end)
-    --ToolBar_obj.handle = iup.scitedialog(tTlb)
+    --ToolBar_obj.handle = iup.scitedialog(tTlb) cacaca
     local hTmp= iup.dialog(tTlb)
     local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander')
     iup.Detach(hBx)
@@ -491,14 +506,16 @@ local function InitStatusBar()
      local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     StatusBar_obj = {}
     StatusBar_obj.Tabs = {}
+    local tTlb = {CreateStatusBar()(StatusBar_obj)}
+    --local tTlb = {CreateStatusBar()}
+     _tmpSidebarButtons = nil
 
-    local tTlb = {CreateStatusBar()}
     tTlb.control = "YES"
     tTlb.sciteid="iupstatusbar"
     tTlb.show_cb=(function(h,state)
 
         if state == 0 and props['iuptoolbar.visible'] == '1' and props['iuptoolbar.restarted'] ~= '1' then
-           -- scite.MenuCommand(IDM_VIEWTLBARIUP)
+           -- scite.MenuCommand(IDM_VIEWTLBARIUP) 778899
         elseif state == 4 then
             for _,tbs in pairs(StatusBar_obj.Tabs) do
                 if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
@@ -520,7 +537,7 @@ local function InitStatusBar()
 
     for i = 1, #tEvents do
         for _,tbs in pairs(StatusBar_obj.Tabs) do
-            if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
+            if tbs[tEvents[i]] then print(tEvents[i]) AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
     if ToolBar_obj.handle then

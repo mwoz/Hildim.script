@@ -5,17 +5,27 @@ local function Run(flag)
     local tPlugins = {}
     local tblView = {}
     local tblUsers, defpath, settName, sTitle, fCond
+    local checkItems, checkTitle
     local clrUsed = '255 0 0'
     if flag == 'Commands' then
         defpath = props["SciteDefaultHome"].."\\tools\\Commands\\"
         settName = "settings.commands.plugins"
         sTitle = "Загрузка команд"
         fCond = function() return true end
+    elseif flag == 'Status' then
+        defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
+        settName = "settings.status.layout"
+        sTitle = "Загрузка плагинов строки состояния"
+        fCond = function(pI) return pI.statusbar end
+        checkItems = 'settings.hidden.plugins'
+        checkTitle = 'Hidden Plugin'
     else
         defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
         settName = "settings.hidden.plugins"
         sTitle = "Загрузка фоновых плагинов"
         fCond = function(pI) return pI.hidden end
+        checkItems = 'settings.status.layout'
+        checkTitle = 'Status Bar'
     end
 
     local function Show()
@@ -41,8 +51,10 @@ local function Run(flag)
             local tPoints = {["settings.toolbars.layout"] = "Tool Bar",
                 ["settings.user.rightbar"] = "Right User Bar",
                 ["settings.user.leftbar"] = "Left User Bar",
+                [checkItems] = checkTitle,
             }
             for s, m in pairs(tPoints) do
+                --print(m)
                 if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
                     if bUnInstoll then
                         local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
@@ -115,9 +127,10 @@ local function Run(flag)
                 if hTarget and hTarget ~= h and idSrc > 0 then
                     if idTarget < 0 then idTarget = tonumber(iup.GetAttribute(hTarget, 'COUNT')) - 1 end
                     if iup.GetAttributeId(h, 'KIND', idSrc) ~= 'BRANCH' then
-                        local pPlase
+                        local pPlase, uId
                         if flag ~= 'Commands' then
-                            pPlase = CheckInstall(h:GetUserId(idSrc), false)
+                            uId = h:GetUserId(idSrc)
+                            pPlase = CheckInstall(uId, false)
                         end
                         if idTarget == 0 and iup.GetAttributeId(hTarget, "KIND", 1) == 'BRANCH' then return end
 
@@ -128,7 +141,7 @@ local function Run(flag)
 
                         iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
                         if pPlase and hTarget ~= tree_plugins then
-                            print("Plugin '"..h:GetUserId(idSrc).."' is already connected to "..pPlase..". Will be reconnected if you continue")
+                            print("Plugin '"..uId.."' is already connected to "..pPlase..". Will be reconnected if you continue")
                         end
                     end
                 end

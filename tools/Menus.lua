@@ -421,6 +421,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Plugins', ru = 'Плагины', visible = RunSettings,{
             {'Toolbars Layout', ru = 'Раскладка панелей инструментов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')"},
             {'SideBars Settings', ru = 'Настройка боковых панелей...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')"},
+            {'Hidden Plugins', ru = 'Настройка панелей статуса...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Status')"},
             {'Hidden Plugins', ru = 'Подключение фоновых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Hidden')"},
             {'Commands Plugins', ru = 'Подключение команд...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Commands')"},
             {'s1', separator = 1},
