@@ -1,6 +1,7 @@
 local is_chanjed = false
 local defpath = props["SciteDefaultHome"].."\\data\\home\\default.solution"
 local CLR_ACTIVE = "30 180 30"
+local _Plugins
 
 local function SaveSolution()
     if not is_chanjed then return false end
@@ -221,6 +222,13 @@ local function Initialize()
 
 end
 
+local function Open_Local(filename)
+    _G.iuprops['solution.current'] = filename
+    iup.SetAttributeId(tree_sol, "DELNODE", 0, "CHILDREN")
+    started = false
+    Initialize()
+end
+
 local function OpenSol()
     is_chanjed = true
     SaveSolution()
@@ -229,12 +237,17 @@ local function OpenSol()
     local filename = d.value
     d:destroy()
     if filename then
-        _G.iuprops['solution.current'] = filename
-        iup.SetAttributeId(tree_sol, "DELNODE", 0, "CHILDREN")
-        started = false
-        Initialize()
+        Open_Local(filename)
     end
 end
+
+AddEventHandler("OnBeforeOpen", function(file, ext)
+    if ext == "solution" then
+        Open_Local(file)
+        _Plugins.solution.Bar_obj.TabCtrl.value = tree_sol
+        return true
+    end
+end)
 
 local function SaveSolAs()
     is_chanjed = true
@@ -252,6 +265,7 @@ local function SaveSolAs()
 end
 
 local function Solution_Init(h)
+    _Plugins = h
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
     local w
    -- for w in string.gmatch(prp, "[^|]+") do

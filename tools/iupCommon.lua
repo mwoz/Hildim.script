@@ -276,8 +276,8 @@ iup.CloseFilesSet = function(cmd)
     else return true end
 end
 
-iup.RestoreFiles = function()
-    if props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1' then
+iup.RestoreFiles = function(bForce)
+    if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
         local bNew = (props['FileName'] ~= '')
         local t,p,bk,l = {},{},{},{}
         for f in (_G.iuprops['buffers'] or ''):gmatch('[^Х]+') do
@@ -325,22 +325,28 @@ iup.RestoreFiles = function()
     end
 end
 
-iup.LoadSession = function()
-    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
-    d:popup()
-    local filename = d.value
-    d:destroy()
-    if not filename then return end
+local function LoadSession_local(filename)
     if pcall(io.input, filename) then
         text = io.read('*a')
         io.close()
         local bSuc, tMsg = pcall(dostring,text)
         if not bSuc then
             print('ќшибка в файле '..filename, tMsg)
+            return false
         end
-        iup.RestoreFiles()
+        iup.RestoreFiles(true)
         _G.iuprops['buffers'] = nil
+        return true
     end
+end
+
+iup.LoadSession = function()
+    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    if not filename then return end
+    LoadSession_local(filename)
 end
 
 iup.SaveSession = function()
@@ -1022,16 +1028,30 @@ AddEventHandler("OnContextMenu", function(lp, wp, source)
     return ""
 end)
 
+local function LoadIuprops_Local(filename)
+    props['config.restore'] = filename
+    _G.iuprops['current.config.restore'] = filename
+    scite.PostCommand(POST_SCRIPTRELOAD,0)
+end
+
 iup.LoadIuprops = function()
     local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
     d:popup()
     local filename = d.value
     d:destroy()
     if not filename then return end
-    props['config.restore'] = filename
-    _G.iuprops['current.config.restore'] = filename
-    scite.PostCommand(POST_SCRIPTRELOAD,0)
+    LoadIuprops_Local(filename)
 end
+
+
+AddEventHandler("OnBeforeOpen", function(file, ext)
+    if ext == "fileset" then
+        return LoadSession_local(file)
+    elseif ext == "config" then
+        LoadIuprops_Local(file)
+        return true
+    end
+end)
 
 local function SaveIuprops_local(filename)
     local hMainLayout = iup.GetLayout()

@@ -1,8 +1,9 @@
 require "luacom"
 
-local dlg = _G.dialogs["align"]
-local txt_listass, chk_ass, tbl_ass, chk_sendTo
+local dlg = _G.dialogs["winint"]
+local txt_listass, chk_ass, tbl_ass, tbl_ass_set, chk_sendTo, txt_listass_set, chk_ass_set
 tbl_ass = {}
+tbl_ass_set = {}
 
 local WshShell = luacom.CreateObject('WScript.Shell')
 local fso = luacom.CreateObject("Scripting.FileSystemObject");
@@ -11,16 +12,22 @@ local reg_backup = 'HKLM\\SOFTWARE\\SciTE\\Script\\WinIntegrator\\';
 if dlg then
     dlg:destroy()
     dlg = nil
-    _G.dialogs["align"] = nil
+    _G.dialogs["winint"] = nil
 end
 
 if dlg == nil then
     txt_listass = iup.text{size = '250x0', mask = "(/d|/w|_|;|[а-я]|[А-Я])+"}
-    local btn_ok = iup.button  {title = "OK"}
-    chk_sendTo = iup.toggle{title = 'Добавить HildiM в контекстное меню "Отправить"'}
-    chk_ass = iup.toggle{title = "Связать с расширениями"; action = function(h)
+    chk_ass = iup.toggle{title = "Связать с расширениями:"; action = function(h)
         txt_listass.active = Iif(h.value == 'ON', 'YES', 'NO')
     end}
+
+    txt_listass_set = iup.text{size = '180x0', mask = "(/d|/w|_|;|[а-я]|[А-Я])+"}
+    chk_ass_set = iup.toggle{title = "Обрабатывать конфигурационные файлы:"; action = function(h)
+        txt_listass_set.active = Iif(h.value == 'ON', 'YES', 'NO')
+    end}
+
+    local btn_ok = iup.button  {title = "OK"}
+    chk_sendTo = iup.toggle{title = 'Добавить HildiM в контекстное меню "Отправить"'}
 
     iup.SetHandle("WININT_BTN_OK", btn_ok)
 
@@ -28,47 +35,53 @@ if dlg == nil then
     iup.SetHandle("WININT_BTN_ESC", btn_esc)
 
     local vbox = iup.vbox{
-        iup.hbox{chk_ass, txt_listass, alignment = 'ACENTER'},
+        iup.hbox{chk_ass, iup.fill{}, txt_listass, alignment = 'ACENTER'},
         iup.hbox{chk_sendTo, alignment = 'ACENTER'},
+        iup.hbox{chk_ass_set, iup.fill{}, txt_listass_set, alignment = 'ACENTER', expand ='HORIZONTAL'},
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
     gap = 2, margin = "4x4" }
     local result = false
-    dlg = iup.scitedialog{vbox; title = "Интеграция с Windows", defaultenter = "WININT_BTN_OK", defaultesc = "WININT_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid = "align" }
+    dlg = iup.scitedialog{vbox; title = "Интеграция с Windows", defaultenter = "WININT_BTN_OK", defaultesc = "WININT_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid = "winint" }
 
     function btn_ok:action()
-        if chk_ass.value == 'ON' then
-            local l = txt_listass.value
-            for t in l:gmatch('[^;]+') do
-                if (tbl_ass[t] or 0) ~= 1 then
-                    local current_association
-                    luacom.SkipCheckError(WshShell)
-                    current_association = WshShell:RegRead('HKCR\\.'..t..'\\')
-                    WshShell:RegWrite(reg_backup..t, current_association or '');
-                    WshShell:RegWrite('HKCR\\.'..t..'\\', 'SciTE.File');
+        local function WriteReg(txt, chk, tbl, strBack, strType, strCapt, strIcon)
+            if chk.value == 'ON' then
+                local l = txt.value
+                for t in l:gmatch('[^;]+') do
+                    if (tbl[t] or 0) ~= 1 then
+                        local current_association
+                        luacom.SkipCheckError(WshShell)
+                        current_association = WshShell:RegRead('HKCR\\.'..t..'\\')
+                        WshShell:RegWrite(reg_backup..t, current_association or '');
+                        WshShell:RegWrite('HKCR\\.'..t..'\\', strType);
+                    end
+                    tbl[t] = -1
                 end
-                tbl_ass[t] = -1
-            end
 
-            WshShell:RegWrite(reg_backup..'associations', txt_listass.value);
-            WshShell:RegWrite('HKCR\\SciTE.File\\', 'SciTE file');
-            WshShell:RegWrite('HKCR\\SciTE.File\\DefaultIcon\\', props["SciteDefaultHome"]..'\\Hildim.exe,1');
-            WshShell:RegWrite('HKCR\\SciTE.File\\shell\\open\\command\\', '"'..props["SciteDefaultHome"]..'\\HildiM.exe" "%1"');
+                WshShell:RegWrite(reg_backup..strBack, txt.value);
+                WshShell:RegWrite('HKCR\\'..strType..'\\', strCapt);
+                WshShell:RegWrite('HKCR\\'..strType..'\\DefaultIcon\\', props["SciteDefaultHome"]..'\\Hildim.exe'..strIcon);
+                WshShell:RegWrite('HKCR\\'..strType..'\\shell\\open\\command\\', '"'..props["SciteDefaultHome"]..'\\HildiM.exe" "%1"');
 
-        end
-        for t, v in pairs(tbl_ass) do
-            if v == 1 then
-                local old_association
+            end
+            for t, v in pairs(tbl) do
+                if v == 1 then
+                    local old_association
+                    luacom.SkipCheckError(WshShell)
+                    old_association = WshShell:RegRead(reg_backup..t);
+                    luacom.SkipCheckError(WshShell)
+                    WshShell:RegDelete(reg_backup..t);
+                    WshShell:RegWrite('HKCR\\.'..t..'\\', old_association);
+                end
+            end
+            if chk.value == 'OFF' then
                 luacom.SkipCheckError(WshShell)
-                old_association = WshShell:RegRead(reg_backup..t);
-                luacom.SkipCheckError(WshShell)
-                WshShell:RegDelete(reg_backup..t);
-                WshShell:RegWrite('HKCR\\.'..t..'\\', old_association);
+                WshShell:RegDelete(reg_backup..strBack);
             end
         end
-        if chk_ass.value == 'OFF' then
-            luacom.SkipCheckError(WshShell)
-            WshShell:RegDelete(reg_backup..'associations');
-        end
+
+        WriteReg(txt_listass, chk_ass, tbl_ass, 'associations', 'SciTE.File', 'SciTE file', ',1')
+        WriteReg(txt_listass_set, chk_ass_set, tbl_ass_set, 'configs', 'SciTE.Session', 'SciTE session file', '')
 
         if chk_sendTo.value == 'ON' then
             local oLnk = WshShell:CreateShortcut(WshShell.SpecialFolders("SendTo").. "\\HildiM.lnk")
@@ -90,29 +103,34 @@ else
     dlg:show()
 end
 
-luacom.SkipCheckError(WshShell)
-txt_listass.value = WshShell:RegRead(reg_backup..'associations')
+local function ReadReg(txt, chk, tbl, strBack, strType, strDef)
+    luacom.SkipCheckError(WshShell)
+    txt.value = (WshShell:RegRead(reg_backup..strBack) or '')
 
-if txt_listass.value == "" then
-    txt_listass.active = 'NO'
-    chk_ass.value = 'OFF'
-    txt_listass.value = 'm;xml;inc;lua;form;incl;cform;rform;wform'
-else
-    chk_ass.value = 'ON'
-    local tblEr = {}
-    local l = txt_listass.value
-    for t in l:gmatch('[^;]+') do
+    if txt.value == "" then
+        txt.value =strDef
+        txt.active = 'NO'
+        chk.value = 'OFF'
+    else
+        chk.value = 'ON'
+        local tblEr = {}
+        local l = txt.value
+        for t in l:gmatch('[^;]+') do
 
-        luacom.SkipCheckError(WshShell)
-        local chk = WshShell:RegRead('HKCR\\.'..t..'\\')
-        if chk ~= 'SciTE.File' then
-            table.insert(tblEr, t)
-            tbl_ass[t] = 0
-        else
-            tbl_ass[t] = 1
+            luacom.SkipCheckError(WshShell)
+            local chk = WshShell:RegRead('HKCR\\.'..t..'\\')
+            if chk ~= strType then
+                table.insert(tblEr, t)
+                tbl[t] = 0
+            else
+                tbl[t] = 1
+            end
         end
+        if #tblEr > 0 then iup.Message("Warning", "Изменены ассоциации для сдедующих расширений:\n".. table.concat(tblEr, '\n') ) end
     end
-    if #tblEr > 0 then iup.Message("Warning", "Изменены ассоциации для сдедующих расширений:\n".. table.concat(tblEr, '\n') ) end
 end
+
+ReadReg(txt_listass, chk_ass, tbl_ass, 'associations', 'SciTE.File', 'm;xml;inc;lua;form;incl;cform;rform;wform')
+ReadReg(txt_listass_set, chk_ass_set, tbl_ass_set, 'configs', 'SciTE.Session', 'fileset;config;solution')
 
 if fso:FileExists(WshShell.SpecialFolders("SendTo").."\\HildiM.lnk") then chk_sendTo.value = 'ON' end
