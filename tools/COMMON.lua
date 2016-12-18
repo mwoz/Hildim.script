@@ -60,7 +60,7 @@ end
 --------------------------------------------------------
 -- Замена ф-ций string.lower(), string.upper(), string.len()
 -- Работает с любыми национальными кодировками
-local function StringLower(s, cp)
+function StringLower(s, cp)
 	if not cp then cp = props["editor.code.page"] end
 	if cp ~= 65001 then s = s:to_utf8(cp) end
 	s = s:utf8lower()

@@ -56,6 +56,7 @@ local function Show()
     iup.SetHandle("HK_BTN_OK",btn_ok)
     iup.SetHandle("HK_BTN_ESC",btn_esc)
     btn_esc.action = function()
+        bBlockReset = true
         dlg:hide()
         dlg:postdestroy()
     end
@@ -64,7 +65,40 @@ local function Show()
         CORE.HelpUI("HotkeysSetup", nil)
     end
 
-    local edit_hk, tree_hk = iup.text{size='100x', help_cb = help_cb}
+    local edit_hk, tree_hk, edit_find
+
+    local function findMenu(start, val)
+        local v = StringLower(val, 1251)
+        for i = start, iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
+            local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
+            if StringLower(title, 1251):find('^'..v) then
+                edit_hk.value = ''
+                tree_hk.value = i
+                tree_hk.selection_cb(tree_hk, i, 1)
+                return true
+            end
+        end
+        if start == 1 then
+            edit_hk.value = ''
+            tree_hk.value = 0
+            tree_hk.selection_cb(tree_hk, 0, 1)
+        else
+            findMenu(1, val)
+        end
+    end
+
+    edit_hk = iup.text{size='100x', help_cb = help_cb}
+    edit_find = iup.text{expand = 'HORIZONTAL'; action = function(h, c, new_val)
+        if c ~= 27 then
+            findMenu(1, new_val)
+        end
+    end;
+    k_any = function(h, k)
+        if k == iup.K_F3 then
+            findMenu(tonumber(tree_hk.value) + 1, h.value)
+            return -1
+        end
+    end}
 
     btn_ok.action = function()
         local str = ''
@@ -79,6 +113,7 @@ local function Show()
         f:write(str)
         f:flush()
         f:close()
+        bBlockReset = true
         dlg:hide()
         dlg:postdestroy()
         menuhandler:RegistryHotKeys()
@@ -144,14 +179,42 @@ local function Show()
         return -1
     end
 
+    local btn_default
     edit_hk.killfocus_cb = function(h)
         if h.value:sub(#h.value) == '+' then h.value = '' end
         if not bBlockReset then
             for i = 1,  iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
                 local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
                 if title:find('Л'..h.value..'Ы', 1, true) then
-                    tree_hk.value = i
-                    tree_hk.selection_cb(tree_hk, i, 1)
+                    if tree_hk.value == i..'' then return end
+                    result = iup.Alarm(' оманда "'..title..'" уже использует данный акселератор',
+                        'ѕерейти к "'..title:gsub('Л.*', '')..'"?\n'..
+                        'ѕереопределить '..h.value..', а дл€ "'..title:gsub('Л.*', '')..'" восстановить акселератор по умолчанию?\n'..
+                        'ќтменить ввод?',
+                        'ѕерейти',
+                        'ѕереопределить',
+                        'ќтменить')
+                    if result == 1 then
+                        tree_hk.value = i
+                        tree_hk.selection_cb(tree_hk, i, 1)
+                    elseif result == 2 then
+                        do
+                            local id = i
+                            if iup.GetAttributeId(tree_hk, 'KIND', id) == 'BRANCH' then return end
+                            local tuid = tree_hk:GetUserId(id)
+                            local t = tuid.title
+                            if tuid.default then
+                                t = t..' Л'..tuid.default..'Ы'
+                            end
+                            tuid.user = nil
+                            iup.SetAttributeId(tree_hk, 'TITLE', id, t)
+                            iup.SetAttributeId(tree_hk, 'COLOR', id, '0 0 0')
+                        end
+                        resetVal()
+                    else
+                        btn_default.action()
+                    end
+
                     return
                 end
             end
@@ -160,7 +223,7 @@ local function Show()
         bBlockReset = false
     end
 
-    local btn_default = iup.button  {title="Default"}
+    btn_default = iup.button  {title="Default"}
     btn_default.action = function()
         if tonumber(tree_hk.value) > 0 then
             local id = tonumber(tree_hk.value)
@@ -209,6 +272,7 @@ local function Show()
     end
 
     local vbox = iup.vbox{
+        iup.hbox{iup.label{title="ѕоиск:"}, edit_find,iup.label{title="<F3> - следующий результат"}, gap=15};
         iup.hbox{iup.vbox{tree_hk}};
         iup.hbox{edit_hk, btn_default, gap='15'},
         iup.hbox{btn_ok, iup.fill{}, btn_esc},

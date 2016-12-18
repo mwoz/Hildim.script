@@ -9,12 +9,6 @@ local WshShell = luacom.CreateObject('WScript.Shell')
 local fso = luacom.CreateObject("Scripting.FileSystemObject");
 local reg_backup = 'HKLM\\SOFTWARE\\SciTE\\Script\\WinIntegrator\\';
 
-if dlg then
-    dlg:destroy()
-    dlg = nil
-    _G.dialogs["winint"] = nil
-end
-
 if dlg == nil then
     txt_listass = iup.text{size = '250x0', mask = "(/d|/w|_|;|[а-я]|[А-Я])+"}
     chk_ass = iup.toggle{title = "Связать с расширениями:"; action = function(h)

@@ -12,30 +12,38 @@ wholeWord = false
 -----------------------------------
 
 
-local function SelectMethod()
+local function SelectMethod(bModified, bSelection, flag)
 --подсветка слова, если оно выделено целиком
-	local current_mark_number = tonumber(props['findsel.mark'])
+    if (bModified == 0 and bSelection == 0) then return end
+    local current_mark_number = tonumber(props['findsel.mark'])
 	EditorClearMarks(current_mark_number)
-	local sText = editor:GetSelText()
+    local sText, iFind = '', 0
+    local sels = 1
+    if bModified ~= 1 then
+        sels = editor.Selections
+        for i = 0, sels - 1 do
+            if i == 0 then
+                sText = editor:textrange(editor.SelectionNStart[i], editor.SelectionNEnd[i])
+            elseif sText:lower() ~= editor:textrange(editor.SelectionNStart[i], editor.SelectionNEnd[i]):lower() then
+                sText = ''
+                break
+            end
+        end
 
-	local flag1 = 0
-	if props['findtext.matchcase'] == '1' then flag1 = SCFIND_MATCHCASE end
+        local flag1 = 0
+        if props['findtext.matchcase'] == '1' then flag1 = SCFIND_MATCHCASE end
 
-	iFind = 0
-
-	if string.len(sText) > 0 and editor.SelectionStart == editor:WordStartPosition(editor.SelectionEnd) and editor.SelectionEnd == editor:WordEndPosition(editor.SelectionStart) then
-        for m in editor:match(sText, SCFIND_WHOLEWORD + flag1) do
-			EditorMarkText(m.pos, m.len, current_mark_number)
-			iFind = iFind + 1
-		end
-    else
-        sText = ''
-	end
-    iMark = props["findtextsimple.count"]
-    if onSetFindRes then onSetFindRes(sText, iFind) end
-    if iFind > 0 then strStatus='Sel+{'..tostring(iFind-1)..'}' else strStatus='NoSel'  end
-    if iMark ~= '0' then strStatus = strStatus..' | Mark{'..iMark..'}' end
-	props['findtext.status'] = strStatus
+        if string.len(sText) > 0 and editor.SelectionStart == editor:WordStartPosition(editor.SelectionEnd) and editor.SelectionEnd == editor:WordEndPosition(editor.SelectionStart) then
+            for m in editor:match(sText, SCFIND_WHOLEWORD + flag1) do
+                EditorMarkText(m.pos, m.len, current_mark_number)
+                iFind = iFind + 1
+            end
+        else
+            sText = ''
+        end
+        iMark = props["findtextsimple.count"]
+    end
+    if onSetFindRes then onSetFindRes(sText, iFind, sels) end
 end
 
 AddEventHandler("OnUpdateUI", SelectMethod)

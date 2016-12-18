@@ -2,10 +2,10 @@
 local function Init(h)
     local lblSel
 
-    onSetFindRes = function(what, count)
+    onSetFindRes = function(what, count, sels)
         if count > 0 then
             if (scite.SendEditor(SCI_GETCODEPAGE) ~= 0) then what = what:from_utf8(1251) end
-            lblSel.value = what..'   :'..count..' entry'
+            lblSel.value = what..'   :'..Iif(sels > 1, sels..' from ', '')..count..' entry'
         else lblSel.value = ''
         end
     end
