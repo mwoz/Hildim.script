@@ -723,6 +723,7 @@ return {
     title = 'Files  and Favorites',
     code = 'fileman',
     sidebar = FileManTab_Init,
+    tabhotkey = "Alt+Shift+O",
     description = [[Встроенный файловый менеджер]]
 }
 

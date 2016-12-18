@@ -957,6 +957,7 @@ return {
     title = 'Functions',
     code = 'functions',
     sidebar = Func_Init,
+    tabhotkey = "Alt+Shift+U",
     description = [[Дерево функций открытого файла]]
 }
 

@@ -369,6 +369,7 @@ return {
     code = 'htmlpreview',
     sidebar = Sidebar_Init,
     toolbar = Toolbar_Init,
+    tabhotkey = "Alt+Shift+H",
     description = [[Предпросмотр HTML кода по мере набора
 Дополнительные инструменты по работе с HTML]]
 

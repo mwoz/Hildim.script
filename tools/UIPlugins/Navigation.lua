@@ -215,6 +215,7 @@ return {
     code = 'navigation',
     sidebar = Tab_Init,
     toolbar = ToolBar_Init,
+    tabhotkey = "Alt+Shift+N",
     hidden = Hidden_Init,
     description = [[¬едет историю ваших перемещений по открытым
 файлам и позвол€ет быстро перемещатьс€ по ней]]

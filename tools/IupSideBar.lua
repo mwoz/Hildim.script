@@ -123,6 +123,7 @@ end
 local function  CreateBox()
     -- Creates boxes
     local sb_elements = {}
+    local tbl_hotkeys
     local function Pane(t)
         for i = 1, #t do
             if type(t[i])=='string' then
@@ -149,12 +150,13 @@ local function  CreateBox()
             l = t[1]
         else print('Unsupported type:'..t.type) end
         l.tabtitle = t.tabtitle
+        table.insert(tbl_hotkeys, t.tabhotkey or '')
         return l
     end
 
+    local hk_pointer
     local function SideBar(t, Bar_Obj, sciteid)
         if not t then return end
-        t.tip= 'Ctrl+Alt+1,2,3,4...'
         t.name = 'sidebartab_'..sciteid
         Bar_Obj.sciteid = sciteid
         local brObj = Bar_Obj
@@ -175,6 +177,14 @@ local function  CreateBox()
         t.rightclick_cb=(function()
             menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid)
         end)
+        local j = 1
+        local s = 'Hotkeys for Tab Activation:'
+        for i = hk_pointer,  #tbl_hotkeys do
+            s = s..'\n Tab'..(i - hk_pointer + 1)..' - <'..Iif(tbl_hotkeys[i] == '', '', tbl_hotkeys[i])..'>'
+        end
+        hk_pointer =  #tbl_hotkeys + 1
+        t.tip = s
+
         return iup.tabs(t)
     end
 
@@ -237,7 +247,7 @@ local function  CreateBox()
             end
         end
         local strTabs = 'return function(P) return{\n'
-
+        --debug_prnArgs(tSide, SideBar_Plugins)
         for i = 1, #tSide do
             tCur = tSide[i]
             if tCur[1] then
@@ -248,8 +258,9 @@ local function  CreateBox()
                 if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                 iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
                 local tabName = tCur.title
+                local tabhotkey = pI.tabhotkey
                 if #tCur == 1 then
-                    strTabs = strTabs..'P{"'..pI.code..'", tabtitle = "'..tabName..'"},\n'
+                    strTabs = strTabs..'P{"'..pI.code..'", tabtitle = "'..tabName..'", tabhotkey="'..(tabhotkey or '')..'"},\n'
                 else
                     local strPrev = piCode(pI)
                     local bfixedheigth = pI.fixedheigth
@@ -258,6 +269,7 @@ local function  CreateBox()
                         pI.sidebar(SideBar_Plugins)
                         local id = pI.code
                         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
+                        if not tabhotkey and pI.tabhotkey then tabhotkey = pI.tabhotkey end
                         iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
                         strPrev = 'P{'..strPrev..', '..piCode(pI)..', '
                         if bfixedheigth or pI.fixedheigth then
@@ -266,7 +278,7 @@ local function  CreateBox()
                             strPrev = strPrev..' orientation="HORIZONTAL", type="SPLIT", name = "split'..pI.code..'", '
                         end
                         if j == #tCur then
-                            strPrev = strPrev..'tabtitle = "'..tabName..'", '
+                            strPrev = strPrev..'tabtitle = "'..tabName..'", tabhotkey="'..(tabhotkey or '')..'", '
                         end
                         strPrev = strPrev..'}'
                     end
@@ -279,17 +291,10 @@ local function  CreateBox()
     end
 
     local tbArgLeft = assert(loadstring(settings2tbl(_G.iuprops["settings.user.leftbar"] or '',"tbArgLeft")))()
-    local tbArgRight = assert(loadstring(settings2tbl(_G.iuprops["settings.user.rightbar"] or '',"tbArgRight")))()
+    local tbArgRight = assert(loadstring(settings2tbl(_G.iuprops["settings.user.rightbar"] or '', "tbArgRight")))()
 
-    pane_curObj = SideBar_obj
-    local tabs =  SideBar(tbArgRight(Pane), SideBar_obj, 'sidebar')
-
-    if tabs then
-        SideBar_obj.TabCtrl = tabs
-
-        vbox = iup.vbox{tabs}
-        SideBar_obj.handle = SidePane(vbox, 'SideBarSB','sidebar','SourceSplitRight', 'RightBarExpander', '1000', SideBar_obj, 'Right', 'application_sidebar_right_µ' )
-    end
+    tbl_hotkeys = {}
+    hk_pointer = 1
 
     pane_curObj = LeftBar_obj
     tabs =  SideBar(tbArgLeft(Pane), LeftBar_obj, 'leftbar')
@@ -301,6 +306,28 @@ local function  CreateBox()
         LeftBar_obj.handle = SidePane(vbox, 'LeftBarSB','leftbar','SourceSplitLeft', 'LeftBarExpander', '0', LeftBar_obj, 'Left', 'application_sidebar_left_µ' )
     end
 
+    pane_curObj = SideBar_obj
+    local tabs =  SideBar(tbArgRight(Pane), SideBar_obj, 'sidebar')
+
+    if tabs then
+        SideBar_obj.TabCtrl = tabs
+
+        vbox = iup.vbox{tabs}
+        SideBar_obj.handle = SidePane(vbox, 'SideBarSB','sidebar','SourceSplitRight', 'RightBarExpander', '1000', SideBar_obj, 'Right', 'application_sidebar_right_µ' )
+    end
+
+    local tblMenus = {}
+    for i = 1,  #tbl_hotkeys do
+        local t = {}
+        table.insert(t, 'Tab'..i)
+        if tbl_hotkeys[i] ~= '' then t.key = tbl_hotkeys[i] end
+        t.action = function() sidebar_Switch(i) end
+        table.insert(tblMenus, t)
+    end
+
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx', {'Sidebar', tblMenus})
+
+    menuhandler:DoPostponedInsert()
 end
 
 local function RestoreNamedValues(h, root)
@@ -717,16 +744,3 @@ AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
         end
     end
 end)
-
-menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx',
-{'Sidebar', {
-    {'Tab1', key = 'Ctrl+Alt+1',  action=function() sidebar_Switch(1) end, },
-    {'Tab2', key = 'Ctrl+Alt+2',  action=function() sidebar_Switch(2) end, },
-    {'Tab3', key = 'Ctrl+Alt+3',  action=function() sidebar_Switch(3) end, },
-    {'Tab4', key = 'Ctrl+Alt+4',  action=function() sidebar_Switch(4) end, },
-    {'Tab5', key = 'Ctrl+Alt+5',  action=function() sidebar_Switch(5) end, },
-    {'Tab6', key = 'Ctrl+Alt+6',  action=function() sidebar_Switch(6) end, },
-    {'Tab7', key = 'Ctrl+Alt+7',  action=function() sidebar_Switch(7) end, },
-}})
-
-menuhandler:DoPostponedInsert()

@@ -528,6 +528,7 @@ return {
     sidebar = Tab_Init,
     toolbar = ToolBar_Init,
     hidden = Hidden_Init,
+    tabhotkey = "Alt+Shift+A",
     description = [[Список сокращений. По нажатию горячей клавиши
 перед курсором ищется сокращение из списка
 и заменяется на соответствующий фрагмент текста]]

@@ -368,6 +368,7 @@ return {
     title = 'Solution',
     code = 'solution',
     sidebar = Solution_Init,
+    tabhotkey = "Alt+Shift+S",
     description = [[Дерево проектов. Позволяет сохранять закладки
 к файлам в виде дерева]]
 }

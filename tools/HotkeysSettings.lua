@@ -189,7 +189,7 @@ local function Show()
                     if tree_hk.value == i..'' then return end
                     result = iup.Alarm(' оманда "'..title..'" уже использует данный акселератор',
                         'ѕерейти к "'..title:gsub('Л.*', '')..'"?\n'..
-                        'ѕереопределить '..h.value..', а дл€ "'..title:gsub('Л.*', '')..'" восстановить акселератор по умолчанию?\n'..
+                        'ѕереопределить '..h.value..', а дл€ "'..title:gsub('Л.*', '')..'" сбросить акселератор?\n'..
                         'ќтменить ввод?',
                         'ѕерейти',
                         'ѕереопределить',
@@ -198,18 +198,11 @@ local function Show()
                         tree_hk.value = i
                         tree_hk.selection_cb(tree_hk, i, 1)
                     elseif result == 2 then
-                        do
-                            local id = i
-                            if iup.GetAttributeId(tree_hk, 'KIND', id) == 'BRANCH' then return end
-                            local tuid = tree_hk:GetUserId(id)
-                            local t = tuid.title
-                            if tuid.default then
-                                t = t..' Л'..tuid.default..'Ы'
-                            end
-                            tuid.user = nil
-                            iup.SetAttributeId(tree_hk, 'TITLE', id, t)
-                            iup.SetAttributeId(tree_hk, 'COLOR', id, '0 0 0')
-                        end
+                        local tuid = tree_hk:GetUserId(i)
+                        tuid.user = nil
+                        iup.SetAttributeId(tree_hk, 'TITLE', i, tuid.title)
+                        iup.SetAttributeId(tree_hk, 'COLOR', i, Iif(tuid.default, '92 92 255', '0 0 0'))
+
                         resetVal()
                     else
                         btn_default.action()
@@ -231,10 +224,37 @@ local function Show()
             local tuid = tree_hk:GetUserId(id)
             local t = tuid.title
             if tuid.default then
+                for i = 1, iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
+                    local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
+                    if title:find('Л'..tuid.default..'Ы', 1, true) then
+                        if tree_hk.value == i..'' then return end
+                        result = iup.Alarm(' оманда "'..title..'" уже использует акселератор '..tuid.default,
+                            'ѕерейти к "'..title:gsub('Л.*', '')..'"?\n'..
+                            '¬осстановить '..tuid.default..', а дл€ "'..title:gsub('Л.*', '')..'" сбросить акселератор?\n'..
+                            'ќтменить операцию?',
+                            'ѕерейти',
+                            '¬осстановить',
+                        'ќтменить')
+                        if result == 1 then
+                            tree_hk.value = i
+                            tree_hk.selection_cb(tree_hk, i, 1)
+                            return
+                        elseif result == 2 then
+                            local tuid2 = tree_hk:GetUserId(i)
+                            tuid2.user = nil
+                            iup.SetAttributeId(tree_hk, 'TITLE', i, tuid2.title)
+                            iup.SetAttributeId(tree_hk, 'COLOR', i, Iif(tuid2.default, '92 92 255', '0 0 0'))
+
+                            resetVal()
+                        else
+                            return
+                        end
+                    end
+                end
                 t = t..' Л'..tuid.default..'Ы'
                 edit_hk.value = tuid.default
             else
-                edit_hk.value =''
+                edit_hk.value = ''
             end
             tuid.user = nil
             iup.SetAttributeId(tree_hk, 'TITLE', id, t)

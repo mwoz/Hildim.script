@@ -270,6 +270,7 @@ return {
     sidebar = Tab_Init,
     toolbar = ToolBar_Init,
     hidden = Hidden_Init,
+    tabhotkey = "Alt+Shift+B",
     description = [[Список закладок в открытых файлах]]
 
 }

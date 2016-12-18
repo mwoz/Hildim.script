@@ -293,6 +293,7 @@ return {
     sidebar = Sidebar_Init,
     toolbar = Toolbar_Init,
     hidden = Hidden_Init,
+    tabhotkey = "Alt+Shift+C",
     description = [[Автоматическое запоминание текстовых данных
 из буфера обмена в стек с возможностью их последующей
 быстой вставки в текст]]
