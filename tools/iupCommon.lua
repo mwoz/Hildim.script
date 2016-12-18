@@ -547,7 +547,7 @@ iup.matrix = function(t)
     local mtr = old_matrix(t)
     function mtr:SetCommonCB(act_act,act_resel, act_esc, act_right)
         local function a_cb(h, key, lin, col, edition, value)
-            if key == 65364 then  --down
+            if key == iup.K_DOWN then  --down
                 local sel = 1
                 if h.marked then sel = h.marked:find('1') end
                 sel = sel - 1
@@ -559,7 +559,7 @@ iup.matrix = function(t)
                     if act_resel then act_resel(sel) end
                 end
                 return -1
-            elseif key == 65362 then  --up
+            elseif key == iup.K_UP then  --up
                 local sel = h.marked:find('1')
                 if sel == nil then sel = h.count + 2 end
                 sel = sel - 1
@@ -573,7 +573,7 @@ iup.matrix = function(t)
                 return -1
             elseif key == 13 then
                 if act_act then act_act(lin) end
-            elseif key == 65307 then --escape
+            elseif key == iup.K_ESC then --escape
                 if act_esc then act_esc() end
             end
         end
@@ -732,7 +732,6 @@ iup.scitedetachbox = function(t)
     dtb.Split_h = t.Split_h
     dtb.Split_Title = t.Split_Title
     dtb.Split_CloseVal = t.Split_CloseVal
-    dtb.Dlg_Resize_Cb = t.Dlg_Resize_Cb
     dtb.On_Detach = t.On_Detach
     dtb.barsize = 0
 
@@ -783,12 +782,13 @@ iup.scitedetachbox = function(t)
         end)
         hNew.show_cb=(function(h,state)
             if bMoved == 1 then return end
-            if state == 0 then dtb.visible='YES' end
+            if state == 0 then
+                dtb.visible = 'YES'
+                if OnResizeSideBar then OnResizeSideBar(t.sciteid) end
+            end
             if dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(h, state) end
         end)
-        if h.Dlg_Resize_Cb then
-            hNew.resize_cb = h.Dlg_Resize_Cb
-        end
+
         if tonumber(_G.iuprops['dialogs.'..h.sciteid..'.x'])== nil or tonumber(_G.iuprops['dialogs.'..h.sciteid..'.y']) == nil then _G.iuprops['dialogs.'..h.sciteid..'.x']=0;_G.iuprops['dialogs.'..h.sciteid..'.y']=0 end
         hNew.button_cb = function(h, button, pressed, x, y, status) end
         hNew.move_cb = function(h, x, y)
@@ -797,6 +797,7 @@ iup.scitedetachbox = function(t)
         end
         hNew.resize_cb = function(h, x, y)
             _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = h.rastersize
+            if OnResizeSideBar then OnResizeSideBar(t.sciteid) end
         end
     end)
     dtb.HideDialog = function()
@@ -839,6 +840,7 @@ iup.scitedetachbox = function(t)
             end
             dtb.Dialog = nil
             if statusBtn then statusBtn.visible = 'NO' end
+            if OnResizeSideBar then OnResizeSideBar(t.sciteid) end
         end
     end
 

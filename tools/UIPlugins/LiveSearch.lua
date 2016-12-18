@@ -76,14 +76,14 @@ local function Init(ToolBar_obj)
         end
     end)
     txt_search.k_any = (function(c, key)
-        if key == 65364 then  --down
+        if key == iup.K_DOWN then  --down
             local line = findres:LineFromPosition(findres.CurrentPos) + 1
             findres:SetSel(findres:PositionFromLine(line), findres.LineEndPosition[line])
-        elseif key == 65362 then --up
+        elseif key == iup.K_UP then --up
             local line = findres:LineFromPosition(findres.CurrentPos) - 1
             findres:SetSel(findres:PositionFromLine(line), findres.LineEndPosition[line])
 
-        elseif key == 13 then  --enter
+        elseif key == iup.K_CR then  --enter
             local _,_, n = string.find(findres:GetSelText(), '^%s*(%d+):')
             if n==nil then n = string.find(findres:GetSelText(), ':(%d+):') end
             if n==nil then
@@ -92,7 +92,7 @@ local function Init(ToolBar_obj)
             end
             editor:SetSel(editor:PositionFromLine(n-1), editor.LineEndPosition[n-1])
             iup.PassFocus()
-        elseif key == 65307 then  --esc
+        elseif key == iup.K_ESC then  --esc
             iup.PassFocus()
         end
     end)

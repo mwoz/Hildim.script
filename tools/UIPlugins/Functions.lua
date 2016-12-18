@@ -924,7 +924,7 @@ local function Func_Init(h)
         if number == 13 then
             Functions_GotoLine()
             iup.PassFocus()
-        elseif number == 65307 then
+        elseif number == iup.K_ESC then
             iup.PassFocus()
         end
     end

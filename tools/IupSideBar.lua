@@ -189,9 +189,17 @@ local function  CreateBox()
     end
 
     local function SidePane(hVbox,sName,sSciteId,sSplit,sExpander,sSplit_CloseVal, Bar_obj, sSide, buttonImage)
+        local tmr_Resize = iup.timer{time = 100; run = 'NO';action_cb = function(h)
+            if shell.async_mouse_state() >= 0 then
+                h.run = 'NO'
+                OnResizeSideBar(sSciteId)
+            end
+        end}
+        local spl_h = iup.GetDialogChild(hMainLayout, sSplit)
+        spl_h.valuechanged_cb = function(h) if OnResizeSideBar and tmr_Resize.run == 'NO' then tmr_Resize.run = 'YES'  end end;
         local h = iup.scitedetachbox{
             hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes"; buttonImage=buttonImage;
-            sciteid = sSciteId;Split_h = iup.GetDialogChild(hMainLayout, sSplit);Split_CloseVal = sSplit_CloseVal;
+            sciteid = sSciteId;Split_h = spl_h;Split_CloseVal = sSplit_CloseVal;
             Dlg_Title = sSide.." Side Bar"; Dlg_Show_Cb = nil;
             On_Detach = (function(h, hNew, x, y)
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state="CLOSE";
@@ -200,7 +208,8 @@ local function  CreateBox()
             Dlg_Close_Cb = (function(h)
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state="OPEN";
             end);
-            Dlg_Show_Cb=(function(h,state)
+            Dlg_Show_Cb =(function(h, state)
+                print(state)
                 if state == 4 then
                     for _,tbs in pairs(SideBar_Plugins) do
                         if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
@@ -208,9 +217,8 @@ local function  CreateBox()
                 end
             end);
             k_any=(function(_,key)
-                if key == 65307 then iup.PassFocus() end
+                if key == iup.K_ESC then iup.PassFocus() end
             end);
-
         }
         h.SaveValues = (function()
             for _,tbs in pairs(SideBar_Plugins) do
@@ -438,8 +446,6 @@ local function InitSideBar()
         Dlg_Title = "Console"; Dlg_Show_Cb = nil; MenuEx = "OUTPUT";
         Dlg_Close_Cb = (function(h)
         end);
-        Dlg_Resize_Cb = (function(h,width, height)
-        end);
         Dlg_Show_Cb = (function(h, state)
             if state == 0 and (_G.iuprops['findresbar.win'] or '0')~='0' then
                 if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
@@ -463,8 +469,6 @@ local function InitSideBar()
         sciteid = 'findresbar';Split_h = bSplitter;Split_CloseVal = "1000";
         Dlg_Title = "Find Results"; Dlg_Show_Cb = nil; MenuEx = "FINDRES";
         Dlg_Close_Cb = (function(h)
-        end);
-        Dlg_Resize_Cb = (function(h,width, height)
         end);
         Dlg_Show_Cb = (function(h, state)
             if state == 0 and (_G.iuprops['concolebar.win'] or '0')~='0' then
@@ -674,6 +678,8 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
 
             scite.EnsureVisible()
+            if OnResizeSideBar then OnResizeSideBar('sidebar') end
+            if OnResizeSideBar then OnResizeSideBar('leftbar') end
             if dlg_SPLASH then scite.PostCommand(POST_CONTINUESTARTUP2, 0) end
 
             props['session.started'] = '1'

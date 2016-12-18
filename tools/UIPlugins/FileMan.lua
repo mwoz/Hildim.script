@@ -513,35 +513,37 @@ local function OnSwitch(bForse, bRelist)
 end
 
 local function memoNav(key)
-    if key == 65364 then  --down
+    if key == iup.K_DOWN then  --down
         local sel = 1
         if list_dir.marked then sel = list_dir.marked:find('1') end
         sel = sel - 1
         if sel < list_dir.count - 1 then
             iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 0)
             iup.SetAttribute(list_dir, 'MARK'..(sel+1)..':0', 1)
-            list_dir.focus_cell = (sel+1)..":1"
+            list_dir.focus_cell = (sel + 1)..":1"
+            list_dir.show = (sel + 2)..':*'
             list_dir.redraw = "ALL"
         end
         return -1
-    elseif key == 65362 then  --up
+    elseif key == iup.K_UP then  --up
         local sel = list_dir.marked:find('1')
         if sel == nil then sel = list_dir.count + 2 end
         sel = sel - 1
         if sel > 1 then
             iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 0)
             iup.SetAttribute(list_dir, 'MARK'..(sel-1)..':0', 1)
-            list_dir.focus_cell = (sel-1)..":1"
+            list_dir.focus_cell = (sel - 1)..":1"
+            list_dir.show = (sel - 2)..':*'
             list_dir.redraw = "ALL"
         end
         return -1
-    elseif key == 13 then
+    elseif key == iup.K_CR then
         if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
             current_path = memo_path.value:gsub('[\\/][^\\/]*$','')..'\\'
             FileMan_OpenItem()
             memo_path.caretpos = memo_path.count
         end
-    elseif key == 65307 then --escape
+    elseif key == iup.K_ESC then --escape
         iup.PassFocus()
         FileMan_ListFILLByMask(memo_mask.value)
     end
