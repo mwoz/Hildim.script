@@ -562,7 +562,7 @@ local function FileManTab_Init(h)
 
     list_dir = iup.matrix{
     numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0, rasterwidth4= 0}
 
     list_dir.map_cb = (function(h)
@@ -622,9 +622,10 @@ local function FileManTab_Init(h)
 
     list_favorites = iup.matrix{
     numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 80 ,rasterwidth3= 450, tip ='jj'}
+    resizematrix = "YES", readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 150 ,rasterwidth3= 450, tip ='jj'}
 
+    list_favorites.colresize_cb = list_favorites.FitColumns(3, true, 1)
     list_favorites.tips_cb = (function(h, x, y)
         local l = iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))
         if l == 0 then h.tip = 'Избранное - файлы и директории'
@@ -677,7 +678,13 @@ local function FileManTab_Init(h)
     -- memo_mask.killfocus_cb = (function(h)
         -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)
-
+    AddEventHandler("OnResizeSideBar", function(sciteid)
+        if h.fileman.Bar_obj.sciteid == sciteid then
+            list_dir.rasterwidth2 = nil
+            list_dir.fittosize = 'COLUMNS'
+            list_favorites.FitColumns(3, false, 1)()
+        end
+    end)
 
     _Plugins.fileman =  {
         handle = iup.vbox{

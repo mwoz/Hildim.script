@@ -37,15 +37,17 @@ else
     props['config.restore'] = props["SciteDefaultHome"]..'\\tools\\default.config'
 end
 
+
 if props['config.restore'] ~= '' then
     if pcall(io.input, props['config.restore']) then
         local l = (_G.iuprops['settings.lexers'] or '')
         text = io.read('*a')
         io.close()
-        local bSuc, tMsg = pcall(dostring,text)
+        local bSuc, tMsg = pcall(dostring, text)
         if not bSuc then
             print('ќшибка в файле '..props['config.restore'], tMsg)
         elseif l ~= _G.iuprops['settings.lexers'] or '' then
+            print(123,123,123,123)
             local t = {}
             for w in _G.iuprops['settings.lexers']:gmatch('[^¶]+') do
                 local _,_, p4 = w:find('[^Х]*Х[^Х]*Х[^Х]*Х([^Х]*)')
@@ -595,6 +597,43 @@ iup.matrix = function(t)
         self.action_cb = a_cb
         self.click_cb = c_cb
     end
+    function mtr.FitColumns(n, block, s)
+        return function(h, col)
+            local h = mtr
+            if not block or n == col then col = (s or 0) end
+            local w = h.rastersize:gsub('x.*', '') - (16 + 8*n)
+            local w0 = w
+            for i = 1, col do
+                w = w - h["rasterwidth"..i]
+            end
+            local wp = 0
+            for i = col + 1, n do
+                wp = wp + h["rasterwidth"..i]
+            end
+            local l = w / wp
+
+            local iMax, lMax = 0, 0
+            w = 0
+            for i = 1, n do
+                if i > col then
+                    h["rasterwidth"..i] = math.floor(h["rasterwidth"..i] * l)
+                    if tonumber(h["rasterwidth"..i]) < 2 then
+                        h["rasterwidth"..i] = 5
+                    elseif lMax < tonumber(h["rasterwidth"..i]) then
+                        lMax = tonumber(h["rasterwidth"..i])
+                        iMax = i
+                    end
+                end
+                w = w + h["rasterwidth"..i]
+
+                if h.name and block then _G.iuprops[h.name..'.rw'..i] = h["rasterwidth"..i] end
+            end
+            w = w - w0
+            if w > 0 and lMax - 5 > w then
+                h["rasterwidth"..iMax] = h["rasterwidth"..iMax] - w
+            end
+        end
+    end
     return mtr
 end
 
@@ -917,19 +956,27 @@ iup.ShowXY = function(h,x,y)
     return old_iup_ShowXY(h,x,y)
 end
 
-iup.ShowInMouse= function(dlg)
-    local _, _, xS, yS = iup.GetGlobal('SCREENSIZE'):find('(%d*)x(%d*)')
+iup.ShowInMouse = function(dlg)
     local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
     local _, _, xD, yD = dlg.NATURALSIZE:find('(%d+)x(%d+)')
-    xS = tonumber(xS)
     xC = tonumber(xC)
     xD = tonumber(xD)
-    yS = tonumber(yS)
     yC = tonumber(yC)
     yD = tonumber(yD)
-    if xC + xD > xS then xC = xS - xD end
-    if yC + yD > yS then yC = yS - yD end
-    dlg:showxy(xC, yC)
+
+    for x0S, y0S, xS, yS in iup.GetGlobal('MONITORSINFO'):gmatch('(%d+) (%d+) (%d+) (%d+)') do
+        x0S = tonumber(x0S)
+        y0S = tonumber(y0S)
+        xS = tonumber(xS) + x0S
+        yS = tonumber(yS) + y0S
+        if x0S <= xC and xC <= xS and y0S <= yC and yC <= yS then
+            if xC + xD > xS then xC = xS - xD end
+            if yC + yD > yS then yC = yS - yD end
+            dlg:showxy(xC, yC)
+            return
+        end
+    end
+    dlg:showxy(10, 10)
 end
 ---–асширение iup
 
@@ -951,6 +998,9 @@ iup.scitedialog = function(t)
         elseif t.dropdown then
             dlg:showxy(-2000, -2000)
             dlg:hide()
+            function dlg:k_any(k)
+                if k == iup.K_ESC then iup.PassFocus() end
+            end
         elseif t.sciteparent == "SCITE" then
             dlg:showxy((tonumber(_G.iuprops['dialogs.'..t.sciteid..'.x']) or 400),(tonumber(_G.iuprops['dialogs.'..t.sciteid..'.y'])) or 300)
         else
@@ -996,20 +1046,19 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
         elseif wp == POST_SCRIPTRELOAD_OLD then   --перезагрузка скрипта
             print("Reload IDM...")
             scite.ReloadStartupScript()
-            --if BOOKMARK then BOOKMARK.Restore() end
             OnSwitchFile("")
             print("...Ok")
---[[        elseif wp == POST_STARTUPSCRIPTSAVED then   --перезагрузка скрипта
-            scite.MenuCommand(9117)]]
         elseif wp == POST_SCRIPTRELOAD then
+            local bd
+            if BOOKMARK then bd = BOOKMARK.SaveReload() end
             iup.DestroyDialogs();
             SaveIup()
-            --scite.PostCommand(1,0)
             print("Reload...")
             scite.ReloadStartupScript()
-            if BOOKMARK then BOOKMARK.Restore() end
+            if BOOKMARK then BOOKMARK.Restore(bd) end
             OnSwitchFile("")
             print("...Ok")
+            if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS, 0) end
         elseif wp == POST_AFTERLUASAVE and lp ~= output.TextLength then
             s,e = output:findtext('\\w.+?\]:',SCFIND_REGEXP, lp)
             if s then

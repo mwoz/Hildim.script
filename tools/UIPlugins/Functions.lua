@@ -946,7 +946,6 @@ local function Func_Init(h)
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
-		OnNavigation = OnNavigate;
         --tabs_OnSelect = OnSwitch;
         on_SelectMe = function() OnSwitch(); iup.SetFocus(tree_func); iup.Flush();end
         }

@@ -66,7 +66,7 @@ end
 
 local StatusBar_obj = {}
 local function CreateStatusBar()
-    local str = _G.iuprops["settings.status.layout"] or 'PositionStatus.lua¦Selection_Color.lua¦CodibgStatus.lua'
+    local str = _G.iuprops["settings.status.layout"] or ''
     local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "statusbar_expander",iup.hbox{\n'
     local i = 0
     for p in str:gmatch('[^¦]+') do
@@ -196,7 +196,7 @@ local function  CreateBox()
             end
         end}
         local spl_h = iup.GetDialogChild(hMainLayout, sSplit)
-        spl_h.valuechanged_cb = function(h) if OnResizeSideBar and tmr_Resize.run == 'NO' then tmr_Resize.run = 'YES'  end end;
+        spl_h.valuechanged_cb = function(h) if OnResizeSideBar and tmr_Resize.run == 'NO' then tmr_Resize.run = 'YES' end end;
         local h = iup.scitedetachbox{
             hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes"; buttonImage=buttonImage;
             sciteid = sSciteId;Split_h = spl_h;Split_CloseVal = sSplit_CloseVal;
@@ -209,7 +209,6 @@ local function  CreateBox()
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state="OPEN";
             end);
             Dlg_Show_Cb =(function(h, state)
-                print(state)
                 if state == 4 then
                     for _,tbs in pairs(SideBar_Plugins) do
                         if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end

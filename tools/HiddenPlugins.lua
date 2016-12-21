@@ -58,6 +58,8 @@ local function Run(flag)
                 if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
                     if bUnInstoll then
                         local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
+                        v = v:gsub('([^¦¬]+¬¦)([^¦¬]+¬¦)', '%2')
+                        v = v:gsub('[^¦¬]+¬¦-$', '')
                         _G.iuprops[s] = v
                     end
                     return m

@@ -55,7 +55,7 @@ local function init()
     lst_clip = iup.list{expand='YES',}
 
     lst_clip = iup.matrix{
-    numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="VERTICAL" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 0, expand = "YES", framecolor="255 255 255",
     rasterwidth0 = 15 ,rasterwidth1 = 600 ,rasterwidth2 = 0 ,}
 
@@ -226,14 +226,30 @@ local function Sidebar_Init(h)
     init()
     h.cliphistory = {
         handle = lst_clip; }
+    AddEventHandler("OnResizeSideBar", function(sciteid)
+        if h.cliphistory.Bar_obj.sciteid == sciteid then
+            lst_clip.rasterwidth1 = nil
+            lst_clip.fittosize = 'COLUMNS'
+        end
+    end)
 end
 
 local function createDlg()
-    local dlg = iup.scitedialog{iup.scrollbox{lst_clip}, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true,
-                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255',}
+    local dlg = iup.scitedialog{lst_clip, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true, shrink="YES",
+                maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',}
     lst_clip.killfocus_cb = function()
         if blockReselect then return end
         dlg:hide()
+    end
+    dlg.resize_cb = function(h)
+        lst_clip.rasterwidth1 = nil
+        lst_clip.fittosize = 'COLUMNS'
+    end
+    dlg.show_cb = function(h, state)
+        if state == 0 then
+            lst_clip.rasterwidth1 = nil
+            lst_clip.fittosize = 'COLUMNS'
+        end
     end
     return dlg
 end

@@ -353,8 +353,8 @@ end
 
     --События списка функций
     list_abbrev = iup.matrix{
-        numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
-        resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
+        numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "VERTICAL" ,
+        readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
         rasterwidth0 = 0 , rasterwidth1 = 60 , rasterwidth2 = 600 ,
     tip = 'В главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
 
@@ -471,14 +471,25 @@ end
             elseif msg == IDM_INS_ABBREV then TryInsAbbrev(true) return true;
             end
         end))
+
     return Abbreviations_ListFILL
 end
 
 local function createDlg()
-    local dlg = iup.scitedialog{iup.scrollbox{list_abbrev}, sciteparent = "SCITE", sciteid = "abbrev", dropdown = true,
+    local dlg = iup.scitedialog{list_abbrev, sciteparent = "SCITE", sciteid = "abbrev", dropdown = true,shrink="YES",
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
     list_abbrev.killfocus_cb = function()
         if not bMenuMode then dlg:hide() end
+    end
+    dlg.resize_cb = function(h)
+        list_abbrev.rasterwidth2 = nil
+        list_abbrev.fittosize = 'COLUMNS'
+    end
+    dlg.show_cb = function(h, state)
+        if state == 0 then
+            list_abbrev.rasterwidth2 = nil
+            list_abbrev.fittosize = 'COLUMNS'
+        end
     end
     return dlg
 end
@@ -511,6 +522,12 @@ local function Tab_Init(h)
         handle = list_abbrev;
         on_SelectMe = onselect
         }
+    AddEventHandler("OnResizeSideBar", function(sciteid)
+        if h.abbreviations.Bar_obj.sciteid == sciteid then
+            list_abbrev.rasterwidth2 = nil
+            list_abbrev.fittosize = 'COLUMNS'
+        end
+    end)
 end
 
 local function Hidden_Init(h)

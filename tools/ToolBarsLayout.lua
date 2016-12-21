@@ -20,11 +20,14 @@ local function Show()
         local tPoints = {["settings.hidden.plugins"] = "Hidden Plugins",
             ["settings.user.rightbar"] = "Right User Bar",
             ["settings.user.leftbar"] = "Left User Bar",
+            ["settings.status.layout"] = "Status Bar",
         }
         for s, m in pairs(tPoints) do
             if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
                 if bUnInstoll then
                     local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
+                    v = v:gsub('([^¦¬]+¬¦)([^¦¬]+¬¦)', '%2')
+                    v = v:gsub('[^¦¬]+¬¦-$', '')
                     _G.iuprops[s] = v
                 end
                 return m

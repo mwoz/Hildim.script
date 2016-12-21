@@ -1,4 +1,6 @@
 local list_bookmarks
+local Bookmarks_RefreshTable
+
 local function Init()
     local tab2
     local Abbreviations_USECALLTIPS = tonumber(props['sidebar.abbrev.calltip']) == 1
@@ -71,8 +73,12 @@ local function Init()
         list_bookmarks.redraw = "L1-100"
     end
 
+    function BOOKMARK.SaveReload()
+        return table_bookmarks
+    end
 
-    function BOOKMARK.Restore()
+    local function ResetAll()
+        table_bookmarks = {}
         DoForBuffers(function(i)
             local ml = 0
             while true do
@@ -85,7 +91,14 @@ local function Init()
         Bookmarks_ListFILL()
     end
 
-    local function Bookmarks_RefreshTable()
+    function BOOKMARK.Restore(bd)
+        if bd then
+            table_bookmarks = bd
+            Bookmarks_ListFILL()
+        end
+    end
+
+    Bookmarks_RefreshTable = function()
         Bookmark_Delete()
         for i = 0, editor.LineCount do
             if editor:MarkerGet(i) == 2 then
@@ -154,8 +167,6 @@ local function Init()
         Bookmarks_ListFILL()
     end
     ----------------------------------------------------------
-    -- tab2:list_abbrev   Abbreviations
-    ----------------------------------------------------------
 
     local function OnSwitch()
         isEditor = true
@@ -168,8 +179,8 @@ local function Init()
     --local function Init()
     list_bookmarks = iup.matrix{
         numcol = 4, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
-        resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
-    width0 = 0 , width1 = 25 , width2 = 600 , width3 = 0 , width4 = 0 }
+        scrollbar = 'VERTICAL', readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
+    rasterwidth0 = 0 , rasterwidth1 = 25 , rasterwidth2 = 25 , rasterwidth3 = 0 , rasterwidth4 = 0 }
 
 	list_bookmarks:setcell(0, 1, "@")         -- ,size="400x400"
 	list_bookmarks:setcell(0, 2, "Bookmarks")
@@ -211,17 +222,32 @@ local function Init()
             iup.PassFocus()
         end
 	end
+
     AddEventHandler("OnSendEditor", _OnSendEditor)
     AddEventHandler("OnClose", _OnClose)
+    AddEventHandler("OnSave", Bookmarks_RefreshTable)
+    AddEventHandler("OnNavigation", function(item)
+        if not item:find('%-$') then Bookmarks_RefreshTable() end
+    end)
 
     return Bookmarks_ListFILL
 end
 
 local function createDlg()
-    local dlg = iup.scitedialog{iup.scrollbox{list_bookmarks}, sciteparent = "SCITE", sciteid = "bookmarks", dropdown = true,
-                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+    local dlg = iup.scitedialog{iup.hbox{list_bookmarks}, sciteparent = "SCITE", sciteid = "bookmarks", dropdown = true,shrink="YES",
+                resizematrix='NO'; maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255';  }
     list_bookmarks.killfocus_cb = function()
         dlg:hide()
+    end
+    dlg.resize_cb = function(h)
+        list_bookmarks.rasterwidth2 = nil
+        list_bookmarks.fittosize = 'COLUMNS'
+    end
+    dlg.show_cb = function(h, state)
+        if state == 0 then
+            list_bookmarks.rasterwidth2 = nil
+            list_bookmarks.fittosize = 'COLUMNS'
+        end
     end
     return dlg
 end
@@ -253,6 +279,12 @@ local function Tab_Init(h)
         On_SelectMe = onselect
         }
 
+    AddEventHandler("OnResizeSideBar", function(sciteid)
+        if h.bookmark.Bar_obj.sciteid == sciteid then
+            list_bookmarks.rasterwidth2 = nil
+            list_bookmarks.fittosize = 'COLUMNS'
+        end
+    end)
 end
 
 local function Hidden_Init(h)
@@ -260,7 +292,7 @@ local function Hidden_Init(h)
     Init()
     local dlg = createDlg()
     menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
-        {'Boockmarks', ru = 'Закладки', action = function() iup.ShowInMouse(dlg) end,}
+        {'Bookmarks List', ru = 'Список закладок', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end,}
     )
 end
 

@@ -96,7 +96,7 @@ local function internal_Init()
     list_navigation = iup.matrix{
         numcol = 5, numcol_visible = 4, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
         resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
-        width0 = 0 , rasterwidth1 = 250 , rasterwidth2 = 70 , rasterwidth3 = 50 , rasterwidth4 = 40 , rasterwidth5 = 0,
+        width0 = 0 , rasterwidth1 = 250 , rasterwidth2 = 90 , rasterwidth3 = 50 , rasterwidth4 = 40 , rasterwidth5 = 0,
     }
 
 	list_navigation:setcell(0, 1, "Text")
@@ -149,7 +149,7 @@ local function internal_Init()
         }}
     )
     AddEventHandler("OnMenuCommand", function(msg) if msg == 2316 then OnNavigation("Home") elseif msg == 2318 then OnNavigation("End") end end)
-    OnNavigation = OnNavigate;
+    AddEventHandler("OnNavigation", OnNavigate)
 end
 
 local function Tab_Init(h)
@@ -157,13 +157,24 @@ local function Tab_Init(h)
     h.navigation = {
         handle = list_navigation;
         }
+
 end
 
 local function createDlg()
-    local dlg = iup.scitedialog{iup.scrollbox{list_navigation}, sciteparent = "SCITE", sciteid = "navigation", dropdown = true,
+    local dlg = iup.scitedialog{list_navigation, sciteparent = "SCITE", sciteid = "navigation", dropdown = true, shrink="YES",
                 maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
     list_navigation.killfocus_cb = function()
         dlg:hide()
+    end
+    dlg.resize_cb = function(h)
+        list_navigation.rasterwidth1 = nil
+        list_navigation.fittosize = 'COLUMNS'
+    end
+    dlg.show_cb = function(h, state)
+        if state == 0 then
+            list_navigation.rasterwidth1 = nil
+            list_navigation.fittosize = 'COLUMNS'
+        end
     end
     return dlg
 end
