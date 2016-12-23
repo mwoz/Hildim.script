@@ -3,7 +3,9 @@
 ---------------------------------------------------
 -- Description:
 ---------------------------------------------------
-local list_abbrev
+local list_abbrev, showPopUp, editMode
+local bMenuMode = false
+local bToolBar = false
 
 local function Init()
     local text = props['CurrentSelection']
@@ -16,9 +18,6 @@ local function Init()
     local abbr_table
     local bListModified = false
     require"lpeg"
-    local bMenuMode = false
-    local bToolBar = false
-    local showPopUp, editMode
 
     ABBREV = {}
 
@@ -366,7 +365,7 @@ end
         h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'):gsub('¬', '\\')
     end)
 
-	list_abbrev.map_cb = function(h)
+	--[[list_abbrev.map_cb = function(h)
         h.size = "1x1"
     end
 
@@ -377,7 +376,7 @@ end
         elseif k == iup.K_ESC then
             iup.PassFocus()
         end
-	end
+	end]]
 
     local droppedLin = nil
     local clickPos = ""
@@ -390,13 +389,13 @@ end
         droppedLin = nil;
     end
     function list_abbrev:mousemove_cb(lin, col)
-        if lin == 0 then return end
+--[[        if lin == 0 then return end
 
         if iup.GetAttributeId2(list_abbrev, 'MARK', lin, 0) ~= '1' then
             list_abbrev.marked = nil
             iup.SetAttributeId2(list_abbrev, 'MARK', lin, 0, 1)
             list_abbrev.redraw = 'ALL'
-        end
+        end]]
 
         if clickPos == iup.GetGlobal("CURSORPOS") then
             --При первом клике ложно посылается  mousemove - если установлен тултип. тут отсекаем это сообщение, чтобы нормально сработал клик
@@ -425,9 +424,11 @@ end
         end
     end
 
+    iup.drop_cb_to_list(list_abbrev, Abbreviations_InsertExpansion)
+
     function list_abbrev:button_cb(button, pressed, x, y, status)
         if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and list_abbrev.cursor == "ARROW")) then
-            Abbreviations_InsertExpansion()
+            --Abbreviations_InsertExpansion()
         elseif button == iup.BUTTON1 and pressed == 1 then
             clickPos = iup.GetGlobal("CURSORPOS")
         elseif button == iup.BUTTON1 and pressed == 0 then
@@ -491,6 +492,10 @@ local function createDlg()
             list_abbrev.fittosize = 'COLUMNS'
         end
     end
+    menuhandler:InsertItem('MainWindowMenu', 'Edit¦s3',
+        {'Abbreviations List...', ru = 'Список сокращений...', action = function() iup.ShowInMouse(dlg) end, key='Alt+Shift+B'}
+    )
+    bIsList = true
     return dlg
 end
 
@@ -500,7 +505,11 @@ local function ToolBar_Init(h)
     local dlg = createDlg()
 
     local fbutton = iup.flatbutton{title = 'Список сокращений', flat_action=(function(h)
-                local _, _,left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                local _, _, left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                if iup.GetParent(iup.GetParent(h)).name == 'StatusBar' then
+                    local _, _, _, dy = dlg.rastersize:find('(%d*)x(%d*)')
+                    top = top - dy
+                end
                 dlg:showxy(left,top)
             end), padding='5x2',}
 
@@ -534,9 +543,7 @@ local function Hidden_Init(h)
     bToolBar = true
     Init()
     local dlg = createDlg()
-    menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
-        {'Abbreviations List', ru = 'Список сокращений', action = function() iup.ShowInMouse(dlg) end,}
-    )
+    showPopUp = function() iup.ShowInMouse(dlg) end
 end
 
 return {
@@ -544,6 +551,7 @@ return {
     code = 'abbreviations',
     sidebar = Tab_Init,
     toolbar = ToolBar_Init,
+    statusbar = ToolBar_Init,
     hidden = Hidden_Init,
     tabhotkey = "Alt+Shift+A",
     description = [[Список сокращений. По нажатию горячей клавиши

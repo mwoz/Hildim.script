@@ -58,6 +58,30 @@ local function internal_Init()
         if on_nav_cb then on_nav_cb() end
     end
 
+    AddEventHandler("OnScriptReload", function(bSave, t)
+        if bSave then
+            t.navigation = {}
+            for i = 1, list_navigation.numlin do
+                t.navigation[i] = {}
+                for j = 1, 5 do
+                    t.navigation[i][j] = list_navigation:getcell(i, j)
+                end
+            end
+            t.navigation.currentItem = currentItem
+        else
+            if t.navigation then
+                list_navigation.addlin = '0-'..#t.navigation
+                for i = 1, #t.navigation do
+                    for j = 1, 5 do
+                        list_navigation:setcell(i, j, t.navigation[i][j])
+                    end
+                end
+                list_navigation.redraw = 'ALL'
+                currentItem = t.navigation.currentItem or Iif(#t.navigation > 0, 1, 0)
+            end
+        end
+    end)
+
     local function Navigation_Go(item)
         local path = list_navigation:getcell(item, 5)
         if not path then return end
@@ -104,26 +128,7 @@ local function internal_Init()
 	list_navigation:setcell(0, 3, "Item")
 	list_navigation:setcell(0, 4, "Line")
 
-    function list_navigation:leavewindow_cb()
-        list_navigation.marked = nil
-
-        iup.SetAttributeId2(list_navigation, 'MARK', currentItem, 0, 1)
-        list_navigation.redraw = 'ALL'
-    end
-	list_navigation.click_cb = function(_, lin, col, status)
-        if (iup.isdouble(status) or bToolBar) and iup.isbutton1(status) then
-            Navigation_Go(lin)
-        end
-    end
     list_navigation.mousemove_cb = function(_, lin, col)
-        if lin == 0 then return end
-
-        if iup.GetAttributeId2(list_navigation, 'MARK', lin, 0) ~= '1' then
-
-            list_navigation.marked = nil
-            iup.SetAttributeId2(list_navigation, 'MARK', lin, 0, 1)
-            list_navigation.redraw = 'ALL'
-        end
         if m_lastLin ~= lin then
             m_lastLin = lin
             if list_navigation:getcell(lin, 5) then
@@ -133,14 +138,8 @@ local function internal_Init()
             end
         end
     end
-    function list_navigation:k_any(k)
-        if k == iup.K_ESC then
-            iup.PassFocus()
-        end
-    end
-	list_navigation.map_cb = function(h)
-        h.size = "1x1"
-    end
+
+    iup.drop_cb_to_list(list_navigation, Navigation_Go)
     menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
         {'Navigation', ru = 'Навигация', plane = 1,{
             {'s_Navigation', separator = 1,},
@@ -176,6 +175,9 @@ local function createDlg()
             list_navigation.fittosize = 'COLUMNS'
         end
     end
+    menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+        {'Navigation History...', ru = 'История навигации...', action = function() iup.ShowInMouse(dlg) end, key = "Alt+Shift+N"}
+    )
     return dlg
 end
 
@@ -199,9 +201,13 @@ local function ToolBar_Init(h)
 
     local box = iup.hbox{
             btnForward,
-            iup.flatbutton{title = 'Навигация', flat_action=(function(h)
-                local _, _,left, top = h.screenposition:find('(-*%d+),(-*%d+)')
-                dlg:showxy(left,top)
+            iup.flatbutton{title = 'Навигация', flat_action =(function(h)
+                local _, _, left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                if iup.GetParent(iup.GetParent(h)).name == 'StatusBar' then
+                    local _, _, _, dy = dlg.rastersize:find('(%d*)x(%d*)')
+                    top = top - dy
+                end
+                dlg:showxy(left, top)
             end), },
             btnBackward,
             iup.label{separator = "VERTICAL",maxsize='x22', },
@@ -216,9 +222,6 @@ local function Hidden_Init(h)
     bToolBar = true
     internal_Init()
     local dlg = createDlg()
-    menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
-        {'Navigation History', ru = 'История навигации', action = function() iup.ShowInMouse(dlg) end,}
-    )
 end
 
 return {
@@ -226,6 +229,7 @@ return {
     code = 'navigation',
     sidebar = Tab_Init,
     toolbar = ToolBar_Init,
+    statusbar = ToolBar_Init,
     tabhotkey = "Alt+Shift+N",
     hidden = Hidden_Init,
     description = [[Ведет историю ваших перемещений по открытым

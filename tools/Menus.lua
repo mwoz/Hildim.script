@@ -63,6 +63,20 @@ local function SetFindresCount()
 	end
 end
 
+local function ChangeCode(newcmd)
+    return function()
+        local s = editor:GetText()
+        if newcmd == IDM_ENCODING_DEFAULT then
+            s = s:from_utf8(1251)
+        elseif props['editor.unicode.mode'] == ''..IDM_ENCODING_DEFAULT then
+            s = s:to_utf8(1251)
+        end
+        scite.MenuCommand(newcmd)
+        editor:SetText(s)
+        editor:EmptyUndoBuffer()
+    end
+end
+
 local function CopyPathToClipboard(what)
 	local str
 	if what == 'name' then
@@ -301,12 +315,21 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'S&how Calltip', ru = 'Показать подсказку', key = 'Ctrl+?', action = function() ShowTipManualy() end, image = 'ui_tooltip_balloon_bottom_µ',},
 		{'Complete S&ymbol', ru = 'Завершить слово(из API)', key = 'Ctrl++', action = function() ShowListManualy() end},
 		{'Complete &Word', ru = 'Завершить слово(из текста)', key = 'Ctrl+Enter', action = IDM_COMPLETEWORD},
-		{'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=выделение)', key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
+		{'s2', separator = 1},
+        {'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=выделение)', key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
 		{'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=буфер обмена)', key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
-		{'Comment or Uncomment', ru = 'Закомментировать и раскомментировать текст', key = 'Ctrl+Q', action = CORE.xComment, image = 'edit_signiture_µ'},
+		{'s3', separator = 1},
+        {'Comment or Uncomment', ru = 'Закомментировать и раскомментировать текст', key = 'Ctrl+Q', action = CORE.xComment, image = 'edit_signiture_µ'},
 		{'Block Co&mment', ru = 'Блочный комментарий', action = IDM_BLOCK_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},
 		{'Stream Comme&nt', ru = 'Потоковый комментарий', key = 'Ctrl+Shift+Q', action = IDM_STREAM_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},
 		{'Bo&x Comment', ru = 'Бокс - комментарий', key = 'Ctrl+Shift+B', action = IDM_BOX_COMMENT, visible = "props['comment.box.start.'..editor_LexerLanguage()]~=''"},
+        {'Decode  ещ', ru = 'Изменить кодировку на..',{
+            {'&Code Page Property', ru = 'Заданная настройкой codepage', action = ChangeCode(IDM_ENCODING_DEFAULT), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_DEFAULT end},
+            {'UTF-16 &Big Endian', action = ChangeCode(IDM_ENCODING_UCS2BE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCS2BE end},
+            {'UTF-16 &Little Endian', action = ChangeCode(IDM_ENCODING_UCS2LE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCS2LE end},
+            {'UTF-8 &with BOM', ru = 'UTF-8 с заголовком', action = ChangeCode(IDM_ENCODING_UTF8), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UTF8 end},
+            {'&UTF-8', action = ChangeCode(IDM_ENCODING_UCOOKIE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCOOKIE end},
+        },},
 		{'Make &Selection Uppercase', ru = 'Перевести в верхний регистр', key = 'Ctrl+U', action = IDM_UPRCASE, image = 'edit_uppercase_µ'},
 		{'Make Selection &Lowercase', ru = 'Перевести в нижний регистр', key = 'Ctrl+Shift+U', action = IDM_LWRCASE, image = 'edit_lowercase_µ'},
 	},},
@@ -434,7 +457,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Windows Integration', ru = 'Настройка интеграции с Windows', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\WinAssoc.lua')"},
 		{'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
 		{'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
-		{'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = function() do_LexerColors() end},
+		{'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')"},
 		{"Lexers properties", ru = 'Свойства лексеров', {
 			{'Lexers properties', ru = 'Свойства лексеров', plane = 1 ,tLangs},
 			{'s2', separator = 1},

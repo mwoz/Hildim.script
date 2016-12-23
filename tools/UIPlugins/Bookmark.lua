@@ -56,14 +56,21 @@ local function Init()
     end
 
     local function Bookmarks_ListFILL()
+        local bn = tonumber(props['BufferNumber'])
         table.sort(table_bookmarks, function(a, b)
-            return a.BufferNumber < b.BufferNumber or
+            if a.BufferNumber ~= bn and b.BufferNumber == bn then return false end
+            return a.BufferNumber == bn and b.BufferNumber ~= bn or
+            a.BufferNumber < b.BufferNumber or
             a.BufferNumber == b.BufferNumber and
             a.LineNumber < b.LineNumber
         end)
         iup.SetAttribute(list_bookmarks, "DELLIN", "1-"..list_bookmarks.numlin)
         iup.SetAttribute(list_bookmarks, "ADDLIN", "1-"..#table_bookmarks)
         for i, bmk in ipairs(table_bookmarks) do
+            if bn == bmk.BufferNumber then
+                iup.SetAttributeId2(list_bookmarks, 'FGCOLOR', i, 1, '0 0 255')
+                iup.SetAttributeId2(list_bookmarks, 'FGCOLOR', i, 2, '0 0 255')
+            end
             list_bookmarks:setcell(i, 1, bmk.BufferNumber)         -- ,size="400x400"
             list_bookmarks:setcell(i, 2, bmk.LineText)
             list_bookmarks:setcell(i, 3, bmk.FilePath)
@@ -73,9 +80,14 @@ local function Init()
         list_bookmarks.redraw = "L1-100"
     end
 
-    function BOOKMARK.SaveReload()
-        return table_bookmarks
-    end
+    AddEventHandler("OnScriptReload", function(bSave, t)
+        if bSave then
+            t.bookmarks = table_bookmarks
+        else
+            table_bookmarks = t.bookmarks or {}
+            Bookmarks_ListFILL()
+        end
+    end)
 
     local function ResetAll()
         table_bookmarks = {}
@@ -89,13 +101,6 @@ local function Init()
             end
         end)
         Bookmarks_ListFILL()
-    end
-
-    function BOOKMARK.Restore(bd)
-        if bd then
-            table_bookmarks = bd
-            Bookmarks_ListFILL()
-        end
     end
 
     Bookmarks_RefreshTable = function()
@@ -184,22 +189,8 @@ local function Init()
 
 	list_bookmarks:setcell(0, 1, "@")         -- ,size="400x400"
 	list_bookmarks:setcell(0, 2, "Bookmarks")
-	list_bookmarks.click_cb = function(_, lin, col, status)
-        if (iup.isdouble(status) or bToolBar) and iup.isbutton1(status) then
-            Bookmarks_GotoLine(lin)
-        end
-    end
-	list_bookmarks.map_cb = function(h)
-        h.size = "1x1"
-    end
-    list_bookmarks.mousemove_cb = function(_, lin, col)
-        if lin == 0 then return end
-        if iup.GetAttributeId2(list_bookmarks, 'MARK', lin, 0) ~= '1' then
 
-            list_bookmarks.marked = nil
-            iup.SetAttributeId2(list_bookmarks, 'MARK', lin, 0, 1)
-            list_bookmarks.redraw = 'ALL'
-        end
+    list_bookmarks.mousemove_cb = function(_, lin, col)
         if m_lastLin ~= lin then
             m_lastLin = lin
             if list_bookmarks:getcell(lin, 4) then
@@ -209,19 +200,7 @@ local function Init()
             end
         end
     end
-    function list_bookmarks:leavewindow_cb()
-        -- if blockReselect then return end
-        list_bookmarks.marked = nil
-        list_bookmarks.redraw = 'ALL'
-    end
-	list_bookmarks.keypress_cb = function(_, key, press)
-        if press == 0 then return end
-        if key == iup.K_CR then --enter
-            Bookmarks_GotoLine()
-        elseif k == iup.K_ESC then
-            iup.PassFocus()
-        end
-	end
+    iup.drop_cb_to_list(list_bookmarks, Bookmarks_GotoLine)
 
     AddEventHandler("OnSendEditor", _OnSendEditor)
     AddEventHandler("OnClose", _OnClose)
@@ -249,6 +228,9 @@ local function createDlg()
             list_bookmarks.fittosize = 'COLUMNS'
         end
     end
+    menuhandler:InsertItem('MainWindowMenu', 'Search¦xxxx',
+        {'Bookmarks List...', ru = 'Список закладок...', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
+    )
     return dlg
 end
 
@@ -259,7 +241,11 @@ local function ToolBar_Init(h)
 
     local box = iup.hbox{
             iup.flatbutton{title = 'Закладки', flat_action=(function(h)
-                local _, _,left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                local _, _, left, top = h.screenposition:find('(-*%d+),(-*%d+)')
+                if iup.GetParent(iup.GetParent(h)).name == 'StatusBar' then
+                    local _, _, _, dy = dlg.rastersize:find('(%d*)x(%d*)')
+                    top = top - dy
+                end
                 dlg:showxy(left,top)
             end), padding='5x2',},
             iup.label{separator = "VERTICAL",maxsize='x22', },
@@ -291,9 +277,6 @@ local function Hidden_Init(h)
     bToolBar = true
     Init()
     local dlg = createDlg()
-    menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
-        {'Bookmarks List', ru = 'Список закладок', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end,}
-    )
 end
 
 return {
@@ -301,8 +284,9 @@ return {
     code = 'bookmark',
     sidebar = Tab_Init,
     toolbar = ToolBar_Init,
+    statusbar = ToolBar_Init,
     hidden = Hidden_Init,
-    tabhotkey = "Alt+Shift+B",
+    tabhotkey = "Alt+Shift+F2",
     description = [[Список закладок в открытых файлах]]
 
 }

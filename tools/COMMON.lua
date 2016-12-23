@@ -460,7 +460,12 @@ function s:init(t)
 end
 function s:ins(v, p, l, b)
     for i = #self.data.lst, 1, -1 do
-        if self.data.lst[i] == v then table.remove(self.data.lst, i) end
+        if self.data.lst[i] == v then
+            table.remove(self.data.lst, i)
+            table.remove(self.data.pos, i)
+            table.remove(self.data.layout, i)
+            table.remove(self.data.bmk, i)
+        end
     end
     table.insert(self.data.lst, 1, v)
     table.insert(self.data.pos, 1, p)

@@ -47,7 +47,6 @@ if props['config.restore'] ~= '' then
         if not bSuc then
             print('ќшибка в файле '..props['config.restore'], tMsg)
         elseif l ~= _G.iuprops['settings.lexers'] or '' then
-            print(123,123,123,123)
             local t = {}
             for w in _G.iuprops['settings.lexers']:gmatch('[^¶]+') do
                 local _,_, p4 = w:find('[^Х]*Х[^Х]*Х[^Х]*Х([^Х]*)')
@@ -146,6 +145,9 @@ function rfl:check(fname)
     local res = '{lst={'
     for i = 1,  #self.data.lst do
         if self.data.lst[i]:upper() == str then
+            if editor.LineCount < (self.data.pos[i] or 0) then
+                print("So match!", self.data.lst[i], self.data.pos[i], self.data.layout[i], self.data.bmk[i])
+            end
             editor.FirstVisibleLine = (self.data.pos[i] or 0)
             RestoreLayOut(self.data.layout[i] or '')
             editor.FirstVisibleLine = (self.data.pos[i] or 0)
@@ -251,6 +253,8 @@ iup.CloseFilesSet = function(cmd)
     local slayout = ''
     if cmd == IDM_QUIT or cmd == 0 then sposes = '' end
     local curBuf = scite.buffers.GetCurrent()
+    local tmpFlag = props['load.on.activate']
+    props['load.on.activate'] = 0
     DoForBuffers(function(i)
         if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Ѕезым€нный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             scite.SendEditor(SCI_SETSAVEPOINT)
@@ -268,6 +272,7 @@ iup.CloseFilesSet = function(cmd)
             if cmd ~= 0 then scite.MenuCommand(IDM_CLOSE) end
         end
     end)
+    props['load.on.activate'] = tmpFlag
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
     if nf and ((cmd == IDM_QUIT  ) or cmd == 0) then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
         _G.iuprops['buffers'] = spathes;
@@ -465,7 +470,6 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         if not source:find('^\\\\') then
             if not shell.fileexists(source:from_utf8(1251)) then return end
         end
-        iuprops['resent.files.list']:ins(source:from_utf8(1251), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst())
     elseif cmd == IDM_HELP then
         local h = iup.GetFocus()
         local hlp
@@ -1025,6 +1029,67 @@ iup.scitedialog = function(t)
     return dlg
 end
 
+iup.drop_cb_to_list = function(list, action)
+    local mousemove_cb_old =list.mousemove_cb
+    list.mousemove_cb = function(h, lin, col)
+        if lin == 0 then return end
+        if iup.GetAttributeId2(list, 'MARK', lin, 0) ~= '1' then
+
+            list.marked = nil
+            iup.SetAttributeId2(list, 'MARK', lin, 0, 1)
+            list.redraw = 'ALL'
+        end
+        if mousemove_cb_old then mousemove_cb_old(h, lin, col) end
+
+    end
+
+    if not list.leavewindow_cb then
+        function list:leavewindow_cb()
+            -- if blockReselect then return end
+            list.marked = nil
+            list.redraw = 'ALL'
+        end
+    end
+
+	list.click_cb = function(_, lin, col, status)
+        if (iup.isdouble(status) or bToolBar) and iup.isbutton1(status) then
+            action(lin)
+        end
+    end
+
+    local keypress_cb_old = list.keypress_cb
+	list.keypress_cb = function(h, k, press)
+        if press == 0 then return end
+        if k == iup.K_ESC then
+            iup.PassFocus()
+        elseif k == iup.K_CR then
+            local l = 0
+            if list.marked then l = tonumber(list.marked:find('1') or 1) - 1 end
+            if l >= 1 then
+                action(l)
+            end
+        elseif k == iup.K_DOWN then
+            local l = 1
+            if list.marked then l = tonumber(list.marked:find('1') or '1') end
+            if l <= tonumber(list.numlin) then
+                list.marked = nil
+                iup.SetAttributeId2(list, 'MARK', l, 0, 1)
+                list.redraw = 'ALL'
+            end
+        elseif k == iup.K_UP then
+            local l = tonumber(list.numlin)
+            if list.marked then l = tonumber(list.marked:find('1') or list.numlin) - 2 end
+            if l >= 1 then
+                list.marked = nil
+                iup.SetAttributeId2(list, 'MARK',l,0, 1)
+                list.redraw = 'ALL'
+            end
+        elseif keypress_cb_old then
+            keypress_cb_old(h, k, press)
+        end
+	end
+end
+
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
         if wp == POST_CLOSEDIALOG then --закрытие диалога (отложенное)
@@ -1049,14 +1114,17 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             OnSwitchFile("")
             print("...Ok")
         elseif wp == POST_SCRIPTRELOAD then
+            print("Reload...")
+            scite.HideForeReolad()
             local bd
-            if BOOKMARK then bd = BOOKMARK.SaveReload() end
+            local tblDat
+            if OnScriptReload then tblDat = {}; OnScriptReload(true, tblDat) end
             iup.DestroyDialogs();
             SaveIup()
-            print("Reload...")
             scite.ReloadStartupScript()
-            if BOOKMARK then BOOKMARK.Restore(bd) end
+            if OnScriptReload then OnScriptReload(false, tblDat) end
             OnSwitchFile("")
+            scite.EnsureVisible()
             print("...Ok")
             if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS, 0) end
         elseif wp == POST_AFTERLUASAVE and lp ~= output.TextLength then
@@ -1216,12 +1284,14 @@ iup.DestroyDialogs = function()
     if h then iup.Detach(h); iup.Destroy(h) end
 
     if SideBar_obj.handle then
+        SideBar_obj.handle.OnMyDestroy()
         iup.Detach(SideBar_obj.handle)
         iup.Destroy(SideBar_obj.handle)
         iup.GetDialogChild(hMainLayout, "RightBarExpander").state = "OPEN"
         SideBar_obj.handle = nil
     end
     if LeftBar_obj.handle then
+        LeftBar_obj.handle.OnMyDestroy()
         iup.Detach(LeftBar_obj.handle)
         iup.Destroy(LeftBar_obj.handle)
         iup.GetDialogChild(hMainLayout, "LeftBarExpander").state = "OPEN"
@@ -1258,7 +1328,7 @@ iup.DestroyDialogs = function()
 end
 
 function Splash_Screen()
-    if props['iuptoolbar.restarted'] == '1' then return end
+    --if props['iuptoolbar.restarted'] == '1' then return end
     dlg_SPLASH = iup.scitedialog{iup.hbox{
     iup.label{
       padding = "5x5",
@@ -1306,5 +1376,4 @@ dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")
-dofile (props["SciteDefaultHome"].."\\tools\\ColorSettings.lua")
 dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")

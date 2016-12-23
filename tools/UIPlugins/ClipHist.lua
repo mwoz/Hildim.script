@@ -251,6 +251,9 @@ local function createDlg()
             lst_clip.fittosize = 'COLUMNS'
         end
     end
+    menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
+        {'Clipboard History...', ru = 'История буфера обмена...', action = function() iup.ShowInMouse(dlg) end, key="Alt+Shift+C"}
+    )
     return dlg
 end
 
@@ -282,12 +285,9 @@ local function Toolbar_Init(h)
         if tonumber(dx) < tonumber(box.value) then
             dlg.rastersize = box.value..'x'..dy
         end
+        if iup.GetParent(iup.GetParent(iup.GetParent(h))).name =='StatusBar' then top = top - dy end
         dlg:showxy(left,top)
     end
-
-    menuhandler:InsertItem('MainWindowMenu', 'Edit¦s1',
-        {'Clibboard History', ru = 'История буфера обмена', key = 'Alt+V',  action=btn.flat_action, }
-    )
 
     h.Tabs.cliphistory =  {
         handle = box
@@ -298,9 +298,6 @@ local function Hidden_Init(h)
     bToolBar = true
     init()
     local dlg = createDlg()
-    menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
-        {'Clipboard History', ru = 'История буфера обмена', action = function() iup.ShowInMouse(dlg) end,}
-    )
 end
 
 return {
@@ -308,6 +305,7 @@ return {
     code = 'cliphistory',
     sidebar = Sidebar_Init,
     toolbar = Toolbar_Init,
+    statusbar = Toolbar_Init,
     hidden = Hidden_Init,
     tabhotkey = "Alt+Shift+C",
     description = [[Автоматическое запоминание текстовых данных

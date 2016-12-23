@@ -243,8 +243,4 @@ local function LexerColors()
     end)
 end
 
-
-
-function do_LexerColors()
-    LexerColors()
-end
+LexerColors()

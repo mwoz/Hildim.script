@@ -196,7 +196,9 @@ local function  CreateBox()
             end
         end}
         local spl_h = iup.GetDialogChild(hMainLayout, sSplit)
+
         spl_h.valuechanged_cb = function(h) if OnResizeSideBar and tmr_Resize.run == 'NO' then tmr_Resize.run = 'YES' end end;
+
         local h = iup.scitedetachbox{
             hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes"; buttonImage=buttonImage;
             sciteid = sSciteId;Split_h = spl_h;Split_CloseVal = sSplit_CloseVal;
@@ -226,6 +228,7 @@ local function  CreateBox()
             SaveNamedValues(hMainLayout,'sidebarctrl')
             SaveNamedValues(hVbox,'sidebarctrl')
         end)
+        h.OnMyDestroy = function() spl_h.valuechanged_cb = nil end
         return h
     end
 
@@ -567,7 +570,7 @@ local function InitStatusBar()
 
     for i = 1, #tEvents do
         for _,tbs in pairs(StatusBar_obj.Tabs) do
-            if tbs[tEvents[i]] then print(tEvents[i]) AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
+            if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
         end
     end
     if ToolBar_obj.handle then
