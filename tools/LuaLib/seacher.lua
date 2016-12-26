@@ -154,12 +154,15 @@ end
 function s:ReplaceOnce()
 --[[	if (!FindHasText())
 		return;]]
+    local ss, se = self.e.SelectionStart, self.e.SelectionEnd
     if self.searchUp then
         self.e:SetSel(self.e.SelectionEnd, self.e.SelectionEnd)
     else
         self.e:SetSel(self.e.SelectionStart, self.e.SelectionStart)
     end
 	local pos = self:FindNext(true);
+
+    if ss ~= self.e.SelectionStart or se ~= self.e.SelectionEnd then return end
 
 	if pos > -1 then
         local replaceTarget, replaceLen = self:UnSlashAsNeeded(self.replaceWhat)

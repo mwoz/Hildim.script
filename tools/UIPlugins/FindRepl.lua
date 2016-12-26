@@ -24,7 +24,7 @@ local function SetInfo(msg, chColor)
     local strColor
     if chColor == 'E' then strColor = "255 0 0"
     elseif chColor == 'W' then strColor = "255 0 0"
-    else strColor = "0 0 0" end
+    else strColor = "0 0 255" end
     Ctrl('lblInfo').title = msg
     Ctrl('lblInfo').fgcolor = strColor
 end
@@ -54,8 +54,8 @@ local function ReadSettings()
 end
 
 --Хендлеры контролов диалога
-local function PostAction()
-    if _G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1' then
+local function PostAction(bForce)
+    if (_G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1') or bForce then
         popUpFind.show_cb(popUpFind,4)
         popUpFind.close_cb(popUpFind)
     end
@@ -76,6 +76,7 @@ local function ReplaceAll(h)
     iup.PassFocus()
     PostAction()
 end
+
 
 local function ReplaceSel(h)
     if ReadSettings() then return end
@@ -125,16 +126,21 @@ local function FindNext(h)
     if Ctrl('tabFindRepl').valuepos == '0' then PostAction() end
 end
 
-local function ReplaceOnce(h)
+function CORE.ReplaceNext(h)
     if ReadSettings() then return end
+    SetInfo('', '')
     OnNavigation("Repl")
     local pos = findSettings:ReplaceOnce()
     OnNavigation("Repl-")
+    if not pos then SetInfo('Найдено вхождение "'..Ctrl("cmbFindWhat").value..'"', '') return end
+
     if pos < 0 then SetInfo('Ничего не найдено', 'E')
-    else SetInfo('', '') end
+    else SetInfo('Произведена замена', 'E') end
+
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     iup.PassFocus()
+    PostAction()
 end
 
 local function MarkAll(h)
@@ -178,7 +184,8 @@ local function FindInFiles()
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
                    Iif(Ctrl("chkSubFolders").value=='ON', 's','~')..
                    Iif(_G.iuprops['findres.groupbyfile'], 'g', '~')
-    scite.PerformGrepEx(params,fWhat,fDir,fFilter)
+    SetInfo('', '')
+    scite.PerformGrepEx(params, fWhat, fDir, fFilter)
 
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbFolders"):SaveHist()
@@ -278,7 +285,7 @@ end
 local function DefaultAction()
     local nT = Ctrl("tabFindRepl").valuepos
     if nT == '0' then FindNext()
-    elseif nT == '1' then ReplaceOnce()
+    elseif nT == '1' then CORE.ReplaceNext()
     elseif nT == '2' then  FindInFiles()
     elseif nT == '3' then  MarkAll()
     end
@@ -369,8 +376,8 @@ local function FindNextBack(bUp)
 end
 
 local function PassOrClose()
-    if _G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1' then
-        PostAction()
+    if _G.dialogs['findrepl'] then
+        PostAction(true)
     else
         iup.PassFocus()
     end
@@ -495,7 +502,7 @@ local function create_dialog_FindReplace()
     iup.button{
       title = " на:",
       image = "IMAGE_Replace",
-      action = ReplaceOnce,
+      action = CORE.ReplaceNext,
       canfocus  = "NO",
     },
     iup.button{

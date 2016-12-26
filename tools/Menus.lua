@@ -30,7 +30,7 @@ local function windowsList()
 	local maxN = scite.buffers.GetCount() - 1
 	for i = 0,maxN do
 		local row = {}
-		local s = scite.buffers.NameAt(i):gsub('(.+)[\\]([^\\]*)$', '%2(%1)')
+		local s = scite.buffers.NameAt(i):from_utf8(1251):gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
 		local md = Iif(scite.buffers.SavedAt(i), '', '*') .. Iif(i < 9, '&'..((i + 1) % 10)..'. ','')
 
 		row[1] = md..s
@@ -239,8 +239,8 @@ _G.sys_Menus.EDITOR = {title = "Контекстное меню окна редактора",
 
 _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 	{'_HIDDEN_', {
-		{'Next Tab', key = 'Ctrl+Tab', action = IDM_NEXTFILESTACK},
-		{'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = IDM_PREVFILESTACK},
+		{'Next Tab', key = 'Ctrl+Tab', action = function() if iup.GetFocus() then iup.PassFocus() else scite.MenuCommand(IDM_NEXTFILESTACK) end end},
+		{'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = function() if iup.GetFocus() then iup.PassFocus() else scite.MenuCommand(IDM_PREVFILESTACK) end end},
 		{'Block Up', key = 'Alt+Up', action = function() editor:LineUpRectExtend() end},
 		{'Block Down', key = 'Alt+Down', action = function() editor:LineDownRectExtend() end},
 		{'Block Left', key = 'Alt+Left', action = function() editor:CharLeftRectExtend() end},
@@ -255,7 +255,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Open...', ru = 'Открыть', key = 'Ctrl+O', action = IDM_OPEN, image = 'folder_open_document_µ'},
 		--{'Open Selected &Filename', ru = 'Открыть выделенный файл', key = 'Ctrl+Shift+O', action = IDM_OPENSELECTED, active = function() return editor:GetSelText():find('%w:[\\/][^"\n\r\t]') end,},
 		{'Recent Files', ru = 'Недавние файлы', visible = "(_G.iuprops['resent.files.list.location'] or 0) == 0", function() if (_G.iuprops['resent.files.list.location'] or 0) == 0 then return iuprops['resent.files.list']:GetMenu() else return {} end end},
-		{'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+R', action = IDM_REVERT},
+		{'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+Shift+O', action = function() if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then scite.MenuCommand(IDM_REVERT) end end},
 		{'&Close', ru = 'Закрыть', key = 'Ctrl+F4', action = IDM_CLOSE},
 		{'C&lose All', ru = 'Закрыть все', action = IDM_CLOSEALL},
 		{'&Save', ru = 'Сохранить', key = 'Ctrl+S', action = IDM_SAVE, active = function() return editor.Modify end, image = 'disk_µ'},
@@ -339,6 +339,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Find Previou&s', ru = 'Предыдущее совпадение', key = 'Shift+F3', action = IDM_FINDNEXTBACK},
 		{'F&ind in Files...', ru = 'Найти в файлах', key = 'Ctrl+Shift+F', action = IDM_FINDINFILES, image = 'folder_search_result_µ'},
 		{'R&eplace...', ru = 'Заменить', key = 'Ctrl+H', action = IDM_REPLACE, image = 'IMAGE_Replace'},
+		{'Replace Next...', ru = 'Заменить далее', key = 'Ctrl+Shift+H', action = function() CORE.ReplaceNext() end},
 		{'Marks', ru = 'Метки', action = function() CORE.ActivateFind(3) end, key = 'Ctrl+M', image = 'marker_µ',},
 		{'s0', separator = 1},
 		{'Search', ru = 'Поиск', plane = 1,{
@@ -349,6 +350,9 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 			{'Prevous Word/Selection', ru = 'Предыдущее слово/выделение', action = function() CORE.FindNextWrd(2) end, key ='Alt+Shift+F3',},
 			{'Find All Word/Selection(Ctrl+Alt+Click)', ru = 'Найти все слова/выделения(Ctrl+Alt+Click)', action = CORE.FindSelToConcole, key = 'Alt+Shift+F',},
 		}},
+		{'Next Find Result', ru = 'Следующий результат поиска', action = function() CORE.FindResult(1) end, key = 'Ctrl+R',},
+		{'Prevouse Find Result', ru = 'Предыдущий результат поиска', action = function() CORE.FindResult(-1) end, key = 'Ctrl+Shift+R', },
+
 		{'s1', separator = 1},
 		{'&Go to definition(Shift+Click)', ru = 'Перейти к описанию(Shift+Click)', key = 'F12', action = "menu_GoToObjectDefenition()"},
 		{'&Go to...', ru = 'Перейти на позицию...', key = 'Ctrl+G', action = IDM_GOTO},

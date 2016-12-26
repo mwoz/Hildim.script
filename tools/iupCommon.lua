@@ -110,25 +110,31 @@ function rfl:GetMenu()
             local s = ''
             if k < 11 then s = '&'..k..'.' end
             l[1] = s..ts[i]
+            if ((_G.iuprops['resent.files.list.pathafter'] or 1) == 1) then
+                l[1] = l[1]:gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
+            end
             l.action = OpenMenu(i)
             table.insert(t,l)
             k = k + 1
         end
     end
     table.insert(t,{'s0', separator = 1})
-    table.insert(t,{'Recent List Settings', ru = "Свойства списка недавних файлов", action = function()
-        res, loc, len, bClear = iup.GetParam('Recent List Settings',
+    table.insert(t,{'List Settings', ru = "Свойства списка", action = function()
+        local res, loc, len, pathAfter, bClear = iup.GetParam('Recent List Settings',
             nil,
             "Location in File menu: %o|Submenu|Bottom|\n"..
             "Length: %i[5,30,1]\n"..
+            "Path After Name: %b\n"..
             "Clear Now: %b\n",
             _G.iuprops['resent.files.list.location'] or 0,
             _G.iuprops['resent.files.list.length'] or 10,
+            _G.iuprops['resent.files.list.pathafter'] or 10,
             0
         )
         if res then
             _G.iuprops['resent.files.list.location'] = loc
             _G.iuprops['resent.files.list.length'] = len
+            _G.iuprops['resent.files.list.pathafter'] = pathAfter
             if bClear == 1 then
                 self.data.lst = {}
                 self.data.pos = {}
@@ -961,8 +967,19 @@ iup.ShowXY = function(h,x,y)
 end
 
 iup.ShowInMouse = function(dlg)
-    local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
-    local _, _, xD, yD = dlg.NATURALSIZE:find('(%d+)x(%d+)')
+    local cPos = editor.SelectionEnd
+    local _, _, xC, yC, dY
+    if editor.FirstVisibleLine <= editor:LineFromPosition(cPos) and
+        editor:LineFromPosition(cPos) <= editor.FirstVisibleLine + editor.LinesOnScreen then
+        dY = editor:TextHeight(editor:LineFromPosition(cPos))
+        _, _, xC, yC = iup.GetDialogChild(iup.GetLayout(), "Source").Screenposition:find('(%d+),(%d+)')
+        xC = tonumber(xC) + editor:PointXFromPosition(cPos) + editor:TextWidth(editor.StyleAt[cPos], ' ') * editor.SelectionNCaretVirtualSpace[0]
+        yC = tonumber(yC) + editor:PointYFromPosition(cPos) + dY
+    else
+        _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+        dY = 0
+    end
+    local _, _, xD, yD = dlg.RASTERSIZE:find('(%d+)x(%d+)')
     xC = tonumber(xC)
     xD = tonumber(xD)
     yC = tonumber(yC)
@@ -974,8 +991,8 @@ iup.ShowInMouse = function(dlg)
         xS = tonumber(xS) + x0S
         yS = tonumber(yS) + y0S
         if x0S <= xC and xC <= xS and y0S <= yC and yC <= yS then
-            if xC + xD > xS then xC = xS - xD end
-            if yC + yD > yS then yC = yS - yD end
+            if xC + xD > xS then xC = xC - xD if xC < x0S then xC = x0S end end
+            if yC + yD > yS then yC = yC - yD - dY if yC < y0S then yC = y0S end end
             dlg:showxy(xC, yC)
             return
         end
@@ -1037,6 +1054,8 @@ iup.drop_cb_to_list = function(list, action)
 
             list.marked = nil
             iup.SetAttributeId2(list, 'MARK', lin, 0, 1)
+            list.FOCUSCELL = lin..':1'
+            list.SHOW = lin..':1'
             list.redraw = 'ALL'
         end
         if mousemove_cb_old then mousemove_cb_old(h, lin, col) end
@@ -1074,18 +1093,24 @@ iup.drop_cb_to_list = function(list, action)
             if l <= tonumber(list.numlin) then
                 list.marked = nil
                 iup.SetAttributeId2(list, 'MARK', l, 0, 1)
+                list.FOCUSCELL = l..':1'
+                list.SHOW = l..':1'
                 list.redraw = 'ALL'
+                return iup.IGNORE
             end
         elseif k == iup.K_UP then
             local l = tonumber(list.numlin)
             if list.marked then l = tonumber(list.marked:find('1') or list.numlin) - 2 end
             if l >= 1 then
                 list.marked = nil
-                iup.SetAttributeId2(list, 'MARK',l,0, 1)
+                iup.SetAttributeId2(list, 'MARK', l, 0, 1)
+                list.FOCUSCELL = l..':1'
+                list.SHOW = l..':1'
                 list.redraw = 'ALL'
+                return iup.IGNORE
             end
         elseif keypress_cb_old then
-            keypress_cb_old(h, k, press)
+            return keypress_cb_old(h, k, press)
         end
 	end
 end
@@ -1125,6 +1150,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             if OnScriptReload then OnScriptReload(false, tblDat) end
             OnSwitchFile("")
             scite.EnsureVisible()
+            iup.GetLayout().resize_cb()
             print("...Ok")
             if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS, 0) end
         elseif wp == POST_AFTERLUASAVE and lp ~= output.TextLength then
@@ -1193,23 +1219,35 @@ local function SaveIuprops_local(filename)
     h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
     _G.iuprops["layout.statusbar_expander"] = h.state
 
-
+    local hFind
+    if _G.dialogs['findrepl'] then
+        hFind = _G.dialogs['findrepl']
+    else
+        hFind = iup.GetDialogChild(iup.GetLayout(), "FindReplDetach")
+    end
     local t = {}
     for n,v in pairs(_G.iuprops) do
-        local _,_,prefix = n:find('([^%.]*)%.')
+        local _, _, prefix, ctrl = n:find('([^%.]*)%.([^%.]*)')
         if prefix == 'sidebarctrl' or prefix == 'concolebar' or prefix == 'dialogs' or prefix == 'findrepl' or prefix == 'findres' or prefix == 'layout' or
            prefix == 'session' or prefix == 'settings' or prefix == 'sidebar' then
-            local tp = type(v)
-            if tp == 'nil' then v = 'nil'
-            elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
-            elseif tp == 'string' then
-                v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
-            elseif tp == 'table' and v.tostr then
-                v = v:tostr()
-            else
-                iup.Message('Error', "Type "..tp.." can't be saved")
+            local process = true
+
+            if prefix == 'sidebarctrl' then
+                process = (iup.GetDialogChild(hFind, ctrl) == nil)
             end
-            table.insert(t, '_G.iuprops["'..n..'"] = '..v)
+            if process then
+                local tp = type(v)
+                if tp == 'nil' then v = 'nil'
+                elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
+                elseif tp == 'string' then
+                    v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
+                elseif tp == 'table' and v.tostr then
+                    v = v:tostr()
+                else
+                    iup.Message('Error', "Type "..tp.." can't be saved")
+                end
+                table.insert(t, '_G.iuprops["'..n..'"] = '..v)
+            end
         end
     end
 
@@ -1237,6 +1275,7 @@ end
 iup.DestroyDialogs = function()
     local hMainLayout = iup.GetLayout()
     if not hMainLayout then return end
+    hMainLayout.resize_cb = nil
     if SideBar_obj and SideBar_obj.handle then SideBar_obj.handle.SaveValues() end
     if LeftBar_obj and LeftBar_obj.handle then LeftBar_obj.handle.SaveValues() end
 
@@ -1250,6 +1289,7 @@ iup.DestroyDialogs = function()
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
+        iup.SaveNamedValues(_G.dialogs['findrepl'], 'sidebarctrl')
         _G.dialogs['findrepl'].restore = nil
         _G.dialogs['findrepl'] = nul
     end

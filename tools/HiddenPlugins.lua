@@ -89,7 +89,7 @@ local function Run(flag)
                 for i = 1, iup.GetAttribute(h, "TOTALCHILDCOUNT0") do
                     if str ~= '' then str = str..'¦' end
                     str = str..h:GetUserId(i)
-                    CheckInstall(h:GetUserId(i), true)
+                    if checkItems then CheckInstall(h:GetUserId(i), true) end
                 end
                 return str
             end

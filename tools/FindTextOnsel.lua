@@ -197,10 +197,9 @@ CORE.OpenFoundFiles = function(msg)
     end
 end
 
-AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
-    if not findres.Focus then return end
-    local style = findres.StyleAt[findres.CurrentPos]
-    local lineNum = findres:LineFromPosition(findres.CurrentPos)
+function CORE.FindresClickPos(curpos)
+    local style = findres.StyleAt[curpos]
+    local lineNum = findres:LineFromPosition(curpos)
     local function perfGo(s, p, strI)
         OnNavigation("Go")
         s = s:to_utf8(1251)
@@ -267,5 +266,24 @@ AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
             end
         end
     end
+end
+
+function CORE.FindResult(dl)
+    local curLine = findres:LineFromPosition(findres.SelectionEnd)
+    while curLine >= 0 and curLine <= findres.LineCount do
+        curLine = curLine + dl
+        if findres.StyleAt[findres:PositionFromLine(curLine)] == 3 then
+            findres:EnsureVisibleEnforcePolicy(curLine)
+            findres.SelectionEnd = findres:PositionFromLine(curLine)
+            findres.SelectionStart = findres:PositionFromLine(curLine)
+            CORE.FindresClickPos(findres.CurrentPos)
+            return
+        end
+    end
+end
+
+AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
+    if not findres.Focus then return end
+    CORE.FindresClickPos(findres.CurrentPos)
 end)
 require "menuhandler"

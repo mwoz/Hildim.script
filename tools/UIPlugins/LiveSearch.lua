@@ -76,30 +76,21 @@ local function Init(ToolBar_obj)
         end
     end)
     txt_search.k_any = (function(c, key)
-        if key == iup.K_DOWN then  --down
-            local line = findres:LineFromPosition(findres.CurrentPos) + 1
-            findres:SetSel(findres:PositionFromLine(line), findres.LineEndPosition[line])
+        if key == iup.K_DOWN then --down
+            CORE.FindResult(1)
+            iup.SetFocus(c)
+            return iup.IGNORE
         elseif key == iup.K_UP then --up
-            local line = findres:LineFromPosition(findres.CurrentPos) - 1
-            findres:SetSel(findres:PositionFromLine(line), findres.LineEndPosition[line])
-
-        elseif key == iup.K_CR then  --enter
-            local _,_, n = string.find(findres:GetSelText(), '^%s*(%d+):')
-            if n==nil then n = string.find(findres:GetSelText(), ':(%d+):') end
-            if n==nil then
-                Find_onChange(c)
-                return
-            end
-            editor:SetSel(editor:PositionFromLine(n-1), editor.LineEndPosition[n-1])
-            iup.PassFocus()
-        elseif key == iup.K_ESC then  --esc
+            CORE.FindResult(-1)
+            iup.SetFocus(c)
+            return iup.IGNORE
+        elseif key == iup.K_ESC or key == iup.K_CR then  --esc
             iup.PassFocus()
         end
     end)
     btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
     ToolBar_obj.Tabs.livesearch = {
         handle = iup.hbox{
-                -- iup.button{image = 'IMAGE_AlignObjectsLeft', action=(function() iup.PassFocus();do_Align() end), tip='Диалог выравнивания кода(Alt+A)'};
                 btn_search,
                 txt_search,
                 expand='HORIZONTAL', minsize='200x'

@@ -88,7 +88,7 @@ local function CreateStatusBar()
     return loadstring(strTbl)()
 end
 
-local function SaveNamedValues(h, root)
+function iup.SaveNamedValues(h, root)
     if not h then return end
     local child = nil
     repeat
@@ -115,7 +115,7 @@ local function SaveNamedValues(h, root)
                 end
                 if val then _G.iuprops[root..'.'..child.name..'.value'] = val end
             end
-            SaveNamedValues(child, root)
+            iup.SaveNamedValues(child, root)
         end
     until not child
 end
@@ -225,8 +225,8 @@ local function  CreateBox()
             for _,tbs in pairs(SideBar_Plugins) do
                 if tbs.OnSaveValues then tbs.OnSaveValues() end
             end
-            SaveNamedValues(hMainLayout,'sidebarctrl')
-            SaveNamedValues(hVbox,'sidebarctrl')
+            iup.SaveNamedValues(hMainLayout,'sidebarctrl')
+            iup.SaveNamedValues(hVbox,'sidebarctrl')
         end)
         h.OnMyDestroy = function() spl_h.valuechanged_cb = nil end
         return h
@@ -653,7 +653,14 @@ else iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='OPEN'; iup.GetDia
 if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000'
 else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '3'   end
 if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000" end
-
+hMainLayout.resize_cb = function()
+    local tmr = iup.timer{time = 10, run = 'YES', action_cb = function(h)
+        h.run = 'NO'
+        if not LeftBar_obj.handle then iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0' end
+        if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000' end
+    end}
+    tmr.run = 'YES'
+end
 
 AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
     if id_msg == SCN_NOTYFY_ONPOST then
@@ -680,6 +687,7 @@ AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
             local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
 
             scite.EnsureVisible()
+            hMainLayout.resize_cb()
             if OnResizeSideBar then OnResizeSideBar('sidebar') end
             if OnResizeSideBar then OnResizeSideBar('leftbar') end
             if dlg_SPLASH then scite.PostCommand(POST_CONTINUESTARTUP2, 0) end
@@ -748,7 +756,19 @@ AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
         if output.Focus then
             if (_G.iuprops['concolebar.win'] or '0') == '1' then ConsoleBar.Switch() end
         elseif findres.Focus then
-            if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.Switch() end
+            if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.Switch()
+            else iup.PassFocus() end
         end
+    elseif key == iup.K_CR and findres.Focus then
+        if findres:LineFromPosition(findres.SelectionStart) == findres:LineFromPosition(findres.SelectionEnd) then
+            local curpos = findres:PositionFromLine(findres:LineFromPosition(findres.SelectionStart))
+            local st = findres.StyleAt[curpos]
+            if st == 3 then
+                CORE.FindresClickPos(curpos)
+            elseif st == 2 or st == 1 then
+                findres:ToggleFold(findres:LineFromPosition(curpos))
+            end
+        end
+        return true
     end
 end)

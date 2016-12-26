@@ -1,5 +1,5 @@
 
-local lst_clip, clipboard, maxlin, colcolor, blockReselect, blockResetCB
+local lst_clip, clipboard, maxlin, colcolor, blockReselect, blockResetCB, expd, txt_live, btn
 maxlin = 30
 colcolor = '0 150 0'
 blockReselect = false
@@ -15,9 +15,10 @@ local function renum()
     end
 end
 
-CLIPHISTORY = {}
-CLIPHISTORY.GetClip = function(i)
-    return iup.GetAttributeId2(lst_clip, "", i, 2)
+local function MarkList(i)
+    iup.SetAttributeId2(lst_clip, 'MARK', i, 0, 1)
+    lst_clip.FOCUSCELL = i..':1'
+    lst_clip.SHOW = i..':1'
 end
 
 local function setClipboard(lin)
@@ -49,10 +50,14 @@ local function setClipboard(lin)
 end
 
 local function init()
+    CLIPHISTORY = {}
+    CLIPHISTORY.GetClip = function(i)
+        return iup.GetAttributeId2(lst_clip, "", i, 2)
+    end
     clipboard = iup.clipboard{}
     clipboard.format = 'MSDEVColumnSelect'
 
-    lst_clip = iup.list{expand='YES',}
+    --lst_clip = iup.list{expand='YES',}
 
     lst_clip = iup.matrix{
     numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="VERTICAL" ,
@@ -67,7 +72,7 @@ local function init()
         lst_clip.marked = nil
         if clipboard.textavailable == 'YES'  then
             --iup.PassFocus()
-            iup.SetAttributeId2(lst_clip, 'MARK',1,0, 1)
+            MarkList(1)
         end
         lst_clip.redraw = 'ALL'
         lst_clip.cursor = "ARROW"
@@ -80,16 +85,18 @@ local function init()
             if lst_clip.marked then l = tonumber(lst_clip.marked:find('1') or '1') end
             if l <= tonumber(lst_clip.numlin) then
                 lst_clip.marked = nil
-                iup.SetAttributeId2(lst_clip, 'MARK', l, 0, 1)
+                MarkList(l)
                 lst_clip.redraw = 'ALL'
+                return iup.IGNORE
             end
         elseif k == iup.K_UP then
             local l = tonumber(lst_clip.numlin)
             if lst_clip.marked then l = tonumber(lst_clip.marked:find('1') or lst_clip.numlin) - 2 end
             if l >= 1 then
                 lst_clip.marked = nil
-                iup.SetAttributeId2(lst_clip, 'MARK',l,0, 1)
+                MarkList(l)
                 lst_clip.redraw = 'ALL'
+                return iup.IGNORE
             end
         elseif k == iup.K_CR then
             local l = tonumber(lst_clip.marked:find('1') or '0') - 1
@@ -99,6 +106,19 @@ local function init()
             end
         elseif k == iup.K_ESC then
             iup.PassFocus()
+        elseif k == iup.K_TAB and txt_live then
+            if expd.state == 'OPEN' then
+                txt_live.valuechanged_cb()
+                return iup.IGNORE
+            end
+        elseif tonumber(k) > 31 and tonumber(k) < 256 and txt_live and not blockReselect then
+            if expd.state == 'CLOSE' then
+                expd.state = 'OPEN'
+                blockReselect = true
+                iup.SetFocus(txt_live)
+                iup.SetGlobal('KEY', k)
+                blockReselect = false
+            end
         end
     end
 
@@ -145,7 +165,7 @@ local function init()
         if iup.GetAttributeId2(lst_clip, 'MARK', lin, 0) ~= '1' then
 
             lst_clip.marked = nil
-            iup.SetAttributeId2(lst_clip, 'MARK', lin, 0, 1)
+            MarkList(lin)
             lst_clip.redraw = 'ALL'
         end
 
@@ -179,6 +199,37 @@ local function init()
         end
     end
 
+    AddEventHandler("OnScriptReload", function(bSave, t)
+        if bSave then
+            t.cliphist = {}
+            for i = 1, lst_clip.numlin do
+                t.cliphist[i] = {}
+                for j = 1, 2 do
+                    t.cliphist[i][j] = lst_clip:getcell(i, j)
+                end
+                if (iup.GetAttributeId2(lst_clip, "FGCOLOR", i, 1) == colcolor) then t.cliphist[i].mult = true end
+            end
+            t.cliphist.lin0 = lin0
+        else
+            if t.cliphist then
+                lst_clip.addlin = '0-'..#t.cliphist
+                lin0 = t.cliphist.lin0 or 10
+                for i = 1, #t.cliphist do
+                    lst_clip:setcell(i, 0, Iif(i==lin0,0,i))
+                    for j = 1, 2 do
+                        lst_clip:setcell(i, j, t.cliphist[i][j])
+                    end
+                    if t.cliphist[i].mult then iup.SetAttributeId2(lst_clip, "FGCOLOR", i, 1, colcolor) end
+                end
+                lst_clip.redraw = 'ALL'
+                if clipboard.textavailable == 'YES' then
+                    if btn then btn.title = lst_clip:getcell(1, 1) or '' end
+                    MarkList(1)
+                end
+            end
+        end
+    end)
+
     AddEventHandler("OnDrawClipboard", function(flag)
         lst_clip.marked = nil
         local caption = ''
@@ -200,7 +251,7 @@ local function init()
 
             renum()
 
-            iup.SetAttributeId2(lst_clip, 'MARK',1,0, 1)
+            MarkList(1)
             lst_clip.redraw = 'ALL'
         end
         if onDraw_cb and not blockResetCB then onDraw_cb(caption) end
@@ -235,12 +286,42 @@ local function Sidebar_Init(h)
 end
 
 local function createDlg()
-    local dlg = iup.scitedialog{lst_clip, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true, shrink="YES",
+    txt_live = iup.text{size = '25x', k_any = lst_clip.k_any, expand = 'HORIZONTAL'}
+    expd = iup.expander{iup.hbox{txt_live, iup.label{title = '<Tab>-Next'},iup.label{}, gap = 10, alignment='ACENTER'}, barposition = 'BOTTOM', barsize = '0', state = 'CLOSE', visible = 'NO'}
+
+    local dlg = iup.scitedialog{iup.vbox{expd, lst_clip}, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true, shrink="YES",
                 maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',}
+
+    local tmr = iup.timer{time = 10, run = 'NO', action_cb = function(h)
+        expd.state = 'CLOSE'
+        txt_live.value = ''
+        h.run = 'NO'
+        dlg:hide()
+    end}
+
     lst_clip.killfocus_cb = function()
         if blockReselect then return end
-        dlg:hide()
+        tmr.run = 'YES'
     end
+    txt_live.killfocus_cb = lst_clip.killfocus_cb
+
+    lst_clip.getfocus_cb = function()
+        tmr.tun = 'NO'
+    end
+    txt_live.getfocus_cb = lst_clip.getfocus_cb
+    txt_live.valuechanged_cb = function()
+        local lStart = tonumber(lst_clip.marked:find('1') or '0') - 1
+        for i = 0, lst_clip.numlin - 1 do
+            local j = (i + lStart) % (lst_clip.numlin) + 1
+            if lst_clip:getcell(j, 1):lower():find('^'..txt_live.value:lower()) then
+                lst_clip.marked = nil
+                MarkList(j)
+                lst_clip.redraw = 'ALL'
+                return
+            end
+        end
+    end
+
     dlg.resize_cb = function(h)
         lst_clip.rasterwidth1 = nil
         lst_clip.fittosize = 'COLUMNS'
@@ -259,7 +340,7 @@ end
 
 local function Toolbar_Init(h)
     bToolBar = true
-    local btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
+    btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
     local box = iup.sc_sbox{ iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22'}, maxsize = "900x22",shrink='YES'}
     onDraw_cb = function(s)
         btn.title = s
