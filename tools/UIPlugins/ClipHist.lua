@@ -124,11 +124,11 @@ local function init()
 
     function lst_clip:button_cb(button, pressed, x, y, status)
         if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and lst_clip.cursor == "ARROW")) then
-            iup.PassFocus(); setClipboard(math.floor(iup.ConvertXYToPos(lst_clip, x, y)/3))
+            iup.PassFocus(); setClipboard(math.floor(iup.ConvertXYToPos(lst_clip, x, y) / 3))
         elseif button == iup.BUTTON1 and pressed == 0 then
             droppedLin = nil; lst_clip.cursor = "ARROW"
         elseif button == iup.BUTTON3 and pressed == 0 then
-            local lin = math.floor(iup.ConvertXYToPos(lst_clip, x, y)/3)
+            local lin = math.floor(iup.ConvertXYToPos(lst_clip, x, y) / 3)
             blockReselect = true
 
             iup.menu{
@@ -136,9 +136,9 @@ local function init()
                     lst_clip.dellin = lin
                     if lin == 1 then clipboard.text = lst_clip:getcell(1, 2) end
                 end)},
-                iup.item{title="Вставить верх списка как блок",action=(function()
+                iup.item{title = "Вставить верх списка как блок", action =(function()
                     local text = ''
-                    for i = 1,  lin do
+                    for i = 1, lin do
                         text = text..lst_clip:getcell(i, 2)
                         if i < lin then text = text..'\n' end
                     end
@@ -149,11 +149,16 @@ local function init()
                     blockReselect = false
                     iup.PassFocus()
                 end)},
-                iup.item{title="Вставлять по Ctrl+0",action=(function()
+                iup.item{title = "Вставлять по Ctrl+0", action =(function()
                     lin0 = lin
-                end), active = Iif(lin >=10, 'YES', 'NO')},
+                    for i = 1, lst_clip.numlin do
+                        lst_clip:setcell(i, 0, Iif(i == lin0, 0, i))
+                    end
+                    lst_clip.redraw = 'ALL'
+                    blockReselect = false
+                end), active = Iif(lin >= 10, 'YES', 'NO')},
 
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
             blockReselect = false
             lst_clip.leavewindow_cb()
         end

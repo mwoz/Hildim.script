@@ -656,8 +656,8 @@ if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDial
 hMainLayout.resize_cb = function()
     local tmr = iup.timer{time = 10, run = 'YES', action_cb = function(h)
         h.run = 'NO'
-        if not LeftBar_obj.handle then iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0' end
-        if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000' end
+        if iup.GetDialogChild(hMainLayout, "LeftBarExpander").state == 'CLOSE' then iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0' end
+        if iup.GetDialogChild(hMainLayout, "RightBarExpander").state == 'CLOSE' then iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000' end
     end}
     tmr.run = 'YES'
 end

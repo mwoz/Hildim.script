@@ -450,9 +450,9 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         local bHidden = (tonumber(iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize) == 0)
         if bHidden then
             local l =  (_G.iuprops['bottombar.layout'] or 700500)
-            local v2 = l % 1000
+            local v2 = l % 10000
             if SideBar_Plugins.findrepl.Bar_obj then v2 = 0 end
-            local v = math.floor(l / 1000)
+            local v = math.floor(l / 10000)
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
             iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
             if v > 0 then iup.GetDialogChild(hMainLayout, "ConsoleDetach").Attach() end
@@ -462,7 +462,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             if v2 < 1000 and v2 ~= 0 then iup.GetDialogChild(hMainLayout, "BottomSplit2").value = v2 end
             iup.GetDialogChild(hMainLayout, "BottomSplit").value = v
         else
-            _G.iuprops['bottombar.layout'] = iup.GetDialogChild(hMainLayout, "BottomSplit").value * 1000 + iup.GetDialogChild(hMainLayout, "BottomSplit2").value
+            _G.iuprops['bottombar.layout'] = iup.GetDialogChild(hMainLayout, "BottomSplit").value * 10000 + iup.GetDialogChild(hMainLayout, "BottomSplit2").value
 
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
             if (_G.iuprops['concolebar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "ConsoleDetach").cmdHide() end
@@ -877,24 +877,34 @@ iup.scitedetachbox = function(t)
         if _G.dialogs[dtb.sciteid] ~= nil then
             if dtb.Dlg_Close_Cb then dtb.Dlg_Close_Cb(h) end
 
-            _G.iuprops[dtb.sciteid..'.win']='0'
-            dtb.restore = nil
-            _G.dialogs[dtb.sciteid] = nil
+            _G.iuprops[dtb.sciteid..'.win'] = '0'
+            local canvasbar
+            if dtb.sciteid == 'concolebar' or dtb.sciteid == 'findresbar' then
+                canvasbar = iup.GetChild(iup.GetChild(_G.dialogs[dtb.sciteid], 1), 1)
+                canvasbar.visible = 'NO'
+            end
 
             hbTitle.state = 'CLOSE'
             dtb.visible = 'YES'
+
+            dtb.restore = nil
+            _G.dialogs[dtb.sciteid] = nil
             if t.Split_h then
-                dtb.Split_h.value = _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue']
+                local l = tonumber(_G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] or 500)
+                if l < 15 and dtb.sciteid == 'concolebar' then l = 200
+                elseif l > 985 and dtb.sciteid == 'findresbar'  then l = 800 end
+                dtb.Split_h.value = l
                 dtb.Split_h.barsize = "3"
             end
             dtb.Dialog = nil
             if statusBtn then statusBtn.visible = 'NO' end
             if OnResizeSideBar then OnResizeSideBar(t.sciteid) end
+            if canvasbar then canvasbar.visible = 'YES' end
         end
     end
 
     cmd_Attach = function ()
-        if get_scId()=="0" then return end
+        if get_scId() == "0" then return end
         dtb.Attach()
     end
 
