@@ -1,4 +1,4 @@
-359
+372
 Альфабанк/IIIhIiIk
 БД
 ВТБ
@@ -14,6 +14,8 @@
 автообновление/IIIw
 автопоиск/IIIhIiIk
 авторазмещение/IIIw
+агрегировать/BGLLNP
+агрегироваться/BGLLNP
 алиас/IIIhIiIk
 аллокация/IIIw
 амперсант/IIIhIiIk
@@ -36,6 +38,8 @@
 варант/IIIhIiIk
 визард/IIIhIiIk
 визуализировать/BbLLNn
+внелимитка/IIIeIh
+возобновляемость/IF
 волатильность/IF
 воркфлоу
 ворнинг/IIIhIiIk
@@ -131,6 +135,7 @@
 мастерформа/IIIhIw
 масштабироваться/BbLLNn
 матюрити
+межстрочный/CCCDCOSa
 межфолдерность/IF
 межфолдерный/CCCDCOSa
 мепирование/IIIw
@@ -161,12 +166,15 @@
 опциональный/CCCDCOSa
 откомментированный/CCSaXX
 отрисовка/IIIeIh
+отрисовывать/BBLLNN
+отрисовываться/BBLLNN
 п
 паддинг/IIIhIiIk
 парент/IIIhIiIk
 парсер/IIIhIiIk
 парсинг/IIIhIiIk
 парсить/BBLLNN
+парситься/BBLLNN
 паттерн/IIIhIiIk
 перегенерация/IIIw
 перегенерировать/BbLLNn
@@ -176,6 +184,7 @@
 перезапросить/BBLLNn
 перезапрошенный/CCSaXX
 перезатереть/JJ
+перезатирать/BBLLNN
 переинициализироавть/BbLLNn
 переназначаться/BBLLNN
 перерасчитанный/CCCDCOSa
@@ -191,6 +200,7 @@
 пинить/BBLLNN
 плагин/IIIhIiIk
 плейсхолдер/IIIhIiIk
+подзапрос/IIIhIiIk
 подпапка/IIIeIh
 подстановочный/CCCDCOSa
 поинт/IIIhIiIk
@@ -231,6 +241,7 @@
 рекалькуляция/IIIw
 рекордсет/IIIhIiIk
 релогин/IIIhIiIk
+репликатор/IIIhIiIk
 репо
 репозиторий/II
 репортбатча/IIIiIqIw
@@ -274,6 +285,7 @@
 скриптинг/IIIhIiIk
 скроллить/BBLLNn
 скроллиться/BBLLNn
+слэш/IIIhIiIw
 смэпировать/BbLLNn
 снэпшот/IIIhIiIk
 соптимизировать/BbLLNn
@@ -323,6 +335,7 @@
 фолдер/IIIhIiIk
 фолдинг/IIIhIiIk
 фондирование/IIIw
+фондированный/CCSaXX
 форекс/IIIhIiIk
 форексовый/CCCDCOSa
 формконтрол/IIIhIiIk

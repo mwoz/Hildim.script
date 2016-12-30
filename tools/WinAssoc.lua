@@ -1,15 +1,19 @@
 require "luacom"
 
 local dlg = _G.dialogs["winint"]
-local txt_listass, chk_ass, tbl_ass, tbl_ass_set, chk_sendTo, txt_listass_set, chk_ass_set
-tbl_ass = {}
-tbl_ass_set = {}
 
 local WshShell = luacom.CreateObject('WScript.Shell')
 local fso = luacom.CreateObject("Scripting.FileSystemObject");
 local reg_backup = 'HKLM\\SOFTWARE\\SciTE\\Script\\WinIntegrator\\';
 
+local tbl_ass, tbl_ass_set
+tbl_ass = {}
+tbl_ass_set = {}
+
 if dlg == nil then
+    local txt_listass, chk_ass, chk_sendTo, txt_listass_set, chk_ass_set
+    tbl_ass = {}
+    tbl_ass_set = {}
     txt_listass = iup.text{size = '250x0', mask = "(/d|/w|_|;|[а-я]|[А-Я])+"}
     chk_ass = iup.toggle{title = "Связать с расширениями:"; action = function(h)
         txt_listass.active = Iif(h.value == 'ON', 'YES', 'NO')
@@ -62,10 +66,16 @@ if dlg == nil then
                 if v == 1 then
                     local old_association
                     luacom.SkipCheckError(WshShell)
-                    old_association = WshShell:RegRead(reg_backup..t);
+                    old_association = WshShell:RegRead(reg_backup..t) or ''
                     luacom.SkipCheckError(WshShell)
                     WshShell:RegDelete(reg_backup..t);
-                    WshShell:RegWrite('HKCR\\.'..t..'\\', old_association);
+                    if old_association == '' or old_association == 'SciTE.Session' then
+                        luacom.SkipCheckError(WshShell)
+                        WshShell:RegWrite('HKCR\\.'..t..'\\', '');
+                        WshShell:RegDelete('HKCR\\.'..t..'\\');
+                    else
+                        WshShell:RegWrite('HKCR\\.'..t..'\\', old_association);
+                    end
                 end
             end
             if chk.value == 'OFF' then
@@ -93,38 +103,41 @@ if dlg == nil then
     function btn_esc:action()
         dlg:hide()
     end
-else
-    dlg:show()
-end
-
-local function ReadReg(txt, chk, tbl, strBack, strType, strDef)
-    luacom.SkipCheckError(WshShell)
-    txt.value = (WshShell:RegRead(reg_backup..strBack) or '')
-
-    if txt.value == "" then
-        txt.value =strDef
-        txt.active = 'NO'
-        chk.value = 'OFF'
-    else
-        chk.value = 'ON'
-        local tblEr = {}
-        local l = txt.value
-        for t in l:gmatch('[^;]+') do
-
+    dlg.my_init = function()
+        local function ReadReg(txt, chk, tbl, strBack, strType, strDef)
             luacom.SkipCheckError(WshShell)
-            local chk = WshShell:RegRead('HKCR\\.'..t..'\\')
-            if chk ~= strType then
-                table.insert(tblEr, t)
-                tbl[t] = 0
+            txt.value = (WshShell:RegRead(reg_backup..strBack) or '')
+
+            if txt.value == "" then
+                txt.value = strDef
+                txt.active = 'NO'
+                chk.value = 'OFF'
             else
-                tbl[t] = 1
+                chk.value = 'ON'
+                local tblEr = {}
+                local l = txt.value
+                for t in l:gmatch('[^;]+') do
+
+                    luacom.SkipCheckError(WshShell)
+                    local chk = WshShell:RegRead('HKCR\\.'..t..'\\')
+                    if chk ~= strType then
+                        table.insert(tblEr, t)
+                        tbl[t] = 0
+                    else
+                        tbl[t] = 1
+                    end
+                end
+                if #tblEr > 0 then iup.Message("Warning", "Изменены ассоциации для сдедующих расширений:\n".. table.concat(tblEr, '\n') ) end
             end
         end
-        if #tblEr > 0 then iup.Message("Warning", "Изменены ассоциации для сдедующих расширений:\n".. table.concat(tblEr, '\n') ) end
+
+        ReadReg(txt_listass, chk_ass, tbl_ass, 'associations', 'SciTE.File', 'm;xml;inc;lua;form;incl;cform;rform;wform;wiki')
+        ReadReg(txt_listass_set, chk_ass_set, tbl_ass_set, 'configs', 'SciTE.Session', 'fileset;config;solution;session')
+
+        if fso:FileExists(WshShell.SpecialFolders("SendTo").."\\HildiM.lnk") then chk_sendTo.value = 'ON' end
     end
+    dlg.my_init()
+else
+    dlg:show()
+    dlg.my_init()
 end
-
-ReadReg(txt_listass, chk_ass, tbl_ass, 'associations', 'SciTE.File', 'm;xml;inc;lua;form;incl;cform;rform;wform')
-ReadReg(txt_listass_set, chk_ass_set, tbl_ass_set, 'configs', 'SciTE.Session', 'fileset;config;solution')
-
-if fso:FileExists(WshShell.SpecialFolders("SendTo").."\\HildiM.lnk") then chk_sendTo.value = 'ON' end

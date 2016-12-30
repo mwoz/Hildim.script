@@ -55,9 +55,16 @@ end
 
 --Хендлеры контролов диалога
 local function PostAction(bForce)
-    if (_G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1') or bForce then
+    if (_G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1' and Ctrl("chkPassFocus").value == 'ON') or bForce then
         popUpFind.show_cb(popUpFind,4)
         popUpFind.close_cb(popUpFind)
+    end
+end
+
+local function PassFocus_local()
+    -- if Ctrl("chkPassFocus").value == 'ON' or (_G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1') then
+    if Ctrl("chkPassFocus").value == 'ON' then
+        iup.PassFocus()
     end
 end
 
@@ -73,7 +80,7 @@ local function ReplaceAll(h)
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -84,7 +91,7 @@ local function ReplaceSel(h)
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -93,7 +100,7 @@ local function FindSel(h)
     local count = findSettings:FindAll(500, false, true)
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -102,7 +109,7 @@ local function FindAll(h)
     local count = findSettings:FindAll(500, false)
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -111,7 +118,7 @@ local function GetCount(h)
     local count = findSettings:Count()
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
 end
 
 local function FindNext(h)
@@ -122,7 +129,7 @@ local function FindNext(h)
     if pos < 0 then SetInfo('Ничего не найдено', 'E')
     else SetInfo('', '') end
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     if Ctrl('tabFindRepl').valuepos == '0' then PostAction() end
 end
 
@@ -139,7 +146,7 @@ function CORE.ReplaceNext(h)
 
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -148,7 +155,7 @@ local function MarkAll(h)
     local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
     SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
 end
 
 local function ClearMark(h)
@@ -166,7 +173,7 @@ local function BookmarkAll(h)
     local count = findSettings:BookmarkAll(Ctrl("chkMarkInSelection").value == "ON")
     SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -190,7 +197,7 @@ local function FindInFiles()
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbFolders"):SaveHist()
     Ctrl("cmbFilter"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -200,7 +207,7 @@ local function ReplaceInBuffers()
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -210,7 +217,7 @@ local function FindInBuffers()
     local count = DoForBuffers(findSettings:FindInBufer(), 100)
     SetInfo('Всего найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    iup.PassFocus()
+    PassFocus_local()
     PostAction()
 end
 
@@ -376,13 +383,27 @@ local function FindNextBack(bUp)
 end
 
 local function PassOrClose()
-    if _G.dialogs['findrepl'] then
+    if _G.dialogs['findrepl'] and (Ctrl("zPin").valuepos == '1' or Ctrl("chkCloseOnESC").value == 'ON') then
         PostAction(true)
     else
         iup.PassFocus()
     end
 end
 
+local function kf_cb(h)
+
+    if _G.dialogs['findrepl'] and Ctrl("chkTransparency").value == 'ON' and Ctrl("chkTranspFocus").value == 'ON' then
+        local tmr = iup.timer{time = 10; run = 'YES';action_cb = function(h)
+            h.run = 'NO'
+            local hc = iup.GetFocus()
+            while hc do
+                if hc == _G.dialogs['findrepl'] then return end
+                hc = iup.GetParent(hc)
+            end
+            if _G.dialogs['findrepl'] then popUpFind.opacity = _G.iuprops['settings,findrepl.opacity'] or 200 end
+        end}
+    end
+end
 
 --создание диалога
 
@@ -701,16 +722,77 @@ local function create_dialog_FindReplace()
     containers[29],
     margin = "0x00",
   }
+  local dialPrev = 0
+  containers[34] = iup.vbox{expand='NO',
+      iup.hbox{expand='HORIZONTAL',
+          iup.toggle{
+              title = "Прогресс поиска в файлах",
+          name = "chkFindProgress", },
+          iup.fill{},
+          iup.link{title = 'Вид', padding='15x0', action = function() menuhandler:PopUp('MainWindowMenu¦View¦findrepl') end},
+          margin = "0x0", padding = '0x0'
+      };
+      iup.hbox{expand = 'HORIZONTAL',
+          iup.toggle{
+              title = "Возвращать фокус",
+          name = "chkPassFocus", },
+          iup.fill{},
+          iup.toggle{
+              title = "Закрывать по ESC",
+          name = "chkCloseOnESC" },
+          margin = "0x0", padding = '0x0'
+      },
+      iup.hbox{
+          iup.toggle{
+              title = "Прозрачность",
+          name = "chkTransparency",
+          action = function(h)
+              if popUpFind and Ctrl("chkTranspFocus").value == 'OFF' then popUpFind.opacity = Iif(h.value == 'ON', _G.iuprops['settings,findrepl.opacity'] or 200, 255) end
+          end
+          },
+          iup.dial{
+              name = 'vTransparency',
+              size = '45x8',
+              unit = "DEGREES", density = "0.3",
+              valuechanged_cb = function(h)
+                  if popUpFind and Ctrl("chkTransparency").value == 'ON' then
+                      local o = _G.iuprops['settings,findrepl.opacity'] or 200
+                      if tonumber(h.value) < dialPrev and o >= 30 then o = o - 3
+                      elseif tonumber(h.value) > dialPrev and o < 240 then o = o + 3 end
+                      _G.iuprops['settings,findrepl.opacity'] = o
+                      popUpFind.opacity = o
+                      dialPrev = tonumber(h.value)
+                  end
+              end;
+              getfocus_cb = function(h)
+                  dialPrev = 0
+              end;
+          },
+          iup.toggle{
+              title = "При потере фокуса ",
+              name = "chkTranspFocus",
+              action = function(h)
+                  if popUpFind and Ctrl("chkTransparency").value == 'ON' then popUpFind.opacity = Iif(h.value == 'OFF', _G.iuprops['settings,findrepl.opacity'] or 200, 255) end
+              end
+          },
+          margin = "0x0", padding = '0x0'
+      },
+
+      margin = "10x5"
+
+  }
 
   containers[5] = iup.tabs{
     containers[6],
     containers[11],
     containers[16],
     containers[19],
+    containers[34],
     ["tabtitle0"] = "Найти",
     ["tabtitle1"] = "Заменить",
     ["tabtitle2"] = "Найти в файлах",
     ["tabtitle3"] = "Метки",
+    ["tabtitle4"] = "Свойства",
     canfocus  = "NO",
     name = "tabFindRepl",
     tabchange_cb = SetStaticControls,
@@ -835,6 +917,21 @@ local function create_dialog_FindReplace()
     toolbox = "YES",
   }]]
 
+  local function set_cb(cont)
+      for i = 0, iup.GetChildCount(cont) - 1 do
+          local c = iup.GetChild(cont, i)
+          c.killfocus_cb = kf_cb
+          if iup.GetChildCount(c) ~= 0 then
+--[[              if not c.kikillfocus_cb then
+              end
+          else]]
+              set_cb(c)
+          end
+      end
+  end
+  local dlg = containers[2]
+  set_cb(dlg)
+
   return containers[2]
 end
 
@@ -858,7 +955,8 @@ local function Init(h)
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="CLOSE";
             end
             popUpFind = hNew
-            if _G.iuprops["sidebarctrl.zPin.unpinned.value"] then Ctrl("zPin").valuepos = _G.iuprops["sidebarctrl.zPin.unpinned.value"] end
+            popUpFind.getfocus_cb = function() if Ctrl("chkTranspFocus").value == 'ON' then popUpFind.opacity = 255 end end
+            popUpFind.opacity = Iif(Ctrl("chkTransparency").value == 'ON' and Ctrl("chkTranspFocus").value == 'OFF', _G.iuprops['settings,findrepl.opacity'] or 200, 255)
         end);
         Dlg_Close_Cb = (function(h)
             local hMainLayout = iup.GetLayout()
@@ -868,7 +966,6 @@ local function Init(h)
             else
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
             end
-            _G.iuprops["sidebarctrl.zPin.unpinned.value"] = Ctrl("zPin").valuepos
         end);
         }
     local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')

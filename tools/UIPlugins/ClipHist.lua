@@ -1,6 +1,6 @@
 
 local lst_clip, clipboard, maxlin, colcolor, blockReselect, blockResetCB, expd, txt_live, btn
-maxlin = 30
+maxlin = 60
 colcolor = '0 150 0'
 blockReselect = false
 blockResetCB = false
@@ -37,6 +37,7 @@ local function setClipboard(lin)
             clipboard.formatdatasize = text:len()
             clipboard.formatdata = text
         else
+            clipboard.formatdata = nil
             clipboard.text = text
         end
 
@@ -149,19 +150,72 @@ local function init()
                     blockReselect = false
                     iup.PassFocus()
                 end)},
-                iup.item{title = "Вставлять по Ctrl+0", action =(function()
+                iup.item{title = "Вставлять по Ctrl+0", action = function()
                     lin0 = lin
                     for i = 1, lst_clip.numlin do
                         lst_clip:setcell(i, 0, Iif(i == lin0, 0, i))
                     end
                     lst_clip.redraw = 'ALL'
                     blockReselect = false
-                end), active = Iif(lin >= 10, 'YES', 'NO')},
+                end,
+                active = Iif(lin >= 10, 'YES', 'NO')},
+                iup.item{title = "Разрезать по подстроке", action = function()
+                    local bok, res, bside = iup.GetParam('Разделить клип на несколько',
+                        nil,
+                        "Сепаратор: %s\n"..
+                        "Вставлять в обратном порядке %b\n"
+                        , '\\n', 1
+                    )
+                    if bok and res ~= '' then
+                        local p = lpeg.C((1 - lpeg.P(res:gsub('\\n', '\n'):gsub('\\r', '\r'):gsub('\\t', '\t')))^1)
+                        local tclp = lpeg.Ct(lpeg.P{p + 1 * lpeg.V(1)}^1)
+                        local str = lst_clip:getcell(lin, 2)
+                        local t = tclp:match(str, 1)
+                        if iup.Alarm("Итого", 'Клип будет разделен на '..#t..' фрагментов. Продолжить?', 'Yes', 'No') == 1 then
+                            local I, I1, S = #t, 1, -1
+                            if bside == 1 then I, I1, S = 1, #t, 1 end
+                            lst_clip.marked = nil
+                            for i = I, I1, S do
+                                lst_clip.addlin = 0
+                                lst_clip["1:1"] = t[i]:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')
+                                lst_clip["1:2"] = t[i]
+                            end
+                            renum()
+                            MarkList(1)
+                            lst_clip.redraw = 'ALL'
+                            if onDraw_cb then onDraw_cb(lst_clip:getcell(1, 1)) end
+                            blockResetCB = true
+                            clipboard.text = lst_clip:getcell(1, 2)
+                        end
+                    end
+                    iup.SetFocus(lst_clip)
+                end};
+                iup.item{title = "Конвертировать формат: Блок < - > Текст", action = function()
+                    lin0 = lin
+                    local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
 
-            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
-            blockReselect = false
-            lst_clip.leavewindow_cb()
-        end
+                    if bCol then
+                        iup.SetAttributeId2(lst_clip, "FGCOLOR", lin, 1, '0 0 0')
+                        if lin == 1 then
+                            clipboard.text = nil
+                            clipboard.formatdatasize = 0
+                            clipboard.formatdata = nil
+                            clipboard.text = lst_clip:getcell(1, 2)
+                        end
+                    else
+                        iup.SetAttributeId2(lst_clip, "FGCOLOR", lin, 1, colcolor)
+                        if lin == 1 then
+                            local text = lst_clip:getcell(1, 2)
+                            clipboard.text = text
+                            clipboard.formatdatasize = text:len()
+                            clipboard.formatdata = text
+                        end
+                    end
+                end},
+                }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+                blockReselect = false
+                lst_clip.leavewindow_cb()
+            end
     end
 
     function lst_clip:mousemove_cb(lin, col)

@@ -1,4 +1,4 @@
-146
+148
 Admin
 Arial
 Arithm
@@ -7,6 +7,7 @@ Fx
 Micex
 Mlt
 Mult
+Plugin
 Prin
 Quanto
 Timestamp
@@ -54,6 +55,7 @@ decimaln
 del
 disporder
 dlg/MS
+doesn
 doubleclick/DGMRSZ
 drilldown
 dt
