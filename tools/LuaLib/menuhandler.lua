@@ -166,7 +166,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
 
     if bToolBar then
         waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
-        scite.PostCommand(POST_CONTINUESHOWMENU,0)
+        scite.RunAsync(function() s:ContinuePopUp() end)
     else
         CreateMenu(smnu):popup(x,y)
     end
@@ -213,7 +213,7 @@ function s:OnMouseHook(x,y)
 
         reselectedItem = {id = 1, x = left, y = top + height}
         activeLabel = labels[reselectedItem.id]
-        scite.PostCommand(POST_CONTINUESHOWMENU,0)
+        scite.RunAsync(function() s:ContinuePopUp() end)
     end
 end
 

@@ -29,7 +29,7 @@ local function Show()
 
         dlg:hide()
         dlg:postdestroy()
-        scite.PostCommand(POST_SCRIPTRELOAD,0)
+        scite.RunAsync(iup.ReloadScript)
     end
 
     list_lex = iup.matrix{

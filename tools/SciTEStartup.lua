@@ -24,4 +24,41 @@ if tab_width ~= nil then
 	scite.SendOutput(SCI_SETTABWIDTH, tab_width)
 end
 
-scite.PostCommand(POST_CONTINUESTARTUP,0)
+scite.RunAsync(function()
+    props['session.reload'] = _G.iuprops['session.reload']
+    iup.RestoreFiles()
+    local hMainLayout = iup.GetLayout()
+    if navigation_Unblock then navigation_Unblock() end
+    local bHide
+    if ((_G.iuprops['sidebar.win'] or '0')~= '0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win'] == '2');    SideBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')]]
+    if ((_G.iuprops['leftbar.win'] or '0')~= '0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win'] == '2');    LeftBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')]]
+    if (_G.iuprops['concolebar.win'] or '0')~= '0' then bHide = (_G.iuprops['concolebar.win'] == '2'); ConsoleBar.detachPos(not bHide) end
+    if (_G.iuprops['findresbar.win'] or '0')~= '0' then bHide = (_G.iuprops['findresbar.win'] == '2'); FindResBar.detachPos(not bHide) end
+    if (_G.iuprops['findrepl.win'] or '0')~= '0' then bHide = (_G.iuprops['findrepl.win'] == '2'); local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos(not bHide) end
+
+    if _G.dialogs['findresbar'] and _G.dialogs['concolebar'] then
+        iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
+        iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
+        iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
+    end
+
+    menuhandler:RegistryHotKeys()
+
+    local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
+
+    scite.EnsureVisible()
+    hMainLayout.resize_cb()
+    if OnResizeSideBar then OnResizeSideBar('sidebar') end
+    if OnResizeSideBar then OnResizeSideBar('leftbar') end
+    if dlg_SPLASH then
+        scite.RunAsync(function()
+            if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
+            if _G.iuprops['command.reloadprops'] then
+                _G.iuprops['command.reloadprops'] = false;
+                scite.RunAsync(function() scite.Perform("reloadproperties:") end)
+            end
+        end)
+    end
+    props['session.started'] = '1'
+
+end)

@@ -662,45 +662,6 @@ hMainLayout.resize_cb = function()
     tmr.run = 'YES'
 end
 
-AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
-    if id_msg == SCN_NOTYFY_ONPOST then
-        if wp == POST_CONTINUESTARTUP then  --ѕоказ отдельным окном разв€зываем через пост, иначе плохо иконки показывает
-            props['session.reload'] = _G.iuprops['session.reload']
-            iup.RestoreFiles()
-
-            if navigation_Unblock then navigation_Unblock() end
-            local bHide
-            if ((_G.iuprops['sidebar.win'] or '0')~='0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win']=='2');    SideBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')]]
-            if ((_G.iuprops['leftbar.win'] or '0')~='0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win']=='2');    LeftBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')]]
-            if (_G.iuprops['concolebar.win'] or '0')~='0'                       then bHide = (_G.iuprops['concolebar.win']=='2'); ConsoleBar.detachPos(not bHide) end
-            if (_G.iuprops['findresbar.win'] or '0')~='0'                       then bHide = (_G.iuprops['findresbar.win']=='2'); FindResBar.detachPos(not bHide)end
-            if (_G.iuprops['findrepl.win'] or '0')~='0'                         then bHide = (_G.iuprops['findrepl.win']=='2');   local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos(not bHide) end
-
-            if _G.dialogs['findresbar'] and _G.dialogs['concolebar'] then
-                iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
-                iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
-            end
-
-            menuhandler:RegistryHotKeys()
-
-            local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
-
-            scite.EnsureVisible()
-            hMainLayout.resize_cb()
-            if OnResizeSideBar then OnResizeSideBar('sidebar') end
-            if OnResizeSideBar then OnResizeSideBar('leftbar') end
-            if dlg_SPLASH then scite.PostCommand(POST_CONTINUESTARTUP2, 0) end
-
-            props['session.started'] = '1'
-        elseif wp == POST_CONTINUESTARTUP2 then
-            if dlg_SPLASH then dlg_SPLASH:postdestroy()end
-        elseif wp == POST_CONTINUESHOWMENU then
-            menuhandler:ContinuePopUp()
-        end
-    end
-end)
-
 local bMenu,bToolBar,bStatusBar
 local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
 

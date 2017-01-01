@@ -190,13 +190,15 @@ local function FindInFiles()
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
                    Iif(Ctrl("chkSubFolders").value=='ON', 's','~')..
-                   Iif(_G.iuprops['findres.groupbyfile'], 'g', '~')
+                   Iif(_G.iuprops['findres.groupbyfile'], 'g', '~')..
+                   Iif(Ctrl("chkFindProgress").value=='ON', 'p', '~')
     SetInfo('', '')
     scite.PerformGrepEx(params, fWhat, fDir, fFilter)
 
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbFolders"):SaveHist()
     Ctrl("cmbFilter"):SaveHist()
+    Ctrl("btnFindInFiles").image = "cross_script_µ"
     PassFocus_local()
     PostAction()
 end
@@ -624,6 +626,7 @@ local function create_dialog_FindReplace()
       title = "В подпапках",
     },
     iup.button{
+      name = 'btnFindInFiles',
       image = "IMAGE_search",
       padding = "14x0",
       action = FindInFiles,
@@ -879,9 +882,18 @@ local function create_dialog_FindReplace()
       action = SetStaticControls,
     },
     containers[28],
-    iup.label{
-      name = "lblInfo",
-      expand = "HORIZONTAL",
+    iup.zbox{ name = "zbProgress",
+        iup.label{
+            name = "lblInfo",
+            expand = "HORIZONTAL",
+        },
+        iup.gauge{
+        --iup.progressbar{
+            name = "progress",
+            expand = "ALL",
+        },
+
+
     },
   }
 
@@ -1007,11 +1019,26 @@ local function Init(h)
             SetStaticControls()
     end)
 
-    AddEventHandler("OnFindCompleted", (function()
-        findSettings:MarkResult()
-    end))
+    function OnFindProgress(state, iAll)
+        --scite.RunAsync(function()
+            if state == 0 then
+                --Ctrl("progress").min = 0
+                Ctrl("progress").max = iAll
+                Ctrl("progress").value = 0
+                Ctrl("progress").text = '0 from '..iAll
+                Ctrl("zbProgress").valuepos = 1
+            elseif state == 1 then
+                Ctrl("progress").value = iAll
+                Ctrl("progress").text = iAll..' from '..tonumber(Ctrl("progress").max)
+            elseif state == 2 then
+                Ctrl("zbProgress").valuepos = 0
+                Ctrl("btnFindInFiles").image = "IMAGE_search"
+                findSettings:MarkResult()
+            end
+        --end)
+    end
 end
-
+g_Ctrl = Ctrl
 return {
     title = 'Find Replace Dialog',
     code = 'findrepl',

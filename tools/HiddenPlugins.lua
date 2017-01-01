@@ -96,7 +96,7 @@ local function Run(flag)
             _G.iuprops[settName] = SaveTree(tree_right)
             dlg:hide()
             dlg:postdestroy()
-            scite.PostCommand(POST_SCRIPTRELOAD, 0)
+            scite.RunAsync(iup.ReloadScript)
         end
 
         local dragName, dragPath, drag_id

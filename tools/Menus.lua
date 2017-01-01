@@ -44,6 +44,62 @@ local function windowsList()
 	return t
 end
 
+local function ResetWrapProps()
+	local ret, style, flag, loc, mode, indent, keys =
+                    iup.GetParam("Настройки переноса по словам",
+					nil,
+					'Wrap:%l|По границам слов|любой символ|По пробелам|\n'..
+					'Символы перевода-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n'..
+					'Символы перевода-в тексте:%l|По границам окна|В конце - по тексту|В начале - по тексту|Оба по тексту|\n'..
+					'Выравнивание после переноса%l|Отступ от края|По Предыдущей строке|Отступ от пред. строки|\n'..
+					'Величина отступа:%i[1,10,1]\n'..
+					'<Home>,<End> учитывая переносы %b\n',
+                   (tonumber(props['wrap.style']) or 1) - 1,
+                    tonumber(props['wrap.visual.flags']) or 0,
+                    tonumber(props['wrap.visual.flags.location']) or 0,
+                    tonumber(props['wrap.indent.mode']) or 0,
+                    tonumber(props['wrap.visual.startindent']) or 0,
+                    tonumber(props['wrap.aware.home.end.keys']) or 0
+    )
+	if ret then
+        props['wrap.style'] = style + 1
+        props['wrap.visual.flags'] = flag
+        props['wrap.visual.flags.location'] = loc
+        props['wrap.indent.mode'] = mode
+        props['wrap.visual.startindent'] = indent
+        props['wrap.aware.home.end.keys'] = keys
+        iup.SaveChProps(true)
+        editor.WrapMode = style + 1
+	end
+end
+
+local function ResetTabbarProps()
+	local ret, mult, maxlen, ondbl, buff, zord, newpos =
+                    iup.GetParam("Свойства панели закладок",
+					nil,
+					'Многострочный%b\n'..
+					'Максимальнаф ширина(0- не задана)%i[0,100,10]\n'..
+					'Закрывать по DblClick%b\n'..
+					'Максимальное количесво вкладок:%i[10,500,1]\n'..
+					'Переключать в порядке использования%b\n'..
+					'Открывать новую вкладку%l|В конце списка|Cледующей за текущей|В начале списка|%b\n',
+                    tonumber(props['tabbar.multiline']) or 1,
+                    tonumber(props['tabbar.title.maxlength']) or 0,
+                    tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
+                    tonumber(props['buffers']) or 100,
+                    tonumber(props['buffers.zorder.switching']) or 0,
+                    tonumber(props['buffers.new.position']) or 0
+    )
+	if ret then
+        props['tabbar.multiline']                = mult
+        props['tabbar.title.maxlength']          = maxlen
+        props['tabbar.tab.close.on.doubleclick'] = ondbl
+        props['buffers']                         = buff
+        props['buffers.zorder.switching']        = zord
+		iup.Alarm('Свойства панели закладок', 'Изменения будут применены после перезапуска программы', 'OK')
+	end
+end
+
 local function ResetFontSize()
 	local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса",
 					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 5 then return 0 end return 1 end,
@@ -166,6 +222,7 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 		{'Path', ru='Путь', action = function() CopyPathToClipboard("path") end,},
 		{'FileName', ru='Имя файла', action = function() CopyPathToClipboard("name") end,},
 	}},
+    {'Tabbar Settings', ru = 'Свойства панели вкладок', action = ResetTabbarProps},
 	{link='File¦Encoding'},
 	{link='Options¦&Read-Only'},
 	{'slast', separator=1},
@@ -393,7 +450,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Go', ru = 'Выполнить', key = 'F5', action = IDM_GO, image = 'control_µ'},
 		{'&Stop Executing', ru = 'Остановить выполнение', key = 'Ctrl+Break', action = IDM_STOPEXECUTE},
 		{'Script', ru = 'Скрипт автозагрузки',{
-			{'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', action = function() scite.PostCommand(POST_SCRIPTRELOAD, 0) end,},
+			{'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', action = function() scite.RunAsync(iup.ReloadScript) end,},
 		},},
 		{'s1', separator = 1},
 		{'Utils', ru = 'Утилиты',{
@@ -427,6 +484,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 	{'Options', ru = 'Настройки',{
 
 		{'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
+		{'Wrap settings', ru = 'Настройки переноса...', action = ResetWrapProps, visible = "props['wrap']=='1'"},
 		{'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
 		{'s2', separator = 1},
 		{'Line End Characters', ru = 'Символы перевода строк',{radio = 1,

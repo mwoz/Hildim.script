@@ -1,16 +1,5 @@
 --Constants
-POST_SCRIPTRELOAD = 1
-POST_CLOSEDIALOG = 2
-POST_CONTINUESTARTUP = 3
-POST_SCRIPTRELOAD_OLD = 4
-POST_CONTINUESHOWMENU = 6
-POST_AFTERLUASAVE = 7
-POST_RELOADPROPS = 8
-POST_SHOWUL = 9
-POST_EDITORFOCUS = 10
-POST_CONTINUESTARTUP2 = 11
 require 'shell'
-
 
 local old_iup_ShowXY = iup.ShowXY
 
@@ -174,9 +163,52 @@ end
 iuprops['resent.files.list'] = rfl
 
 _G.iuprops['pariedtag.on'] = _G.iuprops['pariedtag.on'] or 1
-props['spell.autospell'] = _G.iuprops['spell.autospell']
-props['formenjine.old.ext'] = _G.iuprops['formenjine.old.ext']
-props['pariedtag.on'] = _G.iuprops['pariedtag.on']
+
+function iup.SaveChProps(bReset)
+    local t = {
+'buffers',
+'buffers.new.position',
+'buffers.zorder.switching',
+'findres.magnification',
+'findres.width',
+'findres.wrap',
+'iup.defaultfontsize',
+'iuptoolbar.visible',
+'line.margin.visible',
+'magnification',
+'output.magnification',
+'output.vertical.size',
+'output.wrap',
+'position.height',
+'position.left',
+'position.maximize',
+'position.top',
+'position.width',
+'print.magnification',
+'tabbar.multiline',
+'tabbar.tab.close.on.doubleclick',
+'tabbar.title.maxlength',
+'view.eol',
+'view.indentation.guides',
+'view.whitespace',
+'wrap',
+'wrap.aware.home.end.keys',
+'wrap.indent.mode',
+'wrap.style',
+'wrap.visual.flags',
+'wrap.visual.flags.location',
+'wrap.visual.startindent',
+    }
+    for i = 1, #t do
+        t[i] = t[i]..'='..props[t[i]]
+    end
+    local file = props["scite.userhome"]..'\\SciTE.session'
+ 	if pcall(io.output, file) then
+		io.write(table.concat(t,'\n'))
+ 	end
+	io.close()
+    if bReset then scite.RunAsync(function() scite.Perform("reloadproperties:") end) end
+end
 
 local function SaveIup()
     if not iuprops_read_ok then return end
@@ -200,7 +232,7 @@ local function SaveIup()
 		io.write('_G.iuprops = {\n'..table.concat(t,'\n')..'\n}')
  	end
 	io.close()
-
+    iup.SaveChProps()
 end
 
 local function SaveLayOut()
@@ -442,8 +474,12 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
         iup.DestroyDialogs();
         SaveIup()
-        scite.PostCommand(POST_SCRIPTRELOAD_OLD,0)
-        --scite.PostCommand(POST_SCRIPTRELOAD,0)
+        scite.RunAsync(function()
+                print("Reload IDM...")
+                scite.ReloadStartupScript()
+                OnSwitchFile("")
+                print("...Ok")
+            end)
         return true
     elseif cmd == IDM_TOGGLEOUTPUT then
         local hMainLayout = iup.GetLayout()
@@ -495,9 +531,19 @@ end)
 
 AddEventHandler("OnSave", function(cmd, source)
     if props["ext.lua.startup.script"] == props["FilePath"] then
-        scite.PostCommand(POST_SCRIPTRELOAD,0)
+        scite.RunAsync(iup.ReloadScript)
     elseif editor.Lexer == SCLEX_LUA then
-        scite.PostCommand(POST_AFTERLUASAVE,output.TextLength)
+        local lp = output.TextLength
+        scite.RunAsync(function()
+            if lp ~= output.TextLength then
+                s, e = output:findtext('\\w.+?\]:', SCFIND_REGEXP, lp)
+                if s then
+                    output.TargetStart = s
+                    output.TargetEnd = e
+                    output:ReplaceTarget(props["FilePath"]..':')
+                end
+            end
+        end)
         assert(loadstring(editor:GetText()))
         return
     end
@@ -1042,10 +1088,20 @@ iup.scitedialog = function(t)
             iup.ShowSideBar(tonumber(w))
         end
         function dlg:postdestroy()
-            --вызывать destroy из обработчиков событий в диалоге нельзя - развязываемся через пост
-            if _G.deletedDialogs == nil then _G.deletedDialogs = {} end
-            table.insert(_G.deletedDialogs, t.sciteid)
-            scite.PostCommand(POST_CLOSEDIALOG,0)
+            scite.RunAsync(function()
+                if _G.dialogs[sciteid] then
+                    _G.iuprops['dialogs.'..t.sciteid..'.rastersize'] = dlg.rastersize
+                    _G.iuprops['dialogs.'..t.sciteid..'.x'] = dlg.x
+                    _G.iuprops['dialogs.'..t.sciteid..'.y'] = dlg.y
+
+                    _G.dialogs[sciteid] = nil
+                    dlg:hide()
+                    dlg:destroy()
+                elseif t.sciteid == 'splash' then
+                    dlg:hide()
+                    dlg:destroy()
+                end
+            end)
         end
         local id = t.sciteid
         if t.hlpdevice then id = t.hlpdevice..'::'..id end
@@ -1125,58 +1181,22 @@ iup.drop_cb_to_list = function(list, action)
 	end
 end
 
-AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
-    if id_msg == SCN_NOTYFY_ONPOST then
-        if wp == POST_CLOSEDIALOG then --закрытие диалога (отложенное)
-            while table.maxn(_G.deletedDialogs or {}) > 0 do
-                sciteid = table.remove(_G.deletedDialogs)
-                local dlg = _G.dialogs[sciteid]
-                if dlg ~= nil then
-                    if (_G.iuprops['sidebar.win'] or '0') == '0' then
-                        _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
-                        _G.iuprops['dialogs.'..sciteid..'.x'] = dlg.x
-                        _G.iuprops['dialogs.'..sciteid..'.y'] = dlg.y
-                    end
-                    _G.dialogs[sciteid] = nil
-                    dlg:hide()
-                    dlg:destroy()
-                end
-            end
-            if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS,0) end
-        elseif wp == POST_SCRIPTRELOAD_OLD then   --перезагрузка скрипта
-            print("Reload IDM...")
-            scite.ReloadStartupScript()
-            OnSwitchFile("")
-            print("...Ok")
-        elseif wp == POST_SCRIPTRELOAD then
-            print("Reload...")
-            scite.HideForeReolad()
-            local bd
-            local tblDat
-            if OnScriptReload then tblDat = {}; OnScriptReload(true, tblDat) end
-            iup.DestroyDialogs();
-            SaveIup()
-            scite.ReloadStartupScript()
-            if OnScriptReload then OnScriptReload(false, tblDat) end
-            OnSwitchFile("")
-            scite.EnsureVisible()
-            iup.GetLayout().resize_cb()
-            print("...Ok")
-            if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.PostCommand(POST_RELOADPROPS, 0) end
-        elseif wp == POST_AFTERLUASAVE and lp ~= output.TextLength then
-            s,e = output:findtext('\\w.+?\]:',SCFIND_REGEXP, lp)
-            if s then
-                output.TargetStart = s
-                output.TargetEnd = e
-                output:ReplaceTarget(props["FilePath"]..':')
-            end
-        elseif wp == POST_RELOADPROPS then
-            scite.Perform("reloadproperties:")
-        elseif wp == POST_EDITORFOCUS then
-            editor.Focus = true
-        end
-    end
-end)
+function iup.ReloadScript()
+    print("Reload...")
+    scite.HideForeReolad()
+    local bd
+    local tblDat
+    if OnScriptReload then tblDat = {}; OnScriptReload(true, tblDat) end
+    iup.DestroyDialogs();
+    SaveIup()
+    scite.ReloadStartupScript()
+    if OnScriptReload then OnScriptReload(false, tblDat) end
+    OnSwitchFile("")
+    scite.EnsureVisible()
+    iup.GetLayout().resize_cb()
+    print("...Ok")
+    if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.RunAsync(function() scite.Perform("reloadproperties:") end) end
+end
 
 AddEventHandler("OnContextMenu", function(lp, wp, source)
     menuhandler:ContextMenu(lp, wp, source)
@@ -1186,7 +1206,7 @@ end)
 local function LoadIuprops_Local(filename)
     props['config.restore'] = filename
     _G.iuprops['current.config.restore'] = filename
-    scite.PostCommand(POST_SCRIPTRELOAD,0)
+    scite.RunAsync(iup.ReloadScript)
 end
 
 iup.LoadIuprops = function()
@@ -1378,20 +1398,17 @@ iup.DestroyDialogs = function()
 end
 
 function Splash_Screen()
-    --if props['iuptoolbar.restarted'] == '1' then return end
-    dlg_SPLASH = iup.scitedialog{iup.hbox{
+    dlg_SPLASH = iup.dialog{iup.hbox{
     iup.label{
       padding = "5x5",
-      --title = "!!!WAIT!!!",
       image = props["SciteDefaultHome"].."\\tools\\HildiM.bmp",
       font = "Arial, 33",
     },
   }; maxbox="NO",minbox ="NO",resize ="NO", menubox = "NO", border = "NO",opacity= "123",
-    sciteparent="SCITE", sciteid="splash", resize ="NO"}
-    dlg_SPLASH.show_cb=(function(h,state)
-        if state == 4 then dlg_SPLASH:postdestroy() end
-    end)
+    sciteparent = "SCITE", sciteid = "splash", resize = "NO"}
 
+    local _, _, x2, y2 = iup.GetGlobal('SCREENSIZE'):find('(%d*)x(%d*)')
+    dlg_SPLASH:showxy(tonumber(x2)/2 - 100,tonumber(y2)/2 - 100)
 end
 
 AddEventHandler("OnMarginClick", function(margin, modif, line)

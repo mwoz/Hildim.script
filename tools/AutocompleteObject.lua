@@ -212,22 +212,6 @@ end
 
 local ulFromCT_data
 
-AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
-    if wp == POST_SHOWUL and #ulFromCT_data > 0 then
-        local tl = {}
-        for w in ulFromCT_data:gmatch('[^|]+') do
-            table.insert(tl, w)
-        end
-        tl = TableSort(tl)
-        ulFromCT_data = table.concat(tl, ',')
-        editor.AutoCSeparator = string.byte(',')
-        current_poslst = current_pos
-        pasteFromXml = false
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8(1251) end
-        editor:UserListShow(constListIdXmlPar, ulFromCT_data)
-    end
-end)
-
 local function isXmlLine(cp)
 --определяем, является ли текущая строка тэгом xml
     cp = cp or editor.SelectionStart
@@ -249,7 +233,6 @@ local function ShowCallTip(pos, str, s, e, reshow)
         pasteFromXml = false
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
         editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
-   print(l, 1)
         editor:UserListShow(constListIdXmlPar, l)
     end
     local function IsWordCharParam()
@@ -289,8 +272,22 @@ local function ShowCallTip(pos, str, s, e, reshow)
             end
         else
             ulFromCT_data = list
-            editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
-            scite.PostCommand(POST_SHOWUL, 0)
+            editor:SetSel(editor:WordStartPosition(editor.CurrentPos, true), editor:WordEndPosition(editor.CurrentPos, true))
+            scite.RunAsync(function()
+                if #ulFromCT_data > 0 then
+                    local tl = {}
+                    for w in ulFromCT_data:gmatch('[^|]+') do
+                        table.insert(tl, w)
+                    end
+                    tl = TableSort(tl)
+                    ulFromCT_data = table.concat(tl, ',')
+                    editor.AutoCSeparator = string.byte(',')
+                    current_poslst = current_pos
+                    pasteFromXml = false
+                    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8(1251) end
+                    editor:UserListShow(constListIdXmlPar, ulFromCT_data)
+                end
+            end)
             return
         end
     end

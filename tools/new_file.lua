@@ -71,7 +71,7 @@ local function CreateUntitledFile()
     if isMakeUTF8() then scite.MenuCommand(IDM_ENCODING_UCOOKIE) end
     unsaved_files[file_path:upper()] = true --сохраняем путь к созданному буферу в таблице
     props['warning.couldnotopenfile.disable'] = warning_couldnotopenfile_disable
-    scite.PostCommand(POST_EDITORFOCUS,0)
+    scite.RunAsync(function() editor.Focus = true end)
     return true
 end
 
