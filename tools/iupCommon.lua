@@ -44,8 +44,12 @@ if props['config.restore'] ~= '' then
             local str = ''
             for n,_ in pairs(t) do
                 str = str..'import $(SciteDefaultHome)\\languages\\'..n..'\n'
+                n = n:gsub('%.properties$', '.styles')
+                if shell.fileexists(props["SciteUserHome"]..'\\'..n) then
+                    str = str..'import $(SciteUserHome)\\'..n..'\n'
+                end
             end
-            f = io.open(props['SciteDefaultHome']..'\\data\\home\\Languages.properties',"w")
+            f = io.open(props['SciteUserHome']..'\\Languages.properties',"w")
             f:write(str)
             f:close()
             _G.iuprops['command.reloadprops'] = true
@@ -1089,12 +1093,12 @@ iup.scitedialog = function(t)
         end
         function dlg:postdestroy()
             scite.RunAsync(function()
-                if _G.dialogs[sciteid] then
+                if _G.dialogs[t.sciteid] then
                     _G.iuprops['dialogs.'..t.sciteid..'.rastersize'] = dlg.rastersize
                     _G.iuprops['dialogs.'..t.sciteid..'.x'] = dlg.x
                     _G.iuprops['dialogs.'..t.sciteid..'.y'] = dlg.y
 
-                    _G.dialogs[sciteid] = nil
+                    _G.dialogs[t.sciteid] = nil
                     dlg:hide()
                     dlg:destroy()
                 elseif t.sciteid == 'splash' then

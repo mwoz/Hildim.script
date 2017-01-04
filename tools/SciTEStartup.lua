@@ -24,6 +24,11 @@ if tab_width ~= nil then
 	scite.SendOutput(SCI_SETTABWIDTH, tab_width)
 end
 
+--local prn_ol = print
+--print = function() подмена print для отлова дебажного вывода
+--    prn_ol(debug.traceback())
+--end
+
 scite.RunAsync(function()
     props['session.reload'] = _G.iuprops['session.reload']
     iup.RestoreFiles()

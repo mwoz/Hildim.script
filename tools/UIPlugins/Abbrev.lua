@@ -324,6 +324,7 @@ end
         iup.SetAttribute(list_abbrev, "ADDLIN", "1-"..#abbr_table)
         for i, v in ipairs(abbr_table) do
             list_abbrev:setcell(i, 1, v.abbr)         -- ,size="400x400"
+            --print(iup.GetAttribute(list_abbrev, "FONT"..i..':1'))
             list_abbrev:setcell(i, 2, v.exp:gsub('\t', '\\t'))
         end
         table.sort(abbr_table, function(a, b)

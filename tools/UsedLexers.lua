@@ -18,8 +18,12 @@ local function Show()
                 tFiles[fName] = true
              end
         end
-        for n,_ in pairs(tFiles) do
-            t = t..'import $(SciteDefaultHome)\\languages\\'..n:gsub('%.[^.]*$', '')..'.properties\n'
+        for n, _ in pairs(tFiles) do
+            local nm = n:gsub('%.[^.]*$', '')
+            t = t..'import $(SciteDefaultHome)\\languages\\'..nm..'.properties\n'
+            if shell.fileexists(props["SciteUserHome"]..'\\'..nm..'.styles') then
+                t = t..'import $(SciteUserHome)\\'..nm..'.styles\n'
+            end
         end
         f = io.open(props['SciteDefaultHome']..'\\data\\home\\Languages.properties',"w")
         f:write(t)
@@ -79,7 +83,7 @@ local function Show()
 
     iup.SetAttribute(list_lex, "ADDLIN", "1-"..(#tbl_lex))
     table.sort(tbl_lex, function(a, b)
-        return a.view:upper() < b.view:upper()
+        return a.view:upper() > b.view:upper()
     end)
     for i = 1, #tbl_lex do
         list_lex:setcell(i, 2, tbl_lex[i].view)

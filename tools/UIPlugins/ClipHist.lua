@@ -143,13 +143,40 @@ local function init()
                         text = text..lst_clip:getcell(i, 2)
                         if i < lin then text = text..'\n' end
                     end
+                    blockResetCB = false
                     clipboard.text = text
                     clipboard.formatdatasize = text:len()
                     clipboard.formatdata = text
+                    OnDrawClipboard(2)
                     scite.MenuCommand(IDM_PASTE)
                     blockReselect = false
                     iup.PassFocus()
                 end)},
+                iup.separator{},
+                iup.item{title = "Верх списка в обратном порядке", action = function()
+                    if lin == 1 then return end
+                    for i = 2, lin do
+                        lst_clip.addlin = 0
+                        lst_clip:setcell(1, 1, lst_clip:getcell(i + 1, 1))
+                        lst_clip:setcell(1, 2, lst_clip:getcell(i + 1, 2))
+                        iup.SetAttributeId2(lst_clip, 'FGCOLOR', 1, 1, iup.GetAttributeId2(lst_clip, 'FGCOLOR', i + 1, 1))
+                        lst_clip.dellin = i + 1
+                    end
+                    lst_clip.redraw = 'ALL'
+
+                    if iup.GetAttributeId2(lst_clip, "FGCOLOR", 1, 1) == colcolor then
+                        clipboard.text = nil
+                        clipboard.formatdatasize = 0
+                        clipboard.formatdata = nil
+                        clipboard.text = lst_clip:getcell(1, 2)
+                    else
+                        local text = lst_clip:getcell(1, 2)
+                        clipboard.text = text
+                        clipboard.formatdatasize = text:len()
+                        clipboard.formatdata = text
+                    end
+                end,
+                active = Iif(lin > 1, 'YES', 'NO'),},
                 iup.item{title = "Вставлять по Ctrl+0", action = function()
                     lin0 = lin
                     for i = 1, lst_clip.numlin do
@@ -191,7 +218,6 @@ local function init()
                     iup.SetFocus(lst_clip)
                 end};
                 iup.item{title = "Конвертировать формат: Блок < - > Текст", action = function()
-                    lin0 = lin
                     local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
 
                     if bCol then

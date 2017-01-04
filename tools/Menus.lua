@@ -172,7 +172,9 @@ end
 
 local function RunSettings()
     for s, _ in pairs(dialogs) do
-        if s == 'commandsplugin' or s == 'sidebarlayout' or s == 'LexersSetup' or s == 'toolbarlayout' or s == 'usertb' or s == 'HotkeysSetup' then return false end
+        if s == 'commandsplugin' or s == 'sidebarlayout' or s == 'LexersSetup' or
+           s == 'toolbarlayout' or s == 'usertb' or s == 'HotkeysSetup' or
+           s == 'lexerColors' then return false end
     end
     return true
 end
@@ -519,7 +521,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Windows Integration', ru = 'Настройка интеграции с Windows', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\WinAssoc.lua')"},
 		{'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
 		{'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
-		{'Change Lexer Colors', ru = 'Изменить цвета лексера...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')"},
+		{'Colors and Fonts', ru = 'Цвета и шрифты...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings},
 		{"Lexers properties", ru = 'Свойства лексеров', {
 			{'Lexers properties', ru = 'Свойства лексеров', plane = 1 ,tLangs},
 			{'s2', separator = 1},
