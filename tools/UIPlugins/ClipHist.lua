@@ -80,8 +80,151 @@ local function init()
         droppedLin = nil;
     end
 
+    local function contextMenu(lin)
+        blockReselect = true
+
+        iup.menu{
+            iup.item{title = "Удалить", action =(function()
+                lst_clip.dellin = lin
+                if lin == 1 then clipboard.text = lst_clip:getcell(1, 2) end
+            end)},
+            iup.item{title = "Вставить верх списка как блок", action =(function()
+                local text = ''
+                for i = 1, lin do
+                    text = text..lst_clip:getcell(i, 2)
+                    if i < lin then text = text..'\n' end
+                end
+                blockResetCB = false
+                clipboard.text = text
+                clipboard.formatdatasize = text:len()
+                clipboard.formatdata = text
+                OnDrawClipboard(2)
+                scite.MenuCommand(IDM_PASTE)
+                blockReselect = false
+                iup.PassFocus()
+            end)},
+            iup.item{title = "Вставить верх списка через сепаратор", action =(function()
+                local bok, res, bside = iup.GetParam('Вставить через сепаратор',
+                    nil,
+                    "Сепаратор: %s\n"..
+                    "Объединять в обратном порядке %b\n"
+                    , ', ', 0
+                )
+                iup.SetFocus(lst_clip)
+                if bok then
+                    local text = ''
+                    local I, I1, S = lin, 1, -1
+                    if bside == 0 then I, I1, S = 1, lin, 1 end
+                    res = res:gsub('\\n', '\n'):gsub('\\r', '\r'):gsub('\\t', '\t')
+                    for i = I, I1, S do
+                        if text ~= '' then text = text..res end
+                        text = text..lst_clip:getcell(i, 2)
+                    end
+                    blockResetCB = false
+                    clipboard.formatdatasize = 0
+                    clipboard.formatdata = nil
+                    clipboard.text = text
+                    OnDrawClipboard(1)
+                    scite.MenuCommand(IDM_PASTE)
+                    blockReselect = false
+                    iup.PassFocus()
+                end
+            end)},
+            iup.separator{},
+            iup.item{title = "Верх списка в обратном порядке", action = function()
+                if lin == 1 then return end
+                for i = 2, lin do
+                    lst_clip.addlin = 0
+                    lst_clip:setcell(1, 1, lst_clip:getcell(i + 1, 1))
+                    lst_clip:setcell(1, 2, lst_clip:getcell(i + 1, 2))
+                    iup.SetAttributeId2(lst_clip, 'FGCOLOR', 1, 1, iup.GetAttributeId2(lst_clip, 'FGCOLOR', i + 1, 1))
+                    lst_clip.dellin = i + 1
+                end
+                lst_clip.redraw = 'ALL'
+
+                if iup.GetAttributeId2(lst_clip, "FGCOLOR", 1, 1) == colcolor then
+                    clipboard.text = nil
+                    clipboard.formatdatasize = 0
+                    clipboard.formatdata = nil
+                    clipboard.text = lst_clip:getcell(1, 2)
+                else
+                    local text = lst_clip:getcell(1, 2)
+                    clipboard.text = text
+                    clipboard.formatdatasize = text:len()
+                    clipboard.formatdata = text
+                end
+            end,
+            active = Iif(lin > 1, 'YES', 'NO'),},
+            iup.item{title = "Вставлять по Ctrl+0", action = function()
+                lin0 = lin
+                for i = 1, lst_clip.numlin do
+                    lst_clip:setcell(i, 0, Iif(i == lin0, 0, i))
+                end
+                lst_clip.redraw = 'ALL'
+                blockReselect = false
+            end,
+            active = Iif(lin >= 10, 'YES', 'NO')},
+            iup.item{title = "Разрезать по подстроке", action = function()
+                local bok, res, bside = iup.GetParam('Разделить клип на несколько',
+                    nil,
+                    "Сепаратор: %s\n"..
+                    "Вставлять в обратном порядке %b\n"
+                    , '\\n', 1
+                )
+                if bok and res ~= '' then
+                    local p = lpeg.C((1 - lpeg.P(res:gsub('\\n', '\n'):gsub('\\r', '\r'):gsub('\\t', '\t')))^1)
+                    local tclp = lpeg.Ct(lpeg.P{p + 1 * lpeg.V(1)}^1)
+                    local str = lst_clip:getcell(lin, 2)
+                    local t = tclp:match(str, 1)
+                    if iup.Alarm("Итого", 'Клип будет разделен на '..#t..' фрагментов. Продолжить?', 'Yes', 'No') == 1 then
+                        local I, I1, S = #t, 1, -1
+                        if bside == 1 then I, I1, S = 1, #t, 1 end
+                        lst_clip.marked = nil
+                        for i = I, I1, S do
+                            lst_clip.addlin = 0
+                            lst_clip["1:1"] = t[i]:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')
+                            lst_clip["1:2"] = t[i]
+                        end
+                        renum()
+                        MarkList(1)
+                        lst_clip.redraw = 'ALL'
+                        if onDraw_cb then onDraw_cb(lst_clip:getcell(1, 1)) end
+                        blockResetCB = true
+                        clipboard.text = lst_clip:getcell(1, 2)
+                    end
+                end
+                iup.SetFocus(lst_clip)
+            end};
+            iup.item{title = "Конвертировать формат: Блок < - > Текст", action = function()
+                local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
+
+                if bCol then
+                    iup.SetAttributeId2(lst_clip, "FGCOLOR", lin, 1, '0 0 0')
+                    if lin == 1 then
+                        clipboard.text = nil
+                        clipboard.formatdatasize = 0
+                        clipboard.formatdata = nil
+                        clipboard.text = lst_clip:getcell(1, 2)
+                    end
+                else
+                    iup.SetAttributeId2(lst_clip, "FGCOLOR", lin, 1, colcolor)
+                    if lin == 1 then
+                        local text = lst_clip:getcell(1, 2)
+                        clipboard.text = text
+                        clipboard.formatdatasize = text:len()
+                        clipboard.formatdata = text
+                    end
+                end
+            end},
+        }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+        blockReselect = false
+        lst_clip.leavewindow_cb()
+    end
+
     function lst_clip:k_any(k)
-        if k == iup.K_DOWN then
+        if k == iup.K_Menu then
+            contextMenu(tonumber(lst_clip.marked:find('1') or '0') - 1)
+        elseif k == iup.K_DOWN then
             local l = 1
             if lst_clip.marked then l = tonumber(lst_clip.marked:find('1') or '1') end
             if l <= tonumber(lst_clip.numlin) then
@@ -99,7 +242,7 @@ local function init()
                 lst_clip.redraw = 'ALL'
                 return iup.IGNORE
             end
-        elseif k == iup.K_CR then
+        elseif k == iup.K_CR or k == iup.K_TAB then
             local l = tonumber(lst_clip.marked:find('1') or '0') - 1
             if l > 0 then
                 iup.PassFocus()
@@ -130,118 +273,8 @@ local function init()
             droppedLin = nil; lst_clip.cursor = "ARROW"
         elseif button == iup.BUTTON3 and pressed == 0 then
             local lin = math.floor(iup.ConvertXYToPos(lst_clip, x, y) / 3)
-            blockReselect = true
-
-            iup.menu{
-                iup.item{title = "Удалить", action =(function()
-                    lst_clip.dellin = lin
-                    if lin == 1 then clipboard.text = lst_clip:getcell(1, 2) end
-                end)},
-                iup.item{title = "Вставить верх списка как блок", action =(function()
-                    local text = ''
-                    for i = 1, lin do
-                        text = text..lst_clip:getcell(i, 2)
-                        if i < lin then text = text..'\n' end
-                    end
-                    blockResetCB = false
-                    clipboard.text = text
-                    clipboard.formatdatasize = text:len()
-                    clipboard.formatdata = text
-                    OnDrawClipboard(2)
-                    scite.MenuCommand(IDM_PASTE)
-                    blockReselect = false
-                    iup.PassFocus()
-                end)},
-                iup.separator{},
-                iup.item{title = "Верх списка в обратном порядке", action = function()
-                    if lin == 1 then return end
-                    for i = 2, lin do
-                        lst_clip.addlin = 0
-                        lst_clip:setcell(1, 1, lst_clip:getcell(i + 1, 1))
-                        lst_clip:setcell(1, 2, lst_clip:getcell(i + 1, 2))
-                        iup.SetAttributeId2(lst_clip, 'FGCOLOR', 1, 1, iup.GetAttributeId2(lst_clip, 'FGCOLOR', i + 1, 1))
-                        lst_clip.dellin = i + 1
-                    end
-                    lst_clip.redraw = 'ALL'
-
-                    if iup.GetAttributeId2(lst_clip, "FGCOLOR", 1, 1) == colcolor then
-                        clipboard.text = nil
-                        clipboard.formatdatasize = 0
-                        clipboard.formatdata = nil
-                        clipboard.text = lst_clip:getcell(1, 2)
-                    else
-                        local text = lst_clip:getcell(1, 2)
-                        clipboard.text = text
-                        clipboard.formatdatasize = text:len()
-                        clipboard.formatdata = text
-                    end
-                end,
-                active = Iif(lin > 1, 'YES', 'NO'),},
-                iup.item{title = "Вставлять по Ctrl+0", action = function()
-                    lin0 = lin
-                    for i = 1, lst_clip.numlin do
-                        lst_clip:setcell(i, 0, Iif(i == lin0, 0, i))
-                    end
-                    lst_clip.redraw = 'ALL'
-                    blockReselect = false
-                end,
-                active = Iif(lin >= 10, 'YES', 'NO')},
-                iup.item{title = "Разрезать по подстроке", action = function()
-                    local bok, res, bside = iup.GetParam('Разделить клип на несколько',
-                        nil,
-                        "Сепаратор: %s\n"..
-                        "Вставлять в обратном порядке %b\n"
-                        , '\\n', 1
-                    )
-                    if bok and res ~= '' then
-                        local p = lpeg.C((1 - lpeg.P(res:gsub('\\n', '\n'):gsub('\\r', '\r'):gsub('\\t', '\t')))^1)
-                        local tclp = lpeg.Ct(lpeg.P{p + 1 * lpeg.V(1)}^1)
-                        local str = lst_clip:getcell(lin, 2)
-                        local t = tclp:match(str, 1)
-                        if iup.Alarm("Итого", 'Клип будет разделен на '..#t..' фрагментов. Продолжить?', 'Yes', 'No') == 1 then
-                            local I, I1, S = #t, 1, -1
-                            if bside == 1 then I, I1, S = 1, #t, 1 end
-                            lst_clip.marked = nil
-                            for i = I, I1, S do
-                                lst_clip.addlin = 0
-                                lst_clip["1:1"] = t[i]:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')
-                                lst_clip["1:2"] = t[i]
-                            end
-                            renum()
-                            MarkList(1)
-                            lst_clip.redraw = 'ALL'
-                            if onDraw_cb then onDraw_cb(lst_clip:getcell(1, 1)) end
-                            blockResetCB = true
-                            clipboard.text = lst_clip:getcell(1, 2)
-                        end
-                    end
-                    iup.SetFocus(lst_clip)
-                end};
-                iup.item{title = "Конвертировать формат: Блок < - > Текст", action = function()
-                    local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
-
-                    if bCol then
-                        iup.SetAttributeId2(lst_clip, "FGCOLOR", lin, 1, '0 0 0')
-                        if lin == 1 then
-                            clipboard.text = nil
-                            clipboard.formatdatasize = 0
-                            clipboard.formatdata = nil
-                            clipboard.text = lst_clip:getcell(1, 2)
-                        end
-                    else
-                        iup.SetAttributeId2(lst_clip, "FGCOLOR", lin, 1, colcolor)
-                        if lin == 1 then
-                            local text = lst_clip:getcell(1, 2)
-                            clipboard.text = text
-                            clipboard.formatdatasize = text:len()
-                            clipboard.formatdata = text
-                        end
-                    end
-                end},
-                }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
-                blockReselect = false
-                lst_clip.leavewindow_cb()
-            end
+            contextMenu(lin)
+        end
     end
 
     function lst_clip:mousemove_cb(lin, col)

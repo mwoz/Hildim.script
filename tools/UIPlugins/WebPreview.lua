@@ -1,6 +1,6 @@
 require "luacom"
 
-local web
+local web, onSwitchBar
 
 local function init()
     local body_events = {}
@@ -140,6 +140,7 @@ local function init()
     end
 
     local function onSwitchLocal()
+        if onSwitchBar then onSwitchBar() end
         pBody = nil
         if editor.LexerLanguage ~= "hypertext" then
             web.html = strEmpty
@@ -157,6 +158,7 @@ local function init()
     end
 
     local function onOpenLocal()
+        if onSwitchBar then onSwitchBar() end
         pBody = nil
         if editor.LexerLanguage ~= "hypertext" then
             web.html = strEmpty
@@ -346,6 +348,7 @@ end
 local function Toolbar_Init(h)
     init()
     local box = iup.sc_sbox{ web, maxsize = "x590", shrink = 'YES', direction = 'SOUTH'}
+    local expan = iup.expander{box, barsize = 0}
 
     function web:map_cb()
         local bar = iup.GetParent(box)
@@ -359,9 +362,11 @@ local function Toolbar_Init(h)
     end
 
     h.Tabs.htmlpreview =  {
-        handle = box
+        handle = expan
     }
-
+    onSwitchBar = function()
+        expan.state = Iif(editor_LexerLanguage() == 'hypertext', 'OPEN', 'CLOSE')
+    end
 end
 
 return {

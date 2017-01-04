@@ -326,7 +326,12 @@ local function ActivateFind_l(nTab)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
     if _G.dialogs['findrepl'] then
-        _G.dialogs['findrepl'].ShowDialog()
+        if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and
+            ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 0) and _G.iuprops['findrepl.win'] == '2' then
+            scite.MenuCommand(IDM_TOGGLEOUTPUT)
+        else
+            _G.dialogs['findrepl'].ShowDialog()
+        end
     elseif _Plugins.findrepl.Bar_obj then
         local tabCtrl = _Plugins.findrepl.Bar_obj.TabCtrl
         local ind
@@ -402,7 +407,7 @@ local function kf_cb(h)
                 if hc == _G.dialogs['findrepl'] then return end
                 hc = iup.GetParent(hc)
             end
-            if _G.dialogs['findrepl'] then popUpFind.opacity = _G.iuprops['settings,findrepl.opacity'] or 200 end
+            if _G.dialogs['findrepl'] then popUpFind.opacity = _G.iuprops['settings.findrepl.opacity'] or 200 end
         end}
     end
 end
@@ -442,7 +447,7 @@ local function create_dialog_FindReplace()
       dropdown = "YES",
       visibleitems = "18",
       edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then h.value = PrepareFindText(new_value) return -1 end end),
-      k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return true; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
+      k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return iup.IGNORE; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],
     iup.button{           ------------
@@ -750,7 +755,7 @@ local function create_dialog_FindReplace()
               title = "Прозрачность",
           name = "chkTransparency",
           action = function(h)
-              if popUpFind and Ctrl("chkTranspFocus").value == 'OFF' then popUpFind.opacity = Iif(h.value == 'ON', _G.iuprops['settings,findrepl.opacity'] or 200, 255) end
+              if popUpFind and Ctrl("chkTranspFocus").value == 'OFF' then popUpFind.opacity = Iif(h.value == 'ON', _G.iuprops['settings.findrepl.opacity'] or 200, 255) end
           end
           },
           iup.dial{
@@ -759,10 +764,10 @@ local function create_dialog_FindReplace()
               unit = "DEGREES", density = "0.3",
               valuechanged_cb = function(h)
                   if popUpFind and Ctrl("chkTransparency").value == 'ON' then
-                      local o = _G.iuprops['settings,findrepl.opacity'] or 200
+                      local o = _G.iuprops['settings.findrepl.opacity'] or 200
                       if tonumber(h.value) < dialPrev and o >= 30 then o = o - 3
                       elseif tonumber(h.value) > dialPrev and o < 240 then o = o + 3 end
-                      _G.iuprops['settings,findrepl.opacity'] = o
+                      _G.iuprops['settings.findrepl.opacity'] = o
                       popUpFind.opacity = o
                       dialPrev = tonumber(h.value)
                   end
@@ -775,7 +780,7 @@ local function create_dialog_FindReplace()
               title = "При потере фокуса ",
               name = "chkTranspFocus",
               action = function(h)
-                  if popUpFind and Ctrl("chkTransparency").value == 'ON' then popUpFind.opacity = Iif(h.value == 'OFF', _G.iuprops['settings,findrepl.opacity'] or 200, 255) end
+                  if _G.iuprops['findrepl.win'] ~= '0' and Ctrl("chkTransparency").value == 'ON' then popUpFind.opacity = Iif(h.value == 'OFF', _G.iuprops['settings.findrepl.opacity'] or 200, 255) end
               end
           },
           margin = "0x0", padding = '0x0'
@@ -968,7 +973,7 @@ local function Init(h)
             end
             popUpFind = hNew
             popUpFind.getfocus_cb = function() if Ctrl("chkTranspFocus").value == 'ON' then popUpFind.opacity = 255 end end
-            popUpFind.opacity = Iif(Ctrl("chkTransparency").value == 'ON' and Ctrl("chkTranspFocus").value == 'OFF', _G.iuprops['settings,findrepl.opacity'] or 200, 255)
+            popUpFind.opacity = Iif(Ctrl("chkTransparency").value == 'ON' and Ctrl("chkTranspFocus").value == 'OFF', _G.iuprops['settings.findrepl.opacity'] or 200, 255)
         end);
         Dlg_Close_Cb = (function(h)
             local hMainLayout = iup.GetLayout()

@@ -159,6 +159,11 @@ local function IsSelection()
 	return scintilla().SelectionStart<scintilla().SelectionEnd
 end
 
+local function switchCase(cmd)
+    if scintilla().SelectionStart == scintilla().SelectionEnd then editor:WordLeftExtend() end
+    scite.MenuCommand(cmd)
+end
+
 local function ResetReadOnly()
 	local attr = shell.getfileattr(props['FilePath'])
 	if shell.bit_and(attr, 1) == 1 then
@@ -389,8 +394,8 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
             {'UTF-8 &with BOM', ru = 'UTF-8 с заголовком', action = ChangeCode(IDM_ENCODING_UTF8), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UTF8 end},
             {'&UTF-8', action = ChangeCode(IDM_ENCODING_UCOOKIE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCOOKIE end},
         },},
-		{'Make &Selection Uppercase', ru = 'Перевести в верхний регистр', key = 'Ctrl+U', action = IDM_UPRCASE, image = 'edit_uppercase_µ'},
-		{'Make Selection &Lowercase', ru = 'Перевести в нижний регистр', key = 'Ctrl+Shift+U', action = IDM_LWRCASE, image = 'edit_lowercase_µ'},
+		{'Make &Selection Uppercase', ru = 'Перевести в верхний регистр', key = 'Ctrl+U', action = function() switchCase(IDM_UPRCASE) end, image = 'edit_uppercase_µ'},
+		{'Make Selection &Lowercase', ru = 'Перевести в нижний регистр', key = 'Ctrl+Shift+U', action = function() switchCase(IDM_LWRCASE) end, image = 'edit_lowercase_µ'},
 	},},
 	{'Search', ru = 'Поиск',{
 		{'&Find...', ru = 'Найти', key = 'Ctrl+F', action = IDM_FIND, image = 'IMAGE_search'},
@@ -523,7 +528,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
 		{'Colors and Fonts', ru = 'Цвета и шрифты...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings},
 		{"Lexers properties", ru = 'Свойства лексеров', {
-			{'Lexers properties', ru = 'Свойства лексеров', plane = 1 ,tLangs},
+			{'Lexers properties', ru = 'Свойства лексеров', plane = 1 , tLangs},
 			{'s2', separator = 1},
 			{"Select lexers", ru = "Используемые языки", action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\UsedLexers.lua')", active = RunSettings},
 		},},

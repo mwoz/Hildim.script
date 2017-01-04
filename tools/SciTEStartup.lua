@@ -37,8 +37,8 @@ scite.RunAsync(function()
     local bHide
     if ((_G.iuprops['sidebar.win'] or '0')~= '0') and SideBar_obj.handle then bHide = (_G.iuprops['sidebar.win'] == '2');    SideBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(SideBar_obj.handle, 'sidebarctrl')]]
     if ((_G.iuprops['leftbar.win'] or '0')~= '0') and LeftBar_obj.handle then bHide = (_G.iuprops['leftbar.win'] == '2');    LeftBar_obj.handle.detachPos(not bHide) end --[[;RestoreNamedValues(LeftBar_obj.handle, 'sidebarctrl')]]
-    if (_G.iuprops['concolebar.win'] or '0')~= '0' then bHide = (_G.iuprops['concolebar.win'] == '2'); ConsoleBar.detachPos(not bHide) end
-    if (_G.iuprops['findresbar.win'] or '0')~= '0' then bHide = (_G.iuprops['findresbar.win'] == '2'); FindResBar.detachPos(not bHide) end
+    if (_G.iuprops['concolebar.win'] or '0')~= '0' then bHide = (_G.iuprops['concolebar.win'] == '2'); iup.GetDialogChild(hMainLayout, "ConsoleDetach").detachPos(not bHide) end
+    if (_G.iuprops['findresbar.win'] or '0')~= '0' then bHide = (_G.iuprops['findresbar.win'] == '2'); iup.GetDialogChild(hMainLayout, "FindResDetach").detachPos(not bHide) end
     if (_G.iuprops['findrepl.win'] or '0')~= '0' then bHide = (_G.iuprops['findrepl.win'] == '2'); local h = iup.GetDialogChild(hMainLayout, "FindReplDetach"); h.detachPos(not bHide) end
 
     if _G.dialogs['findresbar'] and _G.dialogs['concolebar'] then

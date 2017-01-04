@@ -508,6 +508,10 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             if (_G.iuprops['concolebar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "ConsoleDetach").cmdHide() end
             if (_G.iuprops['findresbar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "FindResDetach").cmdHide() end
             iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
+            local v = tonumber(iup.GetDialogChild(hMainLayout, "BottomBarSplit").value)
+            if v > 950 then v = 950
+            elseif v < 100 then v = 100 end
+            _G.iuprops["sidebarctrl.BottomBarSplit.value"] = ''..v
             iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = '1000'
         end
     elseif cmd == IDM_CLOSE then
@@ -955,6 +959,10 @@ iup.scitedetachbox = function(t)
 
     cmd_Attach = function ()
         if get_scId() == "0" then return end
+        if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 then
+            scite.MenuCommand(IDM_TOGGLEOUTPUT)
+            if get_scId() == "0" then return end
+        end
         dtb.Attach()
     end
 
@@ -1299,6 +1307,8 @@ iup.SaveIuprops = function()
     local filename = d.value
     d:destroy()
     SaveIuprops_local(filename)
+
+    _G.iuprops['current.config.restore'] = filename
 end
 
 iup.SaveCurIuprops = function()
