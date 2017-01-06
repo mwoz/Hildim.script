@@ -46,7 +46,7 @@ if props['config.restore'] ~= '' then
                 str = str..'import $(SciteDefaultHome)\\languages\\'..n..'\n'
                 n = n:gsub('%.properties$', '.styles')
                 if shell.fileexists(props["SciteUserHome"]..'\\'..n) then
-                    str = str..'import $(SciteUserHome)\\'..n..'\n'
+                    str = str..'import $(scite.userhome)\\'..n..'\n'
                 end
             end
             f = io.open(props['SciteUserHome']..'\\Languages.properties',"w")
@@ -446,7 +446,7 @@ function CORE.HelpUI(helpid, anchor)
         scite.ExecuteHelp(strCmd, 0)
     elseif shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html') then
         local url = 'file:///'..props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html'
-        if anchor then url = url..'#'..anchor end
+        if anchor then url = url..'#'..anchor; print(anchor) end
         shell.exec(url)
     else print(dv..'/ui/'..fl..'.html'..' - file not found') end
 end
@@ -918,13 +918,9 @@ iup.scitedetachbox = function(t)
             if statusBtn then statusBtn.visible = 'NO' end
         end
     end
-    local function FindReplButCondition()
-        return (dtb.sciteid ~= 'findrepl' or get_scId()=='0' or
-                (_G.iuprops['findresbar.win'] or '0')=='0' or (_G.iuprops['concolebar.win'] or '0') =='0' or
-                SideBar_Plugins.findrepl.Bar_obj)
-    end
+
     dtb.onSetStaticControls = function()
-        btn_attach.active = Iif(FindReplButCondition(),'YES', 'NO')
+        --btn_attach.active = Iif(FindReplButCondition(),'YES', 'NO')
     end
     dtb.Attach = function()
         if t.Dlg_BeforeAttach then t.Dlg_BeforeAttach() end
@@ -1009,8 +1005,7 @@ iup.scitedetachbox = function(t)
     end
 
     local tSub = {radio = 1,
-        {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return get_scId()=="0" end,
-            active=FindReplButCondition},
+        {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return get_scId()=="0" end,},
         {'Pop Up', ru='Всплывающее окно', action=cmd_PopUp, check = function() return get_scId()=="1" end, },
         {'Hidden', ru='Скрыто', action=cmd_Hide, check = function() return get_scId()=="2" end },
         {'Show/Hide', ru='Скрыть/Показать (Горячая клавиша)', action=cmd_Switch, visible = false },

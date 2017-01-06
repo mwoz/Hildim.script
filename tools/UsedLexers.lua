@@ -22,7 +22,7 @@ local function Show()
             local nm = n:gsub('%.[^.]*$', '')
             t = t..'import $(SciteDefaultHome)\\languages\\'..nm..'.properties\n'
             if shell.fileexists(props["SciteUserHome"]..'\\'..nm..'.styles') then
-                t = t..'import $(SciteUserHome)\\'..nm..'.styles\n'
+                t = t..'import $(scite.userhome)\\'..nm..'.styles\n'
             end
         end
         f = io.open(props['SciteDefaultHome']..'\\data\\home\\Languages.properties',"w")
@@ -37,7 +37,7 @@ local function Show()
     end
 
     list_lex = iup.matrix{
-    numcol=5, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=5, numcol_visible=5,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
     resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 200,rasterwidth3= 100,rasterwidth3= 100,rasterwidth4= 100}
 
@@ -55,7 +55,7 @@ local function Show()
         iup.hbox{btn_ok},
         expandchildren ='YES',gap=2,margin="4x4"}
     dlg = iup.scitedialog{vbox; title="Список используемых языков",defaultenter="LEX_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='300x600'}
+        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='670x600', maxsize='670x1600'}
 
     dlg.show_cb=(function(h,state)
         if state == 4 then
@@ -83,7 +83,7 @@ local function Show()
 
     iup.SetAttribute(list_lex, "ADDLIN", "1-"..(#tbl_lex))
     table.sort(tbl_lex, function(a, b)
-        return a.view:upper() > b.view:upper()
+        return a.view:upper() < b.view:upper()
     end)
     for i = 1, #tbl_lex do
         list_lex:setcell(i, 2, tbl_lex[i].view)

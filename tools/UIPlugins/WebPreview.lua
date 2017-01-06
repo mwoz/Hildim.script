@@ -33,9 +33,9 @@ local function init()
     local pt_tg =  (lpeg.P"<a " * ((1 - lpeg.P'>'))^0 * lpeg.P">") + (lpeg.P"<" *((pt_h / repl + (1 - lpeg.P'>'))^0) * lpeg.P">")
     local pt_all = lpeg.Cs(((1 - lpeg.P"<")^1 + pt_tg)^0)
 
-    local TAG = (1 - lpeg.S'<>' - lpeg.P"name")^0
+    local TAG = (1 - lpeg.S'<>' - (lpeg.P"name" + "id"))^0
     local SPS = lpeg.S'\n \t\r\f'^0
-    local ANC = lpeg.P'<' * lpeg.S('aA') * TAG * "name" * SPS * "=" * SPS * '"' * (lpeg.C((1 - lpeg.P'"')^1))
+    local ANC = lpeg.P'<' * lpeg.S('aA') * TAG * (lpeg.P"name" + "id") * SPS * "=" * SPS * '"' * (lpeg.C((1 - lpeg.P'"')^1))
     local tmPl = lpeg.Ct(lpeg.P{ANC + 1 * lpeg.V(1)}^1)
     local function GetAnchors(strTxt)
         return tmPl:match(strTxt, 1)
@@ -134,8 +134,8 @@ local function init()
 
         local cur = web.com.document:getElementById('cursor___')
         if not cur then return end
-        cur:scrollIntoView(true)
-        pBody.scrollTop = pBody.scrollTop - 50
+        cur:scrollIntoView(false)
+        pBody.scrollTop = pBody.scrollTop + 100
         pBody.scrollLeft = pBody.scrollLeft - 50
     end
 
@@ -253,11 +253,18 @@ local function init()
             {'Underlined', ru = 'Подчеркнутый', action = setUnderlined, key = 'Alt+U', active = bHt, },
             {'Span', ru = 'Интервал', action = setSpan, key = 'Alt+N', active = bHt, },
             {'Paragrafh', ru = 'Параграф', action = setPar, key = 'Alt+P', active = bHt, },
+            {'H1', action = function() tagAround"h1" end, key = 'Alt+1', active = bHt, },
+            {'H2', action = function() tagAround"h2" end, key = 'Alt+2', active = bHt, },
+            {'H3', action = function() tagAround"h3" end, key = 'Alt+3', active = bHt, },
+            {'H4', action = function() tagAround"h4" end, key = 'Alt+4', active = bHt, },
+            {'H5', action = function() tagAround"h5" end, key = 'Alt+5', active = bHt, },
+            {'H6', action = function() tagAround"h6" end, key = 'Alt+6', active = bHt, },
+            {'Referens', ru = 'Ссылка', action = function() tagAround"a" end, key = 'Alt+Shift+A', active = bHt, },
+            {'Anchor', ru = 'Якорь', action = function() editor:ReplaceSel'<a id=""/>'; for i = 1,3 do editor:CharLeft() end end, key = 'Ctrl+Shift+A', active = bHt, },
             {'New Line', ru = 'Новая строка', action = newLine, key = 'Alt+Enter', active = bHt, },
             {'Line Break', action = function() editor:ReplaceSel('<br>') end, key = 'Alt+Ctrl+Enter', active = bHt, },
         }}
     )
-
     menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_¦Fileman_sidebar¦sxxx',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Web', plane = 1, visible = bHt ,{
             {'s_web', separator = 1},
@@ -322,7 +329,8 @@ local function init()
                     local f = io.open(filename)
                     local tblAnc = GetAnchors(f:read('*a'))
                     f:close()
-                    res = rel..'#'..table.concat(tblAnc, '|'..rel..'#')
+                    res = ''
+                    if tblAnc then res = rel..'#'..table.concat(tblAnc, '|'..rel..'#') end
                 end
                 if res ~= '' then res = '|'..res end
                 res = rel..res

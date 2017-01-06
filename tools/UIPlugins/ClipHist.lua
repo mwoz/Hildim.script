@@ -250,9 +250,9 @@ local function init()
             end
         elseif k == iup.K_ESC then
             iup.PassFocus()
-        elseif k == iup.K_TAB and txt_live then
+        elseif k == iup.K_PGDN and txt_live then
             if expd.state == 'OPEN' then
-                txt_live.valuechanged_cb()
+                txt_live:valuechanged_cb()
                 return iup.IGNORE
             end
         elseif tonumber(k) > 31 and tonumber(k) < 256 and txt_live and not blockReselect then
@@ -405,7 +405,7 @@ end
 
 local function createDlg()
     txt_live = iup.text{size = '25x', k_any = lst_clip.k_any, expand = 'HORIZONTAL'}
-    expd = iup.expander{iup.hbox{txt_live, iup.label{title = '<Tab>-Next'},iup.label{}, gap = 10, alignment='ACENTER'}, barposition = 'BOTTOM', barsize = '0', state = 'CLOSE', visible = 'NO'}
+    expd = iup.expander{iup.hbox{txt_live, iup.label{title = '<PgDn>-Next'},iup.label{}, gap = 10, alignment='ACENTER'}, barposition = 'BOTTOM', barsize = '0', state = 'CLOSE', visible = 'NO'}
 
     local dlg = iup.scitedialog{iup.vbox{expd, lst_clip}, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true, shrink="YES",
                 maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',}
@@ -427,17 +427,20 @@ local function createDlg()
         tmr.tun = 'NO'
     end
     txt_live.getfocus_cb = lst_clip.getfocus_cb
-    txt_live.valuechanged_cb = function()
-        local lStart = tonumber(lst_clip.marked:find('1') or '0') - 1
+    txt_live.valuechanged_cb = function(h)
+        local lStart = 1
+        if h.value == '' then MarkList(1); lst_clip.redraw = 'ALL'; return end
+        if lst_clip.marked then lStart = tonumber(lst_clip.marked:find('1') or '0') - 1 end
         for i = 0, lst_clip.numlin - 1 do
             local j = (i + lStart) % (lst_clip.numlin) + 1
-            if lst_clip:getcell(j, 1):lower():find('^'..txt_live.value:lower()) then
+            if StringLower(lst_clip:getcell(j, 1),1251):find('^'..StringLower(h.value,1251)) then
                 lst_clip.marked = nil
                 MarkList(j)
                 lst_clip.redraw = 'ALL'
                 return
             end
         end
+        MarkList(1); lst_clip.redraw = 'ALL'
     end
 
     dlg.resize_cb = function(h)

@@ -48,12 +48,12 @@ local function ResetWrapProps()
 	local ret, style, flag, loc, mode, indent, keys =
                     iup.GetParam("Настройки переноса по словам",
 					nil,
-					'Wrap:%l|По границам слов|любой символ|По пробелам|\n'..
-					'Символы перевода-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n'..
-					'Символы перевода-в тексте:%l|По границам окна|В конце - по тексту|В начале - по тексту|Оба по тексту|\n'..
+					'Переносить:%l|По границам слов|По любому символу|По пробелам|\n'..
+					'Символы переноса-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n'..
+					'Символы переноса-в тексте:%l|По границам окна|В конце - по тексту|В начале - по тексту|Оба по тексту|\n'..
 					'Выравнивание после переноса%l|Отступ от края|По Предыдущей строке|Отступ от пред. строки|\n'..
 					'Величина отступа:%i[1,10,1]\n'..
-					'<Home>,<End> учитывая переносы %b\n',
+					'<Home>,<End> до ближайшего переноса %b\n',
                    (tonumber(props['wrap.style']) or 1) - 1,
                     tonumber(props['wrap.visual.flags']) or 0,
                     tonumber(props['wrap.visual.flags.location']) or 0,
@@ -77,12 +77,12 @@ local function ResetTabbarProps()
 	local ret, mult, maxlen, ondbl, buff, zord, newpos =
                     iup.GetParam("Свойства панели закладок",
 					nil,
-					'Многострочный%b\n'..
-					'Максимальнаф ширина(0- не задана)%i[0,100,10]\n'..
+					'Многострочная%b\n'..
+					'Максимальная ширина(0- не задана)%i[0,100,10]\n'..
 					'Закрывать по DblClick%b\n'..
-					'Максимальное количесво вкладок:%i[10,500,1]\n'..
+					'Максимальное количество вкладок:%i[10,500,1]\n'..
 					'Переключать в порядке использования%b\n'..
-					'Открывать новую вкладку%l|В конце списка|Cледующей за текущей|В начале списка|%b\n',
+					'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n',
                     tonumber(props['tabbar.multiline']) or 1,
                     tonumber(props['tabbar.title.maxlength']) or 0,
                     tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
@@ -419,7 +419,6 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 
 		{'s1', separator = 1},
 		{'&Go to definition(Shift+Click)', ru = 'Перейти к описанию(Shift+Click)', key = 'F12', action = "menu_GoToObjectDefenition()"},
-		{'&Go to...', ru = 'Перейти на позицию...', key = 'Ctrl+G', action = IDM_GOTO},
 		{'Next Book&mark', ru = 'Следующая закладка', key = 'F2', action = IDM_BOOKMARK_NEXT, image = 'bookmark__arrow_µ'},
 		{'Pre&vious Bookmark', ru = 'Предыдущая закладка', key = 'Shift+F2', action = IDM_BOOKMARK_PREV, image = 'bookmark__arrow_left_µ'},
 		{'Toggle Bookmar&k', ru = 'Добавить/Удалить закладку', key = 'Ctrl+F2', action = IDM_BOOKMARK_TOGGLE, image = 'bookmark_µ'},
@@ -437,7 +436,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Full Scree&n', ru = 'Полноэкранный режим', key = 'F11', action = IDM_FULLSCREEN},
 		{'&Menu Bar', ru = 'Панель меню', action = function() iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "MenuBar").isOpen() end},
 		{'&Tool Bar', ru = 'Панель инструментов', action = function() iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").isOpen() end},
-		{'Status Bar', ru = 'Панель статуса', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen() end},
+		{'Status Bar', ru = 'Строка состояния', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen() end},
 		{'Tab &Bar', ru = 'Вкладки', action = function() local h = iup.GetDialogChild(iup.GetLayout(), "TabbarExpander"); if h.state == 'OPEN' then h.state = 'CLOSE' else h.state = 'OPEN' end end, check = function() return iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state == 'OPEN' end},
 		{'Bottom Bar', ru = 'Нижняя панель', key = 'F10', action = IDM_TOGGLEOUTPUT, check = function() return (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) ~= 0) end},
 		{'s2', separator = 1},
@@ -491,7 +490,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 	{'Options', ru = 'Настройки',{
 
 		{'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
-		{'Wrap settings', ru = 'Настройки переноса...', action = ResetWrapProps, visible = "props['wrap']=='1'"},
+		{'Wrap settings', ru = 'Настройки переноса по словам...', action = ResetWrapProps, visible = "props['wrap']=='1'"},
 		{'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
 		{'s2', separator = 1},
 		{'Line End Characters', ru = 'Символы перевода строк',{radio = 1,
@@ -513,8 +512,8 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Plugins', ru = 'Плагины', visible = RunSettings,{
             {'Toolbars Layout', ru = 'Раскладка панелей инструментов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')", image = "ui_toolbar__arrow_µ"},
             {'SideBars Settings', ru = 'Настройка боковых панелей...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')", image="application_sidebar_right_µ"},
-            {'Hidden Plugins', ru = 'Настройка панелей статуса...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Status')"},
-            {'Status Bar Plugins', ru = 'Подключение фоновых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Hidden')"},
+            {'Status Bar Plugins', ru = 'Настройка строки состояния...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Status')"},
+            {'Hidden Plugins', ru = 'Подключение фоновых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Hidden')"},
             {'Commands Plugins', ru = 'Подключение команд...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Commands')", image = 'terminal_µ'},
             {'s1', separator = 1},
             {'User Toolbar...', ru = 'Пользовательская панель инструментов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarSetings.lua')"},
@@ -541,7 +540,8 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Previous', ru = 'Предыдущая', key = 'Shift+F6', action = IDM_PREVFILE},
 		{'&Next', ru = 'Следующая', key = 'F6', action = IDM_NEXTFILE},
 		{'Move Tab &Left', ru = 'Переместить влево', action = IDM_MOVETABLEFT},
-		{'Move Tab &Right', ru = 'Переместить вправо', action = IDM_MOVETABRIGHT},
+		{'Move Tab &Right', ru = 'Переместить вправо...', action = IDM_MOVETABRIGHT},
+        {'Tabbar Settings', ru = 'Свойства панели вкладок...', action = ResetTabbarProps},
 		{'&Close All', ru = 'Закрыть все', action = IDM_CLOSEALL},
 		{'&Save All', ru = 'Сохранить все', key = 'Ctrl+Alt+S', action = IDM_SAVEALL, image = 'disks_µ'},
 		{'s2', separator = 1},

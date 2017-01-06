@@ -81,7 +81,7 @@ local function OnSaveClr(bClouse)
         --print(s)
         if not s:lower():find(strFName:lower(), 1, true) then
             file = io.output(props["SciteUserHome"]..'\\Languages.properties')
-            file:write(s..'\nimport $(SciteUserHome)\\'..strFName..'\n')
+            file:write(s..'\nimport $(scite.userhome)\\'..strFName..'\n')
             file:close()
         end
     end
@@ -444,7 +444,7 @@ local function LexerColors()
     iup.SetHandle("LCOLOR_BTN_ESC", Ctrl('LCOLOR_BTN_ESC'))
     dlg = iup.scitedialog{cont,
         maxbox = "NO",
-        title = "Colours",
+        title = "Colours and Fonts",
         defaultesc = "LCOLOR_BTN_ESC",
         resize = "YES",
         minbox = "NO",

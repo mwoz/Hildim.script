@@ -755,7 +755,7 @@ local function create_dialog_FindReplace()
               title = "Прозрачность",
           name = "chkTransparency",
           action = function(h)
-              if popUpFind and Ctrl("chkTranspFocus").value == 'OFF' then popUpFind.opacity = Iif(h.value == 'ON', _G.iuprops['settings.findrepl.opacity'] or 200, 255) end
+              if _G.iuprops['findrepl.win'] ~= '0' and Ctrl("chkTranspFocus").value == 'OFF' then popUpFind.opacity = Iif(h.value == 'ON', _G.iuprops['settings.findrepl.opacity'] or 200, 255) end
           end
           },
           iup.dial{
@@ -763,7 +763,7 @@ local function create_dialog_FindReplace()
               size = '45x8',
               unit = "DEGREES", density = "0.3",
               valuechanged_cb = function(h)
-                  if popUpFind and Ctrl("chkTransparency").value == 'ON' then
+                  if _G.iuprops['findrepl.win'] ~= '0' and Ctrl("chkTransparency").value == 'ON' then
                       local o = _G.iuprops['settings.findrepl.opacity'] or 200
                       if tonumber(h.value) < dialPrev and o >= 30 then o = o - 3
                       elseif tonumber(h.value) > dialPrev and o < 240 then o = o + 3 end

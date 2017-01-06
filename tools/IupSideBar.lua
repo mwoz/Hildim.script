@@ -337,7 +337,6 @@ local function  CreateBox()
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx', {'Sidebar', tblMenus})
 
-    menuhandler:DoPostponedInsert()
 end
 
 local function RestoreNamedValues(h, root)
@@ -452,7 +451,7 @@ local function InitSideBar()
             if state == 0 and (_G.iuprops['findresbar.win'] or '0')~='0' then
                 if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
                     SideBar_Plugins.findrepl.handle_deattach.detachPos(false)
-                    _G.iuprops['findrepl.visible.state'] = "1"
+                    _G.iuprops['findrepl.visible.state'] = "0"
                 end
                  _G.iuprops['dialogs.concolebar.splitvalue'] =  _G.iuprops['dialogs.findresbar.splitvalue']
                 toggleOf()
@@ -476,7 +475,7 @@ local function InitSideBar()
             if state == 0 and (_G.iuprops['concolebar.win'] or '0')~='0' then
                 if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
                     SideBar_Plugins.findrepl.handle_deattach.detachPos(false)
-                    _G.iuprops['findrepl.visible.state'] = "1"
+                    _G.iuprops['findrepl.visible.state'] = "0"
                 end
                 _G.iuprops['dialogs.findresbar.splitvalue'] =  _G.iuprops['dialogs.concolebar.splitvalue']
                 toggleOf()
@@ -661,6 +660,8 @@ hMainLayout.resize_cb = function()
     end}
     tmr.run = 'YES'
 end
+
+menuhandler:DoPostponedInsert()
 
 local bMenu,bToolBar,bStatusBar
 local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
