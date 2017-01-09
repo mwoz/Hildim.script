@@ -7,7 +7,7 @@ function s.CheckScript(strScript, bVbs)
     local oScr = luacom.CreateObject('MSScriptControl.ScriptControl')
     oScr.Language = Iif(bVbs, 'VBScript', 'JScript')
     oScr.AllowUI = true
-    luacom.SkipCheckError(oScr)
+    luacom.TryCatch(oScr)
     oScr:AddCode(strScript)
     if oScr.Error.Number == 0 then return end
     return oScr.Error.Line , oScr.Error.Column , oScr.Error.Description:from_utf8(1251)

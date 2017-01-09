@@ -289,7 +289,7 @@ iup.CloseFilesSet = function(cmd)
             if cmd == 9134 then return end
         end
     end
-    if cmd == IDM_QUIT then ClearAllEventHandler() end
+    if cmd == IDM_QUIT then scite.HideForeReolad(); ClearAllEventHandler() end
     local nf,spathes = false,'',''
     local sposes
     local slayout = ''
@@ -474,7 +474,7 @@ end
 AddEventHandler("OnMenuCommand", function(cmd, source)
 
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
-         return iup.CloseFilesSet(cmd)
+        return iup.CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
         iup.DestroyDialogs();
         SaveIup()

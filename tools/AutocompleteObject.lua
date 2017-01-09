@@ -72,6 +72,22 @@ do
     end
 end
 
+local CUR_POS = {}
+function CUR_POS:Use(pos)
+    self.use = pos
+end
+function CUR_POS:Get(fld)
+    return self.use or editor[fld or 'CurrentPos']
+end
+function CUR_POS:OnShow()
+    if self.use then
+        self.bymouse = true
+    else
+        self.bymouse = nil
+    end
+end
+
+
 local INCL_DEF, PATT
 do
     local INCL = lpeg.P'#INCLUDE(' * lpeg.C((1 - lpeg.S')\n')^1)
@@ -214,9 +230,9 @@ local ulFromCT_data
 
 local function isXmlLine(cp)
 --определяем, является ли текущая строка тэгом xml
-    cp = cp or editor.SelectionStart
+    cp = cp or CUR_POS:Get('SelectionStart')
     if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
-    return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 62)
+    return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[CUR_POS:Get('SelectionStart')] == 1 and editor.CharAt[CUR_POS:Get('SelectionStart')] == 62)
 end
 
 local function ShowCallTip(pos, str, s, e, reshow)
@@ -242,7 +258,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
             if editor.WordChars:find(string.char(ch), 1, true) then return false end
         end
     end
-    if s1 and list and (e > s1 or e == 0) and not reshow and
+    if s1 and list and (e > s1 or e == 0) and not reshow and not CUR_POS.use and
         (not calltipinfo['attr'] or (calltipinfo['attr']['enter'] or s) ~= s or IsWordCharParam()) then
         local _, _, str2 = str:find'.-{{.+}}(.+)'
         local _, _, sub = list:find('^(#@[%u%d]+)$')
@@ -264,17 +280,17 @@ local function ShowCallTip(pos, str, s, e, reshow)
         end
         if not list:find('|') and isXmlLine(cp) then
             calltipinfo ={0}
-            if not bManualTip then
+            if not bManualTip and not CUR_POS.use then
                 editor:SetSel(editor.CurrentPos, editor.CurrentPos)
                 editor:ReplaceSel(list)
                 if str2 then str = str2
                 else return end
             end
-        else
+        elseif not CUR_POS.use then
             ulFromCT_data = list
             editor:SetSel(editor:WordStartPosition(editor.CurrentPos, true), editor:WordEndPosition(editor.CurrentPos, true))
             scite.RunAsync(function()
-                if #ulFromCT_data > 0 then
+                if #ulFromCT_data > 0 and not CUR_POS.use then
                     local tl = {}
                     for w in ulFromCT_data:gmatch('[^|]+') do
                         table.insert(tl, w)
@@ -294,13 +310,16 @@ local function ShowCallTip(pos, str, s, e, reshow)
     if not str then calltipinfo ={0};return end
 
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
-    scite.SendEditor(SCI_CALLTIPSHOW, pos, str) --:gsub('[{}#@]', '_'))
+    str = str:gsub('({{[^}]+}})', ''):gsub('^ +', ''):gsub(' +$', '')
+    if str == '' then return end
+    CUR_POS:OnShow()
+    editor:CallTipShow(pos, str) --:gsub('[{}#@]', '_'))
     if s == nil then return end
     if s > 0 then
-        scite.SendEditor(SCI_CALLTIPSETFOREHLT, 0xff0000)
-        scite.SendEditor(SCI_CALLTIPSETHLT, s + 1, e)
+        editor.CallTipForeHlt = 0xff0000
+        editor:CallTipSetHlt(s + 1, e)
     end
-    scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)
+    editor.AutoCChooseSingle = true
 end
 
 local function isPosInString()
@@ -312,7 +331,7 @@ local function isPosInString()
 end
 
 local function HideCallTip()
-    scite.SendEditor(SCI_CALLTIPCANCEL)
+    editor:CallTipCancel()
     table.remove(calltipinfo)
     if table.maxn(calltipinfo) == 1 then calltipinfo[1] = 0 end
 end
@@ -438,7 +457,7 @@ local function GetObjectNames(tableObj)
 end
 
 local function GetObjectNamesXml()
-    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), editor.CurrentPos)-- editor:PositionFromLine(af_current_line + 1))
+    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), CUR_POS:Get())-- editor:PositionFromLine(af_current_line + 1))
     local names ={}
     local i = 0
     repeat
@@ -662,7 +681,6 @@ local function ReCreateStructures(strText, tblFiles)
 
         local tblIncl = (INCL_DEF:match(strTxt or '', 1) or {})
         local t = lpeg.Ct(PATT):match(strTxt, 1) or {}
-
         FillTableFromText(tbl_fList, t)
         for idx = 1, #tblIncl do
         --while true do     --получим список всех доступных функций
@@ -730,7 +748,7 @@ local function ReCreateStructures(strText, tblFiles)
         str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix$"], str_xmlkwrd~= nil, inheritorsX)
     end
     if editor.Lexer == SCLEX_FORMENJINE then
-        RecrReCreateStructures(editor:GetText(),{})
+        RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
         if str_vbkwrd ~= nil then
             props['keywords6.$('..props['pattern.name$']..')'] = str_vbkwrd
             scite.SendEditor(SCI_SETKEYWORDS,5,str_vbkwrd)
@@ -744,7 +762,7 @@ local function ReCreateStructures(strText, tblFiles)
         scite.SendEditor(3996,15,kw)
         scite.SendEditor(SCI_COLOURISE,0,editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen+2))
     else
-        RecrReCreateStructures(editor:GetText(),{})
+        RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
     end
 	get_api = false
 	return false
@@ -802,7 +820,6 @@ local function ShowUserList(nPos, iId, last)
 		if s ~= '' then
             editor.AutoCSeparator = string.byte(sep)
             scite.SendEditor(SCI_AUTOCSETMAXHEIGHT, maxListsItems)
-
             if nPos > 0 then editor.CurrentPos = editor.CurrentPos - nPos end
             editor:UserListShow(iId or 7, s)
             if nPos > 0 then editor.CurrentPos = editor.CurrentPos + nPos end
@@ -873,6 +890,7 @@ local function CallTipXml(sMethod)
             if TryTipFor(upObj, sMethod, objectsX_table, current_pos) then break end
         end
         bManualTip = false
+
     end
 end
 
@@ -1206,7 +1224,7 @@ end
 ------------------------------------------------------
 function ShowTipManualy()
     calltipinfo['attr'] = nil
-    current_pos = editor.CurrentPos
+    current_pos = CUR_POS:Get()
     af_current_line = editor:LineFromPosition(current_pos)
     if objectsX_table._fill ~= nil then
         local _s, _e, sMethod
@@ -1222,17 +1240,18 @@ function ShowTipManualy()
                 local str = editor:textrange(posLine, current_pos)
                 _s, _e, sMethod = string.find(str, '<(%w+)$')
                 if sMethod ~= nil then
-                    local tip, sign
+                    local _,tip, sign
                     for _, t in ipairs(objects_table['NOOBJ']) do
                         if t[1] == sMethod then
-                            _, _ , tip, sign = t[2]:find('^%s*(.-)([\\>])%s*$')
-                            if not tip then tip = t[2] end
+                            _, _ , tip = t[2]:find('^([^\\>]*)')
                             break
                         end
                     end
-                    if (tip or '') == '' then return end
+                    tip = (tip or ''):gsub('^ +', ''):gsub(' +$', '')
+                    if tip == '' then return end
                     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
-                    scite.SendEditor(SCI_CALLTIPSHOW, editor.CurrentPos, tip)
+                    CUR_POS:OnShow()
+                    editor:CallTipShow(CUR_POS:Get(), tip)
                     return
                 else
                     _s, _e, sMethod = string.find(str, ' (%w+)$')
@@ -1318,6 +1337,20 @@ function ShowListManualy()
         return
     end
 end
+
+local function OnDwellStart_local(pos, word)
+    if (_G.iuprops['menus.tooltip.show'] or 0) ~= 1 then return end
+    if pos == 0 then
+        if CUR_POS.bymouse then
+            HideCallTip()
+            CUR_POS.bymouse = nil
+        end
+    else
+        CUR_POS:Use(pos + 1)
+        ShowTipManualy()
+        CUR_POS:Use()
+    end
+end
 ------------------------------------------------------
 AddEventHandler("OnChar", function(char)
     if not useAutocomp() then return end
@@ -1333,6 +1366,10 @@ AddEventHandler("OnUserListSelection", function(tp, sel_value)
     scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)
 end)
 local function OnSwitchLocal()
+    editor.MouseDwellTime = 1000 --Пусть будет всегда, для всех, кто хочет
+    CUR_POS.bymouse = nil
+    CUR_POS:Use()
+    bManualTip = false
 	get_api = true
     ReCreateStructures()
     if Favorites_AddFileName ~=nil then  --  and StatusBar_obj ~= nil
@@ -1350,4 +1387,4 @@ end)
 AddEventHandler("OnOpen", OnSwitchLocal)
 AddEventHandler("OnBeforeSave", function() get_api = true end)
 AddEventHandler("OnUpdateUI", OnUpdateUI_local)
-
+AddEventHandler("OnDwellStart", OnDwellStart_local)

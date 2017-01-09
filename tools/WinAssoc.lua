@@ -48,7 +48,7 @@ if dlg == nil then
                 for t in l:gmatch('[^;]+') do
                     if (tbl[t] or 0) ~= 1 then
                         local current_association
-                        luacom.SkipCheckError(WshShell)
+                        luacom.TryCatch(WshShell)
                         current_association = WshShell:RegRead('HKCR\\.'..t..'\\')
                         WshShell:RegWrite(reg_backup..t, current_association or '');
                         WshShell:RegWrite('HKCR\\.'..t..'\\', strType);
@@ -65,12 +65,12 @@ if dlg == nil then
             for t, v in pairs(tbl) do
                 if v == 1 then
                     local old_association
-                    luacom.SkipCheckError(WshShell)
+                    luacom.TryCatch(WshShell)
                     old_association = WshShell:RegRead(reg_backup..t) or ''
-                    luacom.SkipCheckError(WshShell)
+                    luacom.TryCatch(WshShell)
                     WshShell:RegDelete(reg_backup..t);
                     if old_association == '' or old_association == 'SciTE.Session' then
-                        luacom.SkipCheckError(WshShell)
+                        luacom.TryCatch(WshShell)
                         WshShell:RegWrite('HKCR\\.'..t..'\\', '');
                         WshShell:RegDelete('HKCR\\.'..t..'\\');
                     else
@@ -79,7 +79,7 @@ if dlg == nil then
                 end
             end
             if chk.value == 'OFF' then
-                luacom.SkipCheckError(WshShell)
+                luacom.TryCatch(WshShell)
                 WshShell:RegDelete(reg_backup..strBack);
             end
         end
@@ -92,7 +92,7 @@ if dlg == nil then
             oLnk.TargetPath = props["SciteDefaultHome"]..'\\Hildim.exe'
             oLnk:Save()
         else
-            luacom.SkipCheckError(fso)
+            luacom.TryCatch(fso)
             fso:DeleteFile(WshShell.SpecialFolders("SendTo").."\\HildiM.lnk", true);
         end
 
@@ -105,7 +105,7 @@ if dlg == nil then
     end
     dlg.my_init = function()
         local function ReadReg(txt, chk, tbl, strBack, strType, strDef)
-            luacom.SkipCheckError(WshShell)
+            luacom.TryCatch(WshShell)
             txt.value = (WshShell:RegRead(reg_backup..strBack) or '')
 
             if txt.value == "" then
@@ -118,7 +118,7 @@ if dlg == nil then
                 local l = txt.value
                 for t in l:gmatch('[^;]+') do
 
-                    luacom.SkipCheckError(WshShell)
+                    luacom.TryCatch(WshShell)
                     local chk = WshShell:RegRead('HKCR\\.'..t..'\\')
                     if chk ~= strType then
                         table.insert(tblEr, t)

@@ -205,7 +205,7 @@ end
 
 local function ReplaceInBuffers()
     if ReadSettings() then return end
-    local count = DoForBuffers(findSettings:ReplaceInBufer())
+    local count = DoForBuffers_Stack(findSettings:ReplaceInBufer())
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
     Ctrl("cmbFindWhat"):SaveHist()
@@ -216,7 +216,7 @@ end
 local function FindInBuffers()
     if ReadSettings() then return end
     findSettings:CollapseFindRez()
-    local count = DoForBuffers(findSettings:FindInBufer(), 100)
+    local count = DoForBuffers_Stack(findSettings:FindInBufer(), 100)
     SetInfo('Всего найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()

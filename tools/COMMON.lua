@@ -372,22 +372,33 @@ function CORE.RelativePath(current_path)
 end
 
 --¬ыполнение действи€ дл€ всех документов
-function DoForBuffers(func, ...)
+local function DoForBuffers_local(func, bStc, ...)
     BlockEventHandler"OnSwitchFile"
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
     local curBuf = scite.buffers.GetCurrent()
     local maxN = scite.buffers.GetCount() - 1
+    local fvl = editor.FirstVisibleLine
+    editor.VScrollBar = false
     for i = maxN,0,-1 do
-        scite.buffers.SetDocumentAt(i)
+        scite.buffers.SetDocumentAt(i, bStc, false)
         func(i, ...)
     end
     scite.buffers.SetDocumentAt(curBuf)
+    editor.VScrollBar = true
+    editor.FirstVisibleLine = fvl
     UnBlockEventHandler"OnUpdateUI"
     UnBlockEventHandler"OnNavigation"
     UnBlockEventHandler"OnSwitchFile"
     return func(nil)
 end
+function DoForBuffers(func, ...)
+    DoForBuffers_local(func, true, ...)
+end
+function DoForBuffers_Stack(func, ...)
+    DoForBuffers_local(func, false, ...)
+end
+
 function debug_prnTb(tb, n)
     local s = string.rep('    ', n)
     for k,v in pairs(tb) do

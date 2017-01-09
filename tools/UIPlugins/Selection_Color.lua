@@ -99,17 +99,6 @@ local function Init(h)
             end
         end)
     end
-    local function OnSwitch()
-        local t = 1000000
-        if editor.Lexer ~= SCLEX_MSSQL then
-            t = 1000
-        end
-        iup.GetGlobal('DLGBGCOLOR')
-        scite.SendEditor(SCI_SETMOUSEDWELLTIME, t)
-    end
-
-    AddEventHandler("OnSwitchFile", OnSwitch)
-    AddEventHandler("OnOpen", OnSwitch)
 
     AddEventHandler("OnDwellStart", function(pos, word)
         if pos ~= 0 then
