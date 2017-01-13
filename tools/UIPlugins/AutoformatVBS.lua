@@ -266,7 +266,7 @@ function FormatSelectedStrings()
         end
     end
     editor:EndUndoAction()
-    local sp = scite.SendEditor(SCI_GETLINEENDPOSITION, lEnd)
+    local sp = editor.LineEndPosition[lEnd]
     editor:SetSel(sp, sp)
 end
 
@@ -524,7 +524,7 @@ function IndentBlockUp()
                         sepLen = poses[i][1]
                         if sepLen > 0 then sepLen = sepLen + 1 end
                     end
-                    scite.SendEditor(SCI_SETLINEINDENTATION, poses[i][3], newIndent)
+                    editor.LineIndentation[poses[i][3]] = newIndent
                     if poses[i][4] == 0 then EditorMarkText(lStart + newIndent, poses[i][2] - poses[i][1] - 1, mark) end
                 end
             end

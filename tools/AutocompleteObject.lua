@@ -314,7 +314,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
     if str == '' then return end
     CUR_POS:OnShow()
     editor:CallTipShow(pos, str) --:gsub('[{}#@]', '_'))
-    if s == nil then return end
+    if s == nil or CUR_POS.use then return end
     if s > 0 then
         editor.CallTipForeHlt = 0xff0000
         editor:CallTipSetHlt(s + 1, e)

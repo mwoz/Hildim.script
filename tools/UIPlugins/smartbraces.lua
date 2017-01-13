@@ -248,7 +248,7 @@ local function Init()
                       nextIs( editor.CurrentPos, prevBrClose ) or nextIs( editor.CurrentPos, ' ' ) or
                       nextIs( editor.CurrentPos, '\t' ) or (string.find('}])', nextsymbol, 1, true) and editor:BraceMatch(editor.CurrentPos) > 0))
                     then
-                        local virtSpace = scite.SendEditor(SCI_GETSELECTIONNANCHORVIRTUALSPACE, 0)
+                        local virtSpace = editor.SelectionNAnchorVirtualSpace[0]
                         local isUndo = false
                         if ( char == braceOpen ) and  virtSpace > 0 then
                             editor:BeginUndoAction()
@@ -375,7 +375,7 @@ local function Init()
 
     -- Перехватываем функцию редактора OnKey
     AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
-        if ( editor.Focus and scite.SendEditor(SCI_GETSELECTIONS) == 1) then
+        if ( editor.Focus and editor.Selections == 1) then
             if ( key == 8 and g_isPastedBraceClose == editor.CurrentPos - 1 ) then -- VK_BACK (08)
                 g_isPastedBraceClose = false
                 editor:BeginUndoAction()

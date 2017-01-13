@@ -43,20 +43,20 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
             if oChild.nodeTypeString == 'text' then
                 if not oChild.nextSibling then
                     if string.find(strNoNewLineEnd, ','..oNode.nodeName..',') then
-                        oChild.text = oChild.xml:gsub('[\r\n\t ]*$', '')
+                        oChild.text = oChild.text:gsub('[\r\n\t ]*$', '')
                     elseif string.find(strInd0, ','..oNode.nodeName..',') then
-                        oChild.text = oChild.xml:gsub('\r\n%s*$', '\r\n')
+                        oChild.text = oChild.text:gsub('\r\n%s*$', '\r\n')
                     else
-                        oChild.text = oChild.xml:gsub('\r\n%s*$', indent)
+                        oChild.text = oChild.text:gsub('\r\n%s*$', indent)
                     end
                 elseif oChild.nextSibling.nodeTypeString  == 'element' then
                     if string.find(strInd0, ','..oChild.nextSibling.nodeName..',') then
-                        oChild.text = oChild.xml:gsub('\r\n%s*$', clb(oChild.nextSibling, '\r\n', indent))
+                        oChild.text = oChild.text:gsub('\r\n%s*$', clb(oChild.nextSibling, '\r\n', indent))
                     else
-                        oChild.text = oChild.xml:gsub('\r\n[\t ]*$', clb(oChild.nextSibling, newindent, indent))
+                        oChild.text = oChild.text:gsub('\r\n[\t ]*$', clb(oChild.nextSibling, newindent, indent))
                     end
                 elseif oChild.nextSibling.nodeTypeString == 'cdatasection' then
-                    oChild.text = oChild.xml:gsub('[\r\n\t ]*$', '')
+                    oChild.text = oChild.text:gsub('[\r\n\t ]*$', '')
                 end
                 bPrevTxt = true
             elseif oChild.nodeTypeString == 'cdatasection' then

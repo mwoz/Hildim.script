@@ -201,6 +201,12 @@ local function FindInFiles()
     Ctrl("btnFindInFiles").image = "cross_script_µ"
     PassFocus_local()
     PostAction()
+    if Ctrl("chkFindProgress").value == 'ON' then
+        Ctrl("progress").max = 100
+        Ctrl("progress").value = 0
+        Ctrl("progress").text = 'Подсчет...'
+        Ctrl("zbProgress").valuepos = 1
+    end
 end
 
 local function ReplaceInBuffers()
@@ -228,10 +234,10 @@ local function GoToMarkDown()
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
     local nextStart = iPos
     local bMark = false
-    iPos = scite.SendEditor(SCI_INDICATOREND, mark, nextStart)
-    if iPos >= editor.TextLength then iPos = scite.SendEditor(SCI_INDICATOREND, mark, 0) end
+    iPos = editor:IndicatorEnd(mark, nextStart)
+    if iPos >= editor.TextLength then iPos = editor:IndicatorEnd(mark, 0) end
     if iPos < editor.TextLength and iPos ~= nextStart then
-        nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
+        nextStart = editor:IndicatorEnd(mark, iPos)
         if nextStart > 0 then
             OnNavigation("Mark")
             editor:SetSel(nextStart, nextStart+1)
@@ -247,20 +253,20 @@ local function GoToMarkUp()
     local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
     local nextStart = iPos
     local bMark = false
-    iPos = scite.SendEditor(SCI_INDICATOREND, mark, nextStart)
+    iPos = editor:IndicatorEnd(mark, nextStart)
     if iPos >= curPos then
-        iPos = scite.SendEditor(SCI_INDICATOREND, mark, curPos)
+        iPos = editor:IndicatorEnd(mark, curPos)
         curPos = editor.TextLength
     end
     if iPos < editor.TextLength and iPos ~= nextStart then
-        nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
+        nextStart = editor:IndicatorEnd(mark, iPos)
         local prevPos = iPos
         while iPos < curPos do
             prevPos = iPos
-            iPos = scite.SendEditor(SCI_INDICATOREND, mark, nextStart)
+            iPos = editor:IndicatorEnd(mark, nextStart)
             if iPos >= editor.TextLength or iPos == nextStart then break end
 
-            nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
+            nextStart = editor:IndicatorEnd(mark, iPos)
         end
         OnNavigation("Mark")
         editor:SetSel(prevPos - 1, prevPos)
@@ -327,7 +333,7 @@ local function ActivateFind_l(nTab)
 
     if _G.dialogs['findrepl'] then
         if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and
-            ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 0) and _G.iuprops['findrepl.win'] == '2' then
+            ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 1000) and _G.iuprops['findrepl.win'] == '2' then
             scite.MenuCommand(IDM_TOGGLEOUTPUT)
         else
             _G.dialogs['findrepl'].ShowDialog()
@@ -1025,22 +1031,19 @@ local function Init(h)
     end)
 
     function OnFindProgress(state, iAll)
-        --scite.RunAsync(function()
-            if state == 0 then
-                --Ctrl("progress").min = 0
-                Ctrl("progress").max = iAll
-                Ctrl("progress").value = 0
-                Ctrl("progress").text = '0 from '..iAll
-                Ctrl("zbProgress").valuepos = 1
-            elseif state == 1 then
-                Ctrl("progress").value = iAll
-                Ctrl("progress").text = iAll..' from '..tonumber(Ctrl("progress").max)
-            elseif state == 2 then
-                Ctrl("zbProgress").valuepos = 0
-                Ctrl("btnFindInFiles").image = "IMAGE_search"
-                findSettings:MarkResult()
-            end
-        --end)
+        if state == 0 then
+            Ctrl("progress").max = iAll
+            Ctrl("progress").value = 0
+            Ctrl("progress").text = '0 from '..iAll
+            Ctrl("zbProgress").valuepos = 1
+        elseif state == 1 then
+            Ctrl("progress").value = iAll
+            Ctrl("progress").text = iAll..' from '..tonumber(Ctrl("progress").max)
+        elseif state == 2 then
+            Ctrl("zbProgress").valuepos = 0
+            Ctrl("btnFindInFiles").image = "IMAGE_search"
+            findSettings:MarkResult()
+        end
     end
 end
 g_Ctrl = Ctrl

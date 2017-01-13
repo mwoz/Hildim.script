@@ -72,6 +72,7 @@ if dlg == nil then
                     if old_association == '' or old_association == 'SciTE.Session' then
                         luacom.TryCatch(WshShell)
                         WshShell:RegWrite('HKCR\\.'..t..'\\', '');
+                        luacom.TryCatch(WshShell)
                         WshShell:RegDelete('HKCR\\.'..t..'\\');
                     else
                         WshShell:RegWrite('HKCR\\.'..t..'\\', old_association);

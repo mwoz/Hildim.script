@@ -120,7 +120,7 @@ if text == "" then
   editor:SelectAll()
   text = editor:GetSelText()
 elseif string.len(text) ~= editor.Length then
-  line = scite.SendEditor(SCI_LINEFROMPOSITION, editor.SelectionStart) + 1
+  line = editor:LineFromPosition(editor.SelectionStart) + 1
 end
 local pos = editor.SelectionStart
 

@@ -16,7 +16,6 @@ function s:init(t)
     self.findWhat    = t.findWhat
     self.replaceWhat = t.replaceWhat
     self.e = editor
-    self.send = scite.SendEditor
 end
 
 function s:UnSlashAsNeeded(strIn)
@@ -48,26 +47,25 @@ function s:Reset(t)
     self.replaceWhat = t.replaceWhat
     if t.inFindRez then
         self.e = findres
-        self.send = scite.SendFindRes
     else
         self.e = editor
-        self.send = scite.SendEditor
     end
 end
 
 function s:EditorMarkText(start, length, indic_number)
-	local current_indic_number = self.send(SCI_GETINDICATORCURRENT)
-	self.send(SCI_SETINDICATORCURRENT, indic_number)
-	self.send(SCI_INDICATORFILLRANGE, start, length)
-	self.send(SCI_SETINDICATORCURRENT, current_indic_number)
+	local current_indic_number = self.e.IndicatorCurrent
+	self.e.IndicatorCurrent = indic_number
+	self.e:IndicatorFillRange(start, length)
+	self.e.IndicatorCurrent = current_indic_number
 end
 
 -- Очистка текста от маркерного выделения заданного стиля
 --   если параметры отсутствуют - очищаются все стили во всем тексте
 --   если не указана позиция и длина - очищается весь текст
+
 function s:EditorClearMarks(indic_number, start, length)
 	local _first_indic, _end_indic
-	local current_indic_number = self.send(SCI_GETINDICATORCURRENT)
+	local current_indic_number = self.e.IndicatorCurrent
 	if indic_number == nil then
 		_first_indic, _end_indic = 0, 31
 	else
@@ -77,24 +75,23 @@ function s:EditorClearMarks(indic_number, start, length)
 		start, length = 0, findres.Length
 	end
 	for indic = _first_indic, _end_indic do
-		self.send(SCI_SETINDICATORCURRENT, indic)
-		self.send(SCI_INDICATORCLEARRANGE, start, length)
+		self.e.IndicatorCurrent = indic
+        self.e:IndicatorClearRange(start, length)
 	end
-	self.send(SCI_SETINDICATORCURRENT, current_indic_number)
+	self.e.IndicatorCurrent = current_indic_number
 end
 
 function s:FindInTarget(findWhat, lenFind, startPosition, endPosition)
-    self.send(SCI_SETTARGETSTART, startPosition)
-    self.send(SCI_SETTARGETEND, endPosition)
-
+    self.e.TargetStart = startPosition
+    self.e.TargetEnd = endPosition
     local posFind = self.e:SearchInTarget(findWhat)
-	while (self.style ~= nil and posFind ~= -1 and self.style ~= self.send(SCI_GETSTYLEAT, posFind)) do
+	while (self.style ~= nil and posFind ~= -1 and self.style ~= self.e.StyleAt[posFind]) do
 		if startPosition < endPosition then
-			self.send(SCI_SETTARGETSTART, posFind + 1)
-			self.send(SCI_SETTARGETEND, endPosition)
+			self.e.TargetStart = posFind + 1
+			self.e.TargetEnd = endPosition
 		else
-			self.send(SCI_SETTARGETSTART, startPosition)
-			self.send(SCI_SETTARGETEND, posFind + 1)
+			self.e.TargetStart = startPosition
+			self.e.TargetEnd = posFind + 1
 		end
 		posFind = self.e:SearchInTarget(findWhat)
 	end
@@ -119,7 +116,7 @@ function s:FindNext(fireEvent)
 	        Iif(self.regExp, SCFIND_REGEXP + SCFIND_CXX11REGEX, 0) +
 	        Iif(props["find.replace.regexp.posix"]=='1', SCFIND_POSIX, 0)
 
-	self.send(SCI_SETSEARCHFLAGS, flags)
+	self.e.SearchFlags = flags
 	local posFind = self:FindInTarget(findTarget, findLen, startPosition, endPosition)
 
 	if posFind == -1 and  self.wrapFind then
@@ -230,11 +227,11 @@ function s:CollapseFindRez()
     end
 
     for line = 0, findres.LineCount do
-        local level = scite.SendFindRes(SCI_GETFOLDLEVEL, line)
+        local level = findres.FoldLevel[line]
         if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
-            scite.SendFindRes(SCI_SETFOLDEXPANDED, line)
+            findres.FoldExpanded[line] = nil
             local lineMaxSubord = scite.SendFindRes(SCI_GETLASTCHILD, line,-1)
-            if line < lineMaxSubord then scite.SendFindRes(SCI_HIDELINES, line + 1, lineMaxSubord) end
+            if line < lineMaxSubord then findres:HideLines(line + 1, lineMaxSubord) end
         end
     end
 end
@@ -244,7 +241,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
 
     local strLive = Iif(bLive, "/\\", "")
     local needCoding = (self.e.CodePage ~= 0)
-    scite.SendFindRes(SCI_SETSEL,0,0)
+    findres:SetSel(0, 0)
     local line, wCount, lCount = -1, 0, 0
     return (function(lenTarget)
         if lenTarget then
@@ -261,28 +258,28 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                     lNum = '\t'..(l+1)..': '
                 end
                 if lCount == maxlines then
-                    scite.SendFindRes(SCI_REPLACESEL, lNum..'...\n')
+                    findres:ReplaceSel(lNum..'...\n')
                     return lenTarget, false
                 end
                 local str = self.e:GetLine(l):gsub('^[ \t]+', '')
                 if needCoding then str = str:from_utf8(1251) end
-                scite.SendFindRes(SCI_REPLACESEL, lNum..str )
+                findres:ReplaceSel(lNum..str)
              end
             return lenTarget, true
         else
-            if bSearchCapt then scite.SendFindRes(SCI_REPLACESEL, '<'..strLive..'\n' ) end
-            scite.SendFindRes(SCI_SETSEL,0,0)
+            if bSearchCapt then findres:ReplaceSel('<'..strLive..'\n') end
+            findres:SetSel(0, 0)
             local strCapt = ''
             local strSrch = self.findWhat
             if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
             if bSearchCapt then strCapt = strCapt..'>Search for "'..strSrch..'" in "'..props[Iif(_G.iuprops['findres.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8(1251)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
 
             if _G.iuprops['findres.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]:from_utf8(1251)..'\n' end
-            if bSearchCapt or wCount > 0 then  scite.SendFindRes(SCI_REPLACESEL, strCapt) end
+            if bSearchCapt or wCount > 0 then  findres:ReplaceSel( strCapt) end
 
-            scite.SendFindRes(SCI_SETSEL,0,0)
+            findres:SetSel(0, 0)
             findres.CurrentPos = 1
-            if scite.SendFindRes(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+            if findres.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
 
             return wCount, lCount
         end
@@ -295,15 +292,15 @@ function s:findWalk(inSelection, funcOnFind)
     if findLen == 0 then return -1 end
 	local startPosition = self.e.SelectionStart;
 	local endPosition = self.e.SelectionEnd;
-	local countSelections = self.send(SCI_GETSELECTIONS)
+	local countSelections = self.e.Selections
     if inSelection then
-        if self.send(SCI_GETSELECTIONMODE) == SC_SEL_LINES then
+        if self.e.SelectionMode == SC_SEL_LINES then
             startPosition = self.e:PositionFromLine(self.e:LineFromPosition(startPosition))
             endPosition = self.e:PositionFromLine(self.e:LineFromPosition(endPosition) + 1)
         else
             for i = 0, countSelections - 1 do
-                startPosition = Min(startPosition, self.send(SCI_GETSELECTIONNSTART, i))
-                endPosition = Max(endPosition, self.send(SCI_GETSELECTIONNEND, i))
+                startPosition = Min(startPosition, self.e.SelectionNStart[i])
+                endPosition = Max(endPosition, self.e.SelectionNEnd[i])
             end
         end
         if startPosition == endPosition then return -2 end
@@ -317,13 +314,13 @@ function s:findWalk(inSelection, funcOnFind)
 	        Iif(self.matchCase, SCFIND_MATCHCASE, 0) +
 	        Iif(self.regExp, SCFIND_REGEXP + SCFIND_CXX11REGEX, 0) +
 	        Iif(props["find.replace.regexp.posix"]=='1', SCFIND_POSIX, 0)
-	self.send(SCI_SETSEARCHFLAGS, flags)
+	self.e.SearchFlags = flags
 	local posFind = self:FindInTarget(findTarget, findLen, startPosition, endPosition);
 	if (findLen == 1) and self.regExp and findTarget:byte() == string.byte('^') then
 		-- // Special case for replace all start of line so it hits the first line
 		posFind = startPosition;
-		self.send(SCI_SETTARGETSTART, startPosition)
-		self.send(SCI_SETTARGETEND, startPosition)
+		self.e.TargetStart = startPosition
+		self.e.TargetEnd = startPosition
 	end
 	if (posFind ~= -1) and (posFind <= endPosition) then
 		local lastMatch = posFind;
@@ -332,15 +329,15 @@ function s:findWalk(inSelection, funcOnFind)
 		-- // Replacement loop
 		while posFind ~= -1 do
             local bContinue = true
-            repeat  --фейковый цикл, чтобы брек сработал как continue
-                local lenTarget = self.send(SCI_GETTARGETEND) - self.send(SCI_GETTARGETSTART)
+            repeat --фейковый цикл, чтобы брек сработал как continue
+                local lenTarget = self.e.TargetEnd - self.e.TargetStart
                 local insideASelection = true
                 if inSelection and countSelections > 1 then
                     -- // We must check that the found target is entirely inside a selection
                     insideASelection = false
                     for i=0, countSelections - 1 do
-                        local startPos= self.send(SCI_GETSELECTIONNSTART, i)
-                        local endPos = self.send(SCI_GETSELECTIONNEND, i)
+                        local startPos= self.e.SelectionNStart[i]
+                        local endPos = self.e.SelectionNEnd[i]
                         if posFind >= startPos and posFind + lenTarget <= endPos then
                             insideASelection = true
                             break
@@ -360,7 +357,7 @@ function s:findWalk(inSelection, funcOnFind)
                 end
                 local movepastEOL = 0;
                 if lenTarget <= 0 then
-                    local chNext = self.send(SCI_GETCHARAT, self.send(SCI_GETTARGETEND))
+                    local chNext = self.e.CharAt[self.e.TargetEnd]
                     if chNext == '\r' or chNext == '\n' then movepastEOL = 1 end
                 end
                 local lenReplaced
@@ -384,7 +381,7 @@ function s:findWalk(inSelection, funcOnFind)
         end
         local out1, out2 = funcOnFind(nil)
         if inSelection then
-            if countSelections == 1 then self.send(SCI_SETSEL, startPosition, endPosition) end
+            if countSelections == 1 then self.e:SetSel(startPosition, endPosition) end
         else
             --if props["find.replace.return.to.start"] ~= '1' then self.e:SetSel(lastMatch, lastMatch) end
         end
@@ -401,7 +398,6 @@ end
 
 function s:MarkResult()
     self.e = findres
-    self.send = scite.SendFindRes
     local origStyle = self.style
     local origFind = self.findWhat
     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then self.findWhat = self.findWhat:from_utf8(1251) end
@@ -411,18 +407,18 @@ function s:MarkResult()
         p = findres:PositionFromLine(i)
         if findres.StyleAt[p + 1] == SCE_SEARCHRESULT_SEARCH_HEADER then break end
     end
-    if not p then return end
-    if p > 0 then
-        findres:SetSel(0,p)
-        findres:Colourise(0,p)
-        self:findWalk(true, self:onMarkOne(31, false))
-        findres:SetSel(0,0)
+    if p then
+        if p > 0 then
+            findres:SetSel(0, p)
+            findres:Colourise(0, p)
+            self:findWalk(true, self:onMarkOne(31, false))
+            findres:SetSel(0, 0)
+        end
     end
 
     self.style = origStyle
     self.findWhat = origFind
     self.e = editor
-    self.send = scite.SendEditor
 end
 
 function s:FindAll(maxlines, bLive, bSel)
@@ -433,9 +429,9 @@ end
 
 function s:FindInBufer()
     local cnt, lin, fil = 0, 0, 0
-    scite.SendFindRes(SCI_SETSEL,0,0)
-    scite.SendFindRes(SCI_REPLACESEL, '<\n')
-    scite.SendFindRes(SCI_SETSEL,0,0)
+    findres:SetSel(0, 0)
+    findres:ReplaceSel('<\n')
+    findres:SetSel(0, 0)
     return (function(nBuff, maxlines)
         local bCollapse = true
         local bSetEnding = false
@@ -446,10 +442,10 @@ function s:FindInBufer()
             cnt = cnt + c
             lin = lin + l
         else
-            scite.SendFindRes(SCI_SETSEL,0,0)
+            findres:SetSel(0, 0)
             local strSrch = self.findWhat
             if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
-            scite.SendFindRes(SCI_REPLACESEL,'>Search for "'..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
+            findres:ReplaceSel('>Search for "'..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
             return cnt
         end
     end)

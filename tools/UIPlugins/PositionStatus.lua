@@ -32,7 +32,7 @@ local function Init(h)
     AddEventHandler("OnUpdateUI", function()
         if not editor.Focus then return end
 
-        txtCol.value = scite.SendEditor(SCI_GETCOLUMN, editor.CurrentPos) + scite.SendEditor(SCI_GETSELECTIONNANCHORVIRTUALSPACE, 0) + 1
+        txtCol.value = editor.Column[editor.CurrentPos] + editor.SelectionNAnchorVirtualSpace[0] + 1
         txtSel.value = editor.SelectionEnd - editor.SelectionStart
         txtLine.value = editor:LineFromPosition(editor.CurrentPos) + 1
     end)

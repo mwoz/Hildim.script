@@ -289,7 +289,12 @@ iup.CloseFilesSet = function(cmd)
             if cmd == 9134 then return end
         end
     end
-    if cmd == IDM_QUIT then scite.HideForeReolad(); ClearAllEventHandler() end
+    if cmd == IDM_QUIT then
+        props['are.you.sure.close'] = 0
+        props['check.if.already.open'] = 0
+        scite.HideForeReolad();
+        ClearAllEventHandler();
+    end
     local nf,spathes = false,'',''
     local sposes
     local slayout = ''
@@ -299,7 +304,7 @@ iup.CloseFilesSet = function(cmd)
     props['load.on.activate'] = 0
     DoForBuffers(function(i)
         if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
-            scite.SendEditor(SCI_SETSAVEPOINT)
+            editor:SetSavePoint()
             if not props['FileNameExt']:from_utf8(1251):find('Безымянный') and not props['FileNameExt']:find('^%^') then
                 spathes = spathes..'•'..props['FilePath']:from_utf8(1251)
                 local bk = iup.GetBookmarkLst()

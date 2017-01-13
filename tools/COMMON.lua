@@ -393,10 +393,10 @@ local function DoForBuffers_local(func, bStc, ...)
     return func(nil)
 end
 function DoForBuffers(func, ...)
-    DoForBuffers_local(func, true, ...)
+    return DoForBuffers_local(func, true, ...)
 end
 function DoForBuffers_Stack(func, ...)
-    DoForBuffers_local(func, false, ...)
+    return DoForBuffers_local(func, false, ...)
 end
 
 function debug_prnTb(tb, n)

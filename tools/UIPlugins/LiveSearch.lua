@@ -30,7 +30,7 @@ local function Find_onFocus(setfocus)
 end
 
 local function OnSwitch()
-    needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
+    needCoding = (editor.CodePage ~= 0)
 end
 
 local function Init(ToolBar_obj)

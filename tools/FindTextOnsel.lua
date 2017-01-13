@@ -49,7 +49,7 @@ end
 AddEventHandler("OnUpdateUI", SelectMethod)
 
 CORE.FindSelToConcole = function()
-    needCoding = (scite.SendEditor(SCI_GETCODEPAGE) ~= 0)
+    needCoding = (editor.CodePage ~= 0)
     local sText = editor:GetSelText()
     findSettings.wholeWord = false
     if (sText == '') then

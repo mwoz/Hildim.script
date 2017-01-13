@@ -43,10 +43,10 @@ local function Init()
         local l1, l2 = editor:LineFromPosition(findSt), editor:LineFromPosition(findEnd)
 
         for i = l1 + 1, l2 do
-            local ind = scite.SendEditor(SCI_GETLINEINDENTATION, i) + dInd
-            scite.SendEditor(SCI_SETLINEINDENTATION, i, 0)  --чтобы избавиться от табов сначала сбрасываем отступ в 0 а потом выставляем нужный
+            local ind = editor.LineIndentation[i] + dInd
+            editor.LineIndentation[i] = 0  --чтобы избавиться от табов сначала сбрасываем отступ в 0 а потом выставляем нужный
             --если просто выставить нужный, и он при этом не изменится, табы могут остаться
-            scite.SendEditor(SCI_SETLINEINDENTATION, i, ind)
+            editor.LineIndentation[i] = ind
             findEnd = findEnd + dInd
         end
 
