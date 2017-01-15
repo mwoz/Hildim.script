@@ -10,14 +10,21 @@ local function Show()
         local f
         local tFiles, tLng = {},{}
         local strLng = ''
+        local strFilter = '$(all.files)'
         for i = 0, maxL  do
             if iup.GetAttributeId2(list_lex, 'TOGGLEVALUE', i, 1) == '1' then
                 if strLng ~= '' then strLng = strLng..'¦' end
                 strLng = strLng..list_lex:getcell(i,2)..'•'..list_lex:getcell(i,5)..'•'..list_lex:getcell(i,3)..'•'..list_lex:getcell(i,4)
-                local fName = list_lex:getcell(i,4)
+                if list_lex:getcell(i, 6) then
+                    strFilter = strFilter..'$('..list_lex:getcell(i, 6)..')'
+                else
+                     strFilter = strFilter..'$(filter.'..list_lex:getcell(i, 2)..')'
+                end
+                local fName = list_lex:getcell(i, 4)
                 tFiles[fName] = true
              end
         end
+        props['open.filter'] = strFilter..'|'
         for n, _ in pairs(tFiles) do
             local nm = n:gsub('%.[^.]*$', '')
             t = t..'import $(SciteDefaultHome)\\languages\\'..nm..'.properties\n'
@@ -37,9 +44,9 @@ local function Show()
     end
 
     list_lex = iup.matrix{
-    numcol=5, numcol_visible=5,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol = 6, numcol_visible = 5, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
     resizematrix = "YES"  ,readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 200,rasterwidth3= 100,rasterwidth3= 100,rasterwidth4= 100}
+    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 150,rasterwidth3= 100,rasterwidth4= 200,rasterwidth5= 100,rasterwidth6= 0}
 
     list_lex.dropcheck_cb = function(h, lin, col)
         if col == 1 then return -4 else return 0 end
@@ -75,7 +82,8 @@ local function Show()
             tbl_l.lexer = lexLng
             local _,_,fExt = s:find('\n? *file%.patterns%.'..filePtrn..'=[^\n]*%.(%w+)')
             tbl_l.ext = fExt or filePtrn
-            local _,_,fView = s:find('\n? *filter%.'..filePtrn..'=([^%(\r\n]*)')
+            local _, _, flt, fView = s:find('\n?( *filter%.'..filePtrn..')=([^%(\r\n]*)')
+            tbl_l.filter = flt
             tbl_l.view = fView or filePtrn
             table.insert(tbl_lex, tbl_l)
         end
@@ -90,6 +98,7 @@ local function Show()
         list_lex:setcell(i, 3, tbl_lex[i].lexer)
         list_lex:setcell(i, 4, tbl_lex[i].name)
         list_lex:setcell(i, 5, tbl_lex[i].ext)
+        list_lex:setcell(i, 6, tbl_lex[i].filter)
 
     end
 

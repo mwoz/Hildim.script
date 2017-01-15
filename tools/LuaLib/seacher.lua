@@ -230,7 +230,7 @@ function s:CollapseFindRez()
         local level = findres.FoldLevel[line]
         if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
             findres.FoldExpanded[line] = nil
-            local lineMaxSubord = scite.SendFindRes(SCI_GETLASTCHILD, line,-1)
+            local lineMaxSubord = findres:GetLastChild(line,-1)
             if line < lineMaxSubord then findres:HideLines(line + 1, lineMaxSubord) end
         end
     end

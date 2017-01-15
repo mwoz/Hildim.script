@@ -21,7 +21,7 @@ dofile (props["SciteDefaultHome"].."\\tools\\IupSideBar.lua")
 -- Установка размера символа табуляции в окне консоли
 local tab_width = tonumber(props['output.tabsize'])
 if tab_width ~= nil then
-	scite.SendOutput(SCI_SETTABWIDTH, tab_width)
+	output.TabWidth = tab_width
 end
 
 --local prn_ol = print

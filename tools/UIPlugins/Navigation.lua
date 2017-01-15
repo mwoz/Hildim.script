@@ -15,6 +15,7 @@ local function internal_Init()
 
     local function OnNavigate(item)
         if navigation_blockUpdate then return end
+        if item:find('^_') then return end
 
         while currentItem > 1 do
             list_navigation.dellin = 0

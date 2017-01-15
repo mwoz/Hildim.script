@@ -5,8 +5,8 @@ local function Init()
         local tbl_pos = {}
         local maxPos = 0
         for i = 0, nSelection - 1 do
-            local selStart = scite.SendEditor(SCI_GETSELECTIONNSTART, i, i)
-            if selStart ~= scite.SendEditor(SCI_GETSELECTIONNEND, i, i) then return end
+            local selStart = editor.SelectionNStart[i]
+            if selStart ~= editor.SelectionNEnd[i] then return end
             local line = editor:LineFromPosition(selStart)
             local posInLine = selStart - editor:PositionFromLine(line)
             if tbl_lines[line] ~= nil then return end
@@ -36,9 +36,9 @@ local function Init()
 
             local selStart = editor:PositionFromLine(line) + maxPos
             if i == 1 then
-                scite.SendEditor(SCI_SETSELECTION, selStart, selStart)
+                editor:SetSelection(selStart, selStart)
             else
-                scite.SendEditor(SCI_ADDSELECTION, selStart, selStart)
+                editor:AddSelection(selStart, selStart)
             end
         end
     end
@@ -93,9 +93,9 @@ local function Init()
                     if pos ~= nil then
                         pos = pos - 2 + editor:PositionFromLine(i)
                         if j == 1 then
-                            scite.SendEditor(SCI_SETSELECTION, pos, pos)
+                            editor:SetSelection(pos, pos)
                         else
-                            scite.SendEditor(SCI_ADDSELECTION, pos, pos)
+                            editor:AddSelection(pos, pos)
                         end
                         j = j + 1
                     end
@@ -116,7 +116,7 @@ local function Init()
     end
 
     function do_Align()
-        local nSelection = scite.SendEditor(SCI_GETSELECTIONS)
+        local nSelection = editor.Selections
         if nSelection <= 1 then
             TRyAlignByString()
             return

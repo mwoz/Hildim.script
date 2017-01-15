@@ -120,11 +120,12 @@ function RemoveEventHandler(EventName, Handler)
 	_remove[#_remove+1]={[EventName]=Handler}
 end
 
-function BlockEventHandler(EventName)
+function BlockEventHandler(EventName, tmpHandler)
 --Блокировка (временная) обработки эвента конкретного
     if events[EventName] then
         _blocked[EventName]=events[EventName]
         events[EventName] = {}
+        if tmpHandler then events[EventName][1] = tmpHandler end
     end
 end
 function UnBlockEventHandler(EventName)

@@ -302,6 +302,7 @@ iup.CloseFilesSet = function(cmd)
     local curBuf = scite.buffers.GetCurrent()
     local tmpFlag = props['load.on.activate']
     props['load.on.activate'] = 0
+    scite.Perform('blockuiupdate:y')
     DoForBuffers(function(i)
         if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
@@ -316,9 +317,11 @@ iup.CloseFilesSet = function(cmd)
             else
                 if i <= curBuf then curBuf = curBuf - 1 end
             end
-            if cmd ~= 0 then scite.MenuCommand(IDM_CLOSE) end
+            scite.Perform('close:')
         end
     end)
+    scite.Perform('blockuiupdate:u')
+
     props['load.on.activate'] = tmpFlag
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
     if nf and ((cmd == IDM_QUIT  ) or cmd == 0) then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
@@ -328,6 +331,32 @@ iup.CloseFilesSet = function(cmd)
     end
     if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
     else return true end
+end
+
+local function onOpen_local(source)
+    if source:find('^%^') then return end
+    if not source:find('^\\\\') then
+        if not shell.fileexists(source:from_utf8(1251)) then return end
+    end
+    iuprops['resent.files.list']:check(source:from_utf8(1251))
+    if props['session.started'] ~= '1' and props['session.reload'] ~= '1' then print('') end --??почему-то этот вывод ликвидирует появление звездочки в названии при открытии из оболочки
+end
+
+local function onNavigate_local(item)
+    if item == '_openSet' then
+        scite.Perform('blockuiupdate:y')
+        editor.VScrollBar = false
+        BlockEventHandler("OnOpen", onOpen_local)
+        BlockEventHandler("OnNavigation", onNavigate_local)
+        BlockEventHandler"OnUpdateUI"
+    elseif item == '_openSetLast' then
+        UnBlockEventHandler"OnOpen"
+        UnBlockEventHandler"OnNavigation"
+        UnBlockEventHandler"OnUpdateUI"
+        editor.VScrollBar = true
+    elseif item == '_-openSet' then
+        scite.Perform('blockuiupdate:u')
+    end
 end
 
 iup.RestoreFiles = function(bForce)
@@ -356,7 +385,22 @@ iup.RestoreFiles = function(bForce)
                 table.insert(l, f)
             end
         end
-        for i = #t,1,-1 do
+        scite.Perform('blockuiupdate:y')
+        local fvl = editor.FirstVisibleLine
+        editor.VScrollBar = false
+        if #t > 0 then
+            BlockEventHandler"OnOpen"
+            BlockEventHandler"OnNavigation"
+            BlockEventHandler"OnUpdateUI"
+            OnOpen = onOpen_local
+        end
+        for i = #t, 1,- 1 do
+            if i == 1 then
+                OnOpen = nil
+                UnBlockEventHandler"OnUpdateUI"
+                UnBlockEventHandler"OnNavigation"
+                UnBlockEventHandler"OnOpen"
+            end
             scite.Open(t[i])
             if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
             if bk and bk[i] then
@@ -369,7 +413,9 @@ iup.RestoreFiles = function(bForce)
                 RestoreLayOut(l[i])
             end
         end
-        --scite.EnsureV visible()
+        scite.Perform('blockuiupdate:u')
+        editor.VScrollBar = true
+        editor.FirstVisibleLine = fvl
         if bNew then
             scite.buffers.SetDocumentAt(0)
         else
@@ -571,14 +617,8 @@ AddEventHandler("OnClose", function(source)
     if scite.buffers.GetCount() == 1 and editor.ReadOnly then scite.MenuCommand(IDM_READONLY) end
 end)
 
-AddEventHandler("OnOpen", function(source)
-    if source:find('^%^') then return end
-    if not source:find('^\\\\') then
-        if not shell.fileexists(source:from_utf8(1251)) then return end
-    end
-    iuprops['resent.files.list']:check(source:from_utf8(1251))
-    if props['session.started'] ~= '1' and props['session.reload'] ~= '1' then print('') end --??почему-то этот вывод ликвидирует появление звездочки в названии при открытии из оболочки
-end)
+AddEventHandler("OnOpen", onOpen_local)
+AddEventHandler("OnNavigation", onNavigate_local)
 
 --Расширение iup.TreeAddNodes - позволяет в табличном представлении дерева задавать свойство userdata
 local old_TreeSetNodeAttrib = iup.TreeSetNodeAttrib

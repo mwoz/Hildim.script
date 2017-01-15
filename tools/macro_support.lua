@@ -77,7 +77,7 @@ end
 function MacroPlay(name)
   local macro = glb_macros_table[name]
   if macro then
-    scite.SendEditor(SCI_AUTOCCANCEL)
+    editor:AutoCCancel()
     editor:BeginUndoAction()
     for _,val in pairs(macro) do
       local c,lp,wp = unpack(val)

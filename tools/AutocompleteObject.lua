@@ -319,7 +319,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
         editor.CallTipForeHlt = 0xff0000
         editor:CallTipSetHlt(s + 1, e)
     end
-    editor.AutoCChooseSingle = true
+    editor.AutoCHooseSingle = true
 end
 
 local function isPosInString()
@@ -574,6 +574,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
         tbl_MethodList,tbl_Method = {},{}
     end
     local strLua = nil
+    local b1Chr = (#props["autocomplete."..editor_LexerLanguage()..".start.characters"] == 1)
 	for api_filename in string.gmatch(strApis, "[^;]+") do
         if api_filename ~= '' then
             local api_file = io.open(api_filename)
@@ -602,7 +603,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                     else
                         local _s, _e, l, c = string.find(line, '^([^%s%(]+)([^%s%(]?.-)$')
                         if _e ~= nil then
-                            local _start, _end, sObj, sMet = string.find(l, '^(.+)'..autocom_chars..'(.+)')
+                            local _start, _end, sObj, sChr, sMet = string.find(l, '^(.+)('..autocom_chars..')(.+)')
                             if _start == nil then
                                 sObj = constObjGlobal
                                 sMet = l
@@ -614,7 +615,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                                 o_tbl[upObj] = {}
                                 o_tbl[upObj].normalName = sObj
                             end
-                            table.insert(o_tbl[upObj], {sMet, c})
+                            if b1Chr then table.insert(o_tbl[upObj], {sMet, c}) else table.insert(o_tbl[upObj], {sMet, c, sChr}) end
                             if needKwd then
                                 if upObj ~= constObjGlobal and tbl_MethodList[sMet] == nil then
                                     tbl_MethodList[sMet] = 1
@@ -706,8 +707,7 @@ local function ReCreateStructures(strText, tblFiles)
             end
         end
     end
-
-    scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE,true)
+    editor.AutoCHooseSingle = true
 
     local str_vbkwrd = nil
     local str_xmlkwrd = nil
@@ -751,16 +751,16 @@ local function ReCreateStructures(strText, tblFiles)
         RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
         if str_vbkwrd ~= nil then
             props['keywords6.$('..props['pattern.name$']..')'] = str_vbkwrd
-            scite.SendEditor(SCI_SETKEYWORDS,5,str_vbkwrd)
+            editor.KeyWords[5] = str_vbkwrd
         end
         if str_xmlkwrd ~= nil then
             props['keywords4.$('..props['pattern.name$']..')'] = str_xmlkwrd
-            scite.SendEditor(SCI_SETKEYWORDS,3,str_xmlkwrd)
+            editor.KeyWords[3] = str_xmlkwrd
         end
         local kw = string.lower(table.concat(tbl_fList,' '))
         props['keywords16.$('..props['pattern.name$']..')'] = kw
-        scite.SendEditor(3996,15,kw)
-        scite.SendEditor(SCI_COLOURISE,0,editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen+2))
+        scite.SendEditor(3996, 15, kw)
+        editor:Colourise(0, editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen + 2))
     else
         RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
     end
@@ -819,7 +819,7 @@ local function ShowUserList(nPos, iId, last)
 		local s = table.concat(methods_table, sep)
 		if s ~= '' then
             editor.AutoCSeparator = string.byte(sep)
-            scite.SendEditor(SCI_AUTOCSETMAXHEIGHT, maxListsItems)
+            editor.AutoCMaxHeight = maxListsItems
             if nPos > 0 then editor.CurrentPos = editor.CurrentPos - nPos end
             editor:UserListShow(iId or 7, s)
             if nPos > 0 then editor.CurrentPos = editor.CurrentPos + nPos end
@@ -971,10 +971,26 @@ local function OnUserListSelection_local(tp, str)
 
         if (tip or '') ~= '' then
             if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
-            scite.SendEditor(SCI_CALLTIPSHOW, editor.CurrentPos, tip)
+            editor:CallTipShow(editor.CurrentPos, tip)
         end
     else
+        local sc = str:lower()
+        local bSet = false
         s = str
+        if #props["autocomplete."..editor_LexerLanguage()..".start.characters"] > 1 then
+            for i = 1,  #obj_names do
+                local tblObj = objects_table[obj_names[i][1]:upper()]
+                for _, t in ipairs(tblObj) do
+                    if t[1] == str then
+                        s = t[3]..str
+                        editor.SelectionStart = editor.SelectionStart - 1
+                        bSet = true
+                        break
+                    end
+                end
+                if bSet then break end
+            end
+        end
     end
 
     editor:ReplaceSel(s)
@@ -1072,7 +1088,7 @@ end
 
 ResetCallTipParams = function()
 
-    if scite.SendEditor(SCI_AUTOCACTIVE) then return end
+    if editor:AutoCActive() then return end
     local tip = calltipinfo[table.maxn(calltipinfo)]
     local pos = current_pos
     if tip[1] > current_pos then
@@ -1143,7 +1159,7 @@ local function OnUpdateUI_local(bChange, bSelect, flag)
             return ResetCallTipParams()
         end
     elseif m_last ~= nil then
-        scite.SendEditor(SCI_AUTOCSELECT,m_last)
+        editor:AutoCSelect(m_last)
         m_last = nil
     end
 end
@@ -1165,10 +1181,10 @@ local function OnChar_local(char)
     if bIsListVisible and not pasteFromXml and fillup_chars ~= '' and string.find(char, fillup_chars) then
         --обеспечиваем вставку выбранного в листе значени€ вводе одного из завершающих символов(fillup_chars - типа (,. ...)
         --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживаетс€ пробел, и  start_chars==fillup_chars - лист сразу же закрываетс€,
-        if scite.SendEditor(SCI_AUTOCACTIVE) then
+        if editor:AutoCActive() then
             --editor:SetSel(editor:WordStartPosition(editor.CurrentPos), editor.CurrentPos)
             curr_fillup_char = char
-            scite.SendEditor(SCI_AUTOCCOMPLETE)
+            editor:AutoCComplete()
             editor:ReplaceSel(curr_fillup_char)
             curr_fillup_char = ''
         else
@@ -1202,7 +1218,7 @@ local function OnChar_local(char)
         end
         if string.find(autocomplete_start_characters, char, 1, 1) ~= nil then
             pasteFromXml = false
-            if calltipinfo[1] ~= 0 then scite.SendEditor(SCI_CALLTIPCANCEL) end
+            if calltipinfo[1] ~= 0 then editor:CallTipCancel() end
             local r = AutocompleteObject(char) --ѕоказываем список методов
             if r then bResetCallTip = false end
             return r or result
@@ -1363,7 +1379,7 @@ AddEventHandler("OnUserListSelection", function(tp, sel_value)
 	if bRun and(tp == constListIdXml or tp == constListId or tp == constListIdXmlPar) then
 		if OnUserListSelection_local(tp, sel_value) then return true end
 	end
-    scite.SendEditor(SCI_AUTOCSETCHOOSESINGLE, true)
+    editor.AutoCHooseSingle = true
 end)
 local function OnSwitchLocal()
     editor.MouseDwellTime = 1000 --ѕусть будет всегда, дл€ всех, кто хочет

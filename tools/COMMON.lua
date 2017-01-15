@@ -186,18 +186,18 @@ end
 
 -- Выделение текста маркером определенного стиля
 function EditorMarkText(start, length, indic_number)
-	local current_indic_number = scite.SendEditor(SCI_GETINDICATORCURRENT)
-	scite.SendEditor(SCI_SETINDICATORCURRENT, indic_number)
-	scite.SendEditor(SCI_INDICATORFILLRANGE, start, length)
-	scite.SendEditor(SCI_SETINDICATORCURRENT, current_indic_number)
+	local current_indic_number = editor.IndicatorCurrent
+	editor.IndicatorCurrent = indic_number
+	editor:IndicatorFillRange(start, length)
+	editor.IndicatorCurrent = current_indic_number
 end
 
 -- Очистка текста от маркерного выделения заданного стиля
---   если параметры отсутсвуют - очищаются все стили во всем тексте
+--   если параметры отсутствуют - очищаются все стили во всем тексте
 --   если не указана позиция и длина - очищается весь текст
 function EditorClearMarks(indic_number, start, length)
 	local _first_indic, _end_indic
-	local current_indic_number = scite.SendEditor(SCI_GETINDICATORCURRENT)
+	local current_indic_number = editor.IndicatorCurrent
 	if indic_number == nil then
 		_first_indic, _end_indic = 0, 31
 	else
@@ -207,10 +207,10 @@ function EditorClearMarks(indic_number, start, length)
 		start, length = 0, editor.Length
 	end
 	for indic = _first_indic, _end_indic do
-		scite.SendEditor(SCI_SETINDICATORCURRENT, indic)
-		scite.SendEditor(SCI_INDICATORCLEARRANGE, start, length)
+		editor.IndicatorCurrent = indic
+		editor:IndicatorClearRange(start, length)
 	end
-	scite.SendEditor(SCI_SETINDICATORCURRENT, current_indic_number)
+	editor.IndicatorCurrent = current_indic_number
 end
 
 ----------------------------------------------------------------------------
@@ -373,6 +373,7 @@ end
 
 --Выполнение действия для всех документов
 local function DoForBuffers_local(func, bStc, ...)
+    scite.Perform('blockuiupdate:y')
     BlockEventHandler"OnSwitchFile"
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
@@ -390,6 +391,7 @@ local function DoForBuffers_local(func, bStc, ...)
     UnBlockEventHandler"OnUpdateUI"
     UnBlockEventHandler"OnNavigation"
     UnBlockEventHandler"OnSwitchFile"
+    scite.Perform('blockuiupdate:n')
     return func(nil)
 end
 function DoForBuffers(func, ...)

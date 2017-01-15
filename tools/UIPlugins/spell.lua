@@ -218,8 +218,8 @@ local function Init()
             file:flush()
             file:close()
         end
-        local s = scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos)
-        local e = scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)
+        local s = editor:IndicatorStart(mark, editor.CurrentPos)
+        local e = editor:IndicatorEnd(mark, editor.CurrentPos)
         if str == cADDBYZXAMPLE then
             local dlg = _G.dialogs["spell"]
             if dlg == nil then
@@ -237,8 +237,8 @@ local function Init()
                 local dlg = iup.scitedialog{vbox; title = "Добавление по образцу", defaultenter = "BTN_OK", defaultesc = "BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid="spell",
                     show_cb =(function(h, state)
                         if state == 0 then
-                            local s = scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos)
-                            local e = scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)
+                            local s = editor:IndicatorStart(mark, editor.CurrentPos)
+                            local e = editor:IndicatorEnd(mark, editor.CurrentPos)
 
                             local word = ProbabblyFromUT(editor:textrange(s, e))
                             txt_sorse.value = word
@@ -342,10 +342,10 @@ local function Init()
         local lineErrors = ""
         local out = ""
         while iPos < editor.TextLength do
-            iPos = scite.SendEditor(SCI_INDICATOREND, mark, nextStart)
+            iPos = editor:IndicatorEnd(mark, nextStart)
             if iPos >= editor.TextLength or iPos == nextStart then break end
 
-            nextStart = scite.SendEditor(SCI_INDICATOREND, mark, iPos)
+            nextStart = editor:IndicatorEnd(mark, iPos)
             local word = ProbabblyFromUT(editor:textrange(editor:WordStartPosition(iPos, true), nextStart))
 
             count = count + 1
@@ -366,20 +366,20 @@ local function Init()
         end
         out = out..'<\r\n'
 
-        for line = 0, editor.LineCount do
-            local level = scite.SendFindRes(SCI_GETFOLDLEVEL, line)
-            if (shell.bit_and(level, SC_FOLDLEVELHEADERFLAG)~= 0 and SC_FOLDLEVELBASE == shell.bit_and(level, SC_FOLDLEVELNUMBERMASK)) then
-                scite.SendFindRes(SCI_SETFOLDEXPANDED, line)
-                local lineMaxSubord = scite.SendFindRes(SCI_GETLASTCHILD, line,- 1)
-                if line < lineMaxSubord then scite.SendFindRes(SCI_HIDELINES, line + 1, lineMaxSubord) end
+        for line = 0, findres.LineCount do
+            local level = findres.FoldLevel[line]
+            if (shell.bit_and(level,SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == shell.bit_and(level,SC_FOLDLEVELNUMBERMASK))then
+                findres.FoldExpanded[line] = nil
+                local lineMaxSubord = findres:GetLastChild(line,-1)
+                if line < lineMaxSubord then findres:HideLines(line + 1, lineMaxSubord) end
             end
         end
 
-        scite.SendFindRes(SCI_SETSEL, 0, 0)
-        scite.SendFindRes(SCI_REPLACESEL, out)
-        if scite.SendFindRes(SCI_LINESONSCREEN) == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
-        scite.SendFindRes(SCI_SETSEL, 0, 0)
-        scite.SendFindRes(SCI_REPLACESEL, '>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]..'\n')
+        findres:SetSel(0, 0)
+        findres:ReplaceSel(out)
+        if findres.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+        findres:SetSel(0, 0)
+        findres:ReplaceSel('>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]:from_utf8(1251)..'\n')
     end
 
     local function OnIdle_local()
@@ -412,7 +412,7 @@ local function Init()
     local function FillVariantsMenu()
         local lst = {}
 
-        local word = ProbabblyFromUT(editor:textrange(scite.SendEditor(SCI_INDICATORSTART, mark, editor.CurrentPos), scite.SendEditor(SCI_INDICATOREND, mark, editor.CurrentPos)))
+        local word = ProbabblyFromUT(editor:textrange(editor:IndicatorStart(mark, editor.CurrentPos), editor:IndicatorEnd(mark, editor.CurrentPos)))
 
         local s
         if word:byte() >= 192 then --eror
@@ -457,7 +457,7 @@ local function Init()
 
         menuhandler:InsertItem('EDITOR', 's0',
             {'Spelling Variants', plane = 1,
-                visible = function() return scite.SendEditor(SCI_INDICATORVALUEAT, mark, editor.CurrentPos) == 1 end,
+                visible = function() return editor:IndicatorValueAt(mark, editor.CurrentPos) == 1 end,
                 bottom ={"Context Menu", ru = "Контекстное меню"}, {
                     {'list', plane = 1, FillVariantsMenu},
                     {cADDYODIC, action = function() ApplyVariant(cADDYODIC) end,},

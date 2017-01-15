@@ -223,9 +223,9 @@ function CORE.FindresClickPos(curpos)
         OnNavigation("Go-")
     end
     local function GetFindTxt(lS, lE)
-        local sInd = scite.SendFindRes(SCI_INDICATOREND, 31, lS)
+        local sInd = findres:IndicatorEnd(31, lS)
         if lE >= sInd and sInd >= lS then
-            local eInd = scite.SendFindRes(SCI_INDICATOREND, 31, sInd)
+            local eInd = findres:IndicatorEnd(31, sInd)
             return findres:textrange(sInd, eInd)
         end
     end

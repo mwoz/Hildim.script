@@ -78,7 +78,7 @@ local function Init()
             user_list = user_list..char2html[i]..sep
         end
         user_list = user_list..char2html[n - 3 + cp]
-        scite.SendEditor(SCI_AUTOCSETMAXHEIGHT, 16)
+        editor.AutoCMaxHeight = 16
         editor.AutoCSeparator = string.byte(sep)
         editor:UserListShow(900, user_list)
         editor.AutoCSeparator = string.byte(' ')

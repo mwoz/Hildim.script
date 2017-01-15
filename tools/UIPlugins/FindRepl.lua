@@ -901,7 +901,8 @@ local function create_dialog_FindReplace()
         iup.gauge{
         --iup.progressbar{
             name = "progress",
-            expand = "ALL",
+            expand = "HORIZONTAL",
+            size = "x8"
         },
 
 

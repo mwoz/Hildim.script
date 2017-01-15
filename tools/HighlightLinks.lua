@@ -52,9 +52,9 @@ end
 
 local function select_highlighted_link()
 	local p = editor.CurrentPos
-	if scite.SendEditor(SCI_INDICATORVALUEAT, mark_number, p) == 1 then
-		local s = scite.SendEditor(SCI_INDICATORSTART, mark_number, p)
-		local e = scite.SendEditor(SCI_INDICATOREND, mark_number, p)
+	if editor:IndicatorValueAt(mark_number, p) == 1 then
+		local s = editor:IndicatorStart(mark_number, p)
+		local e = editor:IndicatorEnd(mark_number, p)
 		if s and e then
 			editor:SetSel(s,e)
 			return true
