@@ -686,7 +686,7 @@ local function FileManTab_Init(h)
         end
     end)
 
-    _Plugins.fileman =  {
+    local res = {
         handle = iup.vbox{
                    iup.scrollbox{iup.vbox{iup.hbox{iup.label{title = "Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
                    iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"}},
@@ -725,6 +725,7 @@ local function FileManTab_Init(h)
         end;
     }
     Favorites_OpenList()
+    return res
 end
 
 

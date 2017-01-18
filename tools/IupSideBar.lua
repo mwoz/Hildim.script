@@ -45,47 +45,52 @@ end
 
 local function  CreateToolBar()
     local str = _G.iuprops["settings.toolbars.layout"] or ''
-    local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'
+    local tblVb = {gap = "1", name="ToolBar"}
+    local tblHb
     local i = 0
     for p in str:gmatch('[^¦]+') do
         local _,_, pname, pf = p:find('(.-)(¬?)$')
         if pf == '¬' then
-            strTbl = strTbl..'}, '..Iif(i > 0, 'iup.label{separator = "HORIZONTAL"}, ' ,'').. 'iup.hbox{\n'
+            if i > 0 then
+                table.insert(tblVb, iup.hbox(tblHb))
+                table.insert(tblVb, iup.label{separator = "HORIZONTAL"})
+            end
+            tblHb = {gap="3",margin="3x0", alignment = "ACENTER"}
             i = i + 1
         end
         local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
-        pI.toolbar(ToolBar_obj)
+        ToolBar_obj.Tabs[pI.code] = pI.toolbar(ToolBar_obj)
         local id = pI.code
         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
         iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
-        strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'
+        table.insert(tblHb, ToolBar_obj.Tabs[pI.code].handle)
+
     end
-    strTbl = strTbl..'gap="3",margin="3x0", maxsize="x36", alignment = "ACENTER",}, name="ToolBar"}} end'
-    return loadstring(strTbl)()
+    table.insert(tblVb, iup.hbox(tblHb))
+
+    return iup.expander{barsize = 1, state = "OPEN", name = "toolbar_expander", iup.vbox(tblVb)}
 end
 
 local StatusBar_obj = {}
 local function CreateStatusBar()
     local str = _G.iuprops["settings.status.layout"] or ''
-    local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "statusbar_expander",iup.hbox{\n'
-    local i = 0
+    local tblH = {gap="3",margin="3x0", name="StatusBar", maxsize="x30", alignment = "ACENTER",}
     for p in str:gmatch('[^¦]+') do
 
         local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
-        pI.statusbar(StatusBar_obj)
+        StatusBar_obj.Tabs[pI.code] = pI.statusbar(StatusBar_obj)
         local id = pI.code
         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
         iup.SetAttribute(StatusBar_obj.Tabs[pI.code].handle, "HELPID", id)
-        strTbl = strTbl..'h.Tabs.'..pI.code..'.handle,\n'
+        table.insert(tblH, StatusBar_obj.Tabs[pI.code].handle)
     end
-    strTbl = strTbl..'iup.fill{},'
+    table.insert(tblH, iup.fill{})
     if _tmpSidebarButtons then
         for i = 1,  #_tmpSidebarButtons do
-            strTbl = strTbl..'_tmpSidebarButtons['..i..'],'
+            table.insert(tblH, _tmpSidebarButtons[i])
         end
     end
-    strTbl = strTbl..'gap="3",margin="3x0", name="StatusBar", maxsize="x30", alignment = "ACENTER",}} end'
-    return loadstring(strTbl)()
+    return iup.expander{barsize = 1, state = "OPEN", name = "statusbar_expander", iup.hbox(tblH)}
 end
 
 function iup.SaveNamedValues(h, root)
@@ -123,7 +128,7 @@ end
 local function  CreateBox()
     -- Creates boxes
     local sb_elements = {}
-    local tbl_hotkeys
+    local tbl_hotkeys = {}
     local function Pane(t)
         for i = 1, #t do
             if type(t[i])=='string' then
@@ -236,14 +241,14 @@ local function  CreateBox()
         local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
         local function piCode(pI)
             if pI.code == 'findrepl' then
-                return 'P{type = "FIND"}'
+                return Pane{type = "FIND"}
             else
-                return '"'..pI.code..'"'
+                return pI.code
             end
             return pI.code
         end
         if str == '' then
-            return 'return function() return nil end'
+            return nil
         end
         local tSide = {}
         local tCur
@@ -256,58 +261,64 @@ local function  CreateBox()
                 table.insert(tCur, pname)
             end
         end
-        local strTabs = 'return function(P) return{\n'
-        --debug_prnArgs(tSide, SideBar_Plugins)
+        local tArg = {}
         for i = 1, #tSide do
             tCur = tSide[i]
             if tCur[1] then
                 local pI = dofile(defpath..tCur[1])
-                pI.sidebar(SideBar_Plugins)
-                --debug_prnArgs()
+                SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
                 local id = pI.code
                 if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                 iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
                 local tabName = tCur.title
                 local tabhotkey = pI.tabhotkey
                 if #tCur == 1 then
-                    strTabs = strTabs..'P{"'..pI.code..'", tabtitle = "'..tabName..'", tabhotkey="'..(tabhotkey or '')..'"},\n'
+                    table.insert(tArg, Pane{pI.code, tabtitle = tabName, tabhotkey = (tabhotkey or '')})
                 else
-                    local strPrev = piCode(pI)
                     local bfixedheigth = pI.fixedheigth
+
+                    local tSub = {piCode(pI)}
                     for j = 2, #tCur do
                         pI = dofile(defpath..tCur[j])
-                        pI.sidebar(SideBar_Plugins)
+                        SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
                         local id = pI.code
                         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                         if not tabhotkey and pI.tabhotkey then tabhotkey = pI.tabhotkey end
                         iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
-                        strPrev = 'P{'..strPrev..', '..piCode(pI)..', '
+
+                        table.insert(tSub, piCode(pI))
                         if bfixedheigth or pI.fixedheigth then
-                            strPrev = strPrev..'type="VBOX", '
+
+                            tSub.type = "VBOX"
                         else
-                            strPrev = strPrev..' orientation="HORIZONTAL", type="SPLIT", name = "split'..pI.code..'", '
+
+                            tSub.name = 'split'..pI.code
+                            tSub.type = "SPLIT"
+                            tSub.orientation = "HORIZONTAL"
                         end
                         if j == #tCur then
-                            strPrev = strPrev..'tabtitle = "'..tabName..'", tabhotkey="'..(tabhotkey or '')..'", '
+
+                            tSub.tabtitle = tabName
+                            tSub.tabhotkey = (tabhotkey or '')
                         end
-                        strPrev = strPrev..'}'
+
+                        tSub = Pane(tSub)
                     end
-                    strTabs = strTabs..strPrev..',\n'
+
+                    table.insert(tArg, tSub)
                 end
             end
         end
-        --print(strTabs.."} end")
-        return strTabs.."} end"
+        return tArg
     end
 
-    local tbArgLeft = assert(loadstring(settings2tbl(_G.iuprops["settings.user.leftbar"] or '',"tbArgLeft")))()
-    local tbArgRight = assert(loadstring(settings2tbl(_G.iuprops["settings.user.rightbar"] or '', "tbArgRight")))()
-
-    tbl_hotkeys = {}
     hk_pointer = 1
-
     pane_curObj = LeftBar_obj
-    tabs =  SideBar(tbArgLeft(Pane), LeftBar_obj, 'leftbar')
+    local tbArgLeft = settings2tbl(_G.iuprops["settings.user.leftbar"] or '', "tbArgLeft")
+    pane_curObj = SideBar_obj
+    local tbArgRight = settings2tbl(_G.iuprops["settings.user.rightbar"] or '', "tbArgRight")
+
+    tabs =  SideBar(tbArgLeft, LeftBar_obj, 'leftbar')
 
     if tabs then
         LeftBar_obj.TabCtrl = tabs
@@ -316,8 +327,7 @@ local function  CreateBox()
         LeftBar_obj.handle = SidePane(vbox, 'LeftBarSB','leftbar','SourceSplitLeft', 'LeftBarExpander', '0', LeftBar_obj, 'Left', 'application_sidebar_left_µ' )
     end
 
-    pane_curObj = SideBar_obj
-    local tabs =  SideBar(tbArgRight(Pane), SideBar_obj, 'sidebar')
+    local tabs =  SideBar(tbArgRight, SideBar_obj, 'sidebar')
 
     if tabs then
         SideBar_obj.TabCtrl = tabs
@@ -398,7 +408,7 @@ local function InitSideBar()
     local bs2 = iup.GetDialogChild(hMainLayout, "BottomSplit2")
     local bFindInSide
     if  not SideBar_Plugins.findrepl then
-        dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar(SideBar_Plugins)
+        SideBar_Plugins.findrepl = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar(SideBar_Plugins)
         local hTmp= iup.dialog{SideBar_Plugins.findrepl.handle}
         local hBx = iup.GetDialogChild(hTmp, 'FindReplDetach')
         iup.Detach(hBx)
@@ -496,7 +506,8 @@ local function InitToolBar()
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     ToolBar_obj.Tabs = {}
 
-    tTlb = {CreateToolBar()(ToolBar_obj)}
+    --tTlb = {CreateToolBar()(ToolBar_obj)}
+    tTlb = {CreateToolBar()}
     tTlb.control = "YES"
     tTlb.sciteid="iuptoolbar"
     tTlb.show_cb=(function(h,state)
@@ -538,8 +549,7 @@ local function InitStatusBar()
      local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     StatusBar_obj = {}
     StatusBar_obj.Tabs = {}
-    local tTlb = {CreateStatusBar()(StatusBar_obj)}
-    --local tTlb = {CreateStatusBar()}
+    local tTlb = {CreateStatusBar()}
      _tmpSidebarButtons = nil
 
     tTlb.control = "YES"

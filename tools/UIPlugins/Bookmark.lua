@@ -251,7 +251,7 @@ local function ToolBar_Init(h)
             iup.label{separator = "VERTICAL",maxsize='x22', },
             expand='HORIZONTAL', alignment='ACENTER' , margin = '3x',
     };
-    h.Tabs.bookmark = {
+    return {
         handle = box;
         On_SelectMe = onselect
         }
@@ -260,10 +260,6 @@ end
 local function Tab_Init(h)
     _Plugins = h
     local onselect = Init()
-    h.bookmark = {
-        handle = list_bookmarks;
-        On_SelectMe = onselect
-        }
 
     AddEventHandler("OnResizeSideBar", function(sciteid)
         if h.bookmark.Bar_obj.sciteid == sciteid then
@@ -271,6 +267,10 @@ local function Tab_Init(h)
             list_bookmarks.fittosize = 'COLUMNS'
         end
     end)
+    return {
+        handle = list_bookmarks;
+        On_SelectMe = onselect
+        }
 end
 
 local function Hidden_Init(h)

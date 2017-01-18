@@ -348,7 +348,7 @@ end
 local function Sidebar_Init(h)
 
     init()
-    h.htmlpreview = {
+    return {
         handle = web;
     }
 end
@@ -368,13 +368,13 @@ local function Toolbar_Init(h)
     function web:unmap_cb(h)
         _G.iuprops["htmlpreview.webwidth"] = box.value
     end
-
-    h.Tabs.htmlpreview =  {
-        handle = expan
-    }
     onSwitchBar = function()
         expan.state = Iif(editor_LexerLanguage() == 'hypertext', 'OPEN', 'CLOSE')
     end
+
+    return  {
+        handle = expan
+    }
 end
 
 return {

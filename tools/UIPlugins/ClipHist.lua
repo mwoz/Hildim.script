@@ -393,14 +393,14 @@ end
 
 local function Sidebar_Init(h)
     init()
-    h.cliphistory = {
-        handle = lst_clip; }
     AddEventHandler("OnResizeSideBar", function(sciteid)
         if h.cliphistory.Bar_obj.sciteid == sciteid then
             lst_clip.rasterwidth1 = nil
             lst_clip.fittosize = 'COLUMNS'
         end
     end)
+    return {
+        handle = lst_clip; }
 end
 
 local function createDlg()
@@ -491,7 +491,7 @@ local function Toolbar_Init(h)
         dlg:showxy(left,top)
     end
 
-    h.Tabs.cliphistory =  {
+    return {
         handle = box
     }
 end

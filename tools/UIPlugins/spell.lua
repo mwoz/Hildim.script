@@ -503,7 +503,7 @@ function Init_status(h)
             button_cb = onSpellContext;
         };
     }
-    h.Tabs.spell = {
+    return {
         handle = zbox_s
     }
 end

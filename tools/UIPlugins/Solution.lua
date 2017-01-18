@@ -268,99 +268,99 @@ local function Solution_Init(h)
     _Plugins = h
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
     local w
-   -- for w in string.gmatch(prp, "[^|]+") do
-   --    layout[w] = 'COLLAPSED'
+    -- for w in string.gmatch(prp, "[^|]+") do
+    --    layout[w] = 'COLLAPSED'
     --end
-    local line = nil                                                                                              --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_sol = iup.tree{minsize = '0x5', size=_G.iuprops["sidebar.functions.tree_sol.size"],
-        showdragdrop='YES', showrename='YES', dropfilestarget='YES',}
-        --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
-        tree_sol.size = nil
+    local line = nil --RGB(73, 163, 83)  RGB(30,180,30)
+    tree_sol = iup.tree{minsize = '0x5', size = _G.iuprops["sidebar.functions.tree_sol.size"],
+    showdragdrop = 'YES', showrename = 'YES', dropfilestarget = 'YES',}
+    --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
+    tree_sol.size = nil
 
-        tree_sol.button_cb = (function(h,but, pressed, x, y, status)
+    tree_sol.button_cb = (function(h, but, pressed, x, y, status)
 
-            if but == 51 and pressed == 0 then --right
-                h.value = iup.ConvertXYToPos(h,x,y)
-                menuhandler:PopUp('MainWindowMenu¦_HIDDEN_¦Solution_sidebar')
+        if but == 51 and pressed == 0 then --right
+            h.value = iup.ConvertXYToPos(h, x, y)
+            menuhandler:PopUp('MainWindowMenu¦_HIDDEN_¦Solution_sidebar')
 
-            elseif but == 49 and iup.isdouble(status) then --dbl left
-                if h.kind ~= 'BRANCH' then
-                    OpenFile(h:GetUserId(h.value))
-                    iup.PassFocus()
-                end
-            end
-            if pressed == 0 and line ~= nil then
-                iup.PassFocus()
-                line = nil
-            end
-        end)
-        tree_sol.k_any = (function(h,number)
-            if number == 13 then
+        elseif but == 49 and iup.isdouble(status) then --dbl left
+            if h.kind ~= 'BRANCH' then
                 OpenFile(h:GetUserId(h.value))
                 iup.PassFocus()
-            elseif number == iup.K_ESC then
-                iup.PassFocus()
-            end
-        end)
-        tree_sol.branchclose_cb = function(h) if h.value=='0' then return -1 end end
-        tree_sol.rename_cb = function() is_chanjed = true return -4 end
-        tree_sol.dragdrop_cb = function(h, drag_id, drop_id, isshift, iscontrol)
-            if iscontrol == 1 then return -1 end
-            is_chanjed = true return -4
-        end
-        tree_sol.killfocus_cb = SaveSolution
-        tree_sol.tips_cb = function(h, x, y, status)
-            local n = iup.ConvertXYToPos(h,x,y)
-            if n == 0 then
-                h.tip = _G.iuprops['solution.current'] or defpath
-            else
-                h.tip = h:GetUserId(n)
             end
         end
-        tree_sol.dropfiles_cb = function(h, filename, num, x, y)
-            local val = iup.ConvertXYToPos(h,x,y)
-            local _,_,fnExt = filename:find('([^\\]*)$')
-            iup.SetAttributeId(tree_sol, "ADDLEAF", val, fnExt)
-            iup.SetAttributeId(tree_sol, "IMAGE", val, GetExtImage(filename))
-            tree_sol:SetUserId(val + 1, filename)
-            is_chanjed = true
-            SaveSolution()
+        if pressed == 0 and line ~= nil then
+            iup.PassFocus()
+            line = nil
         end
+    end)
+    tree_sol.k_any = (function(h, number)
+        if number == 13 then
+            OpenFile(h:GetUserId(h.value))
+            iup.PassFocus()
+        elseif number == iup.K_ESC then
+            iup.PassFocus()
+        end
+    end)
+    tree_sol.branchclose_cb = function(h) if h.value == '0' then return - 1 end end
+    tree_sol.rename_cb = function() is_chanjed = true return - 4 end
+    tree_sol.dragdrop_cb = function(h, drag_id, drop_id, isshift, iscontrol)
+        if iscontrol == 1 then return - 1 end
+        is_chanjed = true return - 4
+    end
+    tree_sol.killfocus_cb = SaveSolution
+    tree_sol.tips_cb = function(h, x, y, status)
+        local n = iup.ConvertXYToPos(h, x, y)
+        if n == 0 then
+            h.tip = _G.iuprops['solution.current'] or defpath
+        else
+            h.tip = h:GetUserId(n)
+        end
+    end
+    tree_sol.dropfiles_cb = function(h, filename, num, x, y)
+        local val = iup.ConvertXYToPos(h, x, y)
+        local _, _, fnExt = filename:find('([^\\]*)$')
+        iup.SetAttributeId(tree_sol, "ADDLEAF", val, fnExt)
+        iup.SetAttributeId(tree_sol, "IMAGE", val, GetExtImage(filename))
+        tree_sol:SetUserId(val + 1, filename)
+        is_chanjed = true
+        SaveSolution()
+    end
 
-    h.solution = {   -- iup.vbox{   };
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+        {'Solution_sidebar', plane = 1,{
+            {'Solution', ru = 'Рабочая область', {
+                {'Save as', ru = 'Сохранить как', action = SaveSolAs},
+                {'Open', ru = 'Открыть', action = OpenSol},
+            }},
+            {'Insert Project', ru = 'Новый  проект', action = InsertProject},
+            {'Delete Project', ru = 'Удалить  проект', action = function() DeleteNode(0) end, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and tree_sol.value~='0' end},
+            {'Open All Projects Files', ru = 'Открыть все файлы проекта', action = OpenAll, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and tree_sol.value~='0' end},
+            {'Set As Active Project', ru = 'Установить активным', action = ActivateProject, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and iup.GetAttribute(tree_sol, "COLOR") ~= CLR_ACTIVE end},
+
+            {'s_FindTextOnSel', separator = 1},
+            {'Add...', ru = 'Добавить...', action = Add},
+            {'Add Curent File', ru = 'Добавить текущтй файл', action = AddCurent, visible = function() return shell.fileexists(props["FilePath"]) end },
+            {'Add All Opened Files', ru = 'Добавить все открытые файлы', action = function() AddAll(tree_sol.value) end},
+            {'Remove File', ru = 'Исключить файл из проекта', action = function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
+            {'s1_FindTextOnSel', separator = 1},
+            {'Go To Directory', ru = 'Перейти в директорию', action = function() h.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$', '')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~= "BRANCH" and (h.fileman ~= nil) end},
+    }})
+
+    menuhandler:InsertItem('TABBAR', 'slast', {'project', plane = 1, {
+        {'Save As New Project', ru = 'Сохранить все как новый проект', action=SaveAsNew},
+        {'Add To Active Project', ru = 'Добавить в активный проект', action=AddToActive},
+    }})
+    menuhandler:InsertItem('TABBAR', 's1',
+        {'Save As New Project', ru = 'Закрыть и добавить в активный проект', action = function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
+
+    )
+    return {   -- iup.vbox{   };
         handle = tree_sol;
         OnSwitchFile = Initialize,
         OnOpen = Initialize,
-        on_SelectMe =Initialize
-        }
-
-    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-    {'Solution_sidebar',  plane=1,{
-        {'Solution', ru='Рабочая область', {
-            {'Save as', ru = 'Сохранить как', action=SaveSolAs},
-            {'Open', ru = 'Открыть', action=OpenSol},
-        }},
-        {'Insert Project', ru='Новый  проект', action=InsertProject},
-        {'Delete Project', ru='Удалить  проект', action=function() DeleteNode(0) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
-        {'Open All Projects Files', ru='Открыть все файлы проекта', action=OpenAll, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and tree_sol.value~='0' end},
-        {'Set As Active Project', ru='Установить активным', action=ActivateProject, visible = function() return iup.GetAttribute(tree_sol, "KIND")=="BRANCH" and iup.GetAttribute(tree_sol, "COLOR") ~= CLR_ACTIVE end},
-
-        {'s_FindTextOnSel', separator=1},
-        {'Add...', ru='Добавить...', action=Add},
-        {'Add Curent File', ru='Добавить текущтй файл', action=AddCurent, visible=function() return shell.fileexists(props["FilePath"]) end },
-        {'Add All Opened Files', ru='Добавить все открытые файлы', action=function() AddAll(tree_sol.value) end},
-        {'Remove File', ru='Исключить файл из проекта', action=function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
-        {'s1_FindTextOnSel', separator=1},
-        {'Go To Directory', ru='Перейти в директорию', action =function() h.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$','')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" and (h.fileman ~= nil) end},
-    }})
-
-    menuhandler:InsertItem('TABBAR', 'slast', {'project',plane = 1, {
-        {'Save As New Project', ru='Сохранить все как новый проект', action=SaveAsNew},
-        {'Add To Active Project', ru='Добавить в активный проект', action=AddToActive},
-    }})
-    menuhandler:InsertItem('TABBAR', 's1',
-        {'Save As New Project', ru='Закрыть и добавить в активный проект', action=function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
-)
+        on_SelectMe = Initialize
+    }
 
 end
 

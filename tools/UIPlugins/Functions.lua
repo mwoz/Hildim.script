@@ -939,7 +939,7 @@ local function Func_Init(h)
     end
     iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
 
-    h.functions = {   -- iup.vbox{   };
+    return {   -- iup.vbox{   };
         handle = tree_func;
         OnSwitchFile = OnSwitch;
         OnSave = OnMySave;

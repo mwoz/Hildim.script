@@ -44,7 +44,7 @@ local function Init(h)
     k_any =(function(_, c) if c == iup.K_CR then iup.PassFocus() end end)}
     txtSel = iup.text{size = '25x'; readonly = 'YES', bgcolor = iup.GetGlobal('DLGBGCOLOR'), canfocus = "NO"}
 
-    h.Tabs.positionstatus = {
+    return {
         handle = iup.hbox{
             iup.label{title = 'Line: '; fontstyle = 'Bold'};
             txtLine;

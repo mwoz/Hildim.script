@@ -520,7 +520,7 @@ local function ToolBar_Init(h)
             expand='HORIZONTAL', alignment='ACENTER' , margin = '3x',
     };
     showPopUp = function() fbutton:flat_action() end
-    h.Tabs.abbreviations = {
+    return {
         handle = box;
         on_SelectMe = onselect
         }
@@ -528,16 +528,16 @@ end
 
 local function Tab_Init(h)
     local onselect = Init()
-    h.abbreviations = {
-        handle = list_abbrev;
-        on_SelectMe = onselect
-        }
     AddEventHandler("OnResizeSideBar", function(sciteid)
         if h.abbreviations.Bar_obj.sciteid == sciteid then
             list_abbrev.rasterwidth2 = nil
             list_abbrev.fittosize = 'COLUMNS'
         end
     end)
+    return {
+        handle = list_abbrev;
+        on_SelectMe = onselect
+        }
 end
 
 local function Hidden_Init(h)

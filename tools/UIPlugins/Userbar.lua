@@ -46,14 +46,15 @@ local function Init(h)
     end
 
     ToolBar_obj = h
-    ToolBar_obj.Tabs.usertb = {
-    handle = iup.hbox(tBar)
-    }
 
     AddEventHandler("OnUpdateUI"  , mnuEvenHandler)
     AddEventHandler("OnOpen"      , mnuEvenHandler)
     AddEventHandler("OnSwitchFile", mnuEvenHandler)
     AddEventHandler("OnBeforeSave", mnuEvenHandler)
+
+    return {
+        handle = iup.hbox(tBar)
+    }
 end
 
 return {

@@ -143,7 +143,7 @@ local function Init(h)
             end
     end)}
 
-    h.Tabs.sel_color = {
+    return {
         handle = iup.hbox{
             lblSel; alignment = 'ACENTER'
         };

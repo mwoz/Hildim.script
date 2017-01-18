@@ -45,7 +45,7 @@ local function Init(h)
 
     lblCode = iup.label{size = '50x'}
 
-    h.Tabs.filecoding = {
+    return {
         handle = lblCode
     }
 end

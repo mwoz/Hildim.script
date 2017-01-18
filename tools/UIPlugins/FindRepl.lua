@@ -53,6 +53,57 @@ local function ReadSettings()
     end
 end
 
+local prev_KF = nil
+local function live_killFocus(h)
+    local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)
+    if a then
+        findres.TargetStart = a
+        findres.TargetEnd = a + 3
+        findres:ReplaceTarget('<')
+    end
+    if prev_KF then prev_KF(h) end
+    h.killfocus_cb = prev_KF
+    prev_KF = nil
+end
+local function Find_onTimer(h)
+    h.run = "NO"
+    local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)
+    if a then
+        findres.TargetStart = 0
+        findres.TargetEnd = findres.LineEndPosition[findres:LineFromPosition(a)]+1
+        findres:ReplaceTarget('')
+    end
+    findSettings:FindAll(50, true)
+    if not prev_KF then
+        prev_KF = Ctrl('cmbFindWhat').killfocus_cb
+        Ctrl('cmbFindWhat').killfocus_cb = live_killFocus
+    end
+end
+local tm = iup.timer{time = 300, run = 'NO', action_cb = Find_onTimer}
+
+local function onFindEdit(h, c, new_value)
+    local res = nil
+    if new_value:find('[\n\r]') then
+        h.value = PrepareFindText(new_value)
+        res = iup.IGNORE
+    end
+    if Ctrl('byInput').value == 'ON' and Ctrl("tabFindRepl").valuepos == '0' and not ReadSettings() then
+        findSettings.findWhat = new_value
+        if Ctrl('byInputAll').value == 'ON' then
+            tm.run = "NO"
+            tm.run = "YES"
+        else
+            OnNavigation("Find")
+            local pos = findSettings:FindNext(true)
+            OnNavigation("Find-")
+            if pos < 0 then SetInfo('Ничего не найдено', 'E')
+            else SetInfo('', '') end
+        end
+    end
+
+    return res
+end
+
 --Хендлеры контролов диалога
 local function PostAction(bForce)
     if (_G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1' and Ctrl("chkPassFocus").value == 'ON') or bForce then
@@ -286,6 +337,7 @@ local function SetStaticControls()
     Ctrl("chkBackslash").active = Iif(notInFiles and notRE, 'YES', 'NO')
     Ctrl("btnArrowUp").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("btnArrowDown").active = Iif(notInFiles, 'YES', 'NO')
+    Ctrl("byInputAll").visible = Iif(Ctrl('byInput').value == 'ON', 'YES', 'NO')
     oDeattFnd.onSetStaticControls()
 end
 
@@ -356,6 +408,7 @@ local function ActivateFind_l(nTab)
 
     if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir']:from_utf8(1251) end
     SetStaticControls()
+    if Ctrl('byInput').value == 'ON' and Ctrl('byInputAll').value == 'ON' then onFindEdit(Ctrl("cmbFindWhat"), '', Ctrl("cmbFindWhat").value) end
     return true
 end
 
@@ -452,7 +505,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visibleitems = "18",
-      edit_cb=(function(h, c, new_value) if new_value:find('[\n\r]') then h.value = PrepareFindText(new_value) return -1 end end),
+      edit_cb=onFindEdit,
       k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return iup.IGNORE; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],
@@ -494,11 +547,21 @@ local function create_dialog_FindReplace()
   containers[7] = iup.vbox{
     iup.hbox{
         margin = "0x0",
+        alignment = 'ACENTER',
         iup.button{
           action = CloseFind,
           name = 'btn_esc',
           size = '1x1',
         },
+        iup.toggle{
+            name = 'byInput',
+            title = 'По мере набора',
+            action = SetStaticControls,
+        },
+        iup.toggle{
+            name = 'byInputAll',
+            title = ' - все',
+        }
     },
     iup.hbox{
       iup.button{
@@ -991,6 +1054,7 @@ local function Init(h)
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
             end
         end);
+        Dlg_Show_Cb=function(h, state) SetStaticControls() end
         }
     local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')
     if hboxPane then
@@ -1004,7 +1068,7 @@ local function Init(h)
     end)
 
 
-    _Plugins.findrepl = {
+    local res = {
         handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};
         OnMenuCommand = (function(msg)
             if msg == IDM_FIND then return ActivateFind_l(0)
@@ -1026,9 +1090,9 @@ local function Init(h)
             end
         end);
         }
-    _Plugins.findrepl.handle_deattach = oDeattFnd
-    _Plugins.findrepl.OnCreate = (function()
-            SetStaticControls()
+    res.handle_deattach = oDeattFnd
+    res.OnCreate = (function()
+        --scite.RunAsync(SetStaticControls)
     end)
 
     function OnFindProgress(state, iAll)
@@ -1046,6 +1110,7 @@ local function Init(h)
             findSettings:MarkResult()
         end
     end
+    return res
 end
 g_Ctrl = Ctrl
 return {

@@ -154,7 +154,7 @@ end
 
 local function Tab_Init(h)
     internal_Init()
-    h.navigation = {
+    return {
         handle = list_navigation;
         }
 
@@ -214,7 +214,7 @@ local function ToolBar_Init(h)
             iup.label{separator = "VERTICAL",maxsize='x22', },
             expand='HORIZONTAL', alignment='ACENTER', margin = '3x',
     };
-    h.Tabs.navigation = {
+    return {
         handle = box;
         }
 end
