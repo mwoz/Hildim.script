@@ -74,9 +74,10 @@ local function CreateUntitledFile()
     scite.RunAsync(function() editor.Focus = true end)
     return true
 end
-
+local scipped, bscip
 AddEventHandler("OnMenuCommand", function(msg, source)
-	if msg == IDM_NEW then
+	bscip = false
+    if msg == IDM_NEW then
 		return CreateUntitledFile()
     elseif msg == IDM_SAVE then
         if props["FileNameExt"]:find'^%^' and not shell.fileexists(props["FilePath"]) then
@@ -84,13 +85,15 @@ AddEventHandler("OnMenuCommand", function(msg, source)
             return true
         end
     elseif msg == IDM_SAVEAS then
-		unsaved_files[props["FilePath"]:upper()] = nil --удаляем запись о буфере из таблицы
+        bscip = true
+	--	unsaved_files[props["FilePath"]:upper()] = nil --удаляем запись о буфере из таблицы
     else
-        end
+    end
 end)
 
 -- Новый буфер, созданный функцией CreateUntitledFile имеет полное имя, поэтому при сохранении SciTE будет сохранять его молча по заданному пути (без вывода диалогового окна "SaveAs")
 -- Обработчик события OnBeforeSave при сохранении такого буфера выводит диалоговое окно "SaveAs"
+
 AddEventHandler("OnBeforeSave", function(file)
 	if isMakeUTF8() and tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then
 		editor.TargetStart = 0
@@ -99,8 +102,16 @@ AddEventHandler("OnBeforeSave", function(file)
 		editor:ReplaceTarget(shell.to_utf8(txt_in))
 		scite.MenuCommand(IDM_ENCODING_UCOOKIE)
 	end
-	if unsaved_files[file:upper()] then -- если это созданный нами несохраненный буфер
-		scite.MenuCommand(IDM_SAVEAS)
+	-- if unsaved_files[file:upper()] then -- если это созданный нами несохраненный буфер
+	if not shell.fileexists(props["FilePath"]) and scipped ~= props["FilePath"] and not bscip then -- если это созданный нами несохраненный буфер
+        scipped = props["FilePath"]
+        scite.MenuCommand(IDM_SAVEAS)
+        scipped = nil
 		return true
 	end
+    bscip = false
+end)
+
+AddEventHandler("OnSave", function(file)
+	unsaved_files[file:upper()] = nil --удаляем запись о буфере из таблицы
 end)

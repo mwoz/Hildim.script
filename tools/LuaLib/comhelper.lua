@@ -41,22 +41,23 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
             lastNode = oChild
             bHasChild = true
             if oChild.nodeTypeString == 'text' then
+                local chTxt = oChild.text:to_utf8(1251)
                 if not oChild.nextSibling then
                     if string.find(strNoNewLineEnd, ','..oNode.nodeName..',') then
-                        oChild.text = oChild.text:gsub('[\r\n\t ]*$', '')
+                        oChild.text = chTxt:gsub('[\r\n\t ]*$', '')
                     elseif string.find(strInd0, ','..oNode.nodeName..',') then
-                        oChild.text = oChild.text:gsub('\r\n%s*$', '\r\n')
+                        oChild.text = chTxt:gsub('\r\n%s*$', '\r\n')
                     else
-                        oChild.text = oChild.text:gsub('\r\n%s*$', indent)
+                        oChild.text = chTxt:gsub('\r\n%s*$', indent)
                     end
                 elseif oChild.nextSibling.nodeTypeString  == 'element' then
                     if string.find(strInd0, ','..oChild.nextSibling.nodeName..',') then
-                        oChild.text = oChild.text:gsub('\r\n%s*$', clb(oChild.nextSibling, '\r\n', indent))
+                        oChild.text = chTxt:gsub('\r\n%s*$', clb(oChild.nextSibling, '\r\n', indent))
                     else
-                        oChild.text = oChild.text:gsub('\r\n[\t ]*$', clb(oChild.nextSibling, newindent, indent))
+                        oChild.text = chTxt:gsub('\r\n[\t ]*$', clb(oChild.nextSibling, newindent, indent))
                     end
                 elseif oChild.nextSibling.nodeTypeString == 'cdatasection' then
-                    oChild.text = oChild.text:gsub('[\r\n\t ]*$', '')
+                    oChild.text = chTxt:gsub('[\r\n\t ]*$', '')
                 end
                 bPrevTxt = true
             elseif oChild.nodeTypeString == 'cdatasection' then
@@ -134,7 +135,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
     xml.preserveWhiteSpace = true
     if not xml:loadXml(strXml) then
         local xmlErr = xml.parseError
-        print(xmlErr.line, xmlErr.linepos, xmlErr.reason:from_utf8(1251))
+        print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
         return strXml, true
     end
 

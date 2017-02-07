@@ -20,10 +20,12 @@ if shell.fileexists(file) then
         io.write(text)
         io.close()
     end
-elseif shell.fileexists(props["SciteDefaultHome"]..'\\data\\home\\default.config') then
-    props['config.restore'] = props["SciteDefaultHome"]..'\\data\\home\\default.config'
+elseif shell.fileexists(props["scite.userhome"]..'\\_default.config') then
+    props['config.restore'] = props["scite.userhome"]..'\\_default.config'
+    _G.iuprops['current.config.restore'] = props["scite.userhome"]..'\\default.config'
 else
-    props['config.restore'] = props["SciteDefaultHome"]..'\\tools\\default.config'
+    props['config.restore'] = props["SciteDefaultHome"]..'\\tools\\_default.config'
+    _G.iuprops['current.config.restore'] = props["scite.userhome"]..'\\default.config'
 end
 
 
@@ -443,7 +445,7 @@ local function LoadSession_local(filename)
 end
 
 iup.LoadSession = function()
-    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["scite.userhome"].."\\" }
     d:popup()
     local filename = d.value
     d:destroy()
@@ -452,7 +454,7 @@ iup.LoadSession = function()
 end
 
 iup.SaveSession = function()
-    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Session|*.fileset;', directory=props["scite.userhome"].."\\" }
     d:popup()
     local filename = d.value
     d:destroy()
@@ -525,7 +527,6 @@ function CORE.SwitchPane(bForward)
 end
 
 AddEventHandler("OnMenuCommand", function(cmd, source)
-
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
         return iup.CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
@@ -587,6 +588,15 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         end
         if output.Focus then CORE.HelpUI("outputpane", nil); return true end
         if findres.Focus then CORE.HelpUI("findrespane", nil); return true end
+    elseif cmd == IDM_GO or cmd == IDM_BUILD or cmd == IDM_COMPILE then
+        local strcmd
+        if cmd == IDM_GO then strcmd = 'go'
+        elseif cmd == IDM_BUILD then strcmd = 'build'
+        else strcmd = 'compile' end
+        if props['command.'..strcmd..'.subsystem$'] == '10' then
+            assert(loadstring(props['command.'..strcmd..'$']))()
+            return true
+        end
     end
 end)
 
@@ -1259,12 +1269,12 @@ end)
 
 local function LoadIuprops_Local(filename)
     props['config.restore'] = filename
-    _G.iuprops['current.config.restore'] = filename
+    _G.iuprops['current.config.restore'] = filename:gsub('^(.-)_?([^\\]-%.[^\\.]+)$', '%1%2')
     scite.RunAsync(iup.ReloadScript)
 end
 
 iup.LoadIuprops = function()
-    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["scite.userhome"].."\\" }
     d:popup()
     local filename = d.value
     d:destroy()
@@ -1344,13 +1354,14 @@ end
 
 iup.SaveIuprops = function()
 
-    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["scite.userhome"].."\\" }
     d:popup()
     local filename = d.value
     d:destroy()
     SaveIuprops_local(filename)
-
-    _G.iuprops['current.config.restore'] = filename
+    if filename then
+        _G.iuprops['current.config.restore'] = filename:gsub('^(.-)_?([^\\]-%.[^\\.]+)$', '%1%2')
+    end
 end
 
 iup.SaveCurIuprops = function()

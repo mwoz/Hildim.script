@@ -266,6 +266,7 @@ local function ReplaceInBuffers()
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
     Ctrl("cmbFindWhat"):SaveHist()
+    scite.Perform('blockuiupdate:u')
     PassFocus_local()
     PostAction()
 end

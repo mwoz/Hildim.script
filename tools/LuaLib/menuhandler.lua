@@ -290,7 +290,7 @@ end
 
 function s:RegistryHotKeys()
 
-    local defpathUsr, tblUsers = props["SciteDefaultHome"].."\\data\\home\\userHotKeys.lua"
+    local defpathUsr, tblUsers = props["scite.userhome"].."\\userHotKeys.lua"
     if shell.fileexists(defpathUsr) then tblUsers = assert(loadfile(defpathUsr))() end
 
     if not sys_Menus then return end

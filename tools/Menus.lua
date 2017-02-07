@@ -451,9 +451,9 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 
 	},},
 	{'Tools', ru = 'Инструменты',{
-		{'&Compile', ru = 'Компилировать', key = 'Ctrl+F7', action = IDM_COMPILE, image = 'compile_µ'},
-		{'&Build', ru = 'Собрать', key = 'F7', action = IDM_BUILD, image = 'building__arrow_µ'},
-		{'&Go', ru = 'Выполнить', key = 'F5', action = IDM_GO, image = 'control_µ'},
+		{'&Compile', ru = 'Компилировать', key = 'Ctrl+F7', action = IDM_COMPILE, image = 'compile_µ', visible='props["command.compile$"]~=""'},
+		{'&Build', ru = 'Собрать', key = 'F7', action = IDM_BUILD, image = 'building__arrow_µ', visible = 'props["command.build$"]~=""'},
+		{'&Go', ru = 'Выполнить', key = 'F5', action = IDM_GO, image = 'control_µ', visible='props["command.go$"]~=""'},
 		{'&Stop Executing', ru = 'Остановить выполнение', key = 'Ctrl+Break', action = IDM_STOPEXECUTE},
 		{'Script', ru = 'Скрипт автозагрузки',{
 			{'Reload', ru = 'Перезагрузить', key = 'Alt+Ctrl+Shift+R', action = function() scite.RunAsync(iup.ReloadScript) end,},

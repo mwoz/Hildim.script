@@ -1,7 +1,7 @@
 --[[Диалог редактирования горячих клавиш]]
 require "menuhandler"
 local tblView = {}, tblUsers
-local defpath = props["SciteDefaultHome"].."\\data\\home\\userMenuBars.lua"
+local defpath = props["scite.userhome"].."\\userMenuBars.lua"
 
 local function viewMenu(tMnu, tView, path)
     local tN, tSub

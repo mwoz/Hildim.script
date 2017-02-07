@@ -37,7 +37,7 @@ if props['FileExt'] == 'form' then
     end
     strFrm = comhelper.FormatXml(strFrm, 4,
     'string,stringtable,script,form,template,value',
-    ',,,', 'form', clb):from_utf8(1251)
+    ',,,', 'form', clb)
 
     strFrm = strFrm:gsub('>%s+</form>', '></form>')
 
@@ -53,16 +53,18 @@ elseif props['FileExt'] == 'cform' or props['FileExt'] == 'rform' or props['File
         end
         return indent
     end
-    strFrm = comhelper.FormatXml(strFrm:from_utf8(1251), 4, 'StringTable,Script,Commands,Design,Columns,Styles', ',,,', ',,,', clb)
+    strFrm = comhelper.FormatXml(strFrm, 4, 'StringTable,Script,Commands,Design,Columns,Styles', ',,,', ',,,', clb)
     strFrm = strFrm:gsub('%]%]>%s+</', ']]></')
     strFrm = strFrm:gsub('>%s+<!%[CDATA%[', '><![CDATA[')
 
 else
-    strFrm = comhelper.FormatXml(strFrm:from_utf8(1251), 3, ',,,', ',,,', ',,,', nil)
+    strFrm = comhelper.FormatXml(strFrm, 3, ',,,', ',,,', ',,,', nil)
     strFrm = strFrm:gsub('>%s+</Field>', '></Field>')
 end
+editor:SetSel(0, editor.Length)
 if h then strFrm = h..strFrm end
-editor:SetText(strFrm)
+--editor:SetText(strFrm)
+editor:ReplaceSel(strFrm)
 editor:SetSel(0, editor.Length)
 
 editor:SetSel(0, 0)

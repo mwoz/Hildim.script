@@ -434,10 +434,6 @@ end
 
 local function LexerColors()
 
-    -- local tmpF = io.input(props["SciteDefaultHome"]..'\\data\\home\\SciTEColors.properties')
-    --strText = tmpF:read('*a')
-    --tmpF:close()
-
     local cont = create_dialog_clr()
     mLst = Ctrl("matrixList")
 

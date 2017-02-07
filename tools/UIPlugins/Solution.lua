@@ -1,5 +1,5 @@
 local is_chanjed = false
-local defpath = props["SciteDefaultHome"].."\\data\\home\\default.solution"
+local defpath = props["scite.userhome"].."\\default.solution"
 local CLR_ACTIVE = "30 180 30"
 local _Plugins
 
@@ -232,7 +232,7 @@ end
 local function OpenSol()
     is_chanjed = true
     SaveSolution()
-    local d = iup.filedlg{dialogtype='OPEN',  parentdialog='SCITE', extfilter='Solutions|*.solution;', directory=props["SciteDefaultHome"].."\\data\\home\\" }
+    local d = iup.filedlg{dialogtype='OPEN',  parentdialog='SCITE', extfilter='Solutions|*.solution;', directory=props["scite.userhome"].."\\" }
     d:popup()
     local filename = d.value
     d:destroy()
@@ -252,7 +252,7 @@ end)
 local function SaveSolAs()
     is_chanjed = true
     SaveSolution()
-    local d = iup.filedlg{dialogtype='SAVE',  parentdialog='SCITE', extfilter='Solutions|*.solution;', directory=props["SciteDefaultHome"].."\\data\\home\\"}
+    local d = iup.filedlg{dialogtype='SAVE',  parentdialog='SCITE', extfilter='Solutions|*.solution;', directory=props["scite.userhome"].."\\"}
     d:popup()
     local filename = d.value
     d:destroy()

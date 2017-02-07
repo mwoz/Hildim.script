@@ -32,7 +32,7 @@ local function Show()
                 t = t..'import $(scite.userhome)\\'..nm..'.styles\n'
             end
         end
-        f = io.open(props['SciteDefaultHome']..'\\data\\home\\Languages.properties',"w")
+        f = io.open(props['scite.userhome']..'\\Languages.properties',"w")
         f:write(t)
         f:close()
         _G.iuprops['settings.lexers']=strLng
