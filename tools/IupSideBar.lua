@@ -109,7 +109,7 @@ function iup.SaveNamedValues(h, root)
                         table.insert(hist,iup.GetAttributeId(child, '', i))
                     end
                     _G.iuprops[root..'.'..child.name..'.hist'] = table.concat(hist,'¤')
-                elseif cType == 'zbox' or cType == 'tabs' then
+                elseif cType == 'zbox' or cType == 'tabs' or cType == 'flattabs' then
                     val = child.valuepos
                 elseif cType == 'matrixlist' then
                     val = child.focusitem
@@ -150,7 +150,7 @@ local function  CreateBox()
         elseif t.type == "FIND" then
             SideBar_Plugins.findrepl.Bar_obj = pane_curObj
             table.insert(sb_elements, SideBar_Plugins.findrepl)
-           l =iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',size='x108'}, barsize = '0', name="FinReplExp"}
+           l =iup.backgroundbox{iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',size='x108'}, barsize = '0', name="FinReplExp"}}
         elseif t.type == nil then
             l = t[1]
         else print('Unsupported type:'..t.type) end
@@ -189,8 +189,10 @@ local function  CreateBox()
         end
         hk_pointer =  #tbl_hotkeys + 1
         t.tip = s
+        t.tabspadding = '10x3'
+        t.forecolor = '0 0 0'
 
-        return iup.tabs(t)
+        return iup.flattabs(t)
     end
 
     local function SidePane(hVbox,sName,sSciteId,sSplit,sExpander,sSplit_CloseVal, Bar_obj, sSide, buttonImage)
@@ -369,7 +371,7 @@ local function RestoreNamedValues(h, root)
                         end
                     end
                     if val then child.value = val end
-                elseif cType == 'zbox' or cType == 'tabs' then
+                elseif cType == 'zbox' or cType == 'tabs' or cType == 'flattabs' then
                     if val then child.valuepos = val end
                 elseif cType == 'matrixlist' then
                     if val then

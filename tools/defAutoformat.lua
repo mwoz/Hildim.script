@@ -122,6 +122,11 @@ local bNewLine = false
 local function doIndentation(line, bSel)
     if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(line)]] then return end
     local dL = 1
+    local dLine = 1
+    for i = line - 1, 0, -1 do
+        if not CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(i)]] then break end
+        dL = dL + 1
+    end
     if bSel then
         for pl = line - 1, 0, -1 do
             if editor:LineLength(pl) > 2 then dL = line - pl; break end
@@ -142,6 +147,7 @@ local function doIndentation(line, bSel)
     end
     local d = f0 - f1
     if d < 0 then d = 0 end
+
     if f0 > FoldLevel(nil, line + 1) then
         d = d - (f0 - FoldLevel(nil, line + 1))
     end

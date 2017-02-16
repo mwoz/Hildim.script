@@ -509,11 +509,11 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Interface Font Size', ru = 'Размер шрифта интерфейса...', action = ResetFontSize},
 
 		{'s3', separator = 1},
-		{'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')", active = RunSettings},
+		{'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')", active = RunSettings, image = "keyboards_µ"},
 		{'Plugins', ru = 'Плагины', visible = RunSettings,{
             {'Toolbars Layout', ru = 'Раскладка панелей инструментов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ToolBarsLayout.lua')", image = "ui_toolbar__arrow_µ"},
             {'SideBars Settings', ru = 'Настройка боковых панелей...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\SideBarLayOut.lua')", image="application_sidebar_right_µ"},
-            {'Status Bar Plugins', ru = 'Настройка строки состояния...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Status')"},
+            {'Status Bar Plugins', ru = 'Настройка строки состояния...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Status')", image="ui_status_bar_blue_µ"},
             {'Hidden Plugins', ru = 'Подключение фоновых плагинов...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Hidden')"},
             {'Commands Plugins', ru = 'Подключение команд...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HiddenPlugins.lua')('Commands')", image = 'terminal_µ'},
             {'s1', separator = 1},

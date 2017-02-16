@@ -121,10 +121,10 @@ local function Init()
                 if ierr~= 0 then print(strerr) end
                 cmd = string.gsub(string.gsub(props['vsscompare'], '%%bname', '"'..tmppath..'\\sstmp"'), '%%yname', '"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
                 shell.exec(cmd)
-            elseif strerr == '' then
+            elseif strerr == '' or ierr == 0 then
                 print('No differences')
             else
-                print(strerr, 22)
+                print(strerr, ierr)
             end
         end
     end

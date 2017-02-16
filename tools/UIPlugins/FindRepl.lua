@@ -589,12 +589,11 @@ local function create_dialog_FindReplace()
       normalizesize = "VERTICAL",
   }
 
-  containers[6]= iup.hbox{
+  containers[6] = iup.backgroundbox{iup.hbox{
     containers[32],
     containers[7],
     expandchildren = "YES",
-
-  }
+  }}
 
   containers[13] = iup.vbox{
     iup.button{
@@ -711,11 +710,11 @@ local function create_dialog_FindReplace()
     margin = "0x00",
   }
 
-  containers[16] = iup.vbox{
+  containers[16] = iup.backgroundbox{iup.vbox{
     containers[17],
     containers[18],
     gap = "4",
-  }
+  }}
 
   containers[21] = iup.hbox{
     iup.button{
@@ -796,12 +795,12 @@ local function create_dialog_FindReplace()
     containers[33],
     margin = "3x3",
   }
-  containers[19] = iup.vbox{
-    containers[29],
-    margin = "0x00",
-  }
+  containers[19] = iup.backgroundbox{iup.vbox{
+      containers[29],
+      margin = "0x00",
+  }}
   local dialPrev = 0
-  containers[34] = iup.vbox{expand='NO',
+  containers[34] = iup.backgroundbox{iup.vbox{expand='NO',
       iup.hbox{expand='HORIZONTAL',
           iup.toggle{
               title = "Ïðîãðåññ ïîèñêà â ôàéëàõ",
@@ -854,13 +853,13 @@ local function create_dialog_FindReplace()
               end
           },
           margin = "0x0", padding = '0x0'
-      },
+      }},
 
       margin = "10x5"
 
   }
 
-  containers[5] = iup.tabs{
+  containers[5] = iup.flattabs{
     containers[6],
     containers[11],
     containers[16],
@@ -874,7 +873,8 @@ local function create_dialog_FindReplace()
     canfocus  = "NO",
     name = "tabFindRepl",
     tabchange_cb = SetStaticControls,
-
+    forecolor = '0 0 0',
+    tabspadding = '10x3'
   }
 
   containers["zUpDown"] = iup.zbox{
@@ -1067,7 +1067,6 @@ local function Init(h)
     Ctrl('tabFindRepl').rightclick_cb = (function()
         menuhandler:PopUp('MainWindowMenu¦View¦findrepl')
     end)
-
 
     local res = {
         handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};

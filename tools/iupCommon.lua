@@ -1012,7 +1012,9 @@ iup.scitedetachbox = function(t)
 
     cmd_Attach = function ()
         if get_scId() == "0" then return end
-        if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 then
+        local s = dtb.sciteid
+        if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and
+            (s == 'findrepl' or s == 'concolebar' or s == 'findresbar') then
             scite.MenuCommand(IDM_TOGGLEOUTPUT)
             if get_scId() == "0" then return end
         end
