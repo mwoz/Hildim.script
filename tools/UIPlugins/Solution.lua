@@ -218,8 +218,9 @@ local function Initialize()
     enrich(tree_nodes)
     if not bSetActive then tree_nodes.color = CLR_ACTIVE end
     tree_nodes.imageexpanded = 'tree_µ'
+    tree_sol.autoredraw = 'NO'
     iup.TreeAddNodes(tree_sol, tree_nodes)
-
+    tree_hk.autoredraw = 'YES'
 end
 
 local function Open_Local(filename)

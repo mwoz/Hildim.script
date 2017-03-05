@@ -19,7 +19,7 @@ function s.CheckXml(strXml)
     strXml = strXml:to_utf8(1251)
     if not xml:loadXml(strXml) then
         local xmlErr = xml.parseError
-        return xmlErr.line, xmlErr.linepos, xmlErr.reason:from_utf8(1251)
+        return xmlErr.line, xmlErr.linepos, xmlErr.reason
     end
 end
 

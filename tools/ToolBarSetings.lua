@@ -162,7 +162,9 @@ local function Show()
         viewMenu(submnu, tb, ups)
     end
 
+    tree_hk.autoredraw = 'NO'
     iup.TreeAddNodes(tree_hk, tblView)
+    tree_hk.autoredraw = 'YES'
 
     local str = _G.iuprops["settings.user.toolbar"] or ''
     local id = 0

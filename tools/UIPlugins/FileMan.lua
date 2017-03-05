@@ -62,10 +62,10 @@ local function FileMan_ListFILLByMask(strMask)
 end
 
 FileMan_ListFILL = function()
-    memo_path.value = current_path:from_utf8(1251)
+    memo_path.value = current_path  
 	if current_path == '' then return end
 
-    local table_dir = shell.findfiles(current_path:from_utf8(1251)..'*')
+    local table_dir = shell.findfiles(current_path..'*')   
     if not table_dir then return end
     table.sort(table_dir, function(a, b)
         if a.isdirectory ~= b.isdirectory then return a.isdirectory end
@@ -492,7 +492,8 @@ local function OnSwitch(bForse, bRelist)
         local path = props['FileDir']
         if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
         if path ~= '' then
-            current_path = path:gsub('\\$','')..'\\'
+            current_path = path:from_utf8(1251):gsub('\\$', '')..'\\'
+           -- print(current_path, current_path)
             -- if bClearMask then memo_mask:set_text = "" end
             FileMan_ListFILL()
             for i = 0, list_dir.count - 1 do

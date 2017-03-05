@@ -317,7 +317,9 @@ local function Show()
         table.insert(tblView, 0, tb)
         viewMenu(submnu, tb, ups)
     end
+    tree_hk.autoredraw = 'NO'
     iup.TreeAddNodes(tree_hk, tblView)
+    tree_hk.autoredraw = 'YES'
 
 end
 

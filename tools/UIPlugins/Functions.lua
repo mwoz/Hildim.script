@@ -601,7 +601,7 @@ local function Functions_ListFILL()
     lineMap = {}
     local j = 1
     local tbBranches = {}
-
+    tree_func.autoredraw = 'NO'
     tree_func.delnode0 = "CHILDREN"
     tree_func.title0 = props['FileName']:from_utf8(1251)
     local rootCount = 0
@@ -668,7 +668,7 @@ local function Functions_ListFILL()
             end
         end
     end
-
+    tree_func.autoredraw = 'YES'
 	--сортируем по ордеру, чтобы удобнее искать имя по строке
 	table.sort(table_functions,function(a,b) return a[2] < b[2] end)
 	currFuncData = -1

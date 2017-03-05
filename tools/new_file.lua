@@ -80,13 +80,12 @@ AddEventHandler("OnMenuCommand", function(msg, source)
     if msg == IDM_NEW then
 		return CreateUntitledFile()
     elseif msg == IDM_SAVE then
-        if props["FileNameExt"]:find'^%^' and not shell.fileexists(props["FilePath"]) then
+        if props["FileNameExt"]:find'^%^' and not shell.fileexists(props["FilePath"]:from_utf8(1251)) then
             scite.MenuCommand(IDM_SAVEAS)
             return true
         end
     elseif msg == IDM_SAVEAS then
         bscip = true
-	--	unsaved_files[props["FilePath"]:upper()] = nil --удаляем запись о буфере из таблицы
     else
     end
 end)
@@ -103,8 +102,8 @@ AddEventHandler("OnBeforeSave", function(file)
 		scite.MenuCommand(IDM_ENCODING_UCOOKIE)
 	end
 	-- if unsaved_files[file:upper()] then -- если это созданный нами несохраненный буфер
-	if not shell.fileexists(props["FilePath"]) and scipped ~= props["FilePath"] and not bscip then -- если это созданный нами несохраненный буфер
-        scipped = props["FilePath"]
+	if not shell.fileexists(props["FilePath"]:from_utf8(1251)) and scipped ~= props["FilePath"]:from_utf8(1251) and not bscip then -- если это созданный нами несохраненный буфер
+        scipped = props["FilePath"]:from_utf8(1251)
         scite.MenuCommand(IDM_SAVEAS)
         scipped = nil
 		return true
