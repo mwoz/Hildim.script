@@ -1066,8 +1066,9 @@ iup.scitedetachbox = function(t)
     local tSub = {radio = 1,
         {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return get_scId()=="0" end,},
         {'Pop Up', ru='Всплывающее окно', action=cmd_PopUp, check = function() return get_scId()=="1" end, },
-        {'Hidden', ru='Скрыто', action=cmd_Hide, check = function() return get_scId()=="2" end },
-        {'Show/Hide', ru='Скрыть/Показать (Горячая клавиша)', action=cmd_Switch, visible = false },
+        {'Hidden', ru = 'Скрыто', action = cmd_Hide, check = function() return get_scId() == "2" end },
+        {'s1', separator = 1},
+        {'Show/Hide', ru = 'Скрыть/Показать', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
     }
 
     menuhandler:InsertItem('MainWindowMenu', 'View¦slast',  {dtb.sciteid, ru = t.Dlg_Title, tSub})

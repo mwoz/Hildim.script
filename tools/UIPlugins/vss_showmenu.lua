@@ -50,7 +50,7 @@ local function Init()
             if ierr == 1 then
                 local rez = shell.msgbox("Файл отличается от базы.\nЗаменить существующий файл?","CheckOut",3)
                 if rez ~= 2 then
-                    print(rez)
+                    -- print(rez)
                     if rez == 7 then
                         stropt = " -G-"
                     end
@@ -87,7 +87,7 @@ local function Init()
                 if ierr == 1 then
                     local rez = shell.msgbox("Файл отличается от базы.\nЗаменить существующий файл?","CheckOut",3)
                     if rez ~= 2 then
-                        print(rez)
+                        -- print(rez)
                         if rez == 7 then
                             stropt = " -G-"
                         end

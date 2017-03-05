@@ -220,7 +220,7 @@ local function Initialize()
     tree_nodes.imageexpanded = 'tree_µ'
     tree_sol.autoredraw = 'NO'
     iup.TreeAddNodes(tree_sol, tree_nodes)
-    tree_hk.autoredraw = 'YES'
+    tree_sol.autoredraw = 'YES'
 end
 
 local function Open_Local(filename)
