@@ -872,7 +872,7 @@ local function create_dialog_FindReplace()
     ["tabtitle4"] = "Свойства",
     canfocus  = "NO",
     name = "tabFindRepl",
-    tabchange_cb = SetStaticControls,
+    tabchange_cb = function() SetStaticControls(); scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")) end) end,
     forecolor = '0 0 0',
     tabspadding = '10x3'
   }

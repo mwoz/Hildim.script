@@ -191,6 +191,7 @@ local function  CreateBox()
         t.tip = s
         t.tabspadding = '10x3'
         t.forecolor = '0 0 0'
+        t.canfocus = 'NO'
 
         return iup.flattabs(t)
     end
@@ -646,6 +647,7 @@ for p in str:gmatch('[^¦]+') do
     if pI and pI.run then
         local t = {}
         t[1] = pI.title
+        t.visible = pI.visible
         if pI.key then t.key = pI.key end
         t.action = function() dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p).run() end
 

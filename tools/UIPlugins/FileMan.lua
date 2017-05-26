@@ -62,10 +62,10 @@ local function FileMan_ListFILLByMask(strMask)
 end
 
 FileMan_ListFILL = function()
-    memo_path.value = current_path  
+    memo_path.value = current_path
 	if current_path == '' then return end
 
-    local table_dir = shell.findfiles(current_path..'*')   
+    local table_dir = shell.findfiles(current_path..'*')
     if not table_dir then return end
     table.sort(table_dir, function(a, b)
         if a.isdirectory ~= b.isdirectory then return a.isdirectory end
@@ -675,7 +675,7 @@ local function FileManTab_Init(h)
     memo_mask.k_any=(function(h,k)
         return memoNav(k)
     end)
-    chkByTime = iup.toggle{title="Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"),action=FileMan_ToggleSort}
+    chkByTime = iup.toggle{title="Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", action=FileMan_ToggleSort}
     -- memo_mask.killfocus_cb = (function(h)
         -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)
@@ -724,6 +724,7 @@ local function FileManTab_Init(h)
             end
             OnSwitch(true,false)
         end;
+        on_SelectMe = function() scite.RunAsync(function() iup.SetFocus(memo_mask) end) end;
     }
     Favorites_OpenList()
     return res

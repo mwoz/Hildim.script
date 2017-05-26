@@ -176,6 +176,13 @@ CORE.OpenFoundFiles = function(msg)
 
     if msg == 1 then
         if findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
+            scite.Perform('blockuiupdate:y')
+            BlockEventHandler"OnBeforeOpen"
+            BlockEventHandler"OnOpen"
+            BlockEventHandler"OnSwitchFile"
+            BlockEventHandler"OnNavigation"
+            BlockEventHandler"OnUpdateUI"
+
             local lineNum = findres:LineFromPosition(findres.CurrentPos) + 1
             while true do
                 local style = findres.StyleAt[findres:PositionFromLine(lineNum) + 1]
@@ -186,13 +193,21 @@ CORE.OpenFoundFiles = function(msg)
                 end
                 lineNum = lineNum + 1
             end
+            UnBlockEventHandler"OnUpdateUI"
+            UnBlockEventHandler"OnNavigation"
+            UnBlockEventHandler"OnSwitchFile"
+            UnBlockEventHandler"OnOpen"
+            UnBlockEventHandler"OnBeforeOpen"
+            scite.Perform('blockuiupdate:u')
         end
         return true
     elseif msg == 2 then
         DoForBuffers(CloseIfFound, fndFiles(), true)
+        scite.Perform('blockuiupdate:u')
         return true
     elseif msg == 3 then
         DoForBuffers(CloseIfFound, fndFiles(), false)
+        scite.Perform('blockuiupdate:u')
         return true
     end
 end

@@ -123,10 +123,19 @@ local function BlockComment()
 	else
 		comment_block = comment_block..string.rep(" ", comment_block_use_space)
 		local text_comment = ""
+        local li = 100000
+        if comment_block_at_line_start == 2 then
+            for i = line_sel_start, line_sel_end - 1 do
+                if li > editor.LineIndentation[i] then li = editor.LineIndentation[i] end
+            end
+            comment_block = string.rep(" ", li)..comment_block
+        end
 		for i = line_sel_start, line_sel_end-1 do
 			local text_line = editor:GetLine(i)
 			if string.find(text_line,"[^%s]") then
-				if comment_block_at_line_start == 1 then
+				if comment_block_at_line_start == 2 then
+                    text_comment = text_comment..comment_block..string.gsub(text_line, "^%s*", string.rep(" ", editor.LineIndentation[i] - li))
+				elseif comment_block_at_line_start == 1 then
 					text_comment = text_comment..comment_block..text_line
 				else
 					text_comment = text_comment..string.gsub(text_line,"([^%s])",comment_block.."%1",1)

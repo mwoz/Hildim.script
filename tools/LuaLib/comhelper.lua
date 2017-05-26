@@ -64,7 +64,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
                 local lMin
                 if string.find(strInd0, ','..oChild.parentNode.nodeName..',') then
                     local ni = clb(oChild.parentNode, '\n', newindent:gsub('\r', ''))
-                    oChild.text = oChild.text:gsub('\n[\t ]*$', ni)
+                    oChild.text = oChild.text:to_utf8(1251):gsub('\n[\t ]*$', ni)
                     if ni ~= '\n' then
                         for s in oChild.text:gmatch('\n([ ]*)[^\n\r\t ]') do
                             if (lMin or #s) >= #s then lMin = #s end
