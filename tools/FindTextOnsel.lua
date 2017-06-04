@@ -285,14 +285,24 @@ end
 
 function CORE.FindResult(dl)
     local curLine = findres:LineFromPosition(findres.SelectionEnd)
+    local bRound = true
     while curLine >= 0 and curLine <= findres.LineCount do
         curLine = curLine + dl
-        if findres.StyleAt[findres:PositionFromLine(curLine)] == 3 then
+        local cSt = findres.StyleAt[findres:PositionFromLine(curLine)]
+        if cSt == 3 then
             findres:EnsureVisibleEnforcePolicy(curLine)
             findres.SelectionEnd = findres:PositionFromLine(curLine)
             findres.SelectionStart = findres:PositionFromLine(curLine)
             CORE.FindresClickPos(findres.CurrentPos)
             return
+        elseif (cSt == 1 or curLine == 0 or curLine == findres.LineCount - 1) and bRound then
+            bRound = false
+            while curLine >= 0 and curLine <= findres.LineCount do
+                curLine = curLine - dl
+                if findres.StyleAt[findres:PositionFromLine(curLine)] == 1 then
+                    break
+                end
+            end
         end
     end
 end
