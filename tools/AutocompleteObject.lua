@@ -466,11 +466,12 @@ local function GetObjectNamesXml()
 
             table.insert(names,{s, s, '', ''})
             strLine = editor:textrange(editor:PositionFromLine(af_current_line - i), editor:PositionFromLine(af_current_line + 1) - 2)
-            _s, _e, s = string.find(strLine, ' type="([%w]+)"')
+            local _s, _e, s1 = string.find(strLine, ' type="([%w&]+)"')
             if _s ~= nil then
-                s = s:lower()
-                if s == "form" then s = "formbox" end
-                table.insert(names,{s, s, '', ''})
+                s1 = s1:lower()
+                if s1 == "form" then s1 = "formbox" end
+                table.insert(names,{s1, s1, '', ''})
+                table.insert(names,{s..'&'..s1, s..'&'..s1, '', ''})
             end
             return names
         elseif strLine:find('[<>]') then return names end
