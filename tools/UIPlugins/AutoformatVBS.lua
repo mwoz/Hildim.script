@@ -192,15 +192,16 @@ local function FindUp(stek, nLine, poses)
     end
 end
 
-local function FormatString(strLine, startPos)
+local function FormatString(strLine, startPos, bForce)
     --форматирование строки - добавление пробелов между операторами, ключевые слова с большой буквы
     local i = 0
     local _s, _e, strSep, strBody = string.find(strLine, "(%s*)(.*)")
+    if not bForce and (_G.iuprops['autoformat.line'] or 0) == 0 then return strSep, strBody:gsub('[\r\n]', '') end
+
     strSep = string.gsub(string.gsub(strSep, "\t", strTab), "\r", "")
     local lk = table.maxn(keywords)
 
     local strOut = ''
-    if string.sub(strBody, 1, 1) == "<" then return strSep, strOut end
 
     local strOutComm = ''
     local commPos = 0
@@ -259,10 +260,10 @@ function FormatSelectedStrings()
     editor:BeginUndoAction()
     for i = lStart, lEnd do
         local strUpLine = editor:GetLine(i)
-        local strSep, strOut = FormatString(strUpLine, editor:PositionFromLine(i))
-        if strOut ~= "" then
+        local strSep, strOut = FormatString(strUpLine, editor:PositionFromLine(i), true)
+        if (strOut or '') ~= "" then
             editor:SetSel(editor:PositionFromLine(i), editor:PositionBefore(editor:PositionFromLine(i + 1)))
-            editor:ReplaceSel(strSep..strOut)
+            editor:ReplaceSel((strSep or '')..strOut)
         end
     end
     editor:EndUndoAction()
@@ -346,7 +347,7 @@ local function doAutoformat(current_pos)
     --ѕроверим стили - форматировать нужно только в Ѕэйсике
     if cmpobj_GetFMDefault() ~= SCE_FM_VB_DEFAULT then return end
     local strLine = editor:textrange(startLine, current_pos)
-    local strSep, strOut = FormatString(strLine, startLine)
+    local strSep, strOut = FormatString(strLine, startLine, true)
     if strOut == '' then
         nextIndent = strSep
         return true
@@ -374,11 +375,12 @@ local function doAutoformat(current_pos)
     end
 end
 
+local needFormat = false
 local function OnChar_local(char)
     if not editor.Focus then return end
     curFold = nil
     if string.byte(char) == 13 then
-        if (_G.iuprops['autoformat.line'] or 0) == 1 then doAutoformat(editor.CurrentPos - 1) end
+        if (_G.iuprops['autoformat.indent'] or 0) == 1 then doAutoformat(editor.CurrentPos - 1) end
         editor:ReplaceSel(nextIndent)
         return
     end
@@ -394,6 +396,7 @@ local function OnChar_local(char)
     end
 
     iChangedLine = editor:LineFromPosition(editor.SelectionStart)
+    needFormat = (char ~= '\n')
     return
 
 end
@@ -404,9 +407,19 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
     if not editor.Focus then return end
     local s = editor.SelectionStart
     local e = editor.SelectionEnd
+    if needFormat and iChangedLine > - 1 and s == e and ((_G.iuprops['autoformat.indent'] or 0) == 1 or (_G.iuprops['autoformat.line'] or 0) == 1) and iChangedLine ~= editor:LineFromPosition(s) then
+        needFormat = false
+        local upLine = editor:textrange(editor:PositionFromLine(iChangedLine), editor:PositionFromLine(iChangedLine + 1))
+        local strSep, strOut = FormatString(upLine , editor:PositionFromLine(iChangedLine))
+        if strOut ~= "" then
+            editor.TargetStart = editor:PositionFromLine(iChangedLine)
+            editor.TargetEnd = editor:PositionFromLine(iChangedLine + 1) - 1
+            editor:ReplaceTarget(strSep..strOut)
+        end
+    end
     if prevFold and FoldLevel(-1) == FoldLevel(0) then
         editor.LineIndentation[editor:LineFromPosition(editor.SelectionStart)] = prevFold
-    elseif iChangedLine > - 1 and s == e and (_G.iuprops['autoformat.line'] or 0) == 1 and editor.StyleAt[editor.SelectionStart - 1] == 13 then
+    elseif iChangedLine > - 1 and s == e and (_G.iuprops['autoformat.indent'] or 0) == 1 and editor.StyleAt[editor.SelectionStart - 1] == 13 then
         local l = editor:LineFromPosition(s)
         if l ~= iChangedLine then
             local iline = editor.FirstVisibleLine

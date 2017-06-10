@@ -179,7 +179,7 @@ end
 AddEventHandler("OnChar", function(char)
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or not editor.Focus then return end
     bNewLine = false
-	if (_G.iuprops['autoformat.line'] or 0) == 1 then
+	if (_G.iuprops['autoformat.indent'] or 0) == 1 or (_G.iuprops['autoformat.line'] or 0) == 1 then
         if not editor.Focus then return end
         if string.byte(char) == 13 then
             editor:BeginUndoAction()
@@ -203,11 +203,12 @@ end)
 local prevFold
 AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or (bModified == 0 and bSelection == 0) then return end
-    if (_G.iuprops['autoformat.line'] or 0) == 1 then
+    if (_G.iuprops['autoformat.indent'] or 0) == 1 or (_G.iuprops['autoformat.line'] or 0) == 1 then
+
         if bNewLine then
             --editor:BeginUndoAction()
-            FormatString(curLine - 1)
-            doIndentation(curLine, true)
+            if (_G.iuprops['autoformat.line'] or 0) == 1 then FormatString(curLine - 1) end
+            if (_G.iuprops['autoformat.indent'] or 0) == 1 then doIndentation(curLine, true) end
             editor:EndUndoAction()
             bNewLine = false
         elseif (bModified == 1 and bSelection == 0) and curFold and curLine and curLine == editor:LineFromPosition(editor.SelectionStart) and FoldLevel(-1) < FoldLevel(0) then
