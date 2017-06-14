@@ -92,7 +92,8 @@ local function Init()
         if posStart == 0 then posStart = 1 end
         local e, s = posStart, 0
         local bSpell
-        local str = editor:textrange(posStart - 1, posEnd + 1)
+        -- if posEnd + 1 > editor.Length then print(posEnd + 1, editor.Length) end  + 1
+        local str = editor:textrange(posStart - 1, posEnd )
         for s, word, e in str:gmatch('[ \t\n\r!-/:-?\[-^{-§]()([A-Za-zÀ-ÿ¨¸]+)()') do
             if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\[-^{-»]') then
                 if word:byte() >= 160 then
