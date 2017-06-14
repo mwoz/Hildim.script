@@ -9,7 +9,7 @@ local tbs
 local vbox
 
 local hMainLayout = iup.GetLayout()
-local ConsoleBar, FindRepl, FindResBar
+local ConsoleBar, FindRepl, FindResBar, CoEditor
 local pane_curObj
 local tEvents = {"OnClose","OnSendEditor","OnSwitchFile","OnOpen","OnSave","OnUpdateUI","OnDoubleClick","OnKey","OnDwellStart","OnNavigation","OnSideBarClouse", "OnMenuCommand", "OnCreate"}
 
@@ -18,8 +18,12 @@ if props['iup.defaultfontsize']~='' then if tonumber(props['iup.defaultfontsize'
 iup.SetGlobal("DEFAULTFONTSIZE", fntSize)
 iup.SetGlobal("TXTHLCOLOR", "222 222 222")
                                -- RGB(121, 161, 201)
-iup.PassFocus=(function()
-    iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
+iup.PassFocus =(function()
+    if scite.buffers.GetCurrent() >= 0 then
+        editor:GrabFocus()
+    else
+        iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
+    end
 end)
 
 function sidebar_Switch(n)
@@ -191,7 +195,6 @@ local function  CreateBox()
         t.tip = s
         t.tabspadding = '10x3'
         t.forecolor = '0 0 0'
-        t.canfocus = 'NO'
 
         return iup.flattabs(t)
     end
@@ -502,6 +505,20 @@ local function InitSideBar()
         end);
     }
 
+    bSplitter = iup.GetDialogChild(hMainLayout, "SourceSplitMiddle")
+
+    CoEditor = iup.scitedetachbox{
+        HANDLE = iup.GetDialogChild(hMainLayout, "SourceExDetach"); buttonImage='binocular__pencil_µ';
+        sciteid = 'coeditor';Split_h = bSplitter;Split_CloseVal = "1000";
+        Dlg_Title = "Second Editior"; Dlg_Show_Cb = nil; MenuEx = "FINDRES";
+        Dlg_Close_Cb = (function(h)
+        end);
+        Dlg_Show_Cb = (function(h, state)
+        end);
+        Dlg_BeforeAttach = (function(h, state)
+        end);
+    }
+    --CoEditor.HideDialog()
 end
 
 local function InitToolBar()
@@ -680,6 +697,12 @@ menuhandler:DoPostponedInsert()
 local bMenu,bToolBar,bStatusBar
 local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
 
+AddEventHandler("OnRightEditorVisibility", function(show)
+    if (show == 0 and _G.iuprops['coeditor.win'] or '0' ~= '0') or
+      (show == 1 and _G.iuprops['coeditor.win'] or '0' ~= '0') then
+        CoEditor.Switch()
+    end
+end)
 AddEventHandler("OnLayOutNotify", function(cmd)
     if cmd == "SHOW_FINDRES" then
         if (_G.iuprops['findresbar.win'] or '0')=='1' then return end

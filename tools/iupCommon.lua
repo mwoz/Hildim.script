@@ -311,7 +311,7 @@ iup.CloseFilesSet = function(cmd)
         if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Ѕезым€нный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
             if not props['FileNameExt']:from_utf8(1251):find('Ѕезым€нный') and not props['FileNameExt']:find('^%^') then
-                spathes = spathes..'Х'..props['FilePath']:from_utf8(1251)
+                spathes = spathes..'Х'..Iif(scite.ActiveEditor() == 1, '>', '')..props['FilePath']:from_utf8(1251)
                 local bk = iup.GetBookmarkLst()
                 if sposes then
                     sposes = sposes..'Х'..editor.FirstVisibleLine..bk
@@ -390,14 +390,16 @@ iup.RestoreFiles = function(bForce)
             end
         end
         scite.Perform('blockuiupdate:y')
-        local fvl = editor.FirstVisibleLine
-        editor.VScrollBar = false
+        --local fvl = editor.FirstVisibleLine
+        --editor.VScrollBar = false
         if #t > 0 then
+            BlockEventHandler"OnRightEditorVisibility"
             BlockEventHandler"OnOpen"
             BlockEventHandler"OnNavigation"
             BlockEventHandler"OnUpdateUI"
             OnOpen = onOpen_local
         end
+        local bRight, bRightPrev = false, false
         for i = #t, 1,- 1 do
             if i == 1 then
                 OnOpen = nil
@@ -405,7 +407,16 @@ iup.RestoreFiles = function(bForce)
                 UnBlockEventHandler"OnNavigation"
                 UnBlockEventHandler"OnOpen"
             end
-            scite.Open(t[i])
+            local sNm = t[i]
+            bRight = false
+            if sNm:find('^>') then
+                sNm = sNm:gsub('^>', '')
+                bRight = true
+            end
+
+            scite.Open(sNm)
+            if bRight ~= bRightPrev then scite.MenuCommand(IDM_CHANGETAB) end
+            bRightPrev = bRight
             if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
             if bk and bk[i] then
                 for j = 1, #(bk[i]) do
@@ -417,9 +428,11 @@ iup.RestoreFiles = function(bForce)
                 RestoreLayOut(l[i])
             end
         end
+        UnBlockEventHandler"OnRightEditorVisibility"
+
         scite.Perform('blockuiupdate:u')
-        editor.VScrollBar = true
-        editor.FirstVisibleLine = fvl
+        --editor.VScrollBar = true
+        --editor.FirstVisibleLine = fvl
         if bNew then
             scite.buffers.SetDocumentAt(0)
         else
@@ -530,6 +543,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
         return iup.CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
+        if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
         iup.DestroyDialogs();
         SaveIup()
         scite.RunAsync(function()
@@ -866,6 +880,7 @@ iup.scitedetachbox = function(t)
         btn_attach,
         iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() cmd_Hide() end},
     }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
+
     if t[1] then
         local vb = t[1]
         table.remove(t)
@@ -1254,6 +1269,7 @@ function iup.ReloadScript()
     local bd
     local tblDat
     if OnScriptReload then tblDat = {}; OnScriptReload(true, tblDat) end
+
     iup.DestroyDialogs();
     SaveIup()
     scite.ReloadStartupScript()
@@ -1386,6 +1402,7 @@ iup.DestroyDialogs = function()
         if (_G.iuprops['findresbar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "FindResExpander").state = 'OPEN' end
         iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops["sidebarctrl.BottomBarSplit.value"] or '900'
     end
+    if (_G.iuprops['coeditor.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "SourceExDetach").state = 'OPEN' end
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
@@ -1420,6 +1437,12 @@ iup.DestroyDialogs = function()
         _G.dialogs['findresbar'] = nil
     end
 
+    if _G.dialogs['coeditor'] ~= nil then
+        iup.GetDialogChild(hMainLayout, "SourceExDetach").state = "OPEN"
+        _G.dialogs['coeditor'].restore = nil
+        _G.dialogs['coeditor'] = nil
+    end
+
     local h = iup.GetDialogChild(hMainLayout, "MenuBar")
     if h then iup.Detach(h); iup.Destroy(h) end
 
@@ -1437,6 +1460,7 @@ iup.DestroyDialogs = function()
         iup.GetDialogChild(hMainLayout, "LeftBarExpander").state = "OPEN"
         LeftBar_obj.handle = nil
     end
+
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
             _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
@@ -1447,6 +1471,7 @@ iup.DestroyDialogs = function()
             dlg:destroy()
         end
     end
+
     h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
     if h then
         _G.iuprops["layout.toolbar_expander"] = h.state

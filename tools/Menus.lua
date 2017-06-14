@@ -231,6 +231,11 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 	}},
     {'Tabbar Settings', ru = 'Свойства панели вкладок', action = ResetTabbarProps},
 	{link='File¦Encoding'},
+	{link = 'Options¦&Read-Only'},
+    {'s1', separator = 1},
+	{'Move to another window', ru = 'Переместить на другое окно', action = IDM_CHANGETAB, },
+	{'Clone to another window', ru = 'Клонировать в другом окне', action = IDM_CLONETAB, },
+
 	{link='Options¦&Read-Only'},
 	{'slast', separator=1},
 }

@@ -55,7 +55,6 @@ end
 --- Запускает обработку события согласно /scite-ru/wiki/SciTE_Events
 -- Возвращает всё, что вернул обработчик, а не только первый аргумент (флаг остановки)
 local function Dispatch (name, ...)
-    if CANCEL_ then print(name); return end
 	RemoveAllOutstandingEventHandlers() -- first remove all from _remove
 	local event = events[name]
 	local res
