@@ -247,7 +247,8 @@ do
 		local STRING = P'"' * (ANY - (P'"' + P"\r\n"))^0*P'"'
 		local COMMENT = (P"'" + P"REM ") * (ANY - P"\r\n")^0
 		local IGNORED = SPACE + COMMENT + STRING
-		local I = C(IDENTIFIER)*cl
+		local I = C(IDENTIFIER) * cl
+        local IC = C((R'AZ' + '_')^3) * cl
 		-- define local patterns
 		local f = AnyCase"function"
 		local p = AnyCase"property"
@@ -260,7 +261,8 @@ do
         local fr=Cmt(AnyCase"<frame name=",(function(s,i) if _group_by_flags then return i else return nil end end))
         local str=Cmt(AnyCase"<string id=",(function(s,i) if _group_by_flags then return i else return nil end end))
 		local con=Cmt(AnyCase"const",(function(s,i) if _group_by_flags then return i else return nil end end))
-		local dim=Cmt(AnyCase"dim",(function(s,i) if _group_by_flags then return i else return nil end end))
+		local dim = Cmt(AnyCase"dim",(function(s, i) if _group_by_flags then return i else return nil end end))
+        local eh = Cmt(AnyCase"case",(function(s, i) if _group_by_flags then return i else return nil end end))
 		--local class=Cmt(AnyCase"class",(function(s,i) if _group_by_flags then return i else return nil end end))
 
 		--local scr=P("<script>")
@@ -277,13 +279,15 @@ do
 		s = NL*((private+public)*SC^1)^0*Cg(s*Cc(true),'Sub')
 		f = NL*((private+public)*SC^1)^0*Cg(f*Cc(true),'Function')
 		dim = NL*Cg(dim*Cc(true),"Dim")
+		eh = NL*Cg(eh*Cc(true),"EventHandler")
 		con = NL*Cg(con*Cc(true),"Constant")
 		fr = NL*Cg(fr*Cc(true),"Frame")
 		str = NL*Cg(str*Cc(true),"String")
         local ec = NL*AnyCase"end"*SC^1*(AnyCase"class") / (function(a,b) m__CLASS = '~~ROOT'; end)
 
+		eh = eh * SC^1 * '"' * IC * '"'
 		local e = NL*AnyCase"end"*SC^1*(AnyCase"sub"+AnyCase"function"+AnyCase"property")
-		local body = (IGNORED^1 + IDENTIFIER + 1 - f - s - p - e)^0*e
+		local body = (Ct(eh) + IGNORED^1 + IDENTIFIER + 1 - f - s - p - e)^0*e
 
 		-- definitions to capture:
 		f = f*SC^1*I*SC^0*par
@@ -291,10 +295,10 @@ do
 		s = s*SC^1*I*SC^0*par
 		con = con*SC^1*I
 		dim = dim*SC^1*I
-		fr = fr*BR^1*I
+		fr = fr * BR^1 * I
 		str = str*BR^1*I
 		local class = (AnyCase"class")*SC^1*(I / function(a,b) m__CLASS = a; end)
-		local def = Ct(((f + s + p)*(SPACE*restype)^-1)*(Cc('')/function() return m__CLASS end))*body + Ct(dim+con+fr+str)+class + ec
+		local def = Ct(((f + s + p)*(SPACE*restype)^-1)*(Cc('')/function() return m__CLASS end))*body + Ct(dim+con+fr+str+eh)+class + ec
 		-- resulting pattern, which does the work
 
 		local patt = (def + IGNORED^1 + IDENTIFIER + (1-NL)^1 + NL)^0 * EOF
@@ -482,6 +486,7 @@ do -- Fill_Ext2Lang
 		[props['file.patterns.vb']]='VisualBasic',
 		[props['file.patterns.wscript']]='VisualBasic',
 		[props['file.patterns.formenjine']]='VisualBasic',
+		[props['file.patterns.cform']]='VisualBasic',
 		['*.css']='CSS',
 		['*.sql']='SQL',
 		[props['file.patterns.pascal']]='Pascal',
