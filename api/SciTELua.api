@@ -328,6 +328,25 @@ scite.InsertAbbreviation
 scite.RunLuaThread
 scite.PostCommand
 scite.PerformGrepEx
+scite.ExecuteHelp
+scite.CheckRegexp
+scite.RunAsync
+scite.RunInConcole
+scite.SwitchMouseHook
+scite.SetLexer
+scite.HideForeReolad
+scite.EnsureVisible
+scite.buffers
+scite.buffers.SecondEditorActive
+scite.buffers.BufferByName
+scite.buffers.IndexOfClone
+scite.buffers.IsCloned
+scite.buffers.GetBufferSide
+scite.buffers.GetCurrent
+scite.buffers.SavedAt
+scite.buffers.NameAt
+scite.buffers.SetDocumentAt
+scite.buffers.GetCount
 
 Open(filename)\n opens a file in a new buffer
 ConstantName(number)\n returns the symbolic name of a Scintilla / SciTE constant

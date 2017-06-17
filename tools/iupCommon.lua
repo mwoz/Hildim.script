@@ -307,17 +307,28 @@ iup.CloseFilesSet = function(cmd)
     local tmpFlag = props['load.on.activate']
     props['load.on.activate'] = 0
     scite.Perform('blockuiupdate:y')
+    local cloned = {}
     DoForBuffers(function(i)
         if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Ѕезым€нный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
             if not props['FileNameExt']:from_utf8(1251):find('Ѕезым€нный') and not props['FileNameExt']:find('^%^') then
-                spathes = spathes..'Х'..props['FilePath']:from_utf8(1251)
-                local bk = iup.GetBookmarkLst()
-                if sposes then
-                    sposes = sposes..'Х'..editor.FirstVisibleLine..bk
-                    slayout = slayout..'Х'..SaveLayOut()
+                if not cloned[props['FilePath']] then
+                    local pref = 'Х'
+                    if scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 1 then
+                        cloned[props['FilePath']] = true
+                        pref = pref..'<'
+                    end
+                    if scite.ActiveEditor() == 1 then
+                        pref = pref..'>'
+                    end
+                    spathes = spathes..pref..props['FilePath']:from_utf8(1251)
+                    local bk = iup.GetBookmarkLst()
+                    if sposes then
+                        sposes = sposes..'Х'..editor.FirstVisibleLine..bk
+                        slayout = slayout..'Х'..SaveLayOut()
+                    end
+                    nf = true
                 end
-                nf = true
             else
                 if i <= curBuf then curBuf = curBuf - 1 end
             end
@@ -390,14 +401,16 @@ iup.RestoreFiles = function(bForce)
             end
         end
         scite.Perform('blockuiupdate:y')
-        local fvl = editor.FirstVisibleLine
-        editor.VScrollBar = false
+        --local fvl = editor.FirstVisibleLine
+        --editor.VScrollBar = false
         if #t > 0 then
+            BlockEventHandler"OnRightEditorVisibility"
             BlockEventHandler"OnOpen"
             BlockEventHandler"OnNavigation"
             BlockEventHandler"OnUpdateUI"
             OnOpen = onOpen_local
         end
+        local bRight, bRightPrev, bCloned = false, false, false
         for i = #t, 1,- 1 do
             if i == 1 then
                 OnOpen = nil
@@ -405,7 +418,23 @@ iup.RestoreFiles = function(bForce)
                 UnBlockEventHandler"OnNavigation"
                 UnBlockEventHandler"OnOpen"
             end
-            scite.Open(t[i])
+            local sNm = t[i]
+            bCloned = false
+            if sNm:find('^<') then
+                sNm = sNm:gsub('^<', '')
+                bCloned = true
+            end
+
+            bRight = false
+            if sNm:find('^>') then
+                sNm = sNm:gsub('^>', '')
+                bRight = true
+            end
+
+            scite.Open(sNm)
+            if bRight ~= bRightPrev then scite.MenuCommand(IDM_CHANGETAB) end
+            if bCloned then  scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
+            bRightPrev = bRight
             if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
             if bk and bk[i] then
                 for j = 1, #(bk[i]) do
@@ -417,9 +446,11 @@ iup.RestoreFiles = function(bForce)
                 RestoreLayOut(l[i])
             end
         end
+        UnBlockEventHandler"OnRightEditorVisibility"
+
         scite.Perform('blockuiupdate:u')
-        editor.VScrollBar = true
-        editor.FirstVisibleLine = fvl
+        --editor.VScrollBar = true
+        --editor.FirstVisibleLine = fvl
         if bNew then
             scite.buffers.SetDocumentAt(0)
         else
@@ -530,6 +561,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
         return iup.CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
+        if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
         iup.DestroyDialogs();
         SaveIup()
         scite.RunAsync(function()
@@ -866,6 +898,7 @@ iup.scitedetachbox = function(t)
         btn_attach,
         iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() cmd_Hide() end},
     }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
+
     if t[1] then
         local vb = t[1]
         table.remove(t)
@@ -895,6 +928,16 @@ iup.scitedetachbox = function(t)
     dtb.On_Detach = t.On_Detach
     dtb.barsize = 0
 
+    local function ShowStatusBtn()
+        if t.MenuVisible then
+            scite.RunAsync(function()
+                statusBtn.visible = Iif(t.MenuVisible(), 'YES', 'NO')
+            end)
+        else
+            statusBtn.visible = 'YES'
+        end
+    end
+
     dtb.detachPos = (function(bShow)
         dtb.detachhidden = 1
         _G.iuprops[dtb.sciteid..'.win']= Iif(bShow,'1', '2')
@@ -911,7 +954,7 @@ iup.scitedetachbox = function(t)
         if bShow then
             iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
         else
-            if statusBtn then statusBtn.visible = 'YES' end
+            if statusBtn then ShowStatusBtn() end
         end
         if not bShow and dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(dtb.Dialog, 0) end
     end)
@@ -965,7 +1008,7 @@ iup.scitedetachbox = function(t)
             dtb.Dialog:hide()
             _G.iuprops[dtb.sciteid..'.win'] = '2'
             iup.PassFocus()
-            if statusBtn then statusBtn.visible = 'YES' end
+            if statusBtn then ShowStatusBtn() end
         end
     end
     dtb.ShowDialog = function()
@@ -1070,8 +1113,9 @@ iup.scitedetachbox = function(t)
         {'s1', separator = 1},
         {'Show/Hide', ru = '—крыть/ѕоказать', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
     }
+    --if t.MenuVisible then tSub.visible =  end
 
-    menuhandler:InsertItem('MainWindowMenu', 'View¶slast',  {dtb.sciteid, ru = t.Dlg_Title, tSub})
+    menuhandler:InsertItem('MainWindowMenu', 'View¶slast',  {dtb.sciteid, ru = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
     if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', ru = '¬ид', tSub}) end
 
@@ -1254,6 +1298,7 @@ function iup.ReloadScript()
     local bd
     local tblDat
     if OnScriptReload then tblDat = {}; OnScriptReload(true, tblDat) end
+
     iup.DestroyDialogs();
     SaveIup()
     scite.ReloadStartupScript()
@@ -1386,6 +1431,7 @@ iup.DestroyDialogs = function()
         if (_G.iuprops['findresbar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "FindResExpander").state = 'OPEN' end
         iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops["sidebarctrl.BottomBarSplit.value"] or '900'
     end
+    if (_G.iuprops['coeditor.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "SourceExDetach").state = 'OPEN' end
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
@@ -1420,6 +1466,12 @@ iup.DestroyDialogs = function()
         _G.dialogs['findresbar'] = nil
     end
 
+    if _G.dialogs['coeditor'] ~= nil then
+        iup.GetDialogChild(hMainLayout, "SourceExDetach").state = "OPEN"
+        _G.dialogs['coeditor'].restore = nil
+        _G.dialogs['coeditor'] = nil
+    end
+
     local h = iup.GetDialogChild(hMainLayout, "MenuBar")
     if h then iup.Detach(h); iup.Destroy(h) end
 
@@ -1437,6 +1489,7 @@ iup.DestroyDialogs = function()
         iup.GetDialogChild(hMainLayout, "LeftBarExpander").state = "OPEN"
         LeftBar_obj.handle = nil
     end
+
     for sciteid, dlg in pairs(_G.dialogs) do
         if dlg ~= nil then
             _G.iuprops['dialogs.'..sciteid..'.rastersize'] = dlg.rastersize
@@ -1447,6 +1500,7 @@ iup.DestroyDialogs = function()
             dlg:destroy()
         end
     end
+
     h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
     if h then
         _G.iuprops["layout.toolbar_expander"] = h.state

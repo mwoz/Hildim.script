@@ -229,6 +229,9 @@ local function InitMarkStyle(indic_number, indic_style, indic_color, indic_alpha
 	editor.IndicStyle[indic_number] = indic_style
 	editor.IndicFore[indic_number] = encodeRGB2WIN(indic_color)
 	editor.IndicAlpha[indic_number] = indic_alpha
+	coeditor.IndicStyle[indic_number] = indic_style
+	coeditor.IndicFore[indic_number] = encodeRGB2WIN(indic_color)
+	coeditor.IndicAlpha[indic_number] = indic_alpha
 end
 
 local function EditorInitMarkStyles()
