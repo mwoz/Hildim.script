@@ -182,10 +182,11 @@ local function  CreateBox()
             end
         end)
         t.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
+        t.extrabuttons = 1
+        t.extraimage1 = "property_µ"
+        t.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
+        t.extrabutton_cb = function(h, button, state) if state==1 then menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid) end end
 
-        t.rightclick_cb=(function()
-            menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid)
-        end)
         local j = 1
         local s = 'Hotkeys for Tab Activation:'
         for i = hk_pointer,  #tbl_hotkeys do
@@ -508,17 +509,22 @@ local function InitSideBar()
     bSplitter = iup.GetDialogChild(hMainLayout, "SourceSplitMiddle")
 
     CoEditor = iup.scitedetachbox{
-        HANDLE = iup.GetDialogChild(hMainLayout, "SourceExDetach"); buttonImage='binocular__pencil_µ';
+        HANDLE = iup.GetDialogChild(hMainLayout, "SourceExDetach"); buttonImage='edit_µ';
         sciteid = 'coeditor';Split_h = bSplitter;Split_CloseVal = "1000";
-        Dlg_Title = "Second Editior"; Dlg_Show_Cb = nil;
+        Dlg_Title = "Second Editior"; Dlg_Show_Cb = nil; MenuEx = 'EDITOR';
         Dlg_Close_Cb = (function(h)
+
         end);
         Dlg_Show_Cb = (function(h, state)
+
         end);
         Dlg_BeforeAttach = (function(h, state)
+
         end);
-        MenuVisible = (function() return scite.buffers.SecondEditorActive() == 1 end)
+        MenuVisible = (function() return scite.buffers.SecondEditorActive() == 1 end);
+        MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
     }
+    _G.g_session['coeditor'] = CoEditor
     --CoEditor.HideDialog()
 end
 
@@ -706,6 +712,7 @@ AddEventHandler("OnRightEditorVisibility", function(show)
     if (show == 0 and _G.iuprops['coeditor.win'] or '0' ~= '0') or
       (show == 1 and _G.iuprops['coeditor.win'] or '0' ~= '0') then
         CoEditor.Switch()
+        if show == 1 then editor.Zoom = coeditor.Zoom end
     end
 end)
 AddEventHandler("OnLayOutNotify", function(cmd)

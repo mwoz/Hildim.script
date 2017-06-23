@@ -410,7 +410,7 @@ iup.RestoreFiles = function(bForce)
             BlockEventHandler"OnUpdateUI"
             OnOpen = onOpen_local
         end
-        local bRight, bRightPrev, bCloned = false, false, false
+        local bRight, bRightPrev, bCloned, bIsRight = false, false, false, false
         for i = #t, 1,- 1 do
             if i == 1 then
                 OnOpen = nil
@@ -433,7 +433,8 @@ iup.RestoreFiles = function(bForce)
 
             scite.Open(sNm)
             if bRight ~= bRightPrev then scite.MenuCommand(IDM_CHANGETAB) end
-            if bCloned then  scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
+            if bCloned then scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
+            if bRight or bCloned then bIsRight = true end
             bRightPrev = bRight
             if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
             if bk and bk[i] then
@@ -456,6 +457,12 @@ iup.RestoreFiles = function(bForce)
         else
             local b = tonumber(_G.iuprops['buffers.current'] or -1)
             if b >= 0 then scite.buffers.SetDocumentAt(b) end
+        end
+        if not bIsRight then
+            _G.iuprops['coeditor.win'] = '2';
+        _G.g_session['coeditor'].HideDialog();
+        else
+            coeditor.Zoom = editor.Zoom
         end
     end
 end
@@ -1117,7 +1124,7 @@ iup.scitedetachbox = function(t)
 
     menuhandler:InsertItem('MainWindowMenu', 'View¦slast',  {dtb.sciteid, ru = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
-    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', ru = 'Âèä', tSub}) end
+    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', ru = 'Âèä', visible = t.MenuVisibleEx, tSub}) end
 
     return dtb
 end

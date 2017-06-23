@@ -236,7 +236,6 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 	{'Move to another window', ru = 'Переместить на другое окно', action = IDM_CHANGETAB, visible="scite.buffers.IsCloned(scite.buffers.GetCurrent())==0"},
 	{'Clone to another window', ru = 'Клонировать в другом окне', action = IDM_CLONETAB, visible="scite.buffers.IsCloned(scite.buffers.GetCurrent())==0" },
 
-	{link='Options¦&Read-Only'},
 	{'slast', separator=1},
 }
 _G.sys_Menus.OUTPUT = {title = "Контекстное меню консоли",

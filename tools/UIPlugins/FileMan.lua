@@ -44,6 +44,10 @@ function FILEMAN.FullPath()
     local lin = list_dir.marked:sub(2):find("1")
     return current_path..list_dir:getcell(lin, 2)
 end
+function FILEMAN.IsDirectory()
+    local lin = list_dir.marked:sub(2):find("1")
+    return (list_dir:getcell(lin, 4) or '') == 'd'
+end
 
 function FILEMAN.RelativePath(sep)
     local lin = list_dir.marked:sub(2):find("1")

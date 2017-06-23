@@ -806,7 +806,6 @@ local function create_dialog_FindReplace()
               title = "Ïðîãðåññ ïîèñêà â ôàéëàõ",
           name = "chkFindProgress", },
           iup.fill{},
-          iup.link{title = 'Âèä', padding='15x0', action = function() menuhandler:PopUp('MainWindowMenu¦View¦findrepl') end},
           margin = "0x0", padding = '0x0'
       };
       iup.hbox{expand = 'HORIZONTAL',
@@ -874,7 +873,11 @@ local function create_dialog_FindReplace()
     name = "tabFindRepl",
     tabchange_cb = function() SetStaticControls(); scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")) end) end,
     forecolor = '0 0 0',
-    tabspadding = '10x3'
+    tabspadding = '10x3',
+    extrabuttons = 1,
+    extraimage1 = "property_µ",
+    extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR"),
+    extrabutton_cb = function(h, button, state) if state==1 then menuhandler:PopUp('MainWindowMenu¦View¦findrepl') end end
   }
 
   containers["zUpDown"] = iup.zbox{
@@ -1063,10 +1066,6 @@ local function Init(h)
         iup.Detach(pin)
         iup.Insert(hboxPane, iup.GetDialogChild(oDeattFnd, "findrepl_title_btnattach"), pin)
     end
-
-    Ctrl('tabFindRepl').rightclick_cb = (function()
-        menuhandler:PopUp('MainWindowMenu¦View¦findrepl')
-    end)
 
     local res = {
         handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};
