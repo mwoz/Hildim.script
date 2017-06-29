@@ -353,7 +353,7 @@ end
 
     --События списка функций
     list_abbrev = iup.matrix{
-        numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "VERTICAL" ,
+        numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
         readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
         rasterwidth0 = 0 , rasterwidth1 = 60 , rasterwidth2 = 600 ,
     tip = 'В главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}

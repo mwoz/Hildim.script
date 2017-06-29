@@ -61,7 +61,7 @@ local function init()
     --lst_clip = iup.list{expand='YES',}
 
     lst_clip = iup.matrix{
-    numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="VERTICAL" ,
+    numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="VERTICAL" ,
     resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 0, expand = "YES", framecolor="255 255 255",
     rasterwidth0 = 15 ,rasterwidth1 = 600 ,rasterwidth2 = 0 ,}
 

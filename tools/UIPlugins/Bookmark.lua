@@ -183,7 +183,7 @@ local function Init()
 
     --local function Init()
     list_bookmarks = iup.matrix{
-        numcol = 4, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
+        numcol = 4, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "YES" ,
         scrollbar = 'VERTICAL', readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
     rasterwidth0 = 0 , rasterwidth1 = 25 , rasterwidth2 = 25 , rasterwidth3 = 0 , rasterwidth4 = 0 }
 

@@ -41,6 +41,7 @@ function GetExtImage(strName)
 end
 
 function FILEMAN.FullPath()
+    if not list_dir.marked then return '' end
     local lin = list_dir.marked:sub(2):find("1")
     return current_path..list_dir:getcell(lin, 2)
 end
@@ -566,7 +567,7 @@ local function FileManTab_Init(h)
     Favorites_Clear = Favorites_Clear_l
 
     list_dir = iup.matrix{
-    numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="YES" ,
     readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0, rasterwidth4= 0}
 
@@ -626,7 +627,7 @@ local function FileManTab_Init(h)
     iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')
 
     list_favorites = iup.matrix{
-    numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', scrollbar="YES" ,
+    numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="YES" ,
     resizematrix = "YES", readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 150 ,rasterwidth3= 450, tip ='jj'}
 

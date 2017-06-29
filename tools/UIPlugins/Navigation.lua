@@ -119,7 +119,7 @@ local function internal_Init()
 
 
     list_navigation = iup.matrix{
-        numcol = 5, numcol_visible = 4, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', scrollbar = "YES" ,
+        numcol = 5, numcol_visible = 4, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "YES" ,
         resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
         width0 = 0 , rasterwidth1 = 250 , rasterwidth2 = 90 , rasterwidth3 = 50 , rasterwidth4 = 40 , rasterwidth5 = 0,
     }

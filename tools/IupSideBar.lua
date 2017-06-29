@@ -506,6 +506,14 @@ local function InitSideBar()
         end);
     }
 
+    bSplitter.valuechanged_cb = function(h)
+        if h.value == '0' then
+            ConsoleBar.cmdHide()
+        elseif h.value == '1000' then
+            FindResBar.cmdHide()
+        end
+    end
+
     bSplitter = iup.GetDialogChild(hMainLayout, "SourceSplitMiddle")
 
     CoEditor = iup.scitedetachbox{
@@ -513,18 +521,23 @@ local function InitSideBar()
         sciteid = 'coeditor';Split_h = bSplitter;Split_CloseVal = "1000";
         Dlg_Title = "Second Editior"; Dlg_Show_Cb = nil; MenuEx = 'EDITOR';
         Dlg_Close_Cb = (function(h)
-
+            if tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) > 980 then _G.iuprops['dialogs.coeditor.splitvalue'] = 900 end
         end);
         Dlg_Show_Cb = (function(h, state)
 
         end);
         Dlg_BeforeAttach = (function(h, state)
-
+            _G.iuprops['dialogs.coeditor.splitvalue'] = 900
         end);
         MenuVisible = (function() return scite.buffers.SecondEditorActive() == 1 end);
         MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
     }
     _G.g_session['coeditor'] = CoEditor
+    bSplitter.valuechanged_cb = function(h)
+        if h.value == '1000' then
+            CoEditor.cmdHide()
+        end
+    end
     --CoEditor.HideDialog()
 end
 
@@ -705,7 +718,10 @@ local bMenu,bToolBar,bStatusBar
 local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
 
 AddEventHandler("OnSwitchFile", function(file)
-    if (scite.ActiveEditor() == 1 and (_G.iuprops['coeditor.win'] or '0') == '2' ) then CoEditor.Switch() end
+    if scite.ActiveEditor() == 1 then
+        if (_G.iuprops['coeditor.win'] or '0') == '2' then CoEditor.Switch()
+        elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']; iup.Redraw(b, 1) end
+    end
 end)
 
 AddEventHandler("OnRightEditorVisibility", function(show)

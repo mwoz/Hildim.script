@@ -899,7 +899,7 @@ iup.scitedetachbox = function(t)
     btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
 
-        iup.flatbutton{title = ' '..t.Dlg_Title, image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
+        iup.flatbutton{title = ' '..t.Dlg_Title,name='Title', image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
         leavewindow_cb=function() end,},
         btn_attach,
@@ -1036,7 +1036,7 @@ iup.scitedetachbox = function(t)
 
             _G.iuprops[dtb.sciteid..'.win'] = '0'
             local canvasbar
-            if dtb.sciteid == 'concolebar' or dtb.sciteid == 'findresbar' then
+            if dtb.sciteid == 'concolebar' or dtb.sciteid == 'findresbar' or dtb.sciteid == 'coeditor' then
                 canvasbar = iup.GetChild(iup.GetChild(_G.dialogs[dtb.sciteid], 1), 1)
                 canvasbar.visible = 'NO'
             end
@@ -1474,7 +1474,7 @@ iup.DestroyDialogs = function()
     end
 
     if _G.dialogs['coeditor'] ~= nil then
-        iup.GetDialogChild(hMainLayout, "SourceExDetach").state = "OPEN"
+        iup.GetDialogChild(hMainLayout, "CoSourceExpander").state = "OPEN"
         _G.dialogs['coeditor'].restore = nil
         _G.dialogs['coeditor'] = nil
     end

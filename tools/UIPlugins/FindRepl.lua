@@ -510,9 +510,9 @@ local function create_dialog_FindReplace()
       k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return iup.IGNORE; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],
-    iup.button{           ------------
+    iup.flatbutton{           ------------
       name = "BtnOK",
-      action = DefAction,
+      flat_action = DefAction,
       fontsize = 1, margin = '0x0',
       visible = 'NO'
     },
@@ -529,17 +529,17 @@ local function create_dialog_FindReplace()
   }
 
   containers[32] = iup.vbox{
-    iup.button{
+    iup.flatbutton{
       image = "IMAGE_search",
       title = " далее",
-      bgcolor = "255 255 255",
+      --bgcolor = "255 255 255",
       name = "btnFind",
-      action = FindNext,
+      flat_action = FindNext,
       padding = "5x0"
     },
-    iup.button{
+    iup.flatbutton{
       title = "Найти все",
-      action = FindAll,
+      flat_action = FindAll,
     },
     margin = "6x6",
     normalizesize = "HORIZONTAL",
@@ -549,8 +549,8 @@ local function create_dialog_FindReplace()
     iup.hbox{
         margin = "0x0",
         alignment = 'ACENTER',
-        iup.button{
-          action = CloseFind,
+        iup.flatbutton{
+          flat_action = CloseFind,
           name = 'btn_esc',
           size = '1x1',
         },
@@ -565,17 +565,20 @@ local function create_dialog_FindReplace()
         }
     },
     iup.hbox{
-      iup.button{
+      iup.flatbutton{
+        padding = "3x",
         title = "В выделенном",
-        action = FindSel,
+        flat_action = FindSel,
       },
-      iup.button{
+      iup.flatbutton{
+        padding = "3x",
         title = "На вкладках",
-        action = FindInBuffers,
+        flat_action = FindInBuffers,
       },
-      iup.button{
+      iup.flatbutton{
+        padding = "3x",
         title = "Подсчитать",
-        action = GetCount,
+        flat_action = GetCount,
       },
       --normalizesize = "HORIZONTAL",
       gap = "3",
@@ -596,34 +599,38 @@ local function create_dialog_FindReplace()
   }}
 
   containers[13] = iup.vbox{
-    iup.button{
+    iup.flatbutton{
       title = " на:",
       image = "IMAGE_Replace",
-      action = CORE.ReplaceNext,
-      canfocus  = "NO",
+      flat_action = CORE.ReplaceNext,
+      canfocus = "NO",
+      padding = "x2",
     },
-    iup.button{
+    iup.flatbutton{
       image = "IMAGE_search",
       title = " далее",
-      padding = "5x0",
-      action = FindNext,
+      padding = "5x3",
+      flat_action = FindNext,
       canfocus  = "NO",
     },
     normalizesize = "HORIZONTAL",
   }
 
   containers[15] = iup.hbox{
-    iup.button{
+    iup.flatbutton{
+      padding = "3x",
       title = "Заменить все",
-      action = ReplaceAll,
+      flat_action = ReplaceAll,
     },
-    iup.button{
+    iup.flatbutton{
+      padding = "3x",
       title = "В выделенном",
-      action = ReplaceSel,
+      flat_action = ReplaceSel,
     },
-    iup.button{
+    iup.flatbutton{
+      padding = "3x",
       title = "На вкладках",
-      action = ReplaceInBuffers,
+      flat_action = ReplaceInBuffers,
     },
     margin = "0x00",
   }
@@ -667,14 +674,14 @@ local function create_dialog_FindReplace()
       dropdown = "YES",
       visibleitems = "18",
     },
-    iup.button{
+    iup.flatbutton{
       image = "IMAGE_ArrowUp",
-      action = FolderUp,
+      flat_action = FolderUp,
       tip = "На уровень вверх\n(PgUp в строке поиска)",
     },
-    iup.button{
+    iup.flatbutton{
       image = "IMAGE_Folder",
-      action = SetFolder,
+      flat_action = SetFolder,
       tip = "Выбор папки",
     },
     gap = "3",
@@ -699,11 +706,11 @@ local function create_dialog_FindReplace()
       name = "chkSubFolders",
       title = "В подпапках",
     },
-    iup.button{
+    iup.flatbutton{
       name = 'btnFindInFiles',
       image = "IMAGE_search",
       padding = "14x0",
-      action = FindInFiles,
+      flat_action = FindInFiles,
       tip = "Искать в файлах",
     },
     alignment = "ACENTER",
@@ -717,17 +724,20 @@ local function create_dialog_FindReplace()
   }}
 
   containers[21] = iup.hbox{
-    iup.button{
+    iup.flatbutton{
+      padding = "3x",
       title = "Пометить",
-      action = MarkAll,
+      flat_action = MarkAll,
     },
-    iup.button{
+    iup.flatbutton{
+      padding = "3x",
       title = "Удалить",
-      action = ClearMark,
+      flat_action = ClearMark,
     },
-    iup.button{
+    iup.flatbutton{
+      padding = "3x",
       title = "Удалить все",
-      action = ClearMarkAll,
+      flat_action = ClearMarkAll,
       padding = "2",
     },
     --normalizesize = "HORIZONTAL",
@@ -735,12 +745,14 @@ local function create_dialog_FindReplace()
   }
   containers[22] = iup.hbox{
     iup.toggle{
+      padding = "3x",
       title = "В выделенном",
       name = "chkMarkInSelection",
     },
-    iup.button{
+    iup.flatbutton{
+      padding = "3x",
       title = "*** Закладками",
-      action = BookmarkAll,
+      flat_action = BookmarkAll,
     },
     gap = "4",
     alignment = "ACENTER",
@@ -748,14 +760,16 @@ local function create_dialog_FindReplace()
   }
 
   containers[33] = iup.vbox{
-    iup.button{
+    iup.flatbutton{
+      padding = "x2",
       image = "IMAGE_ArrowUp",
-      action = GoToMarkUp,
+      flat_action = GoToMarkUp,
       tip = "Предыдущая метка",
     },
-    iup.button{
+    iup.flatbutton{
+      padding = "x2",
       image = "IMAGE_ArrowDown",
-      action = GoToMarkDown,
+      flat_action = GoToMarkDown,
       tip = "Следующая метка",
     },
     margin = "0x3",
@@ -779,7 +793,7 @@ local function create_dialog_FindReplace()
       ["height0"] = "0",
       numlin = "5",
       heightdef = "5",
-      scrollbar = "VERTICAL",
+      flatscrollbar = "VERTICAL",
       count = "5",
       ["width0"] = "0",
       ["width1"] = "34",
@@ -881,23 +895,24 @@ local function create_dialog_FindReplace()
   }
 
   containers["zUpDown"] = iup.zbox{
-    iup.button{
+    iup.flatbutton{
       impress = "IMAGE_ArrowDown",
       visible = "NO",
       image = "IMAGE_ArrowUp",
       size = "11x9",
-      action = (function(h) containers["zUpDown"].valuepos = "1" end),
+      flat_action = (function(h) containers["zUpDown"].valuepos = "1" end),
       name = "btnArrowDown",
     },
-    iup.button{
-      impress = "IMAGE_ArrowUp",
-      visible = "NO",
-      image = "IMAGE_ArrowDown",
-      size = "11x9",
-      action = (function(h) containers["zUpDown"].valuepos = "0" end),
-      name = "btnArrowUp",
+    iup.flatbutton{
+        impress = "IMAGE_ArrowUp",
+        visible = "NO",
+        image = "IMAGE_ArrowDown",
+        size = "11x9",
+        flat_action = (function(h) containers["zUpDown"].valuepos = "0" end),
+        name = "btnArrowUp",
     },
     name = "zUpDown",
+    bgcolor = iup.GetGlobal("DLGBGCOLOR"),
     valuepos = "1",
   }
 
@@ -997,7 +1012,7 @@ local function create_dialog_FindReplace()
     margin = "3x3",
     expandchildren = "YES",
     gap = "3",
-    name = 'vboxFindRepl'
+    name = 'vboxFindRepl',
   }
 
 --[[  containers[1] = iup.dialog{
