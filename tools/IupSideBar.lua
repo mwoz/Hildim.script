@@ -521,13 +521,13 @@ local function InitSideBar()
         sciteid = 'coeditor';Split_h = bSplitter;Split_CloseVal = "1000";
         Dlg_Title = "Second Editior"; Dlg_Show_Cb = nil; MenuEx = 'EDITOR';
         Dlg_Close_Cb = (function(h)
-            if tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) > 980 then _G.iuprops['dialogs.coeditor.splitvalue'] = 900 end
+            if tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) > 980 then _G.iuprops['dialogs.coeditor.splitvalue'] = 900
+            elseif tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) < 20 then _G.iuprops['dialogs.coeditor.splitvalue'] = 100 end
         end);
         Dlg_Show_Cb = (function(h, state)
 
         end);
         Dlg_BeforeAttach = (function(h, state)
-            _G.iuprops['dialogs.coeditor.splitvalue'] = 900
         end);
         MenuVisible = (function() return scite.buffers.SecondEditorActive() == 1 end);
         MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
