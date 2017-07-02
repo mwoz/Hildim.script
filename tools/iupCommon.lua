@@ -929,7 +929,14 @@ iup.scitedetachbox = function(t)
     dtb.sciteid = t.sciteid
     dtb.Dlg_Close_Cb = t.Dlg_Close_Cb
     dtb.Dlg_Show_Cb = t.Dlg_Show_Cb
-    dtb.Split_h = t.Split_h
+    dtb.Split_h = nil
+    if t.Split_h then
+        if type(t.Split_h) == 'function' then
+            dtb.Split_h = t.Split_h
+        else
+            dtb.Split_h = (function() return t.Split_h end)
+        end
+    end
     dtb.Split_Title = t.Split_Title
     dtb.Split_CloseVal = t.Split_CloseVal
     dtb.On_Detach = t.On_Detach
@@ -952,9 +959,11 @@ iup.scitedetachbox = function(t)
         dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
 
         if t.Split_h then
-            if dtb.Split_h.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = dtb.Split_h.value; _G.iuprops['sidebarctrl.'..dtb.Split_h.name..'.value'] = dtb.Split_h.value; end
-            dtb.Split_h.value = dtb.Split_CloseVal
-            dtb.Split_h.barsize = "0"
+            local s = dtb.Split_h()
+
+            if s.barsize ~= "0" then _G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] = s.value; _G.iuprops['sidebarctrl.'..s.name..'.value'] = s.value; end
+            s.value = dtb.Split_CloseVal
+            s.barsize = "0"
         end
         _G.dialogs[dtb.sciteid] = dtb
         dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
@@ -983,7 +992,8 @@ iup.scitedetachbox = function(t)
         local firstShow = true
         hNew.rastersize = _G.iuprops['dialogs.'..h.sciteid..'.rastersize']
         _G.iuprops[h.sciteid..'.win']='1'
-        if h.Split_h then  _G.iuprops['dialogs.'..h.sciteid..'.splitvalue'] = h.Split_h.value end
+        if h.Split_h then _G.iuprops['dialogs.'..h.sciteid..'.splitvalue'] = h.Split_h().value end
+
         hNew.close_cb =(function(h)
             if _G.dialogs[dtb.sciteid] ~= nil then
                 dtb.HideDialog()
@@ -1047,11 +1057,13 @@ iup.scitedetachbox = function(t)
             dtb.restore = nil
             _G.dialogs[dtb.sciteid] = nil
             if t.Split_h then
+                local s = dtb.Split_h()
+
                 local l = tonumber(_G.iuprops['dialogs.'..dtb.sciteid..'.splitvalue'] or 500)
                 if l < 15 and dtb.sciteid == 'concolebar' then l = 200
                 elseif l > 985 and dtb.sciteid == 'findresbar'  then l = 800 end
-                dtb.Split_h.value = l
-                dtb.Split_h.barsize = "3"
+                s.value = l
+                s.barsize = "3"
             end
             dtb.Dialog = nil
             if statusBtn then statusBtn.visible = 'NO' end

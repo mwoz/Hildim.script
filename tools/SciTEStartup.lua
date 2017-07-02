@@ -66,5 +66,10 @@ scite.RunAsync(function()
         end)
     end
     props['session.started'] = '1'
+    if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0 then
+        iup.GetDialogChild(hMainLayout, "SourceSplitBtm").value = '1000'
 
+    else
+        iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
+    end
 end)

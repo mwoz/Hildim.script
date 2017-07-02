@@ -562,7 +562,7 @@ local function create_dialog_FindReplace()
         iup.toggle{
             name = 'byInputAll',
             title = ' - все',
-        }
+        },
     },
     iup.hbox{
       iup.flatbutton{
@@ -657,10 +657,10 @@ local function create_dialog_FindReplace()
     alignment = "ACENTER",
   }
 
-  containers[11] = iup.vbox{
+  containers[11] = iup.backgroundbox{iup.vbox{
     containers[12],
     gap = "4",
-  }
+  }}
 
   containers[17] = iup.hbox{
     iup.label{
@@ -986,8 +986,6 @@ local function create_dialog_FindReplace()
             expand = "HORIZONTAL",
             size = "x8"
         },
-
-
     },
   }
 

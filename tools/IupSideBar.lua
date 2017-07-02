@@ -514,7 +514,14 @@ local function InitSideBar()
         end
     end
 
-    bSplitter = iup.GetDialogChild(hMainLayout, "SourceSplitMiddle")
+    bSplitter = function() return iup.GetDialogChild(hMainLayout, Iif((_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 1, 'SourceSplitBtm', 'SourceSplitMiddle')) end
+    if props['session.reload'] ~= '1' and (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 1 then
+
+        local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
+        iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, "CoSourceExpanderBtm"), nil)
+        iup.GetDialogChild(hMainLayout, "SourceSplitBtm").barsize = '3'
+        iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
+    end
 
     CoEditor = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "SourceExDetach"); buttonImage='edit_µ';
@@ -533,12 +540,34 @@ local function InitSideBar()
         MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
     }
     _G.g_session['coeditor'] = CoEditor
-    bSplitter.valuechanged_cb = function(h)
+    iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").valuechanged_cb = function(h)
+        if h.value == '1000' then
+            CoEditor.cmdHide()
+        end
+    end
+    iup.GetDialogChild(hMainLayout, "SourceSplitBtm").valuechanged_cb = function(h)
         if h.value == '1000' then
             CoEditor.cmdHide()
         end
     end
     --CoEditor.HideDialog()
+end
+
+function CORE.RemapCoeditor()
+    local bIsH = (iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'), 1) ~= nil)
+
+    local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
+    local hPrOld = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitBtm", "SourceSplitMiddle"))
+    local hPr = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitMiddle", "SourceSplitBtm"))
+    hPr.value = hPrOld.value
+    hPr.barsize = '3'
+    iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, Iif(bIsH, "CoSourceExpander", "CoSourceExpanderBtm")), nil)
+    hPrOld.barsize = '0'
+    hPrOld.value = '1000'
+
+    iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
+    _G.iuprops['dialogs.coeditor.splithorizontal'] = Iif(bIsH, 0, 1)
+
 end
 
 local function InitToolBar()
