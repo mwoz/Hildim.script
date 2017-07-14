@@ -232,6 +232,7 @@ local function FindInFiles()
     if ReadSettings() then return end
 
     if Ctrl("cmbFindWhat").value == '' then return end
+
     if Ctrl("cmbFilter").value == '' then Ctrl("cmbFilter").value = '*.*' end
     if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir']:from_utf8(1251) end
     local fWhat = Ctrl("cmbFindWhat").value:to_utf8(1251)
@@ -250,6 +251,7 @@ local function FindInFiles()
     Ctrl("cmbFolders"):SaveHist()
     Ctrl("cmbFilter"):SaveHist()
     Ctrl("btnFindInFiles").image = "cross_script_µ"
+    iup.Update(Ctrl("btnFindInFiles"))
     PassFocus_local()
     PostAction()
     if Ctrl("chkFindProgress").value == 'ON' then
@@ -715,6 +717,7 @@ local function create_dialog_FindReplace()
     },
     alignment = "ACENTER",
     margin = "0x00",
+    name = "hboxFind"
   }
 
   containers[16] = iup.backgroundbox{iup.vbox{
@@ -887,6 +890,7 @@ local function create_dialog_FindReplace()
     name = "tabFindRepl",
     tabchange_cb = function() SetStaticControls(); scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")) end) end,
     forecolor = '0 0 0',
+    highcolor = '15 60 195',
     tabspadding = '10x3',
     extrabuttons = 1,
     extraimage1 = "property_µ",
@@ -1119,6 +1123,7 @@ local function Init(h)
         elseif state == 2 then
             Ctrl("zbProgress").valuepos = 0
             Ctrl("btnFindInFiles").image = "IMAGE_search"
+            iup.Update(Ctrl("btnFindInFiles"))
             findSettings:MarkResult()
         end
     end

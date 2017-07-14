@@ -196,7 +196,7 @@ local function  CreateBox()
         t.tip = s
         t.tabspadding = '10x3'
         t.forecolor = '0 0 0'
-
+        t.highcolor = '15 60 195'
         return iup.flattabs(t)
     end
 

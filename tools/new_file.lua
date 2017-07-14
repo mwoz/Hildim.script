@@ -44,6 +44,8 @@ end
 local function CreateUntitledFile()
 	local file_ext = "."..props["FileExt"]
 	if file_ext == "." then file_ext = props["default.file.ext"] end
+    local unicode_mode = props['editor.unicode.mode']
+    print(unicode_mode)
     local fName = props['scite.new.file']
     if fName == '' then
         local unNum = 0
@@ -71,7 +73,8 @@ local function CreateUntitledFile()
     if isMakeUTF8() then scite.MenuCommand(IDM_ENCODING_UCOOKIE) end
     unsaved_files[file_path:upper()] = true --сохраняем путь к созданному буферу в таблице
     props['warning.couldnotopenfile.disable'] = warning_couldnotopenfile_disable
-    scite.RunAsync(function() editor.Focus = true end)
+    scite.MenuCommand(unicode_mode)
+    scite.RunAsync(function() editor.Focus = true  end)
     return true
 end
 local scipped, bscip

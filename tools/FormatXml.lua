@@ -53,7 +53,7 @@ elseif props['FileExt'] == 'cform' or props['FileExt'] == 'rform' or props['File
         end
         return indent
     end
-    strFrm = comhelper.FormatXml(strFrm, 4, 'StringTable,Script,Commands,Design,Columns,Styles', ',,,', ',,,', clb)
+    strFrm = comhelper.FormatXml(strFrm, 4, 'StringTable,Script,Commands,Design,Columns,Styles,Blotters', ',,,', ',,,', clb)
     strFrm = strFrm:gsub('%]%]>%s+</', ']]></')
     strFrm = strFrm:gsub('>%s+<!%[CDATA%[', '><![CDATA[')
 

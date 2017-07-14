@@ -238,6 +238,10 @@ end
 local function ShowCallTip(pos, str, s, e, reshow)
     local s1, _, list = str:find('{{(.-)}}', s)
     local function ls(l)
+        if not l:find('|') then
+            editor:ReplaceSel(l)
+            return
+        end
         local tl = {}
         for w in l:gmatch('[^|]+') do
             table.insert(tl, w)
