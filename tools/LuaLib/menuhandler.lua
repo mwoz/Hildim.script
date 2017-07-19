@@ -237,7 +237,11 @@ function s:ContinuePopUp()
 end
 
 function s:ContextMenu(x, y, element)
-    s:PopMnu(_G.sys_Menus[element], x, y, false)
+    if type(element) == 'string' then
+        s:PopMnu(_G.sys_Menus[element], x, y, false)
+    else
+        s:PopMnu(element, x, y, false)
+    end
 end
 
 local function InsertItem(mnu, path, t)

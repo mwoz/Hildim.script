@@ -204,6 +204,12 @@ function iup.SaveChProps(bReset)
 'wrap.visual.flags',
 'wrap.visual.flags.location',
 'wrap.visual.startindent',
+'tabctrl.readonly.color',
+'tabctrl.cut.prefix',
+'tabctrl.cut.ext',
+'tabctrl.colorized',
+'tabctrl.cut.illumination',
+'tabctrl.cut.saturation',
     }
     for i = 1, #t do
         t[i] = t[i]..'='..props[t[i]]
@@ -460,7 +466,7 @@ iup.RestoreFiles = function(bForce)
         end
         if not bIsRight then
             _G.iuprops['coeditor.win'] = '2';
-        _G.g_session['coeditor'].HideDialog();
+            _G.g_session['coeditor'].HideDialog();
         else
             coeditor.Zoom = editor.Zoom
         end

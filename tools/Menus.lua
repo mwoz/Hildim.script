@@ -25,18 +25,20 @@
 	- action_cmd
 ]]
 require 'shell'
-local function windowsList()
+function CORE.windowsList(side)
 	local t = {}
 	local maxN = scite.buffers.GetCount() - 1
-	for i = 0,maxN do
-		local row = {}
-		local s = scite.buffers.NameAt(i):from_utf8(1251):gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
-		local md = Iif(scite.buffers.SavedAt(i), '', '*') .. Iif(i < 9, '&'..((i + 1) % 10)..'. ','')
+	for i = 0, maxN do
+        if not side or (scite.buffers.GetBufferSide(i) == side) then
+            local row = {}
+            local s = scite.buffers.NameAt(i):from_utf8(1251):gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
+            local md = Iif(scite.buffers.SavedAt(i), '', '*')
 
-		row[1] = md..s
-		row.order = s:upper()
-		row.action = "scite.buffers.SetDocumentAt("..i..")"
-		t[i + 1] = row
+            row[1] = md..s
+            row.order = s:upper()
+            row.action = "scite.buffers.SetDocumentAt("..i..")"
+            t[i + 1] = row
+        end
 	end
 	table.sort(t, function(a, b)
 		return a.order < b.order
@@ -74,29 +76,75 @@ local function ResetWrapProps()
 end
 
 local function ResetTabbarProps()
-	local ret, mult, maxlen, ondbl, buff, zord, newpos =
-                    iup.GetParam("Свойства панели закладок",
-					nil,
-					'Многострочная%b\n'..
-					'Максимальная ширина(0- не задана)%i[0,100,10]\n'..
-					'Закрывать по DblClick%b\n'..
-					'Максимальное количество вкладок:%i[10,500,1]\n'..
-					'Переключать в порядке использования%b\n'..
-					'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n',
-                    tonumber(props['tabbar.multiline']) or 1,
-                    tonumber(props['tabbar.title.maxlength']) or 0,
-                    tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
-                    tonumber(props['buffers']) or 100,
-                    tonumber(props['buffers.zorder.switching']) or 0,
-                    tonumber(props['buffers.new.position']) or 0
-    )
-	if ret then
-        props['tabbar.multiline']                = mult
-        props['tabbar.title.maxlength']          = maxlen
-        props['tabbar.tab.close.on.doubleclick'] = ondbl
-        props['buffers']                         = buff
-        props['buffers.zorder.switching']        = zord
-		iup.Alarm('Свойства панели закладок', 'Изменения будут применены после перезапуска программы', 'OK')
+    if props["tab.oldstile"] == '' then
+        local oldClr = props['tabctrl.readonly.color']
+        if oldClr == '' then oldClr = '120 120 120' end
+        local ret, maxlen, ondbl, buff, zord, newpos, coloriz, illum, satur, cEx, cPref, ROColor =
+        iup.GetParam("Свойства панели закладок",
+            nil,
+            'Максимальная ширина(0- не задана)%i[0,100,10]\n'..
+            'Закрывать по DblClick%b\n'..
+            'Максимальное количество вкладок:%i[10,500,1]\n'..
+            'Переключать в порядке использования%b\n'..
+            'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n'..
+            'Подсветка по расширению%b\n'..
+            'Освещенность вкладки:%i[10,99,1]\n'..
+            'Насыщенность вкладки:%i[10,99,1]\n'..
+            'Не показывать расширение%b\n'..
+            'Не показывать префикс%b\n'..
+            'Цвет шрифта Read-Only вкладки%c\n'
+            ,
+            tonumber(props['tabbar.title.maxlength']) or 0,
+            tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
+            tonumber(props['buffers']) or 100,
+            tonumber(props['buffers.zorder.switching']) or 0,
+            tonumber(props['buffers.new.position']) or 0,
+            tonumber(props['tabctrl.colorized']) or 0,
+            tonumber(props['tabctrl.cut.illumination']) or 90,
+            tonumber(props['tabctrl.cut.saturation']) or 50,
+            tonumber(props['tabctrl.cut.ext']) or 0,
+            tonumber(props['tabctrl.cut.prefix']) or 0,
+            oldClr
+        )
+        if ret then
+            props['tabbar.title.maxlength'] = maxlen
+            props['tabbar.tab.close.on.doubleclick'] = ondbl
+            props['buffers'] = buff
+            props['buffers.zorder.switching'] = zord
+            props['buffers.new.position']    = newpos
+            props['tabctrl.colorized']       = coloriz
+            props['tabctrl.cut.illumination']= illum
+            props['tabctrl.cut.saturation']  = satur
+            props['tabctrl.cut.ext']         = cEx
+            props['tabctrl.cut.prefix']      = cPref
+            props['tabctrl.readonly.color'] =  ROColor
+
+        end
+    else
+        local ret, mult, maxlen, ondbl, buff, zord, newpos =
+        iup.GetParam("Свойства панели закладок",
+            nil,
+            'Многострочная%b\n'..
+            'Максимальная ширина(0- не задана)%i[0,100,10]\n'..
+            'Закрывать по DblClick%b\n'..
+            'Максимальное количество вкладок:%i[10,500,1]\n'..
+            'Переключать в порядке использования%b\n'..
+            'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n',
+            tonumber(props['tabbar.multiline']) or 1,
+            tonumber(props['tabbar.title.maxlength']) or 0,
+            tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
+            tonumber(props['buffers']) or 100,
+            tonumber(props['buffers.zorder.switching']) or 0,
+            tonumber(props['buffers.new.position']) or 0
+        )
+        if ret then
+            props['tabbar.multiline'] = mult
+            props['tabbar.title.maxlength'] = maxlen
+            props['tabbar.tab.close.on.doubleclick'] = ondbl
+            props['buffers'] = buff
+            props['buffers.zorder.switching'] = zord
+            iup.Alarm('Свойства панели закладок', 'Изменения будут применены после перезапуска программы', 'OK')
+        end
 	end
 end
 
@@ -452,7 +500,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Margin', ru = 'Показывать закладки', action = IDM_SELMARGIN, check = "editor.MarginWidthN[1]>0"},
 		{'&Fold Margin', ru = 'Поле сворачивания блоков текста', action = IDM_FOLDMARGIN, check = "editor.MarginWidthN[2]>0"},
 		{'Main Window split', ru = 'Сплиттер главного окна',visible = "(_G.iuprops['coeditor.win'] or '')=='0'",{radio = 1,
-            {'Horizontal', ru = 'Гоирзонтальный', action = function() CORE.RemapCoeditor() end, check = "iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'),1)", },
+            {'Horizontal', ru = 'Горизонтальный', action = function() CORE.RemapCoeditor() end, check = "iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'),1)", },
             {'Vertical', ru = 'Вертикальный', action = function() CORE.RemapCoeditor() end, check = "not iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'),1)", },
 		},},
         {'s3', separator = 1},
@@ -555,7 +603,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Close All', ru = 'Закрыть все', action = IDM_CLOSEALL},
 		{'&Save All', ru = 'Сохранить все', key = 'Ctrl+Alt+S', action = IDM_SAVEALL, image = 'disks_µ'},
 		{'s2', separator = 1},
-		{'l1', windowsList, plane = 1},
+		{'l1', CORE.windowsList, plane = 1},
 	},},
 	{'Help', ru = 'Справка',{
 		{'&Help', ru = 'Контекстная справка', key = 'F1', action = IDM_HELP},

@@ -68,7 +68,10 @@ scite.RunAsync(function()
     props['session.started'] = '1'
     if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0 then
         iup.GetDialogChild(hMainLayout, "SourceSplitBtm").value = '1000'
-
+        if iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm').state == 'OPEN' and props["tab.oldstile"] == '' then
+            iup.GetDialogChild(hMainLayout, "TabBarSplit").value = Iif((_G.iuprops['coeditor.win'] or '0') == '0', '500', '1000')
+            iup.GetDialogChild(hMainLayout, 'RightTabExpander').state = 'OPEN'
+        end
     else
         iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
     end

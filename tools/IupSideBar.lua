@@ -3,6 +3,7 @@ SideBar_obj = {}
 LeftBar_obj = {}
 SideBar_Plugins = {}
 local ToolBar_obj = {}
+local Splitter_CB
 
 local win_parent --создаем основное окно
 local tbs
@@ -520,6 +521,9 @@ local function InitSideBar()
         local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
         iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, "CoSourceExpanderBtm"), nil)
         iup.GetDialogChild(hMainLayout, "SourceSplitBtm").barsize = '3'
+        if props["tab.oldstile"] == '' then
+            CORE.RemapTab(false)
+        end
         iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
     end
 
@@ -532,9 +536,11 @@ local function InitSideBar()
             elseif tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) < 20 then _G.iuprops['dialogs.coeditor.splitvalue'] = 100 end
         end);
         Dlg_Show_Cb = (function(h, state)
-
+            if state == 0 then CORE.RemapTab(false); iup.Refresh(h)
+            elseif state == 4 then scite.RunAsync(Splitter_CB) end
         end);
         Dlg_BeforeAttach = (function(h, state)
+            if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0 then CORE.RemapTab(true) print(123) end
         end);
         MenuVisible = (function() return scite.buffers.SecondEditorActive() == 1 end);
         MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
@@ -550,18 +556,121 @@ local function InitSideBar()
             CoEditor.cmdHide()
         end
     end
-    --CoEditor.HideDialog()
+
+
+end
+
+local function InitTabbar()
+    local SSL = iup.GetDialogChild(hMainLayout, 'SourceSplitLeft')
+    local SSR = iup.GetDialogChild(hMainLayout, 'SourceSplitRight')
+    local SSM = iup.GetDialogChild(hMainLayout, 'SourceSplitMiddle')
+    local TBS = iup.GetDialogChild(hMainLayout, 'TabBarSplit')
+    local Exp = iup.GetDialogChild(hMainLayout, 'CoSourceExpander')
+    Splitter_CB = function()
+        if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' then
+            TBS.value = ''..math.floor(tonumber(SSL.value) + (tonumber(SSM.value) / 1000) * (tonumber(SSR.value) / 1000) * (1000 - tonumber(SSL.value)))
+        end
+    end
+    SSL.valuechanged_cb = Splitter_CB
+    SSR.valuechanged_cb = Splitter_CB
+    SSM.valuechanged_cb = Splitter_CB
+
+    local function onButton(h, hNew, button, pressed, x, y, tab, tabDrag, status)
+        --print("btn:",h, hNew, button, pressed, x, y, tab, tabDrag, status)
+        if pressed == 1 and tab == tonumber(h.valuepos) then
+            if (h.name == 'TabCtrlLeft' and scite.ActiveEditor() == 1) or (h.name == 'TabCtrlRight' and scite.ActiveEditor() == 0) then
+                coeditor.Focus = true
+            end
+        end
+        if button == iup.BUTTON1 and pressed == 0 then
+            iup.SetAttribute(h, "BGCOLOR", '255 255 255')
+            h.cursor = 'ARROW'
+            iup.Update(h)
+            if (tabDrag > -1 and tab == -4) or (hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' )) then
+                scite.MenuCommand(IDM_CHANGETAB)
+            end
+        elseif button == iup.BUTTON1 and iup.isdouble(status) then
+            scite.MenuCommand(IDM_CLOSE)
+        elseif button == iup.BUTTON3 and pressed == 1 and tab >= -1 then
+            local _, _, wx, wy = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+            wx = tonumber(wx); wy = tonumber(wy)
+            menuhandler:ContextMenu(wx, wy, 'TABBAR')
+        end
+    end
+
+    local function onMotion(h, hNew, x, y, tab, tabDrag, start, status)
+        if start == 2 then
+            iup.SetAttribute(h, "BGCOLOR", '208 231 255')
+            iup.Update(h)
+        end
+        if start > 0 then
+            if tab ~= -1 then
+                h.cursor = 'RESIZE_WE'
+            elseif hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' ) then
+                h.cursor = 'UPARROW'
+            else
+                h.cursor = 'NO'
+            end
+        end
+        --print(h, hNew, x, y, tab, tabDrag, start)
+    end
+
+    local function onButton(h, button, pressed)
+        if pressed == 1 then
+            local side = Iif(h.name == 'TabCtrlLeft', 0, 1)
+            local _, _, wx, wy = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+            wx = tonumber(wx); wy = tonumber(wy)
+            menuhandler:ContextMenu(wx, wy, CORE.windowsList(0))
+        end
+    end
+
+    local tab = iup.GetDialogChild(hMainLayout, 'TabCtrlLeft')
+    tab.tab_button_cb = onButton
+    tab.extraimage1 = "property_µ"
+    tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
+    tab.highcolor = '15 60 195'
+    tab.tab_motion_cb = onMotion
+    tab.extrabutton_cb = onButton
+
+    tab = iup.GetDialogChild(hMainLayout, 'TabCtrlRight')
+    tab.tab_button_cb = onButton
+    tab.extraimage1 = "property_µ"
+    tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
+    tab.highcolor = '15 60 195'
+    tab.tab_motion_cb = onMotion
+    tab.extrabutton_cb = onButton
+end
+
+function CORE.RemapTab(bIsH)
+    local tab = iup.GetDialogChild(hMainLayout, 'RightTabExpander')
+    local splitT = iup.GetDialogChild(hMainLayout, "TabBarSplit")
+    local bIsHNow = (iup.GetParent(tab).name == 'coeditor_vbox')
+    --print(iup.GetParent(tab).name, iup.GetParent(tab).name == 'TabBarSplit', bIsH)
+    if (bIsH and bIsHNow) or (not bIsH and not bIsHNow) then
+        if bIsH then
+            iup.Reparent(tab, splitT, nil)
+            scite.RunAsync(Splitter_CB)
+            --iup.Reparent(tab, iup.GetDialogChild(hMainLayout, "RightTabExpander"), nil)
+        else
+            iup.Reparent(tab, iup.GetDialogChild(hMainLayout, "coeditor_vbox"), iup.GetDialogChild(hMainLayout, 'CoSource'))
+            tab.state = "OPEN"
+            splitT.value = '1000'
+        end
+    end
 end
 
 function CORE.RemapCoeditor()
     local bIsH = (iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'), 1) ~= nil)
-
     local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
     local hPrOld = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitBtm", "SourceSplitMiddle"))
     local hPr = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitMiddle", "SourceSplitBtm"))
     hPr.value = hPrOld.value
     hPr.barsize = '3'
+
     iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, Iif(bIsH, "CoSourceExpander", "CoSourceExpanderBtm")), nil)
+
+    CORE.RemapTab(bIsH)
+
     hPrOld.barsize = '0'
     hPrOld.value = '1000'
 
@@ -722,8 +831,8 @@ for p in str:gmatch('[^¦]+') do
 end
 
 InitSideBar()
+if props["tab.oldstile"] == '' then InitTabbar() end
 InitToolBar()
-
 InitStatusBar()
 RestoreNamedValues(hMainLayout, 'sidebarctrl')
 iup.Refresh(hMainLayout)
@@ -748,7 +857,7 @@ local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
 
 AddEventHandler("OnSwitchFile", function(file)
     if scite.ActiveEditor() == 1 then
-        if (_G.iuprops['coeditor.win'] or '0') == '2' then CoEditor.Switch()
+        if (_G.iuprops['coeditor.win'] or '0') == '2' then CoEditor.Switch();
         elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']; iup.Redraw(b, 1) end
     end
 end)
@@ -757,7 +866,16 @@ AddEventHandler("OnRightEditorVisibility", function(show)
     if (show == 0 and _G.iuprops['coeditor.win'] or '0' ~= '0') or
       (show == 1 and _G.iuprops['coeditor.win'] or '0' ~= '0') then
         CoEditor.Switch()
-        if show == 1 then editor.Zoom = coeditor.Zoom end
+        local expand = iup.GetDialogChild(hMainLayout, "RightTabExpander")
+        local split = iup.GetDialogChild(hMainLayout, "TabBarSplit")
+        if show == 1 then
+            editor.Zoom = coeditor.Zoom
+            Splitter_CB()
+            expand.state = "OPEN"
+        else
+            split.value = "1000"
+            expand.state = "CLOSE"
+        end
     end
 end)
 AddEventHandler("OnLayOutNotify", function(cmd)
