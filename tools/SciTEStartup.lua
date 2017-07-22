@@ -71,8 +71,10 @@ scite.RunAsync(function()
         if iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm').state == 'OPEN' and props["tab.oldstile"] == '' then
             iup.GetDialogChild(hMainLayout, "TabBarSplit").value = Iif((_G.iuprops['coeditor.win'] or '0') == '0', '500', '1000')
             iup.GetDialogChild(hMainLayout, 'RightTabExpander').state = 'OPEN'
+            iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").barsize = Iif((_G.iuprops['coeditor.win'] or '0') == '0','3', '0')
         end
     else
         iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
+        iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
     end
 end)

@@ -209,7 +209,7 @@ do
         local m_Name
 		local I = nokeyword *(C(IDENTIFIER) /(function(a) local _, _, c, e = a:find('^(.-)::(.+)'); m__CLASS = c or '~~ROOT' ;m_Name = e; return e or a end)) * cl
 		-- definitions to capture:
-		local funcdef =     nokeyword * Ct((type * SC^1)^- 1 * I * SC^0 *(par / function(a) return ': '..m_Par1..' '..a end ) * SC^0 *(#funcbody) *(Cc'' / function() return m__CLASS end))
+		local funcdef =     nokeyword * Ct((type * SC^1)^- 1 * I * SC^0 *(par / function(a) return ': '..(m_Par1 or '""')..' '..a end ) * SC^0 *(#funcbody) *(Cc'' / function() return m__CLASS end))
 		local classconstr = nokeyword * Ct((type * SC^1)^- 1 * I * SC^0 * par * SC^0 * P':' * SC^0 * IDENTIFIER * SC^0 *(P"(" *(1 - P")")^0 * P")") * SC^0 *(#funcbody)*(Cc'' / function() return m_Name end)) -- this matches smthing like PrefDialog::PrefDialog(QWidget *parent, blabla) : QDialog(parent)
 		-- resulting pattern, which does the work
 		local patt = (classconstr + funcdef + IGNORED^1 + IDENTIFIER + ANY)^0 * EOF

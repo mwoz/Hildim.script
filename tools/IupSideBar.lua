@@ -540,7 +540,7 @@ local function InitSideBar()
             elseif state == 4 then scite.RunAsync(Splitter_CB) end
         end);
         Dlg_BeforeAttach = (function(h, state)
-            if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0 then CORE.RemapTab(true) print(123) end
+            if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0 then CORE.RemapTab(true) end
         end);
         MenuVisible = (function() return scite.buffers.SecondEditorActive() == 1 end);
         MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
@@ -560,6 +560,7 @@ local function InitSideBar()
 
 end
 
+local tabSwitch = false
 local function InitTabbar()
     local SSL = iup.GetDialogChild(hMainLayout, 'SourceSplitLeft')
     local SSR = iup.GetDialogChild(hMainLayout, 'SourceSplitRight')
@@ -575,10 +576,11 @@ local function InitTabbar()
     SSR.valuechanged_cb = Splitter_CB
     SSM.valuechanged_cb = Splitter_CB
 
+
     local function onButton(h, hNew, button, pressed, x, y, tab, tabDrag, status)
-        --print("btn:",h, hNew, button, pressed, x, y, tab, tabDrag, status)
+        local ts = false
         if pressed == 1 and tab == tonumber(h.valuepos) then
-            if (h.name == 'TabCtrlLeft' and scite.ActiveEditor() == 1) or (h.name == 'TabCtrlRight' and scite.ActiveEditor() == 0) then
+            if ((h.name == 'TabCtrlLeft') and (scite.ActiveEditor() == 1)) or ((h.name == 'TabCtrlRight') and (scite.ActiveEditor() == 0)) then
                 coeditor.Focus = true
             end
         end
@@ -596,6 +598,7 @@ local function InitTabbar()
             wx = tonumber(wx); wy = tonumber(wy)
             menuhandler:ContextMenu(wx, wy, 'TABBAR')
         end
+        if pressed == 0 then scite.RunAsync(function() iup.PassFocus() end) end
     end
 
     local function onMotion(h, hNew, x, y, tab, tabDrag, start, status)
@@ -615,12 +618,24 @@ local function InitTabbar()
         --print(h, hNew, x, y, tab, tabDrag, start)
     end
 
-    local function onButton(h, button, pressed)
+    local function onExButton(h, button, pressed)
         if pressed == 1 then
             local side = Iif(h.name == 'TabCtrlLeft', 0, 1)
             local _, _, wx, wy = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
             wx = tonumber(wx); wy = tonumber(wy)
-            menuhandler:ContextMenu(wx, wy, CORE.windowsList(0))
+            local tMnu = CORE.windowsList(side)
+            if side == 1 then
+                table.insert(tMnu,
+                    {'s1', separator = 1}
+                )
+                table.insert(tMnu,
+                    {link = 'View¦Main Window split', plane = 1}
+                )
+                table.insert(tMnu,
+                    {link = 'View¦coeditor', plane = 1}
+                )
+            end
+            menuhandler:ContextMenu(wx, wy, tMnu)
         end
     end
 
@@ -630,7 +645,7 @@ local function InitTabbar()
     tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
     tab.highcolor = '15 60 195'
     tab.tab_motion_cb = onMotion
-    tab.extrabutton_cb = onButton
+    tab.extrabutton_cb = onExButton
 
     tab = iup.GetDialogChild(hMainLayout, 'TabCtrlRight')
     tab.tab_button_cb = onButton
@@ -638,7 +653,7 @@ local function InitTabbar()
     tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
     tab.highcolor = '15 60 195'
     tab.tab_motion_cb = onMotion
-    tab.extrabutton_cb = onButton
+    tab.extrabutton_cb = onExButton
 end
 
 function CORE.RemapTab(bIsH)

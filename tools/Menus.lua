@@ -37,7 +37,7 @@ function CORE.windowsList(side)
             row[1] = md..s
             row.order = s:upper()
             row.action = "scite.buffers.SetDocumentAt("..i..")"
-            t[i + 1] = row
+            t[#t + 1] = row
         end
 	end
 	table.sort(t, function(a, b)

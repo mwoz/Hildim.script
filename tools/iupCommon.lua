@@ -819,6 +819,7 @@ end
 
 local old_iup_list = iup.list
 iup.list = function(t)
+    if not t.flat then t.flat = 'YES' end
     local cmb = old_iup_list(t)
     function cmb:FillByDir(pathmask, strSel)
         local current_path = props["sys.calcsybase.dir"]..pathmask
