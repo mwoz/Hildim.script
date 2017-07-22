@@ -45,7 +45,6 @@ local function CreateUntitledFile()
 	local file_ext = "."..props["FileExt"]
 	if file_ext == "." then file_ext = props["default.file.ext"] end
     local unicode_mode = props['editor.unicode.mode']
-    print(unicode_mode)
     local fName = props['scite.new.file']
     if fName == '' then
         local unNum = 0
