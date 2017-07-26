@@ -84,6 +84,9 @@ function rfl:GetMenu()
     local function OpenMenu(i)
         return function()
             scite.Open(self.data.lst[i])
+            local tabLeft = iup.GetDialogChild(iup.GetLayout(), "TabCtrlLeft")
+            local w = iup.GetAttribute(tabLeft, "SIZE"):gsub('x.*', '')
+            --if tonumber(w) < 5 then iup.Refresh(tabLeft) end
         end
     end
 
@@ -817,9 +820,16 @@ iup.expander = function(t)
     return expand
 end
 
+--[[local old_iup_text = iup.text
+iup.text = function(t)
+    if not t.nohidesel then t.nohidesel = 'NO' end
+    return old_iup_text(t)
+end]]
+
 local old_iup_list = iup.list
 iup.list = function(t)
     if not t.flat then t.flat = 'YES' end
+    -- if not t.nohidesel then t.nohidesel = 'NO' end
     local cmb = old_iup_list(t)
     function cmb:FillByDir(pathmask, strSel)
         local current_path = props["sys.calcsybase.dir"]..pathmask

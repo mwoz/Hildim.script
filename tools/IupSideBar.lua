@@ -567,7 +567,11 @@ local function InitTabbar()
     local SSM = iup.GetDialogChild(hMainLayout, 'SourceSplitMiddle')
     local TBS = iup.GetDialogChild(hMainLayout, 'TabBarSplit')
     local Exp = iup.GetDialogChild(hMainLayout, 'CoSourceExpander')
-    Splitter_CB = function()
+    Splitter_CB = function(h)
+        if h then
+            if tonumber(SSM.value) > 999 and SSM.barsize ~= '0' then SSM.value = "999"
+            elseif tonumber(SSM.value) < 1 then SSM.value = "1" end
+        end
         if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' then
             TBS.value = ''..math.floor(tonumber(SSL.value) + (tonumber(SSM.value) / 1000) * (tonumber(SSR.value) / 1000) * (1000 - tonumber(SSL.value)))
         end
@@ -592,13 +596,18 @@ local function InitTabbar()
                 scite.MenuCommand(IDM_CHANGETAB)
             end
         elseif button == iup.BUTTON1 and iup.isdouble(status) then
-            scite.MenuCommand(IDM_CLOSE)
+            if tab > - 1 and (tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1 then scite.MenuCommand(IDM_CLOSE)
+            elseif tab == -1 then scite.MenuCommand(IDM_NEW) end
         elseif button == iup.BUTTON3 and pressed == 1 and tab >= -1 then
             local _, _, wx, wy = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
             wx = tonumber(wx); wy = tonumber(wy)
             menuhandler:ContextMenu(wx, wy, 'TABBAR')
         end
         if pressed == 0 then scite.RunAsync(function() iup.PassFocus() end) end
+    end
+
+    local function onTabClose(h, tab)
+        scite.MenuCommand(IDM_CLOSE)
     end
 
     local function onMotion(h, hNew, x, y, tab, tabDrag, start, status)
@@ -639,21 +648,19 @@ local function InitTabbar()
         end
     end
 
-    local tab = iup.GetDialogChild(hMainLayout, 'TabCtrlLeft')
-    tab.tab_button_cb = onButton
-    tab.extraimage1 = "property_µ"
-    tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
-    tab.highcolor = '15 60 195'
-    tab.tab_motion_cb = onMotion
-    tab.extrabutton_cb = onExButton
+    local function SetTab(tab)
+        tab.showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
+        tab.tab_button_cb = onButton
+        tab.extraimage1 = "property_µ"
+        tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
+        tab.highcolor = '15 60 195'
+        tab.tab_motion_cb = onMotion
+        tab.extrabutton_cb = onExButton
+        tab.tabclose_cb  = onTabClose
+    end
 
-    tab = iup.GetDialogChild(hMainLayout, 'TabCtrlRight')
-    tab.tab_button_cb = onButton
-    tab.extraimage1 = "property_µ"
-    tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
-    tab.highcolor = '15 60 195'
-    tab.tab_motion_cb = onMotion
-    tab.extrabutton_cb = onExButton
+    SetTab(iup.GetDialogChild(hMainLayout, 'TabCtrlLeft'))
+    SetTab(iup.GetDialogChild(hMainLayout, 'TabCtrlRight'))
 end
 
 function CORE.RemapTab(bIsH)
@@ -872,7 +879,7 @@ local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
 
 AddEventHandler("OnSwitchFile", function(file)
     if scite.ActiveEditor() == 1 then
-        if (_G.iuprops['coeditor.win'] or '0') == '2' then CoEditor.Switch();
+        if (_G.iuprops['coeditor.win'] or '0') == '2' and scite.buffers.SecondEditorActive() == 1 then CoEditor.Switch();
         elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']; iup.Redraw(b, 1) end
     end
 end)

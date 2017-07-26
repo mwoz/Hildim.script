@@ -1394,7 +1394,7 @@ local function OnSwitchLocal()
 	get_api = true
     ReCreateStructures()
     if Favorites_AddFileName ~=nil then  --  and StatusBar_obj ~= nil
-        Favorites_ListFILL()
+        Favorites_ListFILL(true)
     end
     m_ext = editor.Lexer
     if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end

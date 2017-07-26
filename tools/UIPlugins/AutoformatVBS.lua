@@ -354,7 +354,6 @@ local function doAutoformat(current_pos)
     end
     local bIsError, poses
     bIsError, strSep, poses = ParseStructure(strSep, strOut, current_pos, current_line)
-
     local strNew = strSep..strOut
     if strLine:gsub('%s*$', '')~= strNew:gsub('%s*$', '') then
         editor:SetSel(startLine, current_pos)
@@ -411,7 +410,7 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
         needFormat = false
         local upLine = editor:textrange(editor:PositionFromLine(iChangedLine), editor:PositionFromLine(iChangedLine + 1))
         local strSep, strOut = FormatString(upLine , editor:PositionFromLine(iChangedLine))
-        if strOut ~= "" then
+        if strOut ~= "" and upLine:gsub('%s*$', '') ~= (strSep..strOut):gsub('%s*$', '') then
             editor.TargetStart = editor:PositionFromLine(iChangedLine)
             editor.TargetEnd = editor:PositionFromLine(iChangedLine + 1) - 1
             editor:ReplaceTarget(strSep..strOut)

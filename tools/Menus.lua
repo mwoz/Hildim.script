@@ -79,10 +79,9 @@ local function ResetTabbarProps()
     if props["tab.oldstile"] == '' then
         local oldClr = props['tabctrl.readonly.color']
         if oldClr == '' then oldClr = '120 120 120' end
-        local ret, maxlen, ondbl, buff, zord, newpos, coloriz, illum, satur, cEx, cPref, ROColor =
+        local ret, ondbl, buff, zord, newpos, coloriz, illum, satur, cEx, cPref, ROColor =
         iup.GetParam("Свойства панели закладок",
             nil,
-            'Максимальная ширина(0- не задана)%i[0,100,10]\n'..
             'Закрывать по DblClick%b\n'..
             'Максимальное количество вкладок:%i[10,500,1]\n'..
             'Переключать в порядке использования%b\n'..
@@ -94,7 +93,6 @@ local function ResetTabbarProps()
             'Не показывать префикс%b\n'..
             'Цвет шрифта Read-Only вкладки%c\n'
             ,
-            tonumber(props['tabbar.title.maxlength']) or 0,
             tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
             tonumber(props['buffers']) or 100,
             tonumber(props['buffers.zorder.switching']) or 0,
@@ -107,7 +105,6 @@ local function ResetTabbarProps()
             oldClr
         )
         if ret then
-            props['tabbar.title.maxlength'] = maxlen
             props['tabbar.tab.close.on.doubleclick'] = ondbl
             props['buffers'] = buff
             props['buffers.zorder.switching'] = zord
@@ -117,8 +114,12 @@ local function ResetTabbarProps()
             props['tabctrl.cut.saturation']  = satur
             props['tabctrl.cut.ext']         = cEx
             props['tabctrl.cut.prefix']      = cPref
-            props['tabctrl.readonly.color'] =  ROColor
+            props['tabctrl.readonly.color'] = ROColor
 
+            iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
+            iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
+            iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight'), 1)
+            iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft'), 1)
         end
     else
         local ret, mult, maxlen, ondbl, buff, zord, newpos =

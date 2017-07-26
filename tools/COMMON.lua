@@ -380,6 +380,7 @@ local function DoForBuffers_local(func, bStc, ...)
     BlockEventHandler"OnSwitchFile"
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
+    BlockEventHandler"OnIdle"
     local curBuf = scite.buffers.GetCurrent()
     local maxN = scite.buffers.GetCount() - 1
     local fvl = editor.FirstVisibleLine
@@ -394,6 +395,7 @@ local function DoForBuffers_local(func, bStc, ...)
     UnBlockEventHandler"OnUpdateUI"
     UnBlockEventHandler"OnNavigation"
     UnBlockEventHandler"OnSwitchFile"
+    UnBlockEventHandler"OnIdle"
     scite.Perform('blockuiupdate:n')
     return func(nil)
 end

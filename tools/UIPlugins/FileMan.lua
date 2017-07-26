@@ -306,7 +306,10 @@ end
 local favorites_filename = props['SciteUserHome']..'\\favorites.lst'
 local list_fav_table = {}
 
-local function Favorites_ListFILL_l()
+local prevFileName = ''
+local function Favorites_ListFILL_l(bReset)
+    if not bReset and (prevFileName == props['FilePath']) then return end
+    prevFileName = props['FilePath']
     local function getName(s)
 		local fname = s[1]:gsub('.+\\','')
 		if fname == '' then fname = s[1]:gsub('.+\\(.-)\\','%1') end
@@ -379,7 +382,7 @@ local function Favorites_AddFile()
 		fname = fname:gsub('\\\.\.$', '')..'\\'
 	end
 	list_fav_table[#list_fav_table+1] = {fname, false}
-	Favorites_ListFILL_l()
+	Favorites_ListFILL_l(true)
 	Favorites_SaveList()
 end
 
@@ -452,7 +455,7 @@ end
 
 local function Favorites_AddCurrentBuffer()
 	list_fav_table[#list_fav_table+1] = {props['FilePath'], false}
-	Favorites_ListFILL_l()
+	Favorites_ListFILL_l(true)
     Favorites_SaveList()
 end
 
@@ -465,14 +468,21 @@ local function Favorites_Clear_l()
     for i = #list_fav_table,1,-1 do
         if list_fav_table[i][2] then table.remove(list_fav_table,i) end
     end
-	Favorites_ListFILL_l()
+	Favorites_ListFILL_l(true)
 end
 
 local function Favorites_DeleteItem()
 	local idx = list_getvaluenum(list_favorites)
+    local pth = list_favorites:getcell(idx, 3)
 	if idx == nil then return end
 	iup.SetAttribute(list_favorites, "DELLIN", idx)
-	table.remove (list_fav_table, idx)
+    for i = 1,  #list_fav_table do
+        if list_fav_table[i][1] == pth then
+            table.remove (list_fav_table, i)
+            break
+        end
+    end
+
 	Favorites_SaveList()
 end
 
