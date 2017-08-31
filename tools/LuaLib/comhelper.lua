@@ -10,7 +10,7 @@ function s.CheckScript(strScript, bVbs)
     luacom.TryCatch(oScr)
     oScr:AddCode(strScript)
     if oScr.Error.Number == 0 then return end
-    return oScr.Error.Line , oScr.Error.Column , oScr.Error.Description:from_utf8(1251)
+    return oScr.Error.Line , oScr.Error.Column , oScr.Error.Description
 end
 
 function s.CheckXml(strXml)

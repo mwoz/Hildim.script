@@ -84,9 +84,6 @@ function rfl:GetMenu()
     local function OpenMenu(i)
         return function()
             scite.Open(self.data.lst[i])
-            local tabLeft = iup.GetDialogChild(iup.GetLayout(), "TabCtrlLeft")
-            local w = iup.GetAttribute(tabLeft, "SIZE"):gsub('x.*', '')
-            --if tonumber(w) < 5 then iup.Refresh(tabLeft) end
         end
     end
 
