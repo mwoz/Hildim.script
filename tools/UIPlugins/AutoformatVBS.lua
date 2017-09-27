@@ -54,7 +54,7 @@ local strTab = string.rep(' ', props['tabsize'])
 local keywords = {"If", "Then", "For", "To", "Each", "In", "Select", "Case", "Sub", "Function", "Do", "While", "Until", "With", "Set", "Let", "Get", "Default", "Private", "Public", "Property", "Class",
 "End", "Next", "Loop", "Else", "ElseIf", "Or ", "And ", "Not ", "True", "False", "IsNull", "Is", "Nothing", "Exit", "Wend", "ExecuteGlobal"}
 local keywordsUp = {}
-local lk = table.maxn(keywords)
+local lk = #keywords
 for i = 1, lk do
     table.insert(keywordsUp, "(%W)("..string.gsub(keywords[i], '.', function(s)
         local r = ''
@@ -66,13 +66,13 @@ end
 
 local function prnTable(name)
     print('> ________________')
-    for i = 1, table.maxn(name) do
+    for i = 1, #name do
         print(name[i])
     end
     print('> ^^^^^^^^^^^^^^^')
 end
 local function prnTable2(name)
-    for i = 1, table.maxn(name) do
+    for i = 1, #name do
         prnTable(name[i])
     end
 end
@@ -121,15 +121,15 @@ local function FindUp(stek, nLine, poses)
     while true do
         local strUpLine, nContinued, bIsComment = GetFullLine(nLine) --прочли "продолженную" строку, поняли, коммент ли это или сколько раз онп рподолжена
         local bIsFound = false
-        if nContinued > 1 and table.maxn(poses) > 0 then
-            poses[table.maxn(poses)][4] = cGroupContinued  --пометили, что строка является продолжением
+        if nContinued > 1 and #poses > 0 then
+            poses[#poses][4] = cGroupContinued  --пометили, что строка является продолжением
         end
         local s, _e
         if not bIsComment then
-            for j = 1, table.maxn(wrdEndIndent) do
+            for j = 1, #wrdEndIndent do
                 s, _e = CheckPattern(strUpLine, wrdEndIndent[j][1])
                 if s ~= nil then --нашли строку уменьшающую отступ
-                    table.insert(poses,{string.len(s), _e, nLine, table.maxn(stek) })
+                    table.insert(poses,{string.len(s), _e, nLine, #stek })
                     table.insert(stek, wrdEndIndent[j][2])
                     bIsFound = true
                     break
@@ -137,38 +137,38 @@ local function FindUp(stek, nLine, poses)
             end
 
             if not bIsFound then
-                for j = 1, table.maxn(wrdMidleInent) do
+                for j = 1, #wrdMidleInent do
                     s, _e = CheckPattern(strUpLine, wrdMidleInent[j][1])
                     if s ~= nil then
-                        if bPrevComment and table.maxn(poses) > 0 and poses[table.maxn(poses)][4] == 0 then
-                            poses[table.maxn(poses)][4] = cGroupContinued + 1
-                            --poses[table.maxn(poses)][1] = string.len(s) + 1
+                        if bPrevComment and #poses > 0 and poses[#poses][4] == 0 then
+                            poses[#poses][4] = cGroupContinued + 1
+                            --poses[#poses][1] = string.len(s) + 1
                         end
-                        if stek[table.maxn(stek)] ~= wrdMidleInent[j][2] then
+                        if stek[#stek] ~= wrdMidleInent[j][2] then
                             table.insert(poses,{string.len(s), _e, nLine, 0 })
                             return true, s
                         end
-                        table.insert(poses,{string.len(s), _e, nLine, table.maxn(stek) - 1 })
+                        table.insert(poses,{string.len(s), _e, nLine, #stek - 1 })
                         bIsFound = true
                         break
                     end
                 end
             end
             if not bIsFound then
-                for j = 1, table.maxn(wrdBeginIndent) do
+                for j = 1, #wrdBeginIndent do
                     s, _e = CheckPattern(strUpLine, wrdBeginIndent[j][1])
                     if s ~= nil then
-                        if bPrevComment and table.maxn(poses) > 0 and poses[table.maxn(poses)][4] == 0 then
-                            poses[table.maxn(poses)][4] = cGroupContinued + 1
-                            --poses[table.maxn(poses)][1] = string.len(s) + 1
+                        if bPrevComment and #poses > 0 and poses[#poses][4] == 0 then
+                            poses[#poses][4] = cGroupContinued + 1
+                            --poses[#poses][1] = string.len(s) + 1
                         end
-                        if stek[table.maxn(stek)] ~= wrdBeginIndent[j][2] then
+                        if stek[#stek] ~= wrdBeginIndent[j][2] then
                             table.insert(poses,{string.len(s), _e, nLine , 0})
                             return true, s
                         else
                             table.remove(stek)
-                            table.insert(poses,{string.len(s), _e, nLine, table.maxn(stek) })
-                            if table.maxn(stek) == 0 then
+                            table.insert(poses,{string.len(s), _e, nLine, #stek })
+                            if #stek == 0 then
                                 return false, s
                             end
                             bIsFound = true
@@ -180,7 +180,7 @@ local function FindUp(stek, nLine, poses)
         end
         if not bIsFound then
             local _s1, _e1, intnt = string.find(strUpLine, "^(%s*)%S")
-            local level = table.maxn(stek)
+            local level = #stek
             if bIsComment and level == 1 and string.len(intnt) < 4 then level = level - 1 end
             if _s1 ~= nil then table.insert(poses,{string.len(intnt), 0, nLine, level }) end
         end
@@ -199,7 +199,7 @@ local function FormatString(strLine, startPos, bForce)
     if not bForce and (_G.iuprops['autoformat.line'] or 0) == 0 then return strSep, strBody:gsub('[\r\n]', '') end
 
     strSep = string.gsub(string.gsub(strSep, "\t", strTab), "\r", "")
-    local lk = table.maxn(keywords)
+    local lk = #keywords
 
     local strOut = ''
 
@@ -279,7 +279,7 @@ local function ParseStructure(strSep, strOut, current_pos, current_line)
     local stek = {}  --в стек будем класть индексы открывающих, закрывающих и переходящих конструкций
     local poses ={}   --каждая запись - таблица: величина текущего отступа, позиция окончания строки, номер строки, соответствующая позиция стека
     local s, _e
-    for i = 1, table.maxn(wrdBeginIndent) do
+    for i = 1, #wrdBeginIndent do
         s, _e = CheckPattern(strOut, wrdBeginIndent[i][1])
         if s ~= nil then --нашли увеличивающую отступ конструкцию
             nextIndent = strSep..strTab  --вернем новую строку индента
@@ -288,7 +288,7 @@ local function ParseStructure(strSep, strOut, current_pos, current_line)
         end
     end
     if not bIsFound then
-        for i = 1, table.maxn(wrdEndIndent) do
+        for i = 1, #wrdEndIndent do
             s, _e = CheckPattern(strOut, wrdEndIndent[i][1])  --ищем конструкцию, уменьшающую отступ
             if s ~= nil then
                 stek ={wrdEndIndent[i][2]} --положили в стек индекс этой конструкции
@@ -303,7 +303,7 @@ local function ParseStructure(strSep, strOut, current_pos, current_line)
         if bIsFound then
             nextIndent = strSep
         else
-            for i = 1, table.maxn(wrdMidleInent) do
+            for i = 1, #wrdMidleInent do
                 s, _e = CheckPattern(strOut, wrdMidleInent[i][1])
                 if s ~= nil then
                     stek ={wrdMidleInent[i][2]}
@@ -367,7 +367,7 @@ local function doAutoformat(current_pos)
 
     if poses ~= nil then
         if bIsError then mark = errmark else mark = goodmark end
-        for i = 1, table.maxn(poses) do
+        for i = 1, #poses do
             local lStart = editor:PositionFromLine(poses[i][3])
             if poses[i][4] == 0 then EditorMarkText(lStart + poses[i][1], poses[i][2] - poses[i][1] - 1, mark) end
         end
@@ -466,7 +466,7 @@ function IndentBlockUp()
     local checked = false
     local curLevel = 0
     repeat
-        for j = 1, table.maxn(wrdEndIndent) do
+        for j = 1, #wrdEndIndent do
             if CheckPattern(strLine..'    ', wrdEndIndent[j][1]) then --нашли какой-то конец блока
                 curLevel = curLevel - 1
                 if curLevel < 0 then
@@ -476,7 +476,7 @@ function IndentBlockUp()
             end
         end
         if not checked then --сдвигаемся на строку вниз
-            for j = 1, table.maxn(wrdBeginIndent) do
+            for j = 1, #wrdBeginIndent do
                 if CheckPattern(strLine..'    ', wrdBeginIndent[j][1]) then --начало блока - увеличиваем счетчик блоков
                     curLevel = curLevel + 1
                     break
@@ -501,7 +501,7 @@ function IndentBlockUp()
     if poses ~= nil then
         if bIsError then mark = errmark else mark = goodmark end
         if bIsError then
-            for i = 1, table.maxn(poses) do
+            for i = 1, #poses do
                 local lStart = editor:PositionFromLine(poses[i][3])
                 if poses[i][4] == 0 then EditorMarkText(lStart + poses[i][1], poses[i][2] - poses[i][1] - 1, mark) end
             end
@@ -509,7 +509,7 @@ function IndentBlockUp()
             editor:BeginUndoAction()
             local startIndent = -1
             local newIndent, oldLine, newLine, prevIndent, prevIndentPreset
-            for i = table.maxn(poses), 1,- 1 do
+            for i = #poses, 1,- 1 do
                 local lStart = editor:PositionFromLine(poses[i][3])
                 if startIndent == -1 then
                     --первая строка  - отмечаем-подсвечиваем

@@ -652,7 +652,7 @@ AddEventHandler("OnSave", function(cmd, source)
         local lp = output.TextLength
         scite.RunAsync(function()
             if lp ~= output.TextLength then
-                s, e = output:findtext('\\w.+?\]:', SCFIND_REGEXP, lp)
+                s, e = output:findtext('\\w.+?\\]:', SCFIND_REGEXP, lp)
                 if s then
                     output.TargetStart = s
                     output.TargetEnd = e

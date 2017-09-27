@@ -125,7 +125,7 @@ end
 local pos = editor.SelectionStart
 
 local text = text.."\n"
-for str in string.gfind(text, "([^\n]*)\n") do
+for str in string.gmatch(text, "([^\n]*)\n") do
   -- format next line
   local newstr = ""
   local fin = ""

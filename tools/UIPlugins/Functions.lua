@@ -497,7 +497,7 @@ do -- Fill_Ext2Lang
 		['*.m']='SQL',
 	}
 	for i,v in pairs(patterns) do
-		for ext in (i..';'):gfind("%*%.([^;]+);") do
+		for ext in (i..';'):gmatch("%*%.([^;]+);") do
 			Ext2Lang[ext] = v
 		end
 	end
@@ -622,10 +622,10 @@ local function Functions_ListFILL()
 
             if tbFolders[fnTryGroupName(f, a[4])] == nil then
                 j = j + 1
-                tbBranches[table.maxn(tbBranches) + 1] = fnTryGroupName(f, a[4])
+                tbBranches[#tbBranches + 1] = fnTryGroupName(f, a[4])
                 if fnTryGroupName(f, a[4]) == '~~ROOT'  then
                     tbFolders[fnTryGroupName(f, a[4])] = -i +1
-                else tbFolders[fnTryGroupName(f, a[4])] = table.maxn(tbBranches) end
+                else tbFolders[fnTryGroupName(f, a[4])] = #tbBranches end
 			end
 		else
 
@@ -637,7 +637,7 @@ local function Functions_ListFILL()
 	end
 
     if _group_by_flags then
-        for i = table.maxn(tbBranches), 1, -1 do
+        for i = #tbBranches, 1, -1 do
             if  tbBranches[i] ~= '~~ROOT' then
                 iup.SetAttribute(tree_func, 'ADDBRANCH0', tbBranches[i])
             end

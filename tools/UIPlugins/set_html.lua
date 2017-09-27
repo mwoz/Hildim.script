@@ -13,7 +13,7 @@ Version: 1.1.1
 local function Init()
     local function SetLanguage(lng_name)
         local i = 0
-        for _, name, _ in string.gfind(props["menu.language"], "([^|]*)|([^|]*)|([^|]*)|") do
+        for _, name, _ in string.gmatch(props["menu.language"], "([^|]*)|([^|]*)|([^|]*)|") do
             if name == lng_name then
                 local IDM_LANGUAGE = 1400 -- constant from SciTE.h
                 scite.MenuCommand(IDM_LANGUAGE + i)

@@ -100,7 +100,7 @@ function OnMacro(cmd, msg)
       MacroPlay(msg)
     end
   elseif cmd == "macro:record" then
-    for c,wp,_,lp in string.gfind(msg, "(%d+);(%d+);(%d+);(.*)") do
+    for c,wp,_,lp in string.gmatch(msg, "(%d+);(%d+);(%d+);(.*)") do
       table.insert(glb_macro_buf, {tonumber(c),lp,wp})
     end
   elseif cmd == "macro:startrecord" then
@@ -233,7 +233,7 @@ local function macro_to_string(mode)
 end
 
 local function str_to_macro_name(str)
-  for a in string.gfind(str, macro_name_pattern) do
+  for a in string.gmatch(str, macro_name_pattern) do
     return a
   end
 end
@@ -242,14 +242,14 @@ local function macro_load(text)
   local macro = {}
   local name = nil
   local text = text.."\n"
-  for str in string.gfind(text, "([^\n]*)[\n]") do
+  for str in string.gmatch(text, "([^\n]*)[\n]") do
     if string.sub(str, 1, 3) == "---" then
       MacroAddToList(macro, name)
       macro = {}
       name = str_to_macro_name(string.sub(str, 4))
     else
       str = string.gsub(str, "\r", "")
-      for fnc,wp,lp in string.gfind(str, "(%w+);(%d+);(.*)") do
+      for fnc,wp,lp in string.gmatch(str, "(%w+);(%d+);(.*)") do
         local c = IFACE_FUNCTIONS[fnc]
         if c then
           if string.len(lp) > 0 then

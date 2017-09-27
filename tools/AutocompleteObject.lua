@@ -23,7 +23,7 @@ mydoc = document
 document - имя этого же объекта, заданное в api файле
 
 --]]----------------------------------------------------
-
+local lpeg = require'lpeg'
 local current_pos = 0    -- текущая позиция курсора
 local current_poslst = 0    -- текущая позиция курсора - при активации листа
 local autocom_chars = '' -- паттерн, содержащий экранированные символы из параметра autocomplete.lexer.start.characters - по эти
@@ -66,7 +66,7 @@ do
         ['*.css']='$(file.patterns.css)',
     }
     for i, v in pairs(patterns) do
-        for ext in (i..';'):gfind("%*%.([^;]+);") do
+        for ext in (i..';'):gmatch("%*%.([^;]+);") do
             Ext2Ptrn[ext] = v
         end
     end
