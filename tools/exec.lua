@@ -51,13 +51,13 @@ else
 	else
 		str = FindExpression(str)
 	end
-	local result = loadstring('return '..str)()
+	local result = load('return '..str)()
 
 	print('-> '..scite.GetTranslation("Calculate Expression")..': '..str)
 	print('>> '..scite.GetTranslation("Result")..': '..result)
 
 	--[[ -------- insert result to text ------
-	editor:LineEnd() 
+	editor:LineEnd()
 	local sel_start = editor.SelectionStart + 1
 	local sel_end = sel_start + string.len(result)
 	editor:AddText('\n= '..result)

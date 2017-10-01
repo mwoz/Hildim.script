@@ -1,4 +1,3 @@
-
 local _show_flags = tonumber(_G.iuprops['sidebar.functions.flags']) == 1
 local _show_params = tonumber(_G.iuprops['sidebar.functions.params']) == 1
 
@@ -41,6 +40,7 @@ layout = {}
 local m__CLASS = '~~ROOT'
 local m_Par1
 local Lang2lpeg = {}
+
 do
 	local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
 
@@ -58,7 +58,6 @@ do
 	end
 
 	local PosToLine = function (pos) return editor:LineFromPosition(pos-1) end
-
 --v------- common patterns -------v--
 	-- basics
 	local EOF = P(-1)
@@ -90,7 +89,6 @@ do
 	local cl = cp/PosToLine -- line capture, uses editor:LineFromPosition
 	local par = C(P"("*(1-P")")^0*P")") -- captures parameters in parentheses
 --^------- common patterns -------^--
-
 	do --v------- asm -------v--
 		-- redefine common patterns
 		local SPACE = S' \t'^1
@@ -282,7 +280,8 @@ do
 		eh = NL*Cg(eh*Cc(true),"EventHandler")
 		con = NL*Cg(con*Cc(true),"Constant")
 		fr = NL*Cg(fr*Cc(true),"Frame")
-		str = NL*Cg(str*Cc(true),"String")
+		str = NL * Cg(str * Cc(true), "String")
+
         local ec = NL*AnyCase"end"*SC^1*(AnyCase"class") / (function(a,b) m__CLASS = '~~ROOT'; end)
 
 		eh = eh * SC^1 * '"' * IC * '"'
@@ -305,7 +304,6 @@ do
 
 		Lang2lpeg.VisualBasic = lpeg.Ct(patt)
 	end --^----- VB ------^--]]
-
 
 	do --v------- Python -------v--
 		-- redefine common patterns
@@ -520,7 +518,7 @@ local function Functions_GetNames()
         fnTryGroupName = (function(s) return s end)
     end
 	local start_code = Lang2CodeStart[lang]
-	local lpegPattern = Lang2lpeg[lang]
+	lpegPattern = Lang2lpeg[lang]
 	if not lpegPattern then
 		lang = Lexer2Lang[props['Language']]
 		start_code = Lang2CodeStart[lang]
@@ -887,6 +885,8 @@ local function Functions_Print()
     end
 end
 
+
+
 local function Func_Init(h)
     _Plugins = h
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
@@ -943,7 +943,6 @@ local function Func_Init(h)
         SaveLayoutToProp()
     end
     iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
-
     return {   -- iup.vbox{   };
         handle = tree_func;
         OnSwitchFile = OnSwitch;

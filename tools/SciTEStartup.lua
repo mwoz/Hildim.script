@@ -4,7 +4,6 @@
 
 ----[[ C O M M O N ]]-------------------------------------------------------
 --Загрузка имэджей
-
 if props['script.started'] ~= 'Y' then
     iup.Load(props["SciteDefaultHome"].."\\tools\\Images.led")
     dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
@@ -12,6 +11,16 @@ end
 
 _G.onDestroy_event = {}
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
+lpeg = require"lpeg"
+--Расширения, загружаемые в любом случае
+require "menuhandler"
+_G.g_session = {}
+dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")
+dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")
+
 Splash_Screen()
 dofile (props["SciteDefaultHome"].."\\tools\\Menus.lua")
 
@@ -24,12 +33,15 @@ if tab_width ~= nil then
 	output.TabWidth = tab_width
 end
 
+
+
 --local prn_ol = print
 --print = function() подмена print для отлова дебажного вывода
 --    prn_ol(debug.traceback())
 --end
 
 scite.RunAsync(function()
+
     props['session.reload'] = _G.iuprops['session.reload']
     iup.RestoreFiles()
     local hMainLayout = iup.GetLayout()
@@ -54,8 +66,8 @@ scite.RunAsync(function()
 
     scite.EnsureVisible()
     hMainLayout.resize_cb()
-    if OnResizeSideBar then OnResizeSideBar('sidebar') end
-    if OnResizeSideBar then OnResizeSideBar('leftbar') end
+    if OnResizeSideBar then scite.RunAsync(function() OnResizeSideBar('sidebar') end) end
+    if OnResizeSideBar then scite.RunAsync(function() OnResizeSideBar('leftbar') end) end
     if dlg_SPLASH then
         scite.RunAsync(function()
             if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end

@@ -80,7 +80,7 @@ function MacroPlay(name)
     editor:AutoCCancel()
     editor:BeginUndoAction()
     for _,val in pairs(macro) do
-      local c,lp,wp = unpack(val)
+      local c,lp,wp = table.unpack(val)
       if IFACE_FUNCTIONS_USE_WP[c] then
         scite.SendEditor(c,wp,lp)
       else
@@ -129,7 +129,7 @@ function OnMacro(cmd, msg)
       MacroSaveToFile(macro_file_path())
     end
   elseif cmd == "macro:getlist" then
-    if table.getn(glb_macros_name_table) > 0 then
+    if #glb_macros_name_table > 0 then
       local list = ""
       for _,name in pairs(glb_macros_name_table) do
         list = list..name..";"
@@ -148,16 +148,16 @@ end
 
 function MacroClearList()
   scite.Perform("currentmacro:")
-  while table.getn(glb_macros_name_table) > 0 do
+  while #glb_macros_name_table > 0 do
     glb_macros_table[glb_macros_name_table[1]] = nil
     table.remove(glb_macros_name_table,1)
   end
 end
 
 function MacroAddToList(macro, name, pos)
-  if table.getn(macro) > 0 then
+  if #macro > 0 then
     if not name then
-      local i = table.getn(glb_macros_name_table)
+      local i = #glb_macros_name_table
       repeat
         i = i + 1
         name = "record"..i
@@ -179,7 +179,7 @@ function MacroAddToList(macro, name, pos)
         end
       end
     end
-    if not glb_macros_table[name] or table.getn(glb_macros_name_table) == 0 then
+    if not glb_macros_table[name] or #glb_macros_name_table == 0 then
       if pos then
         table.insert(glb_macros_name_table, pos, name)
       else
@@ -207,10 +207,10 @@ local function macro_to_string(mode)
     if macro then
       text = text.."\n--- "..name.." ---\n"
       for _,val in pairs(macro) do
-        local c,lp,wp = unpack(val)
+        local c,lp,wp = table.unpack(val)
         if string.len(lp) > 0 then
           for _,v in pairs(MACRO_CONVERT_CHARS) do
-            lp = string.gsub(lp,unpack(v))
+            lp = string.gsub(lp,table.unpack(v))
           end
           lp = "'"..lp.."'"
         end
@@ -462,7 +462,7 @@ end
 -- common functions
 
 function table_clear(tbl)
-  while table.getn(tbl) > 0 do table.remove(tbl) end
+  while #tbl > 0 do table.remove(tbl) end
 end
 
 function table_icopy(tbl,from_tbl)

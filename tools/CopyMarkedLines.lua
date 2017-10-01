@@ -26,7 +26,7 @@ while true do
 end
 local text = table.concat(lines)
 editor:CopyText(text)
--- _ALERT('> Copied '..table.getn(lines)..' lines')
+-- _ALERT('> Copied '..#lines..' lines')
 
 if (action ~= nil) then
 	-- Inserted bookmarked lines to current position

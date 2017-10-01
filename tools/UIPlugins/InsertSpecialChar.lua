@@ -73,7 +73,7 @@ local function Init()
         end
         local user_list = ''
         local sep = ';'
-        local n = table.getn(char2html)
+        local n = #char2html
         for i = cp, n - 3, 3 do
             user_list = user_list..char2html[i]..sep
         end

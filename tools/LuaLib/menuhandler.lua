@@ -21,7 +21,7 @@ local function getParam(p, bDef)
     local v,tp = bDef, type(p)
     if tp == 'boolean' then v = p
     elseif tp == 'function' then v = p()
-    elseif tp == 'string' then v = assert(loadstring('return '..p))() end
+    elseif tp == 'string' then v = assert(load('return '..p))() end
     return v
 end
 
@@ -30,15 +30,15 @@ local function GetAction(mnu, bForse)
         if mnu.action then
             local tp = type(mnu.action)
             if tp == 'number' then return function() scite.MenuCommand(mnu.action) end end
-            if tp == 'string' then return assert(loadstring('return '..mnu.action)) end
+            if tp == 'string' then return assert(load('return '..mnu.action)) end
             return mnu.action
         elseif mnu.check_idm then
         elseif mnu.check_prop then
-            return assert(loadstring("CheckChange('"..mnu.check_prop.."', true)"))
+            return assert(load("CheckChange('"..mnu.check_prop.."', true)"))
         elseif mnu.check_iuprops then
-            return assert(loadstring("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)))
+            return assert(load("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)))
         elseif mnu.check_boolean then
-            return assert(loadstring("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
+            return assert(load("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
         else
             return function() debug_prnArgs('Error in menu format!!',mnu) end
         end
@@ -346,8 +346,8 @@ function s:GreateMenuLabel(item)
             function(h,but, pressed, x, y, status)
                 if but == 49 and pressed == 0 then
                     activeLabel = h
-                    local pos = loadstring('return {'..iup.GetAttribute(h, "SCREENPOSITION")..'}')()
-                    local sz = loadstring('return {'..iup.GetAttribute(h, "RASTERSIZE"):gsub('x', ',')..'}')()
+                    local pos = load('return {'..iup.GetAttribute(h, "SCREENPOSITION")..'}')()
+                    local sz = load('return {'..iup.GetAttribute(h, "RASTERSIZE"):gsub('x', ',')..'}')()
                     menuhandler:PopMnu(item[2],pos[1],pos[2] + sz[2], true)
                 end
             end, enterwindow_cb =
@@ -384,7 +384,7 @@ function s:GetMenuItem(path)
         local tp = type(p)
         if tp == 'boolean' then return function() return p end
         elseif tp == 'function' then return p
-        elseif tp == 'string' then return assert(loadstring('return '..p)) end
+        elseif tp == 'string' then return assert(load('return '..p)) end
     end
     local strFld
     local tblConditions = {}

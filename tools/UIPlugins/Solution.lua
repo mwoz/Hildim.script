@@ -42,7 +42,7 @@ local function SaveSolution()
     end
 
     tostr(tOut)
-    assert(loadstring('return '..str))
+    assert(load('return '..str))
     if _G.iuprops['solution.current'] and not shell.fileexists(_G.iuprops['solution.current']) then _G.iuprops['solution.current'] = nil end
     local path = _G.iuprops['solution.current'] or defpath
 
@@ -201,7 +201,7 @@ local function Initialize()
     else
         str = '{branchname = "Solution"}'
     end
-    local tree_nodes = assert(loadstring('return '..str))()
+    local tree_nodes = assert(load('return '..str))()
     local bSetActive = false
     local function enrich(t)
         for i = 1,  #t do

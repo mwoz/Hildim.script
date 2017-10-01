@@ -23,7 +23,7 @@ mydoc = document
 document - имя этого же объекта, заданное в api файле
 
 --]]----------------------------------------------------
-local lpeg = require'lpeg'
+
 local current_pos = 0    -- текущая позиция курсора
 local current_poslst = 0    -- текущая позиция курсора - при активации листа
 local autocom_chars = '' -- паттерн, содержащий экранированные символы из параметра autocomplete.lexer.start.characters - по эти
@@ -205,7 +205,7 @@ local function GetStrAsTable(str)
     local _start, _end, sVar, sSign, sFnc, sValue, sBrash, sPar = string.find(str, '^#$((.)([^=]+))=([^%s%(&]+)([%(&]?[%s]*)([^%s]*)', 1)
     if _start ~=nil and sValue ~= nil then --строку разбили на объект, алиас, скобку и параметр - вставляем, как таблицу
         if sSign == '=' then
-            sVar = loadstring('return '..sFnc)() --выполняем строку между знаками равенства, как функцию, возвращаемая строка - имя объекта
+            sVar = load('return '..sFnc)() --выполняем строку между знаками равенства, как функцию, возвращаемая строка - имя объекта
             if not sVar then return nil end
         end
         string.gsub(sPar, '^[%s]*', '')
@@ -217,7 +217,7 @@ end
 local function TableSort(table_name)
 	table.sort(table_name, function(a, b) return string.upper(a) < string.upper(b) end)
 	-- remove duplicates
-	for i = table.maxn(table_name)-1, 0, -1 do
+	for i = #table_name-1, 0, -1 do
 		if table_name[i] == table_name[i+1] then
 			table.remove (table_name, i+1)
 		end
@@ -337,7 +337,7 @@ end
 local function HideCallTip()
     editor:CallTipCancel()
     table.remove(calltipinfo)
-    if table.maxn(calltipinfo) == 1 then calltipinfo[1] = 0 end
+    if #calltipinfo == 1 then calltipinfo[1] = 0 end
 end
 
 -- Преобразовывает стринг в паттерн для поиска
@@ -370,7 +370,7 @@ local function GetInputObject(line)
                 break
             end
             local j
-            for j=1,table.maxn(wrdEndUp) do
+            for j=1,#wrdEndUp do
                 if string.find(strUpLine,wrdEndUp[j]) ~= nil then
                     nLine = 1
                     break
@@ -420,7 +420,7 @@ local function GetObjectNames(tableObj)
     if tableObj[4] ~= nil then
         local obj_namesUp = GetObjectNames(tableObj[4])
         if obj_namesUp[1] ~= nil then
-            tableObj[1] = obj_namesUp[table.maxn(obj_namesUp)][1]..tableObj[1]
+            tableObj[1] = obj_namesUp[#obj_namesUp][1]..tableObj[1]
         end
     end
 
@@ -434,7 +434,7 @@ local function GetObjectNames(tableObj)
         end
     end
 	-- Поиск по таблице сопоставлений "объект - синоним"
-	for i = 1, table.maxn(alias_table) do
+	for i = 1, #alias_table do
         if string.find(string.lower(tableObj[1]),"^"..alias_table[i][2].."$") and
           ((tableObj[2]=='' and tableObj[3]=='' and alias_table[i][3]=='' and alias_table[i][4]=='')or
           (tableObj[2]~='' and alias_table[i][3]==tableObj[2] and (string.find(tableObj[3],alias_table[i][4])==1 or
@@ -442,12 +442,12 @@ local function GetObjectNames(tableObj)
 			table.insert(obj_names, alias_table[i])
 		end
 	end
-	for i = 1, table.maxn(declarations) do
+	for i = 1, #declarations do
 		if (string.upper(tableObj[1]) == string.upper(declarations[i][2])) then
 			if (tableObj[2]=='' and tableObj[3]=='') then
                 table.insert(obj_names, declarations[i])
             else
-                for j = 1, table.maxn(alias_table) do
+                for j = 1, #alias_table do
                     if string.find(string.lower(declarations[i][1]),"^"..alias_table[j][2].."$") and
                       (alias_table[j][3]==tableObj[2] and (string.find(tableObj[3],alias_table[j][4],1,true)==1 or
                       alias_table[j][4]=='')) then
@@ -500,14 +500,14 @@ local function GetActualText()
             local nextActual = false
             local f = editor:GetLine(i,nil)
             if bActual then
-                for j=1, table.maxn(gloptrns) do
+                for j=1, #gloptrns do
                     if string.find(f,gloptrns[j]) ~= nil then
                         bActual= false
                         break
                     end
                 end
             else
-                for j=1, table.maxn(locptrns) do
+                for j=1, #locptrns do
                     if string.find(f,locptrns[j]) ~= nil then
                         nextActual= true
                         break
@@ -520,7 +520,7 @@ local function GetActualText()
                 bActual = true
             end
         end
-        local iLinesCount = table.maxn( thislines)
+        local iLinesCount = # thislines
         local outpt = ''
         for i=iLinesCount,1,-1 do
             outpt = outpt..thislines[i]
@@ -541,14 +541,14 @@ local function FindDeclarationByPattern(text_all, pattern)
             local input_object = GetInputObject(sRightString)
 			if input_object[1] ~= '' then
 				local objects = GetObjectNames(input_object)
-                if table.maxn(objects) > 0 then
-                    for i = table.maxn(declarations), 1, -1 do  --раз нашли новое присвоение данного объекта, удалим все предыдущие
+                if #objects > 0 then
+                    for i = #declarations, 1, -1 do  --раз нашли новое присвоение данного объекта, удалим все предыдущие
                         if declarations[i][2]== sVar then
                             table.remove(declarations,i)
                         end
                     end
                 end
-				for i = 1, table.maxn(objects) do
+				for i = 1, #objects do
 					if objects[i][1] ~= '=' then
 						table.insert(declarations, {objects[i][1],sVar,'',''})
 					end
@@ -638,7 +638,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
     end
     if strLua then
 
-        local tFn = assert(loadstring(strLua))()
+        local tFn = assert(load(strLua))()
         if tFn and type(tFn) == 'table' then
             for n, f in pairs(tFn) do
                 m_tblSubstitution[n] = f
@@ -795,7 +795,7 @@ local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
     for upObj, _ in pairs(tblobj) do
         if ob_tbl[upObj] ~=nil then
             if ob_tbl[upObj]["last"] ~= nil then last = ob_tbl[upObj]["last"] end
-            for j=1,table.maxn(ob_tbl[upObj]) do
+            for j=1,#ob_tbl[upObj] do
                 if string.find(string.upper(ob_tbl[upObj][j][1]),'^'..sB) then
                     table.insert(retT,ob_tbl[upObj][j][1])
                 end
@@ -808,12 +808,12 @@ end
 -- Показываем раскрывающийся список "методов"
 local function ShowUserList(nPos, iId, last)
     calltipinfo['attr'] = nil
-	local list_count = table.getn(methods_table)
+	local list_count = #methods_table
 	if list_count > 0 then
 		methods_table = TableSort(methods_table)
         local iSel = 0
         if last ~= nil then
-            for i = 1, table.maxn(methods_table) do
+            for i = 1, #methods_table do
                 if methods_table[i] == last then
                     iSel = i
                     break
@@ -845,7 +845,7 @@ end
 local function TryTipFor(sObj, sMet, api_tb, pos)
     api_t = api_tb[string.upper(sObj)]
     if api_t == nil then return false end
-    local lLen = table.maxn(api_t)
+    local lLen = #api_t
     for i = 1, lLen do
         local line = api_t[i][1]
         -- ищем строки, которые начинаются с заданного "объекта"
@@ -1011,8 +1011,8 @@ local function OnUserListSelection_local(tp, str)
             editor:SetSel( editor.CurrentPos, editor.CurrentPos)
         end
         --Если objects_tabl содержит несколько(2) имен объектов, то вроде бы первый родительский,а второй чайлдовый. сохраним наш выбор для чайлдового
-        if table.maxn(obj_names) > 0 then
-            local upObj = string.upper(obj_names[table.maxn(obj_names)][1])
+        if #obj_names > 0 then
+            local upObj = string.upper(obj_names[#obj_names][1])
             objects_table[upObj]['last'] = str
         end
     end
@@ -1027,12 +1027,12 @@ local function RunAutocomplete(char, pos, word)
     if input_object[1] =='' then return '' end
 	-- Если слева от курсора отсутствует слово, которое можно истолковать как имя объекта, то выходим
     obj_names = GetObjectNames(input_object)
-	if table.maxn(obj_names) == 0 then return false end
+	if #obj_names == 0 then return false end
 
     --Возможно, среди obj_names есть и свойства и конструкторы( .Fremes .Frames( ) - тогда свойства надо удалить
     local bIsProps = false
     local bIsConstr = false
-	for i = 1, table.maxn(obj_names) do
+	for i = 1, #obj_names do
 		if obj_names[i][3] ~= '' then bIsConstr = true else bIsProps=true end
 	end
     local last
@@ -1094,7 +1094,7 @@ end
 ResetCallTipParams = function()
 
     if editor:AutoCActive() then return end
-    local tip = calltipinfo[table.maxn(calltipinfo)]
+    local tip = calltipinfo[#calltipinfo]
     local pos = current_pos
     if tip[1] > current_pos then
         if editor:WordEndPosition(current_pos) + 1 == tip[1] then
@@ -1145,7 +1145,7 @@ ResetCallTipParams = function()
         end
     end
 
-    calltipinfo[table.maxn(calltipinfo)][4] = iParCount
+    calltipinfo[#calltipinfo][4] = iParCount
     local s = tip[5][iParCount]
     local e = tip[5][iParCount + 1]
     ShowCallTip(tip[1], tip[2], s, e)
@@ -1234,7 +1234,7 @@ local function OnChar_local(char)
     end
     if calltipinfo[1] and calltipinfo[1] ~= 0 then --будем считать,  что разделители параметров - только запятые
 
-        if (calltipinfo[table.maxn(calltipinfo)][3] or 0) > 0 and bResetCallTip then
+        if (calltipinfo[#calltipinfo][3] or 0) > 0 and bResetCallTip then
             ResetCallTipParams()
             result = true
         end

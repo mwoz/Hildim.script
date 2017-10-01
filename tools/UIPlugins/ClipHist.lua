@@ -1,4 +1,3 @@
-
 local lst_clip, clipboard, maxlin, colcolor, blockReselect, blockResetCB, expd, txt_live, btn
 maxlin = 60
 colcolor = '0 150 0'

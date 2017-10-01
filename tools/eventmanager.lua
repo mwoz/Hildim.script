@@ -63,11 +63,11 @@ local function Dispatch (name, ...)
 		if h then --@ this is a workaround for eventhandler-disappear bug (see v.1.0.3)
             res = { h(...) } -- store whole handler return in a table
 			if res[1] then -- first returned value is a interruption flag
-				return unpack(res)
+				return table.unpack(res)
 			end
 		end
 	end
-	return res and unpack(res) -- just for the case of error-handling
+	return res and table.unpack(res) -- just for the case of error-handling
 end
 
 --- Создаёт новый обработчик для вызова ядром редактора

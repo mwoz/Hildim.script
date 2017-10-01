@@ -17,7 +17,6 @@ local function Init()
     local prevLexer = -1
     local abbr_table
     local bListModified = false
-    require"lpeg"
 
     ABBREV = {}
 
@@ -173,7 +172,7 @@ end
             strGp = strGp..Iif(i > 1, ', ', '')..'arg['..i..']'
         end
         strGp = strGp..') end'
-        return t, assert(loadstring(strGp))()(arg)
+        return t, assert(load(strGp))()(arg)
     end
 
     local function parseParamTemplate(findSt, findEnd, s, dInd, tMap, bContinue, ...)
@@ -254,7 +253,7 @@ end
         if isForm > 0 then return end --запущена форма пользовательских параметров, по окончании она выполнит вставку текста     'Л([^%[]%.-[^%]])Ы'
         s, isForm = s:gsub('Л([^%@%#%?З].-)Ы',
             function(frm)
-                bCancel = parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(loadstring("return function(g) return g("..frm..") end"))()(getParamProxy))
+                bCancel = parseParamTemplate(findSt, editor.SelectionEnd, s:gsub('Л([^%@%#%?].-)Ы', ''), dInd, assert(load("return function(g) return g("..frm..") end"))()(getParamProxy))
             end
         )
         if isForm > 0 then return bCancel end

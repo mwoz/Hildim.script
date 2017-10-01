@@ -274,7 +274,9 @@ local function  CreateBox()
             tCur = tSide[i]
             if tCur[1] then
                 local pI = dofile(defpath..tCur[1])
+
                 SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
+
                 local id = pI.code
                 if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                 iup.SetAttribute(SideBar_Plugins[pI.code].handle, "HELPID", id)
@@ -319,14 +321,13 @@ local function  CreateBox()
         end
         return tArg
     end
-
     hk_pointer = 1
     pane_curObj = LeftBar_obj
     local tbArgLeft = settings2tbl(_G.iuprops["settings.user.leftbar"] or '', "tbArgLeft")
     pane_curObj = SideBar_obj
     local tbArgRight = settings2tbl(_G.iuprops["settings.user.rightbar"] or '', "tbArgRight")
 
-    tabs =  SideBar(tbArgLeft, LeftBar_obj, 'leftbar')
+    tabs = SideBar(tbArgLeft, LeftBar_obj, 'leftbar')
 
     if tabs then
         LeftBar_obj.TabCtrl = tabs
@@ -370,7 +371,7 @@ local function RestoreNamedValues(h, root)
                     local s = _G.iuprops[root..'.'..child.name..'.hist']
                     if s then
                         local i = 1
-                        for w in s:gmatch('([^¤]+)') do
+                        for w in string.gmatch(s, '([^¤]+)') do
                             if i > tonumber(child.visibleitems  or 15) then break end
                             iup.SetAttributeId(child, 'INSERTITEM', i, w)
                             i = i + 1
@@ -433,6 +434,7 @@ local function InitSideBar()
         bs2.value = 1000
         bFindInSide = true
     end
+
     SideBar_Plugins.findrepl.OnCreate()
 
     for i = 1, #tEvents do

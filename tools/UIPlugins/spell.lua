@@ -93,8 +93,8 @@ local function Init()
         local e, s = posStart, 0
         local bSpell
         local str = editor:textrange(posStart - 1, posEnd)
-        for s, word, e in str:gmatch('[ \t\n\r!-/:-?\[-^{-§]()([A-Za-zÀ-ÿ¨¸]+)()') do
-            if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\[-^{-»]') then
+        for s, word, e in str:gmatch('[ \t\n\r!-/:-?\\[-^{-§]()([A-Za-zÀ-ÿ¨¸]+)()') do
+            if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\\[-^{-»]') then
                 if word:byte() >= 160 then
                     bSpell = sRu:spell(word)
                 else
@@ -122,8 +122,8 @@ local function Init()
         local iUt = 2
         local t = nil
         --local str2 = editor:textrange(posStart-1, posEnd+1)
-        for s, word, e in str:gmatch('[ \t\n\r!-/:-?\[-^{-§]()([A-Za-zÀ-ÿ¨¸]+)()') do
-            if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\[-^{-»]') then
+        for s, word, e in str:gmatch('[ \t\n\r!-/:-?\\[-^{-§]()([A-Za-zÀ-ÿ¨¸]+)()') do
+            if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\\[-^{-»]') then
                 if word:byte() >= 160 then
                     bSpell = sRu:spell(word)
                 else

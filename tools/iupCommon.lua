@@ -577,6 +577,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
         iup.DestroyDialogs();
         SaveIup()
+        ClearAllEventHandler()
         scite.RunAsync(function()
                 print("Reload IDM...")
                 scite.ReloadStartupScript()
@@ -639,7 +640,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         elseif cmd == IDM_BUILD then strcmd = 'build'
         else strcmd = 'compile' end
         if props['command.'..strcmd..'.subsystem$'] == '10' then
-            assert(loadstring(props['command.'..strcmd..'$']))()
+            assert(load(props['command.'..strcmd..'$']))()
             return true
         end
     end
@@ -660,7 +661,7 @@ AddEventHandler("OnSave", function(cmd, source)
                 end
             end
         end)
-        assert(loadstring(editor:GetText()))
+        assert(load(editor:GetText()))
         return
     end
 end)
@@ -1326,21 +1327,24 @@ iup.drop_cb_to_list = function(list, action)
 end
 
 function iup.ReloadScript()
+    local tblDat
+    if OnScriptReload then tblDat = {}; OnScriptReload(true, tblDat) end
+    ClearAllEventHandler();
     print("Reload...")
     scite.HideForeReolad()
     local bd
-    local tblDat
-    if OnScriptReload then tblDat = {}; OnScriptReload(true, tblDat) end
 
     iup.DestroyDialogs();
     SaveIup()
     scite.ReloadStartupScript()
+    scite.RunAsync(function()
     if OnScriptReload then OnScriptReload(false, tblDat) end
     OnSwitchFile("")
     scite.EnsureVisible()
     iup.GetLayout().resize_cb()
     print("...Ok")
     if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.RunAsync(function() scite.Perform("reloadproperties:") end) end
+    end)
 end
 
 AddEventHandler("OnContextMenu", function(lp, wp, source)
@@ -1593,11 +1597,3 @@ AddEventHandler("OnMarginClick", function(margin, modif, line)
     end
 end)
 
---Расширения, загружаемые в любом случае
-require "menuhandler"
-_G.g_session = {}
-dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
-dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
-dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
-dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")
-dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")
