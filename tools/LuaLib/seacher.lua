@@ -1,9 +1,6 @@
 
 local s = class()
 
-function s:destroy()
-    print("simple:destroy()")
-end
 
 function s:init(t)
     self.wholeWord   = t.wholeWord
@@ -252,10 +249,10 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                 line = l
                 local lNum
                 if not _G.iuprops['findres.groupbyfile'] then
-                    if bSearchCapt then lNum = '.\\:'..(l+1)..': '
-                    else lNum = props["FilePath"]:from_utf8(1251)..':'..(l+1)..': ' end
+                    if bSearchCapt then lNum = '.\\:'..math.floor(l+1)..': '
+                    else lNum = props["FilePath"]:from_utf8(1251)..':'..math.floor(l+1)..': ' end
                 else
-                    lNum = '\t'..(l+1)..': '
+                    lNum = '\t'..math.floor(l+1)..': '
                 end
                 if lCount == maxlines then
                     findres:ReplaceSel(lNum..'...\n')

@@ -866,7 +866,7 @@ if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander
 else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '3'   end
 if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000" end
 hMainLayout.resize_cb = function()
-    local tmr = iup.timer{time = 10, run = 'YES', action_cb = function(h)
+    local tmr = iup.timer{time = 10, action_cb = function(h)
         h.run = 'NO'
         if iup.GetDialogChild(hMainLayout, "LeftBarExpander").state == 'CLOSE' then iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0' end
         if iup.GetDialogChild(hMainLayout, "RightBarExpander").state == 'CLOSE' then iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000' end

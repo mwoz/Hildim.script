@@ -32,9 +32,9 @@ local function Init(h)
     AddEventHandler("OnUpdateUI", function()
         if not editor.Focus then return end
 
-        txtCol.value = editor.Column[editor.CurrentPos] + editor.SelectionNAnchorVirtualSpace[0] + 1
-        txtSel.value = editor.SelectionEnd - editor.SelectionStart
-        txtLine.value = editor:LineFromPosition(editor.CurrentPos) + 1
+        txtCol.value = math.floor(editor.Column[editor.CurrentPos] + editor.SelectionNAnchorVirtualSpace[0] + 1)
+        txtSel.value = math.floor(editor.SelectionEnd - editor.SelectionStart)
+        txtLine.value = math.floor(editor:LineFromPosition(editor.CurrentPos) + 1)
     end)
 
     local sTip = '(Ctrl+G) Нажмите Enter для перехода на позицию'
@@ -48,7 +48,7 @@ local function Init(h)
         handle = iup.hbox{
             iup.label{title = 'Line: '; fontstyle = 'Bold'};
             txtLine;
-            iup.label{title = 'Colimn: '; fontstyle = 'Bold'};
+            iup.label{title = 'Column: '; fontstyle = 'Bold'};
             txtCol;
             iup.label{title = 'Selection: '; fontstyle = 'Bold'};
             txtSel; alignment = 'ACENTER', gap = '8';

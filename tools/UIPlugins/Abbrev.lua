@@ -190,6 +190,7 @@ end
             end
 
             local _, _, mark, nI = pLong:find('^‹([%@%#%?])(%d+)')
+            local arg = table.pack(...)
             if not nI or tonumber(nI) > #arg then
                 bContinue = false
                 print("Error: "..pLong)

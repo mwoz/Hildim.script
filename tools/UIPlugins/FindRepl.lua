@@ -462,7 +462,7 @@ end
 local function kf_cb(h)
 
     if _G.dialogs['findrepl'] and Ctrl("chkTransparency").value == 'ON' and Ctrl("chkTranspFocus").value == 'ON' then
-        local tmr = iup.timer{time = 10; run = 'YES';action_cb = function(h)
+        local tmr = iup.timer{time = 10; action_cb = function(h)
             h.run = 'NO'
             local hc = iup.GetFocus()
             while hc do
@@ -471,6 +471,7 @@ local function kf_cb(h)
             end
             if _G.dialogs['findrepl'] then popUpFind.opacity = _G.iuprops['settings.findrepl.opacity'] or 200 end
         end}
+        tmr.run = 'YES'
     end
 end
 
@@ -1119,7 +1120,7 @@ local function Init(h)
             Ctrl("zbProgress").valuepos = 1
         elseif state == 1 then
             Ctrl("progress").value = iAll
-            Ctrl("progress").text = iAll..' from '..tonumber(Ctrl("progress").max)
+            Ctrl("progress").text = math.floor(iAll)..' from '..math.floor(tonumber(Ctrl("progress").max))
         elseif state == 2 then
             Ctrl("zbProgress").valuepos = 0
             Ctrl("btnFindInFiles").image = "IMAGE_search"

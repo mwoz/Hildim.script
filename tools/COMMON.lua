@@ -420,6 +420,7 @@ end
 
 function debug_prnArgs(...)
     print('-------------')
+    local arg = table.pack(...)
     for i = 1, #arg do
         if type(arg[i]) == 'table' then
             print(i..'->  Table')
