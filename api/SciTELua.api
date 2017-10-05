@@ -269,24 +269,21 @@ upper (s)\n returns string with letters in upper case
 table.concat
 table.foreach
 table.foreachi
-table.getn
 table.insert
 table.remove
-table.setn
 table.sort
+table.pack
+table.unpack
 concat (table [, sep [, i [, j]]])\n returns concatenated table elements i to j separated by sep
 foreach (table, f)\n executes f(index,value) over all elements of table, returns first non-nil of f
 foreachi (table, f)\n executes f(index,value) in sequential order 1 to n, returns first non-nil of f
-getn (table)\n returns size of table, or n field, or table.setn value, or 1 less first index with nil value
 insert (table, [pos,] value)\n insert value at location pos in table, default pos=n+1
 remove (table [, pos])\n removes element at pos from table, default pos=n
-setn (table, n)\n sets size of table, n field of table if it exists
 sort (table [, comp])\n sorts in-place elements 1 to n, comp(v1,v2) should return true if v1<v2
 
 tonumber (e [, base])\n convert to number, returns number, nil if non-convertible, 2<=base<=36
 tostring (e)\n convert to string, returns string
 type (v)\n returns type of v as a string
-unpack (list)\n returns all elements from list
 xpcall (f, err)\n pcall function f with new error handler err
 
 _ALERT (e1, e2, ...)\n prints values to stdout using tostring

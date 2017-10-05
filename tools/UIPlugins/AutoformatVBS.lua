@@ -439,7 +439,8 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
                         local newPos = curS - (curI - LineIndent(ls - i))
                         editor.TargetStart = editor:PositionFromLine(ls)
                         editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
-                        editor:ReplaceTarget(string.rep(' ', LineIndent(ls - i)))
+                        local li = LineIndent(ls - i)
+                        editor:ReplaceTarget(string.rep(' ', li))
                         editor.SelectionStart = newPos
                         editor.SelectionEnd = newPos
                         prevFold = curI
