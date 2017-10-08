@@ -40,10 +40,15 @@ function GetExtImage(strName)
     end
 end
 
+local function getListDir()
+    return list_dir
+end
+
 function FILEMAN.FullPath()
-    if not list_dir.marked then return '' end
-    local lin = list_dir.marked:sub(2):find("1")
-    return current_path..list_dir:getcell(lin, 2)
+    local ld = getListDir()
+    if not ld.marked then return '' end
+    local lin = ld.marked:sub(2):find("1")
+    return current_path..ld:getcell(lin, 2)
 end
 function FILEMAN.IsDirectory()
     local lin = list_dir.marked:sub(2):find("1")

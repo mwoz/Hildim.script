@@ -1,15 +1,22 @@
-local sys_KeysToMenus = {}
-local labels = {}
+local sys_KeysToMenus, labels, tPostponed
 local waited_mnu, w_x, w_y = nil,nil, nil
 local activeLabel = nil
 local reselectedItem = nil
 local clr_hgl = '15 60 195'
--- local clr_hgl = '206 206 00'
---local clr_select = '205 43 202'
+
 local clr_select = '0 0 0'
 local clr_normal = '70 70 70'
 local s = class()
 local r_button
+
+function s:Init()
+    sys_KeysToMenus = {}
+    labels = {}
+    tPostponed = {}
+    waited_mnu, w_x, w_y = nil,nil, nil
+    activeLabel = nil
+    reselectedItem = nil
+end
 
 function s:get_title(t, bShort)
     local s = t['ru'] or t[1]
@@ -281,7 +288,6 @@ function s:InsertItem(id, path, t)
     end
 end
 
-local tPostponed = {}
 function s:PostponeInsert(id, path, t)
     table.insert(tPostponed, {id, path, t})
 end

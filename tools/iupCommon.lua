@@ -9,9 +9,10 @@ local file = props["scite.userhome"]..'\\settings.lua'
 
 if shell.fileexists(file) then
     local text = ''
-    if pcall(io.input, file) then
-        text = io.read('*a')
-        io.close()
+    local bSuc, pF = pcall(io.input, file)
+    if bSuc then
+        text = pF:read('*a')
+        pF:close()
     end
     local bSuc, tMsg = pcall(dostring,text)
     if not bSuc then
@@ -30,10 +31,11 @@ end
 
 
 if props['config.restore'] ~= '' then
-    if pcall(io.input, props['config.restore']) then
+    local bSuc, pF = pcall(io.input, props['config.restore'])
+    if bSuc then
         local l = (_G.iuprops['settings.lexers'] or '')
-        text = io.read('*a')
-        io.close()
+        text = pF:read('*a')
+        pF:close()
         local bSuc, tMsg = pcall(dostring, text)
         if not bSuc then
             print('Îרטבךא ג פאיכו '..props['config.restore'], tMsg)
@@ -411,15 +413,13 @@ iup.RestoreFiles = function(bForce)
         --editor.VScrollBar = false
         if #t > 0 then
             BlockEventHandler"OnRightEditorVisibility"
-            BlockEventHandler"OnOpen"
+            BlockEventHandler("OnOpen", onOpen_local)
             BlockEventHandler"OnNavigation"
             BlockEventHandler"OnUpdateUI"
-            OnOpen = onOpen_local
         end
         local bRight, bRightPrev, bCloned, bIsRight = false, false, false, false
         for i = #t, 1,- 1 do
             if i == 1 then
-                OnOpen = nil
                 UnBlockEventHandler"OnUpdateUI"
                 UnBlockEventHandler"OnNavigation"
                 UnBlockEventHandler"OnOpen"
@@ -537,11 +537,10 @@ function CORE.HelpUI(helpid, anchor)
     local dv, fl = 'Hildim', helpid
     local _, _, d, f = helpid:find('(.*)::(.*)')
     if d then dv, fl = d, f end
-
+ --print(debug.traceback())
     if shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'.chm') then
         local strCmd = props['SciteDefaultHome']..'/help/'..dv..'.chm::ui/'..fl..'.html'
         if anchor then strCmd = strCmd..'#'..anchor end
-        --print(strCmd)
         scite.ExecuteHelp(strCmd, 0)
     elseif shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html') then
         local url = 'file:///'..props['SciteDefaultHome']..'/help/'..dv..'/ui/'..fl..'.html'
@@ -643,6 +642,10 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             assert(load(props['command.'..strcmd..'$']))()
             return true
         end
+ --[[       if props['command.'..strcmd..'.subsystem$'] == '3' then
+            assert(load(props['command.'..strcmd..'$']..'()'))()
+            return true
+        end]]
     end
 end)
 
@@ -816,6 +819,30 @@ iup.expander = function(t)
     function expand:isOpen() return expand.state == 'OPEN' end
 
     return expand
+end
+
+local old_iup_GetParam = iup.GetParam
+local indGetParam
+iup.GetParam = function(...)
+    local tParams = table.pack(...)
+    local _, _, capt, fName = ('GetParam_'..tParams[1]):find('([^^]*)^(.*)')
+    indGetParam = fName
+    if fName then
+        tParams[1] = capt
+        iup.SetGlobal('INPUTCALLBACKS', 'YES')
+    end
+    local t = table.pack(old_iup_GetParam(table.unpack(tParams)))
+    iup.SetGlobal('INPUTCALLBACKS', 'NO')
+    indGetParam = nil
+    return table.unpack(t)
+end
+
+function OnParamKeyPress()
+    if editor.Focus or findres.Focus or output.Focus or not indGetParam then
+        iup.SetGlobal('INPUTCALLBACKS', 'NO')
+    else
+        CORE.HelpUI(indGetParam, nil)
+    end
 end
 
 --[[local old_iup_text = iup.text
@@ -1250,7 +1277,7 @@ iup.scitedialog = function(t)
         end
         local id = t.sciteid
         if t.hlpdevice then id = t.hlpdevice..'::'..id end
-        iup.SetAttribute(dlg, "HELPID", t.sciteid)
+        iup.SetAttribute(dlg, "HELPID", id)
     else
         dlg:show()
     end

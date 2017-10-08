@@ -232,7 +232,7 @@ local function isXmlLine(cp)
 --определяем, является ли текущая строка тэгом xml
     cp = cp or CUR_POS:Get('SelectionStart')
     if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
-    return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[CUR_POS:Get('SelectionStart')] == 1 and editor.CharAt[CUR_POS:Get('SelectionStart')] == 62)
+    return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..math.floor(editor.StyleAt[cp])..',') or (editor.StyleAt[CUR_POS:Get('SelectionStart')] == 1 and editor.CharAt[CUR_POS:Get('SelectionStart')] == 62)
 end
 
 local function ShowCallTip(pos, str, s, e, reshow)
@@ -381,7 +381,7 @@ local function GetInputObject(line)
     end
     local lineLen = string.len(line)
     local inputObject = {"","","",nil}
-    if props["autocomplete."..editor_LexerLanguage()..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] or editor.CharAt[editor.SelectionStart] == 60 then
+    if props["autocomplete."..editor_LexerLanguage()..".nodestart.stile"] == ''..math.floor(editor.StyleAt[editor.SelectionStart]) or editor.CharAt[editor.SelectionStart] == 60 then
         inputObject = {"noobj", "", "", nil}
         return inputObject
     end

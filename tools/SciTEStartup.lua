@@ -11,7 +11,8 @@ end
 
 _G.onDestroy_event = {}
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
-lpeg = require"lpeg"
+
+if not lpeg then lpeg = require"lpeg" end
 --Расширения, загружаемые в любом случае
 require "menuhandler"
 _G.g_session = {}
@@ -32,13 +33,6 @@ local tab_width = tonumber(props['output.tabsize'])
 if tab_width ~= nil then
 	output.TabWidth = tab_width
 end
-
-
-
---local prn_ol = print
---print = function() подмена print для отлова дебажного вывода
---    prn_ol(debug.traceback())
---end
 
 scite.RunAsync(function()
 

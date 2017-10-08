@@ -793,6 +793,7 @@ end
 
 require "menuhandler"
 local function InitMenuBar()
+    menuhandler:Init()
     if not _G.sys_Menus then return end
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     MenuBar_obj = {}

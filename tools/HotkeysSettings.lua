@@ -314,7 +314,7 @@ local function Show()
     for ups,submnu in pairs(sys_Menus) do
         local tb = {}
         tb.branchname = submnu.title --ups
-        table.insert(tblView, 0, tb)
+        table.insert(tblView, 1, tb)
         viewMenu(submnu, tb, ups)
     end
     tree_hk.autoredraw = 'NO'

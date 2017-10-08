@@ -48,7 +48,7 @@ end
 
 local function ResetWrapProps()
 	local ret, style, flag, loc, mode, indent, keys =
-                    iup.GetParam("Настройки переноса по словам",
+                    iup.GetParam("Настройки переноса по словам^WrapSettings",
 					nil,
 					'Переносить:%l|По границам слов|По любому символу|По пробелам|\n'..
 					'Символы переноса-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n'..
@@ -80,7 +80,7 @@ local function ResetTabbarProps()
         local oldClr = props['tabctrl.readonly.color']
         if oldClr == '' then oldClr = '120 120 120' end
         local ret, ondbl, buff, zord, newpos, coloriz, illum, satur, cEx, cPref, ROColor =
-        iup.GetParam("Свойства панели закладок",
+        iup.GetParam("Свойства панели закладок^TabbarProperties",
             nil,
             'Закрывать по DblClick%b\n'..
             'Максимальное количество вкладок:%i[10,500,1]\n'..
@@ -150,7 +150,7 @@ local function ResetTabbarProps()
 end
 
 local function ResetFontSize()
-	local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса",
+	local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса^InterfaceFontSize",
 					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 5 then return 0 end return 1 end,
 					'Размер%i[1,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
 	if ret then
@@ -269,7 +269,10 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 	{link='Buffers¦&Save All'},
 	{link='File¦Save &As...'},
 	{link='File¦Save a Cop&y...'},
-	{'s1', separator=1},
+    {'s1', separator = 1},
+    {link= 'File¦Move to another window'},
+    {link='File¦Clone to another window'},
+	{'s2', separator=1},
 	{'Move Tab Left', ru = 'Переместить влево', action = IDM_MOVETABLEFT,},
 	{'Move Tab Right', ru = 'Переместить вправо', action = IDM_MOVETABRIGHT,},
 	{'Copy to Clipboard', ru='Копировать в буфер',{
@@ -278,12 +281,9 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 		{'Path', ru='Путь', action = function() CopyPathToClipboard("path") end,},
 		{'FileName', ru='Имя файла', action = function() CopyPathToClipboard("name") end,},
 	}},
-    {'Tabbar Settings', ru = 'Свойства панели вкладок', action = ResetTabbarProps},
+    {link='Options¦Tabbar Settings'},
 	{link='File¦Encoding'},
 	{link = 'Options¦&Read-Only'},
-    {'s1', separator = 1},
-	{'Move to another window', ru = 'Переместить на другое окно', action = IDM_CHANGETAB, visible="scite.buffers.IsCloned(scite.buffers.GetCurrent())==0"},
-	{'Clone to another window', ru = 'Клонировать в другом окне', action = IDM_CLONETAB, visible="scite.buffers.IsCloned(scite.buffers.GetCurrent())==0" },
 
 	{'slast', separator=1},
 }
@@ -400,6 +400,9 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Page Set&up...', ru = 'Параметры страницы', action = IDM_PRINTSETUP, image = 'layout_design_µ'},
 		{'&Print...', ru = 'Печать...', key = 'Ctrl+P', action = IDM_PRINT, image = 'printer_µ'},
 		{'s3', separator = 1},
+        {'Move to another window', ru = 'Переместить на другое окно', action = IDM_CHANGETAB, visible="scite.buffers.IsCloned(scite.buffers.GetCurrent())==0"},
+        {'Clone to another window', ru = 'Клонировать в другом окне', action = IDM_CLONETAB, visible = "scite.buffers.IsCloned(scite.buffers.GetCurrent())==0" },
+        {'s4', separator = 1},
 		{'Exit', ru = 'Выход', action = IDM_QUIT},
         {'sLast', separator = 1},
         {'Recent Files1', plane = 1, visible = "(_G.iuprops['resent.files.list.location'] or 0) == 1", function() if (_G.iuprops['resent.files.list.location'] or 0) == 1 then return iuprops['resent.files.list']:GetMenu() else return {} end end},
@@ -565,6 +568,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Show Menu Icons', ru = 'Отображать иконки в меню', check_iuprops = 'menus.show.icons'},
 		{'Show API Tool Tip', ru = 'Подсказки из API файла', check_iuprops = 'menus.tooltip.show', visible="props['apii$']~='' or props['apiix$']~=''"},
 		{'Interface Font Size', ru = 'Размер шрифта интерфейса...', action = ResetFontSize},
+        {'Tabbar Settings', ru = 'Свойства панели вкладок', action = ResetTabbarProps},
 
 		{'s3', separator = 1},
 		{'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')", active = RunSettings, image = "keyboards_µ"},
