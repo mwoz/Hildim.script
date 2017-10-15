@@ -38,7 +38,7 @@ local function ReadSettings()
         ,wrapFind = (cv("chkWrapFind") == "ON")
         ,backslash = (cv("chkBackslash") == "ON")
         ,regExp = (cv("chkRegExp") == "ON")
-        ,style = Iif(cv("chkInStyle") == "ON",tonumber(cv("numStyle")),nil)
+        ,style = Iif(cv("chkInStyle") == "ON",math.floor(tonumber(cv("numStyle"))),nil)
         ,searchUp = (containers["zUpDown"].valuepos == "0")
         ,findWhat = self:encode(cv("cmbFindWhat"))
         ,replaceWhat = self:encode(cv("cmbReplaceWhat"))
@@ -404,7 +404,7 @@ local function ActivateFind_l(nTab)
         if _G.iuprops[_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '2' then _Plugins.findrepl.Bar_obj.handle.ShowDialog() end
     end
 
-    if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart] end
+    if nTab ~= 2 then Ctrl("numStyle").value = math.floor(wnd.StyleAt[wnd.SelectionStart]);  end
 
     if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
     else iup.SetFocus(Ctrl('cmbFindWhat')) end

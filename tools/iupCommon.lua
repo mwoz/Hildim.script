@@ -946,7 +946,7 @@ iup.scitedetachbox = function(t)
         leavewindow_cb=function() end,},
         btn_attach,
         iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() cmd_Hide() end},
-    }, barsize = 1, state='CLOSE', name = t.sciteid..'_expander'}
+    }, barsize = 0, state='CLOSE', name = t.sciteid..'_expander'}
 
     if t[1] then
         local vb = t[1]
@@ -1428,8 +1428,8 @@ local function SaveIuprops_local(filename)
     local hFind
     if _G.dialogs['findrepl'] then
         hFind = _G.dialogs['findrepl']
-    else
-        hFind = iup.GetDialogChild(iup.GetLayout(), "FindReplDetach")
+    --else
+        --hFind = iup.GetDialogChild(iup.GetLayout(), "FindReplDetach")
     end
     local t = {}
     for n,v in pairs(_G.iuprops) do
@@ -1439,7 +1439,7 @@ local function SaveIuprops_local(filename)
             local process = true
 
             if prefix == 'sidebarctrl' then
-                process = (iup.GetDialogChild(hFind, ctrl) == nil)
+                process = not hFind or (iup.GetDialogChild(hFind, ctrl) == nil)
             end
             if process then
                 local tp = type(v)

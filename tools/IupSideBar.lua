@@ -73,7 +73,7 @@ local function  CreateToolBar()
     end
     table.insert(tblVb, iup.hbox(tblHb))
 
-    return iup.expander{barsize = 1, state = "OPEN", name = "toolbar_expander", iup.vbox(tblVb)}
+    return iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander", iup.vbox(tblVb)}
 end
 
 local StatusBar_obj = {}
@@ -95,7 +95,7 @@ local function CreateStatusBar()
             table.insert(tblH, _tmpSidebarButtons[i])
         end
     end
-    return iup.expander{barsize = 1, state = "OPEN", name = "statusbar_expander", iup.hbox(tblH)}
+    return iup.expander{barsize = 0, state = "OPEN", name = "statusbar_expander", iup.hbox(tblH)}
 end
 
 function iup.SaveNamedValues(h, root)
@@ -286,9 +286,9 @@ local function  CreateBox()
                     table.insert(tArg, Pane{pI.code, tabtitle = tabName, tabhotkey = (tabhotkey or '')})
                 else
                     local bfixedheigth = pI.fixedheigth
-
-                    local tSub = {piCode(pI)}
+                    local tSub = piCode(pI)
                     for j = 2, #tCur do
+                        tSub = {tSub}
                         pI = dofile(defpath..tCur[j])
                         SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
                         local id = pI.code
@@ -811,7 +811,7 @@ local function InitMenuBar()
     end
 
 
-    local tTlb = {iup.expander{barsize = 1, state="OPEN", name = "MenuBar",iup.vbox{expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL"}}}};
+    local tTlb = {iup.expander{barsize = 0, state="OPEN", name = "MenuBar",iup.vbox{expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL"}}}};
 
     tTlb.control = "YES"
     tTlb.sciteid="iupmenubar"
@@ -831,7 +831,7 @@ end
 InitMenuBar()
 --Автозагрузка скрытых плагинов
 local str = _G.iuprops["settings.hidden.plugins"] or ''
-local strTbl = 'return function(h) return iup.expander{barsize = 1, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'
+local strTbl = 'return function(h) return iup.expander{barsize = 0, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'
 local i = 0
 for p in str:gmatch('[^¦]+') do
     local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
