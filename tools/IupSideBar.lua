@@ -211,7 +211,6 @@ local function  CreateBox()
         local spl_h = iup.GetDialogChild(hMainLayout, sSplit)
 
         spl_h.valuechanged_cb = function(h) if OnResizeSideBar and tmr_Resize.run == 'NO' then tmr_Resize.run = 'YES' end end;
-
         local h = iup.scitedetachbox{
             hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes"; buttonImage=buttonImage;
             sciteid = sSciteId;Split_h = spl_h;Split_CloseVal = sSplit_CloseVal;
@@ -242,6 +241,7 @@ local function  CreateBox()
             iup.SaveNamedValues(hVbox,'sidebarctrl')
         end)
         h.OnMyDestroy = function() spl_h.valuechanged_cb = nil end
+
         return h
     end
 
@@ -372,6 +372,7 @@ local function RestoreNamedValues(h, root)
                     if s then
                         local i = 1
                         for w in string.gmatch(s, '([^¤]+)') do
+                            if i == 1 and child.editbox == "YES" then val = w end
                             if i > tonumber(child.visibleitems  or 15) then break end
                             iup.SetAttributeId(child, 'INSERTITEM', i, w)
                             i = i + 1
@@ -548,6 +549,7 @@ local function InitSideBar()
         MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
     }
     _G.g_session['coeditor'] = CoEditor
+
     iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").valuechanged_cb = function(h)
         if h.value == '1000' then
             CoEditor.cmdHide()
@@ -574,13 +576,17 @@ local function InitTabbar()
             if tonumber(SSM.value) > 999 and SSM.barsize ~= '0' then SSM.value = "999"
             elseif tonumber(SSM.value) < 1 then SSM.value = "1" end
         end
-        if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' then
+        if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' and (_G.iuprops['dialogs.coeditor.splithorizontal'] == 0) then
             TBS.value = ''..math.floor(tonumber(SSL.value) + (tonumber(SSM.value) / 1000) * (tonumber(SSR.value) / 1000) * (1000 - tonumber(SSL.value)))
         end
     end
-    SSL.valuechanged_cb = Splitter_CB
-    SSR.valuechanged_cb = Splitter_CB
-    SSM.valuechanged_cb = Splitter_CB
+    local vc_SSL = SSL.valuechanged_cb
+    local vc_SSR = SSR.valuechanged_cb
+    local vc_SSM = SSM.valuechanged_cb
+
+    SSL.valuechanged_cb = function(h) Splitter_CB(h) if vc_SSL then vc_SSL(h) end end
+    SSR.valuechanged_cb = function(h) Splitter_CB(h) if vc_SSR then vc_SSR(h) end end
+    SSM.valuechanged_cb = function(h) Splitter_CB(h) if vc_SSM then vc_SSM(h) end end
 
 
     local function onButton(h, hNew, button, pressed, x, y, tab, tabDrag, status)
@@ -630,23 +636,27 @@ local function InitTabbar()
     end
 
     local function onExButton(h, button, pressed)
-        if pressed == 1 then
+        if pressed == 0 then
             local side = Iif(h.name == 'TabCtrlLeft', 0, 1)
-            local _, _, wx, wy = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
-            wx = tonumber(wx); wy = tonumber(wy)
-            local tMnu = CORE.windowsList(side)
-            if side == 1 then
-                table.insert(tMnu,
-                    {'s1', separator = 1}
-                )
-                table.insert(tMnu,
-                    {link = 'View¦Main Window split', plane = 1}
-                )
-                table.insert(tMnu,
-                    {link = 'View¦coeditor', plane = 1}
-                )
+            if WINDOWS then
+                WINDOWS.BySide(side, h)
+            else
+                local _, _, wx, wy = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+                wx = tonumber(wx); wy = tonumber(wy)
+                local tMnu = CORE.windowsList(side)
+                if side == 1 then
+                    table.insert(tMnu,
+                        {'s1', separator = 1}
+                    )
+                    table.insert(tMnu,
+                        {link = 'View¦Main Window split', plane = 1}
+                    )
+                    table.insert(tMnu,
+                        {link = 'View¦coeditor', plane = 1}
+                    )
+                end
+                menuhandler:ContextMenu(wx, wy, tMnu)
             end
-            menuhandler:ContextMenu(wx, wy, tMnu)
         end
     end
 

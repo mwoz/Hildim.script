@@ -270,9 +270,14 @@ iup.GetBookmarkLst = function()
     return bk
 end
 
-iup.CloseFilesSet = function(cmd)
+iup.CloseFilesSet = function(cmd, tForClose)
     local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
-    if cmd ==  9132 then cur = scite.buffers.GetCurrent() end
+    if cmd == 9132 then cur = scite.buffers.GetCurrent() end
+
+    local function MastClose(i)
+        if tForClose then return tForClose[i] end
+        return i ~= cur
+    end
 
     local msg = ''
     local notSaved = {}
@@ -281,7 +286,7 @@ iup.CloseFilesSet = function(cmd)
     for i = 0,maxN do
         local pth = scite.buffers.NameAt(i):from_utf8(1251)
         local _,_,fnExt = pth:find('([^\\]*)$')
-        if not scite.buffers.SavedAt(i) and i ~= cur and (cmd ~= 9134 or pth:find('Безымянный')) and not fnExt:find('^%^') then
+        if not scite.buffers.SavedAt(i) and MastClose(i) and (cmd ~= 9134 or pth:find('Безымянный')) and not fnExt:find('^%^') then
             msg = msg..pth:gsub('(.+)[\\]([^\\]*)$', '%2(%1)')..'\n'
             table.insert(notSaved, i)
         end
@@ -317,7 +322,7 @@ iup.CloseFilesSet = function(cmd)
     scite.Perform('blockuiupdate:y')
     local cloned = {}
     DoForBuffers(function(i)
-        if i and i ~= cur and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
+        if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
             if not props['FileNameExt']:from_utf8(1251):find('Безымянный') and not props['FileNameExt']:find('^%^') then
                 if not cloned[props['FilePath']] then
@@ -1440,6 +1445,9 @@ local function SaveIuprops_local(filename)
 
             if prefix == 'sidebarctrl' then
                 process = not hFind or (iup.GetDialogChild(hFind, ctrl) == nil)
+            end
+            if process then
+                process = not n:find'%.hist$'
             end
             if process then
                 local tp = type(v)
