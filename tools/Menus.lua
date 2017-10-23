@@ -609,6 +609,9 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Save All', ru = 'Сохранить все', key = 'Ctrl+Alt+S', action = IDM_SAVEALL, image = 'disks_µ'},
 		{'s2', separator = 1},
 		{'l1', CORE.windowsList, plane = 1},
+        {'s2', separator = 1},
+        {'Buffers...', ru = 'Вкладки...', action = function() CORE.showWndDialog() end, },
+
 	},},
 	{'Help', ru = 'Справка',{
 		{'&Help', ru = 'Контекстная справка', key = 'F1', action = IDM_HELP},
