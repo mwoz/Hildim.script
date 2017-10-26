@@ -79,13 +79,14 @@ local function ResetTabbarProps()
     if props["tab.oldstile"] == '' then
         local oldClr = props['tabctrl.readonly.color']
         if oldClr == '' then oldClr = '120 120 120' end
-        local ret, ondbl, buff, zord, newpos, coloriz, illum, satur, cEx, cPref, ROColor =
+        local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref, ROColor =
         iup.GetParam("Свойства панели закладок^TabbarProperties",
             nil,
             'Закрывать по DblClick%b\n'..
             'Максимальное количество вкладок:%i[10,500,1]\n'..
             'Переключать в порядке использования%b\n'..
             'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n'..
+            'Перемещать в начало таб из правого скролла при активации%b\n'..
             'Подсветка по расширению%b\n'..
             'Освещенность вкладки:%i[10,99,1]\n'..
             'Насыщенность вкладки:%i[10,99,1]\n'..
@@ -97,6 +98,7 @@ local function ResetTabbarProps()
             tonumber(props['buffers']) or 100,
             tonumber(props['buffers.zorder.switching']) or 0,
             tonumber(props['buffers.new.position']) or 0,
+            ((tonumber(props['tabctrl.alwayssavepos']) or 0) + 1) % 2,
             tonumber(props['tabctrl.colorized']) or 0,
             tonumber(props['tabctrl.cut.illumination']) or 90,
             tonumber(props['tabctrl.cut.saturation']) or 50,
@@ -109,6 +111,7 @@ local function ResetTabbarProps()
             props['buffers'] = buff
             props['buffers.zorder.switching'] = zord
             props['buffers.new.position']    = newpos
+            props['tabctrl.alwayssavepos']   = (setbegin + 1) % 2
             props['tabctrl.colorized']       = coloriz
             props['tabctrl.cut.illumination']= illum
             props['tabctrl.cut.saturation']  = satur

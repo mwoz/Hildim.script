@@ -926,6 +926,8 @@ local function InitWndDialog()
     list_windows.click_cb = function(h, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             scite.buffers.SetDocumentAt(tonumber(iup.GetAttributeId2(list_windows, '', lin, 5)))
+            fillWindow(curSide)
+            list_windows.redraw = 'ALL'
         end
     end
 
@@ -961,23 +963,27 @@ local function InitWndDialog()
         end
 
         local blockClose
-        local function CloseSet()
-            blockClose = true
-            local tForClose = {}
-            for i = 1, tonumber(iup.GetAttribute(list_windows, "NUMLIN")) do
-                tForClose[tonumber(iup.GetAttributeId2(list_windows, '', i, 5))] = (iup.GetAttributeId2(list_windows, 'TOGGLEVALUE', i, 1) == '1')
+        local function CloseSet(s)
+            return function()
+                blockClose = true
+                local tForClose = {}
+                for i = 1, tonumber(iup.GetAttribute(list_windows, "NUMLIN")) do
+                    print(iup.GetAttributeId2(list_windows, 'TOGGLEVALUE', i, 1))
+                    tForClose[tonumber(iup.GetAttributeId2(list_windows, '', i, 5))] = ((iup.GetAttributeId2(list_windows, 'TOGGLEVALUE', i, 1) or '0') == s)
+                end
+                iup.CloseFilesSet(9132, tForClose)
+                fillWindow(curSide)
+                list_windows.redraw = 'ALL'
+                iup.SetFocus(list_windows)
+                blockClose = nil
             end
-            iup.CloseFilesSet(9132, tForClose)
-            fillWindow(curSide)
-            list_windows.redraw = 'ALL'
-            iup.SetFocus(list_windows)
-            blockClose = nil
         end
 
         dlg = iup.scitedialog{iup.vbox{
             list_windows,
             iup.hbox{
-                iup.flatbutton{title = "Close", expand = 'NO', padding = '9x', flat_action = CloseSet, propagatefocus = 'YES' },
+                iup.flatbutton{title = "Close", expand = 'NO', padding = '9x', flat_action = CloseSet('1'), propagatefocus = 'YES' },
+                iup.flatbutton{title = "Leave", expand = 'NO', padding = '9x', flat_action = CloseSet('0'), propagatefocus = 'YES' },
                 iup.flatbutton{title = "Move...", expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES'},
                 --iup.flatbutton{title = "Cancel", expand = 'NO', padding = '9x', flat_action = function() dlg:hide() end, propagatefocus = 'YES'},
         scrollbar = 'NO', minsize = 'x22', maxsize = 'x22', expand = "HORIZONTAL", margin = "20x", gap = "20"};};

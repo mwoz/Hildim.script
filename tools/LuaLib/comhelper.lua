@@ -131,7 +131,9 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
 
     local xml = luacom.CreateObject("MSXML.DOMDocument")
     if not strXml then strXml = editor:GetText() end
-    strXml = strXml:to_utf8(1251)
+    if(tonumber(props['editor.unicode.mode']) == IDM_ENCODING_DEFAULT) then
+        strXml = strXml:to_utf8(1251)
+    end
     xml.preserveWhiteSpace = true
     if not xml:loadXml(strXml) then
         local xmlErr = xml.parseError
@@ -140,7 +142,11 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
     end
 
     FormatNode(xml, xml.firstChild, '\r\n', lenInd)
-    return xml.xml
+    if(tonumber(props['editor.unicode.mode']) == IDM_ENCODING_DEFAULT) then
+        return xml.xml
+    else
+        return xml.xml:to_utf8(1251)
+    end
 end
 
 _G.comhelper = s

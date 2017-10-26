@@ -53,7 +53,7 @@ elseif props['FileExt'] == 'cform' or props['FileExt'] == 'rform' or props['File
         end
         return indent
     end
-    strFrm = comhelper.FormatXml(strFrm, 4, 'StringTable,Script,Commands,Design,Columns,Styles,Blotters', ',,,', ',,,', clb)
+    strFrm = comhelper.FormatXml(strFrm, 4, 'StringTable,Script,Commands,Design,Columns,Styles,Blotters,ObjectBinds', ',,,', ',,,', clb)
     strFrm = strFrm:gsub('%]%]>%s+</', ']]></')
     strFrm = strFrm:gsub('>%s+<!%[CDATA%[', '><![CDATA[')
 
@@ -61,6 +61,7 @@ else
     strFrm = comhelper.FormatXml(strFrm, 3, ',,,', ',,,', ',,,', nil)
     strFrm = strFrm:gsub('>%s+</Field>', '></Field>')
 end
+
 editor:SetSel(0, editor.Length)
 if h then strFrm = h..strFrm end
 --editor:SetText(strFrm)
