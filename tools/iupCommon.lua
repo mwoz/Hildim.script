@@ -69,7 +69,7 @@ local function RestoreLayOut(strLay)
     strLay = strLay:gsub('^•', '')
     for n in strLay:gmatch('%d+') do
         n = tonumber(n)
-        if shell.bit_and(editor.FoldLevel[n],SC_FOLDLEVELHEADERFLAG) ~=0 then
+        if (editor.FoldLevel[n] & SC_FOLDLEVELHEADERFLAG) ~=0 then
             local lineMaxSubord = editor:GetLastChild(n,- 1)
             if n < lineMaxSubord then
                 editor.FoldExpanded[n] = false
@@ -254,7 +254,7 @@ end
 local function SaveLayOut()
     local res = ''
     for l=0, editor.LineCount do
-        if shell.bit_and(editor.FoldLevel[l],SC_FOLDLEVELHEADERFLAG) ~=0 and not editor.FoldExpanded[l] then res = res..','..l end
+        if (editor.FoldLevel[l] & SC_FOLDLEVELHEADERFLAG) ~= 0 and not editor.FoldExpanded[l] then res = res..','..l end
     end
     return res
 end
@@ -1197,7 +1197,7 @@ iup.ShowXY = function(h,x,y)
     y2 = tonumber(y2)
     if x > x2 - 10 then x = 100 end
     if y > y2 - 10 then y = 100 end
-    return old_iup_ShowXY(h,x,y)
+    return old_iup_ShowXY(h, math.floor(x),math.floor(y))
 end
 
 iup.ShowInMouse = function(dlg)
@@ -1611,7 +1611,7 @@ end
 AddEventHandler("OnMarginClick", function(margin, modif, line)
     if margin == 2 and editor.Focus then
         local curLevel = editor.FoldLevel[line]
-        if shell.bit_and(curLevel, SC_FOLDLEVELHEADERFLAG) == 0 then
+        if (curLevel & SC_FOLDLEVELHEADERFLAG) == 0 then
             if modif == 0 then return end
             line = editor.FoldParent[line]
             curLevel = editor.FoldLevel[line]

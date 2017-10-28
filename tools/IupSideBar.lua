@@ -54,22 +54,26 @@ local function  CreateToolBar()
     local tblHb
     local i = 0
     for p in str:gmatch('[^¦]+') do
-        local _,_, pname, pf = p:find('(.-)(¬?)$')
+        local _, _, pname, pf = p:find('(.-)(¬?)$')
         if pf == '¬' then
             if i > 0 then
                 table.insert(tblVb, iup.hbox(tblHb))
                 table.insert(tblVb, iup.label{separator = "HORIZONTAL"})
             end
-            tblHb = {gap="3",margin="3x0", alignment = "ACENTER"}
+            tblHb = {gap = "3", margin = "3x0", alignment = "ACENTER"}
             i = i + 1
         end
-        local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+        local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+        if not bSucs then
+            print(pI)
+            goto continue
+        end
         ToolBar_obj.Tabs[pI.code] = pI.toolbar(ToolBar_obj)
         local id = pI.code
         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
         iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
         table.insert(tblHb, ToolBar_obj.Tabs[pI.code].handle)
-
+::continue::
     end
     table.insert(tblVb, iup.hbox(tblHb))
 
@@ -82,12 +86,17 @@ local function CreateStatusBar()
     local tblH = {gap="3",margin="3x0", name="StatusBar", maxsize="x30", alignment = "ACENTER",}
     for p in str:gmatch('[^¦]+') do
 
-        local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+        local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+        if not bSucs then
+            print(pI)
+            goto continue
+        end
         StatusBar_obj.Tabs[pI.code] = pI.statusbar(StatusBar_obj)
         local id = pI.code
         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
         iup.SetAttribute(StatusBar_obj.Tabs[pI.code].handle, "HELPID", id)
         table.insert(tblH, StatusBar_obj.Tabs[pI.code].handle)
+::continue::
     end
     table.insert(tblH, iup.fill{})
     if _tmpSidebarButtons then
@@ -130,13 +139,13 @@ function iup.SaveNamedValues(h, root)
     until not child
 end
 
-local function  CreateBox()
+local function CreateBox()
     -- Creates boxes
     local sb_elements = {}
     local tbl_hotkeys = {}
     local function Pane(t)
         for i = 1, #t do
-            if type(t[i])=='string' then
+            if type(t[i]) == 'string' then
                 table.insert(sb_elements, SideBar_Plugins[t[i]])
                 SideBar_Plugins[t[i]].Bar_obj = pane_curObj
                 t[i] = SideBar_Plugins[t[i]].handle
@@ -155,7 +164,7 @@ local function  CreateBox()
         elseif t.type == "FIND" then
             SideBar_Plugins.findrepl.Bar_obj = pane_curObj
             table.insert(sb_elements, SideBar_Plugins.findrepl)
-           l =iup.backgroundbox{iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name='FinReplScroll',expand="HORIZONTAL",scrollbar='NO',size='x108'}, barsize = '0', name="FinReplExp"}}
+            l = iup.backgroundbox{iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name = 'FinReplScroll', expand = "HORIZONTAL", scrollbar = 'NO', size = 'x108'}, barsize = '0', name = "FinReplExp"}}
         elseif t.type == nil then
             l = t[1]
         else print('Unsupported type:'..t.type) end
@@ -171,22 +180,22 @@ local function  CreateBox()
         Bar_Obj.sciteid = sciteid
         local brObj = Bar_Obj
         t.map_cb = (function(h)
-            h.size="1x1"
+            h.size = "1x1"
         end)
-        t.tabchange_cb = (function(_,new_tab, old_tab)
+        t.tabchange_cb = (function(_, new_tab, old_tab)
             --ñíà÷àëà íàéäåì àêòèâíûé òàá è óñòàíîâèì åãî â SideBar_ob
-            for _,tbs in pairs(SideBar_Plugins) do
+            for _, tbs in pairs(SideBar_Plugins) do
                 if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
                 if tbs.id == new_tab.tabtitle then
                     if tbs["on_SelectMe"] then tbs.on_SelectMe() end
                 end
             end
         end)
-        t.k_any= (function(h,c) if c == iup.K_ESC then iup.PassFocus() end end)
+        t.k_any = (function(h, c) if c == iup.K_ESC then iup.PassFocus() end end)
         t.extrabuttons = 1
         t.extraimage1 = "property_µ"
         t.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
-        t.extrabutton_cb = function(h, button, state) if state==1 then menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid) end end
+        t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid) end end
 
         local j = 1
         local s = 'Hotkeys for Tab Activation:'
@@ -201,7 +210,7 @@ local function  CreateBox()
         return iup.flattabs(t)
     end
 
-    local function SidePane(hVbox,sName,sSciteId,sSplit,sExpander,sSplit_CloseVal, Bar_obj, sSide, buttonImage)
+    local function SidePane(hVbox, sName, sSciteId, sSplit, sExpander, sSplit_CloseVal, Bar_obj, sSide, buttonImage)
         local tmr_Resize = iup.timer{time = 100; run = 'NO';action_cb = function(h)
             if shell.async_mouse_state() >= 0 then
                 h.run = 'NO'
@@ -212,33 +221,33 @@ local function  CreateBox()
 
         spl_h.valuechanged_cb = function(h) if OnResizeSideBar and tmr_Resize.run == 'NO' then tmr_Resize.run = 'YES' end end;
         local h = iup.scitedetachbox{
-            hVbox; orientation="HORIZONTAL";barsize=5;minsize="100x100";name=sName; shrink="yes"; buttonImage=buttonImage;
+            hVbox; orientation = "HORIZONTAL";barsize = 5;minsize = "100x100";name = sName; shrink = "yes"; buttonImage = buttonImage;
             sciteid = sSciteId;Split_h = spl_h;Split_CloseVal = sSplit_CloseVal;
             Dlg_Title = sSide.." Side Bar"; Dlg_Show_Cb = nil;
             On_Detach = (function(h, hNew, x, y)
-                iup.GetDialogChild(iup.GetLayout(), sExpander).state="CLOSE";
+                iup.GetDialogChild(iup.GetLayout(), sExpander).state = "CLOSE";
                 --h.visible
             end);
             Dlg_Close_Cb = (function(h)
-                iup.GetDialogChild(iup.GetLayout(), sExpander).state="OPEN";
+                iup.GetDialogChild(iup.GetLayout(), sExpander).state = "OPEN";
             end);
             Dlg_Show_Cb =(function(h, state)
                 if state == 4 then
-                    for _,tbs in pairs(SideBar_Plugins) do
+                    for _, tbs in pairs(SideBar_Plugins) do
                         if tbs["OnSideBarClouse"] then tbs.OnSideBarClouse() end
                     end
                 end
             end);
-            k_any=(function(_,key)
+            k_any =(function(_, key)
                 if key == iup.K_ESC then iup.PassFocus() end
             end);
         }
         h.SaveValues = (function()
-            for _,tbs in pairs(SideBar_Plugins) do
+            for _, tbs in pairs(SideBar_Plugins) do
                 if tbs.OnSaveValues then tbs.OnSaveValues() end
             end
-            iup.SaveNamedValues(hMainLayout,'sidebarctrl')
-            iup.SaveNamedValues(hVbox,'sidebarctrl')
+            iup.SaveNamedValues(hMainLayout, 'sidebarctrl')
+            iup.SaveNamedValues(hVbox, 'sidebarctrl')
         end)
         h.OnMyDestroy = function() spl_h.valuechanged_cb = nil end
 
@@ -273,7 +282,11 @@ local function  CreateBox()
         for i = 1, #tSide do
             tCur = tSide[i]
             if tCur[1] then
-                local pI = dofile(defpath..tCur[1])
+                local bSucs, pI = pcall(dofile, defpath..tCur[1])
+                if not bSucs then
+                    print(pI)
+                    goto continue
+                end
 
                 SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
 
@@ -289,7 +302,11 @@ local function  CreateBox()
                     local tSub = piCode(pI)
                     for j = 2, #tCur do
                         tSub = {tSub}
-                        pI = dofile(defpath..tCur[j])
+                        bSucs, pI = pcall(dofile, defpath..tCur[j])
+                        if not bSucs then
+                            print(pI)
+                            goto continue
+                        end
                         SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
                         local id = pI.code
                         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
@@ -316,7 +333,9 @@ local function  CreateBox()
                     end
 
                     table.insert(tArg, tSub)
+
                 end
+::continue::
             end
         end
         return tArg
@@ -576,7 +595,7 @@ local function InitTabbar()
             if tonumber(SSM.value) > 999 and SSM.barsize ~= '0' then SSM.value = "999"
             elseif tonumber(SSM.value) < 1 then SSM.value = "1" end
         end
-        if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' and (_G.iuprops['dialogs.coeditor.splithorizontal'] == 0) then
+        if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' and ((_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0) then
             TBS.value = ''..math.floor(tonumber(SSL.value) + (tonumber(SSM.value) / 1000) * (tonumber(SSR.value) / 1000) * (1000 - tonumber(SSL.value)))
         end
     end
@@ -826,16 +845,25 @@ local str = _G.iuprops["settings.hidden.plugins"] or ''
 local strTbl = 'return function(h) return iup.expander{barsize = 0, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'
 local i = 0
 for p in str:gmatch('[^¦]+') do
-    local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+    local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+    if not bSucs then
+        print(pI)
+        goto continue
+    end
     if pI then
         pI.hidden()
     else
         pritn('Hidden plugin "'..p..'" not found')
     end
+::continue::
 end
 local str = _G.iuprops["settings.commands.plugins"] or ''
 for p in str:gmatch('[^¦]+') do
-    local pI = dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p)
+    local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\Commands\\"..p)
+    if not bSucs then
+        print(pI)
+        goto continue
+    end
     if pI and pI.run then
         local t = {}
         t[1] = pI.title
@@ -845,6 +873,7 @@ for p in str:gmatch('[^¦]+') do
 
         menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools¦Utils¦xxx', t)
     end
+::continue::
 end
 
 local function InitWndDialog()
@@ -924,7 +953,7 @@ local function InitWndDialog()
         return iup.IGNORE
     end
     list_windows.click_cb = function(h, lin, col, status)
-        if iup.isdouble(status) and iup.isbutton1(status) then
+        if iup.isdouble(status) and iup.isbutton1(status) and lin > 0 then
             scite.buffers.SetDocumentAt(tonumber(iup.GetAttributeId2(list_windows, '', lin, 5)))
             fillWindow(curSide)
             list_windows.redraw = 'ALL'

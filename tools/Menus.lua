@@ -218,7 +218,7 @@ end
 
 local function ResetReadOnly()
 	local attr = shell.getfileattr(props['FilePath'])
-	if shell.bit_and(attr, 1) == 1 then
+	if (attr & 1) == 1 then
 		attr = attr - 1
 	else
 		attr = attr + 1
@@ -555,7 +555,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 
 		{'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
 		{'Wrap settings', ru = 'Настройки переноса по словам...', action = ResetWrapProps, visible = "props['wrap']=='1'"},
-		{'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "shell.bit_and(shell.getfileattr(props['FilePath']), 1) == 1"},
+		{'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "(shell.getfileattr(props['FilePath']) & 1) == 1"},
 		{'s2', separator = 1},
 		{'Line End Characters', ru = 'Символы перевода строк',{radio = 1,
 			{'CR &+ LF', action = IDM_EOL_CRLF, check = "editor.EOLMode==SC_EOL_CRLF"},

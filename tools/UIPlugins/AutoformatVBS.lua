@@ -78,7 +78,7 @@ local function prnTable2(name)
 end
 
 local function FoldLevel(deltaL, L)
-    return shell.bit_and(editor.FoldLevel[L or (editor:LineFromPosition(editor.SelectionStart) - deltaL)], SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE
+    return (editor.FoldLevel[L or (editor:LineFromPosition(editor.SelectionStart) - deltaL)] & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE
 end
 
 local function LineIndent(deltaL, L)

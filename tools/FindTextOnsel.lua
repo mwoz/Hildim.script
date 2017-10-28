@@ -66,14 +66,14 @@ CORE.ToggleSubfolders = function(bShow, line)
     local action
     if not line then action = Iif(bShow, 1, 0) end
     local lStart = line or editor:LineFromPosition(editor.SelectionStart)
-    local baseLevel = shell.bit_and(editor.FoldLevel[lStart],SC_FOLDLEVELNUMBERMASK)
-    if baseLevel > SC_FOLDLEVELBASE and shell.bit_and(baseLevel,SC_FOLDLEVELHEADERFLAG) == 0 then
+    local baseLevel = (editor.FoldLevel[lStart] & SC_FOLDLEVELNUMBERMASK)
+    if baseLevel > SC_FOLDLEVELBASE and (baseLevel & SC_FOLDLEVELHEADERFLAG) == 0 then
         lStart = editor.FoldParent[lStart]
     end
     local lEnd = editor:GetLastChild(lStart, -1)
     for l = lStart + 1, lEnd do
         local level = editor.FoldLevel[l]
-        if (shell.bit_and(level, SC_FOLDLEVELHEADERFLAG)~= 0 and baseLevel == shell.bit_and(level, SC_FOLDLEVELNUMBERMASK)) then
+        if ((level & SC_FOLDLEVELHEADERFLAG)~= 0 and baseLevel == (level & SC_FOLDLEVELNUMBERMASK)) then
             if not action then action = Iif(editor.FoldExpanded[l], 0, 1) end
             editor:FoldLine(l, action)
         end

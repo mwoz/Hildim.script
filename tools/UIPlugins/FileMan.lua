@@ -90,7 +90,7 @@ FileMan_ListFILL = function()
     local j = 0
 
 	for i = 1, #table_dir do
-        if (not table_dir[i].isdirectory) and (not table_dir[i].name:lower():find(maskVal) or shell.bit_and(table_dir[i].attributes,2) == 2) then
+        if (not table_dir[i].isdirectory) and (not table_dir[i].name:lower():find(maskVal) or (table_dir[i].attributes & 2) == 2) then
             j = j + 1
         end
 	end
@@ -108,7 +108,7 @@ FileMan_ListFILL = function()
         if table_dir[i].isdirectory then
             dc = dc + 1
             local n,a = table_dir[i].name, table_dir[i].attributes
-            if n ~= "." and n ~= ".." and not n:find('^%$') and shell.bit_and(a,2) == 0 and shell.bit_and(a,4) == 0 then
+            if n ~= "." and n ~= ".." and not n:find('^%$') and (a & 2) == 0 and (a & 4) == 0 then
                 list_dir:setcell(j, 1, 'IMAGE_Folder')
                 list_dir:setcell(j, 2, n)
                 list_dir:setcell(j, 3, a)
@@ -116,12 +116,12 @@ FileMan_ListFILL = function()
                 j = j + 1
             end
         else
-            if table_dir[i].name:lower():find(maskVal) and shell.bit_and(table_dir[i].attributes,2) ~= 2 then
+            if table_dir[i].name:lower():find(maskVal) and (table_dir[i].attributes & 2) ~= 2 then
                 list_dir:setcell(j, 1,  GetExtImage(table_dir[i].name))
                 list_dir:setcell(j, 2, table_dir[i].name)
                 list_dir:setcell(j, 3, table_dir[i].attributes)
                 list_dir:setcell(j, 4, '')
-                if shell.bit_and(table_dir[i].attributes,1) == 1 then
+                if (table_dir[i].attributes & 1) == 1 then
                     iup.SetAttributeId2(list_dir, 'FGCOLOR', j, 2, '100 100 100')
                 end
                 j = j + 1
@@ -159,7 +159,7 @@ local function FileMan_ListFillDir(strPath)
     local j = 1
     for i = 1, #table_folders do
         local a = table_folders[i].attributes
-        if table_folders[i].isdirectory and shell.bit_and(a,2)==0 and shell.bit_and(a,4)==0 and not table_folders[i].name:find('^%$')  then
+        if table_folders[i].isdirectory and (a & 2) == 0 and (a & 4) == 0 and not table_folders[i].name:find('^%$') then
             list_dir:setcell(j, 1, 'IMAGE_Folder')
             list_dir:setcell(j, 2, table_folders[i].name)
             list_dir:setcell(j, 3, a)
@@ -398,7 +398,7 @@ local function FileMan_ChangeReadOnly()
 	if fname == '' then return end
 	fname = current_path..fname
     l = list_getvaluenum(list_dir)
-    if shell.bit_and(attr, 1) == 1 then
+    if (attr & 1) == 1 then
         attr = attr - 1
     else
         attr = attr + 1
@@ -406,7 +406,7 @@ local function FileMan_ChangeReadOnly()
     shell.setfileattr(fname, attr)
     attr = shell.getfileattr(fname)
     list_dir:setcell(l, 3, attr)
-    if shell.bit_and(attr, 1) == 1 then
+    if (attr & 1) == 1 then
         iup.SetAttributeId2(list_dir, 'FGCOLOR', l, 2, '100 100 100')
     else
         iup.SetAttributeId2(list_dir, 'FGCOLOR', l, 2, '0 0 0')
@@ -574,7 +574,7 @@ end
 
 local function GetReadOnly()
     local lin = list_dir.marked:sub(2):find("1")
-    return shell.bit_and(tonumber(list_dir:getcell(lin, 3) or 0), 1) == 1
+    return (tonumber(list_dir:getcell(lin, 3) or 0) & 1) == 1
 end
 
 local function FileManTab_Init(h)
@@ -600,7 +600,7 @@ local function FileManTab_Init(h)
         if h.marked then sel = h.marked:find('1') - 1 end
         iup.SetAttribute(h,  'MARK'..sel..':0', 0)
         iup.SetAttribute(h, 'MARK'..lin..':0', 1)
-        local l = shell.bit_and(tonumber(list_dir:getcell(lin, 3) or 0), 1)
+        local l = (tonumber(list_dir:getcell(lin, 3) or 0) & 1)
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
             if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then

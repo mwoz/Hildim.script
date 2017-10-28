@@ -434,6 +434,18 @@ end
 function Trim(str)
     return str:gsub('^ +',''):gsub(' +$', '')
 end
+
+function catch(what)
+   return what[1]
+end
+
+function try(what)
+   status, result = pcall(what[1])
+   if not status then
+      what[2](result)
+   end
+   return result
+end
 -- ==============================================================
 -- Функции, выполняющиеся только один раз, при открытии первого файла
 --   ( Выполнить их сразу, при загрузке SciTEStartup.lua, нельзя
