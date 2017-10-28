@@ -383,6 +383,7 @@ return {
     sidebar = Sidebar_Init,
     toolbar = Toolbar_Init,
     tabhotkey = "Alt+Shift+H",
+    destroy = function() WEBPREVIEW = nil end,
     description = [[Предпросмотр HTML кода по мере набора
 Дополнительные инструменты по работе с HTML]]
 

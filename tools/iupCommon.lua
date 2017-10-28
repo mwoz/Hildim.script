@@ -1588,8 +1588,13 @@ iup.DestroyDialogs = function()
 
     _G.dialogs = nil
     --iup.ShowSideBar(-1)
-    for i = 1,  #onDestroy_event do
-        onDestroy_event[i]()
+    for i = 1,  #CORE.onDestroy_event do
+        try{
+            CORE.onDestroy_event[i],
+            catch{
+                print
+            }
+        }
     end
     collectgarbage('collect')
 end

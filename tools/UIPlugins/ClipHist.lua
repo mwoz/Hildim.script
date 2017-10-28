@@ -509,6 +509,7 @@ return {
     statusbar = Toolbar_Init,
     hidden = Hidden_Init,
     tabhotkey = "Alt+Shift+C",
+    destroy = function() CLIPHISTORY = nil end,
     description = [[Автоматическое запоминание текстовых данных
 из буфера обмена в стек с возможностью их последующей
 быстой вставки в текст]]

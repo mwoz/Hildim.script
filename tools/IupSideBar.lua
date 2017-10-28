@@ -68,6 +68,9 @@ local function  CreateToolBar()
             print(pI)
             goto continue
         end
+
+        if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
+
         ToolBar_obj.Tabs[pI.code] = pI.toolbar(ToolBar_obj)
         local id = pI.code
         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
@@ -91,7 +94,10 @@ local function CreateStatusBar()
             print(pI)
             goto continue
         end
+        if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
+
         StatusBar_obj.Tabs[pI.code] = pI.statusbar(StatusBar_obj)
+
         local id = pI.code
         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
         iup.SetAttribute(StatusBar_obj.Tabs[pI.code].handle, "HELPID", id)
@@ -287,6 +293,7 @@ local function CreateBox()
                     print(pI)
                     goto continue
                 end
+                if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
 
                 SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
 
@@ -307,7 +314,10 @@ local function CreateBox()
                             print(pI)
                             goto continue
                         end
+                        if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
+
                         SideBar_Plugins[pI.code] = pI.sidebar(SideBar_Plugins)
+
                         local id = pI.code
                         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                         if not tabhotkey and pI.tabhotkey then tabhotkey = pI.tabhotkey end
@@ -852,6 +862,7 @@ for p in str:gmatch('[^¦]+') do
     end
     if pI then
         pI.hidden()
+        if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
     else
         pritn('Hidden plugin "'..p..'" not found')
     end

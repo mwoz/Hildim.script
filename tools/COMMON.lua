@@ -23,6 +23,7 @@ function class()
     return setmetatable(c, mt)
 end
 CORE = {}
+CORE.onDestroy_event = {}
 -- Пути поиска подключаемых lua-библиотек и модулей
 package.path  = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.lua;"..package.path
 package.cpath = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.dll;"..package.cpath

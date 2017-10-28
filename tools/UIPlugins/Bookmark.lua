@@ -287,6 +287,7 @@ return {
     statusbar = ToolBar_Init,
     hidden = Hidden_Init,
     tabhotkey = "Alt+Shift+F2",
+    destroy = function() BOOKMARK = nil end,
     description = [[Список закладок в открытых файлах]]
 
 }

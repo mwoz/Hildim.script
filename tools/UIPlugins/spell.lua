@@ -1,9 +1,12 @@
+local sRu
+local sEn
+
 local function Init()
     local spell = require "luahunspell"
     require "shell"
 
-    local sRu = spell(props["SciteDefaultHome"]..'\\dics\\ru_RU.aff', props["SciteDefaultHome"]..'\\dics\\ru_RU.dic')
-    local sEn = spell(props["SciteDefaultHome"]..'\\dics\\en_US.aff', props["SciteDefaultHome"]..'\\dics\\en_US.dic')
+    sRu = spell(props["SciteDefaultHome"]..'\\dics\\ru_RU.aff', props["SciteDefaultHome"]..'\\dics\\ru_RU.dic')
+    sEn = spell(props["SciteDefaultHome"]..'\\dics\\en_US.aff', props["SciteDefaultHome"]..'\\dics\\en_US.dic')
     local pUserRu = props["SciteDefaultHome"]..'\\dics\\user_RU.dic'
     local pUserEn = props["SciteDefaultHome"]..'\\dics\\user_EN.dic'
 
@@ -443,7 +446,6 @@ local function Init()
         AddEventHandler("OnOpen", OnSwitch_local)
         AddEventHandler("OnSwitchFile", OnSwitch_local)
         AddEventHandler("OnIdle", OnIdle_local)
-        table.insert(onDestroy_event, function() sRu:destroy(); sEn:destroy(); end)
 
         local function ResetAutoSpell()
             CheckChange('spell.autospell', true)
@@ -513,4 +515,5 @@ return {
     hidden = Init,
     code = 'spell',
     statusbar = Init_status,
+    destroy = function() sRu:destroy(); sEn:destroy(); end,
 }

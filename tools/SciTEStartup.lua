@@ -9,7 +9,6 @@ if props['script.started'] ~= 'Y' then
     dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 end
 
-_G.onDestroy_event = {}
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 
 if not lpeg then lpeg = require"lpeg" end

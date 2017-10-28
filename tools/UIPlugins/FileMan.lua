@@ -758,6 +758,7 @@ return {
     code = 'fileman',
     sidebar = FileManTab_Init,
     tabhotkey = "Alt+Shift+O",
+    destroy = function() FILEMAN = nil end,
     description = [[Встроенный файловый менеджер]]
 }
 
