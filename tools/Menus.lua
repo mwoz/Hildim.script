@@ -86,7 +86,7 @@ local function ResetTabbarProps()
             'Максимальное количество вкладок:%i[10,500,1]\n'..
             'Переключать в порядке использования%b\n'..
             'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n'..
-            'Перемещать в начало таб из правого скролла при активации%b\n'..
+            'Активный таб - в начало%b\n'..
             'Подсветка по расширению%b\n'..
             'Освещенность вкладки:%i[10,99,1]\n'..
             'Насыщенность вкладки:%i[10,99,1]\n'..
@@ -609,7 +609,8 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Move Tab &Right', ru = 'Переместить вправо...', action = IDM_MOVETABRIGHT},
         {'Tabbar Settings', ru = 'Свойства панели вкладок...', action = ResetTabbarProps},
 		{'&Close All', ru = 'Закрыть все', action = IDM_CLOSEALL},
-		{'&Save All', ru = 'Сохранить все', key = 'Ctrl+Alt+S', action = IDM_SAVEALL, image = 'disks_µ'},
+		{'&Save All', ru = 'Сохранить все', key = 'Ctrl+Alt+S', action = function() DoForBuffers_Stack(function() scite.MenuCommand(IDM_SAVE) end) end, image = 'disks_µ'},
+		{'&Full Save All', ru = 'Сохранить все с обработкой событий',  action = IDM_SAVEALL, image = 'disks_µ'},
 		{'s2', separator = 1},
 		{'l1', CORE.windowsList, plane = 1},
         {'s2', separator = 1},

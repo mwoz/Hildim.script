@@ -66,12 +66,11 @@ local function CreateUntitledFile()
     end
 	props['scite.new.file'] = ''
     local file_path = props["FileDir"].."\\".. fName
-    local warning_couldnotopenfile_disable = props['warning.couldnotopenfile.disable']
     props['warning.couldnotopenfile.disable'] = 1
     scite.Open(file_path)
     if isMakeUTF8() then scite.MenuCommand(IDM_ENCODING_UCOOKIE) end
     unsaved_files[file_path:upper()] = true --сохраняем путь к созданному буферу в таблице
-    props['warning.couldnotopenfile.disable'] = warning_couldnotopenfile_disable
+    props['warning.couldnotopenfile.disable'] = 0
     scite.MenuCommand(unicode_mode)
     scite.RunAsync(function() editor.Focus = true  end)
     return true

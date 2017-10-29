@@ -2,6 +2,7 @@
 require 'shell'
 
 local old_iup_ShowXY = iup.ShowXY
+CORE.old_iup_ShowXY = old_iup_ShowXY
 
 _G.iuprops = {}
 local iuprops_read_ok = false
@@ -349,6 +350,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
         end
     end)
     scite.Perform('blockuiupdate:u')
+    if OnCloseFileset then OnCloseFileset() end
 
     props['load.on.activate'] = tmpFlag
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
@@ -738,7 +740,8 @@ iup.matrix = function(t)
                 end
                 return -1
             elseif key == iup.K_UP then  --up
-                local sel = h.marked:find('1')
+                local sel
+                if h.marked then sel = h.marked:find('1') end
                 if sel == nil then sel = h.count + 2 end
                 sel = sel - 1
                 if sel > 1 then

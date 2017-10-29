@@ -381,6 +381,8 @@ local function DoForBuffers_local(func, bStc, ...)
     BlockEventHandler"OnSwitchFile"
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
+    BlockEventHandler"OnSave"
+    BlockEventHandler"OnBeforeSave"
     BlockEventHandler"OnIdle"
     local curBuf = scite.buffers.GetCurrent()
     local maxN = scite.buffers.GetCount() - 1
@@ -393,6 +395,8 @@ local function DoForBuffers_local(func, bStc, ...)
     scite.buffers.SetDocumentAt(curBuf)
     editor.VScrollBar = true
     editor.FirstVisibleLine = fvl
+    BlockEventHandler"OnBeforeSave"
+    BlockEventHandler"OnSave"
     UnBlockEventHandler"OnUpdateUI"
     UnBlockEventHandler"OnNavigation"
     UnBlockEventHandler"OnSwitchFile"
