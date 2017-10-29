@@ -1577,6 +1577,11 @@ iup.DestroyDialogs = function()
         end
     end
 
+    h = iup.GetDialogChild(hMainLayout, "toolbar_expander_upper")
+    if h then
+        iup.Detach(h); iup.Destroy(h)
+    end
+
     h = iup.GetDialogChild(hMainLayout, "toolbar_expander")
     if h then
         _G.iuprops["layout.toolbar_expander"] = h.state

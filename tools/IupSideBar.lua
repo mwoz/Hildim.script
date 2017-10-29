@@ -19,6 +19,9 @@ if props['iup.defaultfontsize']~='' then if tonumber(props['iup.defaultfontsize'
 iup.SetGlobal("DEFAULTFONTSIZE", fntSize)
 iup.SetGlobal("TXTHLCOLOR", "222 222 222")
                                -- RGB(121, 161, 201)
+local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
+
+
 iup.PassFocus =(function()
     if scite.buffers.GetCurrent() >= 0 then
         editor:GrabFocus()
@@ -53,12 +56,13 @@ local function  CreateToolBar()
     local tblVb = {gap = "1", name="ToolBar"}
     local tblHb
     local i = 0
+    local isUpper = false
     for p in str:gmatch('[^¦]+') do
         local _, _, pname, pf = p:find('(.-)(¬?)$')
         if pf == '¬' then
             if i > 0 then
                 table.insert(tblVb, iup.hbox(tblHb))
-                table.insert(tblVb, iup.label{separator = "HORIZONTAL"})
+                if i > 1 or not isUpper then table.insert(tblVb, iup.label{separator = "HORIZONTAL"}) end
             end
             tblHb = {gap = "3", margin = "3x0", alignment = "ACENTER"}
             i = i + 1
@@ -81,11 +85,22 @@ local function  CreateToolBar()
         if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
         iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
 
-        -- if i == 1 and pI.undermenu then
-        --     iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander_upper", iup.vbox(tblVb)}
-        -- else
-               table.insert(tblHb, ToolBar_obj.Tabs[pI.code].handle)
-        -- end
+        if i == 1 and pI.undermenu then
+            local tTlb = {iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander_upper", iup.vbox{
+                iup.hbox{gap = "3", margin = "3x0", alignment = "ACENTER", ToolBar_obj.Tabs[pI.code].handle}
+            }}}
+
+            local hTmp = iup.dialog(tTlb)
+
+            local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander_upper')
+            iup.Detach(hBx)
+            iup.Destroy(hTmp)
+            local ttt = iup.Insert(vbScite,nil, hBx)
+            iup.Map(hBx)
+            isUpper = true
+        else
+            table.insert(tblHb, ToolBar_obj.Tabs[pI.code].handle)
+        end
 ::continue::
     end
     table.insert(tblVb, iup.hbox(tblHb))
@@ -769,7 +784,6 @@ end
 
 local function InitToolBar()
     --if true then return end
-    local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     ToolBar_obj.Tabs = {}
 
     --tTlb = {CreateToolBar()(ToolBar_obj)}

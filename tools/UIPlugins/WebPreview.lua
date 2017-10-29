@@ -144,6 +144,7 @@ local function init()
         pBody = nil
         if editor.LexerLanguage ~= "hypertext" then
             web.html = strEmpty
+
             luacom.Connect(web.com.document, body_events)
         else
             web.html = pt_all:match(editor:GetText(), 1)
@@ -383,6 +384,7 @@ return {
     sidebar = Sidebar_Init,
     toolbar = Toolbar_Init,
     tabhotkey = "Alt+Shift+H",
+    undermenu = true,
     destroy = function() WEBPREVIEW = nil end,
     description = [[Предпросмотр HTML кода по мере набора
 Дополнительные инструменты по работе с HTML]]
