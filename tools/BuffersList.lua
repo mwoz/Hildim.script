@@ -156,7 +156,6 @@ local function InitWndDialog()
                 blockClose = true
                 local tForClose = {}
                 for i = 1, tonumber(iup.GetAttribute(list_windows, "NUMLIN")) do
-                    print(iup.GetAttributeId2(list_windows, 'TOGGLEVALUE', i, 1))
                     tForClose[tonumber(iup.GetAttributeId2(list_windows, '', i, 5))] = ((iup.GetAttributeId2(list_windows, 'TOGGLEVALUE', i, 1) or '0') == s)
                 end
                 iup.CloseFilesSet(9132, tForClose)

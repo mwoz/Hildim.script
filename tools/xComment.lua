@@ -74,8 +74,13 @@ end
 local function IsBlock()
 -- Определение что выделено - блок или поток
 	if sel_text == "" then return true end
-	if sel_end > 0 and editor.CharAt[sel_end - 1] == 10 then
-		if iDEBUG then print ("This Block") end
+	if sel_end > 0 and editor.CharAt[sel_start - 1] == 10 and (editor.CharAt[sel_end - 1] == 10 or editor.CharAt[sel_end + 1] == 10) then
+		if editor.CharAt[sel_end - 1] ~= 10 then
+            sel_end = sel_end + 2
+            editor:SetSel(sel_start, sel_end)
+            line_sel_end = editor:LineFromPosition(sel_end)
+        end
+        if iDEBUG then print ("This Block") end
 		return true
 	end
 	if iDEBUG then print ("This NOT Block") end
@@ -124,7 +129,7 @@ local function BlockComment()
 		comment_block = comment_block..string.rep(" ", comment_block_use_space)
 		local text_comment = ""
         local li = 100000
-        local lenComment = string.len(comment_block)
+
         if comment_block_at_line_start == 2 then
             for i = line_sel_start, line_sel_end - 1 do
                 if editor:LineLength(i) > 2 then
@@ -144,14 +149,13 @@ local function BlockComment()
                 else
                     text_comment = text_comment..string.gsub(text_line, "([^%s])", comment_block.."%1", 1)
                 end
-                sel_end = sel_end + lenComment
             else
                 text_comment = text_comment..text_line
             end
 		end
 		editor:ReplaceSel(text_comment)
 		-- восстанавливаем выделение
-		editor:SetSel(sel_start, sel_end)
+		editor:SetSel(sel_start, editor:PositionFromLine(line_sel_end))
 	end
 end
 

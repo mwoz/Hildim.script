@@ -5,12 +5,12 @@ local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 local function Show()
 
     local list_lex, dlg, bBlockReset, tree_right, tree_left, tree_plugins
-    local btn_ok = iup.button  {title="OK"}
+    local btn_ok = iup.button  {title = "OK"}
     local btn_esc = iup.button  {title = "Cancel"}
     local clrUsed = '255 0 0'
     local tPlugins = {}
-    iup.SetHandle("SIDEBARSETT_BTN_OK",btn_ok)
-    iup.SetHandle("SIDEBARSETT_BTN_ESC",btn_esc)
+    iup.SetHandle("SIDEBARSETT_BTN_OK", btn_ok)
+    iup.SetHandle("SIDEBARSETT_BTN_ESC", btn_esc)
     btn_esc.action = function()
         dlg:hide()
         dlg:postdestroy()
@@ -33,13 +33,13 @@ local function Show()
         end
     end
     local function ConvertXY2WndPos(h, x, y)
-        local _,_,wx,wy = h.position:find('(%d*),(%d*)')
+        local _, _, wx, wy = h.position:find('(%d*),(%d*)')
         wx = tonumber(wx); wy = tonumber(wy)
         x = x + wx; y = y + wy
         local t = {tree_left, tree_plugins, tree_right}
-        for i = 1,  3 do
-            _,_,wx,wy = t[i].position:find('(%d*),(%d*)')
-            local _,_,dx,dy = t[i].rastersize:find('(%d*)x(%d*)')
+        for i = 1, 3 do
+            _, _, wx, wy = t[i].position:find('(%d*),(%d*)')
+            local _, _, dx, dy = t[i].rastersize:find('(%d*)x(%d*)')
             wx = tonumber(wx); wy = tonumber(wy); dx = tonumber(dx); dy = tonumber(dy)
             if wx <= x and x <= wx + dx and wy <= y and y <= wy + dy then
                 x = x - wx; y = y - wy
@@ -62,10 +62,10 @@ local function Show()
         local _, _, xH, yH = h.position:find('(%d+),(%d+)')
 
         local itm = iup.ConvertXYToPos(h, tonumber(xC) - tonumber(dlg.x) - tonumber(xO) - tonumber(xH),
-                              tonumber(yC) - tonumber(dlg.y) - tonumber(yO) - tonumber(yH))
+        tonumber(yC) - tonumber(dlg.y) - tonumber(yO) - tonumber(yH))
         local plg = tPlugins[h:GetUserId(tonumber(itm))]
         if plg then
-            helpid = plg.code or h:GetUserId(tonumber(itm)):gsub('%..*$','')
+            helpid = plg.code or h:GetUserId(tonumber(itm)):gsub('%..*$', '')
             if plg.hlpdevice then helpid = plg.hlpdevice..'::'..helpid end
         end
     end
@@ -73,7 +73,7 @@ local function Show()
     btn_ok.action = function()
         local function SaveTree(h)
             local str = ''
-            for i = 1,  iup.GetAttribute(h, "TOTALCHILDCOUNT0") do
+            for i = 1, iup.GetAttribute(h, "TOTALCHILDCOUNT0") do
                 if str ~= '' then str = str..'¦' end
                 if iup.GetAttributeId(h, "KIND", i) == "BRANCH" then
                     if iup.GetAttributeId(h, "CHILDCOUNT", i) ~= '0' then
@@ -105,8 +105,8 @@ local function Show()
             CORE.HelpUI(helpid, nil)
             helpid = nil
         else
-           local hTarget, idTarget = ConvertXY2WndPos(h, x, y)
-           if hTarget and hTarget ~= h and idSrc > 0 then
+            local hTarget, idTarget = ConvertXY2WndPos(h, x, y)
+            if hTarget and hTarget ~= h and idSrc > 0 then
                 if idTarget < 0 then idTarget = tonumber(iup.GetAttribute(hTarget, 'COUNT')) - 1 end
                 if iup.GetAttributeId(h, 'KIND', idSrc) == 'BRANCH' then
                     if hTarget ~= tree_plugins then
@@ -143,27 +143,27 @@ local function Show()
 
     local function showrename_cb(h, id)
         if iup.GetAttributeId(h, "KIND", id) == "BRANCH" and not h:GetUserId(id) then return true end
-        return -1
+        return - 1
     end
 
     local function rightclick_cb(h, id)
         iup.menu
         {
-            iup.item{title="Add Tab", action=function()
+            iup.item{title = "Add Tab", action = function()
                 iup.SetAttributeId(h, "ADDBRANCH", 0, "<New Tab>")
             end};
-        }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+        }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
     end
 
     local function dragdrop_cb(h, drag_id, drop_id, isshift, iscontrol)
-        if iscontrol == 1 or h == tree_plugins  or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return -1 end
+        if iscontrol == 1 or h == tree_plugins or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return - 1 end
 
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0
             local dragCount = tonumber(iup.GetAttributeId(h, 'CHILDCOUNT', drag_id))
-            if  drag_id > drop_id then iDelta = dragCount + 1; mDelta = 1 end
+            if drag_id > drop_id then iDelta = dragCount + 1; mDelta = 1 end
 
-            if  iup.GetAttributeId(h, 'KIND', drop_id) ~= 'BRANCH' then drop_id = iup.GetAttributeId(h, 'PARENT', drop_id) end
+            if iup.GetAttributeId(h, 'KIND', drop_id) ~= 'BRANCH' then drop_id = iup.GetAttributeId(h, 'PARENT', drop_id) end
 
             if drop_id == 0 then
                 iup.SetAttributeId(h, "ADDBRANCH", drop_id, iup.GetAttributeId(h, 'TITLE', drag_id))
@@ -172,12 +172,12 @@ local function Show()
                 iup.SetAttributeId(h, "INSERTBRANCH", drop_id, iup.GetAttributeId(h, 'TITLE', drag_id))
             end
 
-            for i = 1,  dragCount do
+            for i = 1, dragCount do
                 iup.SetAttributeId(h, "ADDLEAF", h.lastaddnode , iup.GetAttributeId(h, 'TITLE', drag_id + i + i * mDelta))
                 h:SetUserId(h.lastaddnode, h:GetUserId(drag_id + i + (i + 1) * mDelta))
             end
             iup.SetAttributeId(h, 'DELNODE', drag_id + (dragCount + 1) * mDelta, 'SELECTED')
-            return -1
+            return - 1
         elseif drop_id == 0 then drop_id = 1
         end
         if iup.GetAttributeId(h, 'KIND', drop_id) == 'BRANCH' then
@@ -188,34 +188,34 @@ local function Show()
             iup.SetAttributeId(h, 'DELNODE', drag_id + mDelta, 'SELECTED')
             return - 1
         end
-        return -4
+        return - 4
     end
 
-    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return -1 end, tips_cb = onTip, tip = 'xxx'; help_cb = help_cb}
+    tree_plugins = iup.tree{size = '120x', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = function() return - 1 end, tips_cb = onTip, tip = 'xxx'; help_cb = help_cb}
 
     tree_right = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb, tips_cb = onTip, tip = 'xxx'; help_cb = help_cb}
 
     tree_left = iup.tree{size = '120x', showrename = 'YES', showdragdrop = 'YES', button_cb = button_cb, dragdrop_cb = dragdrop_cb, rightclick_cb = rightclick_cb, showrename_cb = showrename_cb, tips_cb = onTip, tip = 'xxx'; help_cb = help_cb}
 
     local vbox = iup.vbox{
-        iup.hbox{tree_left, iup.vbox{tree_plugins},tree_right};
+        iup.hbox{tree_left, iup.vbox{tree_plugins}, tree_right};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
-        expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Настройка боковых панелей",defaultenter="SIDEBARSETT_BTN_OK",defaultesc="SIDEBARSETT_BTN_ESC",tabsize=editor.TabWidth,
-        maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="sidebarlayout", minsize='800x400', helpbutton = 'YES'}
+    expandchildren = 'YES', gap = 2, margin = "4x4"}
+    dlg = iup.scitedialog{vbox; title = "Настройка боковых панелей", defaultenter = "SIDEBARSETT_BTN_OK", defaultesc = "SIDEBARSETT_BTN_ESC", tabsize =editor.TabWidth,
+    maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "sidebarlayout", minsize = '800x400', helpbutton = 'YES'}
 
 
-    dlg.show_cb=(function(h,state)
+    dlg.show_cb =(function(h, state)
         if state == 4 then
             dlg:postdestroy()
         end
     end)
 
-    iup.SetAttributeId(tree_left,"TITLE", 0, "Левая панель")
-    iup.SetAttributeId(tree_right,"TITLE", 0, "Правая панель")
-    iup.SetAttributeId(tree_plugins,"TITLE", 0, "Неиспользуемые элементы")
-    iup.SetAttributeId(tree_left,"ADDBRANCH", 0, "<New Tab>")
-    iup.SetAttributeId(tree_right,"ADDBRANCH", 0, "<New Tab>")
+    iup.SetAttributeId(tree_left, "TITLE", 0, "Левая панель")
+    iup.SetAttributeId(tree_right, "TITLE", 0, "Правая панель")
+    iup.SetAttributeId(tree_plugins, "TITLE", 0, "Неиспользуемые элементы")
+    iup.SetAttributeId(tree_left, "ADDBRANCH", 0, "<New Tab>")
+    iup.SetAttributeId(tree_right, "ADDBRANCH", 0, "<New Tab>")
 
     tree_left:SetUserId(0, '')
     tree_right:SetUserId(0, '')
@@ -229,7 +229,7 @@ local function Show()
         local k = 0
         local lastBr
         for p in str:gmatch('[^¦]+') do
-            local _,_, pname, pf = p:find('(.-)(¬?)$')
+            local _, _, pname, pf = p:find('(.-)(¬?)$')
             if pf ~= '' then
                 if lastBr then
                     iup.SetAttributeId(h, "INSERTBRANCH", lastBr, pname)
@@ -262,15 +262,23 @@ local function Show()
     RestoreTree(tree_left, _G.iuprops["settings.user.leftbar"] or '')
 
     for i = 1, #table_dir do
-        local pI = dofile(defpath..table_dir[i].name)
-        if pI then tPlugins[table_dir[i].name] = pI end
-        if pI and pI.sidebar then
-            iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
-            j = j + 1
-            tree_plugins:SetUserId(j, table_dir[i].name)
-            if CheckInstall(table_dir[i].name, false) then
-                iup.SetAttributeId(tree_plugins, "COLOR", j, clrUsed)
+        local r, err = pcall( function()
+            local pI = dofile(defpath..table_dir[i].name)
+            if type(pI) == 'table'then
+                if pI then tPlugins[table_dir[i].name] = pI end
+                if pI and pI.sidebar then
+                    iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
+                    j = j + 1
+                    tree_plugins:SetUserId(j, table_dir[i].name)
+                    if CheckInstall(table_dir[i].name, false) then
+                        iup.SetAttributeId(tree_plugins, "COLOR", j, clrUsed)
+                    end
+                end
             end
+        end)
+        if not r then
+            print(err)
+            print(defpath..table_dir[i].name)
         end
     end
 

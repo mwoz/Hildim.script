@@ -203,16 +203,24 @@ local function Run(flag)
         RestoreTree(tree_right, _G.iuprops[settName] or '')
 
         for i = 1, #table_dir do
-            local pI = dofile(defpath..table_dir[i].name)
-            if pI then tPlugins[table_dir[i].name] = pI end
+            local r, err = pcall( function()
+                local pI = dofile(defpath..table_dir[i].name)
+                if type(pI) == 'table'then
+                    if pI then tPlugins[table_dir[i].name] = pI end
 
-            if pI and fCond(pI) then
-                iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
-                j = j + 1
-                tree_plugins:SetUserId(j, table_dir[i].name)
-                if flag ~= 'Commands' and CheckInstall(table_dir[i].name, false) then
-                    iup.SetAttributeId(tree_plugins, "COLOR", j, clrUsed)
+                    if pI and fCond(pI) then
+                        iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
+                        j = j + 1
+                        tree_plugins:SetUserId(j, table_dir[i].name)
+                        if flag ~= 'Commands' and CheckInstall(table_dir[i].name, false) then
+                            iup.SetAttributeId(tree_plugins, "COLOR", j, clrUsed)
+                        end
+                    end
                 end
+            end)
+            if not r then
+                print(err)
+                print(defpath..table_dir[i].name)
             end
         end
 
@@ -222,4 +230,5 @@ local function Run(flag)
 end
 
 return Run
+
 

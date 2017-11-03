@@ -658,6 +658,9 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
 end)
 
 AddEventHandler("OnSave", function(cmd, source)
+    while editor:EndUndoAction() > 0 do
+        print'!!!Warning!!! EndUndoAction from OnSave'
+    end
     if props["ext.lua.startup.script"] == props["FilePath"] then
         scite.RunAsync(iup.ReloadScript)
     elseif editor.Lexer == SCLEX_LUA then

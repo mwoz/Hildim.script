@@ -251,15 +251,23 @@ local function Show()
     RestoreTree(tree_right, _G.iuprops["settings.toolbars.layout"] or '')
 
     for i = 1, #table_dir do
-        local pI = dofile(defpath..table_dir[i].name)
-        if pI then tPlugins[table_dir[i].name] = pI end
-        if pI and pI.toolbar then
-            iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
-            j = j + 1
-            tree_plugins:SetUserId(j, table_dir[i].name)
-            if CheckInstall(table_dir[i].name, false) then
-                iup.SetAttributeId(tree_plugins, "COLOR", j, clrUsed)
+        local r, err = pcall( function()
+            local pI = dofile(defpath..table_dir[i].name)
+            if type(pI) == 'table'then
+                if pI then tPlugins[table_dir[i].name] = pI end
+                if pI and pI.toolbar then
+                    iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
+                    j = j + 1
+                    tree_plugins:SetUserId(j, table_dir[i].name)
+                    if CheckInstall(table_dir[i].name, false) then
+                        iup.SetAttributeId(tree_plugins, "COLOR", j, clrUsed)
+                    end
+                end
             end
+        end)
+        if not r then
+            print(err)
+            print(defpath..table_dir[i].name)
         end
     end
 end
