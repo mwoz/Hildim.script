@@ -776,10 +776,15 @@ end
 local function EnrichFromInheritors(obj_names, inh_table)
     local tblobj = {}
     for i = 1, #obj_names do
-        tblobj[obj_names[i][1]:upper()] = true
-        if inh_table and inh_table[obj_names[i][1]] then
-            for j = 1,  #inh_table[obj_names[i][1]] do
-                tblobj[inh_table[obj_names[i][1]][j]:upper()] = true
+        local cyrType = obj_names[i][1]
+        if type(obj_names[i][1]) == 'function' then
+            cyrType = obj_names[i][1]()
+        end
+
+        tblobj[cyrType:upper()] = true
+        if inh_table and inh_table[cyrType] then
+            for j = 1,  #inh_table[cyrType] do
+                tblobj[inh_table[cyrType][j]:upper()] = true
             end
         end
     end
@@ -1012,8 +1017,13 @@ local function OnUserListSelection_local(tp, str)
         end
         --Если objects_tabl содержит несколько(2) имен объектов, то вроде бы первый родительский,а второй чайлдовый. сохраним наш выбор для чайлдового
         if #obj_names > 0 then
-            local upObj = string.upper(obj_names[#obj_names][1])
-            objects_table[upObj]['last'] = str
+            local upObj = obj_names[#obj_names][1]
+            if type(upObj) == 'function' then
+                upObj = upObj()
+            else
+                upObj = upObj:upper()
+            end
+            if objects_table[upObj] then objects_table[upObj]['last'] = str end
         end
     end
     bIsListVisible = false

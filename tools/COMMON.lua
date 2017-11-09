@@ -392,15 +392,15 @@ local function DoForBuffers_local(func, bStc, ...)
         scite.buffers.SetDocumentAt(i, bStc, false)
         func(i, ...)
     end
-    scite.buffers.SetDocumentAt(curBuf)
     editor.VScrollBar = true
     editor.FirstVisibleLine = fvl
-    BlockEventHandler"OnBeforeSave"
-    BlockEventHandler"OnSave"
+    UnBlockEventHandler"OnBeforeSave"
+    UnBlockEventHandler"OnSave"
     UnBlockEventHandler"OnUpdateUI"
     UnBlockEventHandler"OnNavigation"
     UnBlockEventHandler"OnSwitchFile"
     UnBlockEventHandler"OnIdle"
+    scite.buffers.SetDocumentAt(curBuf)
     scite.Perform('blockuiupdate:n')
     return func(nil)
 end

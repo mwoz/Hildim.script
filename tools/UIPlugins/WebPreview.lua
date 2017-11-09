@@ -135,8 +135,9 @@ local function init()
         local cur = web.com.document:getElementById('cursor___')
         if not cur then return end
         cur:scrollIntoView(false)
-        pBody.scrollTop = pBody.scrollTop + 100
-        pBody.scrollLeft = pBody.scrollLeft - 50
+        if cur:getClientRects():item(0).top > 120 then pBody.scrollTop = pBody.scrollTop + 100 end
+        local w = web.rastersize:gsub('x.*', '')
+        if tonumber(w) - 100 > cur:getClientRects():item(0).left then pBody.scrollLeft = pBody.scrollLeft - 50 end
     end
 
     local function onSwitchLocal()

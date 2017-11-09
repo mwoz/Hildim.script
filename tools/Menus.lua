@@ -359,8 +359,8 @@ _G.sys_Menus.EDITOR = {title = "Контекстное меню окна редактора",
 
 _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 	{'_HIDDEN_', {
-		{'Next Tab', key = 'Ctrl+Tab', action = function() if iup.GetFocus() then iup.PassFocus() else scite.MenuCommand(IDM_NEXTFILESTACK) end end},
-		{'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = function() if iup.GetFocus() then iup.PassFocus() else scite.MenuCommand(IDM_PREVFILESTACK) end end},
+		{'Next Tab', key = 'Ctrl+Tab', action = function() if iup.GetFocus() then iup.PassFocus() end scite.MenuCommand(IDM_NEXTFILESTACK) end},
+		{'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = function() if iup.GetFocus() then iup.PassFocus() end scite.MenuCommand(IDM_PREVFILESTACK) end},
 		{'Block Up', key = 'Alt+Up', action = function() editor:LineUpRectExtend() end},
 		{'Block Down', key = 'Alt+Down', action = function() editor:LineDownRectExtend() end},
 		{'Block Left', key = 'Alt+Left', action = function() editor:CharLeftRectExtend() end},
