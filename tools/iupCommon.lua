@@ -576,6 +576,17 @@ function CORE.SwitchPane(bForward)
     end
 end
 
+function CORE.CloseListSet(sel, lst, column)
+    for i = lst.numlin, 1,- 1 do
+        if (iup.GetAttributeId2(lst, 'TOGGLEVALUE', i, column) or '0') == sel then
+            lst.dellin = i
+        else
+            iup.SetAttributeId2(lst, 'TOGGLEVALUE', i, column, '0')
+        end
+    end
+    lst.redraw = 'ALL'
+end
+
 AddEventHandler("OnMenuCommand", function(cmd, source)
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
         if cmd == IDM_QUIT then scite.Perform("savepositions:") end

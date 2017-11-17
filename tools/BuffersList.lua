@@ -9,27 +9,25 @@ local function InitWndDialog()
     local sX, sY, bMoved, bRecurs
     local function button_cb(h, button, pressed, x, y, status)
         h.value = 0
-        if button == 49  then
+        if button == 49 then
             bMoved = pressed; sX = x; sY = y
             if bMoved == 0 then
-                _G.iuprops['dialogs.bufferslist.xv']= dlg.x
+                _G.iuprops['dialogs.bufferslist.xv'] = dlg.x
                 _G.iuprops['dialogs.bufferslist.yv'] = dlg.y
             end
         end
     end
 
     local function motion_cb(h, x, y, status)
-    h.value=1
+        h.value = 1
         if bMoved == 1 and sX and sY and not bRecurs then
-            local _,_,wx,wy = dlg.screenposition:find('(%-?%d*),(%-?%d*)')
+            local _, _, wx, wy = dlg.screenposition:find('(%-?%d*),(%-?%d*)')
             local nX, nY = tonumber(wx) + (x - sX), tonumber(wy) + (y - sY)
             bRecurs = true
             if nX ~= wx or nY ~= wy then CORE.old_iup_ShowXY(dlg, nX, nY) end
             bRecurs = false
         end
     end
-
-
 
     local table_bookmarks = {}
 
@@ -92,11 +90,11 @@ local function InitWndDialog()
     list_windows = iup.matrix{ name = 'list_buffers',
         numcol = 6, numcol_visible = 4, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
         readonly = "NO"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255", resizematrix = "YES", propagatefocus = 'YES'  ,
-    rasterwidth0 = 0 ,
-    rasterwidth1 = _G.iuprops['list_buffers.rw1'] or 20,
-    rasterwidth2 = _G.iuprops['list_buffers.rw2'] or 20,
-    rasterwidth3 = _G.iuprops['list_buffers.rw3'] or 120,
-    rasterwidth4 = _G.iuprops['list_buffers.rw4'] or 500,
+        rasterwidth0 = 0 ,
+        rasterwidth1 = _G.iuprops['list_buffers.rw1'] or 20,
+        rasterwidth2 = _G.iuprops['list_buffers.rw2'] or 20,
+        rasterwidth3 = _G.iuprops['list_buffers.rw3'] or 120,
+        rasterwidth4 = _G.iuprops['list_buffers.rw4'] or 500,
     rasterwidth5 = 0, rasterwidth6 = 0,}
 
 	list_windows:setcell(0, 1, "")         -- ,size="400x400"
@@ -116,6 +114,8 @@ local function InitWndDialog()
             scite.buffers.SetDocumentAt(tonumber(iup.GetAttributeId2(list_windows, '', lin, 5)))
             fillWindow(curSide)
             list_windows.redraw = 'ALL'
+        elseif iup.isbutton3(status) and lin > 0 then
+            menuhandler:PopUp('MainWindowMenu¦_HIDDEN_¦Window_bar')
         end
     end
 
@@ -151,14 +151,17 @@ local function InitWndDialog()
         end
 
         local blockClose
-        local function CloseSet(s)
+
+        local function CloseFileSet(t) iup.CloseFilesSet(9132, t) end
+
+        function CORE.DoForFileSet(s, f)
             return function()
                 blockClose = true
                 local tForClose = {}
                 for i = 1, tonumber(iup.GetAttribute(list_windows, "NUMLIN")) do
                     tForClose[tonumber(iup.GetAttributeId2(list_windows, '', i, 5))] = ((iup.GetAttributeId2(list_windows, 'TOGGLEVALUE', i, 1) or '0') == s)
                 end
-                iup.CloseFilesSet(9132, tForClose)
+                f(tForClose)
                 fillWindow(curSide)
                 list_windows.redraw = 'ALL'
                 iup.SetFocus(list_windows)
@@ -177,13 +180,20 @@ local function InitWndDialog()
             hbTitle,
             list_windows,
             iup.hbox{
-                iup.flatbutton{title = "Закрыть", expand = 'NO', padding = '9x', flat_action = CloseSet('1'), propagatefocus = 'YES' },
-                iup.flatbutton{title = "Закрыть кроме", expand = 'NO', padding = '9x', flat_action = CloseSet('0'), propagatefocus = 'YES' },
+                iup.flatbutton{title = "Закрыть", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES' },
+                iup.flatbutton{title = "Закрыть кроме", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES' },
                 iup.flatbutton{title = "На другое окно", expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES'},
                 --iup.flatbutton{title = "Cancel", expand = 'NO', padding = '9x', flat_action = function() dlg:hide() end, propagatefocus = 'YES'},
         scrollbar = 'NO', minsize = 'x22', maxsize = 'x22', expand = "HORIZONTAL", margin = "20x", gap = "20"};};
         sciteparent = "SCITE", sciteid = "bufferslist", dropdown = true, shrink = "YES",
         maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255', customframedraw = 'NO'}
+
+        menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',
+            {'Window_bar', plane = 1,{
+                {"Close Checked", ru = "Закрыть все отмеченные", action = CORE.DoForFileSet('1', CloseFileSet)},
+                {"Read Only", ru = "Закрыть все НЕ отмеченные", action = CORE.DoForFileSet('0', CloseFileSet)},
+                {"Move Checked", ru = "Переместить на другое окно", action = MoveSet},
+        }})
 
         dlg.resize_cb = function(h)
             list_windows.rasterwidth4 = nil

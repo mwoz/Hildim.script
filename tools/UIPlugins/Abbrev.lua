@@ -428,8 +428,8 @@ end
     iup.drop_cb_to_list(list_abbrev, Abbreviations_InsertExpansion)
 
     function list_abbrev:button_cb(button, pressed, x, y, status)
-        if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and list_abbrev.cursor == "ARROW")) then
-            --Abbreviations_InsertExpansion()
+        if button == iup.BUTTON1 and (iup.isdouble(status)) then
+            Abbreviations_InsertExpansion()
         elseif button == iup.BUTTON1 and pressed == 1 then
             clickPos = iup.GetGlobal("CURSORPOS")
         elseif button == iup.BUTTON1 and pressed == 0 then

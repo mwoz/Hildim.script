@@ -155,21 +155,6 @@ local function OpenAll()
     end
 end
 
-local function AddAll(val)
-    local maxN = scite.buffers.GetCount() - 1
-    for i = 0,maxN do
-        local pth = scite.buffers.NameAt(i):from_utf8(1251)
-        if shell.fileexists(pth) then
-            local _,_,fnExt = pth:find('([^\\]*)$')
-
-            iup.SetAttributeId(tree_sol, "ADDLEAF", val, fnExt)
-            iup.SetAttributeId(tree_sol, "IMAGE", val, GetExtImage(fnExt))
-            tree_sol:SetUserId(val + 1, pth)
-        end
-    end
-    is_chanjed = true
-end
-
 local function ActivateProject()
     for i = 0, iup.GetAttribute(tree_sol, "TOTALCHILDCOUNT0") do
         if iup.GetAttributeId(tree_sol, 'KIND', i) == 'BRANCH' then iup.SetAttributeId(tree_sol, 'COLOR',i, '0 0 0') end
@@ -356,6 +341,30 @@ local function Solution_Init(h)
         {'Save As New Project', ru = 'Закрыть и добавить в активный проект', action = function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
 
     )
+
+    local function AddTbl(tbl)
+        debug_prnArgs(tbl)
+        local maxN = scite.buffers.GetCount() - 1
+        for i = 0, maxN do
+            if tbl[i] then
+                local pth = scite.buffers.NameAt(i):from_utf8(1251)
+                if shell.fileexists(pth) then
+                    local _, _, fnExt = pth:find('([^\\]*)$')
+
+                    iup.SetAttributeId(tree_sol, "ADDLEAF", tree_sol.value, fnExt)
+                    iup.SetAttributeId(tree_sol, "IMAGE", tree_sol.value, GetExtImage(fnExt))
+                    tree_sol:SetUserId(tree_sol.value + 1, pth)
+                end
+            end
+        end
+        is_chanjed = true
+    end
+    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_¦Window_bar¦sxxx',
+        {'solution', plane = 1, {
+            {'s_comptemp', separator = 1},
+            {"Add Checked To Project", ru = "Добавить отмеченные в солюшн", action = function() CORE.DoForFileSet('1', AddAll)() end,},
+            {"Add Un Checked To Project", ru = "Добавить НЕотмеченные в солюшн", action = function() CORE.DoForFileSet('0', AddAll)() end,},
+    }})
     return {   -- iup.vbox{   };
         handle = tree_sol;
         OnSwitchFile = Initialize,

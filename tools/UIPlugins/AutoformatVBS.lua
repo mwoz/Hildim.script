@@ -379,7 +379,7 @@ local function OnChar_local(char)
     if not editor.Focus then return end
     curFold = nil
     if string.byte(char) == 13 then
-        if (_G.iuprops['autoformat.indent'] or 0) == 1 then doAutoformat(editor.CurrentPos - 1) end
+        if (_G.iuprops['autoformat.indent'] or 0) == 1 and (editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart) - 1)] < 14) then doAutoformat(editor.CurrentPos - 1) end
         editor:ReplaceSel(nextIndent)
         return
     end
@@ -406,8 +406,8 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
     if not editor.Focus then return end
     local s = editor.SelectionStart
     local e = editor.SelectionEnd
-    if needFormat and iChangedLine > - 1 and s == e and ((_G.iuprops['autoformat.indent'] or 0) == 1 or (_G.iuprops['autoformat.line'] or 0) == 1) and iChangedLine ~= editor:LineFromPosition(s) then
-        needFormat = false
+    if needFormat and iChangedLine > - 1 and s == e and ((_G.iuprops['autoformat.indent'] or 0) == 1 or (_G.iuprops['autoformat.line'] or 0) == 1)
+      and iChangedLine ~= editor:LineFromPosition(s) and (editor.StyleAt[editor:PositionFromLine(iChangedLine)] < 14) then
         local upLine = editor:textrange(editor:PositionFromLine(iChangedLine), editor:PositionFromLine(iChangedLine + 1))
         local strSep, strOut = FormatString(upLine , editor:PositionFromLine(iChangedLine))
         if strOut ~= "" and upLine:gsub('%s*$', '') ~= (strSep..strOut):gsub('%s*$', '') then
@@ -418,7 +418,7 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
     end
     if prevFold and FoldLevel(-1) == FoldLevel(0) then
         editor.LineIndentation[editor:LineFromPosition(editor.SelectionStart)] = prevFold
-    elseif iChangedLine > - 1 and s == e and (_G.iuprops['autoformat.indent'] or 0) == 1 and editor.StyleAt[editor.SelectionStart - 1] == 13 then
+    elseif iChangedLine > - 1 and s == e and (_G.iuprops['autoformat.indent'] or 0) == 1 and (editor.StyleAt[editor:PositionFromLine(iChangedLine)] < 14) then
         local l = editor:LineFromPosition(s)
         if l ~= iChangedLine then
             local iline = editor.FirstVisibleLine
