@@ -1408,13 +1408,14 @@ local function LoadIuprops_Local(filename)
     scite.RunAsync(iup.ReloadScript)
 end
 
-iup.LoadIuprops = function()
+local function LoadIuprops()
     local d = iup.filedlg{dialogtype='OPEN', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["scite.userhome"].."\\" }
     d:popup()
     local filename = d.value
     d:destroy()
     if not filename then return end
     LoadIuprops_Local(filename)
+    mnu_configs = nil
 end
 
 
@@ -1490,6 +1491,8 @@ local function SaveIuprops_local(filename)
  	end
 end
 
+local mnu_configs
+
 iup.SaveIuprops = function()
 
     local d = iup.filedlg{dialogtype='SAVE', parentdialog='SCITE', extfilter='Config|*.config;', directory=props["scite.userhome"].."\\" }
@@ -1500,6 +1503,24 @@ iup.SaveIuprops = function()
     if filename then
         _G.iuprops['current.config.restore'] = filename:gsub('^(.-)_?([^\\]-%.[^\\.]+)$', '%1%2')
     end
+    mnu_configs = nil
+end
+
+iup.ConfigList = function()
+    if not mnu_configs then
+        local t = shell.findfiles(props["scite.userhome"].."\\*.config")
+        mnu_configs = {}
+        local mnu_i
+        for i = 1,  #t do
+            mnu_i = {t[i].name, action = function() LoadIuprops_Local(props["scite.userhome"]..'\\'..t[i].name) end}
+            table.insert(mnu_configs, mnu_i)
+        end
+        mnu_i = {'s1', separator = 1}
+        table.insert(mnu_configs, mnu_i)
+        mnu_i = {'Load...', ru = 'Загрузить...', action=LoadIuprops, image = 'folder_open_document_µ'}
+        table.insert(mnu_configs, mnu_i)
+    end
+    return mnu_configs
 end
 
 iup.SaveCurIuprops = function()
