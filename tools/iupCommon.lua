@@ -69,8 +69,8 @@ iuprops_read_ok = true
 local function RestoreLayOut(strLay)
     strLay = strLay:gsub('^•', '')
     for n in strLay:gmatch('%d+') do
-        n = tonumber(n)
-        if (editor.FoldLevel[n] & SC_FOLDLEVELHEADERFLAG) ~=0 then
+        n = math.tointeger(n)
+        if (editor.FoldLevel[n] & SC_FOLDLEVELHEADERFLAG) ==0 then
             local lineMaxSubord = editor:GetLastChild(n,- 1)
             if n < lineMaxSubord then
                 editor.FoldExpanded[n] = false
