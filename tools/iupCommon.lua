@@ -245,10 +245,11 @@ local function SaveIup()
     local file = props["scite.userhome"]..'\\settings.lua'
  	if pcall(io.output, file) then
 		io.write('_G.iuprops = {\n'..table.concat(t, '\n')..'\n}')
+        io.close()
     else
-        iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!")
+        iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!", "OK")
  	end
-	io.close()
+
     iup.SaveChProps()
 end
 

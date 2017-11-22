@@ -103,7 +103,7 @@ local function  CreateToolBar()
         end
 ::continue::
     end
-    table.insert(tblVb, iup.hbox(tblHb))
+    table.insert(tblVb, iup.hbox(tblHb or {gap = "3", margin = "3x0", alignment = "ACENTER"}))
 
     return iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander", iup.vbox(tblVb)}
 end

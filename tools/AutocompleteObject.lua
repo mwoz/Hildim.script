@@ -1067,6 +1067,7 @@ local function CallTip(char, pos)
     end
     if objects_table._fill == nil then return false end
     local strLine = editor:textrange(editor:PositionFromLine(af_current_line), pos - 1)
+    if not strLine then return end -- возможно для ридонли файлов
     --найдем, что у нас слева - метод или функция
     local _start, _end, sSep, sMetod = string.find(strLine, "("..autocom_chars.."?)([%w%_]+)$")
     if sSep == '' then
