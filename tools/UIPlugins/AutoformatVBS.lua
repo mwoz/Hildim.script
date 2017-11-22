@@ -205,7 +205,7 @@ local function FormatString(strLine, startPos, bForce)
 
     local strOutComm = ''
     local commPos = 0
-    while true do --отрежем комментарий, чтоб потом его снова приклеить. но при этом смотрим, коммент ли жто - иожет быть внутренность строки
+    while true do --отрежем комментарий, чтоб потом его снова приклеить. но при этом смотрим, коммент ли это - иожет быть внутренность строки
         _s, _e, strOutComm, commPos = strBody:find("(%s*()'[^\n\r]*)", commPos + 1)
         if _s then
             if editor.StyleAt[startPos + commPos - 1 + strSep:len()] == SCE_FM_VB_COMMENT then
@@ -436,11 +436,24 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
                 for i = ls - 1, 0,- 1 do
                     --print(i, FoldLevel(ls - i))
                     if cL >= FoldLevel(ls - i) then
+                        local endWhat = ''
+                        if editor:GetLine(ls):lower():find('^%s*end') then
+                            local lUp = editor:GetLine(i):lower():gsub('public', ''):gsub('private', ''):gsub('^%s*', '')
+                            if lUp:find('^if') or lUp:find('^else') then endWhat = 'If'
+                            elseif lUp:find('^select') or lUp:find('^case') then endWhat = 'Select'
+                            elseif lUp:find('^function') then endWhat = 'Function'
+                            elseif lUp:find('^sub') then endWhat = 'Sub'
+                            elseif lUp:find('^property') then endWhat = 'Property'
+                            elseif lUp:find('^with') then endWhat = 'With'
+                            end
+                        end
                         local newPos = curS - (curI - LineIndent(ls - i))
                         editor.TargetStart = editor:PositionFromLine(ls)
+                        if endWhat ~= '' then curIPos = curIPos + 3 end
                         editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
                         local li = LineIndent(ls - i)
-                        editor:ReplaceTarget(string.rep(' ', li))
+                        editor:ReplaceTarget(string.rep(' ', li)..Iif(endWhat == '', '', 'End '..endWhat))
+                        if endWhat ~= '' then newPos = newPos + #endWhat + 1 end
                         editor.SelectionStart = newPos
                         editor.SelectionEnd = newPos
                         prevFold = curI

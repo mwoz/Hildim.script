@@ -251,14 +251,11 @@ end)
 
 local t = {}
 if _G.iuprops['settings.lexers'] then
-	for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
-		local _,_, p1,p2,p3,p4 = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
-		t[p4] = true
-		table.insert(tHilight,{p1, action = function() scite.SetLexer(p2) end, check=function() return editor_LexerLanguage() == p3 end})
-	end
-	for n,_ in pairs(t) do
-		table.insert(tLangs, {"Open "..n, action =function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..n) end})
-	end
+    local t = _G.iuprops['settings.lexers']
+    for i = 1, #t do
+        table.insert(tHilight,{t[i].view, action = function() scite.SetLexer(t[i].ext) end, check = function() return editor_LexerLanguage() == t[i].name end})
+        table.insert(tLangs, {"Open "..t[i].file, action = function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..t[i].file) end})
+    end
 end
 
 

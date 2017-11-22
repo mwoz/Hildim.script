@@ -411,6 +411,48 @@ function DoForBuffers_Stack(func, ...)
     return DoForBuffers_local(func, false, ...)
 end
 
+function CORE.tbl2Out(tIn, sSep, byIpairs, brashes, upLvl)
+
+    local function val2str(v, n)
+        local tp = type(v)
+        if tp == 'nil' then v = nil
+        elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
+        elseif tp == 'string' then
+            v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
+        elseif tp == 'table' then
+            v = '{\n'..CORE.tbl2Out(v, ' ', true)..'}'
+        else
+            v = nil
+        end
+        return v
+    end
+
+    if type(tIn) == 'table' then
+        local t = {}
+        local tI
+        if tIn.tooutput then tI = tIn:tooutput()
+        else tI = tIn end
+
+        if byIpairs then
+            for n, v in ipairs(tI) do
+                v = val2str(v)
+                if v then table.insert(t, v..",") end
+            end
+        end
+        for n, v in pairs(tI) do
+            if type(n) == 'string' then
+                v = val2str(v)
+                if v then table.insert(t, '["'..n..'"] = '..v..","..Iif(upLvl, '\n', '')) end
+            end
+        end
+        local vOut = table.concat(t, sSep)
+        if brashes then vOut = Iif(upLvl,'return ', '')..'{\n'..vOut..'}' end
+        return vOut
+    else
+        return val2str(tIn)
+    end
+end
+
 function debug_prnTb(tb, n)
     local s = string.rep('    ', n)
     for k,v in pairs(tb) do
@@ -509,28 +551,36 @@ function s:ins(v, p, l, b)
     table.insert(self.data.bmk, 1, b)
     self:lop()
 end
-function s:tostr()
-    local res = '{lst={'
-    for i = 1,  #self.data.lst do
-        if i > 1 then res = res..', ' end
-        res = res..'"'..self.data.lst[i]:gsub('\\','\\\\'):gsub("'", "\\039")..'"'
-    end
-    res = res..'}; pos={'
-    for i = 1,  #self.data.lst do
-        if i > 1 then res = res..', ' end
-        res = res..(self.data.pos[i] or 0)
-    end
-    res = res..'}; layout={'
-    for i = 1,  #self.data.lst do
-        if i > 1 then res = res..', ' end
-        res = res..'"'..(self.data.layout[i] or '')..'"'
-    end
-    res = res..'}; bmk={'
-    for i = 1,  #self.data.lst do
-        if i > 1 then res = res..', ' end
-        res = res..'"'..(self.data.bmk[i] or '')..'"'
-    end
-    return res..'}}'
+-- function s:tostr()
+--     local res = '{lst={'
+--     for i = 1,  #self.data.lst do
+--         if i > 1 then res = res..', ' end
+--         res = res..'"'..self.data.lst[i]:gsub('\\','\\\\'):gsub("'", "\\039")..'"'
+--     end
+--     res = res..'}; pos={'
+--     for i = 1,  #self.data.lst do
+--         if i > 1 then res = res..', ' end
+--         res = res..(self.data.pos[i] or 0)
+--     end
+--     res = res..'}; layout={'
+--     for i = 1,  #self.data.lst do
+--         if i > 1 then res = res..', ' end
+--         res = res..'"'..(self.data.layout[i] or '')..'"'
+--     end
+--     res = res..'}; bmk={'
+--     for i = 1,  #self.data.lst do
+--         if i > 1 then res = res..', ' end
+--         res = res..'"'..(self.data.bmk[i] or '')..'"'
+--     end
+--     return res..'}}'
+-- end
+function s:tooutput()
+    local res = {}
+    res.lst = self.data.lst
+    res.pos = self.data.pos
+    res.bmk = self.data.bmk
+    res.layout = self.data.layout
+    return res
 end
 
 _G.oStack = s

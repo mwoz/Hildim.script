@@ -7,7 +7,6 @@ CORE.old_iup_ShowXY = old_iup_ShowXY
 _G.iuprops = {}
 local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
-
 if shell.fileexists(file) then
     local text = ''
     local bSuc, pF = pcall(io.input, file)
@@ -69,8 +68,8 @@ iuprops_read_ok = true
 local function RestoreLayOut(strLay)
     strLay = strLay:gsub('^•', '')
     for n in strLay:gmatch('%d+') do
-        n = tonumber(n)
-        if (editor.FoldLevel[n] & SC_FOLDLEVELHEADERFLAG) ~=0 then
+        n = math.tointeger(n)
+        if (editor.FoldLevel[n] & SC_FOLDLEVELHEADERFLAG) ==0 then
             local lineMaxSubord = editor:GetLastChild(n,- 1)
             if n < lineMaxSubord then
                 editor.FoldExpanded[n] = false
@@ -226,29 +225,14 @@ function iup.SaveChProps(bReset)
 end
 
 local function SaveIup()
-    if not iuprops_read_ok then return end
-    local t = {}
-    for n,v in pairs(_G.iuprops) do
-
-        local tp = type(v)
-        if tp == 'nil' then v = 'nil'
-        elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
-        elseif tp == 'string' then
-            v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
-        elseif tp == 'table' and v.tostr then
-            v = v:tostr()
-        else
-            iup.Message('Error', "Type "..tp.." can't be saved")
-        end
-        table.insert(t, '["'..n..'"] = '..v..",")
-    end
-    local file = props["scite.userhome"]..'\\settings.lua'
- 	if pcall(io.output, file) then
-		io.write('_G.iuprops = {\n'..table.concat(t, '\n')..'\n}')
+    local file = props["scite.userhome"]..'\\settings.lua_'
+    if pcall(io.output, file) then
+        local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
+        io.write(s)
     else
-        iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!")
- 	end
-	io.close()
+        iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!", "Ok")
+    end
+    io.close()
     iup.SaveChProps()
 end
 
@@ -389,7 +373,7 @@ local function onNavigate_local(item)
     end
 end
 
-iup.RestoreFiles = function(bForce)
+iup.RestoreFilesOld = function(bForce)
     if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
         local bNew = (props['FileName'] ~= '')
         local t,p,bk,l = {},{},{},{}
@@ -469,6 +453,80 @@ iup.RestoreFiles = function(bForce)
             scite.buffers.SetDocumentAt(0)
         else
             local b = tonumber(_G.iuprops['buffers.current'] or -1)
+            if b >= 0 then scite.buffers.SetDocumentAt(b) end
+        end
+        if not bIsRight then
+            _G.iuprops['coeditor.win'] = '2';
+            _G.g_session['coeditor'].HideDialog();
+        else
+            coeditor.Zoom = editor.Zoom
+        end
+    end
+end
+
+iup.RestoreFiles = function(bForce)
+
+    if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
+        local bNew = (props['FileName'] ~= '')
+
+        local t, p, bk, l = _G.iuprops['buffers'].lst ,{}, _G.iuprops['buffers'].pos, _G.iuprops['buffers'].layouts
+
+        scite.Perform('blockuiupdate:y')
+        --local fvl = editor.FirstVisibleLine
+        --editor.VScrollBar = false
+        if #t > 0 then
+            BlockEventHandler"OnRightEditorVisibility"
+            BlockEventHandler"OnOpen"
+            BlockEventHandler"OnNavigation"
+            BlockEventHandler"OnUpdateUI"
+            OnOpen = onOpen_local
+        end
+        local bRight, bRightPrev, bCloned, bIsRight = false, false, false, false
+        for i = #t, 1,- 1 do
+            if i == 1 then
+                OnOpen = nil
+                UnBlockEventHandler"OnUpdateUI"
+                UnBlockEventHandler"OnNavigation"
+                UnBlockEventHandler"OnOpen"
+            end
+            local sNm = t[i]
+            bCloned = false
+            if sNm:find('^<') then
+                sNm = sNm:gsub('^<', '')
+                bCloned = true
+            end
+
+            bRight = false
+            if sNm:find('^>') then
+                sNm = sNm:gsub('^>', '')
+                bRight = true
+            end
+
+            scite.Open(sNm)
+            if bRight ~= bRightPrev then scite.MenuCommand(IDM_CHANGETAB) end
+            if bCloned then scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
+            if bRight or bCloned then bIsRight = true end
+            bRightPrev = bRight
+            if bk[i] and bk[i][1] then editor.FirstVisibleLine = tonumber(bk[i][1]) end
+--            if bk and bk[i] then
+--                for j = 2, #(bk[i]) do
+--                    editor:MarkerAdd(tonumber(bk[i][j]), 1)
+--                    if BOOKMARK then BOOKMARK.Add(tonumber(bk[i][j])) end
+--                end
+--            end
+            if l and l[i] then
+                RestoreLayOut(l[i])
+            end
+        end
+        UnBlockEventHandler"OnRightEditorVisibility"
+
+        scite.Perform('blockuiupdate:u')
+        --editor.VScrollBar = true
+        --editor.FirstVisibleLine = fvl
+        if bNew then
+            scite.buffers.SetDocumentAt(0)
+        else
+            local b = tonumber(_G.iuprops['buffers.current'] or - 1)
             if b >= 0 then scite.buffers.SetDocumentAt(b) end
         end
         if not bIsRight then

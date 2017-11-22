@@ -55,13 +55,12 @@ local function Show()
     end
 
     btn_ok.action = function()
-        local str = ''
+        local tbl = {}
         for i = 1,  iup.GetAttribute(tree_btns, "TOTALCHILDCOUNT0") do
             local p = tree_btns:GetUserId(i) or '---'
-            if str ~= '' then str = str..'‡' end
-            str = str..p
+            table.insert(tbl, p)
         end
-        _G.iuprops["settings.user.toolbar"] = str
+        _G.iuprops["settings.user.toolbar"] = tbl
         dlg:hide()
         dlg:postdestroy()
         scite.RunAsync(iup.ReloadScript)
@@ -166,9 +165,10 @@ local function Show()
     iup.TreeAddNodes(tree_hk, tblView)
     tree_hk.autoredraw = 'YES'
 
-    local str = _G.iuprops["settings.user.toolbar"] or ''
+    local tbl = _G.iuprops["settings.user.toolbar"] or {}
     local id = 0
-    for p in str:gmatch('[^‡]*') do
+    for i = 1, #tbl do
+        local p = tbl[i]
         if p == '---' then
             iup.SetAttributeId(tree_btns,"ADDLEAF", id, '-----------')
             id = iup.GetAttribute(tree_btns, 'LASTADDNODE')

@@ -15,23 +15,33 @@ local function Show()
         dlg:hide()
         dlg:postdestroy()
     end
+
     local function CheckInstall(strUi, bUnInstoll)
         local tPoints = {["settings.toolbars.layout"] = "Tool Bar",
             ["settings.hidden.plugins"] = "Hidden Plugins",
             ["settings.status.layout"] = "Status Bar",
         }
         for s, m in pairs(tPoints) do
-            if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
-                if bUnInstoll then
-                    local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
-                    v = v:gsub('([^¦¬]+¬¦)([^¦¬]+¬¦)', '%2')
-                    v = v:gsub('[^¦¬]+¬¦-$', '')
-                    _G.iuprops[s] = v
+            local tUp = _G.iuprops[s] or {}
+            if s == "settings.status.layout" then tUp = {tUp} end
+            for i = 1, #tUp do
+                for j = 1,  #(tUp[i]) do
+                    if tUp[i][j] == strUi then
+                        if bUnInstoll then
+                            table.remove(tUp[i], j)
+                            if s == "settings.status.layout" then
+                                _G.iuprops[s] = tUp[i]
+                            else
+                                _G.iuprops[s] = tUp
+                            end
+                        end
+                        return m
+                    end
                 end
-                return m
             end
         end
     end
+
     local function ConvertXY2WndPos(h, x, y)
         local _, _, wx, wy = h.position:find('(%d*),(%d*)')
         wx = tonumber(wx); wy = tonumber(wy)
@@ -72,23 +82,23 @@ local function Show()
 
     btn_ok.action = function()
         local function SaveTree(h)
-            local str = ''
+            local tbl = {}
+            local tblB
             for i = 1, iup.GetAttribute(h, "TOTALCHILDCOUNT0") do
-                if str ~= '' then str = str..'¦' end
                 if iup.GetAttributeId(h, "KIND", i) == "BRANCH" then
-                    if iup.GetAttributeId(h, "CHILDCOUNT", i) ~= '0' then
-                        str = str.. iup.GetAttributeId(h, "TITLE", i)..'¬'
-                    end
+                    tblB = {title = iup.GetAttributeId(h, "TITLE", i)}
+                    table.insert(tbl, tblB)
                 else
-                    str = str..h:GetUserId(i)
+                    table.insert(tblB, h:GetUserId(i))
                     CheckInstall(h:GetUserId(i), true)
                 end
 
             end
-            return str
+            return tbl
         end
         _G.iuprops["settings.user.leftbar"] = SaveTree(tree_left)
         _G.iuprops["settings.user.rightbar"] = SaveTree(tree_right)
+
         dlg:hide()
         dlg:postdestroy()
         scite.RunAsync(iup.ReloadScript)
@@ -223,26 +233,26 @@ local function Show()
     local table_dir = shell.findfiles(defpath..'*.lua')
 
     local j = 0
-    local function RestoreTree(h, str)
-        if str == '' then return end
+    local function RestoreTree(h, tbl)
+        if #tbl == '' then return end
         iup.SetAttributeId(h, "DELNODE", 1, "SELECTED")
         local k = 0
         local lastBr
-        for p in str:gmatch('[^¦]+') do
-            local _, _, pname, pf = p:find('(.-)(¬?)$')
-            if pf ~= '' then
-                if lastBr then
-                    iup.SetAttributeId(h, "INSERTBRANCH", lastBr, pname)
-                else
-                    iup.SetAttributeId(h, "ADDBRANCH", k, pname)
-                end
-                k = k + 1
-                lastBr = k
+
+        for i = 1,  #tbl do
+            if i > 1 then
+                iup.SetAttributeId(h, "INSERTBRANCH", lastBr, tbl[i].title)
             else
+                iup.SetAttributeId(h, "ADDBRANCH", k, tbl[i].title)
+            end
+            k = k + 1
+            lastBr = k
+            for j = 1,  #(tbl[i]) do
                 local bFound = false
-                for i = 1, #table_dir do
-                    if table_dir[i].name == pname then
-                        table.remove(table_dir, i)
+                local pname = tbl[i][j]
+                for k = 1, #table_dir do
+                    if table_dir[k].name == pname then
+                        table.remove(table_dir, k)
                         bFound = true
                         break
                     end
@@ -258,8 +268,8 @@ local function Show()
         end
     end
 
-    RestoreTree(tree_right, _G.iuprops["settings.user.rightbar"] or '')
-    RestoreTree(tree_left, _G.iuprops["settings.user.leftbar"] or '')
+    RestoreTree(tree_right, _G.iuprops["settings.user.rightbar"] or {})
+    RestoreTree(tree_left, _G.iuprops["settings.user.leftbar"] or {})
 
     for i = 1, #table_dir do
         local r, err = pcall( function()
