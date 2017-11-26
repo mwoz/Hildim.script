@@ -8,13 +8,27 @@ _G.iuprops = {}
 local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
 if shell.fileexists(file) then
+    local bRepit = true
+::repit::
     local text = ''
     local bSuc, pF = pcall(io.input, file)
     if bSuc then
         text = pF:read('*a')
         pF:close()
     end
-    local bSuc, tMsg = pcall(dostring,text)
+    local bSuc, tMsg = pcall(dostring, text)
+    if bRepit and (_G.iuprops['_VERSION'] or 1) ~= 2 then
+        bRepit = false
+
+        local sucs, msg = pcall(dofile, props["SciteDefaultHome"].."\\tools\\upgradesettings.lua")
+        if sucs then
+            print("Convert settings - 2.0")
+            goto repit
+        else
+            print("Convert settings failed:", msg)
+        end
+    end
+
     if not bSuc then
         print('ќшибка в файле settings.lua:', tMsg..'\nсохраним текущий settings.lua в settings.lua.bak')
         io.output(props["scite.userhome"]..'\\settings.lua.bak')
@@ -40,19 +54,17 @@ if props['config.restore'] ~= '' then
         if not bSuc then
             print('ќшибка в файле '..props['config.restore'], tMsg)
         elseif l ~= _G.iuprops['settings.lexers'] or '' then
-            local t = {}
-            for w in _G.iuprops['settings.lexers']:gmatch('[^¶]+') do
-                local _,_, p4 = w:find('[^Х]*Х[^Х]*Х[^Х]*Х([^Х]*)')
-                t[p4] = true
-            end
+            local t = _G.iuprops['settings.lexers']
             local str = ''
-            for n,_ in pairs(t) do
-                str = str..'import $(SciteDefaultHome)\\languages\\'..n..'\n'
-                n = n:gsub('%.properties$', '.styles')
+
+            for i = 1, #t do
+                str = str..'import $(SciteDefaultHome)\\languages\\'..t[i].file..'\n'
+                local n = t[i].file:gsub('%.properties$', '.styles')
                 if shell.fileexists(props["SciteUserHome"]..'\\'..n) then
                     str = str..'import $(scite.userhome)\\'..n..'\n'
                 end
             end
+
             f = io.open(props['SciteUserHome']..'\\Languages.properties',"w")
             f:write(str)
             f:close()
@@ -66,7 +78,6 @@ props['script.started'] = 'Y'
 iuprops_read_ok = true
 
 local function RestoreLayOut(strLay)
-    strLay = strLay:gsub('^Х', '')
     for n in strLay:gmatch('%d+') do
         n = math.tointeger(n)
         if (editor.FoldLevel[n] & SC_FOLDLEVELHEADERFLAG) ==0 then
@@ -225,8 +236,9 @@ function iup.SaveChProps(bReset)
 end
 
 local function SaveIup()
-    local file = props["scite.userhome"]..'\\settings.lua_'
+    local file = props["scite.userhome"]..'\\settings.lua'
     if pcall(io.output, file) then
+        _G.iuprops['_VERSION'] = 2
         local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
         io.write(s)
     else
@@ -249,7 +261,7 @@ iup.GetBookmarkLst = function()
     while true do
         ml = editor:MarkerNext(ml, 2)
         if (ml == -1) then break end
-        bk = bk..'¶'..ml
+        bk = bk..','..ml
         ml = ml + 1
     end
     return bk
@@ -306,12 +318,13 @@ iup.CloseFilesSet = function(cmd, tForClose)
     props['load.on.activate'] = 0
     scite.Perform('blockuiupdate:y')
     local cloned = {}
+    local tblBuff = {lst = {}, pos = {}, layouts = {}, bmk = {}}
     DoForBuffers(function(i)
         if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Ѕезым€нный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
             if not props['FileNameExt']:from_utf8(1251):find('Ѕезым€нный') and not props['FileNameExt']:find('^%^') then
                 if not cloned[props['FilePath']] then
-                    local pref = 'Х'
+                    local pref = ''
                     if scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 1 then
                         cloned[props['FilePath']] = true
                         pref = pref..'<'
@@ -319,18 +332,16 @@ iup.CloseFilesSet = function(cmd, tForClose)
                     if scite.ActiveEditor() == 1 then
                         pref = pref..'>'
                     end
-                    spathes = spathes..pref..props['FilePath']:from_utf8(1251)
-                    local bk = iup.GetBookmarkLst()
-                    if sposes then
-                        sposes = sposes..'Х'..editor.FirstVisibleLine..bk
-                        slayout = slayout..'Х'..SaveLayOut()
-                    end
+                    table.insert(tblBuff.lst, pref..props['FilePath']:from_utf8(1251))
+                    table.insert(tblBuff.pos, editor.FirstVisibleLine)
+                    table.insert(tblBuff.layouts, SaveLayOut())
+                    table.insert(tblBuff.bmk, pref..iup.GetBookmarkLst())
                     nf = true
                 end
             else
                 if i <= curBuf then curBuf = curBuf - 1 end
             end
-            scite.Perform('close:')
+            if cmd ~= 0 then scite.Perform('close:') end
         end
     end)
     scite.Perform('blockuiupdate:u')
@@ -338,10 +349,8 @@ iup.CloseFilesSet = function(cmd, tForClose)
 
     props['load.on.activate'] = tmpFlag
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
-    if nf and ((cmd == IDM_QUIT  ) or cmd == 0) then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
-        _G.iuprops['buffers'] = spathes;
-        _G.iuprops['buffers.pos'] = sposes
-        _G.iuprops['buffers.layouts'] = slayout
+    if nf then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
+        _G.iuprops['buffers'] = tblBuff;
     end
     if cmd == IDM_QUIT then iup.DestroyDialogs();SaveIup();
     else return true end
@@ -373,103 +382,12 @@ local function onNavigate_local(item)
     end
 end
 
-iup.RestoreFilesOld = function(bForce)
-    if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
-        local bNew = (props['FileName'] ~= '')
-        local t,p,bk,l = {},{},{},{}
-        for f in (_G.iuprops['buffers'] or ''):gmatch('[^Х]+') do
-            table.insert(t, f:to_utf8(1251))
-        end
-        local bki
-        if _G.iuprops['buffers.pos'] then
-            for f in _G.iuprops['buffers.pos']:gmatch('[^Х]+') do
-                local i = 0
-                for g in f:gmatch('[^¶]+') do
-                    if i==0 then
-                        table.insert(p, g)
-                        bki = {}
-                        table.insert(bk, bki)
-                    else table.insert(bki, g) end
-                    i = 1
-                end
-            end
-        end
-        if _G.iuprops['buffers.layouts'] then
-            for f in _G.iuprops['buffers.layouts']:gmatch('Х[^Х]*') do
-                table.insert(l, f)
-            end
-        end
-        scite.Perform('blockuiupdate:y')
-        --local fvl = editor.FirstVisibleLine
-        --editor.VScrollBar = false
-        if #t > 0 then
-            BlockEventHandler"OnRightEditorVisibility"
-            BlockEventHandler("OnOpen", onOpen_local)
-            BlockEventHandler"OnNavigation"
-            BlockEventHandler"OnUpdateUI"
-        end
-        local bRight, bRightPrev, bCloned, bIsRight = false, false, false, false
-        for i = #t, 1,- 1 do
-            if i == 1 then
-                UnBlockEventHandler"OnUpdateUI"
-                UnBlockEventHandler"OnNavigation"
-                UnBlockEventHandler"OnOpen"
-            end
-            local sNm = t[i]
-            bCloned = false
-            if sNm:find('^<') then
-                sNm = sNm:gsub('^<', '')
-                bCloned = true
-            end
-
-            bRight = false
-            if sNm:find('^>') then
-                sNm = sNm:gsub('^>', '')
-                bRight = true
-            end
-
-            scite.Open(sNm)
-            if bRight ~= bRightPrev then scite.MenuCommand(IDM_CHANGETAB) end
-            if bCloned then scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
-            if bRight or bCloned then bIsRight = true end
-            bRightPrev = bRight
-            if p[i] then editor.FirstVisibleLine = tonumber(p[i]) end
-            if bk and bk[i] then
-                for j = 1, #(bk[i]) do
-                    editor:MarkerAdd(tonumber(bk[i][j]), 1)
-                    if BOOKMARK then BOOKMARK.Add(tonumber(bk[i][j])) end
-                end
-            end
-            if l and l[i] then
-                RestoreLayOut(l[i])
-            end
-        end
-        UnBlockEventHandler"OnRightEditorVisibility"
-
-        scite.Perform('blockuiupdate:u')
-        --editor.VScrollBar = true
-        --editor.FirstVisibleLine = fvl
-        if bNew then
-            scite.buffers.SetDocumentAt(0)
-        else
-            local b = tonumber(_G.iuprops['buffers.current'] or -1)
-            if b >= 0 then scite.buffers.SetDocumentAt(b) end
-        end
-        if not bIsRight then
-            _G.iuprops['coeditor.win'] = '2';
-            _G.g_session['coeditor'].HideDialog();
-        else
-            coeditor.Zoom = editor.Zoom
-        end
-    end
-end
-
 iup.RestoreFiles = function(bForce)
 
     if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
         local bNew = (props['FileName'] ~= '')
-
-        local t, p, bk, l = _G.iuprops['buffers'].lst ,{}, _G.iuprops['buffers'].pos, _G.iuprops['buffers'].layouts
+        local buf = (_G.iuprops['buffers'] or {})
+        local t, p, bk, l = _G.iuprops['buffers'].lst or {}, _G.iuprops['buffers'].pos  or {}, _G.iuprops['buffers'].bmk or {}, _G.iuprops['buffers'].layouts or {}
 
         scite.Perform('blockuiupdate:y')
         --local fvl = editor.FirstVisibleLine
@@ -507,13 +425,12 @@ iup.RestoreFiles = function(bForce)
             if bCloned then scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
             if bRight or bCloned then bIsRight = true end
             bRightPrev = bRight
-            if bk[i] and bk[i][1] then editor.FirstVisibleLine = tonumber(bk[i][1]) end
---            if bk and bk[i] then
---                for j = 2, #(bk[i]) do
---                    editor:MarkerAdd(tonumber(bk[i][j]), 1)
---                    if BOOKMARK then BOOKMARK.Add(tonumber(bk[i][j])) end
---                end
---            end
+            if p[i] then editor.FirstVisibleLine = (math.tointeger(p[i]) or 0) end
+
+            for bki in (bk[i] or ''):gmatch('%d+') do
+                editor:MarkerAdd(math.tointeger(bki), 1)
+                if BOOKMARK then BOOKMARK.Add(math.tointeger(bki)) end
+            end
             if l and l[i] then
                 RestoreLayOut(l[i])
             end
@@ -571,28 +488,9 @@ iup.SaveSession = function()
     if not filename then return end
     if not filename:lower():find('%.fileset$') then filename = filename..'.fileset' end
     if iup.CloseFilesSet(0) then
-
-        local t = {}
-        for n,v in pairs(_G.iuprops) do
-            local _,_,prefix = n:find('([^%.]*)')
-            if prefix == 'buffers' then
-                local tp = type(v)
-                if tp == 'nil' then v = 'nil'
-                elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
-                elseif tp == 'string' then
-                    v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
-                elseif tp == 'table' and v.tostr then
-                    v = v:tostr()
-                else
-                    iup.Message('Error', "Type "..tp.." can't be saved")
-                end
-                table.insert(t, '_G.iuprops["'..n..'"] = '..v)
-            end
-        end
-
-
         if pcall(io.output, filename) then
-            io.write(table.concat(t,'\n'))
+            local s = CORE.tbl2Out(_G.iuprops["buffers"], ' ', false, true, true):gsub('^return ', '_G.iuprops["buffers"] = ')
+            io.write(s)
             io.close()
         end
     end
@@ -776,11 +674,6 @@ end
 function list_getvaluenum(h)
     local l = h.focus_cell:gsub(':.*','')
     return tonumber(l)
-end
-
-function Iif(b,a,c)
-    if b then return a end
-    return c
 end
 
 function Min(a,b)
@@ -1527,20 +1420,11 @@ local function SaveIuprops_local(filename)
                 process = not n:find'%.hist$'
             end
             if process then
-                local tp = type(v)
-                if tp == 'nil' then v = 'nil'
-                elseif tp == 'boolean' or tp == 'number' then v = tostring(v)
-                elseif tp == 'string' then
-                    v = "'"..v:gsub('\\', '\\\\'):gsub("'", "\\039").."'"
-                elseif tp == 'table' and v.tostr then
-                    v = v:tostr()
-                else
-                    iup.Message('Error', "Type "..tp.." can't be saved")
-                end
-                table.insert(t, '_G.iuprops["'..n..'"] = '..v)
+                table.insert(t, '_G.iuprops["'..n..'"] = '..CORE.tbl2Out(v, ' ', true, true))
             end
         end
     end
+    table.insert(t, '_G.iuprops["_VERSION"] = 2')
 
 
  	if pcall(io.output, filename) then

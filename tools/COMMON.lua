@@ -58,6 +58,11 @@ function GetCurrentHotspot ()
 	return editor:textrange(s+1,e)
 end
 
+function Iif(b,a,c)
+    if b then return a end
+    return c
+end
+
 --------------------------------------------------------
 -- Замена ф-ций string.lower(), string.upper(), string.len()
 -- Работает с любыми национальными кодировками

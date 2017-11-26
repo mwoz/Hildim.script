@@ -269,8 +269,8 @@ local function OpenFile(filename)
 		scite.Open(filename:to_utf8(1251))
 	end
     if iup.GetGlobal("SHIFTKEY") == 'OFF' then
-        if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON' then mybar_Switch(m_prevSel + 1)
-        elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1' then mybar_Switch(1)
+        if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON' then scite.RunAsync(function() mybar_Switch(m_prevSel + 1) end)
+        elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1' then scite.RunAsync(function()  mybar_Switch(1) end)
         end
     end
     iup.PassFocus()

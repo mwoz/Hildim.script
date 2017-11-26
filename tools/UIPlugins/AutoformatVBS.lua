@@ -233,6 +233,7 @@ local function FormatString(strLine, startPos, bForce)
                     substr = string.gsub(substr, "%)([<>%/%=%+%-&%%%*])", ") %1")
                     substr = string.gsub(substr, "([<>%/%=%+%-&%%%*])%)", "%1 )")
                     substr = string.gsub(substr, "([=,<>%/%*%(] ?)%- ([%w%(])", "%1-%2") --обрабатываем унарный минус
+                    substr = string.gsub(substr, "Step %- ([%w%(])", "Step -%1") --обрабатываем унарный минус
                     if i > 1 then substr = string.sub(substr, 2) end
                     substr = " "..substr.." "
 
