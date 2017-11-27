@@ -3,6 +3,7 @@ local function Convert(t)
 
     local function split(t, field, splitter)
         local s = t[field]
+        if type(s) == 'table' then return end
         if s then
             local out = {}
             for w in s:gmatch('([^'..splitter..']+)') do
@@ -14,6 +15,7 @@ local function Convert(t)
 
     local function converBar(t, field, bCapt)
         local s = t[field]
+        if type(s) == 'table' then return end
         if s then
             local tBars = {}
             local tBar
@@ -45,13 +47,15 @@ local function Convert(t)
     end
 
     if t['settings.lexers'] then
-        local tl = {}
-        for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
-            local tv = {}
-            table.insert(tl, tv)
-            _, _, tv.view, tv.ext, tv.name, tv.file = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
+        if type(t['settings.lexers']) == 'string' then
+            local tl = {}
+            for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
+                local tv = {}
+                table.insert(tl, tv)
+                _, _, tv.view, tv.ext, tv.name, tv.file = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
+            end
+            t['settings.lexers'] = tl
         end
-        t['settings.lexers'] = tl
     end
 
     split(t, 'settings.status.layout', '¦')
@@ -67,7 +71,7 @@ local function Convert(t)
 end
 
 local function ConvertBuffers(tMsg)
-    if type(tMsg['buffers'] or {}) == table then return end
+    if type(tMsg['buffers'] or {}) == 'table' then return end
     local lst, pos, layouts = {}, {}, {}
     for f in (tMsg['buffers'] or ''):gmatch('[^•]+') do
         table.insert(lst, f)
@@ -92,15 +96,23 @@ local function ConvertBuffers(tMsg)
 end
 
 local function Run(a, b)
+
     local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.config")
 
     for i, filenameT in ipairs(files) do
         local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
         local s = f:read('*a')
         f:close()
-        s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,')..'\n}'
+        s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,'):gsub('] = {,','] = {' ):gsub('}\n','},\n' )..'\n}'
 
-        tMsg = assert(load(s))()
+        local bsuc, fun = pcall(assert, load(s))
+        if not bsuc then
+            print(filenameT.name, fun)
+            goto continue1
+        end
+
+        tMsg = fun()
+
         Convert(tMsg)
 
         tOut = {}
@@ -112,6 +124,7 @@ local function Run(a, b)
         f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
         f:write(table.concat(tOut, '\n'))
         f:close()
+::continue1::
     end
 
     local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.fileset")
@@ -120,9 +133,15 @@ local function Run(a, b)
         local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
         local s = f:read('*a')
         f:close()
-        s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,')..'\n}'
+        s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,'):gsub('] = {,','] = {' ):gsub('}\n','},\n' )..'\n}'
 
-        tMsg = assert(load(s))()
+        local bsuc, fun = pcall(assert, load(s))
+        if not bsuc then
+            print(filenameT.name, fun)
+            goto continue
+        end
+
+        tMsg = fun()
         if tMsg['_VERSION'] == 2 then goto continue end
         ConvertBuffers(tMsg)
 

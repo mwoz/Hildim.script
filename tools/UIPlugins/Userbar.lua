@@ -17,10 +17,11 @@ local function Init(h)
 
 
     local tBar = {margin = "5", alignment='ACENTER'}
-    local str = _G.iuprops["settings.user.toolbar"] or ''
-    local id = 0
-    for p in str:gmatch('[^‡]+') do
+    local tblSet = _G.iuprops["settings.user.toolbar"] or ''
 
+    local id = 0
+    for i = 1, #tblSet do
+        local p = tblSet[i]
         if p == '---' then
             table.insert(tBar, iup.label{separator = "VERTICAL",maxsize='x22'})
         else
