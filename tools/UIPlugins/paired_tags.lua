@@ -315,7 +315,7 @@ AddEventHandler("OnSwitchFile", OnSwitchFile_local)
 AddEventHandler("OnOpen", OnSwitchFile_local)
 
 require "menuhandler"
-menuhandler:InsertItem('MainWindowMenu', 'Edit¦Xml¦l1',
+menuhandler:InsertItem('MainWindowMenu', 'Edit|Xml|l1',
     {'Xml', plane = 1,{
         {'Close Incomplete Node', ru = 'Закрыть незавершенную ноду', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
         {'Close Unpaired Tag', ru = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},

@@ -16,7 +16,7 @@ if shell.fileexists(file) then
         text = pF:read('*a')
         pF:close()
     end
-    local bSuc, tMsg = pcall(dostring, text)
+    local bSuc, tMsg = pcall(dostring, text:from_utf8(1251))
 
     if bRepit and (_G.iuprops['_VERSION'] or 1) ~= 2 then
         bRepit = false
@@ -28,8 +28,8 @@ if shell.fileexists(file) then
         else
             print("Convert settings failed:", msg)
         end
-    else
-        text = text:from_utf8(1251)
+   -- else
+   --     text = text:from_utf8(1251)
     end
 
     if not bSuc then

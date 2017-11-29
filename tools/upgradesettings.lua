@@ -168,6 +168,16 @@ local function Run(a, b)
     ConvertBuffers(tMsg)
     tMsg['_VERSION'] = 2
 
+    f = io.open(props['SciteUserHome']..'\\favorites.lst')
+    local sf = f:read('*a')
+    f:close()
+
+    local tf = {}
+    for ff in sf:gmatch('[^\n\r]+') do
+        table.insert(tf, {ff, alias = ff:gsub('^.-([^\\]+)\\?$', '%1')})
+    end
+
+    tMsg['FileMan.Favorits'] = tf
     f = io.open(props['SciteUserHome']..'\\settings.lua', "w")
     s = CORE.tbl2Out(tMsg, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
     f:write(s:to_utf8(1251))
