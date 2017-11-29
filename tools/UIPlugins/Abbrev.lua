@@ -493,7 +493,7 @@ local function createDlg()
             list_abbrev.fittosize = 'COLUMNS'
         end
     end
-    menuhandler:InsertItem('MainWindowMenu', 'Edit¦s3',
+    menuhandler:InsertItem('MainWindowMenu', 'Edit|s3',
         {'Abbreviations List...', ru = 'Список сокращений...', action = function() iup.ShowInMouse(dlg) end, key='Alt+Shift+B'}
     )
     bIsList = true

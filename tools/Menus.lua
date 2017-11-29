@@ -251,30 +251,27 @@ end)
 
 local t = {}
 if _G.iuprops['settings.lexers'] then
-	for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
-		local _,_, p1,p2,p3,p4 = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
-		t[p4] = true
-		table.insert(tHilight,{p1, action = function() scite.SetLexer(p2) end, check=function() return editor_LexerLanguage() == p3 end})
-	end
-	for n,_ in pairs(t) do
-		table.insert(tLangs, {"Open "..n, action =function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..n) end})
-	end
+    local t = _G.iuprops['settings.lexers']
+    for i = 1, #t do
+        table.insert(tHilight,{t[i].view, action = function() scite.SetLexer(t[i].ext) end, check = function() return editor_LexerLanguage() == t[i].name end})
+        table.insert(tLangs, {"Open "..t[i].file, action = function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..t[i].file) end})
+    end
 end
 
 
 _G.sys_Menus.TABBAR = { title = "Êîíòåêñòíîå ìåíş çàêëàäîê",
-	{link='File¦&Close'},
-	{link='File¦C&lose All'},
+	{link='File|&Close'},
+	{link='File|C&lose All'},
 	{'Close All But Curent',  ru = 'Çàğûòü âñå, êğîìå òåêóùåé', action=function() iup.CloseFilesSet(9132) end, },
 	{'Close All Temporally',  ru = 'Çàğûòü âñå âğåìåííûå', action=function() iup.CloseFilesSet(9134) end, visible=IsOpenTemporaly },
 	{'s1', separator=1},
-	{link='File¦&Save'},
-	{link='Buffers¦&Save All'},
-	{link='File¦Save &As...'},
-	{link='File¦Save a Cop&y...'},
+	{link='File|&Save'},
+	{link='Buffers|&Save All'},
+	{link='File|Save &As...'},
+	{link='File|Save a Cop&y...'},
     {'s1', separator = 1},
-    {link= 'File¦Move to another window'},
-    {link='File¦Clone to another window'},
+    {link= 'File|Move to another window'},
+    {link='File|Clone to another window'},
 	{'s2', separator=1},
 	{'Move Tab Left', ru = 'Ïåğåìåñòèòü âëåâî', action = IDM_MOVETABLEFT,},
 	{'Move Tab Right', ru = 'Ïåğåìåñòèòü âïğàâî', action = IDM_MOVETABRIGHT,},
@@ -284,21 +281,21 @@ _G.sys_Menus.TABBAR = { title = "Êîíòåêñòíîå ìåíş çàêëàäîê",
 		{'Path', ru='Ïóòü', action = function() CopyPathToClipboard("path") end,},
 		{'FileName', ru='Èìÿ ôàéëà', action = function() CopyPathToClipboard("name") end,},
 	}},
-    {link='Options¦Tabbar Settings'},
-	{link='File¦Encoding'},
-	{link = 'Options¦&Read-Only'},
+    {link='Options|Tabbar Settings'},
+	{link='File|Encoding'},
+	{link = 'Options|&Read-Only'},
 
 	{'slast', separator=1},
 }
 _G.sys_Menus.OUTPUT = {title = "Êîíòåêñòíîå ìåíş êîíñîëè",
-	{link = 'Edit¦Conventional¦Cu&t'},
-	{link = 'Edit¦Conventional¦&Copy'},
-	{link = 'Edit¦Conventional¦&Paste'},
-	{link = 'Edit¦Conventional¦&Delete'},
+	{link = 'Edit|Conventional|Cu&t'},
+	{link = 'Edit|Conventional|&Copy'},
+	{link = 'Edit|Conventional|&Paste'},
+	{link = 'Edit|Conventional|&Delete'},
 	{'s1', separator = 1},
-	{link = 'Tools¦Clear &Output'},
-	{link = 'Tools¦&Previous Message'},
-	{link = 'Tools¦&Next Message'},
+	{link = 'Tools|Clear &Output'},
+	{link = 'Tools|&Previous Message'},
+	{link = 'Tools|&Next Message'},
 	{'s2', separator = 1},
 	{'Input Mode', ru = 'Ğåæèì ââîäà', {
 		{'Display Mode', ru = 'Îòîáğàçèòü(press Enter)', action = function() output:DocumentEnd();output:ReplaceSel('###?\n') end},
@@ -318,12 +315,12 @@ _G.sys_Menus.OUTPUT = {title = "Êîíòåêñòíîå ìåíş êîíñîëè",
 }
 
 _G.sys_Menus.FINDRES = {title = "Êîíòåêñòíîå ìåíş ğåçóëüòàòîâ ïîèñêà",
-	{link = 'Edit¦Conventional¦Cu&t'},
-	{link = 'Edit¦Conventional¦&Copy'},
-	{link = 'Edit¦Conventional¦&Paste'},
-	{link = 'Edit¦Conventional¦&Delete'},
+	{link = 'Edit|Conventional|Cu&t'},
+	{link = 'Edit|Conventional|&Copy'},
+	{link = 'Edit|Conventional|&Paste'},
+	{link = 'Edit|Conventional|&Delete'},
 	{'s1', separator = 2},
-	{link = 'Tools¦Clear &Find Result'},
+	{link = 'Tools|Clear &Find Result'},
     {'Settings', ru = "Íàñòğîéêè" ,{
         {'DblClick Only On Number', ru = 'DblClick òîëüêî ïî íîìåğó', check_boolean = 'findres.clickonlynumber'},
         {'Group By Name', ru = 'Ãğóïïèğîâàòü ïî èìåíè ôàéëà', check_boolean = 'findres.groupbyfile'},
@@ -341,20 +338,20 @@ _G.sys_Menus.FINDRES = {title = "Êîíòåêñòíîå ìåíş ğåçóëüòàòîâ ïîèñêà",
 }
 
 _G.sys_Menus.EDITOR = {title = "Êîíòåêñòíîå ìåíş îêíà ğåäàêòîğà",
-	{'s0', link='Edit¦Conventional¦&Undo'},
-	{link='Edit¦Conventional¦&Redo'},
+	{'s0', link='Edit|Conventional|&Undo'},
+	{link='Edit|Conventional|&Redo'},
 	{'s1', separator=1},
-	{link='Edit¦Conventional¦Cu&t'},
-	{link='Edit¦Conventional¦&Copy'},
-	{link='Edit¦Conventional¦&Paste'},
-	{link='Edit¦Conventional¦&Delete'},
-	{link='Edit¦Conventional¦Duplicat&e'},
+	{link='Edit|Conventional|Cu&t'},
+	{link='Edit|Conventional|&Copy'},
+	{link='Edit|Conventional|&Paste'},
+	{link='Edit|Conventional|&Delete'},
+	{link='Edit|Conventional|Duplicat&e'},
 	{'s1', separator=2},
-	{link='Edit¦Conventional¦Select &All'},
-	{link='Search¦Search', plane=0},
-	{link='View¦Folding', plane=0},
-	{link='Search¦Toggle Bookmar&k'},
-	{link='Search¦&Go to definition(Shift+Click)'},
+	{link='Edit|Conventional|Select &All'},
+	{link='Search|Search', plane=0},
+	{link='View|Folding', plane=0},
+	{link='Search|Toggle Bookmar&k'},
+	{link='Search|&Go to definition(Shift+Click)'},
 }
 
 _G.sys_Menus.MainWindowMenu = {title = "Ãëàâíîå ìåíş ïğîãğàììû",

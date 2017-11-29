@@ -309,8 +309,7 @@ local function FileMan_OpenSelectedItems()
 end
 ----------------------------------------------------------
 -- tab0:list_favorites   Favorites
-----------------------------------------------------------
-local favorites_filename = props['SciteUserHome']..'\\favorites.lst'
+---------------------------------------------------------- ,
 local list_fav_table = {}
 
 local prevFileName = ''
@@ -346,38 +345,29 @@ local function Favorites_ListFILL_l(bReset)
     iup.SetAttribute(list_favorites, "ADDLIN", "1-"..#list_fav_table)
 	for i, s in ipairs(list_fav_table) do
         list_favorites:setcell(i, 1, getIcon(s[1]))
-        list_favorites:setcell(i, 2, getName(s))
+        list_favorites:setcell(i, 2, s.alias)
         list_favorites:setcell(i, 3, s[1])
     end
     list_favorites.redraw = "ALL"
 end
 
 local function Favorites_OpenList()
-	local favorites_file = io.open(favorites_filename)
     list_fav_table = {}
-	if favorites_file then
-		for line in favorites_file:lines() do
-			if line ~= '' then
-				line = ReplaceWithoutCase(line, '$(SciteDefaultHome)', props['SciteDefaultHome'])
-				list_fav_table[#list_fav_table+1] = {line, false}
-			end
-		end
-		favorites_file:close()
-	end
+    local tblIn = _G.iuprops['FileMan.Favorits'] or {}
+    for i = 1,  #tblIn do
+        table.insert(list_fav_table, {ReplaceWithoutCase(tblIn[i][1], '$(SciteDefaultHome)', props['SciteDefaultHome']), false, alias = tblIn[i].alias})
+    end
     bListOpened = true
 end
 
 
 local function Favorites_SaveList()
-	if bListOpened and pcall(io.output, favorites_filename) then
-        local tbl = {}
+	if bListOpened then
+        local tOut = {}
         for i = 1, #list_fav_table do
-            if not list_fav_table[i][2] then table.insert(tbl,list_fav_table[i][1]) end
+            table.insert(tOut, {ReplaceWithoutCase(list_fav_table[i][1], props['SciteDefaultHome'], '$(SciteDefaultHome)'), alias = list_fav_table[i].alias})
         end
-		local list_string = table.concat(tbl,'\n')
-		list_string = ReplaceWithoutCase(list_string, props['SciteDefaultHome'], '$(SciteDefaultHome)')
-		io.write(list_string)
-		io.close()
+        _G.iuprops['FileMan.Favorits'] = tOut
 	end
 end
 
@@ -388,7 +378,7 @@ local function Favorites_AddFile()
 	if attr == 'd' then
 		fname = fname:gsub('\\\\.\\.$', '')..'\\'
 	end
-	list_fav_table[#list_fav_table+1] = {fname, false}
+    table.insert(list_fav_table {fname, false, alias = fname:gsub('^.-([^\\]+)\\?$', '%1')})
 	Favorites_ListFILL_l(true)
 	Favorites_SaveList()
 end
@@ -437,6 +427,7 @@ local function FileMan_CheckRename(c,lin, col, mode, update)
         if prevName == nil then return -1 end
     end
 end
+
 local function FileMan_DoRename(c, lin, col)
     local fname, d, attr = FileMan_GetSelectedItem()
     if fname ~= prevName then
@@ -460,14 +451,27 @@ local function FileMan_Rename()
     iup.SetAttribute(list_dir, 'EDIT_MODE', 'YES')
 end
 
+local function Favorits_DoRename(c, lin, col)
+    list_fav_table[lin].alias = list_favorites:getcell(lin, col)
+    Favorites_SaveList()
+end
+
+local function Favorites_Rename()
+    local l = list_getvaluenum(list_favorites)
+
+    list_favorites.focus_cell = l..":2"
+    iup.SetAttribute(list_favorites, 'READONLY', 'NO')
+    iup.SetAttribute(list_favorites, 'EDIT_MODE', 'YES')
+end
+
 local function Favorites_AddCurrentBuffer()
-	list_fav_table[#list_fav_table+1] = {props['FilePath'], false}
+	table.insert(list_fav_table, {props['FilePath'], false, alias = props['FilePath']:gsub('^.-([^\\]+)\\?$', '%1')})
 	Favorites_ListFILL_l(true)
     Favorites_SaveList()
 end
 
 local function Favorites_AddFileName_l(fName) --для добавления из других библиотек
-    list_fav_table[#list_fav_table+1] = {fName, true}
+    table.insert(list_fav_table, {fName, true, alias = fName:gsub('^.-([^\\]+)\\?$', '%1')})
 end
 
 local function Favorites_Clear_l()
@@ -614,11 +618,11 @@ local function FileManTab_Init(h)
             return -1
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
-            menuhandler:PopUp('MainWindowMenu¦_HIDDEN_¦Fileman_sidebar')
+            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Fileman_sidebar')
         end
     end)
 
-    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Fileman_sidebar', plane = 1,{
             {"Change Dir", ru = "Изменить Директорию", action = FileMan_ChangeDir},
             {"Read Only", ru = "Только чтение", action = FileMan_ChangeReadOnly, check = GetReadOnly},
@@ -645,7 +649,7 @@ local function FileManTab_Init(h)
 
     list_favorites = iup.matrix{
     numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="YES" ,
-    resizematrix = "YES", readonly="YES"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
+    resizematrix = "YES", readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
     width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 150 ,rasterwidth3= 450, tip ='jj'}
 
     list_favorites.colresize_cb = list_favorites.FitColumns(3, true, 1)
@@ -658,6 +662,10 @@ local function FileManTab_Init(h)
 	list_favorites.map_cb = (function(h)
         h.size="1x1"
     end)
+    list_favorites.edition_cb = (function(c, lin, col, mode, update)
+        if mode == 1 and col ~= 2 then return iup.IGNORE end
+    end)
+    list_favorites.value_edit_cb = Favorits_DoRename
     iup.SetAttribute(list_favorites, 'TYPE*:1', 'IMAGE')
     list_favorites:setcell(0, 2, "Name")
     list_favorites:setcell(0, 3, "Path")
@@ -670,7 +678,8 @@ local function FileManTab_Init(h)
             local mnu = iup.menu
             {
               iup.item{title="Add active buffer",action=Favorites_AddCurrentBuffer},
-              iup.item{title="Delete item",action=Favorites_DeleteItem}
+              iup.item{title = "Delete item", action = Favorites_DeleteItem},
+              iup.item{title = "Rename", action = Favorites_Rename},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
@@ -719,7 +728,7 @@ local function FileManTab_Init(h)
         OnSwitchFile = function()OnSwitch(false,true) end;
         OnSave = function()OnSwitch(false,false) end;
         OnOpen = function()OnSwitch(false,true) end;
-        OnSaveValues = (function() Favorites_SaveList();_G.iuprops['FileMan.Dir.restoretab']=memo_path.value end);
+        OnSaveValues = (function() _G.iuprops['FileMan.Dir.restoretab']=memo_path.value end);
         OpenDir = (function(newPath)
             for i=1, _Plugins.fileman.Bar_obj.TabCtrl.count do
                 if iup.GetAttributeId(_Plugins.fileman.Bar_obj.TabCtrl,'TABTITLE',i) == _Plugins.fileman.id then

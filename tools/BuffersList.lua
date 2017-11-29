@@ -115,7 +115,7 @@ local function InitWndDialog()
             fillWindow(curSide)
             list_windows.redraw = 'ALL'
         elseif iup.isbutton3(status) and lin > 0 then
-            menuhandler:PopUp('MainWindowMenu¦_HIDDEN_¦Window_bar')
+            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Window_bar')
         end
     end
 
@@ -188,7 +188,7 @@ local function InitWndDialog()
         sciteparent = "SCITE", sciteid = "bufferslist", dropdown = true, shrink = "YES",
         maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255', customframedraw = 'NO'}
 
-        menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',
+        menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
             {'Window_bar', plane = 1,{
                 {"Close Checked", ru = "Закрыть все отмеченные", action = CORE.DoForFileSet('1', CloseFileSet)},
                 {"Read Only", ru = "Закрыть все НЕ отмеченные", action = CORE.DoForFileSet('0', CloseFileSet)},

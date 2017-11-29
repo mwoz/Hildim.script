@@ -55,53 +55,55 @@ local function  CreateToolBar()
     local str = _G.iuprops["settings.toolbars.layout"] or ''
     local tblVb = {gap = "1", name="ToolBar"}
     local tblHb
-    local i = 0
+    --local i = 0
     local isUpper = false
-    for p in str:gmatch('[^¦]+') do
-        local _, _, pname, pf = p:find('(.-)(¬?)$')
-        if pf == '¬' then
-            if i > 0 then
+    local tblBars = _G.iuprops["settings.toolbars.layout"] or {}
+    for i = 1, #tblBars do
+        if #(tblBars[i]) > 0 then
+            if i > 1 then
                 table.insert(tblVb, iup.hbox(tblHb))
-                if i > 1 or not isUpper then table.insert(tblVb, iup.label{separator = "HORIZONTAL"}) end
+                if i > 2 or not isUpper then table.insert(tblVb, iup.label{separator = "HORIZONTAL"}) end
             end
             tblHb = {gap = "3", margin = "3x0", alignment = "ACENTER"}
-            i = i + 1
-        end
-        local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
-        if not bSucs then
-            print(pI)
-            goto continue
-        end
+            for j = 1, #(tblBars[i]) do
+                local pname = tblBars[i][j]
+                local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+                if not bSucs then
+                    print(pI)
+                    goto continue
+                end
 
-        if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
+                if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
 
-        local bSucs, res = pcall(pI.toolbar, ToolBar_obj)
-        if not bSucs then
-            print(res)
-            goto continue
-        end
-        ToolBar_obj.Tabs[pI.code] = res
-        local id = pI.code
-        if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
-        iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
+                local bSucs, res = pcall(pI.toolbar, ToolBar_obj)
+                if not bSucs then
+                    print(res)
+                    goto continue
+                end
+                ToolBar_obj.Tabs[pI.code] = res
+                local id = pI.code
+                if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
+                iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
 
-        if i == 1 and pI.undermenu then
-            local tTlb = {iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander_upper", iup.vbox{
-                iup.hbox{gap = "3", margin = "3x0", alignment = "ACENTER", ToolBar_obj.Tabs[pI.code].handle}
-            }}}
+                if i == 1 and pI.undermenu then
+                    local tTlb = {iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander_upper", iup.vbox{
+                        iup.hbox{gap = "3", margin = "3x0", alignment = "ACENTER", ToolBar_obj.Tabs[pI.code].handle}
+                    }}}
 
-            local hTmp = iup.dialog(tTlb)
+                    local hTmp = iup.dialog(tTlb)
 
-            local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander_upper')
-            iup.Detach(hBx)
-            iup.Destroy(hTmp)
-            local ttt = iup.Insert(vbScite,nil, hBx)
-            iup.Map(hBx)
-            isUpper = true
-        else
-            table.insert(tblHb, ToolBar_obj.Tabs[pI.code].handle)
-        end
+                    local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander_upper')
+                    iup.Detach(hBx)
+                    iup.Destroy(hTmp)
+                    local ttt = iup.Insert(vbScite, nil, hBx)
+                    iup.Map(hBx)
+                    isUpper = true
+                else
+                    table.insert(tblHb, ToolBar_obj.Tabs[pI.code].handle)
+                end
 ::continue::
+            end
+        end
     end
     table.insert(tblVb, iup.hbox(tblHb or {gap = "3", margin = "3x0", alignment = "ACENTER"}))
 
@@ -110,10 +112,10 @@ end
 
 local StatusBar_obj = {}
 local function CreateStatusBar()
-    local str = _G.iuprops["settings.status.layout"] or ''
+    local tbl = _G.iuprops["settings.status.layout"] or {}
     local tblH = {gap="3",margin="3x0", name="StatusBar", maxsize="x30", alignment = "ACENTER",}
-    for p in str:gmatch('[^¦]+') do
-
+    for i = 1, #tbl do
+        local p = tbl[i]
         local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
         if not bSucs then
             print(pI)
@@ -158,7 +160,7 @@ function iup.SaveNamedValues(h, root)
                         if i > tonumber(child.visibleitems  or 15) then break end
                         table.insert(hist,iup.GetAttributeId(child, '', i))
                     end
-                    _G.iuprops[root..'.'..child.name..'.hist'] = table.concat(hist,'¤')
+                    _G.iuprops[root..'.'..child.name..'.hist'] = hist
                 elseif cType == 'zbox' or cType == 'tabs' or cType == 'flattabs' then
                     val = child.valuepos
                 elseif cType == 'matrixlist' then
@@ -231,7 +233,7 @@ local function CreateBox()
         t.extrabuttons = 1
         t.extraimage1 = "property_µ"
         t.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
-        t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid) end end
+        t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu|View|'..sciteid) end end
 
         local j = 1
         local s = 'Hotkeys for Tab Activation:'
@@ -290,7 +292,7 @@ local function CreateBox()
         return h
     end
 
-    local function settings2tbl(str, side)
+    local function settings2tbl(tSide, side)
         local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
         local function piCode(pI)
             if pI.code == 'findrepl' then
@@ -300,20 +302,12 @@ local function CreateBox()
             end
             return pI.code
         end
-        if str == '' then
+        if #tSide == 0 then
             return nil
         end
-        local tSide = {}
+
         local tCur
-        for p in str:gmatch('[^¦]+') do
-            local _, _, pname, pf = p:find('(.-)(¬?)$')
-            if pf ~= '' then
-                tCur = {title = pname}
-                table.insert(tSide, tCur)
-            else
-                table.insert(tCur, pname)
-            end
-        end
+
         local tArg = {}
         for i = 1, #tSide do
             tCur = tSide[i]
@@ -392,9 +386,9 @@ local function CreateBox()
     end
     hk_pointer = 1
     pane_curObj = LeftBar_obj
-    local tbArgLeft = settings2tbl(_G.iuprops["settings.user.leftbar"] or '', "tbArgLeft")
+    local tbArgLeft = settings2tbl(_G.iuprops["settings.user.leftbar"] or {}, "tbArgLeft")
     pane_curObj = SideBar_obj
-    local tbArgRight = settings2tbl(_G.iuprops["settings.user.rightbar"] or '', "tbArgRight")
+    local tbArgRight = settings2tbl(_G.iuprops["settings.user.rightbar"] or {}, "tbArgRight")
 
     tabs = SideBar(tbArgLeft, LeftBar_obj, 'leftbar')
 
@@ -423,7 +417,7 @@ local function CreateBox()
         table.insert(tblMenus, t)
     end
 
-    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx', {'Sidebar', tblMenus})
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|xxx', {'Sidebar', tblMenus})
 
 end
 
@@ -439,12 +433,10 @@ local function RestoreNamedValues(h, root)
                 if cType == 'list' and child.dropdown == "YES" and (child.editbox == "YES" or iup.GetAttribute(child, 'HISTORIZED') == 'YES') then
                     local s = _G.iuprops[root..'.'..child.name..'.hist']
                     if s then
-                        local i = 1
-                        for w in string.gmatch(s, '([^¤]+)') do
-                            if i == 1 and child.editbox == "YES" then val = w end
+                        for i = 1, #s do
+                            if i == 1 and child.editbox == "YES" then val = s[i] end
                             if i > tonumber(child.visibleitems  or 15) then break end
-                            iup.SetAttributeId(child, 'INSERTITEM', i, w)
-                            i = i + 1
+                            iup.SetAttributeId(child, 'INSERTITEM', i, s[i])
                         end
                     end
                     if val then child.value = val end
@@ -718,10 +710,10 @@ local function InitTabbar()
                         {'s1', separator = 1}
                     )
                     table.insert(tMnu,
-                        {link = 'View¦Main Window split', plane = 1}
+                        {link = 'View|Main Window split', plane = 1}
                     )
                     table.insert(tMnu,
-                        {link = 'View¦coeditor', plane = 1}
+                        {link = 'View|coeditor', plane = 1}
                     )
                 end
                 menuhandler:ContextMenu(wx, wy, tMnu)
@@ -908,10 +900,11 @@ end
 
 InitMenuBar()
 --Àâòîçàãðóçêà ñêðûòûõ ïëàãèíîâ
-local str = _G.iuprops["settings.hidden.plugins"] or ''
+local tbl = _G.iuprops["settings.hidden.plugins"] or {}
 local strTbl = 'return function(h) return iup.expander{barsize = 0, state="OPEN", name = "toolbar_expander", iup.vbox{gap="1", iup.hbox{\n'
 local i = 0
-for p in str:gmatch('[^¦]+') do
+for i = 1, #tbl do
+    local p = tbl[i]
     local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
     if not bSucs then
         print(pI)
@@ -929,8 +922,9 @@ for p in str:gmatch('[^¦]+') do
     end
 ::continue::
 end
-local str = _G.iuprops["settings.commands.plugins"] or ''
-for p in str:gmatch('[^¦]+') do
+local tbl = _G.iuprops["settings.commands.plugins"] or {}
+for i = 1, #tbl do
+    local p = tbl[i]
     local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\Commands\\"..p)
     if not bSucs then
         print(pI)
@@ -943,7 +937,7 @@ for p in str:gmatch('[^¦]+') do
         if pI.key then t.key = pI.key end
         t.action = function() dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p).run() end
 
-        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools¦Utils¦xxx', t)
+        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools|Utils|xxx', t)
     end
 ::continue::
 end

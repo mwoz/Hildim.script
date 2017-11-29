@@ -23,14 +23,22 @@ local function Show()
             ["settings.status.layout"] = "Status Bar",
         }
         for s, m in pairs(tPoints) do
-            if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
-                if bUnInstoll then
-                    local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
-                    v = v:gsub('([^¦¬]+¬¦)([^¦¬]+¬¦)', '%2')
-                    v = v:gsub('[^¦¬]+¬¦-$', '')
-                    _G.iuprops[s] = v
+            local tUp = _G.iuprops[s] or {}
+            if s == "settings.status.layout" then tUp = {tUp} end
+            for i = 1, #tUp do
+                for j = 1,  #(tUp[i]) do
+                    if tUp[i][j] == strUi then
+                        if bUnInstoll then
+                            table.remove(tUp[i], j)
+                            if s == "settings.status.layout" then
+                                _G.iuprops[s] = tUp[i]
+                            else
+                                _G.iuprops[s] = tUp
+                            end
+                        end
+                        return m
+                    end
                 end
-                return m
             end
         end
     end
@@ -78,17 +86,18 @@ local function Show()
         local function SaveTree(h)
             local str = ''
             local suff = '¬'
+            local tbl = {}
+            local tblB
             for i = 1,  iup.GetAttribute(h, "TOTALCHILDCOUNT0") do
                 if iup.GetAttributeId(h, "KIND", i) == "BRANCH" then
-                    suff = '¬'
+                    tblB = {}
+                    table.insert(tbl, tblB)
                 else
-                    if str ~= '' then str = str..'¦' end
-                    str = str..h:GetUserId(i)..suff
-                    suff = ''
+                    table.insert(tblB, h:GetUserId(i))
                     CheckInstall(h:GetUserId(i), true)
                 end
             end
-            return str
+            return tbl
         end
         _G.iuprops["settings.toolbars.layout"] = SaveTree(tree_right)
         dlg:hide()
@@ -214,41 +223,41 @@ local function Show()
     local table_dir = shell.findfiles(defpath..'*.lua')
 
     local j = 0
-    local function RestoreTree(h, str)
-        if str == '' then return end
+    local function RestoreTree(h, tbl)
+        if #tbl == 0 then return end
         iup.SetAttributeId(h, "DELNODE", 1, "SELECTED")
         local k = 0
         local lastBr
-        for p in str:gmatch('[^¦]+') do
-            local _,_, pname, pf = p:find('(.-)(¬?)$')
-            if pf ~= '' or k == 0 then
-                if lastBr then
-                    iup.SetAttributeId(h, "INSERTBRANCH", lastBr, '<Bar>')
-                else
-                    iup.SetAttributeId(h, "ADDBRANCH", k, '<Bar>')
-                end
-                k = k + 1
-                lastBr = k
+        for i = 1, #tbl do
+            if i > 1 then
+                iup.SetAttributeId(h, "INSERTBRANCH", lastBr, '<Bar>')
+            else
+                iup.SetAttributeId(h, "ADDBRANCH", k, '<Bar>')
             end
-            local bFound = false
-            for i = 1, #table_dir do
-                if table_dir[i].name == pname then
-                    table.remove(table_dir, i)
-                    bFound = true
-                    break
+            k = k + 1
+            lastBr = k
+            for j = 1,  #(tbl[i]) do
+                local pname = tbl[i][j]
+                local bFound = false
+                for i = 1, #table_dir do
+                    if table_dir[i].name == pname then
+                        table.remove(table_dir, i)
+                        bFound = true
+                        break
+                    end
                 end
-            end
-            if bFound then
-                local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
-                if pI then tPlugins[pname] = pI end
-                iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
-                k = k + 1
-                h:SetUserId(k, pname)
+                if bFound then
+                    local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+                    if pI then tPlugins[pname] = pI end
+                    iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
+                    k = k + 1
+                    h:SetUserId(k, pname)
+                end
             end
         end
     end
 
-    RestoreTree(tree_right, _G.iuprops["settings.toolbars.layout"] or '')
+    RestoreTree(tree_right, _G.iuprops["settings.toolbars.layout"] or {})
 
     for i = 1, #table_dir do
         local r, err = pcall( function()

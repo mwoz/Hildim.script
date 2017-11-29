@@ -896,7 +896,7 @@ local function create_dialog_FindReplace()
     extrabuttons = 1,
     extraimage1 = "property_µ",
     extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR"),
-    extrabutton_cb = function(h, button, state) if state==1 then menuhandler:PopUp('MainWindowMenu¦View¦findrepl') end end
+    extrabutton_cb = function(h, button, state) if state==1 then menuhandler:PopUp('MainWindowMenu|View|findrepl') end end
   }
 
   containers["zUpDown"] = iup.zbox{

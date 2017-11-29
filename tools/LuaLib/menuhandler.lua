@@ -57,19 +57,19 @@ end
 local function FindMenuItem(path)
     local strFld
     local function DropDown(path, mnu)
-        _,_, strFld = path:find('^([^¦]+)¦')
+        _,_, strFld = path:find('^([^|]+)|')
         for i = 1, #mnu do
             if strFld then
                 if mnu[i][1] == strFld then
-                    return DropDown(path:gsub('^[^¦]+¦', ''), mnu[i][2])
+                    return DropDown(path:gsub('^[^|]+|', ''), mnu[i][2])
                 end
             elseif mnu[i][1] == path then
                 return mnu[i]
             end
         end
     end
-    _,_, strFld = path:find('^([^¦]+)¦')
-    return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld])
+    _,_, strFld = path:find('^([^|]+)|')
+    return DropDown(path:gsub('^[^|]+|', ''), sys_Menus[strFld])
 end
 
 local function r_button_state()
@@ -86,7 +86,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
     CreateItems = function(m,t)
         for i = 1, #m do
             local itm
-            if m[i].link then itm = FindMenuItem('MainWindowMenu¦'..m[i].link)
+            if m[i].link then itm = FindMenuItem('MainWindowMenu|'..m[i].link)
             else itm = m[i] end
 
             if getParam(itm.visible,true) and
@@ -252,12 +252,12 @@ function s:ContextMenu(x, y, element)
 end
 
 local function InsertItem(mnu, path, t)
-    local _,_, sItm = path:find('^([^¦]+)¦')
+    local _,_, sItm = path:find('^([^|]+)|')
     if sItm then
         for i = 1, #mnu do
             if mnu[i][1]==sItm then
                 if mnu[i][2] then
-                    InsertItem(mnu[i][2], path:gsub('^[^¦]+¦', ''), t)
+                    InsertItem(mnu[i][2], path:gsub('^[^|]+|', ''), t)
                 end
                 return
             end
@@ -265,7 +265,7 @@ local function InsertItem(mnu, path, t)
         table.insert(mnu, {})
         table.insert(mnu[#mnu], sItm)
         table.insert(mnu[#mnu], {})
-        InsertItem(mnu[#mnu][2], path:gsub('^[^¦]+¦', ''), t)
+        InsertItem(mnu[#mnu][2], path:gsub('^[^|]+|', ''), t)
     else
         for i = 1, #mnu do
             if mnu[i][1]==path then
@@ -282,7 +282,7 @@ function s:InsertItem(id, path, t)
         if id == 'MainWindowMenu' then
             InsertItem(sys_Menus[id], path, t)
         else
-            path = '*¦'..path
+            path = '*|'..path
             InsertItem({{'*', sys_Menus[id]}}, path, t)
         end
     end
@@ -311,7 +311,7 @@ function s:RegistryHotKeys()
     local function DropDown(path, mnu)
         for i = 1, #mnu do
             if not mnu[i].link then
-                local lp = path..'¦'..mnu[i][1]
+                local lp = path..'|'..mnu[i][1]
                 local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
                 local bSet
                 if tblUsers then mnu[i].user_hk = tblUsers[lp] end
@@ -395,7 +395,7 @@ function s:GetMenuItem(path)
     local strFld
     local tblConditions = {}
     local function DropDown(path, mnu)
-        _,_, strFld = path:find('^([^¦]+)¦')
+        _,_, strFld = path:find('^([^|]+)|')
         for i = 1, #mnu do
             if strFld then
                 if mnu[i][1] == strFld then
@@ -404,7 +404,7 @@ function s:GetMenuItem(path)
                     elseif mnu[i].visible_ext then
                         table.insert(tblConditions, function() return string.find(','..mnu[i].visible_ext..',',','..props["FileExt"]..',') end)
                     end
-                    return DropDown(path:gsub('^[^¦]+¦', ''), mnu[i][2])
+                    return DropDown(path:gsub('^[^|]+|', ''), mnu[i][2])
                 end
             elseif mnu[i][1] == path then
                 if mnu[i].active then
@@ -415,8 +415,8 @@ function s:GetMenuItem(path)
             end
         end
     end
-    _,_, strFld = path:find('^([^¦]+)¦')
-    return DropDown(path:gsub('^[^¦]+¦', ''), sys_Menus[strFld]), tblConditions
+    _,_, strFld = path:find('^([^|]+)|')
+    return DropDown(path:gsub('^[^|]+|', ''), sys_Menus[strFld]), tblConditions
 end
 function s:GetAction(mnu)
     return GetAction(mnu, true)

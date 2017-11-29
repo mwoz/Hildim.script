@@ -467,7 +467,7 @@ local function Init()
                     {'sSpell2', separator = 1},
             }}
         )
-        menuhandler:InsertItem('MainWindowMenu', 'Tools¦s1',
+        menuhandler:InsertItem('MainWindowMenu', 'Tools|s1',
             {'Spelling', ru = 'Орфография',{
                 {'Auto Spell Check', ru = 'Проверять автоматически', action = ResetAutoSpell, check = "tonumber(_G.iuprops['spell.autospell']) == 1", key = 'Ctrl+Alt+F12',},
                 {'s1', separator = 1,},

@@ -228,7 +228,7 @@ local function createDlg()
             list_bookmarks.fittosize = 'COLUMNS'
         end
     end
-    menuhandler:InsertItem('MainWindowMenu', 'Search¦xxxx',
+    menuhandler:InsertItem('MainWindowMenu', 'Search|xxxx',
         {'Bookmarks List...', ru = 'Список закладок...', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
     )
     return dlg

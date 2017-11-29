@@ -161,7 +161,7 @@ local function init()
             return Select_And_Open_File(false)
         end
     end)
-    menuhandler:InsertItem('MainWindowMenu', 'File¦&Revert',
+    menuhandler:InsertItem('MainWindowMenu', 'File|&Revert',
     {'Select And Open Filename', ru = 'Выделить и открыть файл', action = function() Select_And_Open_File(true) end, key = 'Ctrl+Shift+O',})
 
 end

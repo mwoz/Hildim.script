@@ -90,7 +90,7 @@ local function Init(ToolBar_obj)
     end)
     btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
 
-    menuhandler:InsertItem('MainWindowMenu', 'Search¦s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+    menuhandler:InsertItem('MainWindowMenu', 'Search|s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
     {'Live Search', ru="Живой поиск", key='Alt+F', action=sidebar_Find, image = 'binocular__pencil_µ',})
 
     return {

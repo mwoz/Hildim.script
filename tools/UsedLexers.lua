@@ -9,12 +9,13 @@ local function Show()
         local maxL = tonumber(iup.GetAttribute(list_lex, 'NUMLIN'))
         local f
         local tFiles, tLng = {},{}
-        local strLng = ''
+        local tbl = {}
         local strFilter = '$(all.files)'
         for i = 0, maxL  do
             if iup.GetAttributeId2(list_lex, 'TOGGLEVALUE', i, 1) == '1' then
-                if strLng ~= '' then strLng = strLng..'¦' end
-                strLng = strLng..list_lex:getcell(i,2)..'•'..list_lex:getcell(i,5)..'•'..list_lex:getcell(i,3)..'•'..list_lex:getcell(i,4)
+                local tblB = {view = list_lex:getcell(i, 2), name = list_lex:getcell(i, 3), file = list_lex:getcell(i, 4), ext = list_lex:getcell(i, 5),}
+                table.insert(tbl, tblB)
+
                 if list_lex:getcell(i, 6) then
                     strFilter = strFilter..'$('..list_lex:getcell(i, 6)..')'
                 else
@@ -35,7 +36,7 @@ local function Show()
         f = io.open(props['scite.userhome']..'\\Languages.properties',"w")
         f:write(t)
         f:close()
-        _G.iuprops['settings.lexers']=strLng
+        _G.iuprops['settings.lexers']=tbl
         scite.Perform("reloadproperties:")
 
         dlg:hide()
@@ -102,12 +103,11 @@ local function Show()
 
     end
 
-    if _G.iuprops['settings.lexers'] ~= '' then
+    if #(_G.iuprops['settings.lexers'] or {}) ~= 0 then
         local tHilight = {}
-
-        for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
-            local _,_, p1 = w:find('([^•]*)')
-            table.insert(tHilight,p1)
+        local tSet = _G.iuprops['settings.lexers']
+        for i = 1, #tSet do
+            table.insert(tHilight, tSet[i].view)
         end
         for j = 1, #tHilight do
             for i = 1, #tbl_lex do

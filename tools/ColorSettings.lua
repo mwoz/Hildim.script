@@ -291,15 +291,15 @@ local function create_dialog_clr()
                     tblLexers = {}
                     tblLexers['GLOBAL'] = "SciTEGlobal"
                     iup.SetAttribute(h, 1, "GLOBAL")
-                    local i = 2
-                    for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
-                        local _, _, p1, p2, p3, p4 = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
-                        iup.SetAttribute(h, i, p1)
-                        tblLexers[p1] = p4:gsub('%.properties$', '')
-                        i = i + 1
+
+                    local tblLex = _G.iuprops['settings.lexers'] or {}
+                    for i = 1, #tblLex do
+                        iup.SetAttribute(h, i + 1, tblLex[i].view)
+                        tblLexers[tblLex[i].view] = tblLex[i].file:gsub('%.properties$', '')
                     end
+
                     h.value = 1
-                    h.visibleitems = i
+                    h.visibleitems = #tblLex
                 end,
                 action = reloadLex
             },

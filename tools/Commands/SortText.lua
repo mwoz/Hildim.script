@@ -63,7 +63,7 @@ end
 return {
     title = 'Сортировать строки A...z/z...A',
     run = Run,
-    path = 'Edit¦s2',
+    path = 'Edit|s2',
     description = [[Sorting selected lines_tbl alphabetically and vice versa
 Сортировка выделенных строк по алфавиту и наоборот]]
 }

@@ -141,7 +141,7 @@ local function internal_Init()
     end
 
     iup.drop_cb_to_list(list_navigation, Navigation_Go)
-    menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+    menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
         {'Navigation', ru = 'Навигация', plane = 1,{
             {'s_Navigation', separator = 1,},
             {'Navigate Backward', ru = 'Навигация: Назад', action = function() walk_Navigation(true) end, key = 'Alt+<', active = function() return currentItem ~= 0 and currentItem < tonumber(list_navigation.numlin) end, image = 'navigation_180_µ',},
@@ -176,7 +176,7 @@ local function createDlg()
             list_navigation.fittosize = 'COLUMNS'
         end
     end
-    menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+    menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
         {'Navigation History...', ru = 'История навигации...', action = function() iup.ShowInMouse(dlg) end, key = "Alt+Shift+N"}
     )
     return dlg

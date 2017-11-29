@@ -375,7 +375,7 @@ local function init()
         blockResetCB = false
     end)
 
-    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx',
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|xxx',
     {'Clipboard History', {
         {'C1', key = 'Ctrl+1',  action=function() setClipboard(1) end, },
         {'C2', key = 'Ctrl+2',  action=function() setClipboard(2) end, },
@@ -452,7 +452,7 @@ local function createDlg()
             lst_clip.fittosize = 'COLUMNS'
         end
     end
-    menuhandler:InsertItem('MainWindowMenu', 'Tools¦s2',
+    menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',
         {'Clipboard History...', ru = 'Èñòîğèÿ áóôåğà îáìåíà...', action = function() iup.ShowInMouse(dlg) end, key="Alt+Shift+C", image = "clipboard_list_µ"}
     )
     return dlg

@@ -247,7 +247,7 @@ local function init()
     end
 
 
-    menuhandler:InsertItem('MainWindowMenu', 'Edit¦s1',
+    menuhandler:InsertItem('MainWindowMenu', 'Edit|s1',
         {'Html', ru = 'Html', visible = bHt ,{
             {'Italics', ru = 'Курсив', action = setItalics, key = 'Alt+I', active = bHt, },
             {'Bold', ru = 'Жирный', action = setBold, key = 'Alt+B', active = bHt, },
@@ -267,7 +267,7 @@ local function init()
             {'Line Break', action = function() editor:ReplaceSel('<br>') end, key = 'Alt+Ctrl+Enter', active = bHt, },
         }}
     )
-    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_¦Fileman_sidebar¦sxxx',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_|Fileman_sidebar|sxxx',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Web', plane = 1, visible = bHt ,{
             {'s_web', separator = 1},
             {"Link", ru = "Вставить как ссылку", action = function()

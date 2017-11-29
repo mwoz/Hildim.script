@@ -54,15 +54,22 @@ local function Run(flag)
                 [checkItems] = checkTitle,
             }
             for s, m in pairs(tPoints) do
-                --print(m)
-                if ('¦'..(_G.iuprops[s] or '')..'¦'):find('¦'..strUi..'¬?¦') then
-                    if bUnInstoll then
-                        local v = ('¦'..(_G.iuprops[s] or '')..'¦'):gsub('¦'..strUi..'¬?¦', '¦'):gsub('^¦', ''):gsub('^¦$', '')
-                        v = v:gsub('([^¦¬]+¬¦)([^¦¬]+¬¦)', '%2')
-                        v = v:gsub('[^¦¬]+¬¦-$', '')
-                        _G.iuprops[s] = v
+                local tUp = _G.iuprops[s] or {}
+                if s == "settings.status.layout" then tUp = {tUp} end
+                for i = 1, #tUp do
+                    for j = 1,  #(tUp[i]) do
+                        if tUp[i][j] == strUi then
+                            if bUnInstoll then
+                                table.remove(tUp[i], j)
+                                if s == "settings.status.layout" then
+                                    _G.iuprops[s] = tUp[i]
+                                else
+                                    _G.iuprops[s] = tUp
+                                end
+                            end
+                            return m
+                        end
                     end
-                    return m
                 end
             end
         end
@@ -85,13 +92,12 @@ local function Run(flag)
 
         btn_ok.action = function()
             local function SaveTree(h)
-                local str = ''
+                local tbl = {}
                 for i = 1, iup.GetAttribute(h, "TOTALCHILDCOUNT0") do
-                    if str ~= '' then str = str..'¦' end
-                    str = str..h:GetUserId(i)
+                    table.insert(tbl, h:GetUserId(i))
                     if checkItems then CheckInstall(h:GetUserId(i), true) end
                 end
-                return str
+                return tbl
             end
             _G.iuprops[settName] = SaveTree(tree_right)
             dlg:hide()
@@ -176,12 +182,13 @@ local function Run(flag)
         local table_dir = shell.findfiles(defpath..'*.lua')
 
         local j = 0
-        local function RestoreTree(h, str)
-            if str == '' then return end
+        local function RestoreTree(h, tbl)
+            if #tbl == 0 then return end
             iup.SetAttributeId(h, "DELNODE", 1, "SELECTED")
             local k = 0
             local lastBr
-            for p in str:gmatch('[^¦]+') do
+            for i = 0, #tbl do
+                p = tbl[i]
                 local bFound = false
                 for i = 1, #table_dir do
                     if table_dir[i].name == p then
@@ -200,7 +207,7 @@ local function Run(flag)
             end
         end
 
-        RestoreTree(tree_right, _G.iuprops[settName] or '')
+        RestoreTree(tree_right, _G.iuprops[settName] or {})
 
         for i = 1, #table_dir do
             local r, err = pcall( function()
