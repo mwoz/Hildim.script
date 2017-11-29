@@ -267,7 +267,7 @@ local function Solution_Init(h)
 
         if but == 51 and pressed == 0 then --right
             h.value = iup.ConvertXYToPos(h, x, y)
-            menuhandler:PopUp('MainWindowMenu¦_HIDDEN_¦Solution_sidebar')
+            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Solution_sidebar')
 
         elseif but == 49 and iup.isdouble(status) then --dbl left
             if h.kind ~= 'BRANCH' then
@@ -313,7 +313,7 @@ local function Solution_Init(h)
         SaveSolution()
     end
 
-    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Solution_sidebar', plane = 1,{
             {'Solution', ru = 'Рабочая область', {
                 {'Save as', ru = 'Сохранить как', action = SaveSolAs},
@@ -359,7 +359,7 @@ local function Solution_Init(h)
         end
         is_chanjed = true
     end
-    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_¦Window_bar¦sxxx',
+    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_|Window_bar|sxxx',
         {'solution', plane = 1, {
             {'s_comptemp', separator = 1},
             {"Add Checked To Project", ru = "Добавить отмеченные в солюшн", action = function() CORE.DoForFileSet('1', AddAll)() end,},

@@ -233,7 +233,7 @@ local function CreateBox()
         t.extrabuttons = 1
         t.extraimage1 = "property_µ"
         t.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
-        t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu¦View¦'..sciteid) end end
+        t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu|View|'..sciteid) end end
 
         local j = 1
         local s = 'Hotkeys for Tab Activation:'
@@ -417,7 +417,7 @@ local function CreateBox()
         table.insert(tblMenus, t)
     end
 
-    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_¦xxx', {'Sidebar', tblMenus})
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|xxx', {'Sidebar', tblMenus})
 
 end
 
@@ -710,10 +710,10 @@ local function InitTabbar()
                         {'s1', separator = 1}
                     )
                     table.insert(tMnu,
-                        {link = 'View¦Main Window split', plane = 1}
+                        {link = 'View|Main Window split', plane = 1}
                     )
                     table.insert(tMnu,
-                        {link = 'View¦coeditor', plane = 1}
+                        {link = 'View|coeditor', plane = 1}
                     )
                 end
                 menuhandler:ContextMenu(wx, wy, tMnu)
@@ -937,7 +937,7 @@ for i = 1, #tbl do
         if pI.key then t.key = pI.key end
         t.action = function() dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p).run() end
 
-        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools¦Utils¦xxx', t)
+        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools|Utils|xxx', t)
     end
 ::continue::
 end

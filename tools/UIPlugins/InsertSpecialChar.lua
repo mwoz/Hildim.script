@@ -91,7 +91,7 @@ local function Init()
             return true
         end
     end)
-    menuhandler:InsertItem('MainWindowMenu', 'Edit¦s2',
+    menuhandler:InsertItem('MainWindowMenu', 'Edit|s2',
         {'Insert Special Char', ru = 'Вставить спецсимвол', action = function() SpecialChar() end, image = 'edit_symbol_µ'}
     )
 end

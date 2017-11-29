@@ -49,7 +49,7 @@ local function Convert(t)
     if t['settings.lexers'] then
         if type(t['settings.lexers']) == 'string' then
             local tl = {}
-            for w in _G.iuprops['settings.lexers']:gmatch('[^¦]+') do
+            for w in (_G.iuprops['settings.lexers'] or ''):gmatch('[^¦]+') do
                 local tv = {}
                 table.insert(tl, tv)
                 _, _, tv.view, tv.ext, tv.name, tv.file = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')
@@ -61,6 +61,7 @@ local function Convert(t)
     split(t, 'settings.status.layout', '¦')
     split(t, 'settings.hidden.plugins', '¦')
     split(t, 'settings.commands.plugins', '¦')
+    if t['settings.user.toolbar'] then t['settings.user.toolbar'] = t['settings.user.toolbar']:gsub('¦', '|') end
     split(t, 'settings.user.toolbar', '‡')
 
     converBar(t, 'settings.toolbars.layout', false)
@@ -122,7 +123,7 @@ local function Run(a, b)
         tOut['_VERSION'] = 2
 
         f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
-        f:write(table.concat(tOut, '\n'))
+        f:write(table.concat(tOut, '\n'):to_utf8(1251))
         f:close()
 ::continue1::
     end
@@ -151,7 +152,7 @@ local function Run(a, b)
         end
 
         f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
-        f:write(table.concat(tOut, '\n'))
+        f:write(table.concat(tOut, '\n'):to_utf8(1251))
         f:close()
 ::continue::
     end
@@ -169,7 +170,7 @@ local function Run(a, b)
 
     f = io.open(props['SciteUserHome']..'\\settings.lua', "w")
     s = CORE.tbl2Out(tMsg, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
-    f:write(s)
+    f:write(s:to_utf8(1251))
     f:close()
 
 end

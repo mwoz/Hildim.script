@@ -76,7 +76,7 @@ end
 return {
     title = 'Открыть выделенный файл',
     run = OpenSelectedFilename,
-    path = 'File¦&Revert',
+    path = 'File|&Revert',
     description = [[Обрабатывает явно заданный путь и относительные пути
 переменные SciTE, переменные окружения, конструкции LUA]]
 }

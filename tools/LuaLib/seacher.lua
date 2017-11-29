@@ -18,7 +18,7 @@ end
 function s:UnSlashAsNeeded(strIn)
     local str
     if self.backslash and not self.regExp then
-        str = strIn:gsub('\\\\', '¦'):gsub('\\a', '\a'):gsub('\\b', '\b'):gsub('\\f', '\f'):gsub('\\n', '\n'):gsub('\\r', '\r'):gsub('\\t', '\t'):gsub('\\v', '\v'):gsub('¦', '\\')
+        str = strIn:gsub('\\\\', '¦¦¦¦'):gsub('\\a', '\a'):gsub('\\b', '\b'):gsub('\\f', '\f'):gsub('\\n', '\n'):gsub('\\r', '\r'):gsub('\\t', '\t'):gsub('\\v', '\v'):gsub('¦¦¦¦', '\\')
     else
         str = strIn
     end

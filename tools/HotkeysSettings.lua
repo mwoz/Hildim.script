@@ -15,7 +15,7 @@ local function viewMenu(tMnu, tView, path)
                     tN.leafname = '-----------'
                     tui.disabled = true
                 else
-                    tui.path = path..'¦'..t[1]
+                    tui.path = path..'|'..t[1]
                     local keyStr
                     if t.key_external then
                         tui.disabled = true
@@ -38,7 +38,7 @@ local function viewMenu(tMnu, tView, path)
                 --tSub = {}
                 tN = {}
                 tN.branchname = menuhandler:get_title(t, true)
-                viewMenu(t[2], tN, path..'¦'..t[1])
+                viewMenu(t[2], tN, path..'|'..t[1])
                 ---tN[1] = tSub
                 tui.disabled = true
             end

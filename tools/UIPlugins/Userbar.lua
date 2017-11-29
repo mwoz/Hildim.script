@@ -20,6 +20,7 @@ local function Init(h)
     local tblSet = _G.iuprops["settings.user.toolbar"] or ''
 
     local id = 0
+
     for i = 1, #tblSet do
         local p = tblSet[i]
         if p == '---' then

@@ -18,7 +18,7 @@ local function Init(h)
         OnNavigation("Go-")
         iup.PassFocus()
     end
-    menuhandler:InsertItem('MainWindowMenu', 'Search¦s1',
+    menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
         {'&Go to...', ru = 'Перейти на позицию...', key = 'Ctrl+G', action = IDM_GOTO}
     )
     AddEventHandler("OnMenuCommand", function(cmd)

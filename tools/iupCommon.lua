@@ -17,6 +17,7 @@ if shell.fileexists(file) then
         pF:close()
     end
     local bSuc, tMsg = pcall(dostring, text)
+
     if bRepit and (_G.iuprops['_VERSION'] or 1) ~= 2 then
         bRepit = false
 
@@ -27,12 +28,14 @@ if shell.fileexists(file) then
         else
             print("Convert settings failed:", msg)
         end
+    else
+        text = text:from_utf8(1251)
     end
 
     if not bSuc then
         print('Ошибка в файле settings.lua:', tMsg..'\nсохраним текущий settings.lua в settings.lua.bak')
         io.output(props["scite.userhome"]..'\\settings.lua.bak')
-        io.write(text)
+        io.write(text:to_utf8(1251))
         io.close()
     end
 elseif shell.fileexists(props["scite.userhome"]..'\\_default.config') then
@@ -48,7 +51,7 @@ if props['config.restore'] ~= '' then
     local bSuc, pF = pcall(io.input, props['config.restore'])
     if bSuc then
         local l = (_G.iuprops['settings.lexers'] or '')
-        text = pF:read('*a')
+        text = pF:read('*a'):from_utf8(1251)
         pF:close()
         local bSuc, tMsg = pcall(dostring, text)
         if not bSuc then
@@ -166,7 +169,7 @@ function rfl:check(fname)
             RestoreLayOut(self.data.layout[i] or '')
             editor.FirstVisibleLine = (self.data.pos[i] or 0)
             local bk = self.data.bmk[i] or ''
-            for g in bk:gmatch('[^¦]+') do
+            for g in bk:gmatch('%d+') do
                 editor:MarkerAdd(tonumber(g), 1)
                 if BOOKMARK then BOOKMARK.Add(tonumber(g)) end
             end
@@ -240,7 +243,7 @@ local function SaveIup()
     if pcall(io.output, file) then
         _G.iuprops['_VERSION'] = 2
         local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
-        io.write(s)
+        io.write(s:to_utf8(1251))
     else
         iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!", "Ok")
     end
@@ -457,7 +460,7 @@ end
 
 local function LoadSession_local(filename)
     if pcall(io.input, filename) then
-        text = io.read('*a')
+        text = io.read('*a'):from_utf8(1251)
         io.close()
         local bSuc, tMsg = pcall(dostring,text)
         if not bSuc then
@@ -490,7 +493,7 @@ iup.SaveSession = function()
     if iup.CloseFilesSet(0) then
         if pcall(io.output, filename) then
             local s = CORE.tbl2Out(_G.iuprops["buffers"], ' ', false, true, true):gsub('^return ', '_G.iuprops["buffers"] = ')
-            io.write(s)
+            io.write(s:to_utf8(1251))
             io.close()
         end
     end
@@ -1137,7 +1140,7 @@ iup.scitedetachbox = function(t)
         if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
         statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_Switch,
                                    tip=t.Dlg_Title,}
-        function statusBtn:flat_button_cb(button, pressed, x, y, status) if button==51 and pressed == 1 then menuhandler:PopUp('MainWindowMenu¦View¦'..t.sciteid) end end
+        function statusBtn:flat_button_cb(button, pressed, x, y, status) if button==51 and pressed == 1 then menuhandler:PopUp('MainWindowMenu|View|'..t.sciteid) end end
         table.insert(_tmpSidebarButtons, statusBtn)
     end
 
@@ -1150,7 +1153,7 @@ iup.scitedetachbox = function(t)
     }
     --if t.MenuVisible then tSub.visible =  end
 
-    menuhandler:InsertItem('MainWindowMenu', 'View¦slast',  {dtb.sciteid, ru = t.Dlg_Title, visible = t.MenuVisible, tSub})
+    menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, ru = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
     if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', ru = 'Вид', visible = t.MenuVisibleEx, tSub}) end
 
@@ -1428,7 +1431,7 @@ local function SaveIuprops_local(filename)
 
 
  	if pcall(io.output, filename) then
-		io.write(table.concat(t,'\n'))
+		io.write(table.concat(t,'\n'):to_utf8(1251))
         io.close()
  	end
 end
