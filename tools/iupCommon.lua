@@ -386,7 +386,7 @@ local function onNavigate_local(item)
 end
 
 iup.RestoreFiles = function(bForce)
-
+    local fPrevOnOpen
     if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
         local bNew = (props['FileName'] ~= '')
         local buf = (_G.iuprops['buffers'] or {})
@@ -400,12 +400,13 @@ iup.RestoreFiles = function(bForce)
             BlockEventHandler"OnOpen"
             BlockEventHandler"OnNavigation"
             BlockEventHandler"OnUpdateUI"
+            fPrevOnOpen = OnOpen
             OnOpen = onOpen_local
         end
         local bRight, bRightPrev, bCloned, bIsRight = false, false, false, false
         for i = #t, 1,- 1 do
             if i == 1 then
-                OnOpen = nil
+                OnOpen = fPrevOnOpen
                 UnBlockEventHandler"OnUpdateUI"
                 UnBlockEventHandler"OnNavigation"
                 UnBlockEventHandler"OnOpen"

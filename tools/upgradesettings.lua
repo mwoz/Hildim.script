@@ -49,7 +49,7 @@ local function Convert(t)
     if t['settings.lexers'] then
         if type(t['settings.lexers']) == 'string' then
             local tl = {}
-            for w in (_G.iuprops['settings.lexers'] or ''):gmatch('[^¦]+') do
+            for w in (t['settings.lexers'] or ''):gmatch('[^¦]+') do
                 local tv = {}
                 table.insert(tl, tv)
                 _, _, tv.view, tv.ext, tv.name, tv.file = w:find('([^•]*)•([^•]*)•([^•]*)•([^•]*)')

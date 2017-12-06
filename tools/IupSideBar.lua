@@ -161,6 +161,8 @@ function iup.SaveNamedValues(h, root)
                         table.insert(hist,iup.GetAttributeId(child, '', i))
                     end
                     _G.iuprops[root..'.'..child.name..'.hist'] = hist
+                elseif cType == 'list' and vai == '0' then
+                    goto continue
                 elseif cType == 'zbox' or cType == 'tabs' or cType == 'flattabs' then
                     val = child.valuepos
                 elseif cType == 'matrixlist' then
@@ -172,6 +174,7 @@ function iup.SaveNamedValues(h, root)
                 end
                 if val then _G.iuprops[root..'.'..child.name..'.value'] = val end
             end
+::continue::
             iup.SaveNamedValues(child, root)
         end
     until not child
@@ -448,8 +451,9 @@ local function RestoreNamedValues(h, root)
                         child["show"] = val..":*"
                         child.redraw = 1
                     end
-                else
-                    if val then child.value = val end
+                elseif val then
+                    if cType == 'split' and child.barsize == '0' and child.value ~= '0' and child.value ~= '1000' then child.barsize = '3' end
+                    child.value = val
                 end
             end
             RestoreNamedValues(child, root)
