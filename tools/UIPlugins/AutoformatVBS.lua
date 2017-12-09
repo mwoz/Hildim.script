@@ -390,7 +390,7 @@ local function OnChar_local(char)
         EditorClearMarks(errmark)
         mark = nil
     end
-    if string.byte(char) ~= 10 and FoldLevel(-1) == FoldLevel(0) then
+    if string.byte(char) ~= 10 --[[and FoldLevel(-1) == FoldLevel(0)]] then
         curFold = FoldLevel(-1)
         if curFold == 0 then curFold = nil end
     end
@@ -427,15 +427,25 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
             editor.FirstVisibleLine = iline
             editor:SetSel(s, e)
             iChangedLine = -1
-        elseif curFold and FoldLevel(-1) < FoldLevel(0)  then
+        elseif curFold and curFold > FoldLevel(-1) --[[and FoldLevel(-1) < FoldLevel(0)]] and editor.StyleAt[editor.CurrentPos - 1] == 13 then
             curFold = nil
-            if editor.CharAt[editor.CurrentPos] == 13 then
+            local bSet = true
+            for i = editor.CurrentPos, editor.Length - 1 do
+                local c = editor.CharAt[i]
+                if c == 13 or c == 39 then    -- \n и '
+                    break
+                elseif c ~= 32 then   -- пробел
+                    bSet = false
+                    break
+                end
+            end
+
+            if bSet then
                 local curS = editor.SelectionStart
                 local ls = editor:LineFromPosition(curS)
                 local cL = FoldLevel(-1)
                 local curI, curIPos = LineIndent(0) --print(ls, cL)
                 for i = ls - 1, 0,- 1 do
-                    --print(i, FoldLevel(ls - i))
                     if cL >= FoldLevel(ls - i) then
                         local endWhat = ''
                         if editor:GetLine(ls):lower():find('^%s*end') then
