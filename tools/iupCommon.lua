@@ -404,6 +404,7 @@ iup.RestoreFiles = function(bForce)
             OnOpen = onOpen_local
         end
         local bRight, bRightPrev, bCloned, bIsRight = false, false, false, false
+        local curPos = tonumber(_G.iuprops['buffers.current'] or - 1)
         for i = #t, 1,- 1 do
             if i == 1 then
                 OnOpen = fPrevOnOpen
@@ -427,7 +428,9 @@ iup.RestoreFiles = function(bForce)
             scite.Open(sNm)
             if bRight ~= bRightPrev then scite.MenuCommand(IDM_CHANGETAB) end
             if bCloned then scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
+
             if bRight or bCloned then bIsRight = true end
+
             bRightPrev = bRight
             if p[i] then editor.FirstVisibleLine = (math.tointeger(p[i]) or 0) end
 
@@ -447,9 +450,9 @@ iup.RestoreFiles = function(bForce)
         if bNew then
             scite.buffers.SetDocumentAt(0)
         else
-            local b = tonumber(_G.iuprops['buffers.current'] or - 1)
-            if b >= 0 then scite.buffers.SetDocumentAt(b) end
+            if curPos >= 0 then scite.buffers.SetDocumentAt(curPos) end
         end
+
         if not bIsRight then
             _G.iuprops['coeditor.win'] = '2';
             _G.g_session['coeditor'].HideDialog();
@@ -460,9 +463,10 @@ iup.RestoreFiles = function(bForce)
 end
 
 local function LoadSession_local(filename)
-    if pcall(io.input, filename) then
-        text = io.read('*a'):from_utf8(1251)
-        io.close()
+    local bSucs, f = pcall(io.input, filename)
+    if bSucs then
+        text = f:read('*a'):from_utf8(1251)
+        f:close()
         local bSuc, tMsg = pcall(dostring,text)
         if not bSuc then
             print('Ошибка в файле '..filename, tMsg)
@@ -471,6 +475,8 @@ local function LoadSession_local(filename)
         iup.RestoreFiles(true)
         _G.iuprops['buffers'] = nil
         return true
+    else
+        print('Ошибка при открытии файла: '..f)
     end
 end
 

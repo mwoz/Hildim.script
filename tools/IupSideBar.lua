@@ -589,9 +589,7 @@ local function InitSideBar()
         local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
         iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, "CoSourceExpanderBtm"), nil)
         iup.GetDialogChild(hMainLayout, "SourceSplitBtm").barsize = '3'
-        if props["tab.oldstile"] == '' then
-            CORE.RemapTab(false)
-        end
+        CORE.RemapTab(false)
         iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
     end
 
@@ -875,15 +873,14 @@ local function InitMenuBar()
 
     local mnu = sys_Menus.MainWindowMenu
 
-    local hb = { alignment = 'ACENTER',expand ='HORIZONTAL' }
+    local hb = { alignment = 'ACENTER', expand = 'HORIZONTAL', name = 'Hildim_MenuBar'}
     for i = 1, #mnu do
         if mnu[i][1] ~='_HIDDEN_' then
             table.insert(hb,menuhandler:GreateMenuLabel(mnu[i]))
-            if i == #mnu - 1 then table.insert(hb,iup.fill{})
+            if i == #mnu - 1 then table.insert(hb,iup.fill{name = 'menu_fill'})
             elseif i < #mnu - 1 then table.insert(hb, iup.label{separator = "VERTICAL",maxsize='x18'}) end
         end
     end
-
 
     local tTlb = {iup.expander{barsize = 0, state="OPEN", name = "MenuBar",iup.vbox{expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL"}}}};
 
@@ -947,7 +944,7 @@ for i = 1, #tbl do
 end
 
 InitSideBar()
-if props["tab.oldstile"] == '' then InitTabbar() end
+InitTabbar()
 InitToolBar()
 InitStatusBar()
 RestoreNamedValues(hMainLayout, 'sidebarctrl')
@@ -986,8 +983,8 @@ AddEventHandler("OnSwitchFile", function(file)
 end)
 
 AddEventHandler("OnRightEditorVisibility", function(show)
-    if (show == 0 and _G.iuprops['coeditor.win'] or '0' ~= '0') or
-      (show == 1 and _G.iuprops['coeditor.win'] or '0' ~= '0') then
+    if (show == 0 and ((_G.iuprops['coeditor.win'] or '0') ~= '2')) or
+      (show == 1 and ((_G.iuprops['coeditor.win'] or '0') == '2')) then
         CoEditor.Switch()
         local expand = iup.GetDialogChild(hMainLayout, "RightTabExpander")
         local split = iup.GetDialogChild(hMainLayout, "TabBarSplit")

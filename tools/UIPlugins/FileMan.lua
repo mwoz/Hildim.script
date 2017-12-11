@@ -456,11 +456,12 @@ local function Favorits_DoRename(c, lin, col)
     Favorites_SaveList()
 end
 
+local bRenameFavor = false
 local function Favorites_Rename()
     local l = list_getvaluenum(list_favorites)
 
     list_favorites.focus_cell = l..":2"
-    iup.SetAttribute(list_favorites, 'READONLY', 'NO')
+    bRenameFavor = true
     iup.SetAttribute(list_favorites, 'EDIT_MODE', 'YES')
 end
 
@@ -663,7 +664,7 @@ local function FileManTab_Init(h)
         h.size="1x1"
     end)
     list_favorites.edition_cb = (function(c, lin, col, mode, update)
-        if mode == 1 and col ~= 2 then return iup.IGNORE end
+        if mode == 1 and (not bRenameFavor or col ~= 2) then return iup.IGNORE; end bRenameFavor = false
     end)
     list_favorites.value_edit_cb = Favorits_DoRename
     iup.SetAttribute(list_favorites, 'TYPE*:1', 'IMAGE')
