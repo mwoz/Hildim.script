@@ -648,10 +648,12 @@ local function FileManTab_Init(h)
     list_dir.edition_cb = FileMan_CheckRename
     iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')
 
-    list_favorites = iup.matrix{
+    list_favorites = iup.matrix{name = 'filemam.listfavorites',
     numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="YES" ,
     resizematrix = "YES", readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18 ,rasterwidth2 = 150 ,rasterwidth3= 450, tip ='jj'}
+    width0 = 0 ,
+    rasterwidth1 = 18 , rasterwidth2 = _G.iuprops['filemam.listfavorites.rw2'] or 150 ,
+    rasterwidth3= _G.iuprops['filemam.listfavorites.rw3'] or 450, tip ='jj'}
 
     list_favorites.colresize_cb = list_favorites.FitColumns(3, true, 1)
     list_favorites.tips_cb = (function(h, x, y)

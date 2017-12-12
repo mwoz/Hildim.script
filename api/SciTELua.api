@@ -98,6 +98,7 @@ math.log10
 math.max
 math.min
 math.mod
+math.modf
 math.pow
 math.rad
 math.random
@@ -105,6 +106,11 @@ math.randomseed
 math.sin
 math.sqrt
 math.tan
+math.tointeger
+math.mininteger
+math.maxinteger
+math.type
+math.ult
 abs (v)\n  returns absolute value of v
 acos (v)\n  returns arc cosine value of v in radians
 asin (v)\n  returns arc sine value of v in radians

@@ -76,80 +76,53 @@ local function ResetWrapProps()
 end
 
 local function ResetTabbarProps()
-    if props["tab.oldstile"] == '' then
-        local oldClr = props['tabctrl.readonly.color']
-        if oldClr == '' then oldClr = '120 120 120' end
-        local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref, ROColor =
-        iup.GetParam("Свойства панели закладок^TabbarProperties",
-            nil,
-            'Закрывать по DblClick%b\n'..
-            'Максимальное количество вкладок:%i[10,500,1]\n'..
-            'Переключать в порядке использования%b\n'..
-            'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n'..
-            'Активный таб - в начало%b\n'..
-            'Подсветка по расширению%b\n'..
-            'Освещенность вкладки:%i[10,99,1]\n'..
-            'Насыщенность вкладки:%i[10,99,1]\n'..
-            'Не показывать расширение%b\n'..
-            'Не показывать префикс%b\n'..
-            'Цвет шрифта Read-Only вкладки%c\n'
-            ,
-            tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
-            tonumber(props['buffers']) or 100,
-            tonumber(props['buffers.zorder.switching']) or 0,
-            tonumber(props['buffers.new.position']) or 0,
-            ((tonumber(props['tabctrl.alwayssavepos']) or 0) + 1) % 2,
-            tonumber(props['tabctrl.colorized']) or 0,
-            tonumber(props['tabctrl.cut.illumination']) or 90,
-            tonumber(props['tabctrl.cut.saturation']) or 50,
-            tonumber(props['tabctrl.cut.ext']) or 0,
-            tonumber(props['tabctrl.cut.prefix']) or 0,
-            oldClr
-        )
-        if ret then
-            props['tabbar.tab.close.on.doubleclick'] = ondbl
-            props['buffers'] = buff
-            props['buffers.zorder.switching'] = zord
-            props['buffers.new.position']    = newpos
-            props['tabctrl.alwayssavepos']   = (setbegin + 1) % 2
-            props['tabctrl.colorized']       = coloriz
-            props['tabctrl.cut.illumination']= illum
-            props['tabctrl.cut.saturation']  = satur
-            props['tabctrl.cut.ext']         = cEx
-            props['tabctrl.cut.prefix']      = cPref
-            props['tabctrl.readonly.color'] = ROColor
+    local oldClr = props['tabctrl.readonly.color']
+    if oldClr == '' then oldClr = '120 120 120' end
+    local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref, ROColor =
+    iup.GetParam("Свойства панели закладок^TabbarProperties",
+        nil,
+        'Закрывать по DblClick%b\n'..
+        'Максимальное количество вкладок:%i[10,500,1]\n'..
+        'Переключать в порядке использования%b\n'..
+        'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n'..
+        'Активный таб - в начало%b\n'..
+        'Подсветка по расширению%b\n'..
+        'Освещенность вкладки:%i[10,99,1]\n'..
+        'Насыщенность вкладки:%i[10,99,1]\n'..
+        'Не показывать расширение%b\n'..
+        'Не показывать префикс%b\n'..
+        'Цвет шрифта Read-Only вкладки%c\n'
+        ,
+        tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
+        tonumber(props['buffers']) or 100,
+        tonumber(props['buffers.zorder.switching']) or 0,
+        tonumber(props['buffers.new.position']) or 0,
+        ((tonumber(props['tabctrl.alwayssavepos']) or 0) + 1) % 2,
+        tonumber(props['tabctrl.colorized']) or 0,
+        tonumber(props['tabctrl.cut.illumination']) or 90,
+        tonumber(props['tabctrl.cut.saturation']) or 50,
+        tonumber(props['tabctrl.cut.ext']) or 0,
+        tonumber(props['tabctrl.cut.prefix']) or 0,
+        oldClr
+    )
+    if ret then
+        props['tabbar.tab.close.on.doubleclick'] = ondbl
+        props['buffers'] = buff
+        props['buffers.zorder.switching'] = zord
+        props['buffers.new.position'] = newpos
+        props['tabctrl.alwayssavepos'] = (setbegin + 1) % 2
+        props['tabctrl.colorized'] = coloriz
+        props['tabctrl.cut.illumination'] = illum
+        props['tabctrl.cut.saturation'] = satur
+        props['tabctrl.cut.ext'] = cEx
+        props['tabctrl.cut.prefix'] = cPref
+        props['tabctrl.readonly.color'] = ROColor
 
-            iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
-            iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
-            iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight'), 1)
-            iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft'), 1)
-        end
-    else
-        local ret, mult, maxlen, ondbl, buff, zord, newpos =
-        iup.GetParam("Свойства панели закладок",
-            nil,
-            'Многострочная%b\n'..
-            'Максимальная ширина(0- не задана)%i[0,100,10]\n'..
-            'Закрывать по DblClick%b\n'..
-            'Максимальное количество вкладок:%i[10,500,1]\n'..
-            'Переключать в порядке использования%b\n'..
-            'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n',
-            tonumber(props['tabbar.multiline']) or 1,
-            tonumber(props['tabbar.title.maxlength']) or 0,
-            tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
-            tonumber(props['buffers']) or 100,
-            tonumber(props['buffers.zorder.switching']) or 0,
-            tonumber(props['buffers.new.position']) or 0
-        )
-        if ret then
-            props['tabbar.multiline'] = mult
-            props['tabbar.title.maxlength'] = maxlen
-            props['tabbar.tab.close.on.doubleclick'] = ondbl
-            props['buffers'] = buff
-            props['buffers.zorder.switching'] = zord
-            iup.Alarm('Свойства панели закладок', 'Изменения будут применены после перезапуска программы', 'OK')
-        end
-	end
+        iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
+        iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
+        iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight'), 1)
+        iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft'), 1)
+    end
 end
 
 local function ResetFontSize()

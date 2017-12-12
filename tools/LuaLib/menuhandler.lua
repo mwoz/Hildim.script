@@ -335,8 +335,8 @@ function s:RegistryHotKeys()
         end
 
     end
---debug_prnArgs(sys_Menus)
-    for ups,submnu in pairs(sys_Menus) do
+
+    for ups, submnu in pairs(sys_Menus) do
         DropDown(ups,submnu)
     end
 --debug_prnArgs(tKeys)
@@ -347,7 +347,7 @@ function s:OnHotKey(cmd)
     GetAction(FindMenuItem(sys_KeysToMenus[cmd]))()
 end
 
-function s:GreateMenuLabel(item)
+function s:GreateMenuLabel(item, ind)
     local l =  iup.label{title = menuhandler:get_title(item), padding = '11x3', font= fnt,fgcolor = clr_normal, button_cb=
             function(h,but, pressed, x, y, status)
                 if but == 49 and pressed == 0 then
@@ -366,8 +366,21 @@ function s:GreateMenuLabel(item)
                 iup.SetAttribute(h, 'FGCOLOR', cl)
             end
         }
-    table.insert(labels, l)
+    table.insert(labels, ind or (#labels + 1), l)
     return l
+end
+function s:AddMenu(item)
+    local hMainLayout = iup.GetLayout()
+    local hMainMenu = iup.GetDialogChild(hMainLayout, "Hildim_MenuBar")
+    local hWinMenu = iup.GetDialogChild(hMainMenu, "menu_fill")
+    local l = iup.label{separator = "VERTICAL", maxsize = 'x18'}
+    iup.Insert(hMainMenu, hWinMenu, l)
+    iup.Map(l)
+    local n = #labels
+    table.insert(_G.sys_Menus.MainWindowMenu, n + 1, item)
+    l = menuhandler:GreateMenuLabel(item, n)
+    iup.Insert(hMainMenu, hWinMenu, l)
+    iup.Map(l)
 end
 
 function event_MenuHotKey(cmd)
