@@ -33,7 +33,7 @@ local function InitWndDialog()
 
     local fillWindow = function(side)
         curSide = side
-        list_windows.rasterwidth2 = Iif(side, 0, 20)
+        list_windows.rasterwidth2 = Iif(side, 0, _G.iuprops['list_buffers.rw2'])
         hbTitle.state = Iif(side, 'CLOSE', 'OPEN')
         local function windowsList()
             local Li, Ri = 0, 0
@@ -140,11 +140,16 @@ local function InitWndDialog()
     end
     local function createDlg()
         local function MoveSet()
+            local t = {}
             for i = 1, tonumber(iup.GetAttribute(list_windows, "NUMLIN")) do
                 if iup.GetAttributeId2(list_windows, 'TOGGLEVALUE', i, 1) == '1' then
-                    scite.buffers.SetDocumentAt(tonumber(iup.GetAttributeId2(list_windows, '', i, 5)))
-                    scite.MenuCommand(IDM_CHANGETAB)
+                    table.insert(t, {i, tonumber(iup.GetAttributeId2(list_windows, '', i, 5))})
                 end
+            end
+            for i = 1, #t do
+                print(t[i][2])
+                scite.buffers.SetDocumentAt(t[i][2])
+                scite.MenuCommand(IDM_CHANGETAB)
             end
             fillWindow(curSide)
             list_windows.redraw = 'ALL'

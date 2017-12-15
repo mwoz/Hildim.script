@@ -81,6 +81,7 @@ props['script.started'] = 'Y'
 iuprops_read_ok = true
 
 local function RestoreLayOut(strLay)
+    if not strLay or not strLay.gmatch then return end
     for n in strLay:gmatch('%d+') do
         n = math.tointeger(n)
         if (editor.FoldLevel[n] & SC_FOLDLEVELHEADERFLAG) ==0 then

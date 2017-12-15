@@ -97,7 +97,6 @@ local function ConvertBuffers(tMsg)
 end
 
 local function Run(a, b)
-
     local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.config")
 
     for i, filenameT in ipairs(files) do
@@ -123,14 +122,18 @@ local function Run(a, b)
         tOut['_VERSION'] = 2
 
         f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
-        f:write(table.concat(tOut, '\n'):to_utf8(1251))
-        f:close()
+        if f then
+            f:write(table.concat(tOut, '\n'):to_utf8(1251))
+            f:close()
+        else
+            print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
+        end
 ::continue1::
     end
-
     local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.fileset")
 
-    for i, filenameT in ipairs(files) do
+    for i, filenameT in ipairs(files or {}) do
+        print(111, filenameT.name)
         local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
         local s = f:read('*a')
         f:close()
@@ -150,13 +153,15 @@ local function Run(a, b)
         for n, v in pairs(tMsg) do
             table.insert(tOut, '_G.iuprops["'..n..'"] = '..CORE.tbl2Out(v, ' ', true, true))
         end
-
         f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
-        f:write(table.concat(tOut, '\n'):to_utf8(1251))
-        f:close()
+        if f then
+            f:write(table.concat(tOut, '\n'):to_utf8(1251))
+            f:close()
+        else
+            print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
+        end
 ::continue::
     end
-
     local f = io.open(props['SciteUserHome']..'\\settings.lua')
     local s = f:read('*a')
     f:close()
@@ -179,8 +184,11 @@ local function Run(a, b)
 
     tMsg['FileMan.Favorits'] = tf
     f = io.open(props['SciteUserHome']..'\\settings.lua', "w")
+
     s = CORE.tbl2Out(tMsg, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
+
     f:write(s:to_utf8(1251))
+    f:flush()
     f:close()
 
 end
