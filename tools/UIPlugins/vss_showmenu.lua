@@ -1,6 +1,7 @@
 require 'shell'
 local function Init()
     local bLocalDir = false
+    VSS = {}
 
     function vss_SetCurrentProject(dir)
         local d = dir or props['FileDir']
@@ -105,6 +106,32 @@ local function Init()
         end
     end
 
+    VSS.diff = function(f)
+        if vss_SetCurrentProject() then
+            local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
+            if ierr == 1 then
+
+                local _, tmppath = shell.exec('CMD /c set TEMP', nil, true, true)
+                tmppath = string.sub(tmppath, 6, string.len(tmppath) - 2)
+                local cmd = '"'..props['vsspath']..'\\ss.exe" Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
+                ierr, strerr = shell.exec(cmd, nil, true, true)
+                if ierr~= 0 then print(strerr) end
+                ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\sstmp"', nil, true, true)
+                if ierr~= 0 then print(strerr) end
+                ierr, strerr = shell.exec('CMD /c rename "'..tmppath..'\\'..props['FileNameExt']..'" sstmp', nil, true, true)
+                if ierr~= 0 then print(strerr) end
+                f(tmppath..'\\sstmp')
+            elseif strerr == '' or ierr == 0 then
+                --output:ReplaceSel('\n>"'..props['vsspath']..'\\ss.exe" Diff')
+                                --         scite.RunAsync(scite.RunInConcole) -- ('"'..props['vsspath']..'\\ss.exe" Diff')
+                -- print(shell.exec('"'..props['vsspath']..'\\ss.exe" Diff >1.tmp "', nil, true, true))
+                print('No differences')
+            else
+                print(strerr, ierr)
+            end
+        end
+    end
+
     local function vss_diff()
         if vss_SetCurrentProject() then
             local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
@@ -189,6 +216,7 @@ end
 return {
     title = 'Подменю для команд VSS в контекстном меню таба (вкладки)',
     hidden = Init,
+    destroy = function() VSS = nil end,
     description = [[Добавление подменю для работы с VSS
 в меню таба окна]]
 }

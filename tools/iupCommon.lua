@@ -1431,7 +1431,8 @@ local function SaveIuprops_local(filename)
                 process = not n:find'%.hist$'
             end
             if process then
-                table.insert(t, '_G.iuprops["'..n..'"] = '..CORE.tbl2Out(v, ' ', true, true))
+                v = CORE.tbl2Out(v, ' ', true, true)
+                if v then table.insert(t, '_G.iuprops["'..n..'"] = '..v) end
             end
         end
     end

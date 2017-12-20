@@ -670,9 +670,7 @@ local function InitTabbar()
             if tab > - 1 and (tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1 then scite.MenuCommand(IDM_CLOSE)
             elseif tab == -1 then scite.MenuCommand(IDM_NEW) end
         elseif button == iup.BUTTON3 and pressed == 1 and tab >= -1 then
-            local _, _, wx, wy = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
-            wx = tonumber(wx); wy = tonumber(wy)
-            menuhandler:ContextMenu(wx, wy, 'TABBAR')
+            menuhandler:ContextMenu(iup.MOUSEPOS, iup.MOUSEPOS, 'TABBAR')
         end
         if pressed == 0 then scite.RunAsync(function() iup.PassFocus() end) end
     end

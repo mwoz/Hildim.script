@@ -300,6 +300,7 @@ dostring(s)\n executes s as a Lua string, like Lua 4's dostring
 
 #$editor=output
 #$editor=findres
+#$editor=coeditor
 
 editor:textrange
 editor:findtext
