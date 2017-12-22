@@ -556,29 +556,7 @@ function s:ins(v, p, l, b)
     table.insert(self.data.bmk, 1, b)
     self:lop()
 end
--- function s:tostr()
---     local res = '{lst={'
---     for i = 1,  #self.data.lst do
---         if i > 1 then res = res..', ' end
---         res = res..'"'..self.data.lst[i]:gsub('\\','\\\\'):gsub("'", "\\039")..'"'
---     end
---     res = res..'}; pos={'
---     for i = 1,  #self.data.lst do
---         if i > 1 then res = res..', ' end
---         res = res..(self.data.pos[i] or 0)
---     end
---     res = res..'}; layout={'
---     for i = 1,  #self.data.lst do
---         if i > 1 then res = res..', ' end
---         res = res..'"'..(self.data.layout[i] or '')..'"'
---     end
---     res = res..'}; bmk={'
---     for i = 1,  #self.data.lst do
---         if i > 1 then res = res..', ' end
---         res = res..'"'..(self.data.bmk[i] or '')..'"'
---     end
---     return res..'}}'
--- end
+
 function s:tooutput()
     local res = {}
     res.lst = self.data.lst

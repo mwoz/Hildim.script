@@ -1,6 +1,7 @@
 local tSet
 local function Init_hidden()
 require 'Compare'
+    COMPARE = {}
     local bActive = 0
     local eOffsets = {}
     local tCompare = {left = {}, right = {}}
@@ -9,6 +10,9 @@ require 'Compare'
     local lastEditLine
     local markerMask = 0
     local mark = 15
+    local tmpPath
+    local tmpFiles = {}
+    local gitInstall, bGitActive
 
     for i = 0, 4 do
         --markerMask = markerMask | (1 << (Compare.Markers['MARKER_CHANGED_SYMBOL'] + i))
@@ -23,6 +27,12 @@ require 'Compare'
         return e:MarkerGet(l) & markerMask
     end
 
+    if not gitInstall then
+        gitInstall = 1
+        iErr = pcall(function() luacom.CreateObject('WScript.Shell'):RegRead('HKCU\\Software\\TortoiseGit\\CurrentVersion') end)
+        if not iErr then gitInstall = 0 end
+    end
+
     tSet = (_G.iuprops['compare_settings'] or {})
     if (tSet.version or 0) < 1 then
         tSet.version = 1
@@ -31,8 +41,8 @@ require 'Compare'
         tSet.AddLine = true
         tSet.Color_added = 14745568
         tSet.Color_deleted = 14737663
-        tSet.Color_changed = 10020839
-        tSet.Color_moved = 11643021
+        tSet.Color_changed = 14811135
+        tSet.Color_moved = 16773857
         tSet.Color_blank = 15000804
     end
 
@@ -53,6 +63,7 @@ require 'Compare'
         local i2 = coeditor.IndicatorCurrent
         editor.IndicatorCurrent   = mark
         coeditor.IndicatorCurrent = mark
+        coeditor.Zoom = editor.Zoom
         Compare.Compare()
         editor.IndicatorCurrent   = i1
         coeditor.IndicatorCurrent = i2
@@ -75,10 +86,10 @@ require 'Compare'
     local function ScrollWindows(e1, e2, flag)
         if (bActive & 4) == 4 and not bRunScroll then
             bRunScroll = true
-            if (flag & SC_UPDATE_V_SCROLL) ~= 0 then
+            if (flag & SC_UPDATE_V_SCROLL) ~= 0 and e2.FirstVisibleLine ~= e1.FirstVisibleLine then
                 e2.FirstVisibleLine = e1.FirstVisibleLine
             end
-            if (flag & SC_UPDATE_H_SCROLL) ~= 0 then
+            if (flag & SC_UPDATE_H_SCROLL) ~= 0 and e2.XOffset ~= e1.XOffset then
                 e2.XOffset = e1.XOffset
             end
             bRunScroll = false
@@ -127,6 +138,17 @@ require 'Compare'
     end
 
     local function OnSwitch_local()
+        if (gitInstall or 0) == 1 then
+            local p = props['FilePath']
+            bGitActive = false
+            repeat
+                p = p:gsub('\\[^\\]*$', '')
+                if shell.fileexists(p..'\\.git') then
+                    bGitActive = true
+                    break
+                end
+            until not p:find('\\')
+        end
         if tCompare.right[fPath(tabR)] == "-" or tCompare.left[fPath(tabL)] == "-" then
             Reset()
             return
@@ -139,6 +161,7 @@ require 'Compare'
             SetAnnotationStiles(editor)
             SetAnnotationStiles(coeditor)
         end
+
     end
 
     local function onClose(t1, t2, source)
@@ -293,23 +316,71 @@ require 'Compare'
         StartCompare()
     end
 
-    local function CompareToFile(strName)
+    local function CompareToFile(strName, bTmp)
         local strCur = props['FilePath']
         local strExt = props['FileExt']
 
+        BlockEventHandler"OnSwitchFile"
+        BlockEventHandler"OnNavigation"
+        BlockEventHandler"OnUpdateUI"
+        BlockEventHandler"OnOpen"
         scite.Open(strName)
+
+        if bTmp then tmpFiles[props['FilePath']] = true end
+
         scite.MenuCommand(IDM_CHANGETAB)
         scite.SetLexer(strExt)
 
+        scite.Open(strCur)
         StartCompare()
 
-        --scite.MenuCommand(IDM_NEXTFILESTACK)
+        --coeditor:GrabFocus()
         editor:GrabFocus()
-        editor.Focus = true;
+        editor.Focus = true
+        UnBlockEventHandler"OnOen"
+        UnBlockEventHandler"OnUpdateUI"
+        UnBlockEventHandler"OnNavigation"
+        UnBlockEventHandler"OnSwitchFile"
     end
 
-    local function CompareVss()
-        VSS.diff(CompareToFile)
+    local function prepareTmpPath()
+        if not tmpPath then
+            tmpPath = luacom.CreateObject('Scripting.FileSystemObject'):GetSpecialFolder(2).Path..'\\_HildiM\\'
+        end
+        if shell.greateDirectory(tmpPath) then
+            return tmpPath..'^^'..props['FileNameExt']
+        end
+    end
+
+    local function CompareGit()
+        if not tmpPath then
+            tmpPath = luacom.CreateObject('Scripting.FileSystemObject'):GetSpecialFolder(2).Path..'\\_HildiM\\'
+        end
+        shell.greateDirectory(tmpPath)
+        shell.set_curent_dir(props['FileDir']..'\\')
+
+        local iErr, str = shell.exec('git branch -v', nil, true, true)
+        if iErr ~= 0 then
+            print(str)
+            return
+        end
+        local _, _, sh = str:find('* %w+ (%w+)')
+        local pNew = prepareTmpPath()
+        cmd = 'TortoiseGitProc.exe /command:cat /path:"'..props['FilePath']..
+            '" /savepath:"'..pNew..'" /revision:'..sh
+
+        iErr, str = shell.exec(cmd, nil, true, true)
+        if iErr ~= 0 then
+            print(str)
+            return
+        end
+
+        CompareToFile(pNew, true)
+        tmpFiles[props['FilePath']] = true
+    end
+
+    function COMPARE.CompareVss()
+        VSS.diff(CompareToFile, prepareTmpPath():gsub('\\[^\\]+$', ''))
     end
 
     local function CompareSelfTitled()
@@ -395,6 +466,7 @@ require 'Compare'
     AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
         ScrollWindows(editor, coeditor, flag)
         if (bActive & 4) == 4 and tSet.Recompare then
+            if coeditor.Zoom ~= editor.Zoom then coeditor.Zoom = editor.Zoom end
             if bSelection == 1 and (lastEditLine and lastEditLine ~= editor:LineFromPosition(editor.CurrentPos)) then
                 ClearWindow(editor)
                 ClearWindow(coeditor)
@@ -408,10 +480,27 @@ require 'Compare'
         end
     end)
 
+    AddEventHandler("OnClose", function(file)
+        if tmpFiles[file] then
+            tmpFiles[file] = nil
+            if shell.fileexists(file) then
+                shell.delete_file(file)
+            end
+        end
+    end)
+
     AddEventHandler("CoOnUpdateUI", function(bModified, bSelection, flag)
         ScrollWindows(coeditor, editor, flag)
     end)
 
+
+    local function onDestroy()
+        for f, _ in pairs(tmpFiles) do
+            shell.delete_file(f)
+        end
+        _G.iuprops['compare_settings'] = tSet;
+        COMPARE = nil
+    end
 
     Compare.Init(iup.GetDialogChild(iup.GetLayout(), "Source").hwnd, iup.GetDialogChild(iup.GetLayout(), "CoSource").hwnd)
 
@@ -419,21 +508,38 @@ require 'Compare'
 
     Compare.SetStyles()
 
-    -- Compare.Settings.Color_blank = 111222333
-    -- print(Compare.Settings.Color_blank)
-    -- Compare.Compare()
+    local function bCanCpyLeft()
+        local e = Iif(scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) == 0, editor, coeditor)
+        return not e.ReadOnly and bActive == 7
+    end
+
+    local function bCanCpyRight()
+        local e = Iif(scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) == 1, editor, coeditor)
+        return not e.ReadOnly and bActive == 7
+    end
+
+    local function bCanNewComp()
+        local s = scite.buffers.GetBufferSide(scite.buffers.GetCurrent())
+        return ((s + 1) & bActive) == 0
+    end
+
+    local function bCanCompareSide()
+        return ((_G.iuprops['coeditor.win'] or '')~= '2') and (bActive == 0 or bActive == 7)
+    end
+
     local item = {'Compare', ru = 'Сравнение', {
-		{'Compare', ru = 'Сравнить', key = 'Alt+=', action = StartCompare, active = "(_G.iuprops['coeditor.win'] or '')=='0'"},
-		{'Clear', ru = 'Очистить', action = Reset, active = function() return bActive > 0 end},
+		{'Compare', ru = 'Сравнить', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
+		{'Clear', ru = 'Очистить', action = Reset, },
         {'s1', separator = 1},
-        {'Compare to Vss', ru = 'Сравнить с Vss', action = CompareVss, visible = 'VSS', active = function() return true end},
-        {'Compare to Self-Titled', ru = 'Сравнить с одноименным из...', action = CompareSelfTitled, active = function() return (tSet.selfTitledDir or '') ~= '' end},
+        {'Compare to Git', ru = 'Сравнить с Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end},
+        {'Compare to Vss', ru = 'Сравнить с Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp},
+        {'Compare to Self-Titled', ru = 'Сравнить с одноименным из...', action = CompareSelfTitled, active = function() return ((tSet.selfTitledDir or '' and bCanNewComp())) ~= '' end},
         {'Directory For Comparing', ru = 'Директория для сравнения', action = SetSelfTitledDir, active = function() return true end},
         {'s2', separator = 1},
 		{'Next Difference', ru = 'Следующее различие', key = 'Alt+D', action = nextDiff, active = function() return bActive == 7 end},
 		{'Prevouse Difference', ru = 'Предыдущее различие', key = 'Alt+U', action = prevDif, active = function() return bActive == 7 end},
-		{'Copy To Left', ru = 'Скопировать влево', key = 'Alt+L', action = function() copyToSide(0) end, active = function() return bActive == 7 end},
-		{'Copy To Eight', ru = 'Скопировать вправо', key = 'Alt+R', action = function() copyToSide(1) end, active = function() return bActive == 7 end},
+		{'Copy To Left', ru = 'Скопировать влево', key = 'Alt+L', action = function() copyToSide(0) end, active = bCanCpyLeft},
+		{'Copy To Right', ru = 'Скопировать вправо', key = 'Alt+R', action = function() copyToSide(1) end, active = bCanCpyRight},
         {'s3', separator = 1},
 		{'Recompare by changing line', ru = 'Сравнивать заново при изменении строки', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare end},
 		{'Ignore Space', ru = 'Игнорировать пробелы', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{} end},
@@ -447,6 +553,6 @@ require 'Compare'
 end
 return {
     title = 'Сравнение файлов',
-    destroy = function() _G.iuprops['compare_settings'] = tSet end,
+    destroy = onDestroy,
     hidden = Init_hidden,
 }

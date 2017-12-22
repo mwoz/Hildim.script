@@ -1,7 +1,27 @@
 require 'shell'
+require "luacom"
 local function Init()
     local bLocalDir = false
+    local p_vsscompare, p_vsspath
     VSS = {}
+    do
+        local bOk
+        local wsh = luacom.CreateObject('WScript.Shell')
+        bOk, p_vsscompare = pcall(function() return wsh:RegRead('HKCU\\Software\\Thingamahoochie\\WinMerge\\Executable') end)
+        if not bOk then
+            p_vsscompare = nil
+        else
+            p_vsscompare = '"'..p_vsscompare..'" -e -x -ub %bname %yname'
+        end
+
+        bOk, p_vsspath = pcall(function() return wsh:RegRead('HKLM\\Software\\Microsoft\\VisualStudio\\SxS\\VSS_8\\8.0') end)
+        if not bOk then
+            p_vsspath = nil
+            error('SourceSafe not found')
+        else
+            p_vsspath = '"'..p_vsspath..'ss.exe"'
+        end
+    end
 
     function vss_SetCurrentProject(dir)
         local d = dir or props['FileDir']
@@ -13,7 +33,7 @@ local function Init()
         local strFile = fil:read("*a")
         fil:close()
         local _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
-        local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" CP "'..strProgect..'"', nil, true, true)
+        local ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
         if ierr ~= 0 then print(strerr) end
         return ierr == 0
     end
@@ -28,25 +48,25 @@ local function Init()
 
     local function vss_add()
         if vss_SetCurrentProject() then
-            reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Add "'..props['FileDir']..'\\'..props['FileNameExt']..'" -C-', nil, true, true))
+            reset_err(shell.exec(p_vsspath..' Add "'..props['FileDir']..'\\'..props['FileNameExt']..'" -C-', nil, true, true))
         end
     end
 
     local function vss_getlatest()
         if vss_SetCurrentProject() then
-            reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Get '..props['FileNameExt'], nil, true, true))
+            reset_err(shell.exec(p_vsspath..' Get '..props['FileNameExt'], nil, true, true))
         end
     end
 
     local function vss_undocheckout()
         if vss_SetCurrentProject() then
-            reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Undocheckout '..props['FileNameExt']..' -G-', nil, false, true))
+            reset_err(shell.exec(p_vsspath..' Undocheckout '..props['FileNameExt']..' -G-', nil, false, true))
         end
     end
 
     local function vss_checkout()
         if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
             local stropt = ""
             if ierr == 1 then
                 local rez = shell.msgbox("Файл отличается от базы.\nЗаменить существующий файл?","CheckOut",3)
@@ -59,7 +79,7 @@ local function Init()
                 end
             end
             if ierr == 0 then
-                reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Checkout '..props['FileNameExt']..stropt, nil, true, true))
+                reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']..stropt, nil, true, true))
             elseif ierr ~= 1 then
                 print(strerr)
             end
@@ -68,22 +88,22 @@ local function Init()
 
     local function vss_checkoutundif()
         if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
             if ierr == 1 then
 
                 local _, tmppath = shell.exec('CMD /c set TEMP', nil, true, true)
                 tmppath = string.sub(tmppath, 6, string.len(tmppath) - 2)
-                local cmd = '"'..props['vsspath']..'\\ss.exe" Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
+                local cmd = p_vsspath..' Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
                 ierr, strerr = shell.exec(cmd, nil, true, true)
                 if ierr~= 0 then print(strerr) end
                 ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\sstmp"', nil, true, true)
                 if ierr~= 0 then print(strerr) end
                 ierr, strerr = shell.exec('CMD /c rename "'..tmppath..'\\'..props['FileNameExt']..'" sstmp', nil, true, true)
                 if ierr~= 0 then print(strerr) end
-                cmd = string.gsub(string.gsub(props['vsscompare'], '%%bname', '"'..tmppath..'\\sstmp"'), '%%yname', '"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
+                cmd = string.gsub(string.gsub(p_vsscompare, '%%bname', '"'..tmppath..'\\sstmp"'), '%%yname', '"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
                 shell.exec(cmd)
             elseif strerr == '' then
-                local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
+                local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
                 local stropt = ""
                 if ierr == 1 then
                     local rez = shell.msgbox("Файл отличается от базы.\nЗаменить существующий файл?","CheckOut",3)
@@ -96,7 +116,7 @@ local function Init()
                     end
                 end
                 if ierr == 0 then
-                    reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Checkout '..props['FileNameExt']..stropt, nil, true, true))
+                    reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']..stropt, nil, true, true))
                 elseif ierr ~= 1 then
                     print(strerr)
                 end
@@ -106,26 +126,21 @@ local function Init()
         end
     end
 
-    VSS.diff = function(f)
+    VSS.diff = function(f, tmppath)
         if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
-            if ierr == 1 then
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
+            if ierr == 1 or strerr == '' or ierr == 0 then
 
-                local _, tmppath = shell.exec('CMD /c set TEMP', nil, true, true)
-                tmppath = string.sub(tmppath, 6, string.len(tmppath) - 2)
-                local cmd = '"'..props['vsspath']..'\\ss.exe" Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
+                ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\^^'..props['FileNameExt']..'"', nil, true, true)
+                if ierr~= 0 then print(strerr, 1) end
+
+                local cmd = p_vsspath..' Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
                 ierr, strerr = shell.exec(cmd, nil, true, true)
-                if ierr~= 0 then print(strerr) end
-                ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\sstmp"', nil, true, true)
-                if ierr~= 0 then print(strerr) end
-                ierr, strerr = shell.exec('CMD /c rename "'..tmppath..'\\'..props['FileNameExt']..'" sstmp', nil, true, true)
-                if ierr~= 0 then print(strerr) end
-                f(tmppath..'\\sstmp')
-            elseif strerr == '' or ierr == 0 then
-                --output:ReplaceSel('\n>"'..props['vsspath']..'\\ss.exe" Diff')
-                                --         scite.RunAsync(scite.RunInConcole) -- ('"'..props['vsspath']..'\\ss.exe" Diff')
-                -- print(shell.exec('"'..props['vsspath']..'\\ss.exe" Diff >1.tmp "', nil, true, true))
-                print('No differences')
+                if ierr~= 0 then print(strerr, 2) end
+
+                ierr, strerr = shell.exec('CMD /c rename "'..tmppath..'\\'..props['FileNameExt']..'" "^^'..props['FileNameExt']..'"', nil, true, true)
+                if ierr~= 0 then print(strerr, 3) end
+                f(tmppath..'\\^^'..props['FileNameExt'], true)
             else
                 print(strerr, ierr)
             end
@@ -134,19 +149,19 @@ local function Init()
 
     local function vss_diff()
         if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Diff '..props['FileNameExt'], nil, true, true)
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
             if ierr == 1 then
 
                 local _, tmppath = shell.exec('CMD /c set TEMP', nil, true, true)
                 tmppath = string.sub(tmppath, 6, string.len(tmppath) - 2)
-                local cmd = '"'..props['vsspath']..'\\ss.exe" Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
+                local cmd = p_vsspath..' Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
                 ierr, strerr = shell.exec(cmd, nil, true, true)
                 if ierr~= 0 then print(strerr) end
                 ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\sstmp"', nil, true, true)
                 if ierr~= 0 then print(strerr) end
                 ierr, strerr = shell.exec('CMD /c rename "'..tmppath..'\\'..props['FileNameExt']..'" sstmp', nil, true, true)
                 if ierr~= 0 then print(strerr) end
-                cmd = string.gsub(string.gsub(props['vsscompare'], '%%bname', '"'..tmppath..'\\sstmp"'), '%%yname', '"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
+                cmd = string.gsub(string.gsub(p_vsscompare, '%%bname', '"'..tmppath..'\\sstmp"'), '%%yname', '"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
                 shell.exec(cmd)
             elseif strerr == '' or ierr == 0 then
                 print('No differences')
@@ -158,13 +173,13 @@ local function Init()
 
     local function vss_checkin()
         if vss_SetCurrentProject() then
-            reset_err(shell.exec('"'..props['vsspath']..'\\ss.exe" Checkin '..props['FileNameExt']..' -C-', nil, true, true))
+            reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']..' -C-', nil, true, true))
         end
     end
 
     local function vss_hist()
         if vss_SetCurrentProject() then
-            local _, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" History '..props['FileNameExt'], nil, true, true)
+            local _, strerr = shell.exec(p_vsspath..' History '..props['FileNameExt'], nil, true, true)
             print(strerr)
         end
     end
@@ -173,12 +188,13 @@ local function Init()
         local t = {}
         local VSSContectMenu
         vss_SetCurrentProject()
-        local ierr, strerr = shell.exec('"'..props['vsspath']..'\\ss.exe" Status '..props['FileNameExt'], nil, true, true)
+        local ierr, strerr = shell.exec(p_vsspath..' Status '..props['FileNameExt'], nil, true, true)
         if ierr == 0 then -- не взят
             t = {
                 {'Check Out', action = vss_checkout, image = 'arrow_curve_270_µ'  ,},
                 {'Get Latest Version', ru = 'Получить последнюю версию', action = vss_getlatest ,},
                 {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
+                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = COMPARE.CompareVss, visible = 'COMPARE', image = 'edit_diff_µ' ,},
                 {'History', ru = 'Показать историю', action = vss_hist ,},
                 {'s', separator = 1},
                 {'Check Out Undiff', action = vss_checkoutundif ,},
@@ -189,6 +205,7 @@ local function Init()
                 {'Undo Check Out', ru = 'Отменить Check Out', action = vss_undocheckout,},
                 {'Get Latest Version', action = vss_getlatest ,},
                 {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
+                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = COMPARE.CompareVss, visible = 'COMPARE', image = 'edit_diff_µ' ,},
                 {'History', ru = 'Показать историю', action = vss_hist ,},
             }
         elseif ierr == 100 then --новый

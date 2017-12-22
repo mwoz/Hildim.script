@@ -427,7 +427,9 @@ iup.RestoreFiles = function(bForce)
             end
 
             scite.Open(sNm)
-            if bRight ~= bRightPrev then scite.MenuCommand(IDM_CHANGETAB) end
+            if bRight ~= bRightPrev then
+                scite.MenuCommand(IDM_CHANGETAB)
+            end
             if bCloned then scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
 
             if bRight or bCloned then bIsRight = true end
@@ -459,6 +461,8 @@ iup.RestoreFiles = function(bForce)
             _G.g_session['coeditor'].HideDialog();
         else
             coeditor.Zoom = editor.Zoom
+            editor:GrabFocus()
+            editor.Focus = true
         end
     end
 end
@@ -659,7 +663,7 @@ AddEventHandler("OnSave", function(cmd, source)
 end)
 
 AddEventHandler("OnClose", function(source)
-    if source:find('^%^') then return end
+    if source:find('^%^') or source:find('\\%^^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8(1251)) then return end
     end

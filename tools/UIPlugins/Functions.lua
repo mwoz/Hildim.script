@@ -19,20 +19,7 @@ local lineMap  -- падает дерево на userdata(((
 lineMap = {}
 
 local table_functions = {}
--- 1 - function names
--- 2 - line number
--- 3 - function parameters with parentheses
---[[local function prnTb(tb, n)
-    local s = string.rep('    ', n)
-    for k,v in pairs(tb) do
-        if type(v) == 'table' then
-            print(s..k..'->  Table')
-            prnTb(v, n + 1)
-        else
-            print(s..k..'->  ', v)
-        end
-    end
-end]]
+
 local _backjumppos -- store position if jumping
 local line_count = 0
 local layout --имена полей - имена бранчей, значения - true/false, если отсутствует - значит открыто
@@ -799,6 +786,7 @@ local function  _OnUpdateUI()
                     if lineMap[iDx] == fData then
                         -- выделяем "функцию", в теле которой находится пользователь, но только если она не в свернутой папке - иначе выделяем саму папку
                         local pId = tonumber(iup.GetAttribute(tree_func, "PARENT"..i))
+                        if not pId then return end
                         if iup.GetAttribute(tree_func, "STATE"..pId) == 'EXPANDED' then pId = i end
                         currFuncData = fData
                         iup.SetAttribute(tree_func, "MARKED"..pId, "YES")
@@ -885,8 +873,6 @@ local function Functions_Print()
     end
 end
 
-
-
 local function Func_Init(h)
     _Plugins = h
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
@@ -943,6 +929,10 @@ local function Func_Init(h)
         SaveLayoutToProp()
     end
     iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
+    AddEventHandler("OnClose",
+        function() tree_func.delnode0 = "CHILDREN"; tree_func.title0 = ""
+    end)
+
     return {   -- iup.vbox{   };
         handle = tree_func;
         OnSwitchFile = OnSwitch;
@@ -950,7 +940,6 @@ local function Func_Init(h)
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
-        --tabs_OnSelect = OnSwitch;
         on_SelectMe = function() OnSwitch(); iup.SetFocus(tree_func); iup.Flush();end
         }
 
