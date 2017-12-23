@@ -235,7 +235,7 @@ end
 _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 	{link='File|&Close'},
 	{link='File|C&lose All'},
-	{'Close All But Curent',  ru = 'Зарыть все, кроме текущей', action=function() iup.CloseFilesSet(9132) end, },
+	{'Close All But Curent',  ru = 'Зарыть все, кроме текущей', action=function() iup.CloseFilesSet(9132); OnSwitchFile(props['FilePath']) end, },
 	{'Close All Temporally',  ru = 'Зарыть все временные', action=function() iup.CloseFilesSet(9134) end, visible=IsOpenTemporaly },
 	{'s1', separator=1},
 	{link='File|&Save'},

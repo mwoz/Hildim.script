@@ -1,6 +1,7 @@
 local tSet
 local function Init_hidden()
 require 'Compare'
+require 'luacom'
     COMPARE = {}
     local bActive = 0
     local eOffsets = {}
@@ -320,27 +321,29 @@ require 'Compare'
         local strCur = props['FilePath']
         local strExt = props['FileExt']
 
+        scite.Perform('blockuiupdate:y')
         BlockEventHandler"OnSwitchFile"
         BlockEventHandler"OnNavigation"
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnOpen"
         scite.Open(strName)
 
-        if bTmp then tmpFiles[props['FilePath']] = true end
+        if bTmp then tmpFiles[strName] = true end
 
         scite.MenuCommand(IDM_CHANGETAB)
         scite.SetLexer(strExt)
 
         scite.Open(strCur)
-        StartCompare()
 
         --coeditor:GrabFocus()
         editor:GrabFocus()
         editor.Focus = true
-        UnBlockEventHandler"OnOen"
+        UnBlockEventHandler"OnOpen"
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnNavigation"
         UnBlockEventHandler"OnSwitchFile"
+        scite.Perform('blockuiupdate:u')
+        StartCompare()
     end
 
     local function prepareTmpPath()
@@ -376,7 +379,7 @@ require 'Compare'
         end
 
         CompareToFile(pNew, true)
-        tmpFiles[props['FilePath']] = true
+        tmpFiles[pNew] = true
     end
 
     function COMPARE.CompareVss()
