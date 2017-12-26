@@ -660,7 +660,9 @@ local function InitTabbar()
             end
         end
         if button == iup.BUTTON1 and pressed == 0 then
-            iup.SetAttribute(h, "BGCOLOR", '255 255 255')
+            local clr = props['tabctrl.active.bakcolor']
+            if clr == '' then clr = '255 255 255' end
+            iup.SetAttribute(h, "BGCOLOR", clr)
             h.cursor = 'ARROW'
             iup.Update(h)
             if (tabDrag > -1 and tab == -4) or (hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' )) then
@@ -681,7 +683,9 @@ local function InitTabbar()
 
     local function onMotion(h, hNew, x, y, tab, tabDrag, start, status)
         if start == 2 then
-            iup.SetAttribute(h, "BGCOLOR", '208 231 255')
+            local clr = props['tabctrl.moved.color']
+            if clr == '' then clr = '208 231 255' end
+            iup.SetAttribute(h, "BGCOLOR", clr)
             iup.Update(h)
         end
         if start > 0 then

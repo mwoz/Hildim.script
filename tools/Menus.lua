@@ -76,22 +76,34 @@ local function ResetWrapProps()
 end
 
 local function ResetTabbarProps()
-    local oldClr = props['tabctrl.readonly.color']
-    if oldClr == '' then oldClr = '120 120 120' end
-    local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref, ROColor =
-    iup.GetParam("Свойства панели закладок^TabbarProperties",
+    local function oldClr(p, def)
+        local c = props[p]
+        if c == '' then c = def end
+        return c
+    end
+
+    local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref, ROColor,
+    tabctrl_forecolor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color
+    = iup.GetParam("Свойства панели закладок^TabbarProperties",
         nil,
         'Закрывать по DblClick%b\n'..
         'Максимальное количество вкладок:%i[10,500,1]\n'..
         'Переключать в порядке использования%b\n'..
         'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n'..
         'Активный таб - в начало%b\n'..
+        'Неактивные вкладки%t\n'..
         'Подсветка по расширению%b\n'..
-        'Освещенность вкладки:%i[10,99,1]\n'..
-        'Насыщенность вкладки:%i[10,99,1]\n'..
+        'Освещенность:%i[10,99,1]\n'..
+        'Насыщенность:%i[10,99,1]\n'..
         'Не показывать расширение%b\n'..
         'Не показывать префикс%b\n'..
-        'Цвет шрифта Read-Only вкладки%c\n'
+        'Шрифт%c\n'..
+        'Шрифт Read-Only%c\n'..
+        'Активная вкладка%t\n'..
+        'Фон%c\n'..
+        'Шрифт%c\n'..
+        'Шрифт Read-Only%c\n'..
+        'Перемещаемая (drag-and-drop) %c\n'
         ,
         tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
         tonumber(props['buffers']) or 100,
@@ -103,7 +115,12 @@ local function ResetTabbarProps()
         tonumber(props['tabctrl.cut.saturation']) or 50,
         tonumber(props['tabctrl.cut.ext']) or 0,
         tonumber(props['tabctrl.cut.prefix']) or 0,
-        oldClr
+        oldClr('tabctrl.forecolor' , '0 0 0'),
+        oldClr('tabctrl.readonly.color' , '120 120 120'),
+        oldClr('tabctrl.active.bakcolor' , '255 255 255'),
+        oldClr('tabctrl.active.forecolor' , '0 0 255'),
+        oldClr('tabctrl.active.readonly.forecolor' , '120 120 255'),
+        oldClr('tabctrl.moved.color' , '120 120 255')
     )
     if ret then
         props['tabbar.tab.close.on.doubleclick'] = ondbl
@@ -117,6 +134,11 @@ local function ResetTabbarProps()
         props['tabctrl.cut.ext'] = cEx
         props['tabctrl.cut.prefix'] = cPref
         props['tabctrl.readonly.color'] = ROColor
+        props['tabctrl.forecolor'] = tabctrl_forecolor
+        props['tabctrl.active.bakcolor'] = tabctrl_active_bakcolor
+        props['tabctrl.active.forecolor'] = tabctrl_active_forecolor
+        props['tabctrl.active.readonly.forecolor'] = tabctrl_active_readonly_forecolor
+        props['tabctrl.moved.color'] = tabctrl_moved_color
 
         iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
         iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
