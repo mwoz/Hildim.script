@@ -47,6 +47,7 @@ local constListIdXml = 8
 local constListIdXmlPar = 88
 local maxListsItems = 16
 local bIsListVisible = false
+local AutocomplAutomatic
 local obj_names = {}
 local m_last = nil
 local m_ext, m_ptrn = "", ""
@@ -70,6 +71,15 @@ do
             Ext2Ptrn[ext] = v
         end
     end
+end
+
+local function SetListVisibility(bSet)
+    if bSet then
+        props['autocompleteword.automatic.blocked'] = '1'
+    else
+        props['autocompleteword.automatic.blocked'] = '0'
+    end
+    bIsListVisible = bSet
 end
 
 local CUR_POS = {}
@@ -837,7 +847,7 @@ local function ShowUserList(nPos, iId, last)
             if iSel ~= 0 then
                 m_last = last
             end
-            bIsListVisible = true
+            SetListVisibility(true)
 			return true
         else
 			return false
@@ -1026,7 +1036,7 @@ local function OnUserListSelection_local(tp, str)
             if objects_table[upObj] then objects_table[upObj]['last'] = str end
         end
     end
-    bIsListVisible = false
+    SetListVisibility(false)
     editor:EndUndoAction()
 end
 
@@ -1102,7 +1112,7 @@ local function TipXml()
     return false
 end
 
-ResetCallTipParams = function()
+ResetCallTipParams = function(bHidden)
 
     if editor:AutoCActive() then return end
     local tip = calltipinfo[#calltipinfo]
@@ -1159,7 +1169,7 @@ ResetCallTipParams = function()
     calltipinfo[#calltipinfo][4] = iParCount
     local s = tip[5][iParCount]
     local e = tip[5][iParCount + 1]
-    ShowCallTip(tip[1], tip[2], s, e)
+    if not bHidden then ShowCallTip(tip[1], tip[2], s, e) else editor:CallTipCancel() end
 end
 
 local function OnUpdateUI_local(bChange, bSelect, flag)
@@ -1204,7 +1214,7 @@ local function OnChar_local(char)
             editor:ReplaceSel(curr_fillup_char)
             curr_fillup_char = ''
         else
-            bIsListVisible = false
+            SetListVisibility(false)
         end
     end
 	if IsComment(editor.CurrentPos - 2) then return false end -- Если строка закомментирована, то выходим
@@ -1246,11 +1256,12 @@ local function OnChar_local(char)
     if calltipinfo[1] and calltipinfo[1] ~= 0 then --будем считать,  что разделители параметров - только запятые
 
         if (calltipinfo[#calltipinfo][3] or 0) > 0 and bResetCallTip then
-            ResetCallTipParams()
-            result = true
+            result = ((props['autocompleteword.automatic'] or '') ~= '1')
+            ResetCallTipParams(not resut)
         end
     end
     if char == '\n' then HideCallTip() end
+
     return result
 end
 ------------------------------------------------------

@@ -169,7 +169,7 @@ local function loadList()
         iup.SetAttributeId(mLst, "COLOR", i, iup.GetGlobal('TXTBGCOLOR'))
 
         local t = enrichRow(tblView[i])
-
+        print(t.back)
         iup.SetAttributeId(mLst, "ITEMBGCOLOR", i, t.back or iup.GetGlobal("TXTBGCOLOR"))
 
         iup.SetAttributeId(mLst, "ITEMFGCOLOR", i, t.fore or '0 0 0')

@@ -90,6 +90,17 @@ local function StringLen(s, cp)
 	return s:utf8len()
 end
 
+function CORE.Rgb2Str(rgb)
+    return ''..(rgb & 255)..' '..((rgb >> 8) & 255)..' '..((rgb >> 16) & 255)
+end
+function CORE.Str2Rgb(s, def)
+    local _, _, r, g, b = s:find('(%d+) (%d+) (%d+)')
+    if r then
+        return (b << 16)|(g << 8)|r
+    end
+    return def
+end
+
 --------------------------------------------------------
 -- string.to_pattern возращает строку, пригодную дл€ использовани€
 -- в виде паттерна в string.find и т.п.
@@ -220,7 +231,7 @@ function EditorClearMarks(indic_number, start, length)
 end
 
 ----------------------------------------------------------------------------
--- «адание стил€ дл€ маркеров (затем эти маркеры можно будет использовать в скриптах, вызыва€ их по номеру)
+-- «адание стил€ дл€ маркеров (затем эти маркеры можно tomorrow будет использовать в скриптах, вызыва€ их по номеру)
 
 -- Translate color from RGB to win
 local function encodeRGB2WIN(color)
@@ -240,23 +251,66 @@ local function InitMarkStyle(indic_number, indic_style, indic_color, indic_alpha
 	coeditor.IndicAlpha[indic_number] = indic_alpha
 end
 
+local tIndicMap = {_rev ={}}
+local indicMin, indicMax = 12, 31
+
+function CORE.InidcFactory(id, description, style, fore, alfa)
+    if tIndicMap._rev[id] then return tIndicMap._rev[id] end
+    if not _G.iuprops['INDICATORS'] then _G.iuprops['INDICATORS'] = {} end
+    local tI = _G.iuprops['INDICATORS']
+    if tI[id] then
+        style, fore, alfa = tI[id].s, tI[id].f, tI[id].a
+    else
+        tI[id] = {s = style; f = fore; a = alfa, rem = description}
+    end
+    for i = indicMin, indicMax do
+        if not tIndicMap[i] then
+            tIndicMap[i] = id
+            tIndicMap._rev[id] = i
+            return i
+        end
+    end
+    return nil
+end
+
+function CORE.FreeIndic(i)
+    if tIndicMap[i] then
+        local id = tIndicMap[i]
+        tIndicMap._rev[id] = nil
+        tIndicMap[i] = nil
+    end
+end
+
+function CORE.InitMarkStyles()
+    local tII
+    for i, id in pairs(tIndicMap) do
+        if type(i) == 'number' then
+            tII = _G.iuprops['INDICATORS'][id]
+            InitMarkStyle(i, tII.s, tII.f, tII.a)
+        end
+    end
+end
+function CORE.EditMarkColor(iMrk)
+    return CORE.Rgb2Str(_G.iuprops['INDICATORS'][tIndicMap[iMrk]].f)
+end
+
 local function EditorInitMarkStyles()
-	local string2value = {
-		plain    = INDIC_PLAIN,    squiggle = INDIC_SQUIGGLE,
-		tt       = INDIC_TT,       diagonal = INDIC_DIAGONAL,
-		strike   = INDIC_STRIKE,   hidden   = INDIC_HIDDEN,
-		roundbox = INDIC_ROUNDBOX, box      = INDIC_BOX,
-		hotspot  = INDIC_HOTSPOT
-	}
-	for indic_number = 0, 31 do
-		local mark = props["indic.style."..indic_number]
-		if mark ~= "" then
-			local indic_color = mark:match("#%x%x%x%x%x%x") or (props["find.mark"]):match("#%x%x%x%x%x%x") or "#0F0F0F"
-			local indic_style = string2value[mark:match("%l+")] or INDIC_ROUNDBOX
-			local indic_alpha = tonumber((mark:match("%@%d+") or ""):sub(2)) or 30
-			InitMarkStyle(indic_number, indic_style, indic_color, indic_alpha)
-		end
-	end
+    -- local string2value = {
+    --     plain    = INDIC_PLAIN,    squiggle = INDIC_SQUIGGLE,
+    --     tt       = INDIC_TT,       diagonal = INDIC_DIAGONAL,
+    --     strike   = INDIC_STRIKE,   hidden   = INDIC_HIDDEN,
+    --     roundbox = INDIC_ROUNDBOX, box      = INDIC_BOX,
+    --     hotspot  = INDIC_HOTSPOT
+    -- }
+    -- for indic_number = 0, 31 do
+    --     local mark = props["indic.style."..indic_number]
+    --     if mark ~= "" then
+    --         local indic_color = mark:match("#%x%x%x%x%x%x") or (props["find.mark"]):match("#%x%x%x%x%x%x") or "#0F0F0F"
+    --         local indic_style = string2value[mark:match("%l+")] or INDIC_ROUNDBOX
+    --         local indic_alpha = tonumber((mark:match("%@%d+") or ""):sub(2)) or 30
+    --         InitMarkStyle(indic_number, indic_style, indic_color, indic_alpha)
+    --     end
+    -- end
 	findres.IndicStyle[31] = INDIC_ROUNDBOX
 	findres.IndicFore[31] = encodeRGB2WIN('#54FFB4')
 	findres.IndicAlpha[31] = 35
@@ -507,6 +561,7 @@ AddEventHandler("OnOpen", function()
 	string.upper = StringUpper
 	string.len = StringLen
 	EditorInitMarkStyles()
+    CORE.InitMarkStyles()
 	SetMarginTypeN()
 end, 'RunOnce')
 

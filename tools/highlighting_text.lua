@@ -25,7 +25,7 @@ Setup next menu commands:
 
 --]]----------------------------------------------------
 
-local mark_num = props['highlighting.text.marker']
+local mark_num = CORE.InidcFactory('highlight.text', 'Подсветка выделенного текста', INDIC_ROUNDBOX, 8388863, 120)
 
 if clear then
 	EditorClearMarks(mark_num)

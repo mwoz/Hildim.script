@@ -12,57 +12,14 @@ Author: mozers™, VladVRO, TymurGubayev, nail333
 Внимание:
 В скрипте используются функции из COMMON.lua (EditorMarkText, EditorClearMarks)
 
-------------------------------
-Подключение:
-Добавить в SciTEStartup.lua строку:
-	dofile (props["SciteDefaultHome"].."\\tools\\paired_tags.lua")
-Добавить в файл настроек параметр:
-	hypertext.highlighting.paired.tags=1
-Дополнительно можно задать стили используемых маркеров (11 и 12):
-	indic.style.11=#0099FF
-	indic.style.22=#FF0000 (если этот параметр не задан, то непарные теги не подсвечиваются)
-
-Команды копирования, вставки, удаления тегов добавляются в меню Tools обычным порядком:
-	tagfiles=$(file.patterns.html);$(file.patterns.xml)
-
-	command.name.5.$(tagfiles)=Copy Tags
-	command.5.$(tagfiles)=CopyTags
-	command.mode.5.$(tagfiles)=subsystem:lua,savebefore:no
-	command.shortcut.5.$(tagfiles)=Alt+C
-
-	command.name.6.$(tagfiles)=Paste Tags
-	command.6.$(tagfiles)=PasteTags
-	command.mode.6.$(tagfiles)=subsystem:lua,savebefore:no
-	command.shortcut.6.$(tagfiles)=Alt+P
-
-	command.name.7.$(tagfiles)=Delete Tags
-	command.7.$(tagfiles)=DeleteTags
-	command.mode.7.$(tagfiles)=subsystem:lua,savebefore:no
-	command.shortcut.7.$(tagfiles)=Alt+D
-
-	command.name.8.$(tagfiles)=Goto Paired Tag
-	command.8.$(tagfiles)=GotoPairedTag
-	command.mode.8.$(tagfiles)=subsystem:lua,savebefore:no
-	command.shortcut.8.$(tagfiles)=Alt+B
-
-	command.name.9.$(tagfiles)=Select With Tags
-	command.9.$(tagfiles)=SelectWithTags
-	command.mode.9.$(tagfiles)=subsystem:lua,savebefore:no
-	command.shortcut.9.$(tagfiles)=Alt+S
-
-Для быстрого включения/отключения подсветки можно добавить команду:
-	command.separator.10.$(tagfiles)=1
-	command.checked.10.$(tagfiles)=$(hypertext.highlighting.paired.tags)
-	command.name.10.$(tagfiles)=Highlighting Paired Tags
-	command.10.$(tagfiles)=highlighting_paired_tags_switch
-	command.mode.10.$(tagfiles)=subsystem:lua,savebefore:no
 --]]----------------------------------------------------
 function Init()
     local t = {}
     -- t.tag_start, t.tag_end, t.paired_start, t.paired_end  -- positions
     -- t.begin, t.finish  -- contents of tags (when copying)
     local old_current_pos
-    local blue_indic, red_indic = 24, 23 -- номера используемых маркеров
+    local blue_indic = CORE.InidcFactory('PariedTags.ok', 'Парные теги - найдено', INDIC_BOX, 4834854, 0) -- номера используемых маркеров
+    local red_indic = CORE.InidcFactory('PariedTags.Error', 'Парные теги - ошибка', INDIC_STRIKE, 13311, 0)
 
     local bEnable, styleSpace, styleBracket = false, 0, 1
 

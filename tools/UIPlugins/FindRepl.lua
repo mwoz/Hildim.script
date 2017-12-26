@@ -5,6 +5,14 @@ local firstMark = tonumber(props["findtext.first.mark"])
 local popUpFind
 local _Plugins
 
+local tMarks = {
+    CORE.InidcFactory('Find.Mark.1', 'Метка поиска 1', INDIC_ROUNDBOX, 16711884, 50),
+    CORE.InidcFactory('Find.Mark.2', 'Метка поиска 2', INDIC_ROUNDBOX, 16711680, 50),
+    CORE.InidcFactory('Find.Mark.3', 'Метка поиска 3', INDIC_ROUNDBOX, 65280, 50),
+    CORE.InidcFactory('Find.Mark.4', 'Метка поиска 4', INDIC_ROUNDBOX, 65535, 100),
+    CORE.InidcFactory('Find.Mark.5', 'Метка поиска 5', INDIC_ROUNDBOX, 16768273, 50),
+}
+
 local findSettings = seacher{}
 
 local function Ctrl(s)
@@ -203,19 +211,19 @@ end
 
 local function MarkAll(h)
     if ReadSettings() then return end
-    local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
+    local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", tMarks[tonumber(Ctrl("matrixlistColor").focusitem)])
     SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
 end
 
 local function ClearMark(h)
-    EditorClearMarks(firstMark - 1 + tonumber(Ctrl("matrixlistColor").focusitem))
+    EditorClearMarks(tMarks[tonumber(Ctrl("matrixlistColor").focusitem)])
 end
 
 local function ClearMarkAll(h)
-    for i = 0,4 do
-        EditorClearMarks(firstMark + i)
+    for i = 1, 5 do
+        EditorClearMarks(tMarks[i])
     end
 end
 
@@ -285,7 +293,7 @@ end
 
 local function GoToMarkDown()
     local iPos = editor.SelectionStart
-    local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
+    local mark = tMarks[tonumber(Ctrl("matrixlistColor").focusitem)]
     local nextStart = iPos
     local bMark = false
     iPos = editor:IndicatorEnd(mark, nextStart)
@@ -304,7 +312,7 @@ end
 local function GoToMarkUp()
     local curPos = editor.SelectionStart
     local iPos = 0
-    local mark = firstMark  - 1 + tonumber(Ctrl("matrixlistColor").focusitem)
+    local mark = tMarks[tonumber(Ctrl("matrixlistColor").focusitem)]
     local nextStart = iPos
     local bMark = false
     iPos = editor:IndicatorEnd(mark, nextStart)
@@ -345,10 +353,8 @@ local function SetStaticControls()
 end
 
 local function onMapMColorList(h)
-    for i = 0, 5 do
-        local _, _, r, g, b = props["indic.style."..(i + firstMark - 1)]:find('#(%x%x)(%x%x)(%x%x)')
-        local strClr = (math.floor(0 + ('0x'..r))..' '..math.floor(0 + ('0x'..g))..' ' ..math.floor(0 + ('0x'..b)))
-        h["color"..i] = strClr
+    for i = 1, 5 do
+        h["color"..i] = CORE.EditMarkColor(tMarks[i])
     end
 end
 

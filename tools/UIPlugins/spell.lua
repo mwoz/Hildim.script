@@ -1,5 +1,6 @@
 local sRu
 local sEn
+local mark
 
 local function Init()
     local spell = require "luahunspell"
@@ -16,7 +17,7 @@ local function Init()
     assert(sEn, 'dict En not loaded')
     local tblVariants = {}
 
-    local mark = tonumber(props["spell.mark"])
+    mark = CORE.InidcFactory('Spell.Errors', 'Ошибки при проверке орфографии', INDIC_SQUIGGLE, 255, 0)
     local cHeck, cSpell, cSkip = 0, 1,2
     local commentsStyles
     local cADDYODIC, cADDBYZXAMPLE = '<Add-to-Dic>', '<Add-with-Example>'
@@ -515,5 +516,5 @@ return {
     hidden = Init,
     code = 'spell',
     statusbar = Init_status,
-    destroy = function() sRu:destroy(); sEn:destroy(); end,
+    destroy = function() sRu:destroy(); sEn:destroy(); CORE.FreeIndic(mark) end,
 }

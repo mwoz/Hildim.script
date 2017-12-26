@@ -10,12 +10,11 @@ wholeWord = false
 ,replaceWhat = ''
 }
 -----------------------------------
-
+local current_mark_number = CORE.InidcFactory('FindOnSel.mark', 'Подсветка выделенного слова по всему тексту', INDIC_ROUNDBOX, 6750054, 30)
 
 local function SelectMethod(bModified, bSelection, flag)
 --подсветка слова, если оно выделено целиком
     if (bModified == 0 and bSelection == 0) then return end
-    local current_mark_number = tonumber(props['findsel.mark'])
 	EditorClearMarks(current_mark_number)
     local sText, iFind = '', 0
     local sels = 1

@@ -189,9 +189,18 @@ _G.iuprops['pariedtag.on'] = _G.iuprops['pariedtag.on'] or 1
 
 function iup.SaveChProps(bReset)
     local t = {
+'autocompleteword.automatic',
 'buffers',
 'buffers.new.position',
 'buffers.zorder.switching',
+'caret.additional.blinks',
+'caret.fore'             ,
+'caret.line.back',
+'caret.line.back.alpha',
+'caret.period'           ,
+'caret.width'            ,
+'findres.caret.line.back'      ,
+'findres.caret.line.back.alpha',
 'findres.magnification',
 'findres.width',
 'findres.wrap',
@@ -199,6 +208,8 @@ function iup.SaveChProps(bReset)
 'iuptoolbar.visible',
 'line.margin.visible',
 'magnification',
+'output.caret.line.back'       ,
+'output.caret.line.back.alpha' ,
 'output.magnification',
 'output.vertical.size',
 'output.wrap',
@@ -208,9 +219,16 @@ function iup.SaveChProps(bReset)
 'position.top',
 'position.width',
 'print.magnification',
-'tabbar.multiline',
-'tabbar.tab.close.on.doubleclick',
-'tabbar.title.maxlength',
+'selection.additional.alpha',
+'selection.additional.back',
+'selection.alpha',
+'selection.back',
+'tabctrl.colorized',
+'tabctrl.cut.ext',
+'tabctrl.cut.illumination',
+'tabctrl.cut.prefix',
+'tabctrl.cut.saturation',
+'tabctrl.readonly.color',
 'view.eol',
 'view.indentation.guides',
 'view.whitespace',
@@ -221,12 +239,8 @@ function iup.SaveChProps(bReset)
 'wrap.visual.flags',
 'wrap.visual.flags.location',
 'wrap.visual.startindent',
-'tabctrl.readonly.color',
-'tabctrl.cut.prefix',
-'tabctrl.cut.ext',
-'tabctrl.colorized',
-'tabctrl.cut.illumination',
-'tabctrl.cut.saturation',
+
+
     }
     for i = 1, #t do
         t[i] = t[i]..'='..props[t[i]]

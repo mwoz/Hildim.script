@@ -1,8 +1,5 @@
---[[local chSep = "'"
-local rightSide = "(','['{'If'For'Select'Case"
-local leftSide = ")']'}'Then"
-local twoSide = "[<>/=+-&%*]"
-local get_api = false]]
+local goodmark, errmark
+
 local function Init()
     local mark = nil
     local cGroupContinued = 999999
@@ -16,8 +13,8 @@ local tTwo]]
 local chLeftSide = '([%%),<>%/%=%+%-%%%*])%s*([%w%d%"])'
 local chRightSide = '([%w%d%"])%s*([<>%/%=%+%-%%%*])'
 -- local chRightSide = '([%w%d%"])%s*([%}<>%/%=%+%-&%%%*])'
-local goodmark = props["autoformat.good.mark"]
-local errmark = props["autoformat.err.mark"]
+goodmark = CORE.InidcFactory('FormatVbs.ok', 'Формат VBS - ОК', INDIC_BOX, 4834854, 0)
+errmark = CORE.InidcFactory('FormatVbs.Error', 'Формат VBS - ошибка', INDIC_STRIKE, 13311, 0)
 --local chTwoSide = '(%w)%s*([<>%/%=%+%-&%%%*])%s*(%w)'
 
 -- 3 таблицы wrdBeginIndent wrdEndIndent wrdMidleInent -  в каждой строке - таблица
@@ -600,4 +597,5 @@ end
 return {
     title = 'Автоформатирование VBS и FormEnjine файлов',
     hidden = Init,
+    destroy = function() CORE.FreeIndic(goodmark); CORE.FreeIndic(errmark) end,
 }

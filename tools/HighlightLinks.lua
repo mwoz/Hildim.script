@@ -35,7 +35,7 @@ HighlightLinks v1.5.3
 
 require "shell"
 
-local mark_number = 13
+local mark_number = CORE.InidcFactory('highlight.links', 'Подсветка ссылок', INDIC_PLAIN, 16711680, 0)
 local default_link_mask = "https*://[^ \t\r\n\"\']+"
 
 function HighlightLinks()

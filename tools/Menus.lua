@@ -125,6 +125,155 @@ local function ResetTabbarProps()
     end
 end
 
+local function ResetSelColors()
+    local function Rgb2Str(strrgb)
+        local rgb = tonumber((strrgb or '#000000'):gsub('#', ''), 16) or 0
+        return ''..((rgb >> 16) & 255)..' '..((rgb >> 8) & 255)..' '..(rgb & 255)
+    end
+    local function Str2Rgb(s, def)
+        local _, _, r, g, b = s:find('(%d+) (%d+) (%d+)')
+        local rgb = 0
+        if r then
+            rgb = (r << 16)|(g << 8)|b
+        end
+        return '#'..string.format('%06X', rgb)
+    end
+    local ret, selection_back, selection_alpha, selection_additional_back, selection_additional_alpha, caret_line_back, caret_line_back_alpha,
+    output_caret_line_back, output_caret_line_back_alpha, findres_caret_line_back, findres_caret_line_back_alpha,
+    caret_fore, caret_width, caret_period, caret_additional_blinks
+    = iup.GetParam("Цвета - выделение и курсор^TextColorsSelection",
+        nil,
+        'Выделенный текст - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Выделенный блок - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Строка под курсором - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Консоль - Строка под курсором - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Поиск - Строка под курсором - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Курсор%t\n'..
+        'Цвет%c\n'..
+        'Ширина%i[1,4,1]\n'..
+        'Период мерцания%i[0,2000,100]\n'..
+        'Отображать дополнительные курсоры%b\n'
+        ,
+        Rgb2Str(props['selection.back']),
+        tonumber(props['selection.alpha']) or 30,
+        Rgb2Str(props['selection.additional.back']),
+        tonumber(props['selection.additional.alpha']) or 30,
+        Rgb2Str(props['caret.line.back']),
+        tonumber(props['caret.line.back.alpha']) or 20,
+        Rgb2Str(props['output.caret.line.back']),
+        tonumber(props['output.caret.line.back']) or 20,
+        Rgb2Str(props['findres.caret.line.back']),
+        tonumber(props['findres.caret.line.back.alpha']) or 20,
+        Rgb2Str(props['caret.fore']),
+        tonumber(props['caret.width']) or 1,
+        tonumber(props['caret.period']) or 500,
+        tonumber(props['caret.additional.blinks']) or 1
+    )
+    if ret then
+
+        props['selection.back']                = Str2Rgb(selection_back)
+        props['selection.alpha']               = selection_alpha
+        props['selection.additional.back']     = Str2Rgb(selection_additional_back)
+        props['selection.additional.alpha']    = selection_additional_alpha
+        props['caret.line.back']               = Str2Rgb(caret_line_back)
+        props['caret.line.back.alpha']         = caret_line_back_alpha
+        props['output.caret.line.back']        = Str2Rgb(output_caret_line_back)
+        props['output.caret.line.back.alpha']  = output_caret_line_back_alpha
+        props['findres.caret.line.back']       = Str2Rgb(findres_caret_line_back)
+        props['findres.caret.line.back.alpha'] = findres_caret_line_back_alpha
+        props['caret.fore']                    = Str2Rgb(caret_fore)
+        props['caret.width']                   = caret_width
+        props['caret.period']                  = caret_period
+        props['caret.additional.blinks']       = caret_additional_blinks
+
+        scite.Perform("reloadproperties:")
+    end
+end
+
+local function CurrentTabSettings()
+    local ret, TabWidth, Indent, UseTabs =
+    iup.GetParam("Текущие настройки отступа^CurrentTabSettings",
+        nil,
+        'Табуляция%i[2,16,1]\n'..
+        'Отступ%i[2,16,1]\n'..
+        'Использовать таб%b\n'
+        ,
+        editor.TabWidth,
+        editor.Indent,
+        Iif(editor.UseTabs, 1, 0)
+    )
+    if ret then
+
+        editor.TabWidth = TabWidth
+        editor.Indent   = Indent
+        editor.UseTabs  = (UseTabs ~= 0)
+    end
+end
+
+local function AutoScrollingProps()
+    local ret,
+    caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xeven, caret_policy_xjumps,
+    caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yeven, caret_policy_yjumps,
+    caret_sticky, end_at_last_lin
+    = iup.GetParam("Настройки автопрокрутки^AutiscrollSettings",
+        nil,
+        'Автопрокрутка по ширине%t\n'..
+        'Нежелательная зона (НЗ)%b\n'..
+        'Ширина НЗ, px%i[1,500,20]\n'..
+        'Никогда не помешать каретку в НЗ%b\n'..
+        'Автопрокрутка на 3 НЗ%b\n'..
+        'Ассиметиричная НЗ%b\n'..
+        'Автопрокрутка по высоте%t\n'..
+        'Нежелательная зона (НЗ)%b\n'..
+        'Высота НЗ, lines%i[1,500,20]\n'..
+        'Никогда не помешать каретку в НЗ%b\n'..
+        'Автопрокрутка на 3 НЗ%b\n'..
+        '%t\n'..
+        'Сохранять позицию по горизонтали%b\n'..
+        'Прокрутка вниз на страницу%t\n'..
+        'Запрещено end.at.last.line%b\n'
+        ,
+        tonumber(props['caret.policy.xslop']) or 0,
+        tonumber(props['caret.policy.width']) or 0,
+        tonumber(props['caret.policy.xstrict']) or 0,
+        tonumber(props['caret.policy.xeven']) or 0,
+        tonumber(props['caret.policy.xjumps']) or 0,
+
+        tonumber(props['caret.policy.yslop']) or 0,
+        tonumber(props['caret.policy.lines']) or 0,
+        tonumber(props['caret.policy.ystrict']) or 0,
+        tonumber(props['caret.policy.yeven']) or 0,
+        tonumber(props['caret.policy.yjumps']) or 0,
+
+        tonumber(props['caret.sticky']) or 0,
+
+        tonumber(props['end.at.last.lin']) or 0
+    )
+    if ret then
+        props['caret.policy.xslop']    = caret_policy_xslop
+        props['caret.policy.width']    = caret_policy_width
+        props['caret.policy.xstrict']  = caret_policy_xstrict
+        props['caret.policy.xeven']    = caret_policy_xeven
+        props['caret.policy.xjumps']   = caret_policy_xjumps
+
+        props['caret.policy.yslop']    = caret_policy_yslop
+        props['caret.policy.lines']    = caret_policy_lines
+        props['caret.policy.ystrict']  = caret_policy_ystrict
+        props['caret.policy.yeven']    = caret_policy_yeven
+        props['caret.policy.yjumps']   = caret_policy_yjumps
+
+        props['caret.sticky']          = caret_sticky
+
+        props['end.at.last.lin']       = end_at_last_lin
+
+    end
+end
+
 local function ResetFontSize()
 	local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса^InterfaceFontSize",
 					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 5 then return 0 end return 1 end,
@@ -409,6 +558,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'S&how Calltip', ru = 'Показать подсказку', key = 'Ctrl+?', action = function() ShowTipManualy() end, image = 'ui_tooltip_balloon_bottom_µ',},
 		{'Complete S&ymbol', ru = 'Завершить слово(из API)', key = 'Ctrl++', action = function() ShowListManualy() end},
 		{'Complete &Word', ru = 'Завершить слово(из текста)', key = 'Ctrl+Enter', action = IDM_COMPLETEWORD},
+		{'Autocomplete Words Autoshow', ru = 'Автопоказ списка автозавершения', check_prop = 'autocompleteword.automatic'},
 		{'s2', separator = 1},
         {'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=выделение)', key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
 		{'Expand Abbre&viation', ru = 'Расшифровать сокращение (‹‡›=буфер обмена)', key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
@@ -534,7 +684,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		},},
 		{'&Convert Line End Characters', ru = 'Конвертировать символы перевода строк', action = IDM_EOL_CONVERT},
 		{'s1', separator = 1},
-		{'Change Inden&tation Settings...', ru = 'Изменить настройки отступа', action = IDM_TABSIZE},
+		{'Change Inden&tation Settings...', ru = 'Изменить настройки отступа...', action = CurrentTabSettings},
 		{'Use &Monospaced Font', ru = 'Использовать моноширинные шрифты', action = IDM_MONOFONT},
 		{'s2', separator = 1},
 		{'Reload Session', ru = 'Восстанавливать открытые файлы', action = "CheckChange('session.reload', true)", check = "props['session.reload']=='1'"},
@@ -561,7 +711,10 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Windows Integration', ru = 'Настройка интеграции с Windows', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\WinAssoc.lua')"},
 		{'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
 		{'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
-		{'Colors and Fonts', ru = 'Цвета и шрифты...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings},
+		{'Indicators', ru = 'Индикаторы...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorIndicators.lua')", active = RunSettings},
+		{'Selection Colors', ru = 'Цвета выделения...', action = ResetSelColors},
+		{'Autoscroll Settings', ru = 'Настройка автопрокрутки...', action = AutoScrollingProps},
+		{'Colors and Fonts of lexers', ru = 'Цвета и шрифты лексеров...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings},
 		{"Lexers properties", ru = 'Свойства лексеров', {
 			{'Lexers properties', ru = 'Свойства лексеров', plane = 1 , tLangs},
 			{'s2', separator = 1},

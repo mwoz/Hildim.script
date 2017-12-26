@@ -1,4 +1,4 @@
-local tSet
+local tSet, onDestroy
 local function Init_hidden()
 require 'Compare'
 require 'luacom'
@@ -10,7 +10,7 @@ require 'luacom'
     local tabR = iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight')
     local lastEditLine
     local markerMask = 0
-    local mark = 15
+    local mark = CORE.InidcFactory('Compare.Inline', 'Маркировка различий в строке сравнения', INDIC_BOX, 255, 0)
     local tmpPath
     local tmpFiles = {}
     local gitInstall, bGitActive
@@ -320,7 +320,7 @@ require 'luacom'
     local function CompareToFile(strName, bTmp)
         local strCur = props['FilePath']
         local strExt = props['FileExt']
-
+        local zoom = editor.Zoom
         scite.Perform('blockuiupdate:y')
         BlockEventHandler"OnSwitchFile"
         BlockEventHandler"OnNavigation"
@@ -344,6 +344,8 @@ require 'luacom'
         UnBlockEventHandler"OnSwitchFile"
         scite.Perform('blockuiupdate:u')
         StartCompare()
+        editor.Zoom = zoom
+        coeditor.Zoom = zoom
     end
 
     local function prepareTmpPath()
@@ -414,16 +416,6 @@ require 'luacom'
     end
 
     local function ColorSettings()
-        local function Rgb2Str(rgb)
-            return ''..(rgb & 255)..' '..((rgb >> 8) & 255)..' '..((rgb >> 16) & 255)
-        end
-        local function Str2Rgb(s, def)
-            local _, _, r, g, b = s:find('(%d+) (%d+) (%d+)')
-            if r then
-                return (b << 16)|(g << 8)|r
-            end
-            return def
-        end
         local ret, added, deleted, changed, moved, blank =
         iup.GetParam("Настройки цветов сравнения^CompareColorSettings",
             nil,
@@ -432,18 +424,18 @@ require 'luacom'
             'Changed:%c\n'..
             'Moved:%c\n'..
             'Blank:%c\n',
-            Rgb2Str(tSet.Color_added),
-            Rgb2Str(tSet.Color_deleted),
-            Rgb2Str(tSet.Color_changed),
-            Rgb2Str(tSet.Color_moved),
-            Rgb2Str(tSet.Color_blank)
+            CORE.Rgb2Str(tSet.Color_added),
+            CORE.Rgb2Str(tSet.Color_deleted),
+            CORE.Rgb2Str(tSet.Color_changed),
+            CORE.Rgb2Str(tSet.Color_moved),
+            CORE.Rgb2Str(tSet.Color_blank)
         )
         if ret then
-            tSet.Color_added = Str2Rgb(added  , tSet.Color_added  )
-            tSet.Color_deleted = Str2Rgb(deleted, tSet.Color_deleted)
-            tSet.Color_changed = Str2Rgb(changed, tSet.Color_changed)
-            tSet.Color_moved = Str2Rgb(moved  , tSet.Color_moved  )
-            tSet.Color_blank = Str2Rgb(blank  , tSet.Color_blank  )
+            tSet.Color_added   = CORE.Str2Rgb(added  , tSet.Color_added  )
+            tSet.Color_deleted = CORE.Str2Rgb(deleted, tSet.Color_deleted)
+            tSet.Color_changed = CORE.Str2Rgb(changed, tSet.Color_changed)
+            tSet.Color_moved   = CORE.Str2Rgb(moved  , tSet.Color_moved  )
+            tSet.Color_blank   = CORE.Str2Rgb(blank  , tSet.Color_blank  )
             ApplySettings()
             Compare.SetStyles()
         end
@@ -497,12 +489,13 @@ require 'luacom'
     end)
 
 
-    local function onDestroy()
+    onDestroy = function()
         for f, _ in pairs(tmpFiles) do
             shell.delete_file(f)
         end
         _G.iuprops['compare_settings'] = tSet;
         COMPARE = nil
+        CORE.FreeIndic(mark)
     end
 
     Compare.Init(iup.GetDialogChild(iup.GetLayout(), "Source").hwnd, iup.GetDialogChild(iup.GetLayout(), "CoSource").hwnd)
