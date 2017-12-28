@@ -378,7 +378,7 @@ local function Favorites_AddFile()
 	if attr == 'd' then
 		fname = fname:gsub('\\\\.\\.$', '')..'\\'
 	end
-    table.insert(list_fav_table {fname, false, alias = fname:gsub('^.-([^\\]+)\\?$', '%1')})
+    table.insert(list_fav_table, {fname, false, alias = fname:gsub('^.-([^\\]+)\\?$', '%1')})
 	Favorites_ListFILL_l(true)
 	Favorites_SaveList()
 end

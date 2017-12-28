@@ -5,7 +5,7 @@
 ----[[ C O M M O N ]]-------------------------------------------------------
 --Загрузка имэджей
 if props['script.started'] ~= 'Y' then
-    iup.Load(props["SciteDefaultHome"].."\\tools\\Images.led")
+    --iup.Load(props["SciteDefaultHome"].."\\tools\\Images.led")
     dofile (props["SciteDefaultHome"].."\\tools\\Images.lua")
 end
 

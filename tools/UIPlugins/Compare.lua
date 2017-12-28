@@ -166,9 +166,7 @@ require 'luacom'
     end
 
     local function onClose(t1, t2, source, bScipClear)
-            print(source, t1[source])
         if t1[source] then
-            print(t2[t1[source]])
             t2[t1[source]] = "-"
             if not bScipClear then Reset() end
         end

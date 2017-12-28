@@ -194,7 +194,7 @@ local function Init()
                 {'Check Out', action = vss_checkout, image = 'arrow_curve_270_µ'  ,},
                 {'Get Latest Version', ru = 'Получить последнюю версию', action = vss_getlatest ,},
                 {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
-                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = COMPARE.CompareVss, visible = 'COMPARE', image = 'edit_diff_µ' ,},
+                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
                 {'History', ru = 'Показать историю', action = vss_hist ,},
                 {'s', separator = 1},
                 {'Check Out Undiff', action = vss_checkoutundif ,},
@@ -205,7 +205,7 @@ local function Init()
                 {'Undo Check Out', ru = 'Отменить Check Out', action = vss_undocheckout,},
                 {'Get Latest Version', action = vss_getlatest ,},
                 {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
-                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = COMPARE.CompareVss, visible = 'COMPARE', image = 'edit_diff_µ' ,},
+                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
                 {'History', ru = 'Показать историю', action = vss_hist ,},
             }
         elseif ierr == 100 then --новый
