@@ -352,6 +352,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
     scite.Perform('blockuiupdate:y')
     local cloned = {}
     local tblBuff = {lst = {}, pos = {}, layouts = {}, bmk = {}}
+    local cloused = {}
     DoForBuffers(function(i)
         if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
@@ -370,6 +371,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
                     table.insert(tblBuff.layouts, SaveLayOut())
                     table.insert(tblBuff.bmk, pref..iup.GetBookmarkLst())
                     nf = true
+                    table.insert(cloused, pref..props['FilePath'])
                 end
             else
                 if i <= curBuf then curBuf = curBuf - 1 end
@@ -378,7 +380,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
         end
     end)
     scite.Perform('blockuiupdate:u')
-    if OnCloseFileset then OnCloseFileset() end
+    if OnCloseFileset then OnCloseFileset(cloused) end
 
     props['load.on.activate'] = tmpFlag
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end

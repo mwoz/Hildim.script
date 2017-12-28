@@ -46,7 +46,7 @@ local function ReadSettings()
         ,wrapFind = (cv("chkWrapFind") == "ON")
         ,backslash = (cv("chkBackslash") == "ON")
         ,regExp = (cv("chkRegExp") == "ON")
-        ,style = Iif(cv("chkInStyle") == "ON",cv("numStyle"),nil)
+        ,style = Iif(cv("chkInStyle") == "ON",math.tointeger(cv("numStyle")),nil)
         ,searchUp = (containers["zUpDown"].valuepos == "0")
         ,findWhat = self:encode(cv("cmbFindWhat"))
         ,replaceWhat = self:encode(cv("cmbReplaceWhat"))
@@ -59,7 +59,16 @@ local function ReadSettings()
             return true
         end
     end
+    if cv("chkInStyle") == "ON" and Ctrl("chkInStyle") == 'YES' then
+        local prLine = editor:LineFromPosition(editor.CurrentPos)
+        local fLine = editor.FirstVisibleLine
+        editor:DocumentEnd()
+        editor:LineScroll(1, fLine)
+        editor:GotoLine(prLine)
+        print(123)
+    end
 end
+
 
 local prev_KF = nil
 local function live_killFocus(h)
@@ -895,7 +904,7 @@ local function create_dialog_FindReplace()
     ["tabtitle4"] = "Свойства",
     canfocus  = "NO",
     name = "tabFindRepl",
-    tabchange_cb = function() SetStaticControls(); scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")) end) end,
+    tabchange_cb = function() scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")); SetStaticControls() end) end,
     forecolor = '0 0 0',
     highcolor = '15 60 195',
     tabspadding = '10x3',
@@ -1112,11 +1121,9 @@ local function Init(h)
                 iup.SetFocus(Ctrl("cmbFindWhat"))
             end
         end);
+        OnSwitchFile = function(file) if file == "" then SetStaticControls() end end;
         }
     res.handle_deattach = oDeattFnd
-    res.OnCreate = (function()
-        --scite.RunAsync(SetStaticControls)
-    end)
 
     function OnFindProgress(state, iAll)
         if state == 0 then

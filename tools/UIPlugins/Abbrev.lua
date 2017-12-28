@@ -35,6 +35,7 @@ local function Init()
         local cnt = 0
         s = s:gsub('¦', function(i) cnt = cnt + 1; return Iif(cnt == 1, '¦', '') end )
 
+        editor:AutoCCancel()
         editor:BeginUndoAction()
         editor:SetSel(findSt, findEnd)
         editor:ReplaceSel(s)

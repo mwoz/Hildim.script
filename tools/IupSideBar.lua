@@ -501,8 +501,6 @@ local function InitSideBar()
         bFindInSide = true
     end
 
-    SideBar_Plugins.findrepl.OnCreate()
-
     for i = 1, #tEvents do
         for _,tbs in pairs(SideBar_Plugins) do
             if tbs[tEvents[i]] then AddEventHandler(tEvents[i],tbs[tEvents[i]]) end
@@ -940,7 +938,7 @@ for i = 1, #tbl do
         if pI.key then t.key = pI.key end
         t.action = function() dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p).run() end
 
-        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools|Utils|xxx', t)
+        menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools|xxx', t)
     end
 ::continue::
 end

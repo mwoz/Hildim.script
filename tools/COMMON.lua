@@ -441,6 +441,7 @@ local function DoForBuffers_local(func, bStc, ...)
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
     BlockEventHandler"OnSave"
+    BlockEventHandler"OnClose"
     BlockEventHandler"OnBeforeSave"
     BlockEventHandler"OnIdle"
     local curBuf = scite.buffers.GetCurrent()
@@ -454,6 +455,7 @@ local function DoForBuffers_local(func, bStc, ...)
     editor.VScrollBar = true
     editor.FirstVisibleLine = fvl
     UnBlockEventHandler"OnBeforeSave"
+    UnBlockEventHandler"OnClose"
     UnBlockEventHandler"OnSave"
     UnBlockEventHandler"OnUpdateUI"
     UnBlockEventHandler"OnNavigation"

@@ -165,10 +165,12 @@ require 'luacom'
 
     end
 
-    local function onClose(t1, t2, source)
+    local function onClose(t1, t2, source, bScipClear)
+            print(source, t1[source])
         if t1[source] then
+            print(t2[t1[source]])
             t2[t1[source]] = "-"
-            Reset()
+            if not bScipClear then Reset() end
         end
     end
 
@@ -321,11 +323,12 @@ require 'luacom'
         local strCur = props['FilePath']
         local strExt = props['FileExt']
         local zoom = editor.Zoom
-        scite.Perform('blockuiupdate:y')
+        --scite.Perform('blockuiupdate:y')
         BlockEventHandler"OnSwitchFile"
         BlockEventHandler"OnNavigation"
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnOpen"
+        BlockEventHandler"OnClose"
         scite.Open(strName)
 
         if bTmp then tmpFiles[strName] = true end
@@ -338,12 +341,15 @@ require 'luacom'
         --coeditor:GrabFocus()
         editor:GrabFocus()
         editor.Focus = true
+        UnBlockEventHandler"OnClose"
         UnBlockEventHandler"OnOpen"
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnNavigation"
         UnBlockEventHandler"OnSwitchFile"
-        scite.Perform('blockuiupdate:u')
+        --scite.Perform('blockuiupdate:u')
+        bActive = 0
         StartCompare()
+        --debug_prnArgs(tCompare)
         editor.Zoom = zoom
         coeditor.Zoom = zoom
     end
@@ -445,17 +451,49 @@ require 'luacom'
     AddEventHandler("OnOpen", OnSwitch_local)
     AddEventHandler("OnSwitchFile", OnSwitch_local)
 
-    AddEventHandler("OnClose", function(source)
-        if (bActive & 4) == 4 then
-            Reset()
-        elseif bActive > 0 then
-            local side = scite.buffers.GetBufferSide(scite.buffers.GetCurrent())
-            if side == 0 then
-                onClose(tCompare.left, tCompare.right, source)
-            else
-                onClose(tCompare.right, tCompare.left, source)
+    local function OnClose_local(file, side_in)
+        if tmpFiles[file] then
+            tmpFiles[file] = nil
+            if shell.fileexists(file) then
+                shell.delete_file(file)
             end
         end
+        if (bActive & 4) == 4 and not side_in then
+            Reset()
+        elseif bActive > 0 or side_in then
+            local side = side_in or scite.buffers.GetBufferSide(scite.buffers.GetCurrent())
+            if side == 0 or side_in then
+                onClose(tCompare.left, tCompare.right, file, side_in)
+            else
+                onClose(tCompare.right, tCompare.left, file, side_in)
+            end
+        end
+    end
+
+    AddEventHandler("OnClose", OnClose_local)
+    AddEventHandler("OnCloseFileset", function(tfiles)
+        for i = 1,  #tfiles do
+            local side = 0
+            local path = tfiles[i]
+            if path:find('^>') then
+                side = 1
+                path = path:gsub('^>', '')
+            end
+            if tmpFiles[path] then
+                tmpFiles[path] = nil
+                if shell.fileexists(path) then
+                    shell.delete_file(path)
+                end
+            end
+            if tCompare.left[path] then
+                tCompare.right[tCompare.left[path]] = '-'
+                tCompare.left[path] = nil
+            elseif tCompare.right[path] then
+                tCompare.left[tCompare.right[path]] = '-'
+                tCompare.right[path] = nil
+            end
+        end
+        OnSwitch_local()
     end)
 
     AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
@@ -475,14 +513,7 @@ require 'luacom'
         end
     end)
 
-    AddEventHandler("OnClose", function(file)
-        if tmpFiles[file] then
-            tmpFiles[file] = nil
-            if shell.fileexists(file) then
-                shell.delete_file(file)
-            end
-        end
-    end)
+
 
     AddEventHandler("CoOnUpdateUI", function(bModified, bSelection, flag)
         ScrollWindows(coeditor, editor, flag)
@@ -525,24 +556,24 @@ require 'luacom'
 
     local item = {'Compare', ru = 'Сравнение', {
 		{'Compare', ru = 'Сравнить', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
-		{'Clear', ru = 'Очистить', action = Reset, },
+		{'Clear backlight', ru = 'Очистить подсветку', action = Reset, image='cross_script_µ' },
         {'s1', separator = 1},
-        {'Compare to Git', ru = 'Сравнить с Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end},
-        {'Compare to Vss', ru = 'Сравнить с Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp},
+        {'Compare to Git', ru = 'Сравнить с Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end, image='edit_diff_µ'},
+        {'Compare to Vss', ru = 'Сравнить с Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp, image = 'edit_diff_µ'},
         {'Compare to Self-Titled', ru = 'Сравнить с одноименным из...', action = CompareSelfTitled, active = function() return ((tSet.selfTitledDir or '' and bCanNewComp())) ~= '' end},
         {'Directory For Comparing', ru = 'Директория для сравнения', action = SetSelfTitledDir, active = function() return true end},
         {'s2', separator = 1},
-		{'Next Difference', ru = 'Следующее различие', key = 'Alt+D', action = nextDiff, active = function() return bActive == 7 end},
-		{'Prevouse Difference', ru = 'Предыдущее различие', key = 'Alt+U', action = prevDif, active = function() return bActive == 7 end},
-		{'Copy To Left', ru = 'Скопировать влево', key = 'Alt+L', action = function() copyToSide(0) end, active = bCanCpyLeft},
-		{'Copy To Right', ru = 'Скопировать вправо', key = 'Alt+R', action = function() copyToSide(1) end, active = bCanCpyRight},
+		{'Next Difference', ru = 'Следующее различие', key = 'Alt+D', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
+		{'Prevouse Difference', ru = 'Предыдущее различие', key = 'Alt+U', action = prevDif, active = function() return bActive == 7 end, image='IMAGE_ArrowUp'},
+		{'Copy To Left', ru = 'Скопировать влево', key = 'Alt+L', action = function() copyToSide(0) end, active = bCanCpyLeft, image='control_double_180_µ'},
+		{'Copy To Right', ru = 'Скопировать вправо', key = 'Alt+R', action = function() copyToSide(1) end, active = bCanCpyRight, image='control_double_µ'},
         {'s3', separator = 1},
 		{'Recompare by changing line', ru = 'Сравнивать заново при изменении строки', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare end},
 		{'Ignore Space', ru = 'Игнорировать пробелы', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{} end},
 		{'Detect Move', ru = 'Определять перемещенные строки', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings() end},
 		{'Add Empty Line', ru = 'Добавлять пустые строки', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings() end},
 		{'Use Icons', ru = 'Использовать иконки', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings() end},
-		{'Color Settings', ru = 'Настройки цветов', action = ColorSettings},
+		{'Color Settings', ru = 'Настройки цветов', action = ColorSettings, image='color_µ'},
     }}
     menuhandler:AddMenu(item)
 

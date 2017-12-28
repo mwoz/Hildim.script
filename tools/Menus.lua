@@ -82,8 +82,8 @@ local function ResetTabbarProps()
         return c
     end
 
-    local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref, ROColor,
-    tabctrl_forecolor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color
+    local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref,
+    tabctrl_forecolor, ROColor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color
     = iup.GetParam("Свойства панели закладок^TabbarProperties",
         nil,
         'Закрывать по DblClick%b\n'..
@@ -144,6 +144,7 @@ local function ResetTabbarProps()
         iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight'), 1)
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft'), 1)
+        scite.Perform('blockuiupdate:u')
     end
 end
 
@@ -417,8 +418,6 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
     {link= 'File|Move to another window'},
     {link='File|Clone to another window'},
 	{'s2', separator=1},
-	{'Move Tab Left', ru = 'Переместить влево', action = IDM_MOVETABLEFT,},
-	{'Move Tab Right', ru = 'Переместить вправо', action = IDM_MOVETABRIGHT,},
 	{'Copy to Clipboard', ru='Копировать в буфер',{
 		{'All Text', ru='Весь текст', action = function() CopyPathToClipboard("text") end,},
 		{'Path/FileName', ru='Путь/Имя файла', action = function() CopyPathToClipboard("all") end,},
@@ -573,7 +572,8 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 			{'Format Line', ru = 'Форматировать строку', action = function() if Format_String then Format_String() end end, key = 'Ctrl+['},
 			{'Auto Indent', ru = 'Автоотступ', check_iuprops = 'autoformat.indent', key = 'Ctrl+Shift+]'},
 			{'Autoformating Lines', ru = 'Автоформатирование строк', check_iuprops = 'autoformat.line', key = 'Ctrl+Shift+['},
-		}},
+ 			{'Auto Indent Force', ru = 'Автоотступ с автоформатированием', check_iuprops = 'autoformat.indent.force', active = function() return (_G.iuprops['autoformat.indent'] or 1) == 1 end},
+        }},
 		{'Match &Brace', ru = 'Найти парную скобку', key = 'Ctrl+E', action = IDM_MATCHBRACE},
 		{'Select t&o Brace', ru = 'Выделить до парной скобки', key = 'Ctrl+Shift+E', action = IDM_SELECTTOBRACE},
 		{'s2', separator = 1},
@@ -589,7 +589,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Block Co&mment', ru = 'Блочный комментарий', action = IDM_BLOCK_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},
 		{'Stream Comme&nt', ru = 'Потоковый комментарий', key = 'Ctrl+Shift+Q', action = IDM_STREAM_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},
 		{'Bo&x Comment', ru = 'Бокс - комментарий', key = 'Ctrl+Shift+B', action = IDM_BOX_COMMENT, visible = "props['comment.box.start.'..editor_LexerLanguage()]~=''"},
-        {'Decode  ещ', ru = 'Изменить кодировку на..',{
+        {'Decode  to', ru = 'Изменить кодировку на..',{
             {'&Code Page Property', ru = 'Заданная настройкой codepage', action = ChangeCode(IDM_ENCODING_DEFAULT), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_DEFAULT end},
             {'UTF-16 &Big Endian', action = ChangeCode(IDM_ENCODING_UCS2BE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCS2BE end},
             {'UTF-16 &Little Endian', action = ChangeCode(IDM_ENCODING_UCS2LE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCS2LE end},
@@ -686,13 +686,16 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 			end),},
 		},},
 		{'s2', separator = 1},
-		{'&Next Message', ru = 'Следующее сообщение', key = 'F4', action = IDM_NEXTMSG},
-		{'&Previous Message', ru = 'Предыдущее сообщение', key = 'Shift+F4', action = IDM_PREVMSG},
-		{'Clear &Output', ru = 'Очистить окно консоли', key = 'Shift+F5', action = IDM_CLEAROUTPUT},
-		{'Clear &Find Result', ru = 'Очистить результаты поиска', action = "findres:SetText('')"},
-		{'&Switch Pane', ru = 'Редактирование/Результаты поиска/Консоль', key = 'Ctrl+F6', action = function() CORE.SwitchPane(true) end},
-		{'Switch Pane Back', ru = 'Редактирование/Консоль/Результаты поиска', key = 'Ctrl+Shift+F6', action = function() CORE.SwitchPane(false) end},
-	},},
+            {'Консоль', ru = 'Консоль',{
+            {'&Next Message', ru = 'Следующее сообщение', key = 'F4', action = IDM_NEXTMSG},
+            {'&Previous Message', ru = 'Предыдущее сообщение', key = 'Shift+F4', action = IDM_PREVMSG},
+            {'Clear &Output', ru = 'Очистить окно консоли', key = 'Shift+F5', action = IDM_CLEAROUTPUT},
+            {'Clear &Find Result', ru = 'Очистить результаты поиска', action = "findres:SetText('')"},
+            {'&Switch Pane', ru = 'Редактирование/Результаты поиска/Консоль', key = 'Ctrl+F6', action = function() CORE.SwitchPane(true) end},
+            {'Switch Pane Back', ru = 'Редактирование/Консоль/Результаты поиска', key = 'Ctrl+Shift+F6', action = function() CORE.SwitchPane(false) end},
+        },},
+        {'s2', separator = 1},
+    },},
 	{'Options', ru = 'Настройки',{
 
 		{'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
@@ -706,14 +709,14 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		},},
 		{'&Convert Line End Characters', ru = 'Конвертировать символы перевода строк', action = IDM_EOL_CONVERT},
 		{'s1', separator = 1},
-		{'Change Inden&tation Settings...', ru = 'Изменить настройки отступа...', action = CurrentTabSettings},
+		{'Change Inden&tation Settings...', ru = 'Изменить настройки отступа...', action = CurrentTabSettings, image='edit_indent_µ'},
 		{'Use &Monospaced Font', ru = 'Использовать моноширинные шрифты', action = IDM_MONOFONT},
 		{'s2', separator = 1},
 		{'Reload Session', ru = 'Восстанавливать открытые файлы', action = "CheckChange('session.reload', true)", check = "props['session.reload']=='1'"},
 		{'Show Menu Icons', ru = 'Отображать иконки в меню', check_iuprops = 'menus.show.icons'},
 		{'Show API Tool Tip', ru = 'Подсказки из API файла', check_iuprops = 'menus.tooltip.show', visible="props['apii$']~='' or props['apiix$']~=''"},
 		{'Interface Font Size', ru = 'Размер шрифта интерфейса...', action = ResetFontSize},
-        {'Tabbar Settings', ru = 'Свойства панели вкладок', action = ResetTabbarProps},
+        {'Tabbar Settings', ru = 'Свойства панели вкладок', action = ResetTabbarProps, image='ui_tab__pencil_µ'},
 
 		{'s3', separator = 1},
 		{'Hotkeys Settings', ru = 'Настройка горячих клавиш...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\HotkeysSettings.lua')", active = RunSettings, image = "keyboards_µ"},
@@ -730,13 +733,12 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Save Configuration...', ru = 'Сохранить конфигурацию как...', action = iup.SaveIuprops, image = 'disk__pencil_µ'},
 		{'Save Current Configuration', ru = 'Сохранить текущую конфигурацию: '..(iuprops['current.config.restore'] or ''):gsub('^.-([^\\]-)%.[^\\.]+$', '%1'), action = iup.SaveCurIuprops, visible = "iuprops['current.config.restore']~=nil", image = 'disk_µ'},
 		{'s5', separator = 1},
-		{'Windows Integration', ru = 'Настройка интеграции с Windows', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\WinAssoc.lua')"},
+		{'Windows Integration', ru = 'Настройка интеграции с Windows', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\WinAssoc.lua')", image='windows_µ'},
 		{'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
-		{'Open &Global Options File', ru = 'Открыть файл глобальных настроек', action = IDM_OPENGLOBALPROPERTIES},
-		{'Indicators', ru = 'Индикаторы...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorIndicators.lua')", active = RunSettings},
-		{'Selection Colors', ru = 'Цвета выделения...', action = ResetSelColors},
-		{'Autoscroll Settings', ru = 'Настройка автопрокрутки...', action = AutoScrollingProps},
-		{'Colors and Fonts of lexers', ru = 'Цвета и шрифты лексеров...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings},
+		{'Indicators', ru = 'Индикаторы...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorIndicators.lua')", active = RunSettings, image='color_µ'},
+		{'Selection Colors & caret', ru = 'Цвета выделения и курсор...', action = ResetSelColors, image='color_µ'},
+		{'Autoscroll Settings', ru = 'Настройка автопрокрутки...', action = AutoScrollingProps, image='settings_µ'},
+		{'Colors and Fonts of lexers', ru = 'Цвета и шрифты лексеров...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings, image='settings_µ'},
 		{"Lexers properties", ru = 'Свойства лексеров', {
 			{'Lexers properties', ru = 'Свойства лексеров', plane = 1 , tLangs},
 			{'s2', separator = 1},
@@ -752,14 +754,14 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Next', ru = 'Следующая', key = 'F6', action = IDM_NEXTFILE},
 		{'Move Tab &Left', ru = 'Переместить влево', action = IDM_MOVETABLEFT},
 		{'Move Tab &Right', ru = 'Переместить вправо...', action = IDM_MOVETABRIGHT},
-        {'Tabbar Settings', ru = 'Свойства панели вкладок...', action = ResetTabbarProps},
-		{'&Close All', ru = 'Закрыть все', action = IDM_CLOSEALL},
+        {'Tabbar Settings', ru = 'Свойства панели вкладок...', action = ResetTabbarProps, image='ui_tab__pencil_µ'},
+		{'&Close All', ru = 'Закрыть все', action = IDM_CLOSEALL, image='cross_script_µ'},
 		{'&Save All', ru = 'Сохранить все', key = 'Ctrl+Alt+S', action = function() DoForBuffers_Stack(function() scite.MenuCommand(IDM_SAVE) end) end, image = 'disks_µ'},
 		{'&Full Save All', ru = 'Сохранить все с обработкой событий',  action = IDM_SAVEALL, image = 'disks_µ'},
 		{'s2', separator = 1},
 		{'l1', CORE.windowsList, plane = 1},
         {'s2', separator = 1},
-        {'Buffers...', ru = 'Вкладки...', action = function() CORE.showWndDialog() end, },
+        {'Buffers...', ru = 'Вкладки...', action = function() CORE.showWndDialog() end, image='property_µ' },
 
 	},},
 	{'Help', ru = 'Справка',{
