@@ -79,7 +79,7 @@ require 'luacom'
     end
 
     local function fPath(tabS)
-        return iup.GetAttribute(tabS, "TABTIP"..iup.GetAttribute(tabS, "VALUEPOS"))
+        return scite.buffers.NameAt(math.tointeger(iup.GetAttribute(tabS, "TABBUFFERID"..iup.GetAttribute(tabS, "VALUEPOS"))) or 0)
     end
 
     local bRunScroll

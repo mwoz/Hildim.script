@@ -699,7 +699,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 	{'Options', ru = 'Настройки',{
 
 		{'&Wrap', ru = 'Перенос по словам', action = IDM_WRAP, check = "props['wrap']=='1'"},
-		{'Wrap settings', ru = 'Настройки переноса по словам...', action = ResetWrapProps, visible = "props['wrap']=='1'"},
+		{'Wrap settings', ru = 'Настройки переноса по словам...', action = ResetWrapProps, image='settings_µ'},
 		{'&Read-Only', ru = 'Только для чтения', action = ResetReadOnly, check = "(shell.getfileattr(props['FilePath']) & 1) == 1"},
 		{'s2', separator = 1},
 		{'Line End Characters', ru = 'Символы перевода строк',{radio = 1,

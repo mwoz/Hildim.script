@@ -147,7 +147,6 @@ local function InitWndDialog()
                 end
             end
             for i = 1, #t do
-                print(t[i][2])
                 scite.buffers.SetDocumentAt(t[i][2])
                 scite.MenuCommand(IDM_CHANGETAB)
             end

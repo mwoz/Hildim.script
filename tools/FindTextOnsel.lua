@@ -109,7 +109,7 @@ CORE.Find_FindInDialog = function(ud)
     iup.GetDialogChild(iup.GetLayout(), "zUpDown").valuepos = tmpUD
     iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat").value = sText
     iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat"):SaveHist()
-    iup.GetDialogChild(iup.GetLayout(), "btnFind").action()
+    iup.GetDialogChild(iup.GetLayout(), "btnFind").flat_action()
     iup.GetDialogChild(iup.GetLayout(), "zUpDown").valuepos = curUD
 end
 
