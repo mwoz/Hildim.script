@@ -80,6 +80,8 @@ end
 
 function s:PopMnu(smnu, x, y, bToolBar)
 --debug_prnArgs(smnu)
+    if OnShowMainMenu and OnShowMainMenu(smnu) then return end
+
     local CreateMenu, CreateItems
     local bPrevSepar = false
     local bShoIcons = (_G.iuprops['menus.show.icons'] == 1)
@@ -89,7 +91,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
             if m[i].link then itm = FindMenuItem('MainWindowMenu|'..m[i].link)
             else itm = m[i] end
 
-            if getParam(itm.visible,true) and
+            if itm and getParam(itm.visible,true) and
                (not itm.visible_ext or string.find(','..itm.visible_ext..',',','..props["FileExt"]..',')) then
                 if itm[2] then
 
@@ -339,7 +341,7 @@ function s:RegistryHotKeys()
     for ups, submnu in pairs(sys_Menus) do
         DropDown(ups,submnu)
     end
---debug_prnArgs(tKeys)
+-- debug_prnArgs(tKeys)
    scite.RegistryHotKeys(tKeys)
 end
 

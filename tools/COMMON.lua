@@ -295,22 +295,7 @@ function CORE.EditMarkColor(iMrk)
 end
 
 local function EditorInitMarkStyles()
-    -- local string2value = {
-    --     plain    = INDIC_PLAIN,    squiggle = INDIC_SQUIGGLE,
-    --     tt       = INDIC_TT,       diagonal = INDIC_DIAGONAL,
-    --     strike   = INDIC_STRIKE,   hidden   = INDIC_HIDDEN,
-    --     roundbox = INDIC_ROUNDBOX, box      = INDIC_BOX,
-    --     hotspot  = INDIC_HOTSPOT
-    -- }
-    -- for indic_number = 0, 31 do
-    --     local mark = props["indic.style."..indic_number]
-    --     if mark ~= "" then
-    --         local indic_color = mark:match("#%x%x%x%x%x%x") or (props["find.mark"]):match("#%x%x%x%x%x%x") or "#0F0F0F"
-    --         local indic_style = string2value[mark:match("%l+")] or INDIC_ROUNDBOX
-    --         local indic_alpha = tonumber((mark:match("%@%d+") or ""):sub(2)) or 30
-    --         InitMarkStyle(indic_number, indic_style, indic_color, indic_alpha)
-    --     end
-    -- end
+
 	findres.IndicStyle[31] = INDIC_ROUNDBOX
 	findres.IndicFore[31] = encodeRGB2WIN('#54FFB4')
 	findres.IndicAlpha[31] = 35

@@ -958,6 +958,7 @@ local function OnUserListSelection_local(tp, str)
             if isAbbr and not CancellFromForm then
                 editor:EndUndoAction()
                 editor:AutoCCancel()
+                SetListVisibility(false)
                 CallTipXml(str)
                 return
             elseif isAbbr then
@@ -1204,6 +1205,7 @@ end
 
 -- ОСНОВНАЯ ПРОЦЕДУРА (обрабатываем нажатия на клавиши)
 local function OnChar_local(char)
+
     if bIsListVisible and not pasteFromXml and fillup_chars ~= '' and string.find(char, fillup_chars) then
         --обеспечиваем вставку выбранного в листе значения вводе одного из завершающих символов(fillup_chars - типа (,. ...)
         --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
@@ -1217,6 +1219,9 @@ local function OnChar_local(char)
             SetListVisibility(false)
         end
     end
+
+    if bIsListVisible and not editor:AutoCActive() then SetListVisibility(false) end
+
 	if IsComment(editor.CurrentPos - 2) then return false end -- Если строка закомментирована, то выходим
     current_pos = editor.CurrentPos
     af_current_line = editor:LineFromPosition(current_pos)
