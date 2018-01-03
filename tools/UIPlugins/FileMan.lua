@@ -511,6 +511,19 @@ local function Favorites_OpenFile()
 	end
 end
 
+function FILEMAN.OpenFolder(fname)
+    local itab
+    local h = _Plugins.fileman.Bar_obj.TabCtrl
+    for i = 0, h.count do
+        if iup.GetAttributeId(h, 'TABTITLE', i) == _Plugins.fileman.id then
+            mybar_Switch(i + 1)
+            current_path = fname
+            FileMan_ListFILL()
+            return
+        end
+    end
+end
+
 local function OnSwitch(bForse, bRelist)
     if prev_filename:upper() == props['FilePath']:upper() then return end
     prev_filename = ''

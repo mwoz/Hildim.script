@@ -40,13 +40,19 @@ local function Init_hidden()
     local function nextMC(force)
         if force or MC.typ then
             table.insert(pCurBlock, MC)
-            MC = {}
+            local prevSel = editor.SelectionStart
+            local prevSelEnd = editor.SelectionEnd
+            local col = editor.Column[prevSelEnd] + editor.SelectionNAnchorVirtualSpace[0]
+            MC = {Start = editor.SelectionStart, End = editor.SelectionEnd,
+                  Anchor = editor.SelectionNAnchorVirtualSpace[0],
+                  Caret = editor.SelectionNCaretVirtualSpace[0]}
         end
     end
 
     local prevCol
     local function local_OnMacro(typ, fname, w, l, s)
         if not MACRO.Record then return end
+        -- print(typ, fname, w, l, s)
         if fname == 'ReplaceSel' then
             if s == '\n' or s == '\r' then
                 if s == '\n' then return end
@@ -159,6 +165,8 @@ local function Init_hidden()
 
     local function ClearSciKeys()
         if CLIPHISTORY then
+            editor:ClearCmdKey(string.byte'Y', SCMOD_CTRL)
+            editor:ClearCmdKey(string.byte'Z', SCMOD_CTRL)
             editor:ClearCmdKey(string.byte'C', SCMOD_CTRL)
             editor:ClearCmdKey(string.byte'V', SCMOD_CTRL)
             editor:ClearCmdKey(string.byte'X', SCMOD_CTRL)
@@ -168,6 +176,8 @@ local function Init_hidden()
     end
     local function ReassignSciKeys()
         if CLIPHISTORY then
+            editor:AssignCmdKey(string.byte'Y', SCMOD_CTRL, SCI_REDO)
+            editor:AssignCmdKey(string.byte'Z', SCMOD_CTRL, SCI_UNDO)
             editor:AssignCmdKey(string.byte'C', SCMOD_CTRL, SCI_COPY)
             editor:AssignCmdKey(string.byte'V', SCMOD_CTRL, SCI_PASTE)
             editor:AssignCmdKey(string.byte'X', SCMOD_CTRL, SCI_CUT)
@@ -286,7 +296,7 @@ local function Init_hidden()
         sOut = ''
         for i = 1, #positions_t do
             if i == 1 then
-                sOut = sOut..'\r\nlocal '
+                sOut = sOut..'\nlocal '
             else
                 sOut = sOut..', '
                 if MACRO.Record then sVal = sVal..', ' end
@@ -298,28 +308,28 @@ local function Init_hidden()
 
         if MACRO.Record then
             for i = 1,  #params do
-                sOut = sOut..'\r\nlocal par'..i..' = '..params[i].num
+                sOut = sOut..'\nlocal par'..i..' = '..params[i].num
             end
         else
             if #params > 0 then
-                local strUp = '\r\nlocal ret'
+                local strUp = '\nlocal ret'
                 local strParams = ''
                 local strValues = ''
                 for i = 1,  #params do
                     strUp = strUp..', par'..i
-                    strParams = strParams..'\r\n"'..params[i].caption..params[i].suff..'\\n"..'
+                    strParams = strParams..'\n"'..params[i].caption..params[i].suff..'\\n"..'
                     if params[i].typ == 'for' then
-                        strValues = strValues..',\r\n'..params[i].num
+                        strValues = strValues..',\n'..params[i].num
                     elseif params[i].typ == 'if' then
-                        strValues = strValues..',\r\n'..params[i].default
+                        strValues = strValues..',\n'..params[i].default
                     elseif params[i].typ == 'str' then
-                        strValues = strValues..',\r\n"'..Iif(params[i].default == 1, params[i].str, '')..'"'
+                        strValues = strValues..',\n"'..Iif(params[i].default == 1, params[i].str, '')..'"'
                     end
 
                 end
                 sOut = sOut..strUp..
-                    ' = \r\niup.GetParam("Параметры макроса", nil,'..strParams..
-                    '\r\n"" '..strValues..")\r\nif not ret then return end"
+                    ' = \niup.GetParam("Параметры макроса", nil,'..strParams..
+                    '\n"" '..strValues..")\nif not ret then return end"
             end
         end
 
@@ -363,15 +373,15 @@ local function Init_hidden()
                 elseif block[i].typ == 'for' then
                     local jStart = 1
                     if MACRO.Record then if pCurBlock == block[i] then jStart = 2 end end
-                    sOut = sOut..'\r\n'..line..'for j'..block[i].id..' = '..jStart..', par'..block[i].id..' do'
+                    sOut = sOut..'\n'..line..'for j'..block[i].id..' = '..jStart..', par'..block[i].id..' do'
                     get_block_script(block[i], nTab + 1)
-                    line = line..'end\r\n'
+                    line = line..'end\n'
                 elseif block[i].typ == 'if' then
-                    sOut = sOut..'\r\n'..line..'if par'..block[i].id..' == 1 then'
+                    sOut = sOut..'\n'..line..'if par'..block[i].id..' == 1 then'
                     get_block_script(block[i], nTab + 1)
-                    line = line..'end\r\n'
+                    line = line..'end\n'
                 end
-                sOut = sOut..'\r\n'..line
+                sOut = sOut..'\n'..line
                 --sOut = sOut..';'..line
             end
         end
@@ -398,6 +408,33 @@ local function Init_hidden()
             --par.num = par.num + 1
         end
         pCurBlock = pCurBlock.pUpper
+    end
+
+    local function do_Undo()
+        if MC.typ then
+            if MC.fname == 'ReplaceSel' then
+                MC.s = MC.s:gsub('.$', '')
+                MACRO.Record = false
+                editor:DeleteBack()
+                MACRO.Record = true
+                if MC.s ~= '' then return end
+            end
+            if MC.fname == 'NewLine' then
+                MACRO.Record = false
+                editor:DeleteBack()
+                MACRO.Record = true
+            end
+            editor.SelectionStart = MC.Start
+            editor.SelectionEnd = MC.End
+            editor.SelectionNAnchorVirtualSpace[0] = MC.Anchor
+            editor.SelectionNCaretVirtualSpace[0] = MC.Caret
+            if #pCurBlock > 0 then
+                MC = pCurBlock[#pCurBlock]
+                pCurBlock[#pCurBlock] = nil
+            else
+                --
+            end
+        end
     end
 
     local function GetScript()
@@ -606,6 +643,10 @@ local function Init_hidden()
                 mnu_i = {t[i].name, action = function() RunMacroFile(props["SciteDefaultHome"]..'\\data\\Macros\\'..t[i].name) end}
                 table.insert(macro_list, mnu_i)
             end
+            if FILEMAN then
+                table.insert(macro_list, {'s2', separator = 1})
+                table.insert(macro_list, {'Open Macro Folder', ru = 'Открыть папку с макросами', action = function() FILEMAN.OpenFolder(props["SciteDefaultHome"]..'\\data\\Macros\\') end, image = 'folder_search_result_µ'})
+            end
         end
         return macro_list
     end
@@ -702,6 +743,7 @@ local function Init_hidden()
             {'Find Prev Word/Selection', ru = 'Предыдущее слово/выделение - (через диалог)', action = function() do_Find_FindInDialog(false) end, image = "IMAGE_search"},
             {'Next Word/Selection', ru = 'Следующее слово/выделение', action = function() do_FindNextWrd(1) end, image = "IMAGE_search"},
             {'Prevous Word/Selection', ru = 'Предыдущее слово/выделение', action = function() do_FindNextWrd(2) end, image = "IMAGE_search"} ,
+            {'Undo', ru = 'Отменить', active = function() return MC and (MC.typ == "F" or MC.typ == "P") end, action = do_Undo, image = "arrow_return_270_left_µ"} ,
         }},
     }}
     menuhandler:AddMenu(item)
