@@ -240,6 +240,14 @@ end
 
     local function InsertAbbreviation(expan, dInd, curSel)
         local findSt = editor.SelectionStart
+        if MACRO and expan:find('^MACRO:') then
+            if findSt ~= editor.SelectionEnd then
+                editor:ReplaceSel('')
+                findSt = editor.SelectionStart
+            end
+            scite.RunAsync(function() MACRO.PlayMacro(expan:gsub('^MACRO:', '')) end)
+            return
+        end
         --Меняем: вставляем наш селекшн, коммент в начале убираем,\r убираем, вставляем табы, вставляем новые строки
         local s =(expan:gsub('‹‡›', curSel):gsub('^%-%-.-\\n', ''):gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', CORE.EOL())):gsub('¬', '\\')
         local isForm

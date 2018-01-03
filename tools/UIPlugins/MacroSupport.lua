@@ -281,7 +281,7 @@ local function Init_hidden()
 
     local function GetBlock(b)
 
-        local sOut = ''
+        local sOut, sVal = '', ''
 
         sOut = ''
         for i = 1, #positions_t do
@@ -289,9 +289,12 @@ local function Init_hidden()
                 sOut = sOut..'\r\nlocal '
             else
                 sOut = sOut..', '
+                if MACRO.Record then sVal = sVal..', ' end
             end
             sOut = sOut..'column'..i
+            if MACRO.Record then sVal = sVal..positions_t[i].pos end
         end
+        if MACRO.Record then sOut = sOut..' = '..sVal end
 
         if MACRO.Record then
             for i = 1,  #params do
@@ -512,7 +515,9 @@ local function Init_hidden()
         BlockEventHandler"OnChar"
         BlockEventHandler"OnKey"
         local curOverype = editor.Overtype
+        editor:BeginUndoAction()
         local bOk, msg = pcall(dostring, scr)
+        editor:EndUndoAction()
         editor.Overtype = curOverype
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnChar"
@@ -537,8 +542,14 @@ local function Init_hidden()
         end
     end
 
+    function MACRO.PlayMacro(strPath)
+        if not strPath:find('%.') then strPath = strPath..'.macro' end
+        if not strPath:find('\\') then strPath = props["SciteDefaultHome"].."\\data\\Macros\\"..strPath end
+        RunMacroFile(strPath)
+    end
+
     local function SaveCurrent()
-        local dir = props["scite.userhome"].."\\Macros\\"
+        local dir = props["SciteDefaultHome"].."\\data\\Macros\\"
         shell.greateDirectory(dir)
         local d = iup.filedlg{dialogtype = 'SAVE', parentdialog = 'SCITE', extfilter = 'Macros|*.macro;', directory = dir}
         d:popup()
@@ -588,11 +599,11 @@ local function Init_hidden()
 
     local function get_macro_list()
         if not macro_list then
-            local t = shell.findfiles(props["scite.userhome"].."\\Macros\\*.macro")
+            local t = shell.findfiles(props["SciteDefaultHome"].."\\data\\Macros\\*.macro")
             macro_list = {}
             local mnu_i
             for i = 1,  #t do
-                mnu_i = {t[i].name, action = function() RunMacroFile(props["scite.userhome"]..'\\Macros\\'..t[i].name) end}
+                mnu_i = {t[i].name, action = function() RunMacroFile(props["SciteDefaultHome"]..'\\data\\Macros\\'..t[i].name) end}
                 table.insert(macro_list, mnu_i)
             end
         end
@@ -677,7 +688,7 @@ local function Init_hidden()
         }},
         {'StopRecordBlock', plane = 1, visible = function() return MACRO.Record and pCurBlock.id end, function()
             return {
-                {'Завершить блок "'..params[pCurBlock.id].caption..'"', action = do_StopBlock}
+                {'Завершить блок "'..params[pCurBlock.id].caption..'"', action = do_StopBlock, image='control_double_µ'}
             }
         end},
         {'Insert string', ru = 'Вставить строку...', plane = 1, visible = function() return MACRO.Record end, {
