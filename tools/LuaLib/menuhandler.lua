@@ -80,7 +80,6 @@ end
 
 function s:PopMnu(smnu, x, y, bToolBar)
 --debug_prnArgs(smnu)
-    if OnShowMainMenu and OnShowMainMenu(smnu) then return end
 
     local CreateMenu, CreateItems
     local bPrevSepar = false

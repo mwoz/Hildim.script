@@ -1059,6 +1059,11 @@ local function create_dialog_FindReplace()
   return containers[2]
 end
 
+function CORE.FindNextBack(arg)
+    ReadSettings()
+    return FindNextBack(arg)
+end
+
 local function Init(h)
     _Plugins = h
     CORE.ActivateFind = ActivateFind_l --глобальная ссылка на нашу функцию
@@ -1108,10 +1113,14 @@ local function Init(h)
             elseif msg == IDM_FINDINFILES then return ActivateFind_l(2)
             elseif msg == IDM_FINDNEXT then
                 ReadSettings()
-                return FindNextBack(false)
+                local r = FindNextBack(false)
+                Ctrl("cmbFindWhat"):SaveHist()
+                return r
             elseif msg == IDM_FINDNEXTBACK then
                 ReadSettings()
-                return FindNextBack(true)
+                local r = FindNextBack(true)
+                Ctrl("cmbFindWhat"):SaveHist()
+                return r
             elseif msg == IDM_FINDNEXTSEL then return FindNextSel(false)
             elseif msg == IDM_FINDNEXTBACKSEL then return FindNextSel(true)
             end

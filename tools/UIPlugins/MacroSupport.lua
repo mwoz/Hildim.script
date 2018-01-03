@@ -2,12 +2,7 @@ local tSet, onDestroy
 local function Init_hidden()
 
     MACRO = {}
-    function MACRO.Copy()
-    end
-    function MACRO.Cut()
-    end
-    function MACRO.Paste()
-    end
+
     function MACRO.RestoreColumn(col)
         local line = editor:LineFromPosition(editor.CurrentPos)
         local lineStart = editor:PositionFromLine(line)
@@ -39,8 +34,15 @@ local function Init_hidden()
         editor.SelectionEnd = editor.SelectionStart
     end
 
-    local SavedState, MC, pCurBlock, positions_t, lines_t, recordet_macros, started_overtype
+    local SavedState, MC, pCurBlock, positions_t, lines_t, recordet_macros, started_overtype, macro_list, caret_fore
     local params, params_cnt
+
+    local function nextMC(force)
+        if force or MC.typ then
+            table.insert(pCurBlock, MC)
+            MC = {}
+        end
+    end
 
     local prevCol
     local function local_OnMacro(typ, fname, w, l, s)
@@ -67,14 +69,11 @@ local function Init_hidden()
                 return
             end
         end
-        --новая функция или сформированная строка
-        if CLIPHISTORY and (MC.fname == 'Copy' or MC.fname == 'Paste' or MC.fname == 'Cut') then
-            typ = 'P'
-        end
-        table.insert(pCurBlock, MC)
-        MC = {}
+
+        nextMC(true)
         MC.typ = typ; MC.fname = fname; MC.w = w; MC.l = l; MC.s = s; MC.count = 1
     end
+
 
     local function do_KeepPosition()
         table.insert(positions_t, {name = 'Position '..(#positions_t + 1), pos = editor.Column[editor.CurrentPos] + editor.SelectionNAnchorVirtualSpace[0]})
@@ -104,14 +103,57 @@ local function Init_hidden()
         )
         if ret then
             table.insert(params, {caption = cap, typ = 'for', suff = '%i[1,100,1]', id = #params + 1, num = num})
-            if MC.typ then
-                table.insert(pCurBlock, MC)
-                MC = {}
-            end
+            nextMC()
 
             newBlock = {typ = 'for', id = #params, pUpper = pCurBlock}
             table.insert(pCurBlock, newBlock)
             pCurBlock = newBlock
+        end
+    end
+
+    local function do_PasteHist()
+        local tItems = {'<Fixed>'}
+        local tId = {}
+        local pB = pCurBlock
+        while pB.pUpper do
+            if params[pB.id].typ == 'for' then
+                table.insert(tId, pB.id)
+                table.insert(tItems, params[pB.id].caption)
+            end
+            pB = pB.pUpper
+        end
+
+        local ret, num, fix, reverce =
+        iup.GetParam("Вставка из истории",
+            nil,
+            'Параметр повтора%l|'..table.concat(tItems, '|')..'|\n'..
+            'Фиксированный%i[1,100,1]\n'..
+            'Переместить вверх списка%b\n'
+            ,
+            0, 0, 0
+        )
+        if ret then
+            local id
+            if num == 0 then
+                id = fix
+            else
+                id = Iif(reverce == 1, 'par', 'j')..tId[num]
+            end
+
+            MACRO.Record = false
+            if num == 0 then
+                MACRO.ReplaceSel(CLIPHISTORY.GetClip(id, reverce == 1) or "")
+            elseif reverce == 1 then
+                MACRO.ReplaceSel(CLIPHISTORY.GetClip(params[tId[num]].num, true) or "")
+            else
+                MACRO.ReplaceSel(CLIPHISTORY.GetClip(1) or "")
+            end
+            MACRO.Record = true
+
+            nextMC()
+
+            MC.typ = 'L'; MC.fname = 'MACRO.ReplaceSel(CLIPHISTORY.GetClip('..id..', '..Iif(reverce == 1, 'true', 'false')..') or "")'
+            nextMC()
         end
     end
 
@@ -158,10 +200,7 @@ local function Init_hidden()
         )
         if ret then
             table.insert(params, {caption = cap, typ = 'if', suff = '%b', id = #params + 1, num = 1, default = def})
-            if MC.typ then
-                table.insert(pCurBlock, MC)
-                MC = {}
-            end
+            nextMC()
 
             newBlock = {typ = 'if', id = #params, pUpper = pCurBlock}
             table.insert(pCurBlock, newBlock)
@@ -194,27 +233,21 @@ local function Init_hidden()
         )
         if ret then
             table.insert(params, {caption = cap, typ = 'str', suff = '%s', id = #params + 1, str = val, default = def})
-            if MC.typ then
-                table.insert(pCurBlock, MC)
-                MC = {}
-            end
+            nextMC()
 
             MACRO.Record = false
             MACRO.ReplaceSel(val)
             MACRO.Record = true
 
             MC.typ = 'L'; MC.fname = 'MACRO.ReplaceSel(par'..#params..')'
-            table.insert(pCurBlock, MC)
-            MC = {}
+            nextMC()
 
         end
     end
 
     local function insert_string(id)
-            if MC.typ then
-                table.insert(pCurBlock, MC)
-                MC = {}
-            end
+            nextMC()
+
             local val = params[id].str
 
             MACRO.Record = false
@@ -222,15 +255,12 @@ local function Init_hidden()
             MACRO.Record = true
 
             MC.typ = 'L'; MC.fname = 'MACRO.ReplaceSel(par'..id..')'
-            table.insert(pCurBlock, MC)
-            MC = {}
+            nextMC()
     end
 
     local function insert_iffor_block(id, typ)
-        if MC.typ then
-            table.insert(pCurBlock, MC)
-            MC = {}
-        end
+        nextMC()
+
         newBlock = {typ = typ, id = id, pUpper = pCurBlock}
         table.insert(pCurBlock, newBlock)
         pCurBlock = newBlock
@@ -253,7 +283,7 @@ local function Init_hidden()
 
         local sOut = ''
 
-        sOut = 'local overtype = editor.Overtype\r\neditor.Overtype = '..Iif(started_overtype, 'true', 'false')
+        sOut = ''
         for i = 1, #positions_t do
             if i == 1 then
                 sOut = sOut..'\r\nlocal '
@@ -274,7 +304,7 @@ local function Init_hidden()
                 local strValues = ''
                 for i = 1,  #params do
                     strUp = strUp..', par'..i
-                    strParams = '\r\n"'..params[i].caption..params[i].suff..'\\n"..'
+                    strParams = strParams..'\r\n"'..params[i].caption..params[i].suff..'\\n"..'
                     if params[i].typ == 'for' then
                         strValues = strValues..',\r\n'..params[i].num
                     elseif params[i].typ == 'if' then
@@ -286,7 +316,7 @@ local function Init_hidden()
                 end
                 sOut = sOut..strUp..
                     ' = \r\niup.GetParam("Параметры макроса", nil,'..strParams..
-                    '\r\n"" '..strValues..")"
+                    '\r\n"" '..strValues..")\r\nif not ret then return end"
             end
         end
 
@@ -328,7 +358,9 @@ local function Init_hidden()
                 elseif block[i].typ == 'L' then
                     line = line..block[i].fname
                 elseif block[i].typ == 'for' then
-                    sOut = sOut..'\r\n'..line..'for j'..block[i].id..' = 1, par'..block[i].id..' do'
+                    local jStart = 1
+                    if MACRO.Record then if pCurBlock == block[i] then jStart = 2 end end
+                    sOut = sOut..'\r\n'..line..'for j'..block[i].id..' = '..jStart..', par'..block[i].id..' do'
                     get_block_script(block[i], nTab + 1)
                     line = line..'end\r\n'
                 elseif block[i].typ == 'if' then
@@ -343,19 +375,15 @@ local function Init_hidden()
 
         get_block_script(b, 1)
 
-        sOut = sOut..'\r\neditor.Overtype = overtype'
         return sOut
     end
 
     local function do_StopBlock()
-        if MC.typ then
-            table.insert(pCurBlock, MC)
-            MC = {}
-        end
+        nextMC()
         local par = params[pCurBlock.id]
 
         if par.typ == 'for' and par.num > 1 then
-            par.num = par.num - 1
+            --par.num = par.num - 1
             local scr = GetBlock({pCurBlock}, num)
             MACRO.Record = false
 
@@ -364,7 +392,7 @@ local function Init_hidden()
                 print(msg, scr)
             end
             MACRO.Record = true
-            par.num = par.num + 1
+            --par.num = par.num + 1
         end
         pCurBlock = pCurBlock.pUpper
     end
@@ -374,11 +402,10 @@ local function Init_hidden()
         return GetBlock(recordet_macros)
     end
 
-    OnShowMainMenu = function(smnu)
-        return MACRO.Record and smnu[1][1] ~= 'MacrosItem'
-    end
-
     OnMacroBlockedEvents = function(msg, wParam, lParam)
+        if msg == 516 then
+            menuhandler:PopUp('MainWindowMenu|Macros')
+        end
         if not editor.Focus then iup.PassFocus() end
         return 1
     end
@@ -386,49 +413,67 @@ local function Init_hidden()
     local function SaveState()
 
         SavedState = {}
-        if false then
+        if true then
+            SavedState.bMenuBar = iup.GetDialogChild(iup.GetLayout(), "MenuBar").isOpen()
             SavedState.bToolBar = iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").isOpen()
             SavedState.bStatusBar = iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen()
             SavedState.bTabBar = iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state == 'OPEN'
+            if SavedState.bMenuBar then iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch() end
             if SavedState.bToolBar then iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch() end
             if SavedState.bStatusBar then iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end
             if SavedState.bTabBar then iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state = 'CLOSE' end
 
-            SavedState.bSideBar = ((_G.iuprops['sidebar.win'] or '0')~= '2') and SideBar_obj.handle
-            SavedState.bLeftBar = ((_G.iuprops['leftbar.win'] or '0')~= '2') and LeftBar_obj.handle
-            SavedState.bconsoleBar =  (_G.iuprops['concolebar.win'] or '0')~= '2'
-            SavedState.bFindResBar =  (_G.iuprops['findresbar.win'] or '0')~= '2'
+            if ((_G.iuprops['sidebar.win'] or '0')~= '2') and SideBar_obj.handle then SavedState.SideBar = _G.iuprops['sidebar.win']        end
+            if ((_G.iuprops['leftbar.win'] or '0')~= '2') and LeftBar_obj.handle then SavedState.LeftBar = _G.iuprops['leftbar.win']        end
+            if (_G.iuprops['concolebar.win'] or '0')~= '2'                       then SavedState.consoleBar =  _G.iuprops['concolebar.win'] end
+            if (_G.iuprops['findresbar.win'] or '0')~= '2'                       then SavedState.FindResBar =  _G.iuprops['findresbar.win'] end
+            if (_G.iuprops['findrepl.win'] or '0')~= '2'                         then SavedState.FindRepl = _G.iuprops['findrepl.win']      end
+            if (_G.iuprops['coeditor.win'] or '0')~= '2'                         then SavedState.Coeditor = _G.iuprops['coeditor.win']      end
 
-            if SavedState.bSideBar then SideBar_obj.handle.detachPos(false); end
-            if SavedState.bLeftBar then LefrBar_obj.handle.detachPos(false); end
-            if SavedState.bFindRepl then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").detachPos(false); end
-            if SavedState.bconsoleBar then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").detachPos(false); end
+
+            if SavedState.SideBar    then SideBar_obj.handle.detachPos(false)                                end
+            if SavedState.LeftBar    then LeftBar_obj.handle.detachPos(false)                                end
+            if SavedState.consoleBar then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").detachPos(false)  end
+            if SavedState.FindRepl   then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").detachPos(false) end
+            if SavedState.FindResBar then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").detachPos(false)  end
+            if SavedState.Coeditor   then iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").detachPos(false) end
+
         end
 
+        started_overtype = editor.Overtype
+        caret_fore = editor.CaretFore
+        editor.CaretFore = 255
         scite.RegistryHotKeys({})
 
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnChar"
         BlockEventHandler"OnKey"
+        if CLIPHISTORY then BlockEventHandler"OnDrawClipboard" end
         ClearSciKeys()
     end
 
     local function RestoreState()
 
+        if SavedState.bMenuBar then    iup.GetDialogChild(iup.GetLayout(), "MenuBar").switch()   end
         if SavedState.bToolBar then    iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch()   end
         if SavedState.bStatusBar then  iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end
+        if SavedState.bTabBar then     iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state = 'OPEN' end
 
-        if SavedState.bSideBar    then SideBar_obj.handle.Attach() end
-        if SavedState.bLeftBar then LefrBar_obj.handle.Attach() end
-        if SavedState.bTabBar then iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state = 'OPEN' end
-        if SavedState.bconsoleBar then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").Attach() end
-        if SavedState.bFindResBar then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").Attach() end
+        if SavedState.SideBar    then if SavedState.SideBar    == '0' then SideBar_obj.handle.Attach()                                    else SideBar_obj.handle.detachPos(true)                                    end end
+        if SavedState.LeftBar    then if SavedState.LeftBar    == '0' then LeftBar_obj.handle.Attach()                                    else LeftBar_obj.handle.detachPos(true)                                    end end
+        if SavedState.consoleBar then if SavedState.consoleBar == '0' then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").Attach()  else iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").detachPos(true)  end end
+        if SavedState.FindResBar then if SavedState.FindResBar == '0' then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").Attach()  else iup.GetDialogChild(iup.GetLayout(), "FindResDetach").detachPos(true)  end end
+        if SavedState.Coeditor   then if SavedState.Coeditor   == '0' then iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").detachPos(true) end end
+        if SavedState.FindRepl   then if SavedState.FindRepl   == '0' then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").detachPos(true) end end
 
+        editor.Overtype = started_overtype
+        editor.CaretFore = caret_fore
         menuhandler:RegistryHotKeys()
 
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnChar"
         UnBlockEventHandler"OnKey"
+        if CLIPHISTORY then UnBlockEventHandler"OnDrawClipboard" end
         ReassignSciKeys()
     end
 
@@ -436,14 +481,13 @@ local function Init_hidden()
 
         SaveState()
         MACRO.Record = true
-        MC = {}
+        MC = nil
         params = {}
         params_cnt = 1
         recordet_macros = {}
         pCurBlock = recordet_macros
 
         positions_t, lines_t = {}, {}
-        started_overtype = editor.Overtype
 
         OnMacro = local_OnMacro
         scite.MenuCommand(IDM_MACRORECORD)
@@ -455,26 +499,60 @@ local function Init_hidden()
         OnMacro = nil
         scite.MenuCommand(IDM_MACROSTOPRECORD)
         prevCol = nil
-
+        if #recordet_macros == 0 then recordet_macros = nil end
         if MC.typ then table.insert(pCurBlock, MC) end
 
         RestoreState()
         MACRO.Record = nil
 
-        print(GetScript())
     end
-    local function PlayCurrent()
+
+    local function play_scr(scr)
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnChar"
         BlockEventHandler"OnKey"
-        local scr = GetScript()
+        local curOverype = editor.Overtype
         local bOk, msg = pcall(dostring, scr)
+        editor.Overtype = curOverype
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnChar"
         UnBlockEventHandler"OnKey"
 
         if not bOk then
             print(msg, scr)
+        end
+    end
+
+
+    local function PlayCurrent()
+        play_scr(GetScript())
+    end
+
+    local function RunMacroFile(strPath)
+        local f = io.open(strPath)
+        if f then
+            local scr = f:read('*a')
+            f:close()
+            play_scr(scr)
+        end
+    end
+
+    local function SaveCurrent()
+        local dir = props["scite.userhome"].."\\Macros\\"
+        shell.greateDirectory(dir)
+        local d = iup.filedlg{dialogtype = 'SAVE', parentdialog = 'SCITE', extfilter = 'Macros|*.macro;', directory = dir}
+        d:popup()
+        local filename = d.value
+        d:destroy()
+        if filename then
+            filename = filename:gsub('%.macro$', '')..'.macro'
+            local scr = GetScript()
+            local f = io.open(filename, "w")
+            if f then
+                f:write(scr)
+                f:flush()
+                f:close()
+            end
         end
     end
 
@@ -507,25 +585,82 @@ local function Init_hidden()
         end
         return t
     end
+
+    local function get_macro_list()
+        if not macro_list then
+            local t = shell.findfiles(props["scite.userhome"].."\\Macros\\*.macro")
+            macro_list = {}
+            local mnu_i
+            for i = 1,  #t do
+                mnu_i = {t[i].name, action = function() RunMacroFile(props["scite.userhome"]..'\\Macros\\'..t[i].name) end}
+                table.insert(macro_list, mnu_i)
+            end
+        end
+        return macro_list
+    end
+
     local function do_Copy()
-        print(345)
+        CLIPHISTORY.Copy(1, editor:GetSelText())
+
+        nextMC()
+
+        MC.typ = 'L'; MC.fname = 'CLIPHISTORY.Copy(1, editor:GetSelText())'
+        nextMC()
     end
     local function do_Paste()
-        print(345)
+        MACRO.Record = false
+        MACRO.ReplaceSel(CLIPHISTORY.GetClip(1) or "")
+        MACRO.Record = true
+
+        nextMC()
+
+        MC.typ = 'L'; MC.fname = 'MACRO.ReplaceSel(CLIPHISTORY.GetClip(1) or "")'
+        nextMC()
     end
     local function do_Cut()
-        print(345)
+        CLIPHISTORY.Copy(1, editor:GetSelText())
+        MACRO.Record = false
+        MACRO.ReplaceSel('')
+        MACRO.Record = true
+
+        nextMC()
+
+        MC.typ = 'L'; MC.fname = 'CLIPHISTORY.Copy(1, editor:GetSelText())'
+        nextMC()
+
+        MC.typ = 'L'; MC.fname = 'MACRO.ReplaceSel("")'
+        nextMC()
+    end
+    local function do_FindNextWrd(arg)
+        CORE.FindNextWrd(arg)
+        nextMC()
+        MC.typ = 'L'; MC.fname = 'CORE.FindNextWrd('..arg..')'
+        nextMC()
+    end
+    local function do_Find_FindInDialog(arg)
+        CORE.Find_FindInDialog(arg)
+        nextMC()
+        MC.typ = 'L'; MC.fname = 'CORE.Find_FindInDialog('..Iif(arg, 'true', 'false')..')'
+        nextMC()
+    end
+    local function do_FindNextBack(arg)
+        CORE.FindNextBack(arg)
+        nextMC()
+        MC.typ = 'L'; MC.fname = 'CORE.FindNextBack('..Iif(arg, 'true', 'false')..')'
+        nextMC()
     end
 
     local item = {'Macros', ru = 'Макросы', {
-		{'MacrosItem',  action = function() end, visible = 'false'},
-		{'Start Record', ru = 'Начать запись', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end},
-		{'Play Current', ru = 'Воспроизвести текущий', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end},
-		{'Delete Current', ru = 'Удалить текущий', action = function() if iup.Alarm("Macros", 'Удалить макрос?', 'Да', 'Нет') == 1 then recordet_macros = nil end end, visible = function() return not MACRO.Record and recordet_macros end},
-		{'Stop Record', ru = 'Остановить запись', action = StopRecord, visible = function() return MACRO.Record end },
+		{'Start Record', ru = 'Начать запись', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end, image = "control_record_µ"},
+		{'Play Current', ru = 'Воспроизвести текущий', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "control_µ"},
+		{'Delete Current', ru = 'Удалить текущий', action = function() if iup.Alarm("Macros", 'Удалить макрос?', 'Да', 'Нет') == 1 then recordet_macros = nil end end, visible = function() return not MACRO.Record and recordet_macros end, image = "cross_script_µ"},
+		{'Save Current', ru = 'Сохранить текущий', action = SaveCurrent, visible = function() return not MACRO.Record and recordet_macros  end, image = "disk_µ" },
+		{'View Current', ru = 'Просмотреть текущий', action = function() print(GetScript()) end, visible = function() return not MACRO.Record and recordet_macros  end },
+		{'Stop Record', ru = 'Остановить запись', action = StopRecord, visible = function() return MACRO.Record end, image = "control_stop_square_µ" },
         {'s1', separator = 1},
+        {'macrolist', plane = 1,  visible = function() return not MACRO.Record end , get_macro_list},
         {'OnRecord', plane = 1, visible = function() return MACRO.Record end, {
-            {'Keep Position in line', ru = 'Запомнить позицию в строке', action = do_KeepPosition},
+            {'Keep Position in line', ru = 'Запомнить позицию в строке', action = do_KeepPosition, image = "marker_µ"},
             {'Restore position', ru = 'Перейти на позицию в строке', visible = function() return #positions_t > 0 end, submenu_positions},
         },},
         {'Insert string', ru = 'Вставить строку...', visible = function() return MACRO.Record end, {
@@ -545,10 +680,18 @@ local function Init_hidden()
                 {'Завершить блок "'..params[pCurBlock.id].caption..'"', action = do_StopBlock}
             }
         end},
-        {'Copy', ru = 'Копировать', action = do_Copy, visible = function() return MACRO.Record and CLIPHISTORY end, image = 'document_copy_µ'},
-        {'Cut', ru = 'Вырезать', action = do_Cut, visible = function() return MACRO.Record and CLIPHISTORY end, image = 'scissors_µ'},
-        {'Paste', ru = 'Вставить', action = do_Paste, visible = function() return MACRO.Record and CLIPHISTORY end, image = 'clipboard_paste_µ'},
-
+        {'Insert string', ru = 'Вставить строку...', plane = 1, visible = function() return MACRO.Record end, {
+            {'Copy', ru = 'Копировать', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
+            {'Cut', ru = 'Вырезать', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
+            {'Paste', ru = 'Вставить', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
+            {'Paste from History', ru = 'Вставить из истории клипов', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
+            {'Find &Next', ru = 'Найти далее', action = function() do_FindNextBack(false) end},
+            {'Find &Back', ru = 'Найти предыдущее', action = function() do_FindNextBack(true) end},
+            {'Find Next Word/Selection', ru = 'Слово/выделение - (через диалог)', action = function() do_Find_FindInDialog(true) end, image = "IMAGE_search" },
+            {'Find Prev Word/Selection', ru = 'Предыдущее слово/выделение - (через диалог)', action = function() do_Find_FindInDialog(false) end, image = "IMAGE_search"},
+            {'Next Word/Selection', ru = 'Следующее слово/выделение', action = function() do_FindNextWrd(1) end, image = "IMAGE_search"},
+            {'Prevous Word/Selection', ru = 'Предыдущее слово/выделение', action = function() do_FindNextWrd(2) end, image = "IMAGE_search"} ,
+        }},
     }}
     menuhandler:AddMenu(item)
 

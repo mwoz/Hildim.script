@@ -51,8 +51,25 @@ end
 
 local function init()
     CLIPHISTORY = {}
-    CLIPHISTORY.GetClip = function(i)
-        return iup.GetAttributeId2(lst_clip, "", i, 2)
+    CLIPHISTORY.GetClip = function(lin, bShift)
+        if not bShift then
+            return iup.GetAttributeId2(lst_clip, "", lin, 2)
+        elseif lin > 0 and lin <= tonumber(lst_clip.numlin) then
+            local text = iup.GetAttributeId2(lst_clip, "", lin, 2)
+
+            lst_clip.addlin = 0
+            lst_clip:setcell(1, 1, lst_clip:getcell(lin + 1, 1))
+            lst_clip:setcell(1, 2, lst_clip:getcell(lin + 1, 2))
+            lst_clip["fgcolor1:1"] = lst_clip["fgcolor"..(lin + 1)..":1"]
+            lst_clip.dellin = lin + 1
+            lst_clip.redraw = "1"
+
+            if onDraw_cb then onDraw_cb(text:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')) end
+
+            renum()
+            return text
+        end
+        return ''
     end
     clipboard = iup.clipboard{}
     clipboard.format = 'MSDEVColumnSelect'
@@ -347,13 +364,13 @@ local function init()
         end
     end)
 
-    AddEventHandler("OnDrawClipboard", function(flag)
+    function CLIPHISTORY.Copy(flag, strIn)
         lst_clip.marked = nil
         local caption = ''
         if flag > 0 and not blockResetCB then
-            local text = clipboard.text
+            local text = strIn or clipboard.text
             if not text then return end
-            if not lst_clip["1:2"] or lst_clip["1:2"] ~= text then
+            if not lst_clip["1:2"] or lst_clip["1:2"] ~= text or strIn then
                 lst_clip.addlin = 0
                 caption = text:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')
                 lst_clip["1:1"] = caption
@@ -373,6 +390,10 @@ local function init()
         end
         if onDraw_cb and not blockResetCB then onDraw_cb(caption) end
         blockResetCB = false
+    end
+
+    AddEventHandler("OnDrawClipboard", function(flag)
+        CLIPHISTORY.Copy(flag)
     end)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|xxx',
