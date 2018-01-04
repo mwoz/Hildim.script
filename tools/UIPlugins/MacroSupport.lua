@@ -548,12 +548,25 @@ local function Init_hidden()
     end
 
     local function play_scr(scr)
+        local cnt = 1
+        if not scr:find('iup%.GetParam%("') then
+            local ret
+            ret, cnt =
+            iup.GetParam("Число повторов", nil,
+                "Повторить, раз: %i[1,100,1]\n",
+            1)
+            if not ret then return end
+        end
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnChar"
         BlockEventHandler"OnKey"
         local curOverype = editor.Overtype
         editor:BeginUndoAction()
-        local bOk, msg = pcall(dostring, scr)
+        local bOk, msg
+        for i = 1, cnt do
+            bOk, msg = pcall(dostring, scr)
+            if not bOk then break end
+        end
         editor:EndUndoAction()
         editor.Overtype = curOverype
         UnBlockEventHandler"OnUpdateUI"

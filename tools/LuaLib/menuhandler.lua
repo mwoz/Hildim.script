@@ -33,6 +33,7 @@ local function getParam(p, bDef)
 end
 
 local function GetAction(mnu, bForse)
+    iup.PassFocus()
     if bForse or getParam(mnu.active, true) then
         if mnu.action then
             local tp = type(mnu.action)

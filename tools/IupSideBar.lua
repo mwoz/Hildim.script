@@ -921,7 +921,7 @@ for i = 1, #tbl do
         end
         if pI.destroy then table.insert(CORE.onDestroy_event, pI.destroy) end
     else
-        pritn('Hidden plugin "'..p..'" not found')
+        print('Hidden plugin "'..p..'" not found')
     end
 ::continue::
 end

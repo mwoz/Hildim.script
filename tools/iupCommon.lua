@@ -392,6 +392,8 @@ iup.CloseFilesSet = function(cmd, tForClose)
 end
 
 local function onOpen_local(source)
+    editor:MarkerDeleteAll(3)
+    editor:MarkerDeleteAll(2)
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8(1251)) then return end
@@ -663,14 +665,50 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             assert(load(props['command.'..strcmd..'$']))()
             return true
         end
- --[[       if props['command.'..strcmd..'.subsystem$'] == '3' then
-            assert(load(props['command.'..strcmd..'$']..'()'))()
-            return true
-        end]]
+    end
+end)
+
+function CORE.CoToChange(dif)
+    local f = Iif(dif > 0, editor.MarkerNext, editor.MarkerPrevious)
+    local l = editor:LineFromPosition(editor.CurrentPos)
+    local lP = l
+    OnNavigation("Change")
+    repeat
+        l = f(editor, l + dif, (1 << 2) | (1 << 3))
+        if lP + dif ~= l and l > 0 then
+            editor.SelectionStart = editor:PositionFromLine(l)
+            editor.SelectionEnd = editor.SelectionStart
+            editor:EnsureVisible(l)
+            editor:EnsureVisibleEnforcePolicy(l)
+            OnNavigation("Change-")
+            return
+        end
+        lP = l
+    until l == -1
+    OnNavigation("Change-")
+    print(Iif(dif > 0, 'Next', 'Previous')..' change not found')
+end
+
+AddEventHandler("OnTextChanged", function(position, length, linesAdded)
+    if (_G.iuprops['changes.mark.line'] or 0) == 1 then
+        local bOk, lstart = pcall(function() return editor:LineFromPosition(position) end)
+        if not bOk then return end
+        if lstart ~= 0 or linesAdded ~= editor:LineFromPosition(editor.Length) then
+            for i = lstart, lstart + Iif(linesAdded > 0, linesAdded, 0) do
+                if (editor:MarkerGet(i) & (1 << 3)) == 0 then editor:MarkerAdd(i, 3) end
+            end
+        end
     end
 end)
 
 AddEventHandler("OnSave", function(cmd, source)
+    local mrk = editor:MarkerNext(-1, 1 << 3)
+    while mrk > -1 do
+        editor:MarkerDelete(mrk, 3)
+        editor:MarkerAdd(mrk, 2)
+        mrk = editor:MarkerNext(mrk, 1<<3)
+    end
+
     while editor:EndUndoAction() > 0 do
         print'!!!Warning!!! EndUndoAction from OnSave'
     end

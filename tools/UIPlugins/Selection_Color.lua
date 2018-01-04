@@ -40,7 +40,10 @@ local function Init(h)
             local c = Iif(nTip ==- 1, prim, sec)
         end
         local function ByTxt(h)
-            local rgb =((('0x'..txtR.Value) + 0)..' '..(('0x'..txtG.Value) + 0)..' ' ..(('0x'..txtB.Value) + 0))
+            local function dec(hex)
+                return ''..math.tointeger(tonumber(hex, 16) or 0)
+            end
+            local rgb = dec(txtR.Value)..' '..dec(txtG.Value)..' ' ..dec(txtB.Value)
             clb.rgb = rgb
             iup.SetAttributeId(clp, 'CELL', nCel, rgb )
             StaticControls()
