@@ -738,7 +738,12 @@ local function JumpToFuncDefinition(funcname)
 	end
 end
 
-local function OnSwitch()
+local function OnSwitch(bForce)
+    if (bForce ~= 'Y') and (editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7)) then
+        tree_func.delnode0 = "CHILDREN"
+        tree_func.title0 = props['FileName']..' (Autoufill disabled by size)'
+        return
+    end
     Functions_GetNames()
     Functions_ListFILL()
     line_count = editor.LineCount
@@ -873,6 +878,19 @@ local function Functions_Print()
     end
 end
 
+local function SetMaxSize()
+    local ret, sz =
+    iup.GetParam("Max Size for Autoufill",
+        nil,
+        'Символов * 10 ^ %r[5,10,0.2]\n'
+        ,
+        (_G.iuprops['sidebar.functions.maxsize'] or 7)
+    )
+    if ret then
+        _G.iuprops['sidebar.functions.maxsize'] = sz
+    end
+end
+
 local function Func_Init(h)
     _Plugins = h
     local prp = _G.iuprops['sidebar.functions.layout'] or ""
@@ -902,6 +920,10 @@ local function Func_Init(h)
                 iup.item{title = "Show Parameters", value = Iif(_show_params, "ON", "OFF"), action = Functions_ToggleParams},
                 iup.item{title = "Group By Flags", value = Iif(_group_by_flags, "ON", "OFF"), action = Functions_ToggleGroup},
                 iup.item{title = "Print", action = Functions_Print},
+                iup.item{title = "Max size", action = SetMaxSize},
+                Iif(editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7),
+                    iup.item{title = "Force Reset", action = function() OnSwitch('Y') end},nil
+                )
             }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
         elseif but == 49 and iup.isdouble(status) then --dbl left
             line = Functions_GotoLine()

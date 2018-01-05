@@ -648,7 +648,8 @@ local function Init_hidden()
     end
 
     local function get_macro_list()
-        if not macro_list then
+        if not shell.fileexists(props["SciteDefaultHome"].."\\data\\Macros\\") then return {} end
+        if not macro_list and shell.fileexists(props["SciteDefaultHome"].."\\data\\Macros\\") then
             local t = shell.findfiles(props["SciteDefaultHome"].."\\data\\Macros\\*.macro")
             macro_list = {}
             local mnu_i

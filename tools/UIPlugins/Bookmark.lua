@@ -94,7 +94,7 @@ local function Init()
         DoForBuffers(function(i)
             local ml = 0
             while true do
-                ml = editor:MarkerNext(ml, 2)
+                ml = editor:MarkerNext(ml, 1 << MARKER_BOOKMARK)
                 if (ml == -1) then break end
                 BOOKMARK.Add(ml)
                 ml = ml + 1
@@ -106,7 +106,7 @@ local function Init()
     Bookmarks_RefreshTable = function()
         Bookmark_Delete()
         for i = 0, editor.LineCount do
-            if editor:MarkerGet(i) == 2 then
+            if (editor:MarkerGet(i) & 1 << MARKER_BOOKMARK) ~= 0 then
                 BOOKMARK.Add(i)
             end
         end

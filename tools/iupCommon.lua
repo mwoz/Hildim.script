@@ -171,7 +171,7 @@ function rfl:check(fname)
             editor.FirstVisibleLine = (self.data.pos[i] or 0)
             local bk = self.data.bmk[i] or ''
             for g in bk:gmatch('%d+') do
-                editor:MarkerAdd(tonumber(g), 1)
+                editor:MarkerAdd(tonumber(g), MARKER_BOOKMARK)
                 if BOOKMARK then BOOKMARK.Add(tonumber(g)) end
             end
             table.remove(self.data.lst, i)
@@ -292,7 +292,7 @@ end
 iup.GetBookmarkLst = function()
     local ml, bk = 0, ''
     while true do
-        ml = editor:MarkerNext(ml, 2)
+        ml = editor:MarkerNext(ml, 1 << MARKER_BOOKMARK)
         if (ml == -1) then break end
         bk = bk..','..ml
         ml = ml + 1
@@ -392,8 +392,8 @@ iup.CloseFilesSet = function(cmd, tForClose)
 end
 
 local function onOpen_local(source)
-    editor:MarkerDeleteAll(3)
-    editor:MarkerDeleteAll(2)
+    editor:MarkerDeleteAll(MARKER_NOTSAVED)
+    editor:MarkerDeleteAll(MARKER_SAVED)
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8(1251)) then return end
@@ -471,7 +471,7 @@ iup.RestoreFiles = function(bForce)
             if p[i] then editor.FirstVisibleLine = (math.tointeger(p[i]) or 0) end
 
             for bki in (bk[i] or ''):gmatch('%d+') do
-                editor:MarkerAdd(math.tointeger(bki), 1)
+                editor:MarkerAdd(math.tointeger(bki), MARKER_BOOKMARK)
                 if BOOKMARK then BOOKMARK.Add(math.tointeger(bki)) end
             end
             if l and l[i] then
@@ -689,25 +689,34 @@ function CORE.CoToChange(dif)
     print(Iif(dif > 0, 'Next', 'Previous')..' change not found')
 end
 
-AddEventHandler("OnTextChanged", function(position, length, linesAdded)
+local function fixMarks(bReset)
+    local mrk = editor:MarkerNext(-1, 1 << MARKER_NOTSAVED)
+    while mrk > -1 do
+        editor:MarkerDelete(mrk, MARKER_NOTSAVED)
+        if bReset then editor:MarkerAdd(mrk, MARKER_SAVED) end
+        mrk = editor:MarkerNext(mrk, 1 << MARKER_NOTSAVED)
+    end
+end
+
+AddEventHandler("OnTextChanged", function(position, flag, linesAdded)
     if (_G.iuprops['changes.mark.line'] or 0) == 1 then
+        if (flag & (SC_PERFORMED_UNDO | SC_PERFORMED_REDO)) ~= 0 then
+            scite.RunAsync(function()
+                if scite.buffers.SavedAt(scite.buffers.GetCurrent()) then fixMarks(); return end
+            end)
+        end
         local bOk, lstart = pcall(function() return editor:LineFromPosition(position) end)
         if not bOk then return end
         if lstart ~= 0 or linesAdded ~= editor:LineFromPosition(editor.Length) then
             for i = lstart, lstart + Iif(linesAdded > 0, linesAdded, 0) do
-                if (editor:MarkerGet(i) & (1 << 3)) == 0 then editor:MarkerAdd(i, 3) end
+                if (editor:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then editor:MarkerAdd(i, MARKER_NOTSAVED) end
             end
         end
     end
 end)
 
 AddEventHandler("OnSave", function(cmd, source)
-    local mrk = editor:MarkerNext(-1, 1 << 3)
-    while mrk > -1 do
-        editor:MarkerDelete(mrk, 3)
-        editor:MarkerAdd(mrk, 2)
-        mrk = editor:MarkerNext(mrk, 1<<3)
-    end
+    fixMarks(true)
 
     while editor:EndUndoAction() > 0 do
         print'!!!Warning!!! EndUndoAction from OnSave'
@@ -1452,7 +1461,6 @@ local function LoadIuprops()
     LoadIuprops_Local(filename)
     mnu_configs = nil
 end
-
 
 AddEventHandler("OnBeforeOpen", function(file, ext)
     if ext == "fileset" then

@@ -320,6 +320,7 @@ local function Init()
 
     local spellStart, spellEnd
     local function OnColorise_local(s, e)
+        if editor.Length > 10 ^(_G.iuprops['spell.maxsize'] or 7) then return end
         if tonumber(_G.iuprops["spell.autospell"]) == 1 and editor.Lexer ~= SCLEX_ERRORLIST then
             if spellEnd and spellStart then
                 spellStart = math.min(spellStart, s)
@@ -435,6 +436,19 @@ local function Init()
         return lst
     end
 
+    local function SetMaxSize()
+        local ret, sz =
+        iup.GetParam("Max Size for AutouSpell",
+            nil,
+            'Символов * 10 ^ %r[5,10,0.2]\n'
+            ,
+            (_G.iuprops['spell.maxsize'] or 7)
+        )
+        if ret then
+            _G.iuprops['spell.maxsize'] = sz
+        end
+    end
+
     local function OnMenuCommand_local(msg, source)
         if msg < constFirstSpell then return end
         if msg == constAddToDic then str = cADDYODIC
@@ -470,11 +484,16 @@ local function Init()
         )
         menuhandler:InsertItem('MainWindowMenu', 'Tools|s1',
             {'Spelling', ru = 'Орфография',{
-                {'Auto Spell Check', ru = 'Проверять автоматически', action = ResetAutoSpell, check = "tonumber(_G.iuprops['spell.autospell']) == 1", key = 'Ctrl+Alt+F12',},
+                {'Auto Spell Check', ru = 'Проверять автоматически', action = ResetAutoSpell,
+                    check = "tonumber(_G.iuprops['spell.autospell']) == 1 and (editor.Length < 10 ^(_G.iuprops['spell.maxsize'] or 7))",
+                    active = 'editor.Length < 10 ^(_G.iuprops["spell.maxsize"] or 7)', key = 'Ctrl+Alt+F12',
+                },
                 {'s1', separator = 1,},
                 {'Check Selection', ru = 'Проверить выделенный фрагмент', action = spell_Selected, key = 'Ctrl+F12', image = 'IMAGE_CheckSpelling',},
                 {'Check Selection, By Highlighting', ru = 'Проверить фрагмент с учетом подсветки', action=spell_ByLex,},
                 {'List Errors', ru = 'Показать список ошибок', action = spell_ErrorList, key = 'Ctrl+Shift+F12', image = 'report__exclamation_µ'},
+                {'s1', separator = 1,},
+                {'Max Size', ru = 'Максимальный размер для автопроверки', action = SetMaxSize},
         }}
     )
     _G.g_session["spell.runned"] = true
@@ -485,13 +504,7 @@ function Init_status(h)
     local zbox_s
     local function onSpellContext(_, but, pressed, x, y, status)
         if but == 51 and pressed == 0 then --right
-
-            local mnu = iup.menu
-            {
-                iup.item{title = "Проверить выделенный фрагмент", action = spell_Selected},
-                iup.item{title = "Проверить фрагмент с учетом подсветки", action = spell_ByLex},
-                iup.item{title = "Показать список ошибок", action = spell_ErrorList},
-            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+            menuhandler:PopUp('MainWindowMenu|Tools|Spelling')
         end
     end
     local sTip = 'Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
