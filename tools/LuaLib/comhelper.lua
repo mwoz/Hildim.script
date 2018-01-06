@@ -16,7 +16,7 @@ end
 function s.CheckXml(strXml)
     local xml = luacom.CreateObject("MSXML.DOMDocument")
     if not strXml then strXml = editor:GetText() end
-    strXml = strXml:to_utf8(1251)
+    strXml = strXml:to_utf8()
     if not xml:loadXml(strXml) then
         local xmlErr = xml.parseError
         return xmlErr.line, xmlErr.linepos, xmlErr.reason
@@ -41,7 +41,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
             lastNode = oChild
             bHasChild = true
             if oChild.nodeTypeString == 'text' then
-                local chTxt = oChild.text:to_utf8(1251)
+                local chTxt = oChild.text:to_utf8()
                 if not oChild.nextSibling then
                     if string.find(strNoNewLineEnd, ','..oNode.nodeName..',') then
                         oChild.text = chTxt:gsub('[\r\n\t ]*$', '')
@@ -64,7 +64,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
                 local lMin
                 if string.find(strInd0, ','..oChild.parentNode.nodeName..',') then
                     local ni = clb(oChild.parentNode, '\n', newindent:gsub('\r', ''))
-                    oChild.text = oChild.text:to_utf8(1251):gsub('\n[\t ]*$', ni)
+                    oChild.text = oChild.text:to_utf8():gsub('\n[\t ]*$', ni)
                     if ni ~= '\n' then
                         for s in oChild.text:gmatch('\n([ ]*)[^\n\r\t ]') do
                             if (lMin or #s) >= #s then lMin = #s end
@@ -132,7 +132,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
     local xml = luacom.CreateObject("MSXML.DOMDocument")
     if not strXml then strXml = editor:GetText() end
     if(tonumber(props['editor.unicode.mode']) == IDM_ENCODING_DEFAULT) then
-        strXml = strXml:to_utf8(1251)
+        strXml = strXml:to_utf8()
     end
     xml.preserveWhiteSpace = true
     if not xml:loadXml(strXml) then
@@ -145,7 +145,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
     if(tonumber(props['editor.unicode.mode']) == IDM_ENCODING_DEFAULT) then
         return xml.xml
     else
-        return xml.xml:to_utf8(1251)
+        return xml.xml:to_utf8()
     end
 end
 

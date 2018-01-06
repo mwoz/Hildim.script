@@ -266,7 +266,7 @@ local function OpenFile(filename)
 		filename = filename:gsub('\\','\\\\')
 		scite.Perform ("loadsession:"..filename)
 	else
-		scite.Open(filename:to_utf8(1251))
+		scite.Open(filename:to_utf8())
 	end
     if iup.GetGlobal("SHIFTKEY") == 'OFF' then
         if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON' then scite.RunAsync(function() mybar_Switch(m_prevSel + 1) end)
@@ -532,7 +532,7 @@ local function OnSwitch(bForse, bRelist)
         local path = props['FileDir']
         if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
         if path ~= '' then
-            current_path = path:from_utf8(1251):gsub('\\$', '')..'\\'
+            current_path = path:from_utf8():gsub('\\$', '')..'\\'
            -- print(current_path, current_path)
             -- if bClearMask then memo_mask:set_text = "" end
             FileMan_ListFILL()

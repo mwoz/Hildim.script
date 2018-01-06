@@ -261,7 +261,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
         editor.AutoCSeparator = string.byte(',')
         current_poslst = current_pos
         pasteFromXml = false
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8(1251) end
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8() end
         editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
         editor:UserListShow(constListIdXmlPar, l)
     end
@@ -314,7 +314,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
                     editor.AutoCSeparator = string.byte(',')
                     current_poslst = current_pos
                     pasteFromXml = false
-                    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8(1251) end
+                    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8() end
                     editor:UserListShow(constListIdXmlPar, ulFromCT_data)
                 end
             end)
@@ -323,7 +323,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
     end
     if not str then calltipinfo ={0};return end
 
-    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
     str = str:gsub('({{[^}]+}})', ''):gsub('^ +', ''):gsub(' +$', '')
     if str == '' then return end
     CUR_POS:OnShow()
@@ -991,7 +991,7 @@ local function OnUserListSelection_local(tp, str)
         end
 
         if (tip or '') ~= '' then
-            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
             editor:CallTipShow(editor.CurrentPos, tip)
         end
     else
@@ -1297,7 +1297,7 @@ function ShowTipManualy()
                     end
                     tip = (tip or ''):gsub('^ +', ''):gsub(' +$', '')
                     if tip == '' then return end
-                    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+                    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
                     CUR_POS:OnShow()
                     editor:CallTipShow(CUR_POS:Get(), tip)
                     return

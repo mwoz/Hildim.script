@@ -51,18 +51,18 @@ local function CreateUntitledFile()
         local maxN = scite.buffers.GetCount() - 1
         local bNew
         repeat
-            fName = scite.GetTranslation("Untitled"):to_utf8(1251)..unNum
+            fName = scite.GetTranslation("Untitled"):to_utf8()..unNum
             unNum = unNum + 1
             bNew = true
             for i = 0, maxN do
-                local _, _, sN = scite.buffers.NameAt(i):from_utf8(1251):find('([^\\]*)$')
-                if sN:gsub('%.[^%.]*$', '') == fName:from_utf8(1251) then
+                local _, _, sN = scite.buffers.NameAt(i):from_utf8():find('([^\\]*)$')
+                if sN:gsub('%.[^%.]*$', '') == fName:from_utf8() then
                     bNew = false
                     break
                 end
             end
             fName = fName..file_ext
-        until bNew and not shell.fileexists(props["FileDir"].."\\".. fName:from_utf8(1251))
+        until bNew and not shell.fileexists(props["FileDir"].."\\".. fName:from_utf8())
     end
 	props['scite.new.file'] = ''
     local file_path = props["FileDir"].."\\".. fName
@@ -81,7 +81,7 @@ AddEventHandler("OnMenuCommand", function(msg, source)
     if msg == IDM_NEW then
 		return CreateUntitledFile()
     elseif msg == IDM_SAVE then
-        if props["FileNameExt"]:find'^%^' and not shell.fileexists(props["FilePath"]:from_utf8(1251)) then
+        if props["FileNameExt"]:find'^%^' and not shell.fileexists(props["FilePath"]:from_utf8()) then
             scite.MenuCommand(IDM_SAVEAS)
             return true
         end
@@ -103,8 +103,8 @@ AddEventHandler("OnBeforeSave", function(file)
 		scite.MenuCommand(IDM_ENCODING_UCOOKIE)
 	end
 	-- if unsaved_files[file:upper()] then -- если это созданный нами несохраненный буфер
-	if not shell.fileexists(props["FilePath"]:from_utf8(1251)) and scipped ~= props["FilePath"]:from_utf8(1251) and not bscip then -- если это созданный нами несохраненный буфер
-        scipped = props["FilePath"]:from_utf8(1251)
+	if not shell.fileexists(props["FilePath"]:from_utf8()) and scipped ~= props["FilePath"]:from_utf8() and not bscip then -- если это созданный нами несохраненный буфер
+        scipped = props["FilePath"]:from_utf8()
         scite.MenuCommand(IDM_SAVEAS)
         scipped = nil
 		return true

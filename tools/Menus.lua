@@ -31,7 +31,7 @@ function CORE.windowsList(side)
 	for i = 0, maxN do
         if not side or (scite.buffers.GetBufferSide(i) == side) then
             local row = {}
-            local s = scite.buffers.NameAt(i):from_utf8(1251):gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
+            local s = scite.buffers.NameAt(i):from_utf8():gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
             local md = Iif(scite.buffers.SavedAt(i), '', '*')
 
             row[1] = md..s

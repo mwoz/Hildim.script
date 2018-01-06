@@ -1077,9 +1077,9 @@ function CORE.ChangeCode(unicmode, codepage)
     if unicmode ~= math.tointeger(props['editor.unicode.mode']) then
         local s = editor:GetText()
         if unicmode == IDM_ENCODING_DEFAULT then
-            s = s:from_utf8(1251)
+            s = s:from_utf8()
         elseif props['editor.unicode.mode'] == ''..IDM_ENCODING_DEFAULT then
-            s = s:to_utf8(1251)
+            s = s:to_utf8()
         end
         scite.MenuCommand(unicmode)
         editor:SetText(s)
@@ -1113,5 +1113,5 @@ end
 
 AddEventHandler("OnBeforeOpen", function(file, ext)
     if _ENCODINGCOOKIE then return _ENCODINGCOOKIE end
-    return iuprops['resent.files.list']:check(file:from_utf8(1251))
+    return iuprops['resent.files.list']:check(file:from_utf8())
 end)

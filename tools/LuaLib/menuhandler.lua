@@ -153,7 +153,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
                         titem.action = function()
                             if r_button_state() > 0 then
                                 if shell.fileexists(props['SciteDefaultHome']..'/help/HildiM.chm') then
-                                    scite.ExecuteHelp((props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html#'..itm[1]):to_utf8(1251), 0)
+                                    scite.ExecuteHelp((props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html#'..itm[1]):to_utf8(), 0)
                                 else
                                     local url = '"file:///'..props['SciteDefaultHome']..'/help/HildiM/ui/Menues.html#'..itm[1]..'"'
                                     print(url)

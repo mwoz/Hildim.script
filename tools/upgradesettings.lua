@@ -123,7 +123,7 @@ local function Run(a, b)
 
         f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
         if f then
-            f:write(table.concat(tOut, '\n'):to_utf8(1251))
+            f:write(table.concat(tOut, '\n'):to_utf8())
             f:close()
         else
             print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
@@ -155,7 +155,7 @@ local function Run(a, b)
         end
         f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
         if f then
-            f:write(table.concat(tOut, '\n'):to_utf8(1251))
+            f:write(table.concat(tOut, '\n'):to_utf8())
             f:close()
         else
             print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
@@ -187,7 +187,7 @@ local function Run(a, b)
 
     s = CORE.tbl2Out(tMsg, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
 
-    f:write(s:to_utf8(1251))
+    f:write(s:to_utf8())
     f:flush()
     f:close()
 

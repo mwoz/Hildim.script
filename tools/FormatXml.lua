@@ -1,6 +1,6 @@
 require("comhelper")
 
---:from_utf8(1251):from_utf8(1251)
+--:from_utf8():from_utf8()
 local patt = '^(<%?[^\n]-%?>.-\n)'
 --xml.setIndent(editor.Indent)
 -- debug_prnTb(xml.eval(editor:GetText()),1)

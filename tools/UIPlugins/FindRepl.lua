@@ -251,10 +251,10 @@ local function FindInFiles()
     if Ctrl("cmbFindWhat").value == '' then return end
 
     if Ctrl("cmbFilter").value == '' then Ctrl("cmbFilter").value = '*.*' end
-    if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir']:from_utf8(1251) end
-    local fWhat = Ctrl("cmbFindWhat").value:to_utf8(1251)
+    if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir']:from_utf8() end
+    local fWhat = Ctrl("cmbFindWhat").value:to_utf8()
     local fFilter = Ctrl("cmbFilter").value
-    local fDir = Ctrl("cmbFolders").value:to_utf8(1251)
+    local fDir = Ctrl("cmbFolders").value:to_utf8()
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
@@ -397,7 +397,7 @@ local function ActivateFind_l(nTab)
     local s
     if wnd.SelectionStart == wnd.SelectionEnd then s = GetCurrentWord()
     else s = wnd:GetSelText() end
-    if wnd.CodePage ~= 0 then s = s:from_utf8(1251) end
+    if wnd.CodePage ~= 0 then s = s:from_utf8() end
     s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
@@ -424,7 +424,7 @@ local function ActivateFind_l(nTab)
     if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
     else iup.SetFocus(Ctrl('cmbFindWhat')) end
 
-    if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir']:from_utf8(1251) end
+    if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir']:from_utf8() end
     SetStaticControls()
     if Ctrl('byInput').value == 'ON' and Ctrl('byInputAll').value == 'ON' then onFindEdit(Ctrl("cmbFindWhat"), '', Ctrl("cmbFindWhat").value) end
     return true

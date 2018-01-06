@@ -28,7 +28,7 @@ function s:UnSlashAsNeeded(strIn)
 end
 
 function s:encode(s)
-    if self.e.CodePage ~= 0 then return s:to_utf8(1251) end
+    if self.e.CodePage ~= 0 then return s:to_utf8() end
     return s
 end
 
@@ -249,7 +249,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                 local lNum
                 if not _G.iuprops['findres.groupbyfile'] then
                     if bSearchCapt then lNum = '.\\:'..(l+1)..': '
-                    else lNum = props["FilePath"]:from_utf8(1251)..':'..(l+1)..': ' end
+                    else lNum = props["FilePath"]:from_utf8()..':'..(l+1)..': ' end
                 else
                     lNum = '\t'..(l+1)..': '
                 end
@@ -258,7 +258,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                     return lenTarget, false
                 end
                 local str = self.e:GetLine(l):gsub('^[ \t]+', '')
-                if needCoding then str = str:from_utf8(1251) end
+                if needCoding then str = str:from_utf8() end
                 findres:ReplaceSel(lNum..str)
              end
             return lenTarget, true
@@ -267,10 +267,10 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
             findres:SetSel(0, 0)
             local strCapt = ''
             local strSrch = self.findWhat
-            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
-            if bSearchCapt then strCapt = strCapt..'>Search for "'..strSrch..'" in "'..props[Iif(_G.iuprops['findres.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8(1251)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8() end
+            if bSearchCapt then strCapt = strCapt..'>Search for "'..strSrch..'" in "'..props[Iif(_G.iuprops['findres.groupbyfile'], "FileNameExt", "FilePath")]:from_utf8()..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
 
-            if _G.iuprops['findres.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]:from_utf8(1251)..'\n' end
+            if _G.iuprops['findres.groupbyfile'] then strCapt = strCapt..' '..props["FilePath"]:from_utf8()..'\n' end
             if bSearchCapt or wCount > 0 then  findres:ReplaceSel( strCapt) end
 
             findres:SetSel(0, 0)
@@ -396,7 +396,7 @@ function s:MarkResult()
     self.e = findres
     local origStyle = self.style
     local origFind = self.findWhat
-    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then self.findWhat = self.findWhat:from_utf8(1251) end
+    if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then self.findWhat = self.findWhat:from_utf8() end
     self.style = SCE_SEARCHRESULT_CURRENT_LINE
     local p
     for i = 1, findres.LineCount - 1 do
@@ -440,7 +440,7 @@ function s:FindInBufer()
         else
             findres:SetSel(0, 0)
             local strSrch = self.findWhat
-            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8(1251) end
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8() end
             findres:ReplaceSel('>Search for "'..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
             return cnt
         end

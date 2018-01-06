@@ -115,14 +115,14 @@ local function Init()
 
     local function ProbabblyFromUT(str)
         if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then return str end
-        return str:from_utf8(1251)
+        return str:from_utf8()
     end
 
     local function SpellRangeUTF8(posStart, posEnd)
         if posStart == 0 then posStart = 1 end
         local e, s = posStart, 0
         local bSpell
-        local str = editor:textrange(posStart - 1, posEnd + 1):from_utf8(1251)
+        local str = editor:textrange(posStart - 1, posEnd + 1):from_utf8()
         local iUt = 2
         local t = nil
         --local str2 = editor:textrange(posStart-1, posEnd+1)
@@ -198,7 +198,7 @@ local function Init()
 
     local sPel, pUser, curLine
     local function ApplyVariant(str)
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
         local function saveDic(newWord, pUser)
             local text = ''
             local tbl = {}
@@ -384,7 +384,7 @@ local function Init()
         findres:ReplaceSel(out)
         if findres.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
         findres:SetSel(0, 0)
-        findres:ReplaceSel('>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]:from_utf8(1251)..'\n')
+        findres:ReplaceSel('>Spell        Errors: '..count..' in '..lCount..' lines\n '..props["FilePath"]:from_utf8()..'\n')
     end
 
     local function OnIdle_local()

@@ -55,7 +55,7 @@ local function Init(ToolBar_obj)
             findres:ReplaceTarget('')
         end
         local str = txt_search.value
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8(1251) end
+        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
         findSettings.findWhat = str
         findSettings:FindAll(50,true)
     end

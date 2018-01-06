@@ -16,7 +16,7 @@ if shell.fileexists(file) then
         text = pF:read('*a')
         pF:close()
     end
-    local bSuc, tMsg = pcall(dostring, text:from_utf8(1251))
+    local bSuc, tMsg = pcall(dostring, text:from_utf8())
 
     if bRepit and (_G.iuprops['_VERSION'] or 1) ~= 2 then
         bRepit = false
@@ -29,13 +29,13 @@ if shell.fileexists(file) then
             print("Convert settings failed:", msg)
         end
    -- else
-   --     text = text:from_utf8(1251)
+   --     text = text:from_utf8()
     end
 
     if not bSuc then
         print('Ошибка в файле settings.lua:', tMsg..'\nсохраним текущий settings.lua в settings.lua.bak')
         io.output(props["scite.userhome"]..'\\settings.lua.bak')
-        io.write(text:to_utf8(1251))
+        io.write(text:to_utf8())
         io.close()
     end
 elseif shell.fileexists(props["scite.userhome"]..'\\_default.config') then
@@ -51,7 +51,7 @@ if props['config.restore'] ~= '' then
     local bSuc, pF = pcall(io.input, props['config.restore'])
     if bSuc then
         local l = (_G.iuprops['settings.lexers'] or '')
-        text = pF:read('*a'):from_utf8(1251)
+        text = pF:read('*a'):from_utf8()
         pF:close()
         local bSuc, tMsg = pcall(dostring, text)
         if not bSuc then
@@ -112,7 +112,7 @@ function rfl:GetMenu()
     for i = 1, cnt do
         local bSet = true
         for j = 0,maxN do
-            if ts[i] == scite.buffers.NameAt(j):from_utf8(1251) then
+            if ts[i] == scite.buffers.NameAt(j):from_utf8() then
                 bSet = false
                 break
             end
@@ -276,7 +276,7 @@ local function SaveIup()
     if pcall(io.output, file) then
         _G.iuprops['_VERSION'] = 2
         local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
-        io.write(s:to_utf8(1251))
+        io.write(s:to_utf8())
     else
         iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!", "Ok")
     end
@@ -317,7 +317,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
 
     local maxN = scite.buffers.GetCount() - 1
     for i = 0,maxN do
-        local pth = scite.buffers.NameAt(i):from_utf8(1251)
+        local pth = scite.buffers.NameAt(i):from_utf8()
         local _,_,fnExt = pth:find('([^\\]*)$')
         if not scite.buffers.SavedAt(i) and MastClose(i) and (cmd ~= 9134 or pth:find('Безымянный')) and not fnExt:find('^%^') then
             msg = msg..pth:gsub('(.+)[\\]([^\\]*)$', '%2(%1)')..'\n'
@@ -357,9 +357,9 @@ iup.CloseFilesSet = function(cmd, tForClose)
     local tblBuff = {lst = {}, pos = {}, layouts = {}, bmk = {}, enc = {}}
     local cloused = {}
     DoForBuffers(function(i)
-        if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
+        if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:from_utf8():find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
-            if not props['FileNameExt']:from_utf8(1251):find('Безымянный') and not props['FileNameExt']:find('^%^') then
+            if not props['FileNameExt']:from_utf8():find('Безымянный') and not props['FileNameExt']:find('^%^') then
                 if not cloned[props['FilePath']] then
                     local pref = ''
                     if scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 1 then
@@ -369,7 +369,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
                     if scite.ActiveEditor() == 1 then
                         pref = pref..'>'
                     end
-                    table.insert(tblBuff.lst, pref..props['FilePath']:from_utf8(1251))
+                    table.insert(tblBuff.lst, pref..props['FilePath']:from_utf8())
                     table.insert(tblBuff.pos, editor.FirstVisibleLine)
                     table.insert(tblBuff.layouts, SaveLayOut())
                     table.insert(tblBuff.bmk, pref..iup.GetBookmarkLst())
@@ -400,7 +400,7 @@ local function onOpen_local(source)
     editor:MarkerDeleteAll(MARKER_SAVED)
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
-        if not shell.fileexists(source:from_utf8(1251)) then return end
+        if not shell.fileexists(source:from_utf8()) then return end
     end
     if props['session.started'] ~= '1' and props['session.reload'] ~= '1' then print('') end --??почему-то этот вывод ликвидирует появление звездочки в названии при открытии из оболочки
 end
@@ -509,7 +509,7 @@ end
 local function LoadSession_local(filename)
     local bSucs, f = pcall(io.input, filename)
     if bSucs then
-        text = f:read('*a'):from_utf8(1251)
+        text = f:read('*a'):from_utf8()
         f:close()
         local bSuc, tMsg = pcall(dostring,text)
         if not bSuc then
@@ -544,7 +544,7 @@ iup.SaveSession = function()
     if iup.CloseFilesSet(0) then
         if pcall(io.output, filename) then
             local s = CORE.tbl2Out(_G.iuprops["buffers"], ' ', false, true, true):gsub('^return ', '_G.iuprops["buffers"] = ')
-            io.write(s:to_utf8(1251))
+            io.write(s:to_utf8())
             io.close()
         end
     end
@@ -646,7 +646,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         local source = props["FilePath"]
         if source:find('^%^') then return end
         if not source:find('^\\\\') then
-            if not shell.fileexists(source:from_utf8(1251)) then return end
+            if not shell.fileexists(source:from_utf8()) then return end
         end
     elseif cmd == IDM_HELP then
         local h = iup.GetFocus()
@@ -749,9 +749,9 @@ end)
 AddEventHandler("OnClose", function(source)
     if source:find('^%^') or source:find('\\%^^') then return end
     if not source:find('^\\\\') then
-        if not shell.fileexists(source:from_utf8(1251)) then return end
+        if not shell.fileexists(source:from_utf8()) then return end
     end
-    iuprops['resent.files.list']:ins(source:from_utf8(1251), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
+    iuprops['resent.files.list']:ins(source:from_utf8(), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
     if scite.buffers.GetCount() == 1 and editor.ReadOnly then scite.MenuCommand(IDM_READONLY) end
 end)
 
@@ -1527,7 +1527,7 @@ local function SaveIuprops_local(filename)
 
 
  	if pcall(io.output, filename) then
-		io.write(table.concat(t,'\n'):to_utf8(1251))
+		io.write(table.concat(t,'\n'):to_utf8())
         io.close()
  	end
 end

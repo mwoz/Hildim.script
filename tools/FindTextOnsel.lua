@@ -216,7 +216,7 @@ function CORE.FindresClickPos(curpos)
     local lineNum = findres:LineFromPosition(curpos)
     local function perfGo(s, p, strI)
         OnNavigation("Go")
-        s = s:to_utf8(1251)
+        s = s:to_utf8()
         if s ~= props['FilePath'] then scite.Open(s) end
         if strI and strI:len() > 0 then
             editor.TargetStart = editor:PositionFromLine(p)
@@ -245,7 +245,7 @@ function CORE.FindresClickPos(curpos)
     end
 
     if style == SCE_SEARCHRESULT_FILE_HEADER then
-        local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1):to_utf8(1251)
+        local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1):to_utf8()
         if s ~= props['FilePath'] then
             OnNavigation("Go")
             scite.Open(s)

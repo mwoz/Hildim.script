@@ -43,7 +43,7 @@ local function InitWndDialog()
             for i = 0, maxN do
                 if not side or side == scite.buffers.GetBufferSide(i) then
                     local row = {}
-                    local _, _, p, n = scite.buffers.NameAt(i):from_utf8(1251):find('(.-)([^\\]*)$')
+                    local _, _, p, n = scite.buffers.NameAt(i):from_utf8():find('(.-)([^\\]*)$')
                     row.order = n:upper()
                     n = n..Iif(scite.buffers.SavedAt(i), '', '*')
 
