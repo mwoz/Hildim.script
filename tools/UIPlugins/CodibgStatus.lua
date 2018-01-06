@@ -13,20 +13,32 @@ local function Init(h)
         elseif mode == IDM_ENCODING_UCOOKIE then
             return 'UTF-8'
         else
-            if props["character.set"] == '255' then
-                return 'DOS-866'
-            elseif props["character.set"] == '204' then
-                return 'WIN-1251'
-            elseif tonumber(props["character.set"]) == 0 then
-                return 'CP1252'
-            elseif props["character.set"] == '238' then
-                return 'CP1250'
-            elseif props["character.set"] == '161' then
-                return 'CP1253'
-            elseif props["character.set"] == '162' then
-                return 'CP1254'
+            local cp = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
+            if cp == 0 or cp == math.tointeger(props['system.code.page']) then
+                if props["character.set"] == '255' then
+                    return 'DOS-866'
+                elseif props["character.set"] == '204' then
+                    return 'WIN-1251'
+                elseif tonumber(props["character.set"]) == 0 then
+                    return 'CP1252'
+                elseif props["character.set"] == '238' then
+                    return 'CP1250'
+                elseif props["character.set"] == '161' then
+                    return 'CP1253'
+                elseif props["character.set"] == '162' then
+                    return 'CP1254'
+                else
+                    return '???'
+                end
             else
-                return '???'
+                if     cp == 28595 then return 'ISO-8859-5'
+                elseif cp == 20866 then return 'KOI8_R'
+                elseif cp == 21866 then return 'KOI8_U'
+                elseif cp == 10007 then return 'Macintosh'
+                elseif cp == 855   then return 'OEM855'
+                elseif cp == 856   then return 'OEM856'
+                else
+                end
             end
         end
     end

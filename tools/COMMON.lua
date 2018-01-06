@@ -566,9 +566,9 @@ function s:init(t)
     self.maxN = t[1]
 
     if not t[2] then
-        self.data = {lst = {}; pos = {}; layout = {}; bmk = {}}
+        self.data = {lst = {}; pos = {}; layout = {}; bmk = {}; enc = {}}
     elseif not t[2].lst then
-        tn = {}; tn.lst = t[2]; tn.pos = {}; tn.layout = {}; tn.bmk = {}
+        tn = {}; tn.lst = t[2]; tn.pos = {}; tn.layout = {}; tn.bmk = {}; tn.enc = {};
         for i = 1,  #t[2] do
             tn.pos[i] = 0
             tn.layout[i] = ''
@@ -580,22 +580,25 @@ function s:init(t)
         if not self.data.pos then self.data.pos = {} end
         if not self.data.layout then self.data.layout = {} end
         if not self.data.bmk then self.data.bmk = {} end
+        if not self.data.enc then self.data.enc = {} for i = 1, #(self.data.pos) do self.data.enc[i] = 0 end  end
     end
     self:lop()
 end
-function s:ins(v, p, l, b)
+function s:ins(v, p, l, b, e)
     for i = #self.data.lst, 1, -1 do
         if self.data.lst[i] == v then
             table.remove(self.data.lst, i)
             table.remove(self.data.pos, i)
             table.remove(self.data.layout, i)
             table.remove(self.data.bmk, i)
+            table.remove(self.data.enc, i)
         end
     end
     table.insert(self.data.lst, 1, v)
     table.insert(self.data.pos, 1, p)
     table.insert(self.data.layout, 1, l)
     table.insert(self.data.bmk, 1, b)
+    table.insert(self.data.enc, 1, e)
     self:lop()
 end
 
@@ -605,6 +608,7 @@ function s:tooutput()
     res.pos = self.data.pos
     res.bmk = self.data.bmk
     res.layout = self.data.layout
+    res.enc = self.data.enc
     return res
 end
 

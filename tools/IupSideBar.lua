@@ -21,7 +21,6 @@ iup.SetGlobal("TXTHLCOLOR", "222 222 222")
                                -- RGB(121, 161, 201)
 local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
 
-
 iup.PassFocus =(function()
     if scite.buffers.GetCurrent() >= 0 then
         editor:GrabFocus()
@@ -1001,6 +1000,7 @@ AddEventHandler("OnRightEditorVisibility", function(show)
         end
     end
 end)
+
 AddEventHandler("OnLayOutNotify", function(cmd)
     if cmd == "SHOW_FINDRES" then
         if (_G.iuprops['findresbar.win'] or '0')=='1' then return end
@@ -1068,4 +1068,50 @@ AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
         end
         return true
     end
+end)
+
+function CORE.ChangeCode(unicmode, codepage)
+    codepage = codepage or 0
+    scite.buffers.SetEncodingAt(scite.buffers.GetCurrent(), codepage)
+
+    if unicmode ~= math.tointeger(props['editor.unicode.mode']) then
+        local s = editor:GetText()
+        if unicmode == IDM_ENCODING_DEFAULT then
+            s = s:from_utf8(1251)
+        elseif props['editor.unicode.mode'] == ''..IDM_ENCODING_DEFAULT then
+            s = s:to_utf8(1251)
+        end
+        scite.MenuCommand(unicmode)
+        editor:SetText(s)
+        editor:EmptyUndoBuffer()
+    end
+end
+
+function CORE.Revert()
+    if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
+        _ENCODINGCOOKIE = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
+        scite.MenuCommand(IDM_REVERT)
+        _ENCODINGCOOKIE = nil
+    end
+end
+
+function CORE.SetCP(unicmode, codepage)
+    if unicmode ~= math.tointeger(props['editor.unicode.mode']) then scite.MenuCommand(unicmode) end
+    local cp = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
+    if cp == 0 then cp = math.tointeger(props['system.code.page']) end
+    if cp ~= codepage then
+        if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
+            _ENCODINGCOOKIE = codepage
+            if _ENCODINGCOOKIE == math.tointeger(props['system.code.page']) then _ENCODINGCOOKIE = 0 end
+            scite.MenuCommand(IDM_REVERT)
+            _ENCODINGCOOKIE = nil
+        else
+            return
+        end
+    end
+end
+
+AddEventHandler("OnBeforeOpen", function(file, ext)
+    if _ENCODINGCOOKIE then return _ENCODINGCOOKIE end
+    return iuprops['resent.files.list']:check(file:from_utf8(1251))
 end)

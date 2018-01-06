@@ -316,20 +316,6 @@ local function SetFindresCount()
 	end
 end
 
-local function ChangeCode(newcmd)
-    return function()
-        local s = editor:GetText()
-        if newcmd == IDM_ENCODING_DEFAULT then
-            s = s:from_utf8(1251)
-        elseif props['editor.unicode.mode'] == ''..IDM_ENCODING_DEFAULT then
-            s = s:to_utf8(1251)
-        end
-        scite.MenuCommand(newcmd)
-        editor:SetText(s)
-        editor:EmptyUndoBuffer()
-    end
-end
-
 local function CopyPathToClipboard(what)
 	local str
 	if what == 'name' then
@@ -389,6 +375,32 @@ local function IsOpenTemporaly()
     return false
 end
 
+local function checkEncoding(e, cp)
+    return function()
+        if e ~= IDM_ENCODING_DEFAULT then
+            return math.tointeger(props['editor.unicode.mode']) == e
+        end
+        return (scite.buffers.EncodingAt(scite.buffers.GetCurrent()) == cp) or
+                (scite.buffers.EncodingAt(scite.buffers.GetCurrent()) == 0 and math.tointeger(props['system.code.page']) == cp)
+    end
+end
+
+local function SetCP(u, cp)
+    return function() CORE.SetCP(u, cp) end
+end
+
+local function activeRecoding(e, cp)
+    return function()
+        if cp == math.tointeger(props['system.code.page']) then cp = 0 end
+        return (props['editor.unicode.mode'] ~= ''..e) or
+            (cp ~= scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
+    end
+end
+
+local function ChangeCode(e, cp)
+    return function() CORE.ChangeCode(e, cp) end
+end
+
 local bCanPaste = true
 AddEventHandler("OnDrawClipboard", function(flag)
 	bCanPaste = (flag > 0)
@@ -402,7 +414,6 @@ if _G.iuprops['settings.lexers'] then
         table.insert(tLangs, {"Open "..t[i].file, action = function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..t[i].file) end})
     end
 end
-
 
 _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 	{link='File|&Close'},
@@ -430,6 +441,7 @@ _G.sys_Menus.TABBAR = { title = "Контекстное меню закладок",
 
 	{'slast', separator=1},
 }
+
 _G.sys_Menus.OUTPUT = {title = "Контекстное меню консоли",
 	{link = 'Edit|Conventional|Cu&t'},
 	{link = 'Edit|Conventional|&Copy'},
@@ -515,19 +527,25 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'&Open...', ru = 'Открыть', key = 'Ctrl+O', action = IDM_OPEN, image = 'folder_open_document_µ'},
 		--{'Open Selected &Filename', ru = 'Открыть выделенный файл', key = 'Ctrl+Shift+O', action = IDM_OPENSELECTED, active = function() return editor:GetSelText():find('%w:[\\/][^"\n\r\t]') end,},
 		{'Recent Files', ru = 'Недавние файлы', visible = "(_G.iuprops['resent.files.list.location'] or 0) == 0", function() if (_G.iuprops['resent.files.list.location'] or 0) == 0 then return iuprops['resent.files.list']:GetMenu() else return {} end end},
-		{'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+Shift+O', action = function() if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then scite.MenuCommand(IDM_REVERT) end end},
+		{'&Revert', ru = 'Перезагрузить файл', key = 'Ctrl+Shift+O', action = function() CORE.Revert() end},
 		{'&Close', ru = 'Закрыть', key = 'Ctrl+F4', action = IDM_CLOSE},
 		{'C&lose All', ru = 'Закрыть все', action = IDM_CLOSEALL},
 		{'&Save', ru = 'Сохранить', key = 'Ctrl+S', action = IDM_SAVE, active = function() return editor.Modify end, image = 'disk_µ'},
 		{'Save &As...', ru = 'Сохранить как...', key = 'Ctrl+Shift+S', action = IDM_SAVEAS, image = 'disk__pencil_µ'},
 		{'Save a Cop&y...', ru = 'Сохранить копию...', key = 'Ctrl+Shift+P', action = IDM_SAVEACOPY, image = 'disk__plus_µ'},
 		--[[{'Copy Pat&h',  action = IDM_COPYPATH},]]
-		{'Encoding', ru = 'Кодировка',{check_idm = 'editor.unicode.mode', radio = 1,
-			{'&Code Page Property', ru = 'Заданная настройкой codepage', action = IDM_ENCODING_DEFAULT},
-			{'UTF-16 &Big Endian', action = IDM_ENCODING_UCS2BE},
-			{'UTF-16 &Little Endian', action = IDM_ENCODING_UCS2LE},
-			{'UTF-8 &with BOM', ru = 'UTF-8 с заголовком', action = IDM_ENCODING_UTF8},
-			{'&UTF-8', action = IDM_ENCODING_UCOOKIE},
+		{'Encoding', ru = 'Кодировка',{ radio = 1,
+			{'ISO-8859-5', action = SetCP(IDM_ENCODING_DEFAULT, 28595), check = checkEncoding(IDM_ENCODING_DEFAULT, 28595)},
+			{'KOI8_R', action = SetCP(IDM_ENCODING_DEFAULT, 20866), check = checkEncoding(IDM_ENCODING_DEFAULT, 20866)},
+			{'KOI8_U', action = SetCP(IDM_ENCODING_DEFAULT, 21866), check = checkEncoding(IDM_ENCODING_DEFAULT, 21866)},
+			{'Macintosh', action = SetCP(IDM_ENCODING_DEFAULT, 10007), check = checkEncoding(IDM_ENCODING_DEFAULT, 10007)},
+			{'OEM855', action = SetCP(IDM_ENCODING_DEFAULT, 855), check = checkEncoding(IDM_ENCODING_DEFAULT, 855)},
+			{'OEM856', action = SetCP(IDM_ENCODING_DEFAULT, 856), check = checkEncoding(IDM_ENCODING_DEFAULT, 856)},
+			{'WIN-1251', action = SetCP(IDM_ENCODING_DEFAULT, 1251), check = checkEncoding(IDM_ENCODING_DEFAULT, 1251)},
+			{'UTF-16 &Big Endian', action = SetCP(IDM_ENCODING_UCS2BE), check = checkEncoding(IDM_ENCODING_UCS2BE)},
+			{'UTF-16 &Little Endian', action = SetCP(IDM_ENCODING_UCS2LE), check = checkEncoding(IDM_ENCODING_UCS2LE)},
+			{'UTF-8 &with BOM', ru = 'UTF-8 с заголовком', action = SetCP(IDM_ENCODING_UTF8), check = checkEncoding(IDM_ENCODING_UTF8)},
+			{'&UTF-8', action = SetCP(IDM_ENCODING_UCOOKIE), check = checkEncoding(IDM_ENCODING_UCOOKIE)},
 		},},
 		{'&Export', ru = 'Экспорт',{
 			{'As &HTML...' , ru = 'В &HTML..', action = IDM_SAVEASHTML},
@@ -590,11 +608,17 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Stream Comme&nt', ru = 'Потоковый комментарий', key = 'Ctrl+Shift+Q', action = IDM_STREAM_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},
 		{'Bo&x Comment', ru = 'Бокс - комментарий', key = 'Ctrl+Shift+B', action = IDM_BOX_COMMENT, visible = "props['comment.box.start.'..editor_LexerLanguage()]~=''"},
         {'Decode  to', ru = 'Изменить кодировку на..',{
-            {'&Code Page Property', ru = 'Заданная настройкой codepage', action = ChangeCode(IDM_ENCODING_DEFAULT), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_DEFAULT end},
-            {'UTF-16 &Big Endian', action = ChangeCode(IDM_ENCODING_UCS2BE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCS2BE end},
-            {'UTF-16 &Little Endian', action = ChangeCode(IDM_ENCODING_UCS2LE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCS2LE end},
-            {'UTF-8 &with BOM', ru = 'UTF-8 с заголовком', action = ChangeCode(IDM_ENCODING_UTF8), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UTF8 end},
-            {'&UTF-8', action = ChangeCode(IDM_ENCODING_UCOOKIE), active = function() return props['editor.unicode.mode'] ~= ''..IDM_ENCODING_UCOOKIE end},
+			{'ISO-8859-5', action = ChangeCode(IDM_ENCODING_DEFAULT, 28595), active = activeRecoding(IDM_ENCODING_DEFAULT, 28595)},
+			{'KOI8_R', action = ChangeCode(IDM_ENCODING_DEFAULT, 20866), active = activeRecoding(IDM_ENCODING_DEFAULT, 20866)},
+			{'KOI8_U', action = ChangeCode(IDM_ENCODING_DEFAULT, 21866), active = activeRecoding(IDM_ENCODING_DEFAULT, 21866)},
+			{'Macintosh', action = ChangeCode(IDM_ENCODING_DEFAULT, 10007), active = activeRecoding(IDM_ENCODING_DEFAULT, 10007)},
+			{'OEM855', action = ChangeCode(IDM_ENCODING_DEFAULT, 855), active = activeRecoding(IDM_ENCODING_DEFAULT, 855)},
+			{'OEM856', action = ChangeCode(IDM_ENCODING_DEFAULT, 856), active = activeRecoding(IDM_ENCODING_DEFAULT, 856)},
+			{'WIN-1251', action = ChangeCode(IDM_ENCODING_DEFAULT, 1251), active = activeRecoding(IDM_ENCODING_DEFAULT, 1251)},
+			{'UTF-16 &Big Endian', action = ChangeCode(IDM_ENCODING_UCS2BE), active = activeRecoding(IDM_ENCODING_UCS2BE)},
+			{'UTF-16 &Little Endian', action = ChangeCode(IDM_ENCODING_UCS2LE), active = activeRecoding(IDM_ENCODING_UCS2LE)},
+			{'UTF-8 &with BOM', ru = 'UTF-8 с заголовком', action = ChangeCode(IDM_ENCODING_UTF8), active = activeRecoding(IDM_ENCODING_UTF8)},
+			{'&UTF-8', action = ChangeCode(IDM_ENCODING_UCOOKIE), active = activeRecoding(IDM_ENCODING_UCOOKIE)},
         },},
 		{'Make &Selection Uppercase', ru = 'Перевести в верхний регистр', key = 'Ctrl+U', action = function() switchCase(IDM_UPRCASE) end, image = 'edit_uppercase_µ'},
 		{'Make Selection &Lowercase', ru = 'Перевести в нижний регистр', key = 'Ctrl+Shift+U', action = function() switchCase(IDM_LWRCASE) end, image = 'edit_lowercase_µ'},

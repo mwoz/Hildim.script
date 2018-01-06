@@ -152,6 +152,7 @@ function rfl:GetMenu()
                 self.data.pos = {}
                 self.data.layout = {}
                 self.data.bmk = {}
+                self.data.enc = {}
             end
         end
     end})
@@ -174,11 +175,13 @@ function rfl:check(fname)
                 editor:MarkerAdd(tonumber(g), MARKER_BOOKMARK)
                 if BOOKMARK then BOOKMARK.Add(tonumber(g)) end
             end
+            local rez = self.data.enc[i]
             table.remove(self.data.lst, i)
             table.remove(self.data.pos, i)
             table.remove(self.data.layout, i)
             table.remove(self.data.bmk, i)
-            return
+            table.remove(self.data.enc, i)
+            return rez
         end
     end
 end
@@ -351,7 +354,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
     props['load.on.activate'] = 0
     scite.Perform('blockuiupdate:y')
     local cloned = {}
-    local tblBuff = {lst = {}, pos = {}, layouts = {}, bmk = {}}
+    local tblBuff = {lst = {}, pos = {}, layouts = {}, bmk = {}, enc = {}}
     local cloused = {}
     DoForBuffers(function(i)
         if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:from_utf8(1251):find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
@@ -370,6 +373,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
                     table.insert(tblBuff.pos, editor.FirstVisibleLine)
                     table.insert(tblBuff.layouts, SaveLayOut())
                     table.insert(tblBuff.bmk, pref..iup.GetBookmarkLst())
+                    table.insert(tblBuff.enc, scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
                     nf = true
                     table.insert(cloused, pref..props['FilePath'])
                 end
@@ -398,7 +402,6 @@ local function onOpen_local(source)
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8(1251)) then return end
     end
-    iuprops['resent.files.list']:check(source:from_utf8(1251))
     if props['session.started'] ~= '1' and props['session.reload'] ~= '1' then print('') end --??почему-то этот вывод ликвидирует появление звездочки в названии при открытии из оболочки
 end
 
@@ -424,7 +427,7 @@ iup.RestoreFiles = function(bForce)
     if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
         local bNew = (props['FileName'] ~= '')
         local buf = (_G.iuprops['buffers'] or {})
-        local t, p, bk, l = _G.iuprops['buffers'].lst or {}, _G.iuprops['buffers'].pos  or {}, _G.iuprops['buffers'].bmk or {}, _G.iuprops['buffers'].layouts or {}
+        local t, p, bk, l, enc = _G.iuprops['buffers'].lst or {}, _G.iuprops['buffers'].pos or {}, _G.iuprops['buffers'].bmk or {}, _G.iuprops['buffers'].layouts or {}, _G.iuprops['buffers'].enc or {}
 
         scite.Perform('blockuiupdate:y')
         --local fvl = editor.FirstVisibleLine
@@ -459,7 +462,10 @@ iup.RestoreFiles = function(bForce)
                 bRight = true
             end
 
+            _ENCODINGCOOKIE = enc[i] or 0
             scite.Open(sNm)
+            _ENCODINGCOOKIE = nil
+
             if bRight ~= bRightPrev then
                 scite.MenuCommand(IDM_CHANGETAB)
             end
@@ -674,7 +680,7 @@ function CORE.CoToChange(dif)
     local lP = l
     OnNavigation("Change")
     repeat
-        l = f(editor, l + dif, (1 << 2) | (1 << 3))
+        l = f(editor, l + dif, (1 << MARKER_NOTSAVED) | (1 << MARKER_SAVED))
         if lP + dif ~= l and l > 0 then
             editor.SelectionStart = editor:PositionFromLine(l)
             editor.SelectionEnd = editor.SelectionStart
@@ -745,7 +751,7 @@ AddEventHandler("OnClose", function(source)
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8(1251)) then return end
     end
-    iuprops['resent.files.list']:ins(source:from_utf8(1251), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst())
+    iuprops['resent.files.list']:ins(source:from_utf8(1251), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
     if scite.buffers.GetCount() == 1 and editor.ReadOnly then scite.MenuCommand(IDM_READONLY) end
 end)
 
