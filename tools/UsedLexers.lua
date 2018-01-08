@@ -37,7 +37,7 @@ local function Show()
         f:write(t)
         f:close()
         _G.iuprops['settings.lexers']=tbl
-        scite.Perform("reloadproperties:")
+        scite.ReloadProperties()
 
         dlg:hide()
         dlg:postdestroy()

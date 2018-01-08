@@ -85,7 +85,7 @@ local function OnSaveClr(bClouse)
             file:close()
         end
     end
-    scite.Perform("reloadproperties:")
+    scite.ReloadProperties()
 end
 
 local function txt2rgb(txt)

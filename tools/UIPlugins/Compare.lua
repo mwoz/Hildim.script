@@ -321,7 +321,7 @@ require 'luacom'
         local strCur = props['FilePath']
         local strExt = props['FileExt']
         local zoom = editor.Zoom
-        --scite.Perform('blockuiupdate:y')
+        --scite.BlockUpdate(UPDATE_BLOCK)
         BlockEventHandler"OnSwitchFile"
         BlockEventHandler"OnNavigation"
         BlockEventHandler"OnUpdateUI"
@@ -344,7 +344,7 @@ require 'luacom'
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnNavigation"
         UnBlockEventHandler"OnSwitchFile"
-        --scite.Perform('blockuiupdate:u')
+        --scite.BlockUpdate(UPDATE_FORCE)
         bActive = 0
         StartCompare()
         --debug_prnArgs(tCompare)
@@ -404,7 +404,7 @@ require 'luacom'
 
     local function SetSelfTitledDir()
         local ret, dir =
-        iup.GetParam("Настройки цветов сравнения^CompareColorSettings",
+        iup.GetParam("Выбор директории для сравнения с одноименным^compare",
             function(ih, param_index)
                 if param_index == -2 then
                     local p = iup.GetParamHandle(ih, 'PARAM0')
@@ -421,7 +421,7 @@ require 'luacom'
 
     local function ColorSettings()
         local ret, added, deleted, changed, moved, blank =
-        iup.GetParam("Настройки цветов сравнения^CompareColorSettings",
+        iup.GetParam("Настройки цветов сравнения^compare",
             nil,
             'Added:%c\n'..
             'Deleted:%c\n'..

@@ -316,41 +316,46 @@ append (text)\n appends text to the end of the document
 insert (pos, text)\n inserts text at the specified position
 remove (startPos, endPos)\n removes the text in the range
 
-scite.Open
-scite.ConstantName
-scite.MenuCommand
-scite.SendEditor
-scite.SendOutput
-scite.SendFindRes
-scite.ShowParametersDialog
-scite.Perform
-scite.ReloadStartupScript
-scite.SetSideBarWidth
-scite.RunLuaThread
-scite.GetTranslation
-scite.InsertAbbreviation
-scite.RunLuaThread
-scite.PostCommand
-scite.PerformGrepEx
+scite.ActiveEditor() - 0 - левый, 1 - правый
+scite.BlockUpdate(cmd) UPDATE_BLOCK, UPDATE_UNBLOCK, UPDATE_FORCE
+scite.CheckRegexp(strRegexp)
+scite.Close() - закрыть текущий
+scite.EnsureVisible()
 scite.ExecuteHelp
-scite.CheckRegexp
+scite.GetTranslation
+scite.HideForeReolad
+scite.MenuCommand
+scite.Open
+scite.PerformGrepEx
+scite.RegistryHotKeys
+scite.ReloadProperties
+scite.ReloadStartupScript
 scite.RunAsync
 scite.RunInConcole
-scite.SwitchMouseHook
+scite.RunLuaThread
+scite.SaveEncodingFile
+scite.SavePosition
+scite.SendEditor
+scite.SendFindRes
+scite.SendOutput
 scite.SetLexer
-scite.HideForeReolad
-scite.EnsureVisible
+scite.SwitchMouseHook
+
 scite.buffers
-scite.buffers.SecondEditorActive
-scite.buffers.BufferByName
-scite.buffers.IndexOfClone
-scite.buffers.IsCloned
-scite.buffers.GetBufferSide
-scite.buffers.GetCurrent
-scite.buffers.SavedAt
-scite.buffers.NameAt
-scite.buffers.SetDocumentAt
 scite.buffers.GetCount
+scite.buffers.SetDocumentAt
+scite.buffers.NameAt
+scite.buffers.SavedAt
+scite.buffers.EncodingAt
+scite.buffers.SetEncodingAt
+scite.buffers.SetCurrent
+scite.buffers.GetCurrent
+scite.buffers.GetBufferSide
+scite.buffers.IsCloned
+scite.buffers.IndexOfClone
+scite.buffers.BufferByName
+scite.buffers.SecondEditorActive
+
 
 Open(filename)\n opens a file in a new buffer
 ConstantName(number)\n returns the symbolic name of a Scintilla / SciTE constant

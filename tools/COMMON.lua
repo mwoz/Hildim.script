@@ -421,7 +421,7 @@ end
 
 --¬ыполнение действи€ дл€ всех документов
 local function DoForBuffers_local(func, bStc, ...)
-    scite.Perform('blockuiupdate:y')
+    scite.BlockUpdate(UPDATE_BLOCK)
     BlockEventHandler"OnSwitchFile"
     BlockEventHandler"OnNavigation"
     BlockEventHandler"OnUpdateUI"
@@ -447,7 +447,7 @@ local function DoForBuffers_local(func, bStc, ...)
     UnBlockEventHandler"OnSwitchFile"
     UnBlockEventHandler"OnIdle"
     scite.buffers.SetDocumentAt(curBuf)
-    scite.Perform('blockuiupdate:n')
+    scite.BlockUpdate(UPDATE_UNBLOCK)
     return func(nil)
 end
 function DoForBuffers(func, ...)

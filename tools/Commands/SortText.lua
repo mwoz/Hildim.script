@@ -6,13 +6,34 @@ version 2.1.1
 --]]--------------------------------------------------
 local function Run()
     local lines_tbl = {} -- Таблица со строками нашего текста
-    local sort_direction_decreasing = false -- Обратный порядок сортировки
-    local patt = [[^[%s'"`«]*]] -- паттерн для сортировки без учета пробелов и кавычек в начале строки
 
+    local ret, pDirect, position, pIgnore = iup.GetParam("Сортировка",
+        nil,
+        'Параметр повтора%o|Прямой|Обратный|\n'..
+        'Начиная с позиции%i[1,100,1]\n'..
+        'Игнорировать%o|Пробелы и кавычки|+все операторы|ничего|\n'
+        ,
+        0, 1, 0
+    )
+
+    if not ret then return end
+    local patt = '^'
+    if position > 1 then
+        patt = patt..string.rep('.', position - 1)
+    end
+    if pIgnore == 0 then
+        patt = patt..[[[%s'"`«]*]]
+    elseif pIgnore == 1 then
+        patt = patt..'%W*'
+    end
+
+    local sort_direction_decreasing = (pDirect == 1)
     -- сравниваем две строки
     local function CompareTwoLines(line1, line2)
-        line1 = line1:gsub(patt, '')
-        line2 = line2:gsub(patt, '')
+        if patt ~= '^' then
+            line1 = line1:gsub(patt, '')
+            line2 = line2:gsub(patt, '')
+        end
         if sort_direction_decreasing then
             return (line1 > line2)
         else
@@ -28,16 +49,6 @@ local function Run()
             return (line1:lower() < line2:lower())
         end
     end
-    -- автоматически определяем направление сортировки, последовательно сравнивая строки с последней строкой
-    local function GetSortDirection()
-        local end_line = lines_tbl[#lines_tbl]:gsub(patt, '')
-        for i = 1, #lines_tbl - 1 do
-            local comp_line = lines_tbl[i]:gsub(patt, '')
-            if comp_line ~= end_line then
-                return CompareTwoLines(comp_line, end_line)
-            end
-        end
-    end
 
     local sel_text = editor:GetSelText()
     local sel_start = editor.SelectionStart
@@ -48,7 +59,7 @@ local function Run()
             lines_tbl[#lines_tbl + 1] = current_line
         end
         if #lines_tbl > 1 then
-            sort_direction_decreasing = GetSortDirection()
+            --sort_direction_decreasing = GetSortDirection()
             -- сортируем строки в таблице
             table.sort(lines_tbl, CompareTwoLines)
             -- соединяем все строки из таблицы вместе

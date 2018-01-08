@@ -66,7 +66,7 @@ scite.RunAsync(function()
             if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
             if _G.iuprops['command.reloadprops'] then
                 _G.iuprops['command.reloadprops'] = false;
-                scite.RunAsync(function() scite.Perform("reloadproperties:") end)
+                scite.RunAsync(function() scite.ReloadProperties() end)
             end
         end)
     end

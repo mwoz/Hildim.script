@@ -34,7 +34,7 @@ local function Init_hidden()
         editor.SelectionEnd = editor.SelectionStart
     end
 
-    local SavedState, MC, pCurBlock, positions_t, lines_t, recordet_macros, started_overtype, macro_list, caret_fore
+    local SavedState, MC, pCurBlock, positions_t, lines_t, recordet_macros, started_overtype, macro_list, caret_fore, started_cycle
     local params, params_cnt
 
     local function nextMC(force)
@@ -88,7 +88,7 @@ local function Init_hidden()
 
     local function do_BeginFor()
         local ret, num, cap =
-        iup.GetParam("Новый повтор ввода",
+        iup.GetParam("Новый повтор блока",
             function(h, id)
                 if id == iup.GETPARAM_BUTTON1 then
                     local cap = iup.GetParamParam(h, 1).value
@@ -108,7 +108,7 @@ local function Init_hidden()
             '<New>'
         )
         if ret then
-            table.insert(params, {caption = cap, typ = 'for', suff = '%i[1,100,1]', id = #params + 1, num = num})
+            table.insert(params, {caption = cap, typ = 'for', suff = '%i[1,1000,1]', id = #params + 1, num = num})
             nextMC()
 
             newBlock = {typ = 'for', id = #params, pUpper = pCurBlock}
@@ -130,7 +130,7 @@ local function Init_hidden()
         end
 
         local ret, num, fix, reverce =
-        iup.GetParam("Вставка из истории",
+        iup.GetParam("Вставка из истории^macros",
             nil,
             'Параметр повтора%l|'..table.concat(tItems, '|')..'|\n'..
             'Фиксированный%i[1,100,1]\n'..
@@ -189,7 +189,7 @@ local function Init_hidden()
 
     local function do_BeginIf()
         local ret, def, cap =
-        iup.GetParam("Новое условие",
+        iup.GetParam("Новое условие^macros",
             function(h, id)
                 if id == iup.GETPARAM_BUTTON1 then
                     local cap = iup.GetParamParam(h, 1).value
@@ -220,7 +220,7 @@ local function Init_hidden()
 
     local function do_NewStringPar()
         local ret, val, def, cap =
-        iup.GetParam("Новый строковый параметр",
+        iup.GetParam("Новый строковый параметр^macros",
             function(h, id)
                 if id == iup.GETPARAM_BUTTON1 then
                     local cap = iup.GetParamParam(h, 1).value
@@ -328,7 +328,7 @@ local function Init_hidden()
 
                 end
                 sOut = sOut..strUp..
-                    ' = \niup.GetParam("Параметры макроса", nil,'..strParams..
+                    ' = \niup.GetParam("Параметры макроса^macros", nil,'..strParams..
                     '\n"" '..strValues..")\nif not ret then return end"
             end
         end
@@ -388,7 +388,7 @@ local function Init_hidden()
 
         get_block_script(b, 1)
 
-        return sOut
+        return sOut..'\n::exit::'
     end
 
     local function do_StopBlock()
@@ -482,8 +482,11 @@ local function Init_hidden()
 
         started_overtype = editor.Overtype
         caret_fore = editor.CaretFore
+        started_cycle = iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value
         editor.CaretFore = 255
         scite.RegistryHotKeys({})
+        iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value = 'OFF'
+
 
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnChar"
@@ -508,6 +511,7 @@ local function Init_hidden()
 
         editor.Overtype = started_overtype
         editor.CaretFore = caret_fore
+        iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value = started_cycle
         menuhandler:RegistryHotKeys()
 
         UnBlockEventHandler"OnUpdateUI"
@@ -552,26 +556,34 @@ local function Init_hidden()
         if not scr:find('iup%.GetParam%("') then
             local ret
             ret, cnt =
-            iup.GetParam("Число повторов", nil,
+            iup.GetParam("Число повторов^macros", nil,
                 "Повторить, раз: %i[1,100,1]\n",
             1)
             if not ret then return end
         end
+
+        MACRO.Play = true
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnChar"
         BlockEventHandler"OnKey"
+        local strCycle = iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value
+        iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value = 'OFF'
         local curOverype = editor.Overtype
+
         editor:BeginUndoAction()
         local bOk, msg
         for i = 1, cnt do
             bOk, msg = pcall(dostring, scr)
-            if not bOk then break end
+            if not bOk or not MACRO.Play then break end
         end
         editor:EndUndoAction()
+
         editor.Overtype = curOverype
+        iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value = strCycle
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnChar"
         UnBlockEventHandler"OnKey"
+        MACRO.Play = nil
 
         if not bOk then
             print(msg, scr)
@@ -613,6 +625,9 @@ local function Init_hidden()
                 f:write(scr)
                 f:flush()
                 f:close()
+
+                macro_list = nil
+                recordet_macros = nil
             end
         end
     end
@@ -654,7 +669,7 @@ local function Init_hidden()
             macro_list = {}
             local mnu_i
             for i = 1,  #t do
-                mnu_i = {t[i].name, action = function() RunMacroFile(props["SciteDefaultHome"]..'\\data\\Macros\\'..t[i].name) end}
+                mnu_i = {t[i].name:gsub('%.[^.]*$', ''), action = function() RunMacroFile(props["SciteDefaultHome"]..'\\data\\Macros\\'..t[i].name) end}
                 table.insert(macro_list, mnu_i)
             end
             if FILEMAN then
@@ -700,19 +715,19 @@ local function Init_hidden()
     local function do_FindNextWrd(arg)
         CORE.FindNextWrd(arg)
         nextMC()
-        MC.typ = 'L'; MC.fname = 'CORE.FindNextWrd('..arg..')'
+        MC.typ = 'L'; MC.fname = 'if not CORE.FindNextWrd('..arg..') then MACRO.Play = nil; goto exit end'
         nextMC()
     end
     local function do_Find_FindInDialog(arg)
         CORE.Find_FindInDialog(arg)
         nextMC()
-        MC.typ = 'L'; MC.fname = 'CORE.Find_FindInDialog('..Iif(arg, 'true', 'false')..')'
+        MC.typ = 'L'; MC.fname = 'if not CORE.Find_FindInDialog('..Iif(arg, 'true', 'false')..') then MACRO.Play = nil; goto exit end'
         nextMC()
     end
     local function do_FindNextBack(arg)
         CORE.FindNextBack(arg)
         nextMC()
-        MC.typ = 'L'; MC.fname = 'CORE.FindNextBack('..Iif(arg, 'true', 'false')..')'
+        MC.typ = 'L'; MC.fname = 'if not CORE.FindNextBack('..Iif(arg, 'true', 'false')..') then MACRO.Play = nil; goto exit end'
         nextMC()
     end
 
@@ -752,7 +767,7 @@ local function Init_hidden()
             {'Paste', ru = 'Вставить', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
             {'Paste from History', ru = 'Вставить из истории клипов', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
             {'Find &Next', ru = 'Найти далее', action = function() do_FindNextBack(false) end},
-            {'Find &Back', ru = 'Найти предыдущее', action = function() do_FindNextBack(true) end},
+            {'Find &Back', ru = 'Предыдущее совпадение', action = function() do_FindNextBack(true) end},
             {'Find Next Word/Selection', ru = 'Слово/выделение - (через диалог)', action = function() do_Find_FindInDialog(true) end, image = "IMAGE_search" },
             {'Find Prev Word/Selection', ru = 'Предыдущее слово/выделение - (через диалог)', action = function() do_Find_FindInDialog(false) end, image = "IMAGE_search"},
             {'Next Word/Selection', ru = 'Следующее слово/выделение', action = function() do_FindNextWrd(1) end, image = "IMAGE_search"},

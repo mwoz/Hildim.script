@@ -36,8 +36,8 @@ local function Init(h)
                 elseif cp == 21866 then return 'KOI8_U'
                 elseif cp == 10007 then return 'Macintosh'
                 elseif cp == 855   then return 'OEM855'
-                elseif cp == 856   then return 'OEM856'
-                else
+                elseif cp == 866   then return 'OEM866'
+                else return '???'
                 end
             end
         end

@@ -262,12 +262,7 @@ local function mybar_Switch(n)
 end
 
 local function OpenFile(filename)
-	if filename:match(".session$") ~= nil then
-		filename = filename:gsub('\\','\\\\')
-		scite.Perform ("loadsession:"..filename)
-	else
-		scite.Open(filename:to_utf8())
-	end
+    scite.Open(filename:to_utf8())
     if iup.GetGlobal("SHIFTKEY") == 'OFF' then
         if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON' then scite.RunAsync(function() mybar_Switch(m_prevSel + 1) end)
         elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1' then scite.RunAsync(function()  mybar_Switch(1) end)

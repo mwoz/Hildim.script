@@ -105,12 +105,14 @@ CORE.Find_FindInDialog = function(ud)
         sText = GetCurrentWord()
         wholeWord = 'ON'
     end
+    local pos = editor.CurrentPos
     iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value = wholeWord
     iup.GetDialogChild(iup.GetLayout(), "zUpDown").valuepos = tmpUD
     iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat").value = sText
     iup.GetDialogChild(iup.GetLayout(), "cmbFindWhat"):SaveHist()
     iup.GetDialogChild(iup.GetLayout(), "btnFind").flat_action()
     iup.GetDialogChild(iup.GetLayout(), "zUpDown").valuepos = curUD
+    return pos ~= editor.CurrentPos
 end
 
 CORE.FindNextWrd = function(ud)
@@ -120,10 +122,13 @@ CORE.FindNextWrd = function(ud)
         sText = GetCurrentWord()
         wholeWord = true
     end
+    local bNoMacro = true
+    if MACRO then bNoMacro = not MACRO.Record and not MACRO.Play end
+    local prevpos = editor.CurrentPos
     local fs = seacher{
         wholeWord = wholeWord
         , matchCase = false
-        , wrapFind = true
+        , wrapFind = bNoMacro
         , backslash = false
         , regExp = false
         , style = nil
@@ -136,6 +141,7 @@ CORE.FindNextWrd = function(ud)
         editor.SelectionStart = pos + 1
         editor.SelectionEnd = pos + 1
     end
+    return prevpos ~= pos and pos > -1
 end
 
 AddEventHandler("OnClick", function(shift, ctrl, alt)
@@ -175,7 +181,7 @@ CORE.OpenFoundFiles = function(msg)
 
     if msg == 1 then
         if findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
-            scite.Perform('blockuiupdate:y')
+            scite.BlockUpdate(UPDATE_BLOCK)
             BlockEventHandler"OnBeforeOpen"
             BlockEventHandler"OnOpen"
             BlockEventHandler"OnSwitchFile"
@@ -197,16 +203,16 @@ CORE.OpenFoundFiles = function(msg)
             UnBlockEventHandler"OnSwitchFile"
             UnBlockEventHandler"OnOpen"
             UnBlockEventHandler"OnBeforeOpen"
-            scite.Perform('blockuiupdate:u')
+            scite.BlockUpdate(UPDATE_FORCE)
         end
         return true
     elseif msg == 2 then
         DoForBuffers(CloseIfFound, fndFiles(), true)
-        scite.Perform('blockuiupdate:u')
+        scite.BlockUpdate(UPDATE_FORCE)
         return true
     elseif msg == 3 then
         DoForBuffers(CloseIfFound, fndFiles(), false)
-        scite.Perform('blockuiupdate:u')
+        scite.BlockUpdate(UPDATE_FORCE)
         return true
     end
 end

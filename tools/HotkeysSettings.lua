@@ -156,7 +156,8 @@ local function Show()
         elseif kStr == 'Backslash' then kStr = '\\'
         elseif kStr == 'Slash' then kStr = '?'
         elseif kStr == 'Minus' then kStr = '-'
-        elseif kStr == 'Equal' then kStr = '+'  --??
+        elseif kStr == 'Equal' then kStr = '='
+        elseif kStr == 'Plus' then kStr = '='
         elseif kStr == 'Parentright' then kStr = '0'
         elseif kStr == 'Parentleft' then kStr = '9'
         elseif kStr == 'Exclam' then kStr = '1'

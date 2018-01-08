@@ -20,11 +20,13 @@ local function Ctrl(s)
 end
 
 local function PrepareFindText(s)
-    if Ctrl("chkRegExp").value == "ON" or Ctrl("chkBackslash").value == "ON" then
-        return s:gsub('\\', '\\\\'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t')
+    s = (s or ''):gsub('[\n\r]+$', '')
+    if s:find('[\n\r]') then
+        return ''
+    elseif Ctrl("chkRegExp").value == "ON" or Ctrl("chkBackslash").value == "ON" then
+        return s:gsub('\\', '\\\\'):gsub('\t', '\\t')
     else
-        local _,_,ret = s:find('^([^\n\r\t]*)')
-        return ret or ''
+        return s
     end
 end
 
@@ -285,7 +287,7 @@ local function ReplaceInBuffers()
     SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
     Ctrl("cmbFindWhat"):SaveHist()
-    scite.Perform('blockuiupdate:u')
+    scite.BlockUpdate(UPDATE_FORCE)
     PassFocus_local()
     PostAction()
 end
@@ -454,7 +456,7 @@ end
 
 local function FindNextBack(bUp)
     if not findSettings.findWhat then ReadSettings() end
-    if findSettings.findWhat == '' then return true end
+    if findSettings.findWhat == '' then return false end
     iup.PassFocus()
     local prevUp = findSettings.searchUp
     findSettings.searchUp = bUp
@@ -463,7 +465,7 @@ local function FindNextBack(bUp)
     OnNavigation("Find-")
     if pos < 0 then print("Error: '"..findSettings.findWhat.."' not found") end
     findSettings.searchUp = prevUp
-    return true
+    return pos >= 0
 end
 
 local function PassOrClose()
@@ -1113,14 +1115,14 @@ local function Init(h)
             elseif msg == IDM_FINDINFILES then return ActivateFind_l(2)
             elseif msg == IDM_FINDNEXT then
                 ReadSettings()
-                local r = FindNextBack(false)
+                FindNextBack(false)
                 Ctrl("cmbFindWhat"):SaveHist()
-                return r
+                return true
             elseif msg == IDM_FINDNEXTBACK then
                 ReadSettings()
-                local r = FindNextBack(true)
+                FindNextBack(true)
                 Ctrl("cmbFindWhat"):SaveHist()
-                return r
+                return true
             elseif msg == IDM_FINDNEXTSEL then return FindNextSel(false)
             elseif msg == IDM_FINDNEXTBACKSEL then return FindNextSel(true)
             end

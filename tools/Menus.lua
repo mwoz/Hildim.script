@@ -144,7 +144,7 @@ local function ResetTabbarProps()
         iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight'), 1)
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft'), 1)
-        scite.Perform('blockuiupdate:u')
+        scite.BlockUpdate(UPDATE_FORCE)
     end
 end
 
@@ -180,7 +180,7 @@ local function ResetSelColors()
         'Цвет%c\n'..
         'Ширина%i[1,4,1]\n'..
         'Период мерцания%i[0,2000,100]\n'..
-        'Отображать дополнительные курсоры%b\n'
+        'Мерцание дополнительных курсоров%b\n'
         ,
         Rgb2Str(props['selection.back']),
         tonumber(props['selection.alpha']) or 30,
@@ -214,7 +214,7 @@ local function ResetSelColors()
         props['caret.period']                  = caret_period
         props['caret.additional.blinks']       = caret_additional_blinks
 
-        scite.Perform("reloadproperties:")
+        scite.ReloadProperties()
     end
 end
 
@@ -250,7 +250,7 @@ local function AutoScrollingProps()
         'Ширина НЗ, px%i[1,500,20]\n'..
         'Никогда не помешать каретку в НЗ%b\n'..
         'Автопрокрутка на 3 НЗ%b\n'..
-        'Ассиметиричная НЗ%b\n'..
+        'Асимметричная НЗ%b\n'..
         'Автопрокрутка по высоте%t\n'..
         'Нежелательная зона (НЗ)%b\n'..
         'Высота НЗ, lines%i[1,500,20]\n'..
@@ -293,7 +293,7 @@ local function AutoScrollingProps()
         props['caret.sticky']          = caret_sticky
 
         props['end.at.last.lin']       = end_at_last_lin
-
+        scite.ReloadProperties()
     end
 end
 
@@ -540,7 +540,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 			{'KOI8_U', action = SetCP(IDM_ENCODING_DEFAULT, 21866), check = checkEncoding(IDM_ENCODING_DEFAULT, 21866)},
 			{'Macintosh', action = SetCP(IDM_ENCODING_DEFAULT, 10007), check = checkEncoding(IDM_ENCODING_DEFAULT, 10007)},
 			{'OEM855', action = SetCP(IDM_ENCODING_DEFAULT, 855), check = checkEncoding(IDM_ENCODING_DEFAULT, 855)},
-			{'OEM856', action = SetCP(IDM_ENCODING_DEFAULT, 856), check = checkEncoding(IDM_ENCODING_DEFAULT, 856)},
+			{'OEM866', action = SetCP(IDM_ENCODING_DEFAULT, 866), check = checkEncoding(IDM_ENCODING_DEFAULT, 866)},
 			{'WIN-1251', action = SetCP(IDM_ENCODING_DEFAULT, 1251), check = checkEncoding(IDM_ENCODING_DEFAULT, 1251)},
 			{'UTF-16 &Big Endian', action = SetCP(IDM_ENCODING_UCS2BE), check = checkEncoding(IDM_ENCODING_UCS2BE)},
 			{'UTF-16 &Little Endian', action = SetCP(IDM_ENCODING_UCS2LE), check = checkEncoding(IDM_ENCODING_UCS2LE)},
@@ -613,7 +613,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 			{'KOI8_U', action = ChangeCode(IDM_ENCODING_DEFAULT, 21866), active = activeRecoding(IDM_ENCODING_DEFAULT, 21866)},
 			{'Macintosh', action = ChangeCode(IDM_ENCODING_DEFAULT, 10007), active = activeRecoding(IDM_ENCODING_DEFAULT, 10007)},
 			{'OEM855', action = ChangeCode(IDM_ENCODING_DEFAULT, 855), active = activeRecoding(IDM_ENCODING_DEFAULT, 855)},
-			{'OEM856', action = ChangeCode(IDM_ENCODING_DEFAULT, 856), active = activeRecoding(IDM_ENCODING_DEFAULT, 856)},
+			{'OEM866', action = ChangeCode(IDM_ENCODING_DEFAULT, 866), active = activeRecoding(IDM_ENCODING_DEFAULT, 866)},
 			{'WIN-1251', action = ChangeCode(IDM_ENCODING_DEFAULT, 1251), active = activeRecoding(IDM_ENCODING_DEFAULT, 1251)},
 			{'UTF-16 &Big Endian', action = ChangeCode(IDM_ENCODING_UCS2BE), active = activeRecoding(IDM_ENCODING_UCS2BE)},
 			{'UTF-16 &Little Endian', action = ChangeCode(IDM_ENCODING_UCS2LE), active = activeRecoding(IDM_ENCODING_UCS2LE)},
@@ -764,7 +764,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Windows Integration', ru = 'Настройка интеграции с Windows', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\WinAssoc.lua')", image='windows_µ'},
 		{'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
 		{'Indicators', ru = 'Индикаторы...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorIndicators.lua')", active = RunSettings, image='color_µ'},
-		{'Selection Colors & caret', ru = 'Цвета выделения и курсор...', action = ResetSelColors, image='color_µ'},
+		{'Selection Colors && caret', ru = 'Цвета выделения и курсор...', action = ResetSelColors, image='color_µ'},
 		{'Autoscroll Settings', ru = 'Настройка автопрокрутки...', action = AutoScrollingProps, image='settings_µ'},
 		{'Colors and Fonts of lexers', ru = 'Цвета и шрифты лексеров...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings, image='settings_µ'},
 		{"Lexers properties", ru = 'Свойства лексеров', {

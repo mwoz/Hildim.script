@@ -30,7 +30,7 @@ local function SetReadOnly(ro)
 		if props["style.back.readonly"] ~= "" then
 			props["style.*.33"] = props["style.*.33"]..",back:"..props["style.back.readonly"]
 		end
-		scite.Perform("reloadproperties:")
+		scite.ReloadProperties()
 
 		props["scite.readonly"] = "VIEW"
 
@@ -39,7 +39,7 @@ local function SetReadOnly(ro)
 			props["style.*.33"] = props["style.*.33.normal"]
 			props["caret.period"] = props["caret.period.normal"]
 			props["caret.width"] = props["caret.width.normal"]
-			scite.Perform("reloadproperties:")
+			scite.ReloadProperties()
 		end
 
 		props["scite.readonly"] = "EDIT"

@@ -23,4 +23,4 @@ end
 io.output(file)
 io.write (text)
 io.close()
-scite.Perform("reloadproperties:")
+scite.ReloadProperties()

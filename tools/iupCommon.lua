@@ -268,7 +268,7 @@ function iup.SaveChProps(bReset)
 		io.write(table.concat(t,'\n'))
  	end
 	io.close()
-    if bReset then scite.RunAsync(function() scite.Perform("reloadproperties:") end) end
+    if bReset then scite.RunAsync(function() scite.ReloadProperties() end) end
 end
 
 local function SaveIup()
@@ -352,7 +352,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
     local curBuf = scite.buffers.GetCurrent()
     local tmpFlag = props['load.on.activate']
     props['load.on.activate'] = 0
-    scite.Perform('blockuiupdate:y')
+    scite.BlockUpdate(UPDATE_BLOCK)
     local cloned = {}
     local tblBuff = {lst = {}, pos = {}, layouts = {}, bmk = {}, enc = {}}
     local cloused = {}
@@ -380,10 +380,10 @@ iup.CloseFilesSet = function(cmd, tForClose)
             else
                 if i <= curBuf then curBuf = curBuf - 1 end
             end
-            if cmd ~= 0 then scite.Perform('close:') end
+            if cmd ~= 0 then scite.Close() end
         end
     end)
-    scite.Perform('blockuiupdate:u')
+    scite.BlockUpdate(UPDATE_FORCE)
     if OnCloseFileset then OnCloseFileset(cloused) end
 
     props['load.on.activate'] = tmpFlag
@@ -407,7 +407,7 @@ end
 
 local function onNavigate_local(item)
     if item == '_openSet' then
-        scite.Perform('blockuiupdate:y')
+        scite.BlockUpdate(UPDATE_BLOCK)
         editor.VScrollBar = false
         BlockEventHandler("OnOpen", onOpen_local)
         BlockEventHandler("OnNavigation", onNavigate_local)
@@ -418,7 +418,7 @@ local function onNavigate_local(item)
         UnBlockEventHandler"OnUpdateUI"
         editor.VScrollBar = true
     elseif item == '_-openSet' then
-        scite.Perform('blockuiupdate:u')
+        scite.BlockUpdate(UPDATE_FORCE)
     end
 end
 
@@ -429,7 +429,7 @@ iup.RestoreFiles = function(bForce)
         local buf = (_G.iuprops['buffers'] or {})
         local t, p, bk, l, enc = _G.iuprops['buffers'].lst or {}, _G.iuprops['buffers'].pos or {}, _G.iuprops['buffers'].bmk or {}, _G.iuprops['buffers'].layouts or {}, _G.iuprops['buffers'].enc or {}
 
-        scite.Perform('blockuiupdate:y')
+        scite.BlockUpdate(UPDATE_BLOCK)
         --local fvl = editor.FirstVisibleLine
         --editor.VScrollBar = false
         if #t > 0 then
@@ -486,7 +486,7 @@ iup.RestoreFiles = function(bForce)
         end
         UnBlockEventHandler"OnRightEditorVisibility"
 
-        scite.Perform('blockuiupdate:u')
+        scite.BlockUpdate(UPDATE_FORCE)
         --editor.VScrollBar = true
         --editor.FirstVisibleLine = fvl
         if bNew then
@@ -599,7 +599,7 @@ end
 
 AddEventHandler("OnMenuCommand", function(cmd, source)
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
-        if cmd == IDM_QUIT then scite.Perform("savepositions:") end
+        if cmd == IDM_QUIT then scite.SavePosition() end
         return iup.CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
         if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
@@ -1443,7 +1443,7 @@ function iup.ReloadScript()
     scite.EnsureVisible()
     iup.GetLayout().resize_cb()
     print("...Ok")
-    if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.RunAsync(function() scite.Perform("reloadproperties:") end) end
+    if _G.iuprops['command.reloadprops'] then _G.iuprops['command.reloadprops'] = false; scite.RunAsync(function() scite.ReloadProperties() end) end
     end)
 end
 
