@@ -198,11 +198,13 @@ local function Run(flag)
                     end
                 end
                 if bFound then
-                    local pI = dofile(defpath..p)
-                    if pI then tPlugins[p] = pI end
-                    iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
-                    k = k + 1
-                    h:SetUserId(k, p)
+                    local r, err = pcall( function()
+                        local pI = dofile(defpath..p)
+                        if pI then tPlugins[p] = pI end
+                        iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
+                        k = k + 1
+                        h:SetUserId(k, p)
+                    end)
                 end
             end
         end

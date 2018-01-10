@@ -82,4 +82,5 @@ scite.RunAsync(function()
         iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
         iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
     end
+    _G.g_session['LOADED'] = true
 end)

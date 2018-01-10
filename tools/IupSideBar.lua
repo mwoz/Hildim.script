@@ -174,7 +174,7 @@ function iup.SaveNamedValues(h, root)
                 if val then _G.iuprops[root..'.'..child.name..'.value'] = val end
             end
 ::continue::
-            iup.SaveNamedValues(child, root)
+            iup.SaveNamedValues(child, iup.GetAttribute(child, 'SAVEPREFIX') or root)
         end
     until not child
 end
@@ -949,6 +949,7 @@ InitTabbar()
 InitToolBar()
 InitStatusBar()
 RestoreNamedValues(hMainLayout, 'sidebarctrl')
+RestoreNamedValues(hMainLayout, 'findreplace')
 iup.Refresh(hMainLayout)
 if not LeftBar_obj.handle then iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0'
 else iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '3'   end
@@ -1089,9 +1090,11 @@ end
 
 function CORE.Revert()
     if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
+        scite.BlockUpdate(UPDATE_BLOCK)
         _ENCODINGCOOKIE = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
         scite.MenuCommand(IDM_REVERT)
         _ENCODINGCOOKIE = nil
+        scite.BlockUpdate(UPDATE_UNBLOCK)
     end
 end
 
@@ -1112,6 +1115,7 @@ function CORE.SetCP(unicmode, codepage)
 end
 
 AddEventHandler("OnBeforeOpen", function(file, ext)
+    BlockEventHandler"OnTextChanged"
     if _ENCODINGCOOKIE then return _ENCODINGCOOKIE end
     return iuprops['resent.files.list']:check(file:from_utf8())
 end)

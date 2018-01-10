@@ -15,6 +15,13 @@ local function Init_hidden()
             editor.SelectionNCaretVirtualSpace[0] = col - ln
         end
     end
+
+    function MACRO.SelectWord()
+        local current_pos = editor.CurrentPos
+        return editor:SetSel(editor:WordStartPosition(current_pos, true),
+                                editor:WordEndPosition(current_pos, true))
+    end
+
     function MACRO.ReplaceSel(s)
         local prevSel = editor.SelectionStart
         local prevSelEnd = editor.SelectionEnd
@@ -471,12 +478,12 @@ local function Init_hidden()
             if (_G.iuprops['coeditor.win'] or '0')~= '2'                         then SavedState.Coeditor = _G.iuprops['coeditor.win']      end
 
 
-            if SavedState.SideBar    then SideBar_obj.handle.detachPos(false)                                end
-            if SavedState.LeftBar    then LeftBar_obj.handle.detachPos(false)                                end
-            if SavedState.consoleBar then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").detachPos(false)  end
-            if SavedState.FindRepl   then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").detachPos(false) end
-            if SavedState.FindResBar then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").detachPos(false)  end
-            if SavedState.Coeditor   then iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").detachPos(false) end
+            if SavedState.SideBar    then SideBar_obj.handle.cmdHide()                                end
+            if SavedState.LeftBar    then LeftBar_obj.handle.cmdHide()                                end
+            if SavedState.consoleBar then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").cmdHide()  end
+            if SavedState.FindRepl   then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").cmdHide() end
+            if SavedState.FindResBar then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").cmdHide()  end
+            if SavedState.Coeditor   then iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").cmdHide() end
 
         end
 
@@ -502,12 +509,12 @@ local function Init_hidden()
         if SavedState.bStatusBar then  iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end
         if SavedState.bTabBar then     iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state = 'OPEN' end
 
-        if SavedState.SideBar    then if SavedState.SideBar    == '0' then SideBar_obj.handle.Attach()                                    else SideBar_obj.handle.detachPos(true)                                    end end
-        if SavedState.LeftBar    then if SavedState.LeftBar    == '0' then LeftBar_obj.handle.Attach()                                    else LeftBar_obj.handle.detachPos(true)                                    end end
-        if SavedState.consoleBar then if SavedState.consoleBar == '0' then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").Attach()  else iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").detachPos(true)  end end
-        if SavedState.FindResBar then if SavedState.FindResBar == '0' then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").Attach()  else iup.GetDialogChild(iup.GetLayout(), "FindResDetach").detachPos(true)  end end
-        if SavedState.Coeditor   then if SavedState.Coeditor   == '0' then iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").detachPos(true) end end
-        if SavedState.FindRepl   then if SavedState.FindRepl   == '0' then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").detachPos(true) end end
+        if SavedState.SideBar    then SideBar_obj.handle.Switch()                                    end
+        if SavedState.LeftBar    then LeftBar_obj.handle.Switch()                                    end
+        if SavedState.consoleBar then if SavedState.consoleBar == '0' then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").Attach()  else iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").ShowPopUp()  end end
+        if SavedState.FindResBar then if SavedState.FindResBar == '0' then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").Attach()  else iup.GetDialogChild(iup.GetLayout(), "FindResDetach").ShowPopUp()  end end
+        if SavedState.Coeditor   then if SavedState.Coeditor   == '0' then iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").ShowPopUp() end end
+        if SavedState.FindRepl   then if SavedState.FindRepl   == '0' then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").ShowPopUp() end end
 
         editor.Overtype = started_overtype
         editor.CaretFore = caret_fore
@@ -688,6 +695,7 @@ local function Init_hidden()
         MC.typ = 'L'; MC.fname = 'CLIPHISTORY.Copy(1, editor:GetSelText())'
         nextMC()
     end
+
     local function do_Paste()
         MACRO.Record = false
         MACRO.ReplaceSel(CLIPHISTORY.GetClip(1) or "")
@@ -698,6 +706,16 @@ local function Init_hidden()
         MC.typ = 'L'; MC.fname = 'MACRO.ReplaceSel(CLIPHISTORY.GetClip(1) or "")'
         nextMC()
     end
+
+    local function do_SelectWord()
+        MACRO.SelectWord()
+
+        nextMC()
+
+        MC.typ = 'L'; MC.fname = 'MACRO.SelectWord()'
+        nextMC()
+    end
+
     local function do_Cut()
         CLIPHISTORY.Copy(1, editor:GetSelText())
         MACRO.Record = false
@@ -712,18 +730,21 @@ local function Init_hidden()
         MC.typ = 'L'; MC.fname = 'MACRO.ReplaceSel("")'
         nextMC()
     end
+
     local function do_FindNextWrd(arg)
         CORE.FindNextWrd(arg)
         nextMC()
         MC.typ = 'L'; MC.fname = 'if not CORE.FindNextWrd('..arg..') then MACRO.Play = nil; goto exit end'
         nextMC()
     end
+
     local function do_Find_FindInDialog(arg)
         CORE.Find_FindInDialog(arg)
         nextMC()
         MC.typ = 'L'; MC.fname = 'if not CORE.Find_FindInDialog('..Iif(arg, 'true', 'false')..') then MACRO.Play = nil; goto exit end'
         nextMC()
     end
+
     local function do_FindNextBack(arg)
         CORE.FindNextBack(arg)
         nextMC()
@@ -761,7 +782,8 @@ local function Init_hidden()
                 {'Завершить блок "'..params[pCurBlock.id].caption..'"', action = do_StopBlock, image='control_double_µ'}
             }
         end},
-        {'Insert string', ru = 'Вставить строку...', plane = 1, visible = function() return MACRO.Record end, {
+        {'Commands', plane = 1, visible = function() return MACRO.Record end, {
+            {'Select Word', ru = 'Выделить слово под курсором', action = do_SelectWord},
             {'Copy', ru = 'Копировать', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
             {'Cut', ru = 'Вырезать', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
             {'Paste', ru = 'Вставить', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},

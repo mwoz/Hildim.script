@@ -272,6 +272,7 @@ function iup.SaveChProps(bReset)
 end
 
 local function SaveIup()
+    if not _G.g_session['LOADED'] then return end
     local file = props["scite.userhome"]..'\\settings.lua'
     if pcall(io.output, file) then
         _G.iuprops['_VERSION'] = 2
@@ -396,8 +397,7 @@ iup.CloseFilesSet = function(cmd, tForClose)
 end
 
 local function onOpen_local(source)
-    editor:MarkerDeleteAll(MARKER_NOTSAVED)
-    editor:MarkerDeleteAll(MARKER_SAVED)
+    UnBlockEventHandler"OnTextChanged"
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8()) then return end
@@ -705,7 +705,7 @@ local function fixMarks(bReset)
 end
 
 AddEventHandler("OnTextChanged", function(position, flag, linesAdded)
-    if (_G.iuprops['changes.mark.line'] or 0) == 1 then
+    if (_G.iuprops['changes.mark.line'] or 0) == 1 and not _G.g_session['OPENING'] then
         if (flag & (SC_PERFORMED_UNDO | SC_PERFORMED_REDO)) ~= 0 then
             scite.RunAsync(function()
                 if scite.buffers.SavedAt(scite.buffers.GetCurrent()) then fixMarks(); return end
@@ -715,7 +715,7 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded)
         if not bOk then return end
         if lstart ~= 0 or linesAdded ~= editor:LineFromPosition(editor.Length) then
             for i = lstart, lstart + Iif(linesAdded > 0, linesAdded, 0) do
-                if (editor:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then editor:MarkerAdd(i, MARKER_NOTSAVED) end
+                 if (editor:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then editor:MarkerAdd(i, MARKER_NOTSAVED) end
             end
         end
     end
@@ -1498,26 +1498,12 @@ local function SaveIuprops_local(filename)
     h = iup.GetDialogChild(hMainLayout, "statusbar_expander")
     _G.iuprops["layout.statusbar_expander"] = h.state
 
-    local hFind
-    if _G.dialogs['findrepl'] then
-        hFind = _G.dialogs['findrepl']
-    --else
-        --hFind = iup.GetDialogChild(iup.GetLayout(), "FindReplDetach")
-    end
     local t = {}
     for n,v in pairs(_G.iuprops) do
         local _, _, prefix, ctrl = n:find('([^%.]*)%.([^%.]*)')
         if prefix == 'sidebarctrl' or prefix == 'concolebar' or prefix == 'dialogs' or prefix == 'findrepl' or prefix == 'findres' or prefix == 'layout' or
            prefix == 'session' or prefix == 'settings' or prefix == 'sidebar' then
-            local process = true
-
-            if prefix == 'sidebarctrl' then
-                process = not hFind or (iup.GetDialogChild(hFind, ctrl) == nil)
-            end
-            if process then
-                process = not n:find'%.hist$'
-            end
-            if process then
+            if not n:find'%.hist$' then
                 v = CORE.tbl2Out(v, ' ', true, true)
                 if v then table.insert(t, '_G.iuprops["'..n..'"] = '..v) end
             end
@@ -1587,7 +1573,7 @@ iup.DestroyDialogs = function()
 
     if _G.dialogs == nil then return end
     if _G.dialogs['findrepl'] ~= nil then
-        iup.SaveNamedValues(_G.dialogs['findrepl'], 'sidebarctrl')
+        iup.SaveNamedValues(_G.dialogs['findrepl'], 'findreplace')
         _G.dialogs['findrepl'].restore = nil
         _G.dialogs['findrepl'] = nul
     end

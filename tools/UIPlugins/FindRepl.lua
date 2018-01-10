@@ -1107,6 +1107,8 @@ local function Init(h)
         iup.Insert(hboxPane, iup.GetDialogChild(oDeattFnd, "findrepl_title_btnattach"), pin)
     end
 
+    iup.SetAttribute(oDeattFnd, 'SAVEPREFIX', 'findreplace')
+
     local res = {
         handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};
         OnMenuCommand = (function(msg)
