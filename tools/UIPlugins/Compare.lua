@@ -1,7 +1,7 @@
 local tSet, onDestroy
 local function Init_hidden()
-require 'Compare'
-require 'luacom'
+    require 'Compare'
+    require 'luacom'
     COMPARE = {}
     local bActive = 0
     local eOffsets = {}
@@ -21,8 +21,8 @@ require 'luacom'
     end
 
     local maskLinesADM = (1 << Compare.Markers['MARKER_MOVED_LINE']) |
-                         (1 << Compare.Markers['MARKER_ADDED_LINE']) |
-                         (1 << Compare.Markers['MARKER_REMOVED_LINE'])
+    (1 << Compare.Markers['MARKER_ADDED_LINE']) |
+    (1 << Compare.Markers['MARKER_REMOVED_LINE'])
 
     local function Marker(e, l)
         return e:MarkerGet(l) & markerMask
@@ -52,21 +52,21 @@ require 'luacom'
         Compare.Settings.DetectMove = tSet.DetectMove
         Compare.Settings.AddLine = tSet.AddLine
         Compare.Settings.UseSymbols = tSet.UseSymbols
-        Compare.Settings.Color_added   = tSet.Color_added
+        Compare.Settings.Color_added = tSet.Color_added
         Compare.Settings.Color_deleted = tSet.Color_deleted
         Compare.Settings.Color_changed = tSet.Color_changed
-        Compare.Settings.Color_moved   = tSet.Color_moved
+        Compare.Settings.Color_moved = tSet.Color_moved
         Compare.Settings.Color_blank = tSet.Color_blank
     end
 
     local function CompareSetInd()
         local i1 = editor.IndicatorCurrent
         local i2 = coeditor.IndicatorCurrent
-        editor.IndicatorCurrent   = mark
+        editor.IndicatorCurrent = mark
         coeditor.IndicatorCurrent = mark
         coeditor.Zoom = editor.Zoom
         Compare.Compare()
-        editor.IndicatorCurrent   = i1
+        editor.IndicatorCurrent = i1
         coeditor.IndicatorCurrent = i2
     end
 
@@ -186,7 +186,7 @@ require 'luacom'
 
         local le2 = editor:MarkerPrevious(le, markerMask)
         local lMin = 0
-        if le2 > -1 then lMin = le2 end
+        if le2 > - 1 then lMin = le2 end
 
         local lco2 = -1
         for i = le, lMin, -1 do
@@ -327,6 +327,8 @@ require 'luacom'
         BlockEventHandler"OnUpdateUI"
         BlockEventHandler"OnOpen"
         BlockEventHandler"OnClose"
+        BlockEventHandler"OnTextChanged"
+        BlockEventHandler"OnBeforeOpen"
         scite.Open(strName)
 
         if bTmp then tmpFiles[strName] = true end
@@ -344,13 +346,16 @@ require 'luacom'
         UnBlockEventHandler"OnUpdateUI"
         UnBlockEventHandler"OnNavigation"
         UnBlockEventHandler"OnSwitchFile"
+        UnBlockEventHandler"OnBeforeOpen"
+        UnBlockEventHandler"OnTextChanged"
+
         --scite.BlockUpdate(UPDATE_FORCE)
         bActive = 0
         StartCompare()
         --debug_prnArgs(tCompare)
         editor.Zoom = zoom
         coeditor.Zoom = zoom
-    end
+end
 
     local function prepareTmpPath()
         if not tmpPath then

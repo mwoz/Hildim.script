@@ -182,6 +182,7 @@ CORE.OpenFoundFiles = function(msg)
     if msg == 1 then
         if findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
             scite.BlockUpdate(UPDATE_BLOCK)
+            BlockEventHandler"OnTextChanged"
             BlockEventHandler"OnBeforeOpen"
             BlockEventHandler"OnOpen"
             BlockEventHandler"OnSwitchFile"
@@ -203,6 +204,7 @@ CORE.OpenFoundFiles = function(msg)
             UnBlockEventHandler"OnSwitchFile"
             UnBlockEventHandler"OnOpen"
             UnBlockEventHandler"OnBeforeOpen"
+            UnBlockEventHandler"OnTextChanged"
             scite.BlockUpdate(UPDATE_FORCE)
         end
         return true

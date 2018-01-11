@@ -85,7 +85,16 @@ local function ResetTabbarProps()
     local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref,
     tabctrl_forecolor, ROColor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color
     = iup.GetParam("Свойства панели закладок^TabbarProperties",
-        nil,
+            function(h, id)
+                local bact = Iif(iup.GetParamParam(h, 5).control.value == 'ON', 'YES', 'NO')
+                iup.GetParamParam(h, 6).control.active = bact
+                iup.GetParamParam(h, 7).control.active = bact
+                iup.GetParamParam(h, 6).auxcontrol.active = bact
+                iup.GetParamParam(h, 7).auxcontrol.active = bact
+                iup.GetParamParam(h, 8).control.active = bact
+                iup.GetParamParam(h, 9).control.active = bact
+                return 1
+            end,
         'Закрывать по DblClick%b\n'..
         'Максимальное количество вкладок:%i[10,500,1]\n'..
         'Переключать в порядке использования%b\n'..

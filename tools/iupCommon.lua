@@ -409,6 +409,8 @@ local function onNavigate_local(item)
     if item == '_openSet' then
         scite.BlockUpdate(UPDATE_BLOCK)
         editor.VScrollBar = false
+        BlockEventHandler"OnTextChanged"
+        BlockEventHandler"OnBeforeOpen"
         BlockEventHandler("OnOpen", onOpen_local)
         BlockEventHandler("OnNavigation", onNavigate_local)
         BlockEventHandler"OnUpdateUI"
@@ -416,6 +418,8 @@ local function onNavigate_local(item)
         UnBlockEventHandler"OnOpen"
         UnBlockEventHandler"OnNavigation"
         UnBlockEventHandler"OnUpdateUI"
+        UnBlockEventHandler"OnBeforeOpen"
+        UnBlockEventHandler"OnTextChanged"
         editor.VScrollBar = true
     elseif item == '_-openSet' then
         scite.BlockUpdate(UPDATE_FORCE)
@@ -433,6 +437,8 @@ iup.RestoreFiles = function(bForce)
         --local fvl = editor.FirstVisibleLine
         --editor.VScrollBar = false
         if #t > 0 then
+            BlockEventHandler"OnTextChanged"
+            BlockEventHandler"OnBeforeOpen"
             BlockEventHandler"OnRightEditorVisibility"
             BlockEventHandler"OnOpen"
             BlockEventHandler"OnNavigation"
@@ -448,6 +454,9 @@ iup.RestoreFiles = function(bForce)
                 UnBlockEventHandler"OnUpdateUI"
                 UnBlockEventHandler"OnNavigation"
                 UnBlockEventHandler"OnOpen"
+                UnBlockEventHandler"OnRightEditorVisibility"
+                UnBlockEventHandler"OnBeforeOpen"
+                UnBlockEventHandler"OnTextChanged"
             end
             local sNm = t[i]
             bCloned = false
