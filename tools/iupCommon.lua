@@ -397,7 +397,6 @@ iup.CloseFilesSet = function(cmd, tForClose)
 end
 
 local function onOpen_local(source)
-    UnBlockEventHandler"OnTextChanged"
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8()) then return end

@@ -57,7 +57,6 @@ scite.RunAsync(function()
 
     local frScroll = iup.GetDialogChild(iup.GetLayout(), "FinReplScroll")
 
-    scite.EnsureVisible()
     hMainLayout.resize_cb()
     if OnResizeSideBar then scite.RunAsync(function() OnResizeSideBar('sidebar') end) end
     if OnResizeSideBar then scite.RunAsync(function() OnResizeSideBar('leftbar') end) end
@@ -82,5 +81,6 @@ scite.RunAsync(function()
         iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
         iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
     end
+    scite.EnsureVisible()
     _G.g_session['LOADED'] = true
 end)
