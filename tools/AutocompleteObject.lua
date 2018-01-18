@@ -1413,6 +1413,12 @@ AddEventHandler("OnUserListSelection", function(tp, sel_value)
 	end
     editor.AutoCHooseSingle = true
 end)
+AddEventHandler("OnAutocSelection", function(method, pos)
+    if method == 4 and props['autocompleteword.automatic'] == '1' and props['autocomleted.from.menu'] ~= '1' then
+        editor:AutoCCancel()
+        editor:NewLine()
+    end
+end)
 local function OnSwitchLocal()
     editor.MouseDwellTime = 1000 --Пусть будет всегда, для всех, кто хочет
     CUR_POS.bymouse = nil

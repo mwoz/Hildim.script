@@ -430,7 +430,7 @@ iup.RestoreFiles = function(bForce)
     if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
         local bNew = (props['FileName'] ~= '')
         local buf = (_G.iuprops['buffers'] or {})
-        local t, p, bk, l, enc = _G.iuprops['buffers'].lst or {}, _G.iuprops['buffers'].pos or {}, _G.iuprops['buffers'].bmk or {}, _G.iuprops['buffers'].layouts or {}, _G.iuprops['buffers'].enc or {}
+        local t, p, bk, l, enc = buf.lst or {}, buf.pos or {}, buf.bmk or {}, buf.layouts or {}, buf.enc or {}
 
         scite.BlockUpdate(UPDATE_BLOCK)
         --local fvl = editor.FirstVisibleLine
@@ -594,6 +594,12 @@ function CORE.SwitchPane(bForward)
     end
 end
 
+function CORE.SetText(t)
+    BlockEventHandler"OnTextChanged"
+    editor:SetText(t)
+    UnBlockEventHandler"OnTextChanged"
+end
+
 function CORE.CloseListSet(sel, lst, column)
     for i = lst.numlin, 1,- 1 do
         if (iup.GetAttributeId2(lst, 'TOGGLEVALUE', i, column) or '0') == sel then
@@ -687,6 +693,8 @@ function CORE.CoToChange(dif)
     local l = editor:LineFromPosition(editor.CurrentPos)
     local lP = l
     OnNavigation("Change")
+    local rotate = true
+::rotated::
     repeat
         l = f(editor, l + dif, (1 << MARKER_NOTSAVED) | (1 << MARKER_SAVED))
         if lP + dif ~= l and l > 0 then
@@ -699,6 +707,11 @@ function CORE.CoToChange(dif)
         end
         lP = l
     until l == -1
+    if rotate then
+        rotate = false
+        l = Iif(dif > 0, 0, editor:LineFromPosition(editor.Length - 1))
+        goto rotated
+    end
     OnNavigation("Change-")
     print(Iif(dif > 0, 'Next', 'Previous')..' change not found')
 end
@@ -735,9 +748,7 @@ AddEventHandler("OnSave", function(cmd, source)
     while editor:EndUndoAction() > 0 do
         print'!!!Warning!!! EndUndoAction from OnSave'
     end
-    if props["ext.lua.startup.script"] == props["FilePath"] then
-        scite.RunAsync(iup.ReloadScript)
-    elseif editor.Lexer == SCLEX_LUA then
+    if editor.Lexer == SCLEX_LUA then
         local lp = output.TextLength
         scite.RunAsync(function()
             if lp ~= output.TextLength then

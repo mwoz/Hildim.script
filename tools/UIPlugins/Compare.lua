@@ -173,8 +173,9 @@ local function Init_hidden()
     end
 
     local function prevDif()
+        local rotate = true
         local le = editor:LineFromPosition(editor.SelectionStart)
-
+::docstart::
         local m = Marker(editor, le)
         if m > 0 then
             while m == Marker(editor, le) do
@@ -196,7 +197,14 @@ local function Init_hidden()
             end
         end
 
-        if le2 < 0 and lco2 < 0 then print"Next diff not found"; return end
+        if le2 < 0 and lco2 < 0 and rotate then
+            le = editor:LineFromPosition(editor.Length - 1)
+            print"Continue search from document start"
+            rotate = false
+            goto docstart
+        end
+
+        if le2 < 0 and lco2 < 0 then print"Prevouse diff not found"; return end
         if le2 < 0 then le2 = lco2 end
         if lco2 < 0 then lco2 = le2 end
 
@@ -222,8 +230,10 @@ local function Init_hidden()
 
     local function nextDiff()
         local le = editor:LineFromPosition(editor.CurrentPos)
+        local rotate = true
 
         local m = Marker(editor, le)
+::docend::
         if m > 0 then
             while m == Marker(editor, le) do
                 le = le + 1
@@ -242,6 +252,13 @@ local function Init_hidden()
                 lco2 = i
                 break
             end
+        end
+
+        if le2 < 0 and lco2 < 0 and rotate then
+            le = 0
+            print"Continue search from document end"
+            rotate = false
+            goto docend
         end
 
         if le2 < 0 and lco2 < 0 then print"Next diff not found"; return end

@@ -13,17 +13,18 @@ Author: mozers™, VladVRO, TymurGubayev, nail333
 В скрипте используются функции из COMMON.lua (EditorMarkText, EditorClearMarks)
 
 --]]----------------------------------------------------
-function Init()
+local function Init()
     local t = {}
     -- t.tag_start, t.tag_end, t.paired_start, t.paired_end  -- positions
     -- t.begin, t.finish  -- contents of tags (when copying)
     local old_current_pos
-    local blue_indic = CORE.InidcFactory('PariedTags.ok', 'Парные теги - найдено', INDIC_BOX, 4834854, 0) -- номера используемых маркеров
-    local red_indic = CORE.InidcFactory('PariedTags.Error', 'Парные теги - ошибка', INDIC_STRIKE, 13311, 0)
+    local blue_indic = CORE.InidcFactory('XmlTools.ok', 'Xml - Парные теги - найдено', INDIC_BOX, 4834854, 0) -- номера используемых маркеров
+    local red_indic = CORE.InidcFactory('XmlTools.Error', 'Xml - Парные теги - ошибка', INDIC_STRIKE, 13311, 0)
+    local xpath_indic = CORE.InidcFactory('XmlTools.XPath', 'Xml - Xpath', INDIC_ROUNDBOX, 14538301, 50)
 
-    local bEnable, styleSpace, styleBracket = false, 0, 1
+    local bEnable, styleSpace, styleBracket, styleBracketClose = false, 0, 1, 11
 
-    function CopyTags()
+    local function CopyTags()
         if not t.tag_start then
             print("Error : "..scite.GetTranslation("Move the cursor on a tag to copy it!"))
             return
@@ -44,7 +45,7 @@ function Init()
         end
     end
 
-    function PasteTags()
+    local function PasteTags()
         if t.begin then
             if t.finish then
                 local sel_text = editor:GetSelText()
@@ -58,7 +59,7 @@ function Init()
         end
     end
 
-    function DeleteTags()
+    local function DeleteTags()
         if t.tag_start then
             editor:BeginUndoAction()
             if t.paired_start~= nil then
@@ -83,13 +84,13 @@ function Init()
         end
     end
 
-    function GotoPairedTag()
+    local function GotoPairedTag()
         if t.paired_start then -- the paired tag found
             editor:GotoPos(t.paired_start + 1)
         end
     end
 
-    function SelectWithTags()
+    local function SelectWithTags()
         if t.tag_start and t.paired_start then -- the paired tag found
             if t.tag_start < t.paired_start then
                 editor:SetSel(t.paired_end + 1, t.tag_start)
@@ -99,7 +100,7 @@ function Init()
         end
     end
 
-    function highlighting_paired_tags_switch()
+    local function highlighting_paired_tags_switch()
         local prop_name = 'hypertext.highlighting.paired.tags'
         props[prop_name] = 1 - tonumber(props[prop_name])
         EditorClearMarks(blue_indic)
@@ -202,6 +203,176 @@ function Init()
         end
     end
 
+    local function fillPositionTree(tPos)
+        local p = tPos.TagStart
+
+        while (editor.CharAt[p] ~= 32 and editor.CharAt[p] ~= 62  and editor.CharAt[p] ~= 47 ) and p <= editor.Length do p = p + 1 end -- [ ][>][/]
+        if p == tPos.TagStart then return end
+        --tPos.T = editor:textrange(tPos.TagStart, p)  --for debug
+        tPos.nameEnd = p
+        while (editor.CharAt[p] ~= 62 or (editor.StyleAt[p] ~= styleBracket and editor.StyleAt[p] ~= styleBracketClose)) --[[and p <= editor.Length]]  do p = p + 1 end -- [>]
+
+        if editor.CharAt[p - 1] == 47 then -- [/]
+            tPos.TagEnd = p + 1
+            return
+        end
+
+        while p and p <= editor.Length do
+            while (editor.CharAt[p] ~= 60 or editor.StyleAt[p] ~= styleBracket or  -- [<]
+                editor.CharAt[p + 1] == 63) and p <= editor.Length do p = p + 1 end --[?]
+            if editor.CharAt[p + 1] == 47 then -- [/]
+                while (editor.CharAt[p] ~= 62) and p <= editor.Length do p = p + 1 end -- [>]
+                tPos.TagEnd = p + 1
+                return
+            end
+            local tChild = {TagStart = p}
+            fillPositionTree(tChild)
+            if tChild.nameEnd then
+                table.insert(tPos, tChild)
+                p = tChild.TagEnd
+            else
+                p = nil
+            end
+        end
+    end
+
+    local function getPositionXML()
+        local ss, se, fl = editor.SelectionStart, editor.SelectionEnd, editor.FirstVisibleLine
+        editor:DocumentEnd()
+        editor.SelectionStart, editor.SelectionEnd, editor.FirstVisibleLine = ss, se, fl
+        local tPos = {}
+        local p = 0
+        while (editor.CharAt[p] ~= 60 or editor.StyleAt[p] ~= styleBracket or
+            editor.CharAt[p + 1] == 63) and p <= editor.Length do p = p + 1 end
+        tPos.TagStart = p
+        fillPositionTree(tPos)
+        local tOut = {}
+
+        local function readWithPos(tP, pos)
+            table.insert(tOut, (editor:textrange(pos, tP.nameEnd) or '!!!')..' __start="'..(tP.TagStart or'?')..'" __end="'..(tP.TagEnd or '???')..'" ')
+            pos = tP.nameEnd
+            for i = 1,  #tP do
+                pos = readWithPos(tP[i], pos)
+            end
+            table.insert(tOut, (editor:textrange(pos, tP.TagEnd) or '!!!'))
+            return tP.TagEnd
+        end
+
+        readWithPos(tPos, 0)
+        return table.concat(tOut, '')
+    end
+
+    local function XPath()
+        local dlg = _G.dialogs["xpathfind"]
+        if dlg == nil then
+            local txt_search = iup.text{size = '350x0'}
+
+            local btn_ok = iup.button{title = "Test"}
+            local radio_single = iup.radio{iup.hbox{iup.toggle{title = 'SelectSingleNode', name = 'Single'}, iup.toggle{title = 'SelectNodes', name = 'All'}, } }
+            local chk_higl = iup.toggle{title = 'Подсветить', value = 'ON'}
+
+            iup.SetHandle("XPATH_BTN_OK", btn_ok)
+            local btn_esc = iup.button  {title = "Cancel"}
+            iup.SetHandle("XPATH_BTN_ESC", btn_esc)
+
+            local vbox = iup.vbox{ iup.hbox{
+                iup.label{title = "XPath:", gap = 3}, txt_search, iup.fill{}, alignment = 'ACENTER'},
+                iup.hbox{radio_single, iup.fill{}, chk_higl},
+                iup.hbox{btn_ok, iup.button{title = "Clear", action = function()EditorClearMarks(xpath_indic) end }, iup.fill{}, btn_esc},
+            gap = 2, margin = "4x4" }
+
+            local result = false
+            dlg = iup.scitedialog{vbox; title = "XPath", defaultenter = "XPATH_BTN_OK", defaultesc = "XPATH_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid = "xpathfind" }
+
+            function dlg:show_cb(h, state)
+                if state == 0 then
+                    txt_search.value = ''
+                end
+            end
+
+            function btn_ok:action()
+                EditorClearMarks(xpath_indic)
+                local function selectInText(xml)
+                    if xml.nodeType == 2 then print('Невозможно подсветить атрибут'); return end
+
+                    while xml and xml.nodeType ~= 1 do xml = xml.parentNode end
+                    local s, e = (math.tointeger(xml:getAttribute('__start')) or 0), (math.tointeger(xml:getAttribute('__end')) or 0 )
+                    EditorMarkText(s, e - s, xpath_indic)
+                end
+
+                local xml = luacom.CreateObject("MSXML.DOMDocument")
+                local strXml = editor:GetText()
+                if not xml:loadXml(strXml) then
+                    local xmlErr = xml.parseError
+                    print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                    return
+                end
+                if chk_higl.value == 'ON' then
+                    xml = luacom.CreateObject("MSXML.DOMDocument")
+                    strXml = getPositionXML()
+                    if not xml:loadXml(strXml) then
+                        local xmlErr = xml.parseError
+                        print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                        return
+                    end
+                    if radio_single.value.name == 'All' then
+                        local bOk, msg = pcall(function() return xml:selectNodes(txt_search.value) end)
+                        if not bOk then
+                            print(msg)
+                            return
+                        end
+                        for i = 0, msg.length - 1 do
+                            selectInText(msg:item(i))
+                        end
+
+                    else
+                        local bOk, msg = pcall(function() return xml:selectSingleNode(txt_search.value) end)
+                        if not bOk then
+                            print(msg)
+                            return
+                        end
+                        if msg == nil then
+                            print('Not Found')
+                        else
+                            selectInText(msg)
+                        end
+                    end
+                else
+                    if radio_single.value.name == 'All' then
+                        local bOk, msg = pcall(function() return xml:selectNodes(txt_search.value) end)
+                        if not bOk then
+                            print(msg)
+                            return
+                        end
+                        for i = 0, msg.length - 1 do
+                            print(msg:item(i).xml)
+                        end
+
+                    else
+                        local bOk, msg = pcall(function() return xml:selectSingleNode(txt_search.value) end)
+                        if not bOk then
+                            print(msg)
+                            return
+                        end
+                        if msg == nil then
+                            print('Not Found')
+                        else
+                            print(msg.xml)
+                        end
+                    end
+                end
+
+            end
+
+            function btn_esc:action()
+                print(radio_single.value.name)
+                dlg:hide()
+            end
+        else
+            dlg:show()
+        end
+    end
+
     local function CloseTag(nUnbodyScipped)
         local pos = editor.CurrentPos
         if (editor.StyleAt[pos] == styleSpace or editor.StyleAt[pos - 1] == styleSpace) or
@@ -248,40 +419,40 @@ function Init()
 
     local function OnSwitchFile_local()
         if editor.Lexer == SCLEX_FORMENJINE then
-            bEnable, styleSpace, styleBracket = true, 49, 50
+            bEnable, styleSpace, styleBracket, styleBracketClose = true, 49, 50, 50
         elseif editor.Lexer == SCLEX_XML then
-            bEnable, styleSpace, styleBracket = true, 0, 1
+            bEnable, styleSpace, styleBracket, styleBracketClose = true, 0, 1, 11
         else
             bEnable = false
         end
     end
 
-    function CloseIncompleteTag()
+    local function CloseIncompleteTag()
         CloseTag(0)
     end
 
-    function CloseUnbodyTag()
+    local function CloseUnbodyTag()
         -- iup.GetParam("sdfsd",(function(h, ind) print((iup.GetParamParam(h,0)).value); return 1 end), "Tag%i[1,100,1]{}\n", 1)
         CloseTag(1)
     end
 
     AddEventHandler("OnUpdateUI", function()
         if bEnable and (tonumber(_G.iuprops['pariedtag.on']) == 1) then PairedTagsFinder() end
-end)
-AddEventHandler("OnSwitchFile", OnSwitchFile_local)
-AddEventHandler("OnOpen", OnSwitchFile_local)
+    end)
+    AddEventHandler("OnSwitchFile", OnSwitchFile_local)
+    AddEventHandler("OnOpen", OnSwitchFile_local)
 
-require "menuhandler"
-menuhandler:InsertItem('MainWindowMenu', 'Edit|Xml|l1',
-    {'Xml', plane = 1,{
-        {'Close Incomplete Node', ru = 'Закрыть незавершенную ноду', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
-        {'Close Unpaired Tag', ru = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
-        {'Tag Highlighting', ru = 'Подсветка тэгов', check_iuprops = 'pariedtag.on'},
-}}
-)
+    require "menuhandler"
+    menuhandler:InsertItem('MainWindowMenu', 'Edit|Xml|l1',{'Xml', plane = 1,{
+            {'Close Incomplete Node', ru = 'Закрыть незавершенную ноду', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
+            {'Close Unpaired Tag', ru = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
+            {'Tag Highlighting', ru = 'Подсветка тэгов', check_iuprops = 'pariedtag.on'},
+            {'XPath', ru = 'XPath', action = XPath, },
+        }}
+    )
 end
 
 return {
-    title = 'Подсветка парных и непарных тегов в HTML и XML',
+    title = 'Инструменты XML',
     hidden = Init,
 }

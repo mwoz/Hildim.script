@@ -660,7 +660,6 @@ local function InitTabbar()
             local clr = props['tabctrl.active.bakcolor']
             if clr == '' then clr = '255 255 255' end
             iup.SetAttribute(h, "BGCOLOR", clr)
-            props["tabctrl.active.bakcolor_tmp"] = ""
             h.cursor = 'ARROW'
             iup.Update(h)
             if (tabDrag > -1 and tab == -4) or (hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' )) then
@@ -684,7 +683,6 @@ local function InitTabbar()
             local clr = props['tabctrl.moved.color']
             if clr == '' then clr = '208 231 255' end
             iup.SetAttribute(h, "BGCOLOR", clr)
-            props["tabctrl.active.bakcolor_tmp"] = clr
             iup.Update(h)
         end
         if start > 0 then
@@ -982,7 +980,6 @@ AddEventHandler("OnSwitchFile", function(file)
         if (_G.iuprops['coeditor.win'] or '0') == '2' and scite.buffers.SecondEditorActive() == 1 then CoEditor.Switch();
         elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']; iup.Redraw(b, 1) end
     end
-    props["tabctrl.active.bakcolor_tmp"] = ""
 end)
 
 AddEventHandler("OnRightEditorVisibility", function(show)
@@ -1083,7 +1080,7 @@ function CORE.ChangeCode(unicmode, codepage)
             s = s:to_utf8()
         end
         scite.MenuCommand(unicmode)
-        editor:SetText(s)
+        CORE.SetText(s)
         editor:EmptyUndoBuffer()
     end
 end
