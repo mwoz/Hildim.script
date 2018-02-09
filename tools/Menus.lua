@@ -590,7 +590,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 			{'Select &All', ru = 'Выбрать все', key = 'Ctrl+A', key_external = 1, action = IDM_SELECTALL},
 			{'Copy as RT&F', ru = 'Копировать в формате RTF', action = IDM_COPYASRTF, active = IsSelection},
 		}},
-		{'Xml', ru = 'Xml', visible_ext = 'xml,form,rform,cform,wform',{
+		{'Xml', ru = 'Xml', visible_ext = 'xml,form,rform,cform,wform,xsd',{
 			{'Format Xml', ru = 'Форматировать Xml', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\FormatXml.lua')", image = 'broom_code_µ',},
 		}},
 		{'s1', separator = 1},

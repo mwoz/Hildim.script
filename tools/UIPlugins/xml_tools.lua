@@ -309,6 +309,7 @@ local function Init()
                 end
                 if chk_higl.value == 'ON' then
                     xml = luacom.CreateObject("MSXML.DOMDocument")
+                    xml:setProperty('SelectionLanguage', 'XPath')
                     strXml = getPositionXML()
                     if not xml:loadXml(strXml) then
                         local xmlErr = xml.parseError
@@ -371,6 +372,159 @@ local function Init()
         else
             dlg:show()
         end
+    end
+
+    local srcXsd, pathXsd = 0, ''
+    local function Xsd()
+        local ret, src1, path1 = iup.GetParam("Test Xsd",
+            function(h, id)
+                local bSE = scite.buffers.SecondEditorActive() == 1
+                if not bSE then iup.GetParamParam(h, 0).control.value = 'ON'; iup.GetParamParam(h, 0).value = '0' end
+                local bact = Iif(iup.GetParamParam(h, 0).value == '0', 'YES', 'NO')
+                iup.GetParamParam(h, 1).control.active = bact
+                iup.GetParamParam(h, 1).auxcontrol.active = bact
+                if id == iup.GETPARAM_BUTTON1 and iup.GetParamParam(h, 0).value == '0' and iup.GetParamParam(h, 1).value == '' then
+                    print('File not selected')
+                    return 0
+                end
+                return 1
+            end,
+            'Источник%o|Файл|Другое окно|\n'..
+            'Файл источника%f\n'
+            ,
+            srcXsd,
+            pathXsd
+        )
+        if ret then
+            srcXsd, pathXsd = src1, path1
+
+            scite.MenuCommand(IDM_SAVE)
+            local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
+            if not xmlSrc:loadXml(editor:GetText()) then
+                local xmlErr = xmlSrc.parseError
+                print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                return
+            end
+
+            local xmldoc = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument.6.0")
+            local SchemaCache = luacom.CreateObject("Msxml2.XMLSchemaCache.6.0")
+
+            --xmldoc.async = false;
+            --xmldoc.validateOnParse = false;
+
+            bOk, msg = pcall(function() SchemaCache:add("", props['FilePath']) end)
+            if not bOk then
+                print(msg)
+                return
+            end
+            xmldoc.schemas = SchemaCache;
+
+            local txt
+
+            if srcXsd == 1 then
+                txt = coeditor:GetText()
+            else
+                local f = io.open(pathXsd)
+                if f then
+                    txt = f:read()
+                    f:close()
+                else
+                    print("Can't open file "..pathXsd)
+                end
+            end
+--[[
+            xmldoc:loadXml(txt)
+            if xmldoc.parseError.errorCode ~= 0 then
+                print(xmldoc.parseError.reason)
+            else
+                print('OK')
+            end
+]]
+            --xmldoc:loadXml(txt)
+            if not xmldoc:loadXml(txt) then
+                local path = pathXsd
+                if srcXsd == 1 then
+                    local tabR = iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight')
+                    path = scite.buffers.NameAt(math.tointeger(iup.GetAttribute(tabR, "TABBUFFERID"..iup.GetAttribute(tabR, "VALUEPOS"))) or 0)
+                end
+                print(path..':'..xmldoc.parseError.line..':'..xmldoc.parseError.linepos, xmldoc.parseError.reason)
+            else
+                print('OK')
+            end
+        end
+    end
+
+    local src, path, out = 0, '', 0
+    local function Xslt()
+        local ret, src1, path1, out1 = iup.GetParam("Test Xslt",
+            function(h, id)
+                local bSE = scite.buffers.SecondEditorActive() == 1
+                if not bSE then iup.GetParamParam(h, 0).control.value = 'ON'; iup.GetParamParam(h, 0).value = '0' end
+                local bact = Iif(iup.GetParamParam(h, 0).value == '0', 'YES', 'NO')
+                iup.GetParamParam(h, 1).control.active = bact
+                iup.GetParamParam(h, 1).auxcontrol.active = bact
+                if id == iup.GETPARAM_BUTTON1 and iup.GetParamParam(h, 0).value == '0' and iup.GetParamParam(h, 1).value == '' then
+                    print('File not selected')
+                    return 0
+                end
+                return 1
+            end,
+            'Источник%o|Файл|Другое окно|\n'..
+            'Файл источника%f\n'..
+            'Вывод%o|Лог|Новое окно|\n'
+            ,
+            src,
+            path,
+            out
+        )
+        if ret then
+            src, path, out = src1, path1, out1
+            local xslt = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument")
+            xslt.async = false
+            if not xslt:loadXml(editor:GetText()) then
+                local xmlErr = xslt.parseError
+                print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                return
+            end
+            local xsl = luacom.CreateObject("Msxml2.XSLTemplate")
+            xsl.styleSheet = xslt
+            local xslProc = xsl:createProcessor()
+            local txt
+
+            if src == 1 then
+                txt = coeditor:GetText()
+            else
+                local f = io.open(path)
+                if f then
+                    txt = f:read()
+                    f:close()
+                else
+                    print("Can't open file "..path)
+                end
+            end
+            local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
+            if not xmlSrc:loadXml(txt) then
+                local xmlErr = xmlSrc.parseError
+                print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                return
+            end
+            xslProc.input = xmlSrc
+            xslProc:transform()
+            if out == 0 then
+                print(xslProc.output)
+            else
+                local strOut = '^Output.xml'
+                if src == 0 then
+                    _, _, strOut = path:find('([^\\]*)$')
+                    strOut = '^'..(strOut or 'Output.xml')
+                else
+                end
+                props['scite.new.file'] = strOut --..msgReplay:GetPathValue("FileName")
+                scite.MenuCommand(IDM_NEW)
+                CORE.SetText(xslProc.output)
+            end
+        end
+
     end
 
     local function CloseTag(nUnbodyScipped)
@@ -446,8 +600,42 @@ local function Init()
     menuhandler:InsertItem('MainWindowMenu', 'Edit|Xml|l1',{'Xml', plane = 1,{
             {'Close Incomplete Node', ru = 'Закрыть незавершенную ноду', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
             {'Close Unpaired Tag', ru = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
+        }}
+    )
+    local function isXsd()
+        local fs = seacher{
+            wholeWord = false
+            , matchCase = false
+            , wrapFind = true
+            , backslash = false
+            , regExp = true
+            , style = nil
+            , searchUp = false
+            , replaceWhat = ''
+            , findWhat = "xmlns.*=.*http://www\\.w3\\.org/2001/XMLSchema"
+        }
+        return fs:FindNext(true) > 0
+    end
+    local function isXslt()
+        local fs = seacher{
+            wholeWord = false
+            , matchCase = false
+            , wrapFind = true
+            , backslash = false
+            , regExp = true
+            , style = nil
+            , searchUp = false
+            , replaceWhat = ''
+            , findWhat = "xmlns.*=.*http://www\\.w3\\.org/1999/XSL/Transform"
+        }
+        return fs:FindNext(true) > 0
+    end
+    menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',{'Xml',
+        visible = function() return editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'formenjine' end, {
             {'Tag Highlighting', ru = 'Подсветка тэгов', check_iuprops = 'pariedtag.on'},
-            {'XPath', ru = 'XPath', action = XPath, },
+            {'XPath Test', ru = 'XPath тест', action = XPath, },
+            {'Xslt Test', ru = 'Xslt тест', action = Xslt, active = isXslt},
+            {'Xsd Test', ru = 'Xsd тест', action = Xsd, active = isXsd }
         }}
     )
 end

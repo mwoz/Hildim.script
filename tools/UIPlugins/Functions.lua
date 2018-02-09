@@ -1,3 +1,4 @@
+local _isXform = false
 local _show_flags = tonumber(_G.iuprops['sidebar.functions.flags']) == 1
 local _show_params = tonumber(_G.iuprops['sidebar.functions.params']) == 1
 
@@ -247,7 +248,7 @@ do
         local str=Cmt(AnyCase"<string id=",(function(s,i) if _group_by_flags then return i else return nil end end))
 		local con=Cmt(AnyCase"const",(function(s,i) if _group_by_flags then return i else return nil end end))
 		local dim = Cmt(AnyCase"dim",(function(s, i) if _group_by_flags then return i else return nil end end))
-        local eh = Cmt(AnyCase"case",(function(s, i) if _group_by_flags then return i else return nil end end))
+        local eh = Cmt(AnyCase"case",(function(s, i) if _group_by_flags and _isXform then return i else return nil end end))
 		--local class=Cmt(AnyCase"class",(function(s,i) if _group_by_flags then return i else return nil end end))
 
 		--local scr=P("<script>")
@@ -744,6 +745,7 @@ local function OnSwitch(bForce)
         tree_func.title0 = props['FileName']..' (Autoufill disabled by size)'
         return
     end
+    _isXform = props['FileExt']:find('.form')
     Functions_GetNames()
     Functions_ListFILL()
     line_count = editor.LineCount

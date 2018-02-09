@@ -1091,7 +1091,7 @@ function CORE.Revert()
         _ENCODINGCOOKIE = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
         scite.MenuCommand(IDM_REVERT)
         _ENCODINGCOOKIE = nil
-        scite.BlockUpdate(UPDATE_UNBLOCK)
+        scite.BlockUpdate(UPDATE_FORCE)
     end
 end
 

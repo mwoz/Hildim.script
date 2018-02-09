@@ -85,6 +85,7 @@ FileMan_ListFILL = function()
             return a.writetime > b.writetime
         end
     end)
+
     local maskVal = (file_mask..'*'):gsub('%.', '%%.'):gsub('%*', '.*'):lower()
     maskVal = '^'..maskVal..'$'
     local j = 0
@@ -108,7 +109,7 @@ FileMan_ListFILL = function()
         if table_dir[i].isdirectory then
             dc = dc + 1
             local n,a = table_dir[i].name, table_dir[i].attributes
-            if n ~= "." and n ~= ".." and not n:find('^%$') and (a & 2) == 0 and (a & 4) == 0 then
+            if file_mask == '' and n ~= "." and n ~= ".." and not n:find('^%$') and (a & 2) == 0 and (a & 4) == 0 then
                 list_dir:setcell(j, 1, 'IMAGE_Folder')
                 list_dir:setcell(j, 2, n)
                 list_dir:setcell(j, 3, a)
@@ -128,6 +129,7 @@ FileMan_ListFILL = function()
             end
         end
 	end
+    list_dir.numlin_noscroll = 1
     if j<prevL+1 then iup.SetAttribute(list_dir, 'DELLIN', (j)..'-'..prevL) end
     local d = Iif(file_mask == '', 1, dc)
 	list_dir.focus_cell = d..":1"

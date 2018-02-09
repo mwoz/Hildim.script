@@ -159,6 +159,10 @@ function rfl:GetMenu()
     return t
 end
 
+function OnCommandLine(line)
+   scite.Open(line)
+end
+
 function rfl:check(fname)
     local str = fname:upper()
     local res = '{lst={'
@@ -401,7 +405,6 @@ local function onOpen_local(source)
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8()) then return end
     end
-    if props['session.started'] ~= '1' and props['session.reload'] ~= '1' then print('') end --??почему-то этот вывод ликвидирует появление звездочки в названии при открытии из оболочки
 end
 
 local function onNavigate_local(item)

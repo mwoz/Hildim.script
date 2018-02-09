@@ -12,7 +12,7 @@ local function Init_hidden()
     local markerMask = 0
     local mark = CORE.InidcFactory('Compare.Inline', 'ћаркировка различий в строке сравнени€', INDIC_BOX, 255, 0)
     local tmpPath
-    local tmpFiles = {}
+   tmpFiles = {}
     local gitInstall, bGitActive
 
     for i = 0, 4 do
@@ -348,7 +348,7 @@ local function Init_hidden()
         BlockEventHandler"OnBeforeOpen"
         scite.Open(strName)
 
-        if bTmp then tmpFiles[strName] = true end
+        if bTmp then tmpFiles[props['FilePath']] = true end
 
         scite.MenuCommand(IDM_CHANGETAB)
         scite.SetLexer(strExt)

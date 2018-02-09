@@ -103,6 +103,7 @@ local function Run(a, b)
         local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
         local s = f:read('*a')
         f:close()
+        if s:find('_G.iuprops["_VERSION"] = 2', 1, true) then print('Scipped '..filenameT.name); goto continue1 end
         s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,'):gsub('] = {,','] = {' ):gsub('}\n','},\n' )..'\n}'
 
         local bsuc, fun = pcall(assert, load(s))

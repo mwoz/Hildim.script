@@ -45,26 +45,39 @@ local function CreateUntitledFile()
 	local file_ext = "."..props["FileExt"]
 	if file_ext == "." then file_ext = props["default.file.ext"] end
     local unicode_mode = props['editor.unicode.mode']
-    local fName = props['scite.new.file']
-    if fName == '' then
-        local unNum = 0
-        local maxN = scite.buffers.GetCount() - 1
-        local bNew
-        repeat
-            fName = scite.GetTranslation("Untitled"):to_utf8()..unNum
-            unNum = unNum + 1
-            bNew = true
-            for i = 0, maxN do
-                local _, _, sN = scite.buffers.NameAt(i):from_utf8():find('([^\\]*)$')
-                if sN:gsub('%.[^%.]*$', '') == fName:from_utf8() then
-                    bNew = false
-                    break
-                end
-            end
-            fName = fName..file_ext
-        until bNew and not shell.fileexists(props["FileDir"].."\\".. fName:from_utf8())
+    local fName1 = props['scite.new.file']
+    local bPreset = false
+    if fName1 == '' then
+        fName1 = scite.GetTranslation("Untitled"):to_utf8()
+    elseif fName1:find('(.*)(%.[^.]*)$') then
+        bPreset = true
+        _, _, fName1, file_ext = fName1:find('(.*)(%.[^.]*)$')
     end
+
+    local unNum = 0
+    local maxN = scite.buffers.GetCount() - 1
+    local bNew
+    local fName
+    repeat
+        fName = fName1..Iif(unNum>0, unNum, '')
+        unNum = unNum + 1
+        bNew = true
+        for i = 0, maxN do
+            local _, _, sN = scite.buffers.NameAt(i):from_utf8():find('([^\\]*)$')
+            if sN:gsub('%.[^%.]*$', '') == fName:from_utf8() then
+                if bPreset then
+                    scite.Open(scite.buffers.NameAt(i):from_utf8())
+                    return true
+                end
+                bNew = false
+                break
+            end
+        end
+        fName = fName..file_ext
+    until bNew and not shell.fileexists(props["FileDir"].."\\".. fName:from_utf8())
+
 	props['scite.new.file'] = ''
+
     local file_path = props["FileDir"].."\\".. fName
     props['warning.couldnotopenfile.disable'] = 1
     scite.Open(file_path)

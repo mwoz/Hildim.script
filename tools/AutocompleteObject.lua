@@ -475,7 +475,7 @@ local function GetObjectNamesXml()
     local names ={}
     local i = 0
     repeat
-        local _s, _e, s, p = string.find(strLine, ".*<([%w]*)([^>]*)$") --".*<([%w]+)")
+        local _s, _e, s, p = string.find(strLine, ".*<([%w:_]*)([^>]*)$") --".*<([%w]+)")
         if _s ~= nil and s ~= '' then
 
             table.insert(names,{s, s, '', ''})
@@ -647,7 +647,6 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
         end
     end
     if strLua then
-
         local tFn = assert(load(strLua))()
         if tFn and type(tFn) == 'table' then
             for n, f in pairs(tFn) do
@@ -804,7 +803,7 @@ end
 -- Создание таблицы "методов" заданного "объекта"
 local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
     local retT = {}
-    local sB = string.upper(strMetBeg:gsub('[^%w_.:]',''))
+    local sB = string.upper(strMetBeg:gsub('[^%w_.:]', ''))
     local last = nil
     local tblobj = EnrichFromInheritors(obj_names, inh_table)
     for upObj, _ in pairs(tblobj) do

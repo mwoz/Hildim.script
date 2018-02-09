@@ -81,6 +81,10 @@ scite.RunAsync(function()
         iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
         iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
     end
+    if props['hildim.command.line'] ~= '' then
+        scite.Open(props['hildim.command.line'])
+    end
+    props['hildim.command.line'] = ''
     scite.EnsureVisible()
     _G.g_session['LOADED'] = true
 end)
