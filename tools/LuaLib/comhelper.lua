@@ -137,7 +137,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
     xml.preserveWhiteSpace = true
     if not xml:loadXml(strXml) then
         local xmlErr = xml.parseError
-        print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+        print(':'..xmlErr.line..':'..xmlErr.linepos, xmlErr.reason)
         return strXml, true
     end
 

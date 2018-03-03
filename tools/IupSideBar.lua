@@ -1113,5 +1113,4 @@ end
 
 AddEventHandler("OnBeforeOpen", function(file, ext)
     if _ENCODINGCOOKIE then return _ENCODINGCOOKIE end
-    return iuprops['resent.files.list']:check(file:from_utf8())
 end)

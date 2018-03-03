@@ -417,6 +417,7 @@ do
 		local tb = AnyCase"table"
 		local tr = AnyCase"trigger"
 		local fn = AnyCase"function"
+		local df = AnyCase"define"
 		local IGNORED = SPACE + COMMENT + STRING
 		-- create flags
 		tr = Cg(cr*tr*SC^1*Cc(true),'Trigger')
@@ -424,6 +425,7 @@ do
 		vi = Cg(cr*vi*SC^1*Cc(true),'View')
 		pr = Cg(cr*pr*SC^1*Cc(true),'Proc')
 		fn = Cg(cr*fn*SC^1*Cc(true),'Function')
+		df = Cg(df*Cc(true),'Define')
 
 		local I = C(IDENTIFIER)*cl
 		--параметры процедур и вью(и функций) - всё от имени до as
@@ -435,8 +437,9 @@ do
 		vi = vi*I*SC^0*parpv
 		fn = fn*I*SC^0*parpv
 		tb = tb*I*SC^0--*partb
+		df = df*SC^0*P"("*SC^0*I
 		tr = tr*I*SC^1*AnyCase"on"*SC^1*I --"параметр" триггера - идентификатор после I
-		local def = Ct(( pr + vi + tb + tr+ fn))
+		local def = Ct(( pr + vi + tb + tr+ fn + df))
 		-- resulting pattern, which does the work
 		local patt = (def + IGNORED^1 + IDENTIFIER + 1)^0 * EOF
 

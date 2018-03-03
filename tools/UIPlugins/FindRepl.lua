@@ -67,7 +67,6 @@ local function ReadSettings()
         editor:DocumentEnd()
         editor:LineScroll(1, fLine)
         editor:GotoLine(prLine)
-        print(123)
     end
 end
 

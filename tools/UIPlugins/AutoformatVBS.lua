@@ -464,7 +464,7 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
                         if endWhat ~= '' then newPos = newPos + #endWhat + 1 end
                         editor.SelectionStart = newPos
                         editor.SelectionEnd = newPos
-                        prevFold = curI
+                        prevFold = nil
                         editor:AutoCCancel()
                         if (_G.iuprops['autoformat.indent'] or 1) == 1 then IndentBlockUp() end
                         return

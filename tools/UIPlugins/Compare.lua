@@ -12,7 +12,7 @@ local function Init_hidden()
     local markerMask = 0
     local mark = CORE.InidcFactory('Compare.Inline', 'ћаркировка различий в строке сравнени€', INDIC_BOX, 255, 0)
     local tmpPath
-   tmpFiles = {}
+    tmpFiles = {}
     local gitInstall, bGitActive
 
     for i = 0, 4 do
@@ -126,16 +126,16 @@ local function Init_hidden()
     end
 
     local function StartCompare()
-        if not eOffsets[editor] then --доинициализаци€ при первом запуске - иначе ошибка Editor pane is not accessible at this time.
-            SetAnnotationStiles(editor)
-            SetAnnotationStiles(coeditor)
-        end
+        SetAnnotationStiles(editor)
+        SetAnnotationStiles(coeditor)
+
         if bActive == 7 then Reset() end
 
         bActive = 7
         CompareSetInd()
         tCompare.left[fPath(tabL)] = fPath(tabR)
         tCompare.right[fPath(tabR)] = fPath(tabL)
+        ScrollWindows(editor, coeditor, SC_UPDATE_V_SCROLL | SC_UPDATE_H_SCROLL)
     end
 
     local function OnSwitch_local()
@@ -338,6 +338,7 @@ local function Init_hidden()
         local strCur = props['FilePath']
         local strExt = props['FileExt']
         local zoom = editor.Zoom
+        local fvl = editor.FirstVisibleLine
         --scite.BlockUpdate(UPDATE_BLOCK)
         BlockEventHandler"OnSwitchFile"
         BlockEventHandler"OnNavigation"
@@ -368,6 +369,7 @@ local function Init_hidden()
 
         --scite.BlockUpdate(UPDATE_FORCE)
         bActive = 0
+        editor.FirstVisibleLine = fvl
         StartCompare()
         --debug_prnArgs(tCompare)
         editor.Zoom = zoom
@@ -516,27 +518,39 @@ end
         OnSwitch_local()
     end)
 
+    local bInvertCE = false
     AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
         ScrollWindows(editor, coeditor, flag)
         if (bActive & 4) == 4 and tSet.Recompare then
             if coeditor.Zoom ~= editor.Zoom then coeditor.Zoom = editor.Zoom end
             if bSelection == 1 and (lastEditLine and lastEditLine ~= editor:LineFromPosition(editor.CurrentPos)) then
+                local fvl = editor.FirstVisibleLine
+                editor.VScrollBar = false
+                coeditor.VScrollBar = false
                 ClearWindow(editor)
                 ClearWindow(coeditor)
                 CompareSetInd()
+                editor.FirstVisibleLine = fvl
+                editor.VScrollBar = true
+                coeditor.VScrollBar = true
                 lastEditLine = nil
+                bInvertCE = true
             end
             if not lastEditLine and bModified == 1 then
                 lastEditLine = editor:LineFromPosition(editor.CurrentPos)
             end
-
         end
     end)
 
 
 
     AddEventHandler("CoOnUpdateUI", function(bModified, bSelection, flag)
-        ScrollWindows(coeditor, editor, flag)
+        if bInvertCE then
+            ScrollWindows(editor, coeditor, flag)
+            bInvertCE = false
+        else
+            ScrollWindows(coeditor, editor, flag)
+        end
     end)
 
 

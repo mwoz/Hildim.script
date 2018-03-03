@@ -35,9 +35,10 @@ if props['FileExt'] == 'form' then
         end
         return indent
     end
-    strFrm = comhelper.FormatXml(strFrm, 4,
+    strFrm, err = comhelper.FormatXml(strFrm, 4,
     'string,stringtable,script,form,template,value',
     ',,,', 'form', clb)
+    if err then return end
 
     strFrm = strFrm:gsub('>%s+</form>', '></form>')
 

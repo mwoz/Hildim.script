@@ -1,6 +1,6 @@
 --Constants
 require 'shell'
-
+local RestoreIup
 local old_iup_ShowXY = iup.ShowXY
 CORE.old_iup_ShowXY = old_iup_ShowXY
 
@@ -405,6 +405,7 @@ local function onOpen_local(source)
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8()) then return end
     end
+    iuprops['resent.files.list']:check(source:from_utf8())
 end
 
 local function onNavigate_local(item)
@@ -623,6 +624,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         iup.DestroyDialogs();
         SaveIup()
         ClearAllEventHandler()
+        RestoreIup()
         scite.RunAsync(function()
                 print("Reload IDM...")
                 scite.ReloadStartupScript()
@@ -939,12 +941,6 @@ function OnParamKeyPress()
         CORE.HelpUI(indGetParam, nil)
     end
 end
-
---[[local old_iup_text = iup.text
-iup.text = function(t)
-    if not t.nohidesel then t.nohidesel = 'NO' end
-    return old_iup_text(t)
-end]]
 
 local old_iup_list = iup.list
 iup.list = function(t)
@@ -1278,15 +1274,26 @@ iup.scitedetachbox = function(t)
     return dtb
 end
 
-iup.ShowXY = function(h,x,y)
+iup.ShowXY = function(h, x, y)
     x = tonumber(x)
     y = tonumber(y)
-    local _,_,_,_,x2,y2 = iup.GetGlobal('VIRTUALSCREEN'):find('(%-?%d*) (%-?%d*) (%-?%d*) (%-?%d*)')
-    x2 = tonumber(x2)
-    y2 = tonumber(y2)
-    if x > x2 - 10 then x = 100 end
-    if y > y2 - 10 then y = 100 end
-    return old_iup_ShowXY(h, math.floor(x),math.floor(y))
+    local xNew, yNew
+    if x == -2000 and y == -2000 then goto ok end
+    for x11, y11, x12, y12 in iup.GetGlobal('MONITORSINFO'):gmatch('(%-?%d*) (%-?%d*) (%-?%d*) (%-?%d*)') do
+        x11 = tonumber(x11)
+        x12 = tonumber(x12)
+        y11 = tonumber(y11)
+        y12 = tonumber(y12)
+        if x11 - 5 < x and x < (x12 + x11 - 10) and y11 - 5 < y and y < (y12 + y11 - 10) then goto ok end
+        if not xNew then
+            xNew = x11 + 10
+            yNew = y11 + 10
+        end
+    end
+    x = xNew
+    y = yNew
+::ok::
+    return old_iup_ShowXY(h, x, y)
 end
 
 iup.ShowInMouse = function(dlg)
@@ -1308,7 +1315,7 @@ iup.ShowInMouse = function(dlg)
     yC = tonumber(yC)
     yD = tonumber(yD)
 
-    for x0S, y0S, xS, yS in iup.GetGlobal('MONITORSINFO'):gmatch('(%d+) (%d+) (%d+) (%d+)') do
+    for x0S, y0S, xS, yS in iup.GetGlobal('MONITORSINFO'):gmatch('(%-?%d+) (%-?%d+) (%-?%d+) (%-?%d+)') do
         x0S = tonumber(x0S)
         y0S = tonumber(y0S)
         xS = tonumber(xS) + x0S
@@ -1347,12 +1354,12 @@ iup.scitedialog = function(t)
             end
         elseif t.sciteparent == "SCITE" then
             dlg:showxy((tonumber(_G.iuprops['dialogs.'..t.sciteid..'.x']) or 400),(tonumber(_G.iuprops['dialogs.'..t.sciteid..'.y'])) or 300)
-        else
-            local w = (_G.iuprops['dialogs.'..t.sciteid..'.rastersize'] or ''):gsub('x%d*', '')
-            if w=='' then w='300' end
-            if tonumber(w) < 10 then w = '300' end
-            dlg:showxy(0,0)
-            iup.ShowSideBar(tonumber(w))
+        -- else
+        --     local w = (_G.iuprops['dialogs.'..t.sciteid..'.rastersize'] or ''):gsub('x%d*', '')
+        --     if w=='' then w='300' end
+        --     if tonumber(w) < 10 then w = '300' end
+        --     dlg:showxy(0,0)
+        --     iup.ShowSideBar(tonumber(w))
         end
         function dlg:postdestroy()
             scite.RunAsync(function()
@@ -1458,6 +1465,7 @@ function iup.ReloadScript()
 
     iup.DestroyDialogs();
     SaveIup()
+    RestoreIup()
     scite.ReloadStartupScript()
     scite.RunAsync(function()
     if OnScriptReload then OnScriptReload(false, tblDat) end
@@ -1730,3 +1738,11 @@ AddEventHandler("OnMarginClick", function(margin, modif, line)
     end
 end)
 
+RestoreIup = function()
+    iup.ShowXY              = old_iup_ShowXY
+    iup.TreeSetNodeAttrib   = old_TreeSetNodeAttrib
+    iup.matrix              = old_matrix
+    iup.expander            = old_iup_expander
+    iup.GetParam            = old_iup_GetParam
+    iup.list                = old_iup_list
+end

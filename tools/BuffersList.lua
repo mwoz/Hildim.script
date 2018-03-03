@@ -133,7 +133,7 @@ local function InitWndDialog()
 
     function CORE.WndBySide(side, h)
         fillWindow(side)
-        local _, _, x, y = h.screenposition:find('(%d*),(%d*)')
+        local _, _, x, y = h.screenposition:find('(-?%d*),(-?%d*)')
         local _, _, w, h = h.rastersize:find('(%d*)x(%d*)')
         local _, _, w2, _ = dlg.rastersize:find('(%d*)x(%d*)')
         scite.RunAsync(function() iup.ShowXY(dlg, x + w - w2, y + h) end) --
