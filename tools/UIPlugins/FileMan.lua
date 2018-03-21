@@ -105,10 +105,11 @@ FileMan_ListFILL = function()
 	list_dir:setcell(1, 4, 'd')
     local j = 2
     local dc = 0
+
 	for i = 1, #table_dir do
         if table_dir[i].isdirectory then
             dc = dc + 1
-            local n,a = table_dir[i].name, table_dir[i].attributes
+            local n, a = table_dir[i].name, table_dir[i].attributes
             if file_mask == '' and n ~= "." and n ~= ".." and not n:find('^%$') and (a & 2) == 0 and (a & 4) == 0 then
                 list_dir:setcell(j, 1, 'IMAGE_Folder')
                 list_dir:setcell(j, 2, n)
@@ -130,8 +131,8 @@ FileMan_ListFILL = function()
         end
 	end
     list_dir.numlin_noscroll = 1
-    if j<prevL+1 then iup.SetAttribute(list_dir, 'DELLIN', (j)..'-'..prevL) end
-    local d = Iif(file_mask == '', 1, dc)
+    if j < prevL + 1 and (file_mask ~= '') then iup.SetAttribute(list_dir, 'DELLIN', (j)..'-'..prevL)  end
+    local d = Iif(file_mask == '', dc, 2)
 	list_dir.focus_cell = d..":1"
     iup.SetAttributeId2(list_dir, 'MARK', d, 0, '1')
     list_dir.redraw = "ALL"
@@ -530,13 +531,16 @@ local function OnSwitch(bForse, bRelist)
         if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
         if path ~= '' then
             current_path = path:from_utf8():gsub('\\$', '')..'\\'
-           -- print(current_path, current_path)
+            -- print(current_path, current_path)
             -- if bClearMask then memo_mask:set_text = "" end
             FileMan_ListFILL()
+            local sel = 1
+            if list_dir.marked then sel = list_dir.marked:find('1') end
+            sel = sel - 1
             for i = 0, list_dir.count - 1 do
-                if list_dir:getcell(i,2) ~= nil and list_dir:getcell(i,2):upper() == props['FileNameExt']:upper() then
-                    iup.SetAttributeId2(list_dir, 'MARK',1,0, 0)
-                    iup.SetAttributeId2(list_dir, 'MARK',i,0, 1)
+                if list_dir:getcell(i, 2) ~= nil and list_dir:getcell(i, 2):upper() == props['FileNameExt']:upper() then
+                    iup.SetAttributeId2(list_dir, 'MARK', sel, 0, 0)
+                    iup.SetAttributeId2(list_dir, 'MARK', i, 0, 1)
                     list_dir.focus_cell = i..":1"
                     list_dir.redraw = "ALL"
                     iup.SetAttribute(list_dir, 'SHOW', i..":1")
