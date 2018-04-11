@@ -927,7 +927,7 @@ local function OnUserListSelection_local(tp, str)
             calltipinfo['attr']['enter'] = calltipinfo['attr']['s']
         end
         --calltipinfo ={0}
-        s = str:gsub(' .*', '')
+        s = str:gsub(' .*', ''):gsub('~', ' ')
         local sSt = editor.CurrentPos
         local isX = isXmlLine()
         for i = editor.CurrentPos - 1, editor:PositionFromLine(editor:LineFromPosition(editor.CurrentPos)), -1 do

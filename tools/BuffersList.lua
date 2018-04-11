@@ -156,7 +156,7 @@ local function InitWndDialog()
 
         local blockClose
 
-        local function CloseFileSet(t) iup.CloseFilesSet(9132, t) end
+        local function CloseFileSet(t) iup.CloseFilesSet(9132, t, true) end
 
         function CORE.DoForFileSet(s, f)
             return function()

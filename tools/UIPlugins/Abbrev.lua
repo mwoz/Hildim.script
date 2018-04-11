@@ -318,6 +318,14 @@ end
         return buf
     end
 
+    function ABBREV.GetById(id)
+        for i, v in ipairs(abbr_table) do
+            if v.abbr == id then
+                return v.exp
+            end
+        end
+        return nil
+    end
 
     ----------------------------------------------------------
     --list_abbrev   Abbreviations

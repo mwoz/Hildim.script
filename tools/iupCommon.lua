@@ -308,7 +308,7 @@ iup.GetBookmarkLst = function()
     return bk
 end
 
-iup.CloseFilesSet = function(cmd, tForClose)
+iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
     if cmd == 9132 then cur = scite.buffers.GetCurrent() end
 
@@ -381,6 +381,9 @@ iup.CloseFilesSet = function(cmd, tForClose)
                     table.insert(tblBuff.enc, scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
                     nf = true
                     table.insert(cloused, pref..props['FilePath'])
+                    if bAddToRecent then
+                        iuprops['resent.files.list']:ins(props['FilePath']:from_utf8(), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
+                    end
                 end
             else
                 if i <= curBuf then curBuf = curBuf - 1 end

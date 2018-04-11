@@ -249,22 +249,27 @@ end
 
 local function AutoScrollingProps()
     local ret,
-    caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xeven, caret_policy_xjumps,
-    caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yeven, caret_policy_yjumps,
-    caret_sticky, end_at_last_lin
+    caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xjumps, caret_policy_xeven,
+    caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yjumps, caret_policy_yeven,
+    _, caret_sticky, end_at_last_lin
     = iup.GetParam("Настройки автопрокрутки^AutiscrollSettings",
         nil,
         'Автопрокрутка по ширине%t\n'..
+
         'Нежелательная зона (НЗ)%b\n'..
         'Ширина НЗ, px%i[1,500,20]\n'..
         'Никогда не помешать каретку в НЗ%b\n'..
         'Автопрокрутка на 3 НЗ%b\n'..
         'Асимметричная НЗ%b\n'..
+
         'Автопрокрутка по высоте%t\n'..
+
         'Нежелательная зона (НЗ)%b\n'..
         'Высота НЗ, lines%i[1,500,20]\n'..
         'Никогда не помешать каретку в НЗ%b\n'..
         'Автопрокрутка на 3 НЗ%b\n'..
+        'Асимметричная НЗ%b\n'..
+
         '%t\n'..
         'Сохранять позицию по горизонтали%b\n'..
         'Прокрутка вниз на страницу%t\n'..
@@ -287,7 +292,7 @@ local function AutoScrollingProps()
         tonumber(props['end.at.last.lin']) or 0
     )
     if ret then
-        props['caret.policy.xslop']    = caret_policy_xslop
+        props['caret.policy.xslop']    = caret_policy_x
         props['caret.policy.width']    = caret_policy_width
         props['caret.policy.xstrict']  = caret_policy_xstrict
         props['caret.policy.xeven']    = caret_policy_xeven
@@ -457,9 +462,9 @@ _G.sys_Menus.OUTPUT = {title = "Контекстное меню консоли",
 	{link = 'Edit|Conventional|&Paste'},
 	{link = 'Edit|Conventional|&Delete'},
 	{'s1', separator = 1},
-	{link = 'Tools|Clear &Output'},
-	{link = 'Tools|&Previous Message'},
-	{link = 'Tools|&Next Message'},
+	{link = 'Tools|Консоль|Clear &Output'},
+	{link = 'Tools|Консоль|&Previous Message'},
+	{link = 'Tools|Консоль|&Next Message'},
 	{'s2', separator = 1},
 	{'Input Mode', ru = 'Режим ввода', {
 		{'Display Mode', ru = 'Отобразить(press Enter)', action = function() output:DocumentEnd();output:ReplaceSel('###?\n') end},
@@ -484,7 +489,7 @@ _G.sys_Menus.FINDRES = {title = "Контекстное меню результатов поиска",
 	{link = 'Edit|Conventional|&Paste'},
 	{link = 'Edit|Conventional|&Delete'},
 	{'s1', separator = 2},
-	{link = 'Tools|Clear &Find Result'},
+	{link = 'Tools|Консоль|Clear &Find Result'},
     {'Settings', ru = "Настройки" ,{
         {'DblClick Only On Number', ru = 'DblClick только по номеру', check_boolean = 'findres.clickonlynumber'},
         {'Group By Name', ru = 'Группировать по имени файла', check_boolean = 'findres.groupbyfile'},

@@ -52,10 +52,20 @@ local function RemoveAllOutstandingEventHandlers()
 	_remove = {} -- clear it
 end
 
+-- local bBlock = False
+-- function BLOCK(b)
+--     bBlock = b
+-- end
+
 --- Запускает обработку события согласно /scite-ru/wiki/SciTE_Events
 -- Возвращает всё, что вернул обработчик, а не только первый аргумент (флаг остановки)
+local bFromSE = false
 local function Dispatch (name, ...)
-	RemoveAllOutstandingEventHandlers() -- first remove all from _remove
+    -- if bBlock then
+    --     print(name)
+    --     return
+    -- end
+    RemoveAllOutstandingEventHandlers() -- first remove all from _remove
 	local event = events[name]
 	local res
 	for i = 1, #event do
@@ -63,10 +73,12 @@ local function Dispatch (name, ...)
 		if h then --@ this is a workaround for eventhandler-disappear bug (see v.1.0.3)
             res = { h(...) } -- store whole handler return in a table
 			if res[1] then -- first returned value is a interruption flag
+                bFromSE = false
 				return table.unpack(res)
 			end
 		end
 	end
+    bFromSE = false
 	return res and table.unpack(res) -- just for the case of error-handling
 end
 
@@ -74,11 +86,18 @@ end
 -- В случае, если такая функция уже имеется (т.е. была создана без использования AddEventHandler),
 -- то она ставится первой в очередь
 local function NewDispatcher(EventName)
-
-	local dispatch = function (...) -- `shortcut`
-		return Dispatch(EventName, ...)
-	end
-
+    local dispatch
+    if EventName == "OnSendEditor" then
+        dispatch = function (...) -- `shortcut`
+            if bFromSE then return end
+            return Dispatch(EventName, ...)
+        end
+    else
+        dispatch = function (...) -- `shortcut`
+            bFromSE = true
+            return Dispatch(EventName, ...)
+        end
+    end
 	-- just for the case some handler was defined in other way before
 	local old_handler = _G[EventName]
 	if old_handler then

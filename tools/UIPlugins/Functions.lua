@@ -431,7 +431,7 @@ do
 		--параметры процедур и вью(и функций) - всё от имени до as
 		local parpv = C((1-AnyCase"as")^0)*AnyCase"as"
 		--параметры таблиц содержат комментарии и параметры
-		local partb = C((P"("*(COMMENT + (1-S"()")+par)^1*P")"))
+		--[[local partb = C((P"("*(COMMENT + (1-S"()")+par)^1*P")"))]]
 		-- -- definitions to capture:
 		pr = pr*I*SC^0*parpv
 		vi = vi*I*SC^0*parpv

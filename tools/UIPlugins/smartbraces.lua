@@ -215,11 +215,11 @@ local function Init()
     -- "умные скобки/кавычки"
     -- возвращает true когда обрабатывать дальше символ не нужно
     local function SmartBraces( char )
-        local multiline = props['braces.multiline']
-        if multiline == '' then multiline = 'cpp' end
-        local use_multiline = string.find(','..multiline..',', ','..props['Language']..',')
-
         if ( props['braces.autoclose'] == '1' ) then
+            local multiline = props['braces.multiline']
+            if multiline == '' then multiline = 'cpp' end
+            local use_multiline = string.find(','..multiline..',', ','..props['Language']..',')
+
             local isSelection = editor.SelectionStart ~= editor.SelectionEnd
             -- находим парный символ
             local braceOpen, braceClose = GetBraces(char)

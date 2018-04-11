@@ -49,7 +49,7 @@ local wrdMidleInent =  {
 local strTab = string.rep(' ', props['tabsize'])
 
 local keywords = {"If", "Then", "For", "To", "Each", "In", "Select", "Case", "Sub", "Function", "Do", "While", "Until", "With", "Set", "Let", "Get", "Default", "Private", "Public", "Property", "Class",
-"End", "Next", "Loop", "Else", "ElseIf", "Or ", "And ", "Not ", "True", "False", "IsNull", "Is", "Nothing", "Exit", "Wend", "ExecuteGlobal"}
+"End", "Next", "Loop", "Else", "ElseIf", "Or ", "And ", "Not ", "True", "False", "IsNull", "Is", "Nothing", "Exit", "Wend", "ExecuteGlobal", "Error", "On", "Resume", "GoTo", "IsEmpty"}
 local keywordsUp = {}
 local lk = #keywords
 for i = 1, lk do
