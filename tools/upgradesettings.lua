@@ -113,8 +113,10 @@ local function Run(a, b)
         end
 
         tMsg = fun()
-
-        Convert(tMsg)
+        if not pcall(Convert, tMsg) then
+            print("File '"..filenameT.name.." 'convertion failed")
+            goto continue1
+        end
 
         tOut = {}
         for n, v in pairs(tMsg) do
@@ -134,7 +136,6 @@ local function Run(a, b)
     local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.fileset")
 
     for i, filenameT in ipairs(files or {}) do
-        print(111, filenameT.name)
         local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
         local s = f:read('*a')
         f:close()

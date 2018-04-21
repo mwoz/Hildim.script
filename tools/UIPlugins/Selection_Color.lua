@@ -1,6 +1,9 @@
 
 local function Init(h)
     local lblSel
+    local function ToClr(r, g, b)
+        return math.tointeger('0x'..r)..' '..math.tointeger('0x'..g)..' '..math.tointeger('0x'..b)
+    end
 
     onSetFindRes = function(what, count, sels)
         if count > 0 then
@@ -15,10 +18,10 @@ local function Init(h)
         local t = editor:GetText()
         local tc ={};tc['0 0 0'] = true;tc['255 255 255'] = true
         for r, g, b in t:gmatch('["#](%x%x)(%x%x)(%x%x)[%W]') do
-            tc[((('0x'..r) + 0)..' '..(('0x'..g) + 0)..' ' ..(('0x'..b) + 0))] = true
+            tc[ToClr(r, g, b)] = true
         end
         for r, g, b in t:gmatch('RGB%( *&H(%x%x)[, ]+&H(%x%x)[, ]+&H(%x%x)') do
-            tc[((('0x'..r) + 0)..' '..(('0x'..g) + 0)..' ' ..(('0x'..b) + 0))] = true
+            tc[ToClr(r, g, b)] = true
         end
         for r, g, b in t:gmatch('RGB%( *([0-9]+)[, ]+([0-9]+)[, ]+([0-9]+)') do
             tc[r..' '..g..' '..b] = true
@@ -107,7 +110,7 @@ local function Init(h)
         if pos ~= 0 then
             if #word == 6 and word:match('%x%x%x%x%x%x') then
                 local _, _, r, g, b = word:find('(%x%x)(%x%x)(%x%x)$')
-                lblSel.bgcolor = (('0x'..r) + 0)..' '..(('0x'..g) + 0)..' ' ..(('0x'..b) + 0);isColor = true
+                lblSel.bgcolor = ToClr(r, g, b);isColor = true
             elseif word == 'RGB' then
                 local le = editor:GetLine(editor:LineFromPosition(pos))     --[, ]+%)
                 local f, _, r, g, b = le:find('RGB%( *([0-9]+)[, ]+([0-9]+)[, ]+([0-9]+)')
@@ -116,7 +119,7 @@ local function Init(h)
                 else
                     f, _, r, g, b = le:find('RGB%( *&H(%x%x)[, ]+&H(%x%x)[, ]+&H(%x%x)')
                     if f then
-                        lblSel.bgcolor = (('0x'..r) + 0)..' '..(('0x'..g) + 0)..' ' ..(('0x'..b) + 0) ;isColor = true
+                        lblSel.bgcolor = ToClr(r, g, b) ;isColor = true
                     end
                 end
             elseif isColor then

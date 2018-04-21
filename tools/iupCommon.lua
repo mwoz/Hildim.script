@@ -814,7 +814,10 @@ end
 local old_matrix = iup.matrix
 iup.matrix = function(t)
     t.hlcolor="255 255 255"
-    t.hlcoloralpha="255"
+    t.hlcoloralpha = "255"
+    t.forecolor = props['iup.scroll.forecolor'];
+    t.highcolor = props['iup.scroll.highcolor'];
+    t.presscolor = props['iup.scroll.presscolor'];
     local mtr = old_matrix(t)
     function mtr:SetCommonCB(act_act,act_resel, act_esc, act_right)
         local function a_cb(h, key, lin, col, edition, value)

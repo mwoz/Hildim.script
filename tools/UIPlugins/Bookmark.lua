@@ -206,7 +206,7 @@ local function Init()
     AddEventHandler("OnClose", _OnClose)
     AddEventHandler("OnSave", Bookmarks_RefreshTable)
     AddEventHandler("OnNavigation", function(item)
-        if not item:find('%-$') then Bookmarks_RefreshTable() end
+        if not item:find('%-$') then if not pcall(Bookmarks_RefreshTable) then scite.RunAsync(Bookmarks_RefreshTable) end end  --Чтобы обойти ошибку "editor pane is unaccessible..."
     end)
 
     return Bookmarks_ListFILL

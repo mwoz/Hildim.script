@@ -251,7 +251,7 @@ local function AutoScrollingProps()
     local ret,
     caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xjumps, caret_policy_xeven,
     caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yjumps, caret_policy_yeven,
-    _, caret_sticky, end_at_last_lin
+    caret_sticky, end_at_last_lin
     = iup.GetParam("Настройки автопрокрутки^AutiscrollSettings",
         nil,
         'Автопрокрутка по ширине%t\n'..
@@ -289,7 +289,7 @@ local function AutoScrollingProps()
 
         tonumber(props['caret.sticky']) or 0,
 
-        tonumber(props['end.at.last.lin']) or 0
+        tonumber(props['end.at.last.line']) or 0
     )
     if ret then
         props['caret.policy.xslop']    = caret_policy_x
@@ -306,7 +306,7 @@ local function AutoScrollingProps()
 
         props['caret.sticky']          = caret_sticky
 
-        props['end.at.last.lin']       = end_at_last_lin
+        props['end.at.last.line'] = end_at_last_lin
         scite.ReloadProperties()
     end
 end

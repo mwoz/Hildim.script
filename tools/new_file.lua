@@ -67,6 +67,7 @@ local function CreateUntitledFile()
             if sN:gsub('%.[^%.]*$', '') == fName:from_utf8() then
                 if bPreset then
                     scite.Open(scite.buffers.NameAt(i):from_utf8())
+                    props['scite.new.file'] = ''
                     return true
                 end
                 bNew = false
