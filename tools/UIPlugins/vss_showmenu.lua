@@ -40,7 +40,7 @@ local function Init()
 
     local function reset_err(ierr, strerr)
         if ierr == 0 then
-            scite.MenuCommand(IDM_REVERT)
+            CORE.DoRevert()
         else
             print(strerr)
         end

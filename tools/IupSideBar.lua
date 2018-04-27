@@ -698,8 +698,8 @@ local function InitTabbar()
     end
 
     local function onExButton(h, button, pressed)
+        local side = Iif(h.name == 'TabCtrlLeft', 0, 1)
         if pressed == 0 then
-            local side = Iif(h.name == 'TabCtrlLeft', 0, 1)
             if not CORE.visibleWndDialog() then
                 CORE.WndBySide(side, h)
             else
@@ -718,6 +718,12 @@ local function InitTabbar()
                     )
                 end
                 menuhandler:ContextMenu(wx, wy, tMnu)
+            end
+        else
+            if side == scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) then
+                editor.Focus = true
+            else
+                coeditor.Focus = true
             end
         end
     end
@@ -1085,11 +1091,16 @@ function CORE.ChangeCode(unicmode, codepage)
     end
 end
 
+function CORE.DoRevert()
+    BlockEventHandler"OnTextChanged"
+    scite.MenuCommand(IDM_REVERT)
+    UnBlockEventHandler"OnTextChanged"
+end
+
 function CORE.Revert()
     if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
-        scite.BlockUpdate(UPDATE_BLOCK)
         _ENCODINGCOOKIE = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
-        scite.MenuCommand(IDM_REVERT)
+        CORE.DoRevert()
         _ENCODINGCOOKIE = nil
         scite.BlockUpdate(UPDATE_FORCE)
     end
@@ -1103,7 +1114,7 @@ function CORE.SetCP(unicmode, codepage)
         if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
             _ENCODINGCOOKIE = codepage
             if _ENCODINGCOOKIE == math.tointeger(props['system.code.page']) then _ENCODINGCOOKIE = 0 end
-            scite.MenuCommand(IDM_REVERT)
+            CORE.DoRevert()
             _ENCODINGCOOKIE = nil
         else
             return

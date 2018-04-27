@@ -662,6 +662,7 @@ local function Functions_ListFILL()
             end
         end
     end
+    tree_func.resetscroll = 1
     tree_func.autoredraw = 'YES'
 	--сортируем по ордеру, чтобы удобнее искать имя по строке
 	table.sort(table_functions,function(a,b) return a[2] < b[2] end)
@@ -794,15 +795,13 @@ local function  _OnUpdateUI()
                 for  i=0, tree_func.count do
                     local iDx = getPath(i)
                     if lineMap[iDx] == fData then
-                        -- выделяем "функцию", в теле которой находится пользователь, но только если она не в свернутой папке - иначе выделяем саму папку
-                        local pId = tonumber(iup.GetAttribute(tree_func, "PARENT"..i))
-                        if not pId then return end
-                        if iup.GetAttribute(tree_func, "STATE"..pId) == 'EXPANDED' then pId = i end
+
                         currFuncData = fData
-                        iup.SetAttribute(tree_func, "MARKED"..pId, "YES")
-                        iup.SetAttribute(tree_func, "COLOR"..pId, "0 0 255")
+                        tree_func.flat_topitem = i
+                        iup.SetAttribute(tree_func, "MARKED"..i, "YES")
+                        iup.SetAttribute(tree_func, "COLOR"..i, "0 0 255")
                         if curSelect > -1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0");--[[iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") ]]end
-                        curSelect = pId
+                        curSelect = i
                         tree_func.topitem="YES"
                         return
                     end
@@ -904,7 +903,7 @@ local function Func_Init(h)
        layout[w] = 'COLLAPSED'
     end
     local line = nil                                                                                              --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_func = iup.tree{minsize = '0x5'}
+    tree_func = iup.sc_tree{expand = 'YES'}
         --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
         tree_func.size = nil
     tree_func.button_cb = function(_, but, pressed, x, y, status)
@@ -946,11 +945,11 @@ local function Func_Init(h)
             iup.PassFocus()
         end
     end
-    tree_func.branchopen_cb = function(h, number)
+    tree_func.flat_branchopen_cb = function(h, number)
         layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'EXPANDED'
         SaveLayoutToProp()
     end
-    tree_func.branchclose_cb = function(h, number)
+    tree_func.flat_branchclose_cb = function(h, number)
         if h.value == '0' then return - 1 end
         layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'COLLAPSED'
         SaveLayoutToProp()
@@ -961,7 +960,7 @@ local function Func_Init(h)
     end)
 
     return {   -- iup.vbox{   };
-        handle = tree_func;
+        handle = iup.flatscrollbox{tree_func, border='NO'};
         OnSwitchFile = OnSwitch;
         OnSave = OnMySave;
         OnOpen = OnSwitch;

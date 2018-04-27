@@ -53,6 +53,7 @@ local m_last = nil
 local m_ext, m_ptrn = "", ""
 local bManualTip = false
 local m_tblSubstitution = {}
+local m_tblFilters = {}
 local curr_fillup_char = ''
 local inheritors, inheritorsX = {}, {} --таблицы наследования объектов
 local objPatern
@@ -630,6 +631,11 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                                 o_tbl[upObj] = {}
                                 o_tbl[upObj].normalName = sObj
                             end
+                            local _, _, filterarg = c:find('(<<[^ ]+>>)')
+                            if filterarg then
+                                sMet = sMet..filterarg
+                                c = c:gsub('<<[^ ]+>>', '')
+                            end
                             if b1Chr then table.insert(o_tbl[upObj], {sMet, c}) else table.insert(o_tbl[upObj], {sMet, c, sChr}) end
                             if needKwd then
                                 if upObj ~= constObjGlobal and tbl_MethodList[sMet] == nil then
@@ -646,11 +652,16 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
             end
         end
     end
+--debug_prnArgs(o_tbl)
     if strLua then
         local tFn = assert(load(strLua))()
         if tFn and type(tFn) == 'table' then
             for n, f in pairs(tFn) do
-                m_tblSubstitution[n] = f
+                if n == 'FILTER' then
+                    m_tblFilters = f
+                else
+                    m_tblSubstitution[n] = f
+                end
             end
         end
     end
@@ -744,6 +755,7 @@ local function ReCreateStructures(strText, tblFiles)
 
     end
     m_tblSubstitution = {}
+    m_tblFilters = {}
     if m_ext ~= editor.Lexer or str_vbkwrd ~= nil or m_ptrn ~= props['pattern.name$']  then
         alias_table = {}
         objects_table = {}
@@ -765,11 +777,11 @@ local function ReCreateStructures(strText, tblFiles)
         RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
         if str_vbkwrd ~= nil then
             props['keywords6.$('..props['pattern.name$']..')'] = str_vbkwrd
-            editor.KeyWords[5] = str_vbkwrd
+            editor.KeyWords[5] = str_vbkwrd:gsub('<<[^ ]->>', '')
         end
         if str_xmlkwrd ~= nil then
             props['keywords4.$('..props['pattern.name$']..')'] = str_xmlkwrd
-            editor.KeyWords[3] = str_xmlkwrd
+            editor.KeyWords[3] = str_xmlkwrd:gsub('<<[^ ]->>', '')
         end
         local kw = string.lower(table.concat(tbl_fList,' '))
         props['keywords16.$('..props['pattern.name$']..')'] = kw
@@ -816,6 +828,10 @@ local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
             end
         end
 	end
+
+    if obj_names[1] and m_tblFilters[obj_names[1][1]:upper()] then
+        m_tblFilters[obj_names[1][1]:upper()](retT)
+    end
     return retT, last
 end
 

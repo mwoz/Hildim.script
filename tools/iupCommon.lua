@@ -811,6 +811,15 @@ function Max(a,b)
     return b
 end
 
+local old_flatscrollbox = iup.flatscrollbox
+iup.flatscrollbox = function(t)
+    t.forecolor = props['iup.scroll.forecolor']
+    t.highcolor = props['iup.scroll.highcolor']
+    t.backcolor = iup.GetGlobal('DLGBGCOLOR')
+    t.presscolor = props['iup.scroll.presscolor']
+    return old_flatscrollbox(t)
+end
+
 local old_matrix = iup.matrix
 iup.matrix = function(t)
     t.hlcolor="255 255 255"

@@ -369,7 +369,7 @@ local function ResetReadOnly()
 		attr = attr + 1
 	end
 	shell.setfileattr(props['FilePath'], attr)
-	scite.MenuCommand(IDM_REVERT)
+	CORE.DoRevert()
 end
 
 local function RunSettings()

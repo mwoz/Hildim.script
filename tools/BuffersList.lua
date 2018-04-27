@@ -131,11 +131,13 @@ local function InitWndDialog()
         droppedLin = nil;
     end
 
+    local blockClose
     function CORE.WndBySide(side, h)
         fillWindow(side)
         local _, _, x, y = h.screenposition:find('(-?%d*),(-?%d*)')
         local _, _, w, h = h.rastersize:find('(%d*)x(%d*)')
         local _, _, w2, _ = dlg.rastersize:find('(%d*)x(%d*)')
+        blockClose = true;
         scite.RunAsync(function() iup.ShowXY(dlg, x + w - w2, y + h) end) --
     end
     local function createDlg()
@@ -154,7 +156,6 @@ local function InitWndDialog()
             list_windows.redraw = 'ALL'
         end
 
-        local blockClose
 
         local function CloseFileSet(t) iup.CloseFilesSet(9132, t, true) end
 
@@ -207,6 +208,7 @@ local function InitWndDialog()
             if state == 0 then
                 list_windows.rasterwidth4 = nil
                 list_windows.fittosize = 'COLUMNS'
+                blockClose = false
             end
         end
         dlg.focus_cb = function(h, focus)
