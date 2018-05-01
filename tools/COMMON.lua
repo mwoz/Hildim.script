@@ -91,6 +91,7 @@ local function StringLen(s, cp)
 end
 
 function CORE.Rgb2Str(rgb)
+    rgb = math.tointeger(rgb) or 0
     return ''..(rgb & 255)..' '..((rgb >> 8) & 255)..' '..((rgb >> 16) & 255)
 end
 function CORE.Str2Rgb(s, def)

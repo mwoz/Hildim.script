@@ -59,6 +59,13 @@ local function Init_hidden()
         Compare.Settings.Color_blank = tSet.Color_blank
     end
 
+    local function addSBColors(sb)
+        iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_ADDED_LINE'], CORE.Rgb2Str(tSet.Color_added))
+        iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_REMOVED_LINE'], CORE.Rgb2Str(tSet.Color_deleted))
+        iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_MOVED_LINE'], CORE.Rgb2Str(tSet.Color_moved))
+        iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_CHANGED_LINE'], CORE.Rgb2Str(tSet.Color_changed))
+    end
+
     local function CompareSetInd()
         local i1 = editor.IndicatorCurrent
         local i2 = coeditor.IndicatorCurrent
@@ -566,6 +573,8 @@ end
     Compare.Init(iup.GetDialogChild(iup.GetLayout(), "Source").hwnd, iup.GetDialogChild(iup.GetLayout(), "CoSource").hwnd)
 
     ApplySettings()
+    addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'))
+    addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'))
 
     Compare.SetStyles()
 

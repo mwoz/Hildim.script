@@ -63,7 +63,7 @@ local function  CreateToolBar()
                 table.insert(tblVb, iup.hbox(tblHb))
                 if i > 2 or not isUpper then table.insert(tblVb, iup.label{separator = "HORIZONTAL"}) end
             end
-            tblHb = {gap = "3", margin = "3x0", alignment = "ACENTER"}
+            tblHb = {gap = "3", margin = "3x1", alignment = "ACENTER"}
             for j = 1, #(tblBars[i]) do
                 local pname = tblBars[i][j]
                 local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
@@ -112,7 +112,7 @@ end
 local StatusBar_obj = {}
 local function CreateStatusBar()
     local tbl = _G.iuprops["settings.status.layout"] or {}
-    local tblH = {gap="3",margin="3x0", name="StatusBar", maxsize="x30", alignment = "ACENTER",}
+    local tblH = {gap="3",margin="3x2", name="StatusBar", maxsize="x32", alignment = "ACENTER",}
     for i = 1, #tbl do
         local p = tbl[i]
         local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
@@ -451,7 +451,7 @@ local function RestoreNamedValues(h, root)
                         child.redraw = 1
                     end
                 elseif val then
-                    if cType == 'split' and child.barsize == '0' and child.value ~= '0' and child.value ~= '1000' then child.barsize = '3' end
+                    if cType == 'split' and child.barsize == '0' and child.value ~= '0' and child.value ~= '1000' then child.barsize = '5' end
                     child.value = val
                 end
             end
@@ -489,7 +489,7 @@ local function InitSideBar()
         iup.Insert(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"), nil, hBx)
         iup.Map(hBx)
         iup.Destroy(hTmp)
-        bs2.barsize="3"
+        bs2.barsize='5'
         if tonumber(bs2.value) > 980 then bs2.value = 800 end
         iup.GetDialogChild(hMainLayout, "FindPlaceHolder").yautohide = 'NO'
         iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
@@ -509,7 +509,7 @@ local function InitSideBar()
     local bSplitter = iup.GetDialogChild(hMainLayout, "BottomSplit")
 
     local function toggleOf()
-        if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '3' then
+        if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '5' then
            iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '0'
            iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'
            _G.iuprops["sidebarctrl.BottomBarSplit.value"] = iup.GetDialogChild(hMainLayout, "BottomBarSplit").value
@@ -518,7 +518,7 @@ local function InitSideBar()
     end
     local function toggleOn()
         if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
-           iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
+           iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '5'
            iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
            iup.GetDialogChild(hMainLayout, "BottomBarSplit").value = _G.iuprops["sidebarctrl.BottomBarSplit.value"] or '900'
         end
@@ -585,7 +585,7 @@ local function InitSideBar()
 
         local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
         iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, "CoSourceExpanderBtm"), nil)
-        iup.GetDialogChild(hMainLayout, "SourceSplitBtm").barsize = '3'
+        iup.GetDialogChild(hMainLayout, "SourceSplitBtm").barsize = '5'
         CORE.RemapTab(false)
         iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
     end
@@ -767,7 +767,7 @@ function CORE.RemapCoeditor()
     local hPrOld = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitBtm", "SourceSplitMiddle"))
     local hPr = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitMiddle", "SourceSplitBtm"))
     hPr.value = hPrOld.value
-    hPr.barsize = '3'
+    hPr.barsize = '5'
 
     iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, Iif(bIsH, "CoSourceExpander", "CoSourceExpanderBtm")), nil)
 
@@ -887,7 +887,7 @@ local function InitMenuBar()
         end
     end
 
-    local tTlb = {iup.expander{barsize = 0, state="OPEN", name = "MenuBar",iup.vbox{expandchildren ='YES', iup.hbox(hb),iup.label{separator = "HORIZONTAL"}}}};
+    local tTlb = {iup.expander{barsize = 0, state="OPEN", name = "MenuBar",iup.vbox{expandchildren ='YES', iup.hbox(hb)}}};
 
     tTlb.control = "YES"
     tTlb.sciteid="iupmenubar"
@@ -903,6 +903,17 @@ local function InitMenuBar()
 
     iup.PassFocus()
 end
+
+local function resetSBColors(sb)
+    iup.SetAttributeId2(sb, "COLORID", 1, -1, "")
+    iup.SetAttributeId2(sb, "COLORID", 2, -1, "")
+    iup.SetAttributeId2(sb, "COLORID", 1, MARKER_BOOKMARK, Iif(props["bookmark.fore"]~= '', CORE.Rgb2Str(props["bookmark.fore"]), '0 0 255', 0))
+    iup.SetAttributeId2(sb, "COLORID", 1, MARKER_NOTSAVED, Iif(props["marker.notsaved.back"]~= '', CORE.Rgb2Str(props["marker.notsaved.back"]), '255 112 112', 0))
+    iup.SetAttributeId2(sb, "COLORID", 1, MARKER_SAVED, Iif(props["marker.saved.back"]~= '', CORE.Rgb2Str(props["marker.saved.back"]), '112 255 112', 0))
+end
+
+resetSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'))
+resetSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'))
 
 InitMenuBar()
 --Автозагрузка скрытых плагинов
@@ -956,9 +967,9 @@ RestoreNamedValues(hMainLayout, 'sidebarctrl')
 RestoreNamedValues(hMainLayout, 'findreplace')
 iup.Refresh(hMainLayout)
 if not LeftBar_obj.handle then iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0'
-else iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '3'   end
+else iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '5'   end
 if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000'
-else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '3'   end
+else iup.GetDialogChild(hMainLayout, "RightBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '5'   end
 if iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize=="0" then iup.GetDialogChild(hMainLayout, "BottomSplit2").value="1000" end
 hMainLayout.resize_cb = function()
     local tmr = iup.timer{time = 10, action_cb = function(h)

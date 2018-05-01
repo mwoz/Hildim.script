@@ -643,7 +643,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
             local v2 = l % 10000
             if SideBar_Plugins.findrepl.Bar_obj then v2 = 0 end
             local v = math.floor(l / 10000)
-            iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
+            iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '5'
             iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
             if v > 0 then iup.GetDialogChild(hMainLayout, "ConsoleDetach").Attach() end
             if v < 1000 then iup.GetDialogChild(hMainLayout, "FindResDetach").Attach() end
@@ -1211,7 +1211,7 @@ iup.scitedetachbox = function(t)
                 if l < 15 and dtb.sciteid == 'concolebar' then l = 200
                 elseif l > 985 and dtb.sciteid == 'findresbar'  then l = 800 end
                 s.value = l
-                s.barsize = "3"
+                s.barsize = '5'
             end
             dtb.Dialog = nil
             if statusBtn then statusBtn.visible = 'NO' end
@@ -1608,7 +1608,7 @@ iup.DestroyDialogs = function()
     if LeftBar_obj and LeftBar_obj.handle then LeftBar_obj.handle.SaveValues() end
 
     if iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize == '0' then
-        iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '3'
+        iup.GetDialogChild(hMainLayout, "BottomBarSplit").barsize = '5'
         iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'OPEN'
         if (_G.iuprops['concolebar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "ConsoleExpander").state = 'OPEN' end
         if (_G.iuprops['findresbar.win'] or '0') == '0' then iup.GetDialogChild(hMainLayout, "FindResExpander").state = 'OPEN' end
