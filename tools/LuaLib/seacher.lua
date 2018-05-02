@@ -178,11 +178,12 @@ function s:ReplaceOnce()
     return pos
 end
 
-function s:onMarkOne(iMark, bClear)
+function s:onMarkOne(iMark, bClear, iMarker)
     if bClear then self:EditorClearMarks(iMark) end
     return (function(lenTarget)
         if lenTarget then
             self:EditorMarkText(self.e.TargetStart, lenTarget, iMark)
+            if iMarker then self.e:MarkerAdd(self.e:LineFromPosition(self.e.TargetStart) , iMarker) end
             return lenTarget, true
         else
             return true
@@ -233,12 +234,13 @@ function s:CollapseFindRez()
     end
 end
 
-function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
+function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker)
     if bColapsPrev and bSearchCapt then self:CollapseFindRez() end
     local strLive = Iif(bLive, "/\\", "")
     local needCoding = (self.e.CodePage ~= 0)
     findres:SetSel(0, 0)
     local line, wCount, lCount = -1, 0, 0
+    local bShowAll = true
     return (function(lenTarget)
         if lenTarget then
             wCount = wCount + 1
@@ -253,15 +255,23 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
                 else
                     lNum = '\t'..(l+1)..': '
                 end
-                if lCount == maxlines then
+                if (lCount == (maxlines or (-1))) and not iMarker then
                     findres:ReplaceSel(lNum..'...\n')
                     return lenTarget, false
                 end
-                local str = self.e:GetLine(l):gsub('^[ \t]+', '')
-                if needCoding then str = str:from_utf8() end
-                findres:ReplaceSel(lNum..str)
+
+                if (maxlines or (-1)) > lCount then
+                    local str = self.e:GetLine(l):gsub('^[ \t]+', '')
+                    if needCoding then str = str:from_utf8() end
+                    findres:ReplaceSel(lNum..str)
+                else
+                    if bShowAll then findres:ReplaceSel(lNum..'...\n') end
+                    bShowAll = false
+                end
+
+                if iMarker then self.e:MarkerAdd(l, iMarker) end
              end
-            return lenTarget, true
+            return lenTarget, bShowAll
         else
             if bSearchCapt then findres:ReplaceSel('<'..strLive..'\n') end
             findres:SetSel(0, 0)
@@ -282,8 +292,11 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt)
     end)
 end
 
+local iPrevMark
 function s:findWalk(inSelection, funcOnFind)
     local findTarget, findLen = self:UnSlashAsNeeded(self.findWhat)
+    if iPrevMark then editor:MarkerDeleteAll(iPrevMark) end
+    iPrevMark = nil
 
     if findLen == 0 then return -1 end
 	local startPosition = self.e.SelectionStart;
@@ -417,9 +430,10 @@ function s:MarkResult()
     self.e = editor
 end
 
-function s:FindAll(maxlines, bLive, bSel)
-    local rez = self:findWalk((bSel == true), self:onFindAll(maxlines, bLive, true, 'Current', true))
+function s:FindAll(maxlines, bLive, bSel, iMarker)
+    local rez = self:findWalk((bSel == true), self:onFindAll(maxlines, bLive, true, 'Current', true, iMarker))
     self:MarkResult()
+    iPrevMark = iMarker
     return rez
 end
 
@@ -458,8 +472,8 @@ end
 function s:Count()
     return self:findWalk(false, (function(lenTarget) return lenTarget, true; end))
 end
-function s:MarkAll(bInSel, iMark)
-    return self:findWalk(bInSel, self:onMarkOne(iMark, true))
+function s:MarkAll(bInSel, iMark, iMarker)
+    return self:findWalk(bInSel, self:onMarkOne(iMark, true, iMarker))
 end
 function s:BookmarkAll(bInSel)
     return self:findWalk(bInSel, (function(lenTarget) self.e:MarkerAdd(self.e:LineFromPosition(self.e.TargetStart),1); return lenTarget, true; end))

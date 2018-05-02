@@ -85,6 +85,8 @@ scite.RunAsync(function()
         scite.Open(props['hildim.command.line'])
     end
     props['hildim.command.line'] = ''
+
+    scite.RunAsync(CORE.SetFindMarkers)
     scite.EnsureVisible()
     _G.g_session['LOADED'] = true
 end)

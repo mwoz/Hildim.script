@@ -13,6 +13,41 @@ local tMarks = {
     CORE.InidcFactory('Find.Mark.5', 'Метка поиска 5', INDIC_ROUNDBOX, 16768273, 50),
 }
 
+function CORE.SetFindMarkers()
+    local function SetFMTo(e)
+        e:MarkerDefine(5, SC_MARK_BOOKMARK)
+        e.MarkerBack[5] = 16711884
+        e:MarkerDefine(6, SC_MARK_BOOKMARK)
+        e.MarkerBack[6] = 16711680
+        e:MarkerDefine(7, SC_MARK_BOOKMARK)
+        e.MarkerBack[7] = 65280
+        e:MarkerDefine(8, SC_MARK_BOOKMARK)
+        e.MarkerBack[8] = 65535
+        e:MarkerDefine(9, SC_MARK_BOOKMARK)
+        e.MarkerBack[9] = 16768273
+        e:MarkerDefine(10, SC_MARK_EMPTY)
+        e.MarkerBack[10] = CORE.Str2Rgb('255 127 0')
+    end
+    local function addSBColors(sb, side)
+        iup.SetAttributeId2(sb, "COLORID", 2, -1, "")
+        iup.SetAttributeId2(sb, "COLORID", 2, 5, CORE.Rgb2Str(16711884))
+        iup.SetAttributeId2(sb, "COLORID", 2, 6, CORE.Rgb2Str(16711680))
+        iup.SetAttributeId2(sb, "COLORID", 2, 7, CORE.Rgb2Str(65280))
+        iup.SetAttributeId2(sb, "COLORID", 2, 8, CORE.Rgb2Str(65535))
+        iup.SetAttributeId2(sb, "COLORID", 2, 9, CORE.Rgb2Str(16768273))
+        iup.SetAttributeId2(sb, "COLORID", 2, 10, '255 127 0')
+
+    end
+
+    if props['findreplmarkers.set'] ~= '1' then
+        props['findreplmarkers.set'] = '1'
+        SetFMTo(editor)
+        SetFMTo(coeditor)
+    end
+    addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
+    addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
+end
+
 local findSettings = seacher{}
 
 local function Ctrl(s)
@@ -166,7 +201,7 @@ end
 
 local function FindSel(h)
     if ReadSettings() then return end
-    local count = findSettings:FindAll(500, false, true)
+    local count = findSettings:FindAll(nil, false, true)
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
@@ -175,7 +210,7 @@ end
 
 local function FindAll(h)
     if ReadSettings() then return end
-    local count = findSettings:FindAll(500, false)
+    local count = findSettings:FindAll(nil, false)
     SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
@@ -221,18 +256,21 @@ end
 
 local function MarkAll(h)
     if ReadSettings() then return end
-    local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", tMarks[tonumber(Ctrl("matrixlistColor").focusitem)])
+    local clrStr = math.tointeger(Ctrl("matrixlistColor").focusitem)
+    local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", tMarks[clrStr], clrStr + 4)
     SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
 end
 
 local function ClearMark(h)
-    EditorClearMarks(tMarks[tonumber(Ctrl("matrixlistColor").focusitem)])
+    editor:MarkerDeleteAll(math.tointeger(Ctrl("matrixlistColor").focusitem) + 4)
+    EditorClearMarks(tMarks[math.tointeger(Ctrl("matrixlistColor").focusitem)])
 end
 
 local function ClearMarkAll(h)
     for i = 1, 5 do
+        editor:MarkerDeleteAll(i + 4)
         EditorClearMarks(tMarks[i])
     end
 end

@@ -59,14 +59,20 @@ local function Init_hidden()
         Compare.Settings.Color_blank = tSet.Color_blank
     end
 
-    local function addSBColors(sb)
+    local function addSBColors(sb, side)
+        iup.SetAttributeId2(sb, "COLORID", 2, -1, "")
         iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_ADDED_LINE'], CORE.Rgb2Str(tSet.Color_added))
         iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_REMOVED_LINE'], CORE.Rgb2Str(tSet.Color_deleted))
         iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_MOVED_LINE'], CORE.Rgb2Str(tSet.Color_moved))
         iup.SetAttributeId2(sb, "COLORID", 2, Compare.Markers['MARKER_CHANGED_LINE'], CORE.Rgb2Str(tSet.Color_changed))
+
+        iup.SetAttributeId2(sb, "COLORID", 2, MARKER_MAX + 1, Iif(side == 1, 2, 1))
     end
 
     local function CompareSetInd()
+        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
+        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
+
         local i1 = editor.IndicatorCurrent
         local i2 = coeditor.IndicatorCurrent
         editor.IndicatorCurrent = mark
@@ -130,6 +136,8 @@ local function Init_hidden()
         tCompare.left[fPath(tabL)] = nil
         tCompare.right[fPath(tabR)] = nil
         bActive = 0
+
+        CORE.SetFindMarkers()
     end
 
     local function StartCompare()
@@ -139,6 +147,7 @@ local function Init_hidden()
         if bActive == 7 then Reset() end
 
         bActive = 7
+
         CompareSetInd()
         tCompare.left[fPath(tabL)] = fPath(tabR)
         tCompare.right[fPath(tabR)] = fPath(tabL)
@@ -573,8 +582,7 @@ end
     Compare.Init(iup.GetDialogChild(iup.GetLayout(), "Source").hwnd, iup.GetDialogChild(iup.GetLayout(), "CoSource").hwnd)
 
     ApplySettings()
-    addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'))
-    addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'))
+
 
     Compare.SetStyles()
 

@@ -57,7 +57,7 @@ local function Init(ToolBar_obj)
         local str = txt_search.value
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
         findSettings.findWhat = str
-        findSettings:FindAll(50,true)
+        findSettings:FindAll(50,true, false, 10)
     end
     tm.action_cb = (Find_onTimer)
     local function Find_onChange()
@@ -67,6 +67,7 @@ local function Init(ToolBar_obj)
     end
 
     txt_search.valuechanged_cb = (Find_onChange)
+    txt_search.getfocus_cb = (function(h) editor:MarkerDeleteAll(10) end)
     txt_search.killfocus_cb = (function(h)
         local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
@@ -86,6 +87,7 @@ local function Init(ToolBar_obj)
             return iup.IGNORE
         elseif key == iup.K_ESC or key == iup.K_CR then  --esc
             iup.PassFocus()
+            editor:MarkerDeleteAll(10)
         end
     end)
     btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
