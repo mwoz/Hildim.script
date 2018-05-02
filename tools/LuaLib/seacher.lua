@@ -271,7 +271,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker)
 
                 if iMarker then self.e:MarkerAdd(l, iMarker) end
              end
-            return lenTarget, bShowAll
+            return lenTarget, true
         else
             if bSearchCapt then findres:ReplaceSel('<'..strLive..'\n') end
             findres:SetSel(0, 0)
