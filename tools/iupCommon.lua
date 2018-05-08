@@ -160,7 +160,18 @@ function rfl:GetMenu()
 end
 
 function OnCommandLine(line)
-   scite.Open(line)
+    local cmdLine
+    if line:find('[-]cmd ') then
+        local _, _, l1, l2 = line:find('([^-]*)[-]cmd (.+)')
+        if not l2 then
+            print('Command line error: "'..line..'"')
+            return
+        end
+        cmdLine = l2
+        line = l1:gsub('^ +', ''):gsub(' +$','')
+    end
+    if line ~= '' then scite.Open(line) end
+    if cmdLine then assert(load(cmdLine))() end
 end
 
 function rfl:check(fname)
@@ -263,6 +274,20 @@ function iup.SaveChProps(bReset)
 'wrap.visual.flags',
 'wrap.visual.flags.location',
 'wrap.visual.startindent',
+'layout.hlcolor',
+'layout.borderhlcolor',
+'layout.bordercolor',
+'layout.bgcolor',
+'layout.txtbgcolor',
+'layout.fgcolor',
+'layout.txtfgcolor',
+'layout.txthlcolor',
+'layout.txtinactivcolor',
+'layout.bordercolor',
+'layout.scroll.forecolor',
+'layout.scroll.presscolor',
+'layout.scroll.highcolor',
+'layout.scroll.backcolor',
     }
     for i = 1, #t do
         t[i] = t[i]..'='..props[t[i]]
@@ -733,18 +758,19 @@ local function fixMarks(bReset)
     end
 end
 
-AddEventHandler("OnTextChanged", function(position, flag, linesAdded)
+AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
     if (_G.iuprops['changes.mark.line'] or 0) == 1 and not _G.g_session['OPENING'] then
+        local e = Iif(leg == scite.buffers.GetBufferSide(scite.buffers.GetCurrent()), editor, coeditor)
         if (flag & (SC_PERFORMED_UNDO | SC_PERFORMED_REDO)) ~= 0 then
             scite.RunAsync(function()
                 if scite.buffers.SavedAt(scite.buffers.GetCurrent()) then fixMarks(); return end
             end)
         end
-        local bOk, lstart = pcall(function() return editor:LineFromPosition(position) end)
+        local bOk, lstart = pcall(function() return e:LineFromPosition(position) end)
         if not bOk then return end
-        if lstart ~= 0 or linesAdded ~= editor:LineFromPosition(editor.Length) then
+        if lstart ~= 0 or linesAdded ~= e:LineFromPosition(e.Length) then
             for i = lstart, lstart + Iif(linesAdded > 0, linesAdded, 0) do
-                 if (editor:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then editor:MarkerAdd(i, MARKER_NOTSAVED) end
+                 if (e:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then e:MarkerAdd(i, MARKER_NOTSAVED) end
             end
         end
     end
@@ -813,20 +839,27 @@ end
 
 local old_flatscrollbox = iup.flatscrollbox
 iup.flatscrollbox = function(t)
-    t.forecolor = props['iup.scroll.forecolor']
-    t.highcolor = props['iup.scroll.highcolor']
-    t.backcolor = iup.GetGlobal('DLGBGCOLOR')
-    t.presscolor = props['iup.scroll.presscolor']
+    t.forecolor = props['layout.scroll.forecolor']
+    t.highcolor = props['layout.scroll.highcolor']
+    t.backcolor = props['layout.scroll.backcolor']
+    t.presscolor = props['layout.scroll.presscolor']
     return old_flatscrollbox(t)
+end
+
+local old_toggle = iup.toggle
+iup.toggle = function(t)
+    t.flat = 'YES'
+    return old_toggle(t)
 end
 
 local old_matrix = iup.matrix
 iup.matrix = function(t)
     t.hlcolor="255 255 255"
     t.hlcoloralpha = "255"
-    t.forecolor = props['iup.scroll.forecolor'];
-    t.highcolor = props['iup.scroll.highcolor'];
-    t.presscolor = props['iup.scroll.presscolor'];
+    t.forecolor = props['layout.scroll.forecolor'];
+    t.highcolor = props['layout.scroll.highcolor'];
+    t.presscolor = props['layout.scroll.presscolor'];
+    t.backcolor = props['layout.scroll.backcolor']
     local mtr = old_matrix(t)
     function mtr:SetCommonCB(act_act,act_resel, act_esc, act_right)
         local function a_cb(h, key, lin, col, edition, value)
@@ -1044,8 +1077,8 @@ iup.scitedetachbox = function(t)
     end
     local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() cmd_Attach() end}
 
-    btn_attach.image.bgcolor = iup.GetGlobal('DLGBGCOLOR')
-    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+    btn_attach.image.bgcolor = iup.GetLayout().bgcolor
+    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetLayout().bgcolor, name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
 
         iup.flatbutton{title = ' '..t.Dlg_Title,name='Title', image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
@@ -1102,7 +1135,7 @@ iup.scitedetachbox = function(t)
 
     dtb.detachPos = (function(bShow)
         dtb.detachhidden = 1
-        _G.iuprops[dtb.sciteid..'.win']= Iif(bShow,'1', '2')
+        _G.iuprops[dtb.sciteid..'.win'] = Iif(bShow, '1', '2')
         hbTitle.state = 'OPEN'
         dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
 
@@ -1133,6 +1166,13 @@ iup.scitedetachbox = function(t)
         hNew.minbox="NO"
         hNew.menubox="NO"
         hNew.toolbox="YES"
+        hNew.bgcolor = iup.GetLayout().bgcolor
+        hNew.txtbgcolor = iup.GetLayout().txtbgcolor
+        hNew.txtfgcolor = iup.GetLayout().txtfgcolor
+        hNew.borderhlcolor = iup.GetLayout().borderhlcolor
+        hNew.hlcolor = iup.GetLayout().hlcolor
+        hNew.bordercolor = iup.GetLayout().bordercolor
+        hNew.flat = 'YES'
   --[[      hNew.title= t.Dlg_Title or "dialog"]]
         hNew.x=10
         hNew.y=10

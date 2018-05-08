@@ -31,6 +31,7 @@ end
 
 local function OnSwitch()
     needCoding = (editor.CodePage ~= 0)
+    editor:MarkerDeleteAll(10)
 end
 
 local function Init(ToolBar_obj)
@@ -57,7 +58,7 @@ local function Init(ToolBar_obj)
         local str = txt_search.value
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
         findSettings.findWhat = str
-        findSettings:FindAll(50,true, false, 10)
+        findSettings:FindAll(50, true, false, Iif(#str > 1, 10, nil))
     end
     tm.action_cb = (Find_onTimer)
     local function Find_onChange()

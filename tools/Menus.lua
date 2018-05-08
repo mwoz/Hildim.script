@@ -157,6 +157,62 @@ local function ResetTabbarProps()
     end
 end
 
+function CORE.ResetGlobalColors()
+
+    local ret, bgcolor, txtbgcolor, fgcolor, txtfgcolor, txthlcolor, txtinactivcolor, hlcolor, borderhlcolor, bordercolor,
+    scroll_forecolor , scroll_presscolor, scroll_highcolor , scroll_backcolor
+    = iup.GetParam("Цвета главного окна^MainWindowColor",
+        nil,
+        'Панели%c\n'..
+        'Поля редактирования%c\n'..
+        'Шрифт панелей%c\n'..
+        'Шрифт полей редактирования%c\n'..
+        'Шрифт подсвеченного элемента меню%c\n'..
+        'Шрифт неактивного элемента%c\n'..
+        'Подсветка кнопки, контрола%c\n'..
+        'Граница подсвеченного контрола%c\n'..
+        'Границы контролов%c\n'..
+        'Ползунок скролла%c\n'..
+        'Ползунок скролла - нажатый%c\n'..
+        'Ползунок скролла - подсвеченный%c\n'..
+        'Фон панели прокрутки%c\n'
+        ,
+        props['layout.bgcolor']          ,
+        props['layout.txtbgcolor']       ,
+        props['layout.fgcolor']          ,
+        props['layout.txtfgcolor']       ,
+        props['layout.txthlcolor']       ,
+        props['layout.txtinactivcolor']  ,
+        props['layout.hlcolor']          ,
+        props['layout.borderhlcolor']    ,
+        props['layout.bordercolor']      ,
+        props['layout.scroll.forecolor'] ,
+        props['layout.scroll.presscolor'],
+        props['layout.scroll.highcolor'] ,
+        props['layout.scroll.backcolor']
+    )
+    if ret then
+
+        props['layout.hlcolor']           = hlcolor
+        props['layout.borderhlcolor']     = borderhlcolor
+        props['layout.bgcolor']           = bgcolor
+        props['layout.txtbgcolor']        = txtbgcolor
+        props['layout.fgcolor']           = fgcolor
+        props['layout.txtfgcolor']        = txtfgcolor
+        props['layout.txthlcolor']        = txthlcolor
+        props['layout.txtinactivcolor']   = txtinactivcolor
+        props['layout.bordercolor']       = bordercolor
+        props['layout.scroll.forecolor']  = scroll_forecolor
+        props['layout.scroll.presscolor'] = scroll_presscolor
+        props['layout.scroll.highcolor']  = scroll_highcolor
+        props['layout.scroll.backcolor'] = scroll_backcolor
+
+        scite.SetRestart('  -cmd scite.RunAsync(function() CORE.ResetGlobalColors() end)')
+        scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+    end
+
+end
+
 local function ResetSelColors()
     local function Rgb2Str(strrgb)
         local rgb = tonumber((strrgb or '#000000'):gsub('#', ''), 16) or 0
@@ -578,7 +634,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
         {'Move to another window', ru = 'Переместить на другое окно', action = IDM_CHANGETAB, visible="scite.buffers.IsCloned(scite.buffers.GetCurrent())==0"},
         {'Clone to another window', ru = 'Клонировать в другом окне', action = IDM_CLONETAB, visible = "scite.buffers.IsCloned(scite.buffers.GetCurrent())==0" },
         {'s4', separator = 1},
-		{'Exit', ru = 'Выход', action = IDM_QUIT},
+		{'Exit', ru = 'Выход', action = function() scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end) end },
         {'sLast', separator = 1},
         {'Recent Files1', plane = 1, visible = "(_G.iuprops['resent.files.list.location'] or 0) == 1", function() if (_G.iuprops['resent.files.list.location'] or 0) == 1 then return iuprops['resent.files.list']:GetMenu() else return {} end end},
 	},},
@@ -779,6 +835,7 @@ _G.sys_Menus.MainWindowMenu = {title = "Главное меню программы",
 		{'Windows Integration', ru = 'Настройка интеграции с Windows', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\WinAssoc.lua')", image='windows_µ'},
 		{'Open &User Options File', ru = 'Открыть файл пользовательских настроек', action = IDM_OPENUSERPROPERTIES},
 		{'Indicators', ru = 'Индикаторы...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorIndicators.lua')", active = RunSettings, image='color_µ'},
+		{'Main window colors', ru = 'Цвета главного окна', action = CORE.ResetGlobalColors, image='color_µ'},
 		{'Selection Colors && caret', ru = 'Цвета выделения и курсор...', action = ResetSelColors, image='color_µ'},
 		{'Autoscroll Settings', ru = 'Настройка автопрокрутки...', action = AutoScrollingProps, image='settings_µ'},
 		{'Colors and Fonts of lexers', ru = 'Цвета и шрифты лексеров...', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings, image='settings_µ'},

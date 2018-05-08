@@ -42,7 +42,7 @@ local function Init(h)
     k_any =(function(_, c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
     txtLine = iup.text{size = '25x'; mask = '[0-9]*', tip = sTip, killfocus_cb = GoToPos,
     k_any =(function(_, c) if c == iup.K_CR then iup.PassFocus() end end)}
-    txtSel = iup.text{size = '25x'; readonly = 'YES', bgcolor = iup.GetGlobal('DLGBGCOLOR'), canfocus = "NO"}
+    txtSel = iup.text{size = '25x'; readonly = 'YES', bgcolor = iup.GetLayout().bgcolor, canfocus = "NO", border = "NO"}
 
     return {
         handle = iup.hbox{

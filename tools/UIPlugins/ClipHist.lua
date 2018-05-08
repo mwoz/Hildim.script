@@ -482,7 +482,7 @@ end
 local function Toolbar_Init(h)
     bToolBar = true
     btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
-    local box = iup.sc_sbox{ iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22'}, maxsize = "900x22",shrink='YES'}
+    local box = iup.sc_sbox{iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22'}, maxsize = "900x22",shrink='YES', color=props['layout.scroll.forecolor']}
     onDraw_cb = function(s)
         btn.title = s
         iup.Redraw(box, 1)

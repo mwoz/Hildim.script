@@ -70,8 +70,6 @@ local function Init_hidden()
     end
 
     local function CompareSetInd()
-        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
-        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
 
         local i1 = editor.IndicatorCurrent
         local i2 = coeditor.IndicatorCurrent
@@ -144,6 +142,9 @@ local function Init_hidden()
         SetAnnotationStiles(editor)
         SetAnnotationStiles(coeditor)
 
+        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
+        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
+
         if bActive == 7 then Reset() end
 
         bActive = 7
@@ -177,6 +178,11 @@ local function Init_hidden()
         if bActive > 0 then
             SetAnnotationStiles(editor)
             SetAnnotationStiles(coeditor)
+
+            addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
+            addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
+        else
+            CORE.SetFindMarkers()
         end
 
     end
@@ -409,10 +415,11 @@ end
         shell.set_curent_dir(props['FileDir']..'\\')
 
         local iErr, str = shell.exec('git branch -v', nil, true, true)
-        if iErr ~= 0 then
-            print(str)
+        if iErr ~= 0 or not str then
+            print("No git branch found:", str)
             return
         end
+
         local _, _, sh = str:find('* %w+ (%w+)')
         local pNew = prepareTmpPath()
         cmd = 'TortoiseGitProc.exe /command:cat /path:"'..props['FilePath']..

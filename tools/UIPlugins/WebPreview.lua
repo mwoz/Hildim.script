@@ -357,7 +357,7 @@ end
 
 local function Toolbar_Init(h)
     init()
-    local box = iup.sc_sbox{ web, maxsize = "x590", shrink = 'YES', direction = 'SOUTH'}
+    local box = iup.sc_sbox{ web, maxsize = "x590", shrink = 'YES', direction = 'SOUTH', color=props['layout.scroll.forecolor']}
     local expan = iup.expander{box, barsize = 0}
 
     function web:map_cb()

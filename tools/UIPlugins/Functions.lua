@@ -800,7 +800,7 @@ local function  _OnUpdateUI()
                         tree_func.flat_topitem = i
                         iup.SetAttribute(tree_func, "MARKED"..i, "YES")
                         iup.SetAttribute(tree_func, "COLOR"..i, "0 0 255")
-                        if curSelect > -1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0");--[[iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") ]]end
+                        if curSelect > -1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, tree_func.fgcolor);--[[iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") ]]end
                         curSelect = i
                         tree_func.topitem="YES"
                         return
@@ -809,7 +809,7 @@ local function  _OnUpdateUI()
                 -- мы находимся над первой функцией - пометим корневую папку
                 iup.SetAttribute(tree_func, "MARKED0", "YES")
                 iup.SetAttribute(tree_func, "COLOR0", "0 0 255")
-                iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0")
+                iup.SetAttribute(tree_func, "COLOR"..curSelect, tree_func.fgcolor)
                 curSelect = 0
                 currFuncData=-1
             end

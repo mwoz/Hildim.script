@@ -2,10 +2,10 @@ local sys_KeysToMenus, labels, tPostponed
 local waited_mnu, w_x, w_y = nil,nil, nil
 local activeLabel = nil
 local reselectedItem = nil
-local clr_hgl = '15 60 195'
+local clr_hgl = props['layout.txthlcolor']
 
-local clr_select = '0 0 0'
-local clr_normal = '70 70 70'
+local clr_select = props['layout.fgcolor']
+local clr_normal = props['layout.txtinactivcolor']
 local s = class()
 local r_button
 
@@ -375,7 +375,7 @@ function s:AddMenu(item)
     local hMainLayout = iup.GetLayout()
     local hMainMenu = iup.GetDialogChild(hMainLayout, "Hildim_MenuBar")
     local hWinMenu = iup.GetDialogChild(hMainMenu, "menu_fill")
-    local l = iup.label{separator = "VERTICAL", maxsize = 'x18'}
+    local l = iup.canvas{ maxsize = 'x18', rastersize = '1x', bgcolor = props['layout.bordercolor'], expand = 'NO', border = 'NO'}
     iup.Insert(hMainMenu, hWinMenu, l)
     iup.Map(l)
     local n = #labels

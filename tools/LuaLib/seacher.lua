@@ -255,12 +255,12 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker)
                 else
                     lNum = '\t'..(l+1)..': '
                 end
-                if (lCount == (maxlines or (-1))) and not iMarker then
+                if (lCount == (maxlines or (-2))) and not iMarker then
                     findres:ReplaceSel(lNum..'...\n')
                     return lenTarget, false
                 end
 
-                if (maxlines or (-1)) > lCount then
+                if (maxlines or (lCount + 1)) > lCount then
                     local str = self.e:GetLine(l):gsub('^[ \t]+', '')
                     if needCoding then str = str:from_utf8() end
                     findres:ReplaceSel(lNum..str)

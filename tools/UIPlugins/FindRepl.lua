@@ -25,7 +25,7 @@ function CORE.SetFindMarkers()
         e.MarkerBack[8] = 65535
         e:MarkerDefine(9, SC_MARK_BOOKMARK)
         e.MarkerBack[9] = 16768273
-        e:MarkerDefine(10, SC_MARK_EMPTY)
+        e:MarkerDefine(10, SC_MARK_ARROW)
         e.MarkerBack[10] = CORE.Str2Rgb('255 127 0')
     end
     local function addSBColors(sb, side)
@@ -579,10 +579,11 @@ local function create_dialog_FindReplace()
 
   }
 
-  containers[3] = iup.frame{
+  containers[3] = iup.flatframe{
     containers[4],
     expand = "HORIZONTAL",
     rastersize = "372x29",
+    framecolor = iup.GetLayout().bordercolor,
   }
 
   containers[32] = iup.vbox{
@@ -944,12 +945,15 @@ local function create_dialog_FindReplace()
     canfocus  = "NO",
     name = "tabFindRepl",
     tabchange_cb = function() scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")); SetStaticControls() end) end,
-    forecolor = '0 0 0',
-    highcolor = '15 60 195',
+    forecolor = props['layout.txtfgcolor'],
+    highcolor = props['layout.txthlcolor'],
+    tabslinecolor = iup.GetLayout().bordercolor,
     tabspadding = '10x3',
     extrabuttons = 1,
     extraimage1 = "property_µ",
-    extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR"),
+    extrapresscolor1 = props['layout.bgcolor'],
+    bgcolor = props['layout.txtbgcolor'],
+    tabsforecolor = props["layout.fgcolor"],
     extrabutton_cb = function(h, button, state) if state==1 then menuhandler:PopUp('MainWindowMenu|View|findrepl') end end
   }
 
@@ -971,7 +975,7 @@ local function create_dialog_FindReplace()
         name = "btnArrowUp",
     },
     name = "zUpDown",
-    bgcolor = iup.GetGlobal("DLGBGCOLOR"),
+    bgcolor = iup.GetLayout().bgcolor,
     valuepos = "1",
   }
 
@@ -1053,8 +1057,9 @@ local function create_dialog_FindReplace()
     containers[27],
   }
 
-  containers[24] = iup.frame{
+  containers[24] = iup.flatframe{
     containers[25],
+    framecolor = iup.GetLayout().bordercolor,
   }
 
   containers[23] = iup.hbox{

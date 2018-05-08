@@ -24,7 +24,7 @@ local function Init(h)
     for i = 1, #tblSet do
         local p = tblSet[i]
         if p == '---' then
-            table.insert(tBar, iup.label{separator = "VERTICAL",maxsize='x22'})
+            table.insert(tBar, iup.canvas{ maxsize = 'x18', rastersize = '1x', bgcolor = props['layout.bordercolor'], expand = 'NO', border = 'NO'})
         else
             local tItem, tCond = menuhandler:GetMenuItem(p)
             if tItem then

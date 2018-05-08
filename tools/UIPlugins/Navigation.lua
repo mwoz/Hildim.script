@@ -211,7 +211,7 @@ local function ToolBar_Init(h)
                 dlg:showxy(left, top)
             end), },
             btnBackward,
-            iup.label{separator = "VERTICAL",maxsize='x22', },
+            iup.canvas{ maxsize = 'x18', rastersize = '1x', bgcolor = props['layout.bordercolor'], expand = 'NO', border = 'NO'},
             expand='HORIZONTAL', alignment='ACENTER', margin = '3x',
     };
     return {

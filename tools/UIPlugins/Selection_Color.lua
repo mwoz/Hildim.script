@@ -123,16 +123,16 @@ local function Init(h)
                     end
                 end
             elseif isColor then
-                lblSel.bgcolor = iup.GetGlobal('DLGBGCOLOR') ;isColor = false
+                lblSel.bgcolor = iup.GetLayout().bgcolor ;isColor = false
             end
         elseif isColor then
-            lblSel.bgcolor = iup.GetGlobal('DLGBGCOLOR') ;isColor = false
+            lblSel.bgcolor = iup.GetLayout().bgcolor ;isColor = false
         end
     end)
 
     --AddEventHandler("OnSwitchFile", ShowCurrentColour)
     --AddEventHandler("OnDwellStart", ShowCurrentColour)
-    lblSel = iup.text{size = '200x0'; readonly = 'YES', canfocus = "NO", bgcolor = iup.GetGlobal('DLGBGCOLOR'),
+    lblSel = iup.text{size = '200x0'; readonly = 'YES', canfocus = "NO", bgcolor = iup.GetLayout().bgcolor, border = 'NO',
         tip = 'Число вхождений выделенного слова',
         tips_cb =(function(h, x, y)
             h.tip = 'Число вхождений выделенного слова'..Iif(editor.Lexer == SCLEX_FORMENJINE, '\nПоказ цвета под курсором', '')

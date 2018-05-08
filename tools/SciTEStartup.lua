@@ -82,7 +82,7 @@ scite.RunAsync(function()
         iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
     end
     if props['hildim.command.line'] ~= '' then
-        scite.Open(props['hildim.command.line'])
+        OnCommandLine(props['hildim.command.line'])
     end
     props['hildim.command.line'] = ''
 

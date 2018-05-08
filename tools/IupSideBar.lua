@@ -57,11 +57,13 @@ local function  CreateToolBar()
     --local i = 0
     local isUpper = false
     local tblBars = _G.iuprops["settings.toolbars.layout"] or {}
+    local ii = 0;
     for i = 1, #tblBars do
         if #(tblBars[i]) > 0 then
-            if i > 1 then
+            ii = ii + 1
+            if ii > 1 then
                 table.insert(tblVb, iup.hbox(tblHb))
-                if i > 2 or not isUpper then table.insert(tblVb, iup.label{separator = "HORIZONTAL"}) end
+                --if i > 2 or not isUpper then table.insert(tblVb, iup.label{separator = "HORIZONTAL"}) end
             end
             tblHb = {gap = "3", margin = "3x1", alignment = "ACENTER"}
             for j = 1, #(tblBars[i]) do
@@ -200,6 +202,8 @@ local function CreateBox()
             l = iup.vbox(t)
         elseif t.type == "SPLIT" then
             t.layoutdrag = 'NO'
+            t.color = props['layout.scroll.forecolor']
+            t.showgrip = 'LINES'
             l = iup.split(t)
         elseif t.type == "FIND" then
             SideBar_Plugins.findrepl.Bar_obj = pane_curObj
@@ -234,7 +238,7 @@ local function CreateBox()
         t.k_any = (function(h, c) if c == iup.K_ESC then iup.PassFocus() end end)
         t.extrabuttons = 1
         t.extraimage1 = "property_µ"
-        t.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
+        t.extrapresscolor1 = props["layout.scroll.forecolor"]
         t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu|View|'..sciteid) end end
 
         local j = 1
@@ -245,8 +249,13 @@ local function CreateBox()
         hk_pointer =  #tbl_hotkeys + 1
         t.tip = s
         t.tabspadding = '10x3'
-        t.forecolor = '0 0 0'
-        t.highcolor = '15 60 195'
+        t.forecolor = props['layout.fgcolor']
+        t.highcolor = props['layout.txthlcolor']
+        t.showlines = 'NO'
+        t.forecolor = iup.GetLayout().fgcolor
+        t.tabsforecolor = props['layout.fgcolor']
+        t.bgcolor = iup.GetLayout().bgcolor
+        t.tabsbackcolor = props["layout.scroll.forecolor"]
         return iup.flattabs(t)
     end
 
@@ -732,8 +741,8 @@ local function InitTabbar()
         tab.showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
         tab.tab_button_cb = onButton
         tab.extraimage1 = "property_µ"
-        tab.extrapresscolor1 = iup.GetGlobal("DLGBGCOLOR")
-        tab.highcolor = '15 60 195'
+        tab.extrapresscolor1 = props['layout.bgcolor']
+        tab.highcolor = props['layout.txthlcolor']
         tab.tab_motion_cb = onMotion
         tab.extrabutton_cb = onExButton
         tab.tabclose_cb  = onTabClose
@@ -883,7 +892,8 @@ local function InitMenuBar()
         if mnu[i][1] ~='_HIDDEN_' then
             table.insert(hb,menuhandler:GreateMenuLabel(mnu[i]))
             if i == #mnu - 1 then table.insert(hb,iup.fill{name = 'menu_fill'})
-            elseif i < #mnu - 1 then table.insert(hb, iup.label{separator = "VERTICAL",maxsize='x18'}) end
+            elseif i < #mnu - 1 then table.insert(hb, iup.canvas{ maxsize = 'x18', rastersize = '1x', bgcolor = props['layout.bordercolor'], expand = 'NO', border = 'NO'}) end
+            -- elseif i < #mnu - 1 then table.insert(hb, iup.label{separator = "VERTICAL",maxsize='x18'}) end
         end
     end
 

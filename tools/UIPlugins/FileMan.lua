@@ -700,7 +700,7 @@ local function FileManTab_Init(h)
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
-    split_s = iup.split{list_dir, list_favorites, orientation="HORIZONTAL", name='splitFileMan',layoutdrag = 'NO'}
+    split_s = iup.split{iup.backgroundbox{list_dir, bgcolor = iup.GetLayout().txtbgcolor}, iup.backgroundbox{list_favorites, bgcolor = iup.GetLayout().txtbgcolor}, orientation="HORIZONTAL", name='splitFileMan',layoutdrag = 'NO',color = props['layout.scroll.forecolor'], showgrip = 'LINES'}
     memo_path = iup.text{expand='YES'}
     memo_path.action = (function(h,s,new_value)
         if new_value:find('^%w:[\\/]') or new_value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
