@@ -118,10 +118,11 @@ local function internal_Init()
 	local list_func_height = tonumber(props['sidebar.list_navigation.height']) or 200
 
 
-    list_navigation = iup.matrix{
+    list_navigation = iup.matrix{name='list_navigation',
         numcol = 5, numcol_visible = 4, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "YES" ,
-        resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
-        width0 = 0 , rasterwidth1 = 250 , rasterwidth2 = 90 , rasterwidth3 = 50 , rasterwidth4 = 40 , rasterwidth5 = 0,
+        resizematrix = "YES"  , readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = iup.GetLayout().txtbgcolor,
+        map_cb = (function(h) h.size = "1x1" end), width0 = 0 ,
+        rasterwidth1 = 250 , rasterwidth2 = 90 , rasterwidth3 = 50 , rasterwidth4 = 40 , rasterwidth5 = 0,
     }
 
 	list_navigation:setcell(0, 1, "Text")
@@ -154,15 +155,21 @@ end
 
 local function Tab_Init(h)
     internal_Init()
+    AddEventHandler("OnResizeSideBar", function(sciteid)
+        if h.navigation.Bar_obj.sciteid == sciteid then
+            list_navigation.rasterwidth1 = nil
+            list_navigation.fittosize = 'COLUMNS'
+        end
+    end)
     return {
-        handle = list_navigation;
+        handle = iup.backgroundbox{list_navigation, bgcolor = iup.GetLayout().txtbgcolor};
         }
 
 end
 
 local function createDlg()
     local dlg = iup.scitedialog{list_navigation, sciteparent = "SCITE", sciteid = "navigation", dropdown = true, shrink="YES",
-                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200',  bgcolor=iup.GetLayout().txtbgcolor,}
     list_navigation.killfocus_cb = function()
         dlg:hide()
     end

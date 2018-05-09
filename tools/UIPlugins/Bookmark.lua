@@ -156,11 +156,11 @@ local function Init()
 
     local function _OnSendEditor(id_msg, wp, lp)
         if id_msg == SCI_MARKERADD then
-            if lp == 1 then BOOKMARK.Add(wp) Bookmarks_ListFILL() end
+            if lp == MARKER_BOOKMARK then BOOKMARK.Add(wp) Bookmarks_ListFILL() end
         elseif id_msg == SCI_MARKERDELETE then
-            if lp == 1 then Bookmark_Delete(wp) Bookmarks_ListFILL() end
+            if lp == MARKER_BOOKMARK then Bookmark_Delete(wp) Bookmarks_ListFILL() end
         elseif id_msg == SCI_MARKERDELETEALL then
-            if wp == 1 then Bookmark_Delete() Bookmarks_ListFILL() end
+            if wp == MARKER_BOOKMARK then Bookmark_Delete() Bookmarks_ListFILL() end
         end
     end
     local function _OnClose(file)
@@ -182,10 +182,12 @@ local function Init()
     end
 
     --local function Init()
-    list_bookmarks = iup.matrix{
-        numcol = 4, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "YES" ,
-        scrollbar = 'VERTICAL', readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
-    rasterwidth0 = 0 , rasterwidth1 = 25 , rasterwidth2 = 25 , rasterwidth3 = 0 , rasterwidth4 = 0 }
+    list_bookmarks = iup.matrix{ name = 'list_bookmarks',
+        numcol = 4, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
+        resizematrix = "YES", readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
+    map_cb = (function(h) h.size = "1x1" end), rasterwidth0 = 0 ,
+    rasterwidth1 = 25 , rasterwidth2 = 25 ,
+    rasterwidth3 = 0 , rasterwidth4 = 0 }
 
 	list_bookmarks:setcell(0, 1, "@")         -- ,size="400x400"
 	list_bookmarks:setcell(0, 2, "Bookmarks")
@@ -213,8 +215,9 @@ local function Init()
 end
 
 local function createDlg()
-    local dlg = iup.scitedialog{iup.hbox{list_bookmarks}, sciteparent = "SCITE", sciteid = "bookmarks", dropdown = true,shrink="YES",
-                resizematrix='NO'; maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255';  }
+
+    local dlg = iup.scitedialog{iup.vbox{list_bookmarks}, sciteparent = "SCITE", sciteid = "bookmarks", dropdown = true,shrink="YES",
+                maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor=iup.GetLayout().txtbgcolor;  }
     list_bookmarks.killfocus_cb = function()
         dlg:hide()
     end
@@ -268,7 +271,7 @@ local function Tab_Init(h)
         end
     end)
     return {
-        handle = list_bookmarks;
+        handle = iup.backgroundbox{list_bookmarks, bgcolor = iup.GetLayout().txtbgcolor};
         On_SelectMe = onselect
         }
 end

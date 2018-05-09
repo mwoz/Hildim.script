@@ -67,6 +67,9 @@ scite.RunAsync(function()
                 _G.iuprops['command.reloadprops'] = false;
                 scite.RunAsync(function() scite.ReloadProperties() end)
             end
+            if props['hildim.command.line'] ~= '' then
+                scite.RunAsync(function() OnCommandLine(props['hildim.command.line']); props['hildim.command.line'] = '' end)
+            end
         end)
     end
     props['session.started'] = '1'
@@ -81,12 +84,12 @@ scite.RunAsync(function()
         iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
         iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
     end
-    if props['hildim.command.line'] ~= '' then
-        OnCommandLine(props['hildim.command.line'])
-    end
-    props['hildim.command.line'] = ''
 
     scite.RunAsync(CORE.SetFindMarkers)
+
+    if not dlg_SPLASH and props['hildim.command.line'] ~= '' then
+        scite.RunAsync(function() OnCommandLine(props['hildim.command.line']); props['hildim.command.line'] = '' end)
+    end
     scite.EnsureVisible()
     _G.g_session['LOADED'] = true
 end)

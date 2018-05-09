@@ -18,7 +18,7 @@ local function SaveSolution()
             table.insert(tStack[#tStack], brn)
             table.insert(tStack, brn)
         else
-            local lf = {leafname = iup.GetAttributeId(tree_sol, "TITLE", i), userid = (tree_sol:GetUserId(i) or 'null')}
+            local lf = {leafname = iup.GetAttributeId(tree_sol, "TITLE", i), userid = (iup.TreeGetUserId(tree_sol, i) or 'null')}
             table.insert(tStack[#tStack], lf)
         end
     end
@@ -92,7 +92,7 @@ local function Add()
        local _,_,fnExt = filename:find('([^\\]*)$')
        iup.SetAttributeId(tree_sol, "ADDLEAF", val, fnExt)
        iup.SetAttributeId(tree_sol, "IMAGE", val, GetExtImage(fnExt))
-       tree_sol:SetUserId(val + 1, filename)
+       iup.TreeSetUserId(tree_sol, val + 1, filename)
        is_chanjed = true
     end
 end
@@ -101,7 +101,7 @@ local function AddCurentIn(val)
    if shell.fileexists(props["FilePath"]) then
        iup.SetAttributeId(tree_sol, "ADDLEAF", val, props['FileNameExt']:from_utf8())
        iup.SetAttributeId(tree_sol, "IMAGE", val + 1, GetExtImage(props['FileNameExt']))
-       tree_sol:SetUserId(val + 1, props['FilePath']:from_utf8())
+       iup.TreeSetUserId(tree_sol, val + 1, props['FilePath']:from_utf8())
        is_chanjed = true
    else
        iup.Alarm("Добавдение файла в проект", "Файл еще не сохранен на диск", "OK"
@@ -134,7 +134,7 @@ end
 local function OpenFile(filename)
     local _,_,fnExt = filename:find('([^\\]*)$')
     local _,_,ext = filename:find('([^%.]*)$')
-    local filename = tree_sol:GetUserId(tree_sol.value)
+    local filename = iup.TreeGetUserId(tree_sol, tree_sol.value)
     if string.find(',exe,lnk,doc,xsl,pdf,chm,', ','..(ext or ''):lower()..',') then
         exec(filename)
     else
@@ -146,7 +146,7 @@ local function OpenAll()
     local val = tree_sol.value
     for i = 1,  iup.GetAttribute(tree_sol, "TOTALCHILDCOUNT0") do
         if iup.GetAttributeId(tree_sol, "KIND", i) ~= 'BRANCH' and iup.GetAttributeId(tree_sol, "PARENT", i) == val then
-            local path = tree_sol:GetUserId(i)
+            local path = iup.TreeGetUserId(tree_sol, i)
             local _,_,ext = path:find('([^%.]*)$')
             if not string.find(',exe,lnk,doc,xsl,pdf,chm,', ','..(ext or ''):lower()..',') then
                 scite.Open(path:to_utf8())
@@ -205,6 +205,7 @@ local function Initialize()
     tree_nodes.imageexpanded = 'tree_µ'
     tree_sol.autoredraw = 'NO'
     iup.TreeAddNodes(tree_sol, tree_nodes)
+    tree_sol.resetscroll = 1
     tree_sol.autoredraw = 'YES'
 end
 
@@ -258,7 +259,7 @@ local function Solution_Init(h)
     --    layout[w] = 'COLLAPSED'
     --end
     local line = nil --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_sol = iup.tree{minsize = '0x5', size = _G.iuprops["sidebar.functions.tree_sol.size"],
+    tree_sol = iup.sc_tree{minsize = '0x5', size = _G.iuprops["sidebar.functions.tree_sol.size"],
     showdragdrop = 'YES', showrename = 'YES', dropfilestarget = 'YES',}
     --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
     tree_sol.size = nil
@@ -271,7 +272,7 @@ local function Solution_Init(h)
 
         elseif but == 49 and iup.isdouble(status) then --dbl left
             if h.kind ~= 'BRANCH' then
-                OpenFile(h:GetUserId(h.value))
+                OpenFile(iup.TreeGetUserId(h, h.value))
                 iup.PassFocus()
             end
         end
@@ -282,7 +283,7 @@ local function Solution_Init(h)
     end)
     tree_sol.k_any = (function(h, number)
         if number == 13 then
-            OpenFile(h:GetUserId(h.value))
+            OpenFile(iup.TreeGetUserId(h, h.value))
             iup.PassFocus()
         elseif number == iup.K_ESC then
             iup.PassFocus()
@@ -300,7 +301,7 @@ local function Solution_Init(h)
         if n == 0 then
             h.tip = _G.iuprops['solution.current'] or defpath
         else
-            h.tip = h:GetUserId(n)
+            h.tip = iup.TreeGetUserId(h, n)
         end
     end
     tree_sol.dropfiles_cb = function(h, filename, num, x, y)
@@ -308,7 +309,7 @@ local function Solution_Init(h)
         local _, _, fnExt = filename:find('([^\\]*)$')
         iup.SetAttributeId(tree_sol, "ADDLEAF", val, fnExt)
         iup.SetAttributeId(tree_sol, "IMAGE", val, GetExtImage(filename))
-        tree_sol:SetUserId(val + 1, filename)
+        iup.TreeSetUserId(tree_sol, val + 1, filename)
         is_chanjed = true
         SaveSolution()
     end
@@ -330,7 +331,7 @@ local function Solution_Init(h)
             {'Add All Opened Files', ru = 'Добавить все открытые файлы', action = function() AddAll(tree_sol.value) end},
             {'Remove File', ru = 'Исключить файл из проекта', action = function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
             {'s1_FindTextOnSel', separator = 1},
-            {'Go To Directory', ru = 'Перейти в директорию', action = function() h.fileman.OpenDir(tree_sol:GetUserId(tree_sol.value):gsub('([^\\]*)$', '')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~= "BRANCH" and (h.fileman ~= nil) end},
+            {'Go To Directory', ru = 'Перейти в директорию', action = function() h.fileman.OpenDir(iup.TreeGetUserId(tree_sol, tree_sol.value):gsub('([^\\]*)$', '')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~= "BRANCH" and (h.fileman ~= nil) end},
     }})
 
     menuhandler:InsertItem('TABBAR', 'slast', {'project', plane = 1, {
@@ -353,7 +354,7 @@ local function Solution_Init(h)
 
                     iup.SetAttributeId(tree_sol, "ADDLEAF", tree_sol.value, fnExt)
                     iup.SetAttributeId(tree_sol, "IMAGE", tree_sol.value, GetExtImage(fnExt))
-                    tree_sol:SetUserId(tree_sol.value + 1, pth)
+                    iup.TreeSetUserId(tree_sol, tree_sol.value + 1, pth)
                 end
             end
         end
@@ -366,7 +367,7 @@ local function Solution_Init(h)
             {"Add Un Checked To Project", ru = "Добавить НЕотмеченные в солюшн", action = function() CORE.DoForFileSet('0', AddAll)() end,},
     }})
     return {   -- iup.vbox{   };
-        handle = tree_sol;
+        handle = iup.flatscrollbox{tree_sol, border='NO'};
         OnSwitchFile = Initialize,
         OnOpen = Initialize,
         on_SelectMe = Initialize

@@ -367,12 +367,13 @@ end
         iup.PassFocus()
     end
 
-
     --События списка функций
-    list_abbrev = iup.matrix{
-        numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
-        readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
-        rasterwidth0 = 0 , rasterwidth1 = 60 , rasterwidth2 = 600 ,
+    list_abbrev = iup.matrix{name = 'list_abbrev',
+        numcol = 2, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "YES" ,
+        resizematrix = "YES"  ,readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = iup.GetLayout().txtbgcolor,
+        map_cb = (function(h) h.size = "1x1" end), rasterwidth0 = 0 ,
+        rasterwidth1 = _G.iuprops['list_abbrev.rw1'] or 60 ,
+        rasterwidth2 = _G.iuprops['list_abbrev.rw2'] or 600,
     tip = 'В главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
 
 	list_abbrev:setcell(0, 1, "Abbrev")         -- ,size="400x400"
@@ -496,7 +497,7 @@ end
 
 local function createDlg()
     local dlg = iup.scitedialog{list_abbrev, sciteparent = "SCITE", sciteid = "abbrev", dropdown = true,shrink="YES",
-                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor='255 255 255'}
+                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200', bgcolor=iup.GetLayout().txtbgcolor,}
     list_abbrev.killfocus_cb = function()
         if not bMenuMode then dlg:hide() end
     end
@@ -544,6 +545,9 @@ local function ToolBar_Init(h)
 end
 
 local function Tab_Init(h)
+    local function onResize_local()
+        list_abbrev.FitColumns(2, false)()
+    end
     local onselect = Init()
     AddEventHandler("OnResizeSideBar", function(sciteid)
         if h.abbreviations.Bar_obj.sciteid == sciteid then
@@ -551,10 +555,14 @@ local function Tab_Init(h)
             list_abbrev.fittosize = 'COLUMNS'
         end
     end)
+    AddEventHandler("OnResizeSideBar", function(sciteid)
+        if h.atrium.Bar_obj.sciteid == sciteid then onResize_local() end
+    end)
     return {
-        handle = list_abbrev;
+        handle = iup.backgroundbox{list_abbrev, bgcolor = iup.GetLayout().txtbgcolor};
         on_SelectMe = onselect
         }
+
 end
 
 local function Hidden_Init(h)

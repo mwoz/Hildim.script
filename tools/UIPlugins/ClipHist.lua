@@ -78,8 +78,8 @@ local function init()
 
     lst_clip = iup.matrix{
     numcol=2, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="VERTICAL" ,
-    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 0, expand = "YES", framecolor="255 255 255",
-    rasterwidth0 = 15 ,rasterwidth1 = 600 ,rasterwidth2 = 0 ,}
+    resizematrix = "YES"  ,readonly="YES"  ,markmultiple="NO" ,height0 = 0, expand = "YES", framecolor=iup.GetLayout().txtbgcolor;
+    rasterwidth0 = 15 ,rasterwidth1 = 600 ,rasterwidth2 = 0 ,bgcolor=iup.GetLayout().txtbgcolor;}
 
     function lst_clip:map_cb(lin, col, status)
         lst_clip.size="1x1"
@@ -420,7 +420,7 @@ local function Sidebar_Init(h)
         end
     end)
     return {
-        handle = lst_clip; }
+        handle = iup.backgroundbox{lst_clip, bgcolor = iup.GetLayout().txtbgcolor}; }
 end
 
 local function createDlg()
@@ -482,7 +482,7 @@ end
 local function Toolbar_Init(h)
     bToolBar = true
     btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
-    local box = iup.sc_sbox{iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22'}, maxsize = "900x22",shrink='YES', color=props['layout.scroll.forecolor']}
+    local box = iup.sc_sbox{iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22', bgcolor = iup.GetLayout().bgcolor}, maxsize = "900x22",shrink='YES'}
     onDraw_cb = function(s)
         btn.title = s
         iup.Redraw(box, 1)

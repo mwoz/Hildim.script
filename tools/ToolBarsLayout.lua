@@ -24,13 +24,13 @@ local function Show()
         }
         for s, m in pairs(tPoints) do
             local tUp = _G.iuprops[s] or {}
-            if s == "settings.status.layout" then tUp = {tUp} end
+            if s == "settings.status.layout" or s == "settings.hidden.plugins" then tUp = {tUp} end
             for i = 1, #tUp do
-                for j = 1,  #(tUp[i]) do
+                for j = #(tUp[i]), 1, -1 do
                     if tUp[i][j] == strUi then
                         if bUnInstoll then
                             table.remove(tUp[i], j)
-                            if s == "settings.status.layout" then
+                            if s == "settings.status.layout" or s == "settings.hidden.plugins" then
                                 _G.iuprops[s] = tUp[i]
                             else
                                 _G.iuprops[s] = tUp

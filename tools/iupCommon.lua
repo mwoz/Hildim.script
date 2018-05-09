@@ -208,6 +208,7 @@ _G.iuprops['pariedtag.on'] = _G.iuprops['pariedtag.on'] or 1
 function iup.SaveChProps(bReset)
     local t = {
 'autocompleteword.automatic',
+'ext.lua.debug.traceback',
 'buffers',
 'buffers.new.position',
 'buffers.zorder.switching',
@@ -860,6 +861,11 @@ iup.matrix = function(t)
     t.highcolor = props['layout.scroll.highcolor'];
     t.presscolor = props['layout.scroll.presscolor'];
     t.backcolor = props['layout.scroll.backcolor']
+    t['bgcolor0:*'] = props['layout.scroll.forecolor']
+    t['fgcolor0:*'] = iup.GetLayout().fgcolor
+    t.bgcolor = props['layout.txtbgcolor'];
+    t.fgcolor = props['layout.txtfgcolor'];
+
     local mtr = old_matrix(t)
     function mtr:SetCommonCB(act_act,act_resel, act_esc, act_right)
         local function a_cb(h, key, lin, col, edition, value)
@@ -916,7 +922,7 @@ iup.matrix = function(t)
         return function(h, col)
             local h = mtr
             if not block or n == col then col = (s or 0) end
-            local w = h.rastersize:gsub('x.*', '') - (16 + 8*n)
+            local w = h.rastersize:gsub('x.*', '') - (16 + 8 * n)
             local w0 = w
             for i = 1, col do
                 w = w - h["rasterwidth"..i]
@@ -926,7 +932,6 @@ iup.matrix = function(t)
                 wp = wp + h["rasterwidth"..i]
             end
             local l = w / wp
-
             local iMax, lMax = 0, 0
             w = 0
             for i = 1, n do
@@ -949,6 +954,7 @@ iup.matrix = function(t)
             end
         end
     end
+
     return mtr
 end
 

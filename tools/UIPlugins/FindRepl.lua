@@ -5,6 +5,17 @@ local firstMark = tonumber(props["findtext.first.mark"])
 local popUpFind
 local _Plugins
 
+local function fb_find(t)
+  t.map_cb = function(h)h.bgcolor = props["layout.txtbgcolor"] end
+  return iup.flatbutton(t)
+end
+
+local function bgb_find(t)
+    t.map_cb = function(h) h.bgcolor = props["layout.txtbgcolor"] end
+    t.fgcolor = props["layout.txtfgcolor"]
+    return iup.backgroundbox(t)
+end
+
 local tMarks = {
     CORE.InidcFactory('Find.Mark.1', 'Метка поиска 1', INDIC_ROUNDBOX, 16711884, 50),
     CORE.InidcFactory('Find.Mark.2', 'Метка поиска 2', INDIC_ROUNDBOX, 16711680, 50),
@@ -587,15 +598,14 @@ local function create_dialog_FindReplace()
   }
 
   containers[32] = iup.vbox{
-    iup.flatbutton{
+    fb_find{
       image = "IMAGE_search",
       title = " далее",
-      --bgcolor = "255 255 255",
       name = "btnFind",
       flat_action = FindNext,
       padding = "5x0"
     },
-    iup.flatbutton{
+    fb_find{
       title = "Найти все",
       flat_action = FindAll,
     },
@@ -607,7 +617,7 @@ local function create_dialog_FindReplace()
     iup.hbox{
         margin = "0x0",
         alignment = 'ACENTER',
-        iup.flatbutton{
+        fb_find{
           flat_action = CloseFind,
           name = 'btn_esc',
           size = '1x1',
@@ -623,17 +633,17 @@ local function create_dialog_FindReplace()
         },
     },
     iup.hbox{
-      iup.flatbutton{
+      fb_find{
         padding = "3x",
         title = "В выделенном",
         flat_action = FindSel,
       },
-      iup.flatbutton{
+      fb_find{
         padding = "3x",
         title = "На вкладках",
         flat_action = FindInBuffers,
       },
-      iup.flatbutton{
+      fb_find{
         padding = "3x",
         title = "Подсчитать",
         flat_action = GetCount,
@@ -650,21 +660,21 @@ local function create_dialog_FindReplace()
       normalizesize = "VERTICAL",
   }
 
-  containers[6] = iup.backgroundbox{iup.hbox{
+  containers[6] = bgb_find{iup.hbox{
     containers[32],
     containers[7],
     expandchildren = "YES",
   }}
 
   containers[13] = iup.vbox{
-    iup.flatbutton{
+    fb_find{
       title = " на:",
       image = "IMAGE_Replace",
       flat_action = CORE.ReplaceNext,
       canfocus = "NO",
       padding = "x2",
     },
-    iup.flatbutton{
+    fb_find{
       image = "IMAGE_search",
       title = " далее",
       padding = "5x3",
@@ -675,17 +685,17 @@ local function create_dialog_FindReplace()
   }
 
   containers[15] = iup.hbox{
-    iup.flatbutton{
+    fb_find{
       padding = "3x",
       title = "Заменить все",
       flat_action = ReplaceAll,
     },
-    iup.flatbutton{
+    fb_find{
       padding = "3x",
       title = "В выделенном",
       flat_action = ReplaceSel,
     },
-    iup.flatbutton{
+    fb_find{
       padding = "3x",
       title = "На вкладках",
       flat_action = ReplaceInBuffers,
@@ -715,9 +725,9 @@ local function create_dialog_FindReplace()
     alignment = "ACENTER",
   }
 
-  containers[11] = iup.backgroundbox{iup.vbox{
+  containers[11] = bgb_find{iup.vbox{
     containers[12],
-    gap = "4",
+    gap = "4"
   }}
 
   containers[17] = iup.hbox{
@@ -732,12 +742,12 @@ local function create_dialog_FindReplace()
       dropdown = "YES",
       visibleitems = "18",
     },
-    iup.flatbutton{
+    fb_find{
       image = "IMAGE_ArrowUp",
       flat_action = FolderUp,
       tip = "На уровень вверх\n(PgUp в строке поиска)",
     },
-    iup.flatbutton{
+    fb_find{
       image = "IMAGE_Folder",
       flat_action = SetFolder,
       tip = "Выбор папки",
@@ -764,7 +774,7 @@ local function create_dialog_FindReplace()
       name = "chkSubFolders",
       title = "В подпапках",
     },
-    iup.flatbutton{
+    fb_find{
       name = 'btnFindInFiles',
       image = "IMAGE_search",
       padding = "14x0",
@@ -776,24 +786,24 @@ local function create_dialog_FindReplace()
     name = "hboxFind"
   }
 
-  containers[16] = iup.backgroundbox{iup.vbox{
+  containers[16] = bgb_find{iup.vbox{
     containers[17],
     containers[18],
-    gap = "4",
+    gap = "4"
   }}
 
   containers[21] = iup.hbox{
-    iup.flatbutton{
+    fb_find{
       padding = "3x",
       title = "Пометить",
       flat_action = MarkAll,
     },
-    iup.flatbutton{
+    fb_find{
       padding = "3x",
       title = "Удалить",
       flat_action = ClearMark,
     },
-    iup.flatbutton{
+    fb_find{
       padding = "3x",
       title = "Удалить все",
       flat_action = ClearMarkAll,
@@ -808,7 +818,7 @@ local function create_dialog_FindReplace()
       title = "В выделенном",
       name = "chkMarkInSelection",
     },
-    iup.flatbutton{
+    fb_find{
       padding = "3x",
       title = "*** Закладками",
       flat_action = BookmarkAll,
@@ -819,13 +829,13 @@ local function create_dialog_FindReplace()
   }
 
   containers[33] = iup.vbox{
-    iup.flatbutton{
+    fb_find{
       padding = "x2",
       image = "IMAGE_ArrowUp",
       flat_action = GoToMarkUp,
       tip = "Предыдущая метка",
     },
-    iup.flatbutton{
+    fb_find{
       padding = "x2",
       image = "IMAGE_ArrowDown",
       flat_action = GoToMarkDown,
@@ -868,12 +878,12 @@ local function create_dialog_FindReplace()
     containers[33],
     margin = "3x3",
   }
-  containers[19] = iup.backgroundbox{iup.vbox{
+  containers[19] = bgb_find{iup.vbox{
       containers[29],
       margin = "0x00",
   }}
   local dialPrev = 0
-  containers[34] = iup.backgroundbox{iup.vbox{expand='NO',
+  containers[34] = bgb_find{iup.vbox{expand='NO',
       iup.hbox{expand='HORIZONTAL',
           iup.toggle{
               title = "Прогресс поиска в файлах",
@@ -927,7 +937,7 @@ local function create_dialog_FindReplace()
           margin = "0x0", padding = '0x0'
       }},
 
-      margin = "10x5"
+      margin = "10x5",
 
   }
 

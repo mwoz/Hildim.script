@@ -316,17 +316,17 @@ local function Init()
         end
         return true
 
-    end --fghgfhgtgh
+    end --корова
 
     local spellStart, spellEnd
     local function OnColorise_local(s, e)
-        if editor.Length > 10 ^(_G.iuprops['spell.maxsize'] or 7) then return end
+        local bEd, bLen = pcall(function() return not(editor.Length > 10 ^(_G.iuprops['spell.maxsize'] or 7)) end)
+        if not bEd or not bLen then return end
         if tonumber(_G.iuprops["spell.autospell"]) == 1 and editor.Lexer ~= SCLEX_ERRORLIST then
             if spellEnd and spellStart then
                 spellStart = math.min(spellStart, s)
                 spellEnd = math.max(spellEnd, e)
             else spellStart, spellEnd = s, e end
-            --SpellLexer(s, e)
         end
     end
 
