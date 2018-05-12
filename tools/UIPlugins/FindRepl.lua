@@ -22,6 +22,7 @@ local tMarks = {
     CORE.InidcFactory('Find.Mark.3', 'Метка поиска 3', INDIC_ROUNDBOX, 65280, 50),
     CORE.InidcFactory('Find.Mark.4', 'Метка поиска 4', INDIC_ROUNDBOX, 65535, 100),
     CORE.InidcFactory('Find.Mark.5', 'Метка поиска 5', INDIC_ROUNDBOX, 16768273, 50),
+    CORE.InidcFactory('Find.Mark.6', 'Метка поиска 6', INDIC_ROUNDBOX, 494591, 50),
 }
 
 function CORE.SetFindMarkers()
@@ -36,7 +37,7 @@ function CORE.SetFindMarkers()
         e.MarkerBack[8] = 65535
         e:MarkerDefine(9, SC_MARK_BOOKMARK)
         e.MarkerBack[9] = 16768273
-        e:MarkerDefine(10, SC_MARK_ARROW)
+        e:MarkerDefine(10, SC_MARK_EMPTY)
         e.MarkerBack[10] = CORE.Str2Rgb('255 127 0')
     end
     local function addSBColors(sb, side)
@@ -46,7 +47,7 @@ function CORE.SetFindMarkers()
         iup.SetAttributeId2(sb, "COLORID", 2, 7, CORE.Rgb2Str(65280))
         iup.SetAttributeId2(sb, "COLORID", 2, 8, CORE.Rgb2Str(65535))
         iup.SetAttributeId2(sb, "COLORID", 2, 9, CORE.Rgb2Str(16768273))
-        iup.SetAttributeId2(sb, "COLORID", 2, 10, '255 127 0')
+        iup.SetAttributeId2(sb, "COLORID", 2, 10, CORE.Rgb2Str(494591))
 
     end
 
@@ -145,14 +146,36 @@ local function Find_onTimer(h)
 end
 local tm = iup.timer{time = 300, run = 'NO', action_cb = Find_onTimer}
 
+local tmr
+
+function CORE.ClearLiveFindMrk()
+    EditorClearMarks(tMarks[6])
+    editor:MarkerDeleteAll(10);
+end
+
+function CORE.FindMarkAll(fnd, maxlines, bLive, bMark)
+    CORE.ClearLiveFindMrk()
+    fnd:FindAll(maxlines, bLive, false, Iif(bMark, 10, nil), Iif(bMark, tMarks[6], nil))
+end
+
+local function FindMark_onTimer()
+    CORE.ClearLiveFindMrk()
+    if ReadSettings() then return end
+    tmr.run="NO"
+    findSettings:MarkAll(false, tMarks[6], 10)
+end
+
+tmr = iup.timer{time = 300, run = 'NO', action_cb = FindMark_onTimer}
+
 local function onFindEdit(h, c, new_value)
+
     local res = nil
     if new_value:find('[\n\r]') then
         h.value = PrepareFindText(new_value)
         res = iup.IGNORE
     end
+    findSettings.findWhat = new_value
     if Ctrl('byInput').value == 'ON' and Ctrl("tabFindRepl").valuepos == '0' and not ReadSettings() then
-        findSettings.findWhat = new_value
         if Ctrl('byInputAll').value == 'ON' then
             tm.run = "NO"
             tm.run = "YES"
@@ -164,6 +187,8 @@ local function onFindEdit(h, c, new_value)
             else SetInfo('', '') end
         end
     end
+    tmr.run = "NO"
+    tmr.run = "YES"
 
     return res
 end
@@ -477,6 +502,8 @@ local function ActivateFind_l(nTab)
     if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir']:from_utf8() end
     SetStaticControls()
     if Ctrl('byInput').value == 'ON' and Ctrl('byInputAll').value == 'ON' then onFindEdit(Ctrl("cmbFindWhat"), '', Ctrl("cmbFindWhat").value) end
+
+    onFindEdit(Ctrl('cmbFindWhat'), c, Ctrl("cmbFindWhat").value)
     return true
 end
 
@@ -1186,7 +1213,7 @@ local function Init(h)
                 iup.SetFocus(Ctrl("cmbFindWhat"))
             end
         end);
-        OnSwitchFile = function(file) if file == "" then SetStaticControls() end end;
+        OnSwitchFile = function(file) if file == "" then CORE.ClearLiveFindMrk() end end;
         }
     res.handle_deattach = oDeattFnd
 

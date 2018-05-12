@@ -396,7 +396,11 @@ local function Init_hidden()
         --debug_prnArgs(tCompare)
         editor.Zoom = zoom
         coeditor.Zoom = zoom
-end
+    end
+
+    function COMPARE.To(strName)
+        CompareToFile(strName, false)
+    end
 
     local function prepareTmpPath()
         if not tmpPath then
@@ -516,6 +520,16 @@ end
     end
 
     AddEventHandler("OnClose", OnClose_local)
+    AddEventHandler("OnMenuCommand", function(cmd)
+        if cmd == IDM_CHANGETAB then
+            local side = side_in or scite.buffers.GetBufferSide(scite.buffers.GetCurrent())
+            if side == 0 then
+                onClose(tCompare.left, tCompare.right, props['FilePath'], side_in)
+            else
+                onClose(tCompare.right, tCompare.left, props['FilePath'], side_in)
+            end
+        end
+    end)
     AddEventHandler("OnCloseFileset", function(tfiles)
         for i = 1,  #tfiles do
             local side = 0

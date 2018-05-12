@@ -674,7 +674,7 @@ local function InitTabbar()
             if (tabDrag > -1 and tab == -4) or (hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' )) then
                 scite.MenuCommand(IDM_CHANGETAB)
             end
-        elseif (button == iup.BUTTON1 and iup.isdouble(status)) or (button == iup.BUTTON2 and pressed == 0 ) then
+        elseif (button == iup.BUTTON1 and iup.isdouble(status) and not CORE.visibleWndDialog() ) or (button == iup.BUTTON2 and pressed == 0 ) then
             if tab > - 1 and (tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1 then scite.MenuCommand(IDM_CLOSE)
             elseif tab == -1 then scite.MenuCommand(IDM_NEW) end
         elseif button == iup.BUTTON3 and pressed == 1 and tab >= -1 then
@@ -703,7 +703,6 @@ local function InitTabbar()
                 h.cursor = 'NO'
             end
         end
-        --print(h, hNew, x, y, tab, tabDrag, start)
     end
 
     local function onExButton(h, button, pressed)

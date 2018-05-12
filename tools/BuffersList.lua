@@ -212,7 +212,7 @@ local function InitWndDialog()
             end
         end
         dlg.focus_cb = function(h, focus)
-            if h.activewindow == 'NO' and not blockClose and hbTitle.state == 'CLOSE' then dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end
+            if h.activewindow == 'NO' and not blockClose and hbTitle.state == 'CLOSE' then scite.RunAsync(function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end)  end
         end
         dlg.k_any = function(h, k)
             if k == iup.K_ESC then h:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end

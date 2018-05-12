@@ -57,8 +57,7 @@ CORE.FindSelToConcole = function()
     end
 
     findSettings.findWhat = sText
-
-    findSettings:FindAll(100, false, false, 10)
+    CORE.FindMarkAll(findSettings, 100, false, true)
 end
 
 CORE.ToggleSubfolders = function(bShow, line)

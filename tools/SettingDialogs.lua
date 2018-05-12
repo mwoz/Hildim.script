@@ -380,4 +380,34 @@ function sett.Colors_Default()
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
 end
 
+function sett.Colors_Atrium()
+    props["tabctrl.active.bakcolor"] = "255 255 255"
+    props["tabctrl.active.forecolor"] = "0 0 255"
+    props["tabctrl.active.readonly.forecolor"] = "120 120 255"
+    props["tabctrl.colorized"] = "1"
+    props["tabctrl.cut.ext"] = "1"
+    props["tabctrl.cut.illumination"] = "81"
+    props["tabctrl.cut.prefix"] = "1"
+    props["tabctrl.cut.saturation"] = "55"
+    props["tabctrl.moved.color"] = "213 213 254"
+    props["tabctrl.moved.color"] = "213 213 254"
+    props["tabctrl.readonly.color"] = "82 82 82"
+    props["layout.hlcolor"] = "200 225 245"
+    props["layout.borderhlcolor"] = "50 150 255"
+    props["layout.bordercolor"] = "221 157 216"
+    props["layout.bgcolor"] = "165 211 206"
+    props["layout.txtbgcolor"] = "255 255 255"
+    props["layout.fgcolor"] = "0 0 0"
+    props["layout.txtfgcolor"] = "2 2 2"
+    props["layout.txthlcolor"] = "15 60 195"
+    props["layout.txtinactivcolor"] = "97 97 97"
+    props["layout.bordercolor"] = "221 157 216"
+    props["layout.scroll.forecolor"] = "173 181 211"
+    props["layout.scroll.presscolor"] = "81 102 178"
+    props["layout.scroll.highcolor"] = "134 148 198"
+    props["layout.scroll.backcolor"] = "238 245 244"
+    scite.SetRestart('')
+    scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+end
+
 return sett

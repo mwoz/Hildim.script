@@ -73,6 +73,9 @@ if props['config.restore'] ~= '' then
             f:close()
             _G.iuprops['command.reloadprops'] = true
         end
+        if not _G.iuprops['buffers'] then
+            _G.iuprops['buffers'] = { lst = {'',}, pos = {0,}, enc = {0,}, bmk = {'',}, layouts = {'',},}
+        end
     end
 end
 props['config.restore'] = ''
@@ -161,8 +164,9 @@ end
 
 function OnCommandLine(line)
     local cmdLine
-    if line:find('[-]cmd ') then
-        local _, _, l1, l2 = line:find('([^-]*)[-]cmd (.+)')
+    local _, l1, lk, l2
+    if line:find('[-/]cmd ') then
+        _, _, l1, lk, l2 = line:find('([^-]*)([-/])cmd (.+)')
         if not l2 then
             print('Command line error: "'..line..'"')
             return
@@ -171,7 +175,10 @@ function OnCommandLine(line)
         line = l1:gsub('^ +', ''):gsub(' +$','')
     end
     if line ~= '' then scite.Open(line) end
-    if cmdLine then assert(load(cmdLine))() end
+    if cmdLine then
+        if lk == '/' then cmdLine = cmdLine:gsub('\\', '\\\\') end
+        assert(load(cmdLine))()
+    end
 end
 
 function rfl:check(fname)

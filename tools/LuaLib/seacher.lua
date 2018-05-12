@@ -234,7 +234,7 @@ function s:CollapseFindRez()
     end
 end
 
-function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker)
+function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker, iIndic)
     if bColapsPrev and bSearchCapt then self:CollapseFindRez() end
     local strLive = Iif(bLive, "/\\", "")
     local needCoding = (self.e.CodePage ~= 0)
@@ -269,8 +269,16 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker)
                     bShowAll = false
                 end
 
-                if iMarker then self.e:MarkerAdd(l, iMarker) end
+                if iMarker then
+                    self.e:MarkerAdd(l, iMarker)
+                end
              end
+            if iIndic then
+                local current_indic_number = self.e.IndicatorCurrent
+                self.e.IndicatorCurrent = iIndic
+                self.e:IndicatorFillRange(self.e.TargetStart, lenTarget)
+                self.e.IndicatorCurrent = current_indic_number
+            end
             return lenTarget, true
         else
             if bSearchCapt then findres:ReplaceSel('<'..strLive..'\n') end
@@ -430,8 +438,8 @@ function s:MarkResult()
     self.e = editor
 end
 
-function s:FindAll(maxlines, bLive, bSel, iMarker)
-    local rez = self:findWalk((bSel == true), self:onFindAll(maxlines, bLive, true, 'Current', true, iMarker))
+function s:FindAll(maxlines, bLive, bSel, iMarker, iIndic)
+    local rez = self:findWalk((bSel == true), self:onFindAll(maxlines, bLive, true, 'Current', true, iMarker, iIndic))
     self:MarkResult()
     iPrevMark = iMarker
     return rez
