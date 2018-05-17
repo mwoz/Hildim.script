@@ -74,7 +74,12 @@ if props['config.restore'] ~= '' then
             _G.iuprops['command.reloadprops'] = true
         end
         if not _G.iuprops['buffers'] then
-            _G.iuprops['buffers'] = { lst = {'',}, pos = {0,}, enc = {0,}, bmk = {'',}, layouts = {'',},}
+    _G.iuprops['buffers'] = { lst = {'',}, pos = {0,}, enc = {0,}, bmk = {'',}, layouts = {'',},}
+    _G.iuprops['menus.show.icons'] = 1
+    _G.iuprops['autoformat.indent'] = 1
+    _G.iuprops['autoformat.line'] = 1
+    _G.iuprops['autoformat.indent.force'] = 1
+    _G.iuprops['changes.mark.line'] = 1
         end
     end
 end
@@ -172,9 +177,13 @@ function OnCommandLine(line)
             return
         end
         cmdLine = l2
-        line = l1:gsub('^ +', ''):gsub(' +$','')
+        line = l1
     end
-    if line ~= '' then scite.Open(line) end
+    if line ~= '' then
+        line = line:gsub('^ +', ''):gsub(' +$', '')
+        line = line:gsub('^"', ''):gsub('"$', '')
+        scite.Open(line)
+    end
     if cmdLine then
         if lk == '/' then cmdLine = cmdLine:gsub('\\', '\\\\') end
         assert(load(cmdLine))()
@@ -269,7 +278,7 @@ function iup.SaveChProps(bReset)
 'tabctrl.cut.illumination',
 'tabctrl.cut.prefix',
 'tabctrl.cut.saturation',
-'tabctrl.moved.color',
+'tabctrl.forecolor',
 'tabctrl.moved.color',
 'tabctrl.readonly.color',
 'view.eol',
@@ -467,7 +476,8 @@ end
 
 iup.RestoreFiles = function(bForce)
     local fPrevOnOpen
-    if (props['session.started'] ~= '1' and _G.iuprops['session.reload'] == '1') or bForce then
+    if _G.iuprops['session.reload'] ~= '1' then _G.iuprops['buffers'] = { lst = {'',}, pos = {0,}, enc = {0,}, bmk = {'',}, layouts = {'',},} end
+    if props['session.started'] ~= '1' or bForce then
         local bNew = (props['FileName'] ~= '')
         local buf = (_G.iuprops['buffers'] or {})
         local t, p, bk, l, enc = buf.lst or {}, buf.pos or {}, buf.bmk or {}, buf.layouts or {}, buf.enc or {}
@@ -854,10 +864,40 @@ iup.flatscrollbox = function(t)
     return old_flatscrollbox(t)
 end
 
-local old_toggle = iup.toggle
-iup.toggle = function(t)
-    t.flat = 'YES'
-    return old_toggle(t)
+local old_iup_flatbutton = iup.flatbutton
+iup.flatbutton = function(t)
+    t.borderhlcolor = props["layout.borderhlcolor"]
+    t.hlcolor = props["layout.hlcolor"]
+    return old_iup_flatbutton(t)
+end
+
+iup.hi_toggle = function(t)
+    t.toggle = 'YES'
+    local fg, bg
+    if t.ctrl then
+        t.image = "uncheck_t_µ"
+        t.imagepress = "check_t_µ"
+        t.imageinactive = "uncheck_µ"
+        fg = props['layout.txtfgcolor']
+        bg = props['layout.txtbgcolor']
+    else
+        t.image = "uncheck_µ"
+        t.imagepress = "check_µ"
+        t.imageinactive = "uncheck_µ"
+        fg = props['layout.fgcolor']
+        bg = props['layout.bgcolor']
+    end
+
+    t.borderwidth = '0'
+
+    t.pscolor = bg
+    t.fgcolor = fg
+    local map_cb_old = t.map_cb
+    t.map_cb = function(h)
+        h.bgcolor = bg
+        if map_cb_old then map_cb_old(h) end
+    end
+    return iup.flatbutton(t)
 end
 
 local old_matrix = iup.matrix
@@ -868,7 +908,7 @@ iup.matrix = function(t)
     t.highcolor = props['layout.scroll.highcolor'];
     t.presscolor = props['layout.scroll.presscolor'];
     t.backcolor = props['layout.scroll.backcolor']
-    t['bgcolor0:*'] = props['layout.scroll.forecolor']
+    t['bgcolor0:*'] = props['layout.scroll.backcolor']
     t['fgcolor0:*'] = iup.GetLayout().fgcolor
     t.bgcolor = props['layout.txtbgcolor'];
     t.fgcolor = props['layout.txtfgcolor'];

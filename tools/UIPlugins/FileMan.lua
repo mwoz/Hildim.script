@@ -723,7 +723,7 @@ local function FileManTab_Init(h)
     memo_mask.k_any=(function(h,k)
         return memoNav(k)
     end)
-    chkByTime = iup.toggle{title="Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", action=FileMan_ToggleSort}
+    chkByTime = iup.hi_toggle{title="Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", flat_action=FileMan_ToggleSort}
     -- memo_mask.killfocus_cb = (function(h)
         -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)

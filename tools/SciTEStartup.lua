@@ -62,13 +62,19 @@ scite.RunAsync(function()
     if OnResizeSideBar then scite.RunAsync(function() OnResizeSideBar('leftbar') end) end
     if dlg_SPLASH then
         scite.RunAsync(function()
-            if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
-            if _G.iuprops['command.reloadprops'] then
-                _G.iuprops['command.reloadprops'] = false;
-                scite.RunAsync(function() scite.ReloadProperties() end)
-            end
-            if props['hildim.command.line'] ~= '' then
-                scite.RunAsync(function() OnCommandLine(props['hildim.command.line']); props['hildim.command.line'] = '' end)
+            if props['script.installed'] == 'Y' then
+                props['script.installed'] = ''
+                scite.RunAsync(function() scite.MenuCommand(IDM_REBOOT) end)
+                return
+            else
+                scite.RunAsync(function() if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end end)
+                if _G.iuprops['command.reloadprops'] then
+                    _G.iuprops['command.reloadprops'] = false;
+                    scite.RunAsync(function() scite.ReloadProperties() end)
+                end
+                if props['hildim.command.line'] ~= '' then
+                    scite.RunAsync(function() OnCommandLine(props['hildim.command.line']); props['hildim.command.line'] = '' end)
+                end
             end
         end)
     end

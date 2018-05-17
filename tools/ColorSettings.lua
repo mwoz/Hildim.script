@@ -90,7 +90,7 @@ end
 
 local function txt2rgb(txt)
     local _, _, r, g, b = txt:find('(..)(..)(..)')
-    return ((('0x'..r) + 0)..' '..(('0x'..g) + 0)..' ' ..(('0x'..b) + 0))
+    return (math.tointeger('0x'..r)..' '..math.tointeger('0x'..g)..' '..math.tointeger('0x'..b))
 end
 
 local function enrichRow(tSrs, t)
@@ -186,10 +186,12 @@ local function ApplyToRow()
 end
 
 local function create_colour_bar(name)
+    --local lbl_hsi = iup.label{expand = 'HORIZONTAL'}
     local function onClr(h)
         local _, _, r, g, b = h.rgb:find('([0-9]+) ([0-9]+) ([0-9]+)')
         Ctrl(name).value = (string.format('%02x', r)..string.format('%02x', g)..string.format('%02x', b)):upper()
         updateExample()
+        --lbl_hsi.title = h.hsi
     end
     local function onTxt(h)
         local c = h.caret
@@ -224,6 +226,7 @@ local function create_colour_bar(name)
             Ctrl("colour_"..name).active = 'YES'
             txtClr.value = val
             Ctrl("colour_"..name).rgb = txt2rgb(val)
+            --lbl_hsi.title = Ctrl("colour_"..name).hsi
         end
     end
     local res = iup.frame{
@@ -251,7 +254,8 @@ local function create_colour_bar(name)
                 },
                 txtClr,
                 alignment = "ACENTER"
-            }
+            },
+            --lbl_hsi
         }
     }
     return res

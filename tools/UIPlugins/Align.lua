@@ -55,7 +55,7 @@ local function Init()
             local btn_esc = iup.button  {title = "Cancel"}
             iup.SetHandle("ALIGN_BTN_ESC", btn_esc)
 
-            local vbox = iup.vbox{ iup.hbox{iup.label{title = "Подстрока:", gap = 3}, txt_search, iup.fill{},chk_regex, iup.label{title = "Позиция:"},  txt_num, alignment = 'ACENTER'}, iup.hbox{btn_ok, iup.fill{}, btn_esc}, gap =2,margin="4x4" }
+            local vbox = iup.vbox{ iup.hbox{iup.label{title = "Подстрока:", gap = 3}, txt_search, iup.fill{}, chk_regex, iup.label{title = "Позиция:"}, txt_num, alignment = 'ACENTER'}, iup.hbox{btn_ok, iup.fill{}, btn_esc}, gap = 2, margin="4x4" }
             local result = false
             dlg = iup.scitedialog{vbox; title = "Выравнивание", defaultenter = "ALIGN_BTN_OK", defaultesc = "ALIGN_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid="align" }
 

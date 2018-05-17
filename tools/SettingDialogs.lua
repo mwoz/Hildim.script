@@ -28,6 +28,84 @@ function sett.ResetWrapProps()
 	end
 end
 
+function sett.ResetSelColors()
+    local function Rgb2Str(strrgb)
+        local rgb = tonumber((strrgb or '#000000'):gsub('#', ''), 16)
+        return ''..((rgb >> 16) & 255)..' '..((rgb >> 8) & 255)..' '..(rgb & 255)
+    end
+    local function Str2Rgb(s, def)
+        local _, _, r, g, b = s:find('(%d+) (%d+) (%d+)')
+        local rgb = 0
+        if r then
+            rgb = (r << 16)|(g << 8)|b
+        end
+        return '#'..string.format('%06X', rgb)
+    end
+    local ret, selection_back, selection_alpha, selection_additional_back, selection_additional_alpha, caret_line_back, caret_line_back_alpha,
+    output_caret_line_back, output_caret_line_back_alpha, findres_caret_line_back, findres_caret_line_back_alpha =
+    iup.GetParam("Цвета текста - выделение^TextColorsSelection",
+        nil,
+        'Выделенный текст - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Выделенный блок - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Строка под курсором - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Консоль - Строка под курсором - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'..
+        'Поиск - Строка под курсором - цвет%c\n'..
+        '- прозрачность%i[0,255,1]\n'
+        ,
+        Rgb2Str(props['selection.back']),
+        tonumber(props['selection.alpha']) or 30,
+        Rgb2Str(props['selection.additional.back']),
+        tonumber(props['selection.additional.alpha']) or 30,
+        Rgb2Str(props['caret.line.back']),
+        tonumber(props['caret.line.back.alpha']) or 20,
+        Rgb2Str(props['output.caret.line.back']),
+        tonumber(props['output.caret.line.back']) or 20,
+        Rgb2Str(props['findres.caret.line.back']),
+        tonumber(props['findres.caret.line.back.alpha']) or 20
+    )
+    if ret then
+
+        props['selection.back']                = Str2Rgb(selection_back)
+        props['selection.alpha']               = selection_alpha
+        props['selection.additional.back']     = Str2Rgb(selection_additional_back)
+        props['selection.additional.alpha']    = selection_additional_alpha
+        props['caret.line.back']               = Str2Rgb(caret_line_back)
+        props['caret.line.back.alpha']         = caret_line_back_alpha
+        props['output.caret.line.back']        = Str2Rgb(output_caret_line_back)
+        props['output.caret.line.back.alpha']  = output_caret_line_back_alpha
+        props['findres.caret.line.back']       = Str2Rgb(findres_caret_line_back)
+        props['findres.caret.line.back.alpha'] = findres_caret_line_back_alpha
+
+        scite.Perform("reloadproperties:")
+    end
+end
+
+function sett.ResetFontSize()
+	local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса^InterfaceFontSize",
+					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 5 then return 0 end return 1 end,
+					'Размер%i[1,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
+	if ret then
+		props['iup.defaultfontsize'] = size
+		if 1 == iup.Alarm('Шрифт интефейса', 'Перезапустить программу для применения изменений?', "Да", "Нет") then
+            scite.SetRestart('')
+            scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+        end
+	end
+end
+
+function sett.SetFindresCount()
+	local ret, size = iup.GetParam("Хранить результатов поиска",
+					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 3 then return 0 end return 1 end,
+					'Не более%i[1,30,1]\n', tonumber(_G.iuprops['findres.maxresultcount']) or 10)
+	if ret then
+		_G.iuprops['findres.maxresultcount'] = size
+	end
+end
+
 function sett.ResetTabbarProps()
     local function oldClr(p, def)
         local c = props[p]
@@ -45,7 +123,8 @@ function sett.ResetTabbarProps()
                 iup.GetParamParam(h, 6).auxcontrol.active = bact
                 iup.GetParamParam(h, 7).auxcontrol.active = bact
                 iup.GetParamParam(h, 8).control.active = bact
-                iup.GetParamParam(h, 9).control.active = bact
+                local bext = Iif(iup.GetParamParam(h, 8).control.value == 'ON' and bact == 'YES', 'YES', 'NO')
+                iup.GetParamParam(h, 9).control.active = bext
                 return 1
             end,
         'Закрывать по DblClick%b\n'..
@@ -160,80 +239,12 @@ function sett.ResetGlobalColors()
         props['layout.scroll.highcolor']  = scroll_highcolor
         props['layout.scroll.backcolor'] = scroll_backcolor
 
-        scite.SetRestart('  -cmd scite.RunAsync(CORE.ResetGlobalColors)')
-        scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
-    end
-
-end
-
-function sett.ResetSelColors()
-    local function Rgb2Str(strrgb)
-        local rgb = tonumber((strrgb or '#000000'):gsub('#', ''), 16) or 0
-        return ''..((rgb >> 16) & 255)..' '..((rgb >> 8) & 255)..' '..(rgb & 255)
-    end
-    local function Str2Rgb(s, def)
-        local _, _, r, g, b = s:find('(%d+) (%d+) (%d+)')
-        local rgb = 0
-        if r then
-            rgb = (r << 16)|(g << 8)|b
+        if 1 == iup.Alarm('Цвета интефейса', 'Перезапустить программу для применения изменений?', "Да", "Нет") then
+            scite.SetRestart('  -cmd scite.RunAsync(CORE.ResetGlobalColors)')
+            scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
         end
-        return '#'..string.format('%06X', rgb)
     end
-    local ret, selection_back, selection_alpha, selection_additional_back, selection_additional_alpha, caret_line_back, caret_line_back_alpha,
-    output_caret_line_back, output_caret_line_back_alpha, findres_caret_line_back, findres_caret_line_back_alpha,
-    caret_fore, caret_width, caret_period, caret_additional_blinks
-    = iup.GetParam("Цвета - выделение и курсор^TextColorsSelection",
-        nil,
-        'Выделенный текст - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Выделенный блок - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Строка под курсором - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Консоль - Строка под курсором - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Поиск - Строка под курсором - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Курсор%t\n'..
-        'Цвет%c\n'..
-        'Ширина%i[1,4,1]\n'..
-        'Период мерцания%i[0,2000,100]\n'..
-        'Мерцание дополнительных курсоров%b\n'
-        ,
-        Rgb2Str(props['selection.back']),
-        tonumber(props['selection.alpha']) or 30,
-        Rgb2Str(props['selection.additional.back']),
-        tonumber(props['selection.additional.alpha']) or 30,
-        Rgb2Str(props['caret.line.back']),
-        tonumber(props['caret.line.back.alpha']) or 20,
-        Rgb2Str(props['output.caret.line.back']),
-        tonumber(props['output.caret.line.back']) or 20,
-        Rgb2Str(props['findres.caret.line.back']),
-        tonumber(props['findres.caret.line.back.alpha']) or 20,
-        Rgb2Str(props['caret.fore']),
-        tonumber(props['caret.width']) or 1,
-        tonumber(props['caret.period']) or 500,
-        tonumber(props['caret.additional.blinks']) or 1
-    )
-    if ret then
 
-        props['selection.back']                = Str2Rgb(selection_back)
-        props['selection.alpha']               = selection_alpha
-        props['selection.additional.back']     = Str2Rgb(selection_additional_back)
-        props['selection.additional.alpha']    = selection_additional_alpha
-        props['caret.line.back']               = Str2Rgb(caret_line_back)
-        props['caret.line.back.alpha']         = caret_line_back_alpha
-        props['output.caret.line.back']        = Str2Rgb(output_caret_line_back)
-        props['output.caret.line.back.alpha']  = output_caret_line_back_alpha
-        props['findres.caret.line.back']       = Str2Rgb(findres_caret_line_back)
-        props['findres.caret.line.back.alpha'] = findres_caret_line_back_alpha
-        props['caret.fore']                    = Str2Rgb(caret_fore)
-        props['caret.width']                   = caret_width
-        props['caret.period']                  = caret_period
-        props['caret.additional.blinks']       = caret_additional_blinks
-
-        scite.ReloadProperties()
-    end
 end
 
 function sett.CurrentTabSettings()
@@ -324,10 +335,7 @@ function sett.Colors_Work()
     props["tabctrl.active.bakcolor"] = "255 255 255"
     props["tabctrl.active.forecolor"] = "0 0 255"
     props["tabctrl.active.readonly.forecolor"] = "120 120 255"
-    props["tabctrl.colorized"] = "1"
-    props["tabctrl.cut.ext"] = "1"
     props["tabctrl.cut.illumination"] = "90"
-    props["tabctrl.cut.prefix"] = "1"
     props["tabctrl.cut.saturation"] = "50"
     props["tabctrl.moved.color"] = "213 213 254"
     props["tabctrl.moved.color"] = "213 213 254"
@@ -350,16 +358,73 @@ function sett.Colors_Work()
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
 end
 
+function sett.CreateColorSettings()
+    local d = iup.filedlg{dialogtype = 'SAVE', parentdialog = 'SCITE', extfilter = 'Colors|*.colors;', directory = props["scite.userhome"].."\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    if not filename then return end
+    if not filename:find('%.colors$') then filename = filename..'.colors' end
+    local fields = {
+'tabctrl.active.bakcolor',
+'tabctrl.active.forecolor',
+'tabctrl.active.readonly.forecolor',
+'tabctrl.cut.illumination',
+'tabctrl.cut.saturation',
+'tabctrl.readonly.color',
+'tabctrl.moved.color',
+'tabctrl.readonly.color',
+'layout.hlcolor',
+'layout.borderhlcolor',
+'layout.bordercolor',
+'layout.bgcolor',
+'layout.txtbgcolor',
+'layout.fgcolor',
+'layout.txtfgcolor',
+'layout.txthlcolor',
+'layout.txtinactivcolor',
+'layout.bordercolor',
+'layout.scroll.forecolor',
+'layout.scroll.presscolor',
+'layout.scroll.highcolor',
+'layout.scroll.backcolor',
+    }
+
+    local strOut = ''
+    for i = 1,  #fields do
+        strOut = strOut..'props["'..fields[i]..'"] = "'..props[fields[i]]..'"\n'
+    end
+    strOut = strOut..[[
+    scite.SetRestart('')
+    scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+    ]]
+    if pcall(io.output, filename) then
+        io.write(strOut)
+        io.close()
+    end
+end
+
+function sett.ApplyColorsSettings()
+    local d = iup.filedlg{dialogtype = 'OPEN', parentdialog = 'SCITE', extfilter = 'Colors|*.colors;', directory = props["scite.userhome"].."\\" }
+    d:popup()
+    local filename = d.value
+    d:destroy()
+    if not filename then return end
+    local bSuc, pF = pcall(io.input, filename)
+    if bSuc then
+        text = pF:read('*a')
+        pF:close()
+        assert(load(text))()
+    end
+end
+
 function sett.Colors_Default()
     props["tabctrl.active.bakcolor"] = "255 255 255"
     props["tabctrl.active.forecolor"] = "90 33 33"
     props["tabctrl.active.readonly.forecolor"] = "111 108 108"
-    props["tabctrl.colorized"] = "1"
-    props["tabctrl.cut.ext"] = "1"
     props["tabctrl.cut.illumination"] = "90"
-    props["tabctrl.cut.prefix"] = "1"
     props["tabctrl.cut.saturation"] = "50"
-    props["tabctrl.moved.color"] = "120 120 255"
+    props["tabctrl.forecolor"] = "0 0 0"
     props["tabctrl.moved.color"] = "120 120 255"
     props["tabctrl.readonly.color"] = "120 120 120"
     props["layout.hlcolor"] = "200 225 245"
@@ -389,7 +454,7 @@ function sett.Colors_Atrium()
     props["tabctrl.cut.illumination"] = "81"
     props["tabctrl.cut.prefix"] = "1"
     props["tabctrl.cut.saturation"] = "55"
-    props["tabctrl.moved.color"] = "213 213 254"
+    props["tabctrl.forecolor"] = "0 0 0"
     props["tabctrl.moved.color"] = "213 213 254"
     props["tabctrl.readonly.color"] = "82 82 82"
     props["layout.hlcolor"] = "200 225 245"
@@ -405,6 +470,33 @@ function sett.Colors_Atrium()
     props["layout.scroll.forecolor"] = "173 181 211"
     props["layout.scroll.presscolor"] = "81 102 178"
     props["layout.scroll.highcolor"] = "134 148 198"
+    props["layout.scroll.backcolor"] = "238 245 244"
+    scite.SetRestart('')
+    scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+end
+
+function sett.Colors_Darkblue()
+    props["tabctrl.active.bakcolor"] = "255 255 255"
+    props["tabctrl.active.forecolor"] = "0 0 255"
+    props["tabctrl.active.readonly.forecolor"] = "120 120 255"
+    props["tabctrl.cut.illumination"] = "44"
+    props["tabctrl.cut.saturation"] = "67"
+    props["tabctrl.readonly.color"] = "229 229 229"
+    props["tabctrl.moved.color"] = "213 213 254"
+    props["tabctrl.readonly.color"] = "229 229 229"
+    props["layout.hlcolor"] = "94 180 189"
+    props["layout.borderhlcolor"] = "51 146 156"
+    props["layout.bordercolor"] = "1 148 143"
+    props["layout.bgcolor"] = "76 95 129"
+    props["layout.txtbgcolor"] = "255 255 255"
+    props["layout.fgcolor"] = "255 255 255"
+    props["layout.txtfgcolor"] = "0 0 0"
+    props["layout.txthlcolor"] = "255 216 75"
+    props["layout.txtinactivcolor"] = "183 183 183"
+    props["layout.bordercolor"] = "1 148 143"
+    props["layout.scroll.forecolor"] = "120 165 125"
+    props["layout.scroll.presscolor"] = "61 114 66"
+    props["layout.scroll.highcolor"] = "81 139 87"
     props["layout.scroll.backcolor"] = "238 245 244"
     scite.SetRestart('')
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)

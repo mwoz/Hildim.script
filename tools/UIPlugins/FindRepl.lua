@@ -649,14 +649,16 @@ local function create_dialog_FindReplace()
           name = 'btn_esc',
           size = '1x1',
         },
-        iup.toggle{
+        iup.hi_toggle{
             name = 'byInput',
             title = 'По мере набора',
-            action = SetStaticControls,
+            flat_action = SetStaticControls,
+            ctrl = true,
         },
-        iup.toggle{
+        iup.hi_toggle{
             name = 'byInputAll',
             title = ' - все',
+            ctrl = true,
         },
     },
     iup.hbox{
@@ -797,9 +799,10 @@ local function create_dialog_FindReplace()
       dropdown = "YES",
       visibleitems = "18",
     },
-    iup.toggle{
+    iup.hi_toggle{
       name = "chkSubFolders",
       title = "В подпапках",
+      ctrl = true,
     },
     fb_find{
       name = 'btnFindInFiles',
@@ -912,27 +915,31 @@ local function create_dialog_FindReplace()
   local dialPrev = 0
   containers[34] = bgb_find{iup.vbox{expand='NO',
       iup.hbox{expand='HORIZONTAL',
-          iup.toggle{
+          iup.hi_toggle{
               title = "Прогресс поиска в файлах",
+              ctrl = true,
           name = "chkFindProgress", },
           iup.fill{},
           margin = "0x0", padding = '0x0'
       };
       iup.hbox{expand = 'HORIZONTAL',
-          iup.toggle{
+          iup.hi_toggle{
               title = "Возвращать фокус",
+              ctrl = true,
           name = "chkPassFocus", },
           iup.fill{},
-          iup.toggle{
+          iup.hi_toggle{
               title = "Закрывать по ESC",
+              ctrl = true,
           name = "chkCloseOnESC" },
           margin = "0x0", padding = '0x0'
       },
       iup.hbox{
-          iup.toggle{
+          iup.hi_toggle{
               title = "Прозрачность",
+              ctrl = true,
           name = "chkTransparency",
-          action = function(h)
+          flat_action = function(h)
               if _G.iuprops['findrepl.win'] ~= '0' and Ctrl("chkTranspFocus").value == 'OFF' then popUpFind.opacity = Iif(h.value == 'ON', _G.iuprops['settings.findrepl.opacity'] or 200, 255) end
           end
           },
@@ -940,6 +947,7 @@ local function create_dialog_FindReplace()
               name = 'vTransparency',
               size = '45x8',
               unit = "DEGREES", density = "0.3",
+              ctrl = true,
               valuechanged_cb = function(h)
                   if _G.iuprops['findrepl.win'] ~= '0' and Ctrl("chkTransparency").value == 'ON' then
                       local o = _G.iuprops['settings.findrepl.opacity'] or 200
@@ -954,10 +962,11 @@ local function create_dialog_FindReplace()
                   dialPrev = 0
               end;
           },
-          iup.toggle{
+          iup.hi_toggle{
               title = "При потере фокуса ",
               name = "chkTranspFocus",
-              action = function(h)
+              ctrl = true,
+              flat_action = function(h)
                   if _G.iuprops['findrepl.win'] ~= '0' and Ctrl("chkTransparency").value == 'ON' then popUpFind.opacity = Iif(h.value == 'OFF', _G.iuprops['settings.findrepl.opacity'] or 200, 255) end
               end
           },
@@ -1032,17 +1041,17 @@ local function create_dialog_FindReplace()
 
   containers[26] = iup.vbox{
     containers["hUpDown"],
-    iup.toggle{
+    iup.hi_toggle{
       title = "Слово целиком",
       name = "chkWholeWord",
       map_cb = (function(h)  h.value = _G["dialogs.findreplace."..h.name] end),
       ldestroy_cb = (function(h) _G["dialogs.findreplace."..h.name] = h.value end),
     },
-    iup.toggle{
+    iup.hi_toggle{
       title = "Учитывать регистр",
       name = "chkMatchCase",
     },
-    iup.toggle{
+    iup.hi_toggle{
       title = "Зациклить поиск",
       name = "chkWrapFind",
       value = "ON",
@@ -1050,10 +1059,10 @@ local function create_dialog_FindReplace()
   }
 
   containers[28] = iup.hbox{
-    iup.toggle{
+    iup.hi_toggle{
       title = "Только в стиле:",
       name = "chkInStyle",
-      action = SetStaticControls,
+      flat_action = SetStaticControls,
     },
     iup.text{
       mask = "[0-9]+",
@@ -1065,14 +1074,14 @@ local function create_dialog_FindReplace()
   }
 
   containers[27] = iup.vbox{
-    iup.toggle{
+    iup.hi_toggle{
       title = "Backslash (\\n,\\r,\\t...)",
       name = "chkBackslash",
     },
-    iup.toggle{
+    iup.hi_toggle{
       title = "Регулярные выражения",
       name = "chkRegExp",
-      action = SetStaticControls,
+      flat_action = SetStaticControls,
     },
     containers[28],
     iup.zbox{ name = "zbProgress",
@@ -1189,7 +1198,7 @@ local function Init(h)
     iup.SetAttribute(oDeattFnd, 'SAVEPREFIX', 'findreplace')
 
     local res = {
-        handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT")};
+        handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT"), map_cb=SetStaticControls()};
         OnMenuCommand = (function(msg)
             if msg == IDM_FIND then return ActivateFind_l(0)
             elseif msg == IDM_REPLACE then return ActivateFind_l(1)
@@ -1213,7 +1222,7 @@ local function Init(h)
                 iup.SetFocus(Ctrl("cmbFindWhat"))
             end
         end);
-        OnSwitchFile = function(file) if file == "" then CORE.ClearLiveFindMrk() end end;
+        OnSwitchFile = function(file) CORE.ClearLiveFindMrk() end;
         }
     res.handle_deattach = oDeattFnd
 

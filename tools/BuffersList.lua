@@ -1,5 +1,5 @@
 local function InitWndDialog()
-    local list_windows, showPopUp, editMode, hbTitle
+    local list_windows, showPopUp, editMode, hbTitle, cmb_Sort, curSide
     local bMenuMode = false
     local bToolBar = false
     local fillWindow
@@ -44,14 +44,23 @@ local function InitWndDialog()
                 if not side or side == scite.buffers.GetBufferSide(i) then
                     local row = {}
                     local _, _, p, n = scite.buffers.NameAt(i):from_utf8():find('(.-)([^\\]*)$')
-                    row.order = n:upper()
+                    if cmb_Sort.value == '1' then
+                        row.order = i
+                    elseif cmb_Sort.value == '2' then
+                        row.order = n:upper()
+                    elseif cmb_Sort.value == '3' then
+                        local _, _, ext = n:find('([^%.]*)$')
+                        row.order = (ext..n):upper()
+                    else
+                        row.order = p:upper()..' '..n:upper()
+                    end
                     n = n..Iif(scite.buffers.SavedAt(i), '', '*')
 
                     row.name = n
                     row.path = p
                     row.side = scite.buffers.GetBufferSide(i)
                     row.num = i
-                    if (_G.iuprops['menus.show.icons'] or 0) == 1 then
+                    if (props['tabctrl.colorized'] or '') == '1' then
                         if scite.buffers.GetBufferSide(i) == 1 then
                             row.bgcolor = iup.GetAttributeId(iup.GetDialogChild(hMainLayout, 'TabCtrlRight'), "TABBACKCOLOR", Ri)
                             Ri = Ri + 1
@@ -181,15 +190,21 @@ local function InitWndDialog()
             btn_attach,
             iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end},
         }, barsize = 0, state = 'CLOSE', name = 'bufferslist_expander'}
+        cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0', expand = 'NO', propagatefocus = 'YES', action = function() fillWindow(curSide) end, tip = 'Сортировка списка'}
+        iup.SetAttribute(cmb_Sort, 1, "Нет")
+        iup.SetAttribute(cmb_Sort, 2, "Имя")
+        iup.SetAttribute(cmb_Sort, 3, "Расширение")
+        iup.SetAttribute(cmb_Sort, 4, "Путь")
+        --cmb_Sort.value = 1
         dlg = iup.scitedialog{iup.vbox{
             hbTitle,
             list_windows,
             iup.hbox{
-                iup.flatbutton{title = "Закрыть", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES' },
-                iup.flatbutton{title = "Закрыть кроме", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES' },
-                iup.flatbutton{title = "На другое окно", expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES'},
+                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = 'Закрыть все отмеченные' },
+                iup.flatbutton{title = "кроме", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = 'Закрыть все НЕотмеченные'  },
+                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip='Переместить отмеченные на другое окно' }, cmb_Sort,
                 --iup.flatbutton{title = "Cancel", expand = 'NO', padding = '9x', flat_action = function() dlg:hide() end, propagatefocus = 'YES'},
-        scrollbar = 'NO', minsize = 'x22', maxsize = 'x22', expand = "HORIZONTAL", margin = "20x", gap = "20"};};
+        scrollbar = 'NO', minsize = 'x35', maxsize = 'x35', expand = "HORIZONTAL", margin = "20x0", gap = "20", alignment='ACENTER'};};
         sciteparent = "SCITE", sciteid = "bufferslist", dropdown = true, shrink = "YES",
         maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255', customframedraw = 'NO'}
 
@@ -209,6 +224,9 @@ local function InitWndDialog()
                 list_windows.rasterwidth4 = nil
                 list_windows.fittosize = 'COLUMNS'
                 blockClose = false
+                cmb_Sort.value = _G.iuprops['buffers.sortorder'] or 2
+            elseif state == 4 then
+                _G.iuprops['buffers.sortorder'] = cmb_Sort.value
             end
         end
         dlg.focus_cb = function(h, focus)
