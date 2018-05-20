@@ -843,10 +843,11 @@ local function create_dialog_FindReplace()
     margin = "0x00",
   }
   containers[22] = iup.hbox{
-    iup.toggle{
+    iup.hi_toggle{
       padding = "3x",
       title = "В выделенном",
       name = "chkMarkInSelection",
+      ctrl = true,
     },
     fb_find{
       padding = "3x",

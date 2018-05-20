@@ -1673,7 +1673,7 @@ end
 
 iup.ConfigList = function()
     if not mnu_configs then
-        local t = shell.findfiles(props["scite.userhome"].."\\*.config")
+        local t = (shell.findfiles(props["scite.userhome"].."\\*.config") or {})
         mnu_configs = {}
         local mnu_i
         for i = 1,  #t do
