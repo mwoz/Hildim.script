@@ -5,8 +5,8 @@ local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 local function Show()
 
     local list_lex, dlg, bBlockReset, tree_right, tree_left, tree_plugins
-    local btn_ok = iup.button  {title = "OK"}
-    local btn_esc = iup.button  {title = "Cancel"}
+    local btn_ok = iup.button  {title = _TH"OK"}
+    local btn_esc = iup.button  {title = _TH"Cancel"}
     local clrUsed = '255 0 0'
     local tPlugins = {}
     iup.SetHandle("SIDEBARSETT_BTN_OK", btn_ok)
@@ -211,7 +211,7 @@ local function Show()
         iup.hbox{tree_left, iup.vbox{tree_plugins}, tree_right};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
     expandchildren = 'YES', gap = 2, margin = "4x4"}
-    dlg = iup.scitedialog{vbox; title = "Настройка боковых панелей", defaultenter = "SIDEBARSETT_BTN_OK", defaultesc = "SIDEBARSETT_BTN_ESC", tabsize =editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title = _T"Sidebars Settings", defaultenter = "SIDEBARSETT_BTN_OK", defaultesc = "SIDEBARSETT_BTN_ESC", tabsize =editor.TabWidth,
     maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "sidebarlayout", minsize = '800x400', helpbutton = 'YES'}
 
 
@@ -221,9 +221,9 @@ local function Show()
         end
     end)
 
-    iup.SetAttributeId(tree_left, "TITLE", 0, "Левая панель")
-    iup.SetAttributeId(tree_right, "TITLE", 0, "Правая панель")
-    iup.SetAttributeId(tree_plugins, "TITLE", 0, "Неиспользуемые элементы")
+    iup.SetAttributeId(tree_left, "TITLE", 0, _T"Left Bar")
+    iup.SetAttributeId(tree_right, "TITLE", 0, _T"Right Bar")
+    iup.SetAttributeId(tree_plugins, "TITLE", 0, _T"Available Plugins")
     iup.SetAttributeId(tree_left, "ADDBRANCH", 0, "<New Tab>")
     iup.SetAttributeId(tree_right, "ADDBRANCH", 0, "<New Tab>")
 

@@ -16,13 +16,14 @@ local function bgb_find(t)
     return iup.backgroundbox(t)
 end
 
+local fmark = _T'Search Mark'
 local tMarks = {
-    CORE.InidcFactory('Find.Mark.1', 'Метка поиска 1', INDIC_ROUNDBOX, 16711884, 50),
-    CORE.InidcFactory('Find.Mark.2', 'Метка поиска 2', INDIC_ROUNDBOX, 16711680, 50),
-    CORE.InidcFactory('Find.Mark.3', 'Метка поиска 3', INDIC_ROUNDBOX, 65280, 50),
-    CORE.InidcFactory('Find.Mark.4', 'Метка поиска 4', INDIC_ROUNDBOX, 65535, 100),
-    CORE.InidcFactory('Find.Mark.5', 'Метка поиска 5', INDIC_ROUNDBOX, 16768273, 50),
-    CORE.InidcFactory('Find.Mark.6', 'Метка поиска 6', INDIC_ROUNDBOX, 494591, 50),
+    CORE.InidcFactory('Find.Mark.1', fmark..' 1', INDIC_ROUNDBOX, 16711884, 50),
+    CORE.InidcFactory('Find.Mark.2', fmark..' 2', INDIC_ROUNDBOX, 16711680, 50),
+    CORE.InidcFactory('Find.Mark.3', fmark..' 3', INDIC_ROUNDBOX, 65280, 50),
+    CORE.InidcFactory('Find.Mark.4', fmark..' 4', INDIC_ROUNDBOX, 65535, 100),
+    CORE.InidcFactory('Find.Mark.5', fmark..' 5', INDIC_ROUNDBOX, 16768273, 50),
+    CORE.InidcFactory('Find.Mark.6', fmark..' 6', INDIC_ROUNDBOX, 494591, 50),
 }
 
 function CORE.SetFindMarkers()
@@ -183,7 +184,7 @@ local function onFindEdit(h, c, new_value)
             OnNavigation("Find")
             local pos = findSettings:FindNext(true)
             OnNavigation("Find-")
-            if pos < 0 then SetInfo('Ничего не найдено', 'E')
+            if pos < 0 then SetInfo(_T'Nothing Found', 'E')
             else SetInfo('', '') end
         end
     end
@@ -217,7 +218,7 @@ end
 local function ReplaceAll(h)
     if ReadSettings() then return end
     local count = findSettings:ReplaceAll(false)
-    SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Replacments: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     PassFocus_local()
@@ -228,7 +229,7 @@ end
 local function ReplaceSel(h)
     if ReadSettings() then return end
     local count = findSettings:ReplaceAll(true)
-    SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Replacments: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     PassFocus_local()
@@ -238,7 +239,7 @@ end
 local function FindSel(h)
     if ReadSettings() then return end
     local count = findSettings:FindAll(nil, false, true)
-    SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Found: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
     PostAction()
@@ -247,7 +248,7 @@ end
 local function FindAll(h)
     if ReadSettings() then return end
     local count = findSettings:FindAll(nil, false)
-    SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Found: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
     PostAction()
@@ -256,7 +257,7 @@ end
 local function GetCount(h)
     if ReadSettings() then return end
     local count = findSettings:Count()
-    SetInfo('Найдено: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Found: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
 end
@@ -266,7 +267,7 @@ local function FindNext(h)
     OnNavigation("Find")
     local pos = findSettings:FindNext(true)
     OnNavigation("Find-")
-    if pos < 0 then SetInfo('Ничего не найдено', 'E')
+    if pos < 0 then SetInfo(_T'Nothing Found', 'E')
     else SetInfo('', '') end
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
@@ -279,10 +280,10 @@ function CORE.ReplaceNext(h)
     OnNavigation("Repl")
     local pos = findSettings:ReplaceOnce()
     OnNavigation("Repl-")
-    if not pos then SetInfo('Найдено вхождение "'..Ctrl("cmbFindWhat").value..'"', '') return end
+    if not pos then SetInfo(_T'Found an entry "'..Ctrl("cmbFindWhat").value..'"', '') return end
 
-    if pos < 0 then SetInfo('Ничего не найдено', 'E')
-    else SetInfo('Произведена замена', 'E') end
+    if pos < 0 then SetInfo(_T'Nothing Found', 'E')
+    else SetInfo(_T'Replacment done', 'E') end
 
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
@@ -294,7 +295,7 @@ local function MarkAll(h)
     if ReadSettings() then return end
     local clrStr = math.tointeger(Ctrl("matrixlistColor").focusitem)
     local count = findSettings:MarkAll(Ctrl("chkMarkInSelection").value == "ON", tMarks[clrStr], clrStr + 4)
-    SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Marked: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
 end
@@ -314,7 +315,7 @@ end
 local function BookmarkAll(h)
     if ReadSettings() then return end
     local count = findSettings:BookmarkAll(Ctrl("chkMarkInSelection").value == "ON")
-    SetInfo('Помечено: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Marked: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
     PostAction()
@@ -349,7 +350,7 @@ local function FindInFiles()
     if Ctrl("chkFindProgress").value == 'ON' then
         Ctrl("progress").max = 100
         Ctrl("progress").value = 0
-        Ctrl("progress").text = 'Подсчет...'
+        Ctrl("progress").text = _T'Count...'
         Ctrl("zbProgress").valuepos = 1
     end
 end
@@ -357,7 +358,7 @@ end
 local function ReplaceInBuffers()
     if ReadSettings() then return end
     local count = DoForBuffers_Stack(findSettings:ReplaceInBufer())
-    SetInfo('Произведено замен: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Replacments: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
     Ctrl("cmbFindWhat"):SaveHist()
     scite.BlockUpdate(UPDATE_FORCE)
@@ -369,7 +370,7 @@ local function FindInBuffers()
     if ReadSettings() then return end
     findSettings:CollapseFindRez()
     local count = DoForBuffers_Stack(findSettings:FindInBufer(), 100)
-    SetInfo('Всего найдено: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Found: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
     PostAction()
@@ -391,7 +392,7 @@ local function GoToMarkDown()
             bMark = true
         end
     end
-    SetInfo(Iif(bMark, '', 'Меток не обнаружено'), Iif(bMark, '', 'E'))
+    SetInfo(Iif(bMark, '', _T'Marks not Found'), Iif(bMark, '', 'E'))
 end
 local function GoToMarkUp()
     local curPos = editor.SelectionStart
@@ -419,7 +420,7 @@ local function GoToMarkUp()
         OnNavigation("Mark-")
         bMark = true
     end
-    SetInfo(Iif(bMark, '', 'Меток не обнаружено'), Iif(bMark, '', 'E'))
+    SetInfo(Iif(bMark, '', _T'Marks not Found'), Iif(bMark, '', 'E'))
 end
 
 local function SetStaticControls()
@@ -519,7 +520,7 @@ local function FindNextSel(bUp)
             findSettings.searchUp = bUp
             local pos = findSettings:FindNext(true)
             OnNavigation("Find-")
-            if pos < 0 then SetInfo('Ничего не найдено', 'E')
+            if pos < 0 then SetInfo(_T'Nothing Found', 'E')
             else SetInfo('', '') end
             Ctrl("cmbFindWhat"):SaveHist()
 
@@ -592,7 +593,7 @@ local function create_dialog_FindReplace()
   }
   containers[4] = iup.hbox{
     iup.label{
-      title = "Найти:",
+      title = _T"Find:",
     },
     iup.list{
       name = "cmbFindWhat",
@@ -627,13 +628,13 @@ local function create_dialog_FindReplace()
   containers[32] = iup.vbox{
     fb_find{
       image = "IMAGE_search",
-      title = " далее",
+      title = _T" next",
       name = "btnFind",
       flat_action = FindNext,
       padding = "5x0"
     },
     fb_find{
-      title = "Найти все",
+      title = _T"Find All",
       flat_action = FindAll,
     },
     margin = "6x6",
@@ -651,30 +652,30 @@ local function create_dialog_FindReplace()
         },
         iup.hi_toggle{
             name = 'byInput',
-            title = 'По мере набора',
+            title = _T'While User Input',
             flat_action = SetStaticControls,
             ctrl = true,
         },
         iup.hi_toggle{
             name = 'byInputAll',
-            title = ' - все',
+            title = _T' - all',
             ctrl = true,
         },
     },
     iup.hbox{
       fb_find{
         padding = "3x",
-        title = "В выделенном",
+        title = _T"In Selection",
         flat_action = FindSel,
       },
       fb_find{
         padding = "3x",
-        title = "На вкладках",
+        title = _T"In Open Files",
         flat_action = FindInBuffers,
       },
       fb_find{
         padding = "3x",
-        title = "Подсчитать",
+        title = _T"Count",
         flat_action = GetCount,
       },
       --normalizesize = "HORIZONTAL",
@@ -697,7 +698,7 @@ local function create_dialog_FindReplace()
 
   containers[13] = iup.vbox{
     fb_find{
-      title = " на:",
+      title = _T" to:",
       image = "IMAGE_Replace",
       flat_action = CORE.ReplaceNext,
       canfocus = "NO",
@@ -705,7 +706,7 @@ local function create_dialog_FindReplace()
     },
     fb_find{
       image = "IMAGE_search",
-      title = " далее",
+      title = _T" next",
       padding = "5x3",
       flat_action = FindNext,
       canfocus  = "NO",
@@ -716,17 +717,17 @@ local function create_dialog_FindReplace()
   containers[15] = iup.hbox{
     fb_find{
       padding = "3x",
-      title = "Заменить все",
+      title = _T"Replace All",
       flat_action = ReplaceAll,
     },
     fb_find{
       padding = "3x",
-      title = "В выделенном",
+      title = _T"In Selection",
       flat_action = ReplaceSel,
     },
     fb_find{
       padding = "3x",
-      title = "На вкладках",
+      title = _T"In Open Files",
       flat_action = ReplaceInBuffers,
     },
     margin = "0x00",
@@ -761,7 +762,7 @@ local function create_dialog_FindReplace()
 
   containers[17] = iup.hbox{
     iup.label{
-      title = "В папках:",
+      title = _T"In Folder:",
     },
     iup.list{
       name = "cmbFolders",
@@ -774,12 +775,12 @@ local function create_dialog_FindReplace()
     fb_find{
       image = "IMAGE_ArrowUp",
       flat_action = FolderUp,
-      tip = "На уровень вверх\n(PgUp в строке поиска)",
+      tip = _T"Level Up\n(Press 'PgUp' in the line)",
     },
     fb_find{
       image = "IMAGE_Folder",
       flat_action = SetFolder,
-      tip = "Выбор папки",
+      tip = _T"Change Folder",
     },
     gap = "3",
     alignment = "ACENTER",
@@ -789,7 +790,7 @@ local function create_dialog_FindReplace()
   containers[18] = iup.hbox{
     iup.label{
       size = "31x8",
-      title = "Фильтр:",
+      title = _T"File Mask:",
     },
     iup.list{
       name = "cmbFilter",
@@ -801,7 +802,7 @@ local function create_dialog_FindReplace()
     },
     iup.hi_toggle{
       name = "chkSubFolders",
-      title = "В подпапках",
+      title = _T"In Subfolders",
       ctrl = true,
     },
     fb_find{
@@ -809,7 +810,7 @@ local function create_dialog_FindReplace()
       image = "IMAGE_search",
       padding = "14x0",
       flat_action = FindInFiles,
-      tip = "Искать в файлах",
+      tip = _T"Find in Files",
     },
     alignment = "ACENTER",
     margin = "0x00",
@@ -825,17 +826,17 @@ local function create_dialog_FindReplace()
   containers[21] = iup.hbox{
     fb_find{
       padding = "3x",
-      title = "Пометить",
+      title = _T"Mark",
       flat_action = MarkAll,
     },
     fb_find{
       padding = "3x",
-      title = "Удалить",
+      title = _T"Delete",
       flat_action = ClearMark,
     },
     fb_find{
       padding = "3x",
-      title = "Удалить все",
+      title = _T"Delete All",
       flat_action = ClearMarkAll,
       padding = "2",
     },
@@ -845,13 +846,13 @@ local function create_dialog_FindReplace()
   containers[22] = iup.hbox{
     iup.hi_toggle{
       padding = "3x",
-      title = "В выделенном",
+      title = _T"In Selection",
       name = "chkMarkInSelection",
       ctrl = true,
     },
     fb_find{
       padding = "3x",
-      title = "*** Закладками",
+      title = _T"*** Закладками",
       flat_action = BookmarkAll,
     },
     gap = "4",
@@ -864,13 +865,13 @@ local function create_dialog_FindReplace()
       padding = "x2",
       image = "IMAGE_ArrowUp",
       flat_action = GoToMarkUp,
-      tip = "Предыдущая метка",
+      tip = _T"Previous Mark",
     },
     fb_find{
       padding = "x2",
       image = "IMAGE_ArrowDown",
       flat_action = GoToMarkDown,
-      tip = "Следующая метка",
+      tip = _T"Next Mark",
     },
     margin = "0x3",
   }
@@ -917,7 +918,7 @@ local function create_dialog_FindReplace()
   containers[34] = bgb_find{iup.vbox{expand='NO',
       iup.hbox{expand='HORIZONTAL',
           iup.hi_toggle{
-              title = "Прогресс поиска в файлах",
+              title = _T"Search in Files - Progressbar",
               ctrl = true,
           name = "chkFindProgress", },
           iup.fill{},
@@ -925,19 +926,19 @@ local function create_dialog_FindReplace()
       };
       iup.hbox{expand = 'HORIZONTAL',
           iup.hi_toggle{
-              title = "Возвращать фокус",
+              title = _T"Return focus",
               ctrl = true,
           name = "chkPassFocus", },
           iup.fill{},
           iup.hi_toggle{
-              title = "Закрывать по ESC",
+              title = _T"Clouse with ESC",
               ctrl = true,
           name = "chkCloseOnESC" },
           margin = "0x0", padding = '0x0'
       },
       iup.hbox{
           iup.hi_toggle{
-              title = "Прозрачность",
+              title = _T"Transparency",
               ctrl = true,
           name = "chkTransparency",
           flat_action = function(h)
@@ -964,7 +965,7 @@ local function create_dialog_FindReplace()
               end;
           },
           iup.hi_toggle{
-              title = "При потере фокуса ",
+              title = _T"When lost focus",
               name = "chkTranspFocus",
               ctrl = true,
               flat_action = function(h)
@@ -984,11 +985,11 @@ local function create_dialog_FindReplace()
     containers[16],
     containers[19],
     containers[34],
-    ["tabtitle0"] = "Найти",
-    ["tabtitle1"] = "Заменить",
-    ["tabtitle2"] = "Найти в файлах",
-    ["tabtitle3"] = "Метки",
-    ["tabtitle4"] = "Свойства",
+    ["tabtitle0"] = _T"Find",
+    ["tabtitle1"] = _T"Replace",
+    ["tabtitle2"] = _T"Find in Files",
+    ["tabtitle3"] = _T"Mark",
+    ["tabtitle4"] = _T"Preferences",
     canfocus  = "NO",
     name = "tabFindRepl",
     tabchange_cb = function() scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")); SetStaticControls() end) end,
@@ -1029,7 +1030,7 @@ local function create_dialog_FindReplace()
   containers["hUpDown"] = iup.hbox{
     containers["zUpDown"],
     iup.label{
-      title = "Направление",
+      title = _T"Up / Down",
       button_cb = (function(_,but, pressed, x, y, status)
         if iup.isbutton1(status) and pressed == 0 and Ctrl('btnArrowUp').active == "YES" then
             containers["zUpDown"].valuepos = Iif(containers["zUpDown"].valuepos == '0', '1', '0')
@@ -1043,17 +1044,17 @@ local function create_dialog_FindReplace()
   containers[26] = iup.vbox{
     containers["hUpDown"],
     iup.hi_toggle{
-      title = "Слово целиком",
+      title = _T"Whole Word",
       name = "chkWholeWord",
       map_cb = (function(h)  h.value = _G["dialogs.findreplace."..h.name] end),
       ldestroy_cb = (function(h) _G["dialogs.findreplace."..h.name] = h.value end),
     },
     iup.hi_toggle{
-      title = "Учитывать регистр",
+      title = _T"Case Sensitive",
       name = "chkMatchCase",
     },
     iup.hi_toggle{
-      title = "Зациклить поиск",
+      title = _T"Wrap around",
       name = "chkWrapFind",
       value = "ON",
     },
@@ -1061,7 +1062,7 @@ local function create_dialog_FindReplace()
 
   containers[28] = iup.hbox{
     iup.hi_toggle{
-      title = "Только в стиле:",
+      title = _T"This Style Only:",
       name = "chkInStyle",
       flat_action = SetStaticControls,
     },
@@ -1080,7 +1081,7 @@ local function create_dialog_FindReplace()
       name = "chkBackslash",
     },
     iup.hi_toggle{
-      title = "Регулярные выражения",
+      title = _T"Regular expressions",
       name = "chkRegExp",
       flat_action = SetStaticControls,
     },
@@ -1163,7 +1164,7 @@ local function Init(h)
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";defaultesc="FIND_BTN_ESC";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
-        sciteid = 'findrepl';  Dlg_Title = "Поиск и замена"; expand='HORIZONTAL'; buttonImage='IMAGE_search'; onFormSetStaticControls = SetStaticControls;
+        sciteid = 'findrepl';  Dlg_Title = _T"Find Replace"; expand='HORIZONTAL'; buttonImage='IMAGE_search'; onFormSetStaticControls = SetStaticControls;
         On_Detach = (function(h, hNew, x, y)
             iup.SetHandle("FIND_BTN_ESC",Ctrl('btn_esc'))
             local hMainLayout = iup.GetLayout()

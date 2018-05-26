@@ -62,7 +62,7 @@ local function Show()
 
         iup.hbox{btn_ok},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Список используемых языков",defaultenter="LEX_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title=_T"Used languages",defaultenter="LEX_BTN_OK",defaultesc="LEX_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="LexersSetup", minsize='670x600', maxsize='670x1600'}
 
     dlg.show_cb=(function(h,state)

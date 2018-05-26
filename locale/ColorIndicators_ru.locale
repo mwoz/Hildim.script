@@ -1,0 +1,7 @@
+return {
+["Color"] = "Цвет";
+["Indicator Preferences"] = "Свойства индикаторов";
+["Indicator"] = "Индикатор";
+["Transparency"] = "Прозрачность";
+["Style"] = "Стиль";
+}

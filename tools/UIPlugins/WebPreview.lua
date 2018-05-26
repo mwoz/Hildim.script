@@ -249,28 +249,28 @@ local function init()
 
     menuhandler:InsertItem('MainWindowMenu', 'Edit|s1',
         {'Html', ru = 'Html', visible = bHt ,{
-            {'Italics', ru = 'Курсив', action = setItalics, key = 'Alt+I', active = bHt, },
-            {'Bold', ru = 'Жирный', action = setBold, key = 'Alt+B', active = bHt, },
-            {'Strike', ru = 'Зачеркнутый', action = setStrike, key = 'Alt+S', active = bHt, },
-            {'Underlined', ru = 'Подчеркнутый', action = setUnderlined, key = 'Alt+U', active = bHt, },
-            {'Span', ru = 'Интервал', action = setSpan, key = 'Alt+N', active = bHt, },
-            {'Paragrafh', ru = 'Параграф', action = setPar, key = 'Alt+P', active = bHt, },
+            {'Italics', ru = _T'Italics', action = setItalics, key = 'Alt+I', active = bHt, },
+            {'Bold', ru = _T'Bold', action = setBold, key = 'Alt+B', active = bHt, },
+            {'Strike', ru = _T'Strike', action = setStrike, key = 'Alt+S', active = bHt, },
+            {'Underlined', ru = _T'Underlined', action = setUnderlined, key = 'Alt+U', active = bHt, },
+            {'Span', ru = _T'Span', action = setSpan, key = 'Alt+N', active = bHt, },
+            {'Paragrafh', ru = _T'Paragrafh', action = setPar, key = 'Alt+P', active = bHt, },
             {'H1', action = function() tagAround"h1" end, key = 'Alt+1', active = bHt, },
             {'H2', action = function() tagAround"h2" end, key = 'Alt+2', active = bHt, },
             {'H3', action = function() tagAround"h3" end, key = 'Alt+3', active = bHt, },
             {'H4', action = function() tagAround"h4" end, key = 'Alt+4', active = bHt, },
             {'H5', action = function() tagAround"h5" end, key = 'Alt+5', active = bHt, },
             {'H6', action = function() tagAround"h6" end, key = 'Alt+6', active = bHt, },
-            {'Referens', ru = 'Ссылка', action = function() tagAround"a" end, key = 'Alt+Shift+A', active = bHt, },
-            {'Anchor', ru = 'Якорь', action = function() editor:ReplaceSel'<a id=""/>'; for i = 1,3 do editor:CharLeft() end end, key = 'Ctrl+Shift+A', active = bHt, },
-            {'New Line', ru = 'Новая строка', action = newLine, key = 'Alt+Enter', active = bHt, },
+            {'Referens', ru = _T'Referens', action = function() tagAround"a" end, key = 'Alt+Shift+A', active = bHt, },
+            {'Anchor', ru = _T'Anchor', action = function() editor:ReplaceSel'<a id=""/>'; for i = 1,3 do editor:CharLeft() end end, key = 'Ctrl+Shift+A', active = bHt, },
+            {'New Line', ru = _T'New Line', action = newLine, key = 'Alt+Enter', active = bHt, },
             {'Line Break', action = function() editor:ReplaceSel('<br>') end, key = 'Alt+Ctrl+Enter', active = bHt, },
         }}
     )
     menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_|Fileman_sidebar|sxxx',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Web', plane = 1, visible = bHt ,{
             {'s_web', separator = 1},
-            {"Link", ru = "Вставить как ссылку", action = function()
+            {"Link", ru = _T"Insert as Link", action = function()
                 local anc = ''
                 local strSel = editor:GetSelText()
                 local strPath = FILEMAN.FullPath()
@@ -297,7 +297,7 @@ local function init()
 
                 iup.PassFocus()
             end},
-            {"Image", ru = "Вставить как изображение", action = function()
+            {"Image", ru = _T"Insert as Image", action = function()
             editor:ReplaceSel('<img src="'..FILEMAN.RelativePath()..'"/>')
                 iup.PassFocus()
             end},

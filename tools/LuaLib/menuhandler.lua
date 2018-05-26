@@ -19,7 +19,8 @@ function s:Init()
 end
 
 function s:get_title(t, bShort)
-    local s = t['ru'] or t[1]
+    --local s = t['ru'] or t[1]
+    local s = t['ru'] or _TM(t[1])
     if not bShort and (t.user_hk or t.key) then s = s..'\t'..(t.user_hk or t.key) end
     return s
 end

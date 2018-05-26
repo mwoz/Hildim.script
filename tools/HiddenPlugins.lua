@@ -10,19 +10,19 @@ local function Run(flag)
     if flag == 'Commands' then
         defpath = props["SciteDefaultHome"].."\\tools\\Commands\\"
         settName = "settings.commands.plugins"
-        sTitle = "Загрузка команд"
+        sTitle = _T"Connection of Commands"
         fCond = function() return true end
     elseif flag == 'Status' then
         defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
         settName = "settings.status.layout"
-        sTitle = "Загрузка плагинов строки состояния"
+        sTitle = _T"Connection of Statusbar Plugins"
         fCond = function(pI) return pI.statusbar end
         checkItems = 'settings.hidden.plugins'
         checkTitle = 'Hidden Plugin'
     else
         defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
         settName = "settings.hidden.plugins"
-        sTitle = "Загрузка фоновых плагинов"
+        sTitle = _T"Connection of Background Plugins"
         fCond = function(pI) return pI.hidden end
         checkItems = 'settings.status.layout'
         checkTitle = 'Status Bar'
@@ -31,8 +31,8 @@ local function Run(flag)
     local function Show()
 
         local list_lex, dlg, bBlockReset, tree_right, tree_plugins
-        local btn_ok = iup.button  {title = "OK"}
-        local btn_esc = iup.button  {title = "Cancel"}
+        local btn_ok = iup.button  {title = _TH"OK"}
+        local btn_esc = iup.button  {title = _TH"Cancel"}
         iup.SetHandle("TOOLBARSETT_BTN_OK", btn_ok)
         iup.SetHandle("TOOLBARSETT_BTN_ESC", btn_esc)
         btn_esc.action = function()
@@ -174,8 +174,8 @@ local function Run(flag)
             end
         end)
 
-        iup.SetAttributeId(tree_right, "TITLE", 0, "Загружаемые элементы")
-        iup.SetAttributeId(tree_plugins, "TITLE", 0, "Неиспользуемые элементы")
+        iup.SetAttributeId(tree_right, "TITLE", 0, _T"Connected Plugins")
+        iup.SetAttributeId(tree_plugins, "TITLE", 0, _T"Available Plugins")
 
         tree_right:SetUserId(0, '')
 

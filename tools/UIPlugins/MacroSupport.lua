@@ -95,7 +95,7 @@ local function Init_hidden()
 
     local function do_BeginFor()
         local ret, num, cap =
-        iup.GetParam("Новый повтор блока",
+        iup.GetParam(_T"New Command Block Repeatition".."^macros",
             function(h, id)
                 if id == iup.GETPARAM_BUTTON1 then
                     local cap = iup.GetParamParam(h, 1).value
@@ -108,8 +108,8 @@ local function Init_hidden()
                 end
                 return 1
             end,
-            'Число повторений%i[1,100,1]\n'..
-            'Заголовок%s\n'
+            _T'Number of Repeatition'..'%i[1,100,1]\n'..
+            _T'Caption'..'%s\n'
             ,
             2,
             '<New>'
@@ -137,11 +137,11 @@ local function Init_hidden()
         end
 
         local ret, num, fix, reverce =
-        iup.GetParam("Вставка из истории^macros",
+        iup.GetParam(_T"Pasting From History".."^macros",
             nil,
-            'Параметр повтора%l|'..table.concat(tItems, '|')..'|\n'..
-            'Фиксированный%i[1,100,1]\n'..
-            'Переместить вверх списка%b\n'
+            _T'Repeatition Parameter'..'%l|'..table.concat(tItems, '|')..'|\n'..
+            _T'Fixed'..'%i[1,100,1]\n'..
+            _T'Move Up the list'..'%b\n'
             ,
             0, 0, 0
         )
@@ -196,7 +196,7 @@ local function Init_hidden()
 
     local function do_BeginIf()
         local ret, def, cap =
-        iup.GetParam("Новое условие^macros",
+        iup.GetParam(_T"New Condition".."^macros",
             function(h, id)
                 if id == iup.GETPARAM_BUTTON1 then
                     local cap = iup.GetParamParam(h, 1).value
@@ -209,8 +209,8 @@ local function Init_hidden()
                 end
                 return 1
             end,
-            'По умолчанию%b\n'..
-            'Заголовок%s\n'
+            _T'Default'..'%b\n'..
+            _T'Caption'..'%s\n'
             ,
             0,
             '<New>'
@@ -227,7 +227,7 @@ local function Init_hidden()
 
     local function do_NewStringPar()
         local ret, val, def, cap =
-        iup.GetParam("Новый строковый параметр^macros",
+        iup.GetParam(_T"New String Parameter".."^macros",
             function(h, id)
                 if id == iup.GETPARAM_BUTTON1 then
                     local cap = iup.GetParamParam(h, 1).value
@@ -240,9 +240,9 @@ local function Init_hidden()
                 end
                 return 1
             end,
-            'Значение%s\n'..
-            'Использовать по умолчанию%b\n'..
-            'Заголовок%s\n'
+            _T'Value'..'%s\n'..
+            _T'Use By Default'..'%b\n'..
+            _T'Caption'..'%s\n'
             ,
             '',
             0,
@@ -335,7 +335,7 @@ local function Init_hidden()
 
                 end
                 sOut = sOut..strUp..
-                    ' = \niup.GetParam("Параметры макроса^macros", nil,'..strParams..
+                    ' = \niup.GetParam(_T"Macro Parameters".."^macros", nil,'..strParams..
                     '\n"" '..strValues..")\nif not ret then return end"
             end
         end
@@ -563,8 +563,8 @@ local function Init_hidden()
         if not scr:find('iup%.GetParam%("') then
             local ret
             ret, cnt =
-            iup.GetParam("Число повторов^macros", nil,
-                "Повторить, раз: %i[1,100,1]\n",
+            iup.GetParam(_T"Number of Repeatition".."^macros", nil,
+                _T"Repeat"..": %i[1,100,1]\n",
             1)
             if not ret then return end
         end
@@ -681,7 +681,7 @@ local function Init_hidden()
             end
             if FILEMAN then
                 table.insert(macro_list, {'s2', separator = 1})
-                table.insert(macro_list, {'Open Macro Folder', ru = 'Открыть папку с макросами', action = function() FILEMAN.OpenFolder(props["SciteDefaultHome"]..'\\data\\Macros\\') end, image = 'folder_search_result_µ'})
+                table.insert(macro_list, {'Open Macro Folder', ru = _T'Open Macro Folder', action = function() FILEMAN.OpenFolder(props["SciteDefaultHome"]..'\\data\\Macros\\') end, image = 'folder_search_result_µ'})
             end
         end
         return macro_list
@@ -752,56 +752,56 @@ local function Init_hidden()
         nextMC()
     end
 
-    local item = {'Macros', ru = 'Макросы', {
-		{'Start Record', ru = 'Начать запись', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end, image = "control_record_µ"},
-		{'Play Current', ru = 'Воспроизвести текущий', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "control_µ"},
-		{'Delete Current', ru = 'Удалить текущий', action = function() if iup.Alarm("Macros", 'Удалить макрос?', 'Да', 'Нет') == 1 then recordet_macros = nil end end, visible = function() return not MACRO.Record and recordet_macros end, image = "cross_script_µ"},
-		{'Save Current', ru = 'Сохранить текущий', action = SaveCurrent, visible = function() return not MACRO.Record and recordet_macros  end, image = "disk_µ" },
-		{'View Current', ru = 'Просмотреть текущий', action = function() print(GetScript()) end, visible = function() return not MACRO.Record and recordet_macros  end },
-		{'Stop Record', ru = 'Остановить запись', action = StopRecord, visible = function() return MACRO.Record end, image = "control_stop_square_µ" },
+    local item = {'Macros', ru = _T'Macro', {
+		{'Start Record', ru = _T'Start Recording', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end, image = "control_record_µ"},
+		{'Play Current', ru = _T'Playback Current Macro', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "control_µ"},
+		{'Delete Current', ru = _T'Delete Current Macro', action = function() if iup.Alarm("Macros", _T'Delete Macro?', _TH'Да', _TH'Нет') == 1 then recordet_macros = nil end end, visible = function() return not MACRO.Record and recordet_macros end, image = "cross_script_µ"},
+		{'Save Current', ru = _T'Save Current Macro', action = SaveCurrent, visible = function() return not MACRO.Record and recordet_macros  end, image = "disk_µ" },
+		{'View Current', ru = _T'View Current Macro', action = function() print(GetScript()) end, visible = function() return not MACRO.Record and recordet_macros  end },
+		{'Stop Record', ru = _T'Stop Recording', action = StopRecord, visible = function() return MACRO.Record end, image = "control_stop_square_µ" },
         {'s1', separator = 1},
         {'macrolist', plane = 1,  visible = function() return not MACRO.Record end , get_macro_list},
         {'OnRecord', plane = 1, visible = function() return MACRO.Record end, {
-            {'Keep Position in line', ru = 'Запомнить позицию в строке', action = do_KeepPosition, image = "marker_µ"},
-            {'Restore position', ru = 'Перейти на позицию в строке', visible = function() return #positions_t > 0 end, submenu_positions},
+            {'Keep Position in line', ru = _T'Store Position in String', action = do_KeepPosition, image = "marker_µ"},
+            {'Restore position', ru = _T'Go to Position in String', visible = function() return #positions_t > 0 end, submenu_positions},
         },},
-        {'Insert string', ru = 'Вставить строку...', visible = function() return MACRO.Record end, {
+        {'Insert string', ru = _T'Insert User-Defined String...', visible = function() return MACRO.Record end, {
             {'StringList', plane = 1, string_block_content},
-            {'New String Parameter', ru = 'Задать новый строковый параметр', action = do_NewStringPar}
+            {'New String Parameter', ru = _T'Set New String Parameter', action = do_NewStringPar}
         }},
-        {'Repeat Next Block', ru = 'Повторить следующий блок...', visible = function() return MACRO.Record end, {
+        {'Repeat Next Block', ru = _T'Repeat Next Command Block...', visible = function() return MACRO.Record end, {
             {'ForList', plane = 1, for_block_content},
-            {'New Repeat Parameter', ru = 'Задать новый параметр повторений', action = do_BeginFor}
+            {'New Repeat Parameter', ru = _T'Set New Repeatition Parameter', action = do_BeginFor}
         }},
-        {'Call By Condition...', ru = 'Выполнить при условии...', visible = function() return MACRO.Record end, {
+        {'Call By Condition...', ru = _T'Playback Commands on Condition...', visible = function() return MACRO.Record end, {
             {'IfList', plane = 1, if_block_content},
-            {'New Condition', ru = 'Задать новое условие', action = do_BeginIf}
+            {'New Condition', ru = _T'Set New Condition', action = do_BeginIf}
         }},
         {'StopRecordBlock', plane = 1, visible = function() return MACRO.Record and pCurBlock.id end, function()
             return {
-                {'Завершить блок "'..params[pCurBlock.id].caption..'"', action = do_StopBlock, image='control_double_µ'}
+                {_T'Complete Block/Condition "'..params[pCurBlock.id].caption..'"', action = do_StopBlock, image='control_double_µ'}
             }
         end},
         {'Commands', plane = 1, visible = function() return MACRO.Record end, {
-            {'Select Word', ru = 'Выделить слово под курсором', action = do_SelectWord},
-            {'Copy', ru = 'Копировать', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
-            {'Cut', ru = 'Вырезать', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
-            {'Paste', ru = 'Вставить', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
-            {'Paste from History', ru = 'Вставить из истории клипов', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
-            {'Find &Next', ru = 'Найти далее', action = function() do_FindNextBack(false) end},
-            {'Find &Back', ru = 'Предыдущее совпадение', action = function() do_FindNextBack(true) end},
-            {'Find Next Word/Selection', ru = 'Слово/выделение - (через диалог)', action = function() do_Find_FindInDialog(true) end, image = "IMAGE_search" },
-            {'Find Prev Word/Selection', ru = 'Предыдущее слово/выделение - (через диалог)', action = function() do_Find_FindInDialog(false) end, image = "IMAGE_search"},
-            {'Next Word/Selection', ru = 'Следующее слово/выделение', action = function() do_FindNextWrd(1) end, image = "IMAGE_search"},
-            {'Prevous Word/Selection', ru = 'Предыдущее слово/выделение', action = function() do_FindNextWrd(2) end, image = "IMAGE_search"} ,
-            {'Undo', ru = 'Отменить', active = function() return MC and (MC.typ == "F" or MC.typ == "P") end, action = do_Undo, image = "arrow_return_270_left_µ"} ,
+            {'Select Word', ru = _T'Select Word Under Cursor', action = do_SelectWord},
+            {'Copy', ru = _T'Copy', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
+            {'Cut', ru = _T'Cut', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
+            {'Paste', ru = _T'Paste', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
+            {'Paste from History', ru = _T'Paste from Clip History', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
+            {'Find &Next', ru = _T'Find Next', action = function() do_FindNextBack(false) end},
+            {'Find &Back', ru = _T'Find Previous', action = function() do_FindNextBack(true) end},
+            {'Find Next Word/Selection', ru = _T'Find Next Word/Selection', action = function() do_Find_FindInDialog(true) end, image = "IMAGE_search" },
+            {'Find Prev Word/Selection', ru = _T'Find Prev Word/Selection', action = function() do_Find_FindInDialog(false) end, image = "IMAGE_search"},
+            {'Next Word/Selection', ru = _T'Next Word/Selection', action = function() do_FindNextWrd(1) end, image = "IMAGE_search"},
+            {'Prevous Word/Selection', ru = _T'Prevous Word/Selection', action = function() do_FindNextWrd(2) end, image = "IMAGE_search"} ,
+            {'Undo', ru = _T'Undo', active = function() return MC and (MC.typ == "F" or MC.typ == "P") end, action = do_Undo, image = "arrow_return_270_left_µ"} ,
         }},
     }}
     menuhandler:AddMenu(item)
 
 end
 return {
-    title = 'Поддержка макросов',
+    title = _T'Macro Support',
     destroy = onDestroy,
     hidden = Init_hidden,
 }

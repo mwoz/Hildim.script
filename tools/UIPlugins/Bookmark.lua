@@ -198,7 +198,7 @@ local function Init()
             if list_bookmarks:getcell(lin, 4) then
                 list_bookmarks.tip = list_bookmarks:getcell(lin, 2)..'\n\n File: '..list_bookmarks:getcell(lin, 3)..'\nLine:  '..(tonumber(list_bookmarks:getcell(lin, 4)) + 1)
             else
-                list_bookmarks.tip = 'Список букмарков'
+                list_bookmarks.tip = _T'Bookmark List'
             end
         end
     end
@@ -232,7 +232,7 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|xxxx',
-        {'Bookmarks List...', ru = 'Список закладок...', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
+        {'Bookmarks List...', ru = _T'Bookmark List'..'...', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
     )
     return dlg
 end
@@ -243,7 +243,7 @@ local function ToolBar_Init(h)
     local dlg = createDlg()
 
     local box = iup.hbox{
-            iup.flatbutton{title = 'Закладки', flat_action=(function(h)
+            iup.flatbutton{title = _T'Bookmarks', flat_action=(function(h)
                 local _, _, left, top = h.screenposition:find('(-*%d+),(-*%d+)')
                 if iup.GetParent(iup.GetParent(h)).name == 'StatusBar' then
                     local _, _, _, dy = dlg.rastersize:find('(%d*)x(%d*)')

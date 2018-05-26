@@ -1,0 +1,26 @@
+return {
+["Имя%s\n"] = "Name%s\n";
+["Удаление проекта"] = "Deleting Project";
+["Вы действительно хотите удалить проект\nсо всем его содержимым?"] = "Do you really want to delete the project\nwith all its content?";
+["Удаление элемента"] = "Deleting Item";
+["Исключить файл из проекта?"] = "Exclude file from project?";
+["Добавление файла в проект"] = "Adding a file to Project";
+["Файл еще не сохранен на диск"] = "File not yet saved to disk";
+["Добавить отмеченные в солюшн"] = "Add marked to Solution";
+["Добавить НЕотмеченные в солюшн"] = "Add NOT marked to Solution";
+['Рабочая область'] = 'Solution';
+['Сохранить как'] = 'Save As';
+['Открыть'] = 'Open';
+['Новый  проект'] = 'New  project';
+['Удалить  проект'] = 'Delete  project';
+['Открыть все файлы проекта'] = 'Open all project files';
+['Установить активным'] = 'Set Active';
+['Добавить...'] = 'Add...';
+['Добавить текущий файл - '] = 'Add current file - ';
+['Добавить все открытые файлы'] = 'Add all open files';
+['Исключить файл из проекта'] = 'Exclude file from project';
+['Перейти в директорию'] = 'Change Folder';
+['Сохранить все как новый проект'] = 'Save all open files as New Project';
+['Добавить в активный проект'] = 'Add to active project';
+['Закрыть и добавить в активный проект'] = 'Close and add to active project';
+}

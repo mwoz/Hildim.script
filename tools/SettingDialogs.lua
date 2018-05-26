@@ -1,14 +1,14 @@
 local sett = {}
 function sett.ResetWrapProps()
 	local ret, style, flag, loc, mode, indent, keys =
-                    iup.GetParam("Настройки переноса по словам^WrapSettings",
+                    iup.GetParam(_T"Wrap Line Settings".."^WrapSettings",
 					nil,
-					'Переносить:%l|По границам слов|По любому символу|По пробелам|\n'..
-					'Символы переноса-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n'..
-					'Символы переноса-в тексте:%l|По границам окна|В конце - по тексту|В начале - по тексту|Оба по тексту|\n'..
-					'Выравнивание после переноса%l|Отступ от края|По Предыдущей строке|Отступ от пред. строки|\n'..
-					'Величина отступа:%i[1,10,1]\n'..
-					'<Home>,<End> до ближайшего переноса %b\n',
+					_T'Wrap by:%l|Word Boundaries|Any Charactersу|Whitespaces|\n'..
+					_T'Visual Flags-Draw:%l|No|At Begining|At End|At Begining and End|In Line Number|Line Number and End|Line Number and Begining|All|\n'..
+					_T'Visual Flags-In Line:%l|All Near Border|At End - Near Text|At Begining - Near Text|All - Near Text|\n'..
+					_T'Wrapped sublines aligned to%l|Left of Window|First Subline Indent|First Subline Indent + 1 level|\n'..
+					_T'Wraped Line Indent:'..'%i[1,10,1]\n'..
+					_T'<Home>,<End> up to Nearest Wraped up Line'..' %b\n',
                    (tonumber(props['wrap.style']) or 1) - 1,
                     tonumber(props['wrap.visual.flags']) or 0,
                     tonumber(props['wrap.visual.flags.location']) or 0,
@@ -43,18 +43,18 @@ function sett.ResetSelColors()
     end
     local ret, selection_back, selection_alpha, selection_additional_back, selection_additional_alpha, caret_line_back, caret_line_back_alpha,
     output_caret_line_back, output_caret_line_back_alpha, findres_caret_line_back, findres_caret_line_back_alpha =
-    iup.GetParam("Цвета текста - выделение^TextColorsSelection",
+    iup.GetParam(_T"Text Colors - Selection".."^TextColorsSelection",
         nil,
-        'Выделенный текст - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Выделенный блок - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Строка под курсором - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Консоль - Строка под курсором - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'..
-        'Поиск - Строка под курсором - цвет%c\n'..
-        '- прозрачность%i[0,255,1]\n'
+        _T'Selected Text - Color'..'%c\n'..
+        _T'- transparency'..'%i[0,255,1]\n'..
+        _T'Selected Block - Color'..'%c\n'..
+        _T'- transparency'..'%i[0,255,1]\n'..
+        _T'Line Containing Caret - Color'..'%c\n'..
+        _T'- transparency'..'%i[0,255,1]\n'..
+        _T'Output - Line Containing Caret - Color'..'%c\n'..
+        _T'- transparency'..'%i[0,255,1]\n'..
+        _T'Search Results - Line Containing Caret - Color'..'%c\n'..
+        _T'- transparency'..'%i[0,255,1]\n'
         ,
         Rgb2Str(props['selection.back']),
         tonumber(props['selection.alpha']) or 30,
@@ -85,12 +85,12 @@ function sett.ResetSelColors()
 end
 
 function sett.ResetFontSize()
-	local ret, size = iup.GetParam("Шрифт диалогов и элементов интерфейса^InterfaceFontSize",
+	local ret, size = iup.GetParam(_T"Interface Font".."^InterfaceFontSize",
 					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 5 then return 0 end return 1 end,
-					'Размер%i[1,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
+					_T'Size'..'%i[1,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
 	if ret then
 		props['iup.defaultfontsize'] = size
-		if 1 == iup.Alarm('Шрифт интефейса', 'Перезапустить программу для применения изменений?', "Да", "Нет") then
+		if 1 == iup.Alarm(_T'Interface Font', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
             scite.SetRestart('')
             scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
         end
@@ -98,9 +98,9 @@ function sett.ResetFontSize()
 end
 
 function sett.SetFindresCount()
-	local ret, size = iup.GetParam("Хранить результатов поиска",
+	local ret, size = iup.GetParam(_T"Strore Search Results",
 					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 3 then return 0 end return 1 end,
-					'Не более%i[1,30,1]\n', tonumber(_G.iuprops['findres.maxresultcount']) or 10)
+					_T'Not Longer then'..'%i[1,30,1]\n', tonumber(_G.iuprops['findres.maxresultcount']) or 10)
 	if ret then
 		_G.iuprops['findres.maxresultcount'] = size
 	end
@@ -115,7 +115,7 @@ function sett.ResetTabbarProps()
 
     local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref,
     tabctrl_forecolor, ROColor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color
-    = iup.GetParam("Свойства панели закладок^TabbarProperties",
+    = iup.GetParam(_T"Tabbar Preferenses".."^TabbarProperties",
             function(h, id)
                 local bact = Iif(iup.GetParamParam(h, 5).control.value == 'ON', 'YES', 'NO')
                 iup.GetParamParam(h, 6).control.active = bact
@@ -127,24 +127,24 @@ function sett.ResetTabbarProps()
                 iup.GetParamParam(h, 9).control.active = bext
                 return 1
             end,
-        'Закрывать по DblClick%b\n'..
-        'Максимальное количество вкладок:%i[10,500,1]\n'..
-        'Переключать в порядке использования%b\n'..
-        'Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|%b\n'..
-        'Активный таб - в начало%b\n'..
-        'Неактивные вкладки%t\n'..
-        'Подсветка по расширению%b\n'..
-        'Освещенность:%i[10,99,1]\n'..
-        'Насыщенность:%i[10,99,1]\n'..
-        'Не показывать расширение%b\n'..
-        'Не показывать префикс%b\n'..
-        'Шрифт%c\n'..
-        'Шрифт Read-Only%c\n'..
-        'Активная вкладка%t\n'..
-        'Фон%c\n'..
-        'Шрифт%c\n'..
-        'Шрифт Read-Only%c\n'..
-        'Перемещаемая (drag-and-drop) %c\n'
+        _T'Close with DblClick'..'%b\n'..
+        _T'Maximum Tabs Amount:'..'%i[10,500,1]\n'..
+        _T'Switching in Order of Usage'..'%b\n'..
+        _T'Open New Tab%l|At End of List|After Current|At Begining of List|'..'%b\n'..
+        _T'Move Active Tab To Begining'..'%b\n'..
+        _T'Inactive Tabs'..'%t\n'..
+        _T'Highlight by Extension'..'%b\n'..
+        _T'Saturation:'..'%i[10,99,1]\n'..
+        _T'Intensity:'..'%i[10,99,1]\n'..
+        _T'Hide Extension'..'%b\n'..
+        _T'Hide Prefix'..'%b\n'..
+        _T'Foreground'..'%c\n'..
+        _T'Foreground Read-Only'..'%c\n'..
+        _T'Active Tab'..'%t\n'..
+        _T'Background'..'%c\n'..
+        _T'Foreground'..'%c\n'..
+        _T'Foreground Read-Only'..'%c\n'..
+        _T'Draged-and-Droped'..' %c\n'
         ,
         tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
         tonumber(props['buffers']) or 100,
@@ -193,21 +193,21 @@ function sett.ResetGlobalColors()
 
     local ret, bgcolor, txtbgcolor, fgcolor, txtfgcolor, txthlcolor, txtinactivcolor, hlcolor, borderhlcolor, bordercolor,
     scroll_forecolor , scroll_presscolor, scroll_highcolor , scroll_backcolor
-    = iup.GetParam("Цвета главного окна^MainWindowColor",
+    = iup.GetParam(_T"Main Window Colors".."^MainWindowColor",
         nil,
-        'Панели%c\n'..
-        'Поля редактирования%c\n'..
-        'Шрифт панелей%c\n'..
-        'Шрифт полей редактирования%c\n'..
-        'Шрифт подсвеченного элемента меню%c\n'..
-        'Шрифт неактивного элемента%c\n'..
-        'Подсветка кнопки, контрола%c\n'..
-        'Граница подсвеченного контрола%c\n'..
-        'Границы контролов%c\n'..
-        'Ползунок скролла%c\n'..
-        'Ползунок скролла - нажатый%c\n'..
-        'Ползунок скролла - подсвеченный%c\n'..
-        'Фон панели прокрутки%c\n'
+        _T'Bar Background'..'%c\n'..
+        _T'Edited Controls Background'..'%c\n'..
+        _T'Bar Foreground'..'%c\n'..
+        _T'Edited Controls Foreground'..'%c\n'..
+        _T'Highlighted Menu Item'..'%c\n'..
+        _T'Inactive Text Foreground'..'%c\n'..
+        _T'Control Highlight'..'%c\n'..
+        _T'Highlighted Control Border'..'%c\n'..
+        _T'Control Border'..'%c\n'..
+        _T'Scrollbar Slider'..'%c\n'..
+        _T'Scrollbar Slider - Pressed'..'%c\n'..
+        _T'Scrollbar Slider - Highlighted'..'%c\n'..
+        _T'Scrollbar Background'..'%c\n'
         ,
         props['layout.bgcolor']          ,
         props['layout.txtbgcolor']       ,
@@ -239,7 +239,7 @@ function sett.ResetGlobalColors()
         props['layout.scroll.highcolor']  = scroll_highcolor
         props['layout.scroll.backcolor'] = scroll_backcolor
 
-        if 1 == iup.Alarm('Цвета интефейса', 'Перезапустить программу для применения изменений?', "Да", "Нет") then
+        if 1 == iup.Alarm(_T'Interface Color', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
             scite.SetRestart('  -cmd scite.RunAsync(CORE.ResetGlobalColors)')
             scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
         end
@@ -249,11 +249,11 @@ end
 
 function sett.CurrentTabSettings()
     local ret, TabWidth, Indent, UseTabs =
-    iup.GetParam("Текущие настройки отступа^CurrentTabSettings",
+    iup.GetParam(_T"Tab Preferenses".."^CurrentTabSettings",
         nil,
-        'Табуляция%i[2,16,1]\n'..
-        'Отступ%i[2,16,1]\n'..
-        'Использовать таб%b\n'
+        _T'Tab Size'..'%i[2,16,1]\n'..
+        _T'Indentation Size'..'%i[2,16,1]\n'..
+        _T'Use Tab'..'%b\n'
         ,
         editor.TabWidth,
         editor.Indent,
@@ -272,28 +272,28 @@ function sett.AutoScrollingProps()
     caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xjumps, caret_policy_xeven,
     caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yjumps, caret_policy_yeven,
     caret_sticky, end_at_last_lin
-    = iup.GetParam("Настройки автопрокрутки^AutiscrollSettings",
+    = iup.GetParam(_T"Autoscroll Preferenses".."^AutiscrollSettings",
         nil,
-        'Автопрокрутка по ширине%t\n'..
+        _T'Horizontal Autoscroll'..'%t\n'..
 
-        'Нежелательная зона (НЗ)%b\n'..
-        'Ширина НЗ, px%i[1,500,20]\n'..
-        'Никогда не помешать каретку в НЗ%b\n'..
-        'Автопрокрутка на 3 НЗ%b\n'..
-        'Асимметричная НЗ%b\n'..
+        _T'Unwanted Zone (UZ)'..'%b\n'..
+        _T'UZ Width, px'..'%i[1,500,20]\n'..
+        _T'UZ - Enforce Strictly'..'%b\n'..
+        _T'Autoscroll for 3 UZ'..'%b\n'..
+        _T'Asymmetric UZ'..'%b\n'..
 
-        'Автопрокрутка по высоте%t\n'..
+        _T'Vertical Autoscroll'..'%t\n'..
 
-        'Нежелательная зона (НЗ)%b\n'..
-        'Высота НЗ, lines%i[1,500,20]\n'..
-        'Никогда не помешать каретку в НЗ%b\n'..
-        'Автопрокрутка на 3 НЗ%b\n'..
-        'Асимметричная НЗ%b\n'..
+        _T'Unwanted Zone (UZ)'..'%b\n'..
+        _T'UZ Height, lines'..'%i[1,500,20]\n'..
+        _T'UZ - Enforce Strictly'..'%b\n'..
+        _T'Autoscroll for 3 UZ'..'%b\n'..
+        _T'Asymmetric UZ'..'%b\n'..
 
         '%t\n'..
-        'Сохранять позицию по горизонтали%b\n'..
-        'Прокрутка вниз на страницу%t\n'..
-        'Запрещено end.at.last.line%b\n'
+        _T'Save Horizontal Position'..'%b\n'..
+        _T'Maximum Vertical Scroll Position'..'%t\n'..
+        _T'Page Below Last Line'..'%b\n'
         ,
         tonumber(props['caret.policy.xslop']) or 0,
         tonumber(props['caret.policy.width']) or 0,

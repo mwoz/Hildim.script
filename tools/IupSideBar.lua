@@ -68,7 +68,7 @@ local function  CreateToolBar()
             tblHb = {gap = "3", margin = "3x1", alignment = "ACENTER"}
             for j = 1, #(tblBars[i]) do
                 local pname = tblBars[i][j]
-                local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
+                local bSucs, pI = pcall(dolocale, "tools\\UIPlugins\\"..pname)
                 if not bSucs then
                     print(pI)
                     goto continue
@@ -117,7 +117,7 @@ local function CreateStatusBar()
     local tblH = {gap="3",margin="3x2", name="StatusBar", maxsize="x32", alignment = "ACENTER",}
     for i = 1, #tbl do
         local p = tbl[i]
-        local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+        local bSucs, pI = pcall(dolocale, "tools\\UIPlugins\\"..p)
         if not bSucs then
             print(pI)
             goto continue
@@ -272,7 +272,7 @@ local function CreateBox()
         local h = iup.scitedetachbox{
             hVbox; orientation = "HORIZONTAL";barsize = 5;minsize = "100x100";name = sName; shrink = "yes"; buttonImage = buttonImage;
             sciteid = sSciteId;Split_h = spl_h;Split_CloseVal = sSplit_CloseVal;
-            Dlg_Title = sSide.." Side Bar"; Dlg_Show_Cb = nil;
+            Dlg_Title = _TH(sSide.." Side Bar"); Dlg_Show_Cb = nil;
             On_Detach = (function(h, hNew, x, y)
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state = "CLOSE";
                 --h.visible
@@ -304,7 +304,7 @@ local function CreateBox()
     end
 
     local function settings2tbl(tSide, side)
-        local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
+        local defpath = "tools\\UIPlugins\\"
         local function piCode(pI)
             if pI.code == 'findrepl' then
                 return Pane{type = "FIND"}
@@ -323,7 +323,7 @@ local function CreateBox()
         for i = 1, #tSide do
             tCur = tSide[i]
             if tCur[1] then
-                local bSucs, pI = pcall(dofile, defpath..tCur[1])
+                local bSucs, pI = pcall(dolocale, defpath..tCur[1])
                 if not bSucs then
                     print(pI)
                     goto continue
@@ -349,7 +349,7 @@ local function CreateBox()
                     local tSub = piCode(pI)
                     for j = 2, #tCur do
                         tSub = {tSub}
-                        bSucs, pI = pcall(dofile, defpath..tCur[j])
+                        bSucs, pI = pcall(dolocale, defpath..tCur[j])
                         if not bSucs then
                             print(pI)
                             goto continue
@@ -491,7 +491,7 @@ local function InitSideBar()
     local bs2 = iup.GetDialogChild(hMainLayout, "BottomSplit2")
     local bFindInSide
     if  not SideBar_Plugins.findrepl then
-        SideBar_Plugins.findrepl = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\FindRepl.lua").sidebar(SideBar_Plugins)
+        SideBar_Plugins.findrepl = dolocale("tools\\UIPlugins\\FindRepl.lua").sidebar(SideBar_Plugins)
         local hTmp= iup.dialog{SideBar_Plugins.findrepl.handle}
         local hBx = iup.GetDialogChild(hTmp, 'FindReplDetach')
         iup.Detach(hBx)
@@ -536,7 +536,7 @@ local function InitSideBar()
     ConsoleBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach"); buttonImage='terminal_µ';
         sciteid = 'concolebar';Split_h = bSplitter;Split_CloseVal = "0";
-        Dlg_Title = "Console"; Dlg_Show_Cb = nil; MenuEx = "OUTPUT";
+        Dlg_Title = _TH"Output"; Dlg_Show_Cb = nil; MenuEx = "OUTPUT";
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Show_Cb = (function(h, state)
@@ -560,7 +560,7 @@ local function InitSideBar()
     FindResBar = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "FindResDetach"); buttonImage='binocular__pencil_µ';
         sciteid = 'findresbar';Split_h = bSplitter;Split_CloseVal = "1000";
-        Dlg_Title = "Find Results"; Dlg_Show_Cb = nil; MenuEx = "FINDRES";
+        Dlg_Title = _TH"Find Results"; Dlg_Show_Cb = nil; MenuEx = "FINDRES";
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Show_Cb = (function(h, state)
@@ -602,7 +602,7 @@ local function InitSideBar()
     CoEditor = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "SourceExDetach"); buttonImage='edit_µ';
         sciteid = 'coeditor';Split_h = bSplitter;Split_CloseVal = "1000";
-        Dlg_Title = "Second Editior"; Dlg_Show_Cb = nil; MenuEx = 'EDITOR';
+        Dlg_Title = _TH"Additional View"; Dlg_Show_Cb = nil; MenuEx = 'EDITOR';
         Dlg_Close_Cb = (function(h)
             if tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) > 980 then _G.iuprops['dialogs.coeditor.splitvalue'] = 900
             elseif tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) < 20 then _G.iuprops['dialogs.coeditor.splitvalue'] = 100 end
@@ -931,7 +931,7 @@ local strTbl = 'return function(h) return iup.expander{barsize = 0, state="OPEN"
 local i = 0
 for i = 1, #tbl do
     local p = tbl[i]
-    local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..p)
+    local bSucs, pI = pcall(dolocale, "tools\\UIPlugins\\"..p)
     if not bSucs then
         print(pI)
         goto continue
@@ -951,7 +951,7 @@ end
 local tbl = _G.iuprops["settings.commands.plugins"] or {}
 for i = 1, #tbl do
     local p = tbl[i]
-    local bSucs, pI = pcall(dofile, props["SciteDefaultHome"].."\\tools\\Commands\\"..p)
+    local bSucs, pI = pcall(dolocale, "tools\\Commands\\"..p)
     if not bSucs then
         print(pI)
         goto continue
@@ -961,7 +961,7 @@ for i = 1, #tbl do
         t[1] = pI.title
         t.visible = pI.visible
         if pI.key then t.key = pI.key end
-        t.action = function() dofile(props["SciteDefaultHome"].."\\tools\\Commands\\"..p).run() end
+        t.action = function() dolocale("tools\\Commands\\"..p).run() end
 
         menuhandler:InsertItem('MainWindowMenu', pI.path or 'Tools|xxx', t)
     end
@@ -990,7 +990,7 @@ hMainLayout.resize_cb = function()
 end
 
 try{
-    function() dofile(props["SciteDefaultHome"]..'\\tools\\BuffersList.lua') end,
+    function() dolocale('tools\\BuffersList.lua') end,
     catch{
         print
     }

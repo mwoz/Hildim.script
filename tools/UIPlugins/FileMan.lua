@@ -613,7 +613,7 @@ local function FileManTab_Init(h)
     --list_dir.
     --list_dir.hlcolor = ""
 
-    list_dir:setcell(0, 2, "Name")
+    list_dir:setcell(0, 2, _T"Name")
   	list_dir.click_cb = (function(h, lin, col, status)
         local sel = 0
         if h.marked then sel = h.marked:find('1') - 1 end
@@ -639,22 +639,22 @@ local function FileManTab_Init(h)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Fileman_sidebar', plane = 1,{
-            {"Change Dir", ru = "Изменить Директорию", action = FileMan_ChangeDir},
-            {"Read Only", ru = "Только чтение", action = FileMan_ChangeReadOnly, check = GetReadOnly},
-            {"Delete", ru = "Удалить", action = FileMan_Delete},
-            {"Rename", ru = "Переименовать", action = FileMan_Rename},
+            {"Change Dir", ru = _T"Change Folder", action = FileMan_ChangeDir},
+            {"Delete", ru = _T"Delete", action = FileMan_Delete},
+            {"Rename", ru = _T"Rename", action = FileMan_Rename},
             {'s_OpenwithHildiM', separator = 1},
-            {"Open with HildiM", action = FileMan_OpenSelectedItems},
-            {"Execute", ru = "Выполнить", action =(function() FileMan_FileExec(nil) end)},
-            {"Exec with Params", ru = "Выполнить с параметрами", action = FileMan_FileExecWithParams},
+            {"Open with HildiM", ru = _T"Open with HildiM", action = FileMan_OpenSelectedItems},
+            {"Execute", ru = _T"Run", action =(function() FileMan_FileExec(nil) end)},
             {'s_AddtoFavorites', separator = 1},
-            {"Add to Favorites", ru = "Добавить в избранное", action = Favorites_AddFile},
-            {'When open file', ru = "После выбора файла",{
-                {"Stay Here", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF'"},
-                {"Restore First Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1'"},
-                {"Restore Prev. Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON'"},
+            {"Add to Favorites", ru = _T"Add to Favorites", action = Favorites_AddFile},
+            {'s_ReadOnly', separator = 1},
+            {"Read Only", ru = _T"Read Only", action = FileMan_ChangeReadOnly, check = GetReadOnly},
+            {'When open file', ru = _T"After File Open",{
+                {"Stay Here", ru = _T"No Tab's switching", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF'"},
+                {"Restore First Tab", ru = _T'Switch To First Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1'"},
+                {"Restore Prev. Tab", ru = _T'Switch To Previous Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON'"},
             }},
-            {"Insert Relative Path", ru = "Вставить относительный путь", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
+            {"Insert Relative Path", ru = _T"Insert Relative Path", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
     }})
 
     list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(key) end)
@@ -684,8 +684,8 @@ local function FileManTab_Init(h)
     end)
     list_favorites.value_edit_cb = Favorits_DoRename
     iup.SetAttribute(list_favorites, 'TYPE*:1', 'IMAGE')
-    list_favorites:setcell(0, 2, "Name")
-    list_favorites:setcell(0, 3, "Path")
+    list_favorites:setcell(0, 2, _T"Name")
+    list_favorites:setcell(0, 3, _T"Path")
   	list_favorites.click_cb = (function(h, lin, col, status)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Favorites_OpenFile()
@@ -694,9 +694,9 @@ local function FileManTab_Init(h)
             iup.SetAttribute(list_dir, 'MARK'..col..':0', 1)
             local mnu = iup.menu
             {
-              iup.item{title="Add active buffer",action=Favorites_AddCurrentBuffer},
-              iup.item{title = "Delete item", action = Favorites_DeleteItem},
-              iup.item{title = "Rename", action = Favorites_Rename},
+              iup.item{title = _T"Add Current File", action = Favorites_AddCurrentBuffer},
+              iup.item{title = _T"Delete from Favorites", action = Favorites_DeleteItem},
+              iup.item{title = _T"Rename", action = Favorites_Rename},
             }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
         end
     end)
@@ -723,7 +723,7 @@ local function FileManTab_Init(h)
     memo_mask.k_any=(function(h,k)
         return memoNav(k)
     end)
-    chkByTime = iup.hi_toggle{title="Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", flat_action=FileMan_ToggleSort}
+    chkByTime = iup.hi_toggle{title=_T"Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", flat_action=FileMan_ToggleSort}
     -- memo_mask.killfocus_cb = (function(h)
         -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)
@@ -737,8 +737,8 @@ local function FileManTab_Init(h)
 
     local res = {
         handle = iup.vbox{
-                   iup.scrollbox{iup.vbox{iup.hbox{iup.label{title = "Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
-                   iup.hbox{iup.label{title = "File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"}},
+                   iup.scrollbox{iup.vbox{iup.hbox{iup.label{title = _T"Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
+                   iup.hbox{iup.label{title = _T"File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"}},
                    scrollbar='NO', minsize='x54', maxsize='x54', expand="HORIZONTAL",};
                    split_s
                  };

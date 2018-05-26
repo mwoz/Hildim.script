@@ -1,0 +1,29 @@
+return {
+["Compare to Git"] = "Сравнить с Git";
+["Copy Right"] = "Скопировать влево";
+["Previous Difference"] = "Предыдущее различие";
+["Comparison Color Preferences"] = "Настройки цветов сравнения";
+["Copy Left"] = "Скопировать вправо";
+["Directory to Compare"] = "Директория для сравнения";
+["Clear Highlighting"] = "Очистить подсветку";
+["Color Preferences"] = "Настройки цветов";
+["Comparison"] = "Сравнение";
+["Compare to same named from "] = "Сравнить с одноименным из...";
+["Selecting a directory for comparison to same named"] = "Выбор директории для сравнения с одноименным";
+["File Comparison"] = "Сравнение файлов";
+["Add Blank Lines"] = "Добавлять пустые строки";
+["Recompare when moved to other line"] = "Сравнивать заново при изменении строки";
+["Use Icons"] = "Использовать иконки";
+["Compare to Other View"] = "Сравнить";
+["Identify moved lines"] = "Определять перемещенные строки";
+["Ignore Spaces"] = "Игнорировать пробелы";
+["Marking differences in the compared line"] = "Маркировка различий в строке сравнения";
+["Next Difference"] = "Следующее различие";
+["Compare to Vss"] = "Сравнить с Vss";
+["Blank"] = "Пустые";
+["Moved"] = "Перемещенные";
+["Changed"] = "Измененные";
+["Deleted"] = "Удаленные";
+["Added"] = "Добавленные";
+["Lines color"] = "Цвета строк";
+}

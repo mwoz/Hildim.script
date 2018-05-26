@@ -4,6 +4,7 @@
 -- Общие функции, использующиеся во многих скриптах
 ---------------------------------------------------
 --Функция - создатель классов
+
 function class()
     local c = {}
     c.__index = c
@@ -28,6 +29,7 @@ CORE.onDestroy_event = {}
 package.path  = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.lua;"..package.path
 package.cpath = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.dll;"..package.cpath
 
+require 'shell'
 --------------------------------------------------------
 -- Подключение пользовательского обработчика к событию SciTE
 dofile(props["SciteDefaultHome"]..'\\tools\\eventmanager.lua')
@@ -614,6 +616,53 @@ function s:tooutput()
 end
 
 _G.oStack = s
+
+function _T(s) return s end
+function _TH(s) return s end
+function _TM(s) return s end
+
+if shell.fileexists(props["SciteDefaultHome"]..'\\locale\\HilduM_'..props['locale']..'.locale') then
+    dofile(props["SciteDefaultHome"]..'\\locale\\HilduM_'..props['locale']..'.locale')
+    _TH = function(s) return __LOCALE.HildiM[s] or s end
+    _TM = function(s) return __LOCALE.Menu[s] or s end
+else
+    props['locale'] = ''
+end
+
+function _GetLocale(fname)
+    return function(s) return __LOCALE[fname][s] or s end
+end
+
+function _FMT(s, ...)
+    local arg = table.pack(...)
+    for i = 1, #arg do
+        s = s:gsub('%%'..i, arg[i])
+    end
+    return s
+end
+
+
+function dolocale(s)
+    local s_name = s:gsub('.lua$', '')
+    local _, _, l_name = s_name:find('([^\\]+)$')
+    local trans = false
+    if props['locale'] ~= '' then
+        if __LOCALE[s_name] then
+            trans = true
+        elseif shell.fileexists(props["SciteDefaultHome"]..'\\locale\\'..l_name..'_'..props['locale']..'.locale') then
+            __LOCALE[s_name] = dofile(props["SciteDefaultHome"]..'\\locale\\'..l_name..'_'..props['locale']..'.locale')
+            trans = true
+        end
+    end
+    if trans then
+        local f = io.open(props["SciteDefaultHome"]..'\\'..s)
+        local t = 'local _T = _GetLocale("'..s_name:gsub('\\', '\\\\')..'")\r\n'..f:read('*a')
+        f:close()
+        return dostring(t)
+    else
+        return dofile(props["SciteDefaultHome"]..'\\'..s)
+    end
+end
 
 
 -- Расширение IUP

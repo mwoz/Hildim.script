@@ -136,17 +136,17 @@ local function internal_Init()
             if list_navigation:getcell(lin, 5) then
                 list_navigation.tip = list_navigation:getcell(lin, 1)..'\n\n File: '..list_navigation:getcell(lin, 5)..'\nLine:  '..list_navigation:getcell(lin, 4)
             else
-                list_navigation.tip = 'История\n(Alt+<)/(Alt+>) - Назад/Вперед'
+                list_navigation.tip = _T'History\n(Alt+<)/(Alt+>) - Backward/Forward'
             end
         end
     end
 
     iup.drop_cb_to_list(list_navigation, Navigation_Go)
     menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
-        {'Navigation', ru = 'Навигация', plane = 1,{
+        {'Navigation', ru = _T'Navigation', plane = 1,{
             {'s_Navigation', separator = 1,},
-            {'Navigate Backward', ru = 'Навигация: Назад', action = function() walk_Navigation(true) end, key = 'Alt+<', active = function() return currentItem ~= 0 and currentItem < tonumber(list_navigation.numlin) end, image = 'navigation_180_µ',},
-            {'Navigate Forward', ru = 'Навигация: Вперед', action = function() walk_Navigation(false) end, key = 'Alt+>', active = function() return currentItem > 1 end, image = 'navigation_µ',},
+            {'Navigate Backward', ru = _T'Navigation: Backward', action = function() walk_Navigation(true) end, key = 'Alt+<', active = function() return currentItem ~= 0 and currentItem < tonumber(list_navigation.numlin) end, image = 'navigation_180_µ',},
+            {'Navigate Forward', ru = _T'Navigation: Forward', action = function() walk_Navigation(false) end, key = 'Alt+>', active = function() return currentItem > 1 end, image = 'navigation_µ',},
         }}
     )
     AddEventHandler("OnMenuCommand", function(msg) if msg == 2316 then OnNavigation("Home") elseif msg == 2318 then OnNavigation("End") end end)
@@ -184,7 +184,7 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
-        {'Navigation History...', ru = 'История навигации...', action = function() iup.ShowInMouse(dlg) end, key = "Alt+Shift+N"}
+        {'Navigation History...', ru = _T'Navigation History...', action = function() iup.ShowInMouse(dlg) end, key = "Alt+Shift+N"}
     )
     return dlg
 end
@@ -209,7 +209,7 @@ local function ToolBar_Init(h)
 
     local box = iup.hbox{
             btnForward,
-            iup.flatbutton{title = 'Навигация', flat_action =(function(h)
+            iup.flatbutton{title = _T'Navigation', flat_action =(function(h)
                 local _, _, left, top = h.screenposition:find('(-*%d+),(-*%d+)')
                 if iup.GetParent(iup.GetParent(h)).name == 'StatusBar' then
                     local _, _, _, dy = dlg.rastersize:find('(%d*)x(%d*)')

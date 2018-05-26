@@ -5,8 +5,8 @@ local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
 local function Show()
 
     local list_lex, dlg, bBlockReset, tree_right, tree_plugins
-    local btn_ok = iup.button  {title="OK"}
-    local btn_esc = iup.button  {title = "Cancel"}
+    local btn_ok = iup.button  {title=_TH"OK"}
+    local btn_esc = iup.button  {title = _TH"Cancel"}
     local clrUsed = '255 0 0'
     local tPlugins = {}
     iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
@@ -204,7 +204,7 @@ local function Show()
         iup.hbox{iup.vbox{tree_plugins},tree_right};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Элементы панелей инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title=_T"Toolbar Items",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="toolbarlayout", minsize='530x400', helpbutton = 'YES'}
 
 
@@ -214,8 +214,8 @@ local function Show()
         end
     end)
 
-    iup.SetAttributeId(tree_right,"TITLE", 0, "Панели инстументов")
-    iup.SetAttributeId(tree_plugins,"TITLE", 0, "Неиспользуемые элементы")
+    iup.SetAttributeId(tree_right,"TITLE", 0, _T"Toolbars")
+    iup.SetAttributeId(tree_plugins,"TITLE", 0, _T"Available Plugins")
     iup.SetAttributeId(tree_right,"ADDBRANCH", 0, "<Bar>")
 
     tree_right:SetUserId(0, '')

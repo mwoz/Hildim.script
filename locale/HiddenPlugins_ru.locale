@@ -1,0 +1,7 @@
+return {
+["Connection of Commands"] = "Загрузка команд";
+["Connection of Statusbar Plugins"] = "Загрузка плагинов строки состояния";
+["Available Plugins"] = "Неиспользуемые элементы";
+["Connected Plugins"] = "Загружаемые элементы";
+["Connection of Background Plugins"] = "Загрузка фоновых плагинов";
+}

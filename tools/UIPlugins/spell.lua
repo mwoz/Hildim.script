@@ -17,11 +17,11 @@ local function Init()
     assert(sEn, 'dict En not loaded')
     local tblVariants = {}
 
-    mark = CORE.InidcFactory('Spell.Errors', 'Ошибки при проверке орфографии', INDIC_SQUIGGLE, 255, 0)
+    mark = CORE.InidcFactory('Spell.Errors', _T'Spelling errors', INDIC_SQUIGGLE, 255, 0)
     local cHeck, cSpell, cSkip = 0, 1,2
     local commentsStyles
-    local cADDYODIC, cADDBYZXAMPLE = '<Add-to-Dic>', '<Add-with-Example>'
-    local constFirstSpell = 65000     --65535 - максимально возможная комманда      coow
+    local cADDYODIC, cADDBYZXAMPLE = '<'.._T'Add to Dictionary'..'>', '<'.._T'Add according to model'..'>'
+    local constFirstSpell = 65000     --65535 - максимально возможная кмманда
     local constAddToDic = 65500
     local constWithExample = 65501
     local SpellRange
@@ -232,13 +232,13 @@ local function Init()
                 local btn_ok = iup.button  {title = "OK"}
                 iup.SetHandle("BTN_OK", btn_ok)
 
-                local btn_esc = iup.button  {title = "Cancel"}
+                local btn_esc = iup.button  {title = _TH"Cancel"}
                 iup.SetHandle("BTN_ESC", btn_esc)
 
-                local vbox = iup.vbox{ iup.hbox{iup.label{title = "Вставить:", gap = 3}, txt_sorse, iup.label{title = "Образец:"}, txt_example}, iup.hbox{btn_ok, btn_esc, gap = 200}, gap =2,margin="4x4" }
+                local vbox = iup.vbox{ iup.hbox{iup.label{title = _T"Insert:", gap = 3}, txt_sorse, iup.label{title = _T"Model:"}, txt_example}, iup.hbox{btn_ok, btn_esc, gap = 200}, gap =2,margin="4x4" }
                 local result = false
 
-                local dlg = iup.scitedialog{vbox; title = "Добавление по образцу", defaultenter = "BTN_OK", defaultesc = "BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid="spell",
+                local dlg = iup.scitedialog{vbox; title = _T"Add according to model", defaultenter = "BTN_OK", defaultesc = "BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid="spell",
                     show_cb =(function(h, state)
                         if state == 0 then
                             local s = editor:IndicatorStart(mark, editor.CurrentPos)
@@ -440,7 +440,7 @@ local function Init()
         local ret, sz =
         iup.GetParam("Max Size for AutouSpell",
             nil,
-            'Символов * 10 ^ %r[5,10,0.2]\n'
+            _T'Символов * 10 ^ %r[5,10,0.2]\n'
             ,
             (_G.iuprops['spell.maxsize'] or 7)
         )
@@ -475,7 +475,7 @@ local function Init()
         menuhandler:InsertItem('EDITOR', 's0',
             {'Spelling Variants', plane = 1,
                 visible = function() return editor:IndicatorValueAt(mark, editor.CurrentPos) == 1 end,
-                bottom ={"Context Menu", ru = "Контекстное меню"}, {
+                bottom ={"Context Menu", ru = _T"Context Menu"}, {
                     {'list', plane = 1, FillVariantsMenu},
                     {cADDYODIC, action = function() ApplyVariant(cADDYODIC) end,},
                     {cADDBYZXAMPLE, action = function() ApplyVariant(cADDBYZXAMPLE) end,},
@@ -483,17 +483,17 @@ local function Init()
             }}
         )
         menuhandler:InsertItem('MainWindowMenu', 'Tools|s1',
-            {'Spelling', ru = 'Орфография',{
-                {'Auto Spell Check', ru = 'Проверять автоматически', action = ResetAutoSpell,
+            {'Spelling', ru = _T'Spelling',{
+                {'Auto Spell Check', ru = _T'Spell Check Automatically', action = ResetAutoSpell,
                     check = "tonumber(_G.iuprops['spell.autospell']) == 1 and (editor.Length < 10 ^(_G.iuprops['spell.maxsize'] or 7))",
                     active = 'editor.Length < 10 ^(_G.iuprops["spell.maxsize"] or 7)', key = 'Ctrl+Alt+F12',
                 },
                 {'s1', separator = 1,},
-                {'Check Selection', ru = 'Проверить выделенный фрагмент', action = spell_Selected, key = 'Ctrl+F12', image = 'IMAGE_CheckSpelling',},
-                {'Check Selection, By Highlighting', ru = 'Проверить фрагмент с учетом подсветки', action=spell_ByLex,},
-                {'List Errors', ru = 'Показать список ошибок', action = spell_ErrorList, key = 'Ctrl+Shift+F12', image = 'report__exclamation_µ'},
+                {'Check Selection', ru = _T'Check Selection', action = spell_Selected, key = 'Ctrl+F12', image = 'IMAGE_CheckSpelling',},
+                {'Check Selection, By Highlighting', ru = _T'Check Selection Considering Highlight', action=spell_ByLex,},
+                {'List Errors', ru = _T'Show error list', action = spell_ErrorList, key = 'Ctrl+Shift+F12', image = 'report__exclamation_µ'},
                 {'s1', separator = 1,},
-                {'Max Size', ru = 'Максимальный размер для автопроверки', action = SetMaxSize},
+                {'Max Size', ru = _T'Maximum file size for auto spell check', action = SetMaxSize},
         }}
     )
     _G.g_session["spell.runned"] = true
@@ -507,7 +507,7 @@ function Init_status(h)
             menuhandler:PopUp('MainWindowMenu|Tools|Spelling')
         end
     end
-    local sTip = 'Режим автоматической проверки\nорфографии(Ctrl+Alt+F12)'
+    local sTip = _T'Automatic spell check\n mode(Ctrl+Alt+F12)'
     zbox_s = iup.zbox{name = "Spelling_zbox",
         iup.button{image = 'IMAGE_CheckSpelling2';impress = 'IMAGE_CheckSpelling'; tip = sTip;canfocus = "NO";
             map_cb =(function(_) if _G.iuprops["spell.autospell"] == "1" then zbox_s.valuepos = 1 else zbox_s.valuepos = 0 end end);
@@ -525,7 +525,7 @@ function Init_status(h)
 end
 
 return {
-    title = 'Проверка орфографии',
+    title = _T'Spell checking',
     hidden = Init,
     code = 'spell',
     statusbar = Init_status,

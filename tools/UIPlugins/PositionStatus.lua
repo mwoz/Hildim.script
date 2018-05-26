@@ -19,7 +19,7 @@ local function Init(h)
         iup.PassFocus()
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
-        {'&Go to...', ru = 'Перейти на позицию...', key = 'Ctrl+G', action = IDM_GOTO}
+        {'Go to...', ru = _T'Go to...', key = 'Ctrl+G', action = IDM_GOTO}
     )
     AddEventHandler("OnMenuCommand", function(cmd)
         if cmd == IDM_GOTO then
@@ -46,11 +46,11 @@ local function Init(h)
 
     return {
         handle = iup.hbox{
-            iup.label{title = 'Line: '; fontstyle = 'Bold'};
+            iup.label{title = _T'Line: '; fontstyle = 'Bold'};
             txtLine;
-            iup.label{title = 'Column: '; fontstyle = 'Bold'};
+            iup.label{title = _T'Column: '; fontstyle = 'Bold'};
             txtCol;
-            iup.label{title = 'Selection: '; fontstyle = 'Bold'};
+            iup.label{title = _T'Selection: '; fontstyle = 'Bold'};
             txtSel; alignment = 'ACENTER', gap = '8';
         };
     }

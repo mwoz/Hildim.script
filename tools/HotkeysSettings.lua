@@ -51,8 +51,8 @@ end
 local function Show()
 
     local list_lex, dlg, bBlockReset
-    local btn_ok = iup.button  {title="OK", help_cb = help_cb}
-    local btn_esc = iup.button  {title="Cancel", help_cb = help_cb}
+    local btn_ok = iup.button  {title=_TH"OK", help_cb = help_cb}
+    local btn_esc = iup.button  {title = _TH"Cancel", help_cb = help_cb}
     iup.SetHandle("HK_BTN_OK",btn_ok)
     iup.SetHandle("HK_BTN_ESC",btn_esc)
     btn_esc.action = function()
@@ -188,13 +188,13 @@ local function Show()
                 local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
                 if title:find('Л'..h.value..'Ы', 1, true) then
                     if tree_hk.value == i..'' then return end
-                    result = iup.Alarm(' оманда "'..title..'" уже использует данный акселератор',
-                        'ѕерейти к "'..title:gsub('Л.*', '')..'"?\n'..
-                        'ѕереопределить '..h.value..', а дл€ "'..title:gsub('Л.*', '')..'" сбросить акселератор?\n'..
-                        'ќтменить ввод?',
-                        'ѕерейти',
-                        'ѕереопределить',
-                        'ќтменить')
+                    result = iup.Alarm(_FMT(_T'"%1" uses this hotkey', title),
+                        _FMT(_T'Go to"%1"?\n', title:gsub('Л.*', ''))..
+                        _FMT(_T'Reset %1, for "%2" remove hotkey?\n', h.value, title:gsub('Л.*', ''))..
+                        _T'Cancel Input?',
+                        _T'Go',
+                        _T'Reset',
+                        _TH'Cancel')
                     if result == 1 then
                         tree_hk.value = i
                         tree_hk.selection_cb(tree_hk, i, 1)
@@ -217,7 +217,7 @@ local function Show()
         bBlockReset = false
     end
 
-    btn_default = iup.button  {title="Default"}
+    btn_default = iup.button  {title=_T"Default"}
     btn_default.action = function()
         if tonumber(tree_hk.value) > 0 then
             local id = tonumber(tree_hk.value)
@@ -229,13 +229,13 @@ local function Show()
                     local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
                     if title:find('Л'..tuid.default..'Ы', 1, true) then
                         if tree_hk.value == i..'' then return end
-                        result = iup.Alarm(' оманда "'..title..'" уже использует акселератор '..tuid.default,
-                            'ѕерейти к "'..title:gsub('Л.*', '')..'"?\n'..
-                            '¬осстановить '..tuid.default..', а дл€ "'..title:gsub('Л.*', '')..'" сбросить акселератор?\n'..
-                            'ќтменить операцию?',
-                            'ѕерейти',
-                            '¬осстановить',
-                        'ќтменить')
+                        result = iup.Alarm(_FMT(_T'"%1" uses hotkey %2' , title ,tuid.default),
+                            _FMT(_T'Go to"%1"?\n', title:gsub('Л.*', ''))..
+                            _FMT(_T'Restore %1, for "%2" remove hotkey?\n', tuid.default, title:gsub('Л.*', ''))..
+                            _T'Cancel Operation?',
+                            _T'Go',
+                            _T'Restore',
+                        _TH'Cancel')
                         if result == 1 then
                             tree_hk.value = i
                             tree_hk.selection_cb(tree_hk, i, 1)
@@ -293,12 +293,12 @@ local function Show()
     end
 
     local vbox = iup.vbox{
-        iup.hbox{iup.label{title="ѕоиск:"}, edit_find,iup.label{title="<F3> - следующий результат"}, gap=15};
+        iup.hbox{iup.label{title = _T"Find:"}, edit_find, iup.label{title = _T"<F3> - Find Next"}, gap = 15};
         iup.hbox{iup.vbox{tree_hk}};
         iup.hbox{edit_hk, btn_default, gap='15'},
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Ќастройка гор€чих клавиш",defaultenter="HK_BTN_OK",defaultesc="HK_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title=_T"Hotkey Preferences",defaultenter="HK_BTN_OK",defaultesc="HK_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="HotkeysSetup", minsize='300x600', helpbutton = 'YES'}
 
     dlg.show_cb=(function(h,state)

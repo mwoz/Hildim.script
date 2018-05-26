@@ -48,16 +48,16 @@ local function Init()
         if dlg == nil then
             local txt_search = iup.text{size = '50x0'}
             local txt_num = iup.text{value = "1", size = "20x0", mask = "/d+"}
-            local btn_ok = iup.button  {title = "OK"}
+            local btn_ok = iup.button  {title = _TH"OK"}
             local chk_regex = iup.toggle{title = "RegEx"}
             iup.SetHandle("ALIGN_BTN_OK", btn_ok)
 
-            local btn_esc = iup.button  {title = "Cancel"}
+            local btn_esc = iup.button  {title = _TH"Cancel"}
             iup.SetHandle("ALIGN_BTN_ESC", btn_esc)
 
-            local vbox = iup.vbox{ iup.hbox{iup.label{title = "Подстрока:", gap = 3}, txt_search, iup.fill{}, chk_regex, iup.label{title = "Позиция:"}, txt_num, alignment = 'ACENTER'}, iup.hbox{btn_ok, iup.fill{}, btn_esc}, gap = 2, margin="4x4" }
+            local vbox = iup.vbox{ iup.hbox{iup.label{title = _T"Substring:", gap = 3}, txt_search, iup.fill{}, chk_regex, iup.label{title = _T"Position:"}, txt_num, alignment = 'ACENTER'}, iup.hbox{btn_ok, iup.fill{}, btn_esc}, gap = 2, margin = "4x4" }
             local result = false
-            dlg = iup.scitedialog{vbox; title = "Выравнивание", defaultenter = "ALIGN_BTN_OK", defaultesc = "ALIGN_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid="align" }
+            dlg = iup.scitedialog{vbox; title = _T"Alignment", defaultenter = "ALIGN_BTN_OK", defaultesc = "ALIGN_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid="align" }
 
             function dlg:show_cb(h, state)
                 if state == 0 then

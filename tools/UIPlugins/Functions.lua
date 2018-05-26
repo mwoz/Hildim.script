@@ -523,17 +523,17 @@ local function Func_Init(h)
                 {
                     iup.menu
                     {
-                        iup.item{title = "Order", value = Iif(_sort == "order", "ON", "OFF"), action = Functions_SortByOrder},
-                        iup.item{title = "Name", value = Iif(_sort == "name", "ON", "OFF"), action = Functions_SortByName}
+                        iup.item{title = _T"Order", value = Iif(_sort == "order", "ON", "OFF"), action = Functions_SortByOrder},
+                        iup.item{title = _T"Name", value = Iif(_sort == "name", "ON", "OFF"), action = Functions_SortByName}
                     }
-                    ;title = "Sort By"
+                    ;title = _T"Sort By"
                 },
-                iup.item{title = "Show Parameters", value = Iif(_show_params, "ON", "OFF"), action = Functions_ToggleParams},
-                iup.item{title = "Group By Flags", value = Iif(_group_by_flags, "ON", "OFF"), action = Functions_ToggleGroup},
-                iup.item{title = "Print", action = Functions_Print},
-                iup.item{title = "Max size", action = SetMaxSize},
+                iup.item{title = _T"Show Parameters", value = Iif(_show_params, "ON", "OFF"), action = Functions_ToggleParams},
+                iup.item{title = _T"Group By Type", value = Iif(_group_by_flags, "ON", "OFF"), action = Functions_ToggleGroup},
+                iup.item{title = _T"Display To Console", action = Functions_Print},
+                iup.item{title = _T"Max Size for Auto Show", action = SetMaxSize},
                 Iif(editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7),
-                    iup.item{title = "Force Reset", action = function() OnSwitch('Y') end}, nil
+                    iup.item{title = _T"(Max size exceeded) Display", action = function() OnSwitch('Y') end}, nil
                 )
             }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
         elseif but == 49 and iup.isdouble(status) then --dbl left

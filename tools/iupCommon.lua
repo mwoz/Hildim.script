@@ -305,6 +305,7 @@ function iup.SaveChProps(bReset)
 'layout.scroll.presscolor',
 'layout.scroll.highcolor',
 'layout.scroll.backcolor',
+'locale',
     }
     for i = 1, #t do
         t[i] = t[i]..'='..props[t[i]]
@@ -1371,7 +1372,6 @@ iup.scitedetachbox = function(t)
         {'s1', separator = 1},
         {'Show/Hide', ru = 'Скрыть/Показать', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
     }
-    --if t.MenuVisible then tSub.visible =  end
 
     menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, ru = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
@@ -1605,12 +1605,12 @@ local function LoadIuprops()
 end
 
 AddEventHandler("OnBeforeOpen", function(file, ext)
-    if ext == "fileset" then
-        return LoadSession_local(file)
-    elseif ext == "config" then
-        LoadIuprops_Local(file)
-        return true
-    end
+    --if ext == "fileset" then
+    --    return LoadSession_local(file)
+    --elseif ext == "config" then
+    --    LoadIuprops_Local(file)
+    --    return true
+    --end
 end)
 
 local function SaveIuprops_local(filename)

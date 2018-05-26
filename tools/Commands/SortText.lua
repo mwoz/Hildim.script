@@ -7,11 +7,11 @@ version 2.1.1
 local function Run()
     local lines_tbl = {} -- Таблица со строками нашего текста
 
-    local ret, pDirect, position, pIgnore = iup.GetParam("Сортировка",
+    local ret, pDirect, position, pIgnore = iup.GetParam(_T"Sorting",
         nil,
-        'Параметр повтора%o|Прямой|Обратный|\n'..
-        'Начиная с позиции%i[1,100,1]\n'..
-        'Игнорировать%o|Пробелы и кавычки|+все операторы|ничего|\n'
+        _T'Order%o|Direct|Reverce|\n'..
+        _T'Starting from Position'..'%i[1,100,1]\n'..
+        _T'Ignore%o|Spaces and Quotes|+all Operators|Nothing|\n'
         ,
         0, 1, 0
     )
@@ -72,7 +72,7 @@ local function Run()
 end
 
 return {
-    title = 'Сортировать строки A...z/z...A',
+    title = _T'Sort Lines A...z/z...A',
     run = Run,
     path = 'Edit|s2',
     description = [[Sorting selected lines_tbl alphabetically and vice versa

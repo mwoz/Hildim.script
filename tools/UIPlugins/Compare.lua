@@ -10,7 +10,7 @@ local function Init_hidden()
     local tabR = iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight')
     local lastEditLine
     local markerMask = 0
-    local mark = CORE.InidcFactory('Compare.Inline', 'Маркировка различий в строке сравнения', INDIC_BOX, 255, 0)
+    local mark = CORE.InidcFactory('Compare.Inline', _T'Marking differences in the compared line', INDIC_BOX, 255, 0)
     local tmpPath
     tmpFiles = {}
     local gitInstall, bGitActive
@@ -455,7 +455,7 @@ local function Init_hidden()
 
     local function SetSelfTitledDir()
         local ret, dir =
-        iup.GetParam("Выбор директории для сравнения с одноименным^compare",
+        iup.GetParam(_T"Выбор директории для сравнения с одноименным'..'^compare",
             function(ih, param_index)
                 if param_index == -2 then
                     local p = iup.GetParamHandle(ih, 'PARAM0')
@@ -472,13 +472,14 @@ local function Init_hidden()
 
     local function ColorSettings()
         local ret, added, deleted, changed, moved, blank =
-        iup.GetParam("Настройки цветов сравнения^compare",
+        iup.GetParam(_T"Настройки цветов сравнения'..'^compare",
             nil,
-            'Added:%c\n'..
-            'Deleted:%c\n'..
-            'Changed:%c\n'..
-            'Moved:%c\n'..
-            'Blank:%c\n',
+            _T'Lines color'..'%t\n'..
+            _T'Added'..':%c\n'..
+            _T'Deleted'..':%c\n'..
+            _T'Changed'..':%c\n'..
+            _T'Moved'..':%c\n'..
+            _T'Blank'..':%c\n',
             CORE.Rgb2Str(tSet.Color_added),
             CORE.Rgb2Str(tSet.Color_deleted),
             CORE.Rgb2Str(tSet.Color_changed),
@@ -626,32 +627,32 @@ local function Init_hidden()
         return ((_G.iuprops['coeditor.win'] or '')~= '2') and (bActive == 0 or bActive == 7)
     end
 
-    local item = {'Compare', ru = 'Сравнение', {
-		{'Compare', ru = 'Сравнить', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
-		{'Clear backlight', ru = 'Очистить подсветку', action = Reset, image='cross_script_µ' },
+    local item = {'Compare', ru = _T'Comparison', {
+		{'Compare', ru = _T'Compare to Other View', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
+		{'Clear backlight', ru = _T'Clear Highlighting', action = Reset, image='cross_script_µ' },
         {'s1', separator = 1},
-        {'Compare to Git', ru = 'Сравнить с Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end, image='edit_diff_µ'},
-        {'Compare to Vss', ru = 'Сравнить с Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp, image = 'edit_diff_µ'},
-        {'Compare to Self-Titled', ru = 'Сравнить с одноименным из...', action = CompareSelfTitled, active = function() return ((tSet.selfTitledDir or '' and bCanNewComp())) ~= '' end},
-        {'Directory For Comparing', ru = 'Директория для сравнения', action = SetSelfTitledDir, active = function() return true end},
+        {'Compare to Git', ru = _T'Compare to Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end, image='edit_diff_µ'},
+        {'Compare to Vss', ru = _T'Compare to Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp, image = 'edit_diff_µ'},
+        {'Compare to Self-Titled', ru = _T'Compare to same named from ', action = CompareSelfTitled, active = function() return ((tSet.selfTitledDir or '' and bCanNewComp())) ~= '' end},
+        {'Directory For Comparing', ru = _T'Directory to Compare', action = SetSelfTitledDir, active = function() return true end},
         {'s2', separator = 1},
-		{'Next Difference', ru = 'Следующее различие', key = 'Alt+D', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
-		{'Prevouse Difference', ru = 'Предыдущее различие', key = 'Alt+U', action = prevDif, active = function() return bActive == 7 end, image='IMAGE_ArrowUp'},
-		{'Copy To Left', ru = 'Скопировать влево', key = 'Alt+L', action = function() copyToSide(0) end, active = bCanCpyLeft, image='control_double_180_µ'},
-		{'Copy To Right', ru = 'Скопировать вправо', key = 'Alt+R', action = function() copyToSide(1) end, active = bCanCpyRight, image='control_double_µ'},
+		{'Next Difference', ru = _T'Next Difference', key = 'Alt+D', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
+		{'Prevouse Difference', ru = _T'Previous Difference', key = 'Alt+U', action = prevDif, active = function() return bActive == 7 end, image='IMAGE_ArrowUp'},
+		{'Copy To Left', ru = _T'Copy Right', key = 'Alt+L', action = function() copyToSide(0) end, active = bCanCpyLeft, image='control_double_180_µ'},
+		{'Copy To Right', ru = _T'Copy Left', key = 'Alt+R', action = function() copyToSide(1) end, active = bCanCpyRight, image='control_double_µ'},
         {'s3', separator = 1},
-		{'Recompare by changing line', ru = 'Сравнивать заново при изменении строки', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare end},
-		{'Ignore Space', ru = 'Игнорировать пробелы', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{} end},
-		{'Detect Move', ru = 'Определять перемещенные строки', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings() end},
-		{'Add Empty Line', ru = 'Добавлять пустые строки', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings() end},
-		{'Use Icons', ru = 'Использовать иконки', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings() end},
-		{'Color Settings', ru = 'Настройки цветов', action = ColorSettings, image='color_µ'},
+		{'Recompare by changing line', ru = _T'Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare end},
+		{'Ignore Space', ru = _T'Ignore Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{} end},
+		{'Detect Move', ru = _T'Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings() end},
+		{'Add Empty Line', ru = _T'Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings() end},
+		{'Use Icons', ru = _T'Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings() end},
+		{'Color Settings', ru = _T'Color Preferences', action = ColorSettings, image='color_µ'},
     }}
     menuhandler:AddMenu(item)
 
 end
 return {
-    title = 'Сравнение файлов',
+    title = _T'File Comparison',
     destroy = onDestroy,
     hidden = Init_hidden,
 }

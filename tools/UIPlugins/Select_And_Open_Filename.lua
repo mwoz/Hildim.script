@@ -161,13 +161,13 @@ local function init()
             return Select_And_Open_File(false)
         end
     end)
-    menuhandler:InsertItem('MainWindowMenu', 'File|&Revert',
-    {'Select And Open Filename', ru = 'Выделить и открыть файл', action = function() Select_And_Open_File(true) end, key = 'Ctrl+Shift+O',})
+    menuhandler:InsertItem('MainWindowMenu', 'File|Reopen File',
+    {'Select And Open Filename', ru = _T'Select And Open Filename', action = function() Select_And_Open_File(true) end, key = 'Ctrl+Shift+O',})
 
 end
 
 return {
-    title = 'Выделить и открыть файл',
+    title = _T'Select And Open Filename',
     hidden = init,
     description = [[Расширение команды "Открыть выделенный файл" для случая когда выделения нет.]]
 }

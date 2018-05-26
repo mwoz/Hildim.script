@@ -1,0 +1,17 @@
+return {
+["Delete"] = "Удалить";
+["Insert Upside Down"] = "Вставлять в обратном порядке";
+["Split on Separator"] = "Разрезать по сепаратору";
+["Clip will be split into %1 fragments. Continue?"] = "Клип будет разделен на %1 фрагментов. Продолжить?";
+["Clipboard History..."] = "История буфера обмена...";
+["Splitting clip"] = "Итого";
+["Separator"] = "Сепаратор";
+["Join Upside Down"] = "Объединять в обратном порядке";
+["Upper List Upside Down"] = "Верх списка в обратном порядке";
+["Insert via Separator"] = "Вставить через сепаратор";
+["Split Clip into Several"] = "Разделить клип на несколько";
+["Insert Upper List via Separator"] = "Вставить верх списка через сепаратор";
+["Insert Upper List as Block"] = "Вставить верх списка как блок";
+["Convert Format: Block < - > Text"] = "Конвертировать формат: Блок < - > Текст";
+["Insert with Ctrl+0"] = "Вставлять по Ctrl+0";
+}

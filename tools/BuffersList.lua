@@ -82,7 +82,7 @@ local function InitWndDialog()
         iup.SetAttribute(list_windows, "DELLIN", "1-"..list_windows.numlin)
         iup.SetAttribute(list_windows, "ADDLIN", "1-"..#t)
         for i = 1,  #t do
-            list_windows:setcell(i, 2, Iif(t[i].side == 0, "Основное", "Дополнительное"))
+            list_windows:setcell(i, 2, Iif(t[i].side == 0, _T"Main", _T"Additional"))
             list_windows:setcell(i, 3, t[i].name)
             list_windows:setcell(i, 4, t[i].path)
             list_windows:setcell(i, 5, t[i].num)
@@ -107,9 +107,9 @@ local function InitWndDialog()
     rasterwidth5 = 0, rasterwidth6 = 0,}
 
 	list_windows:setcell(0, 1, "")         -- ,size="400x400"
-	list_windows:setcell(0, 2, "Окно")
-	list_windows:setcell(0, 3, "Имя")
-	list_windows:setcell(0, 4, "Путь")
+	list_windows:setcell(0, 2, _T"View")
+	list_windows:setcell(0, 3, _T"Name")
+	list_windows:setcell(0, 4, _T"Path")
 
     list_windows.colresize_cb = list_windows.FitColumns(4, true)
     list_windows.dropcheck_cb = function(h, lin, col)
@@ -190,19 +190,19 @@ local function InitWndDialog()
             btn_attach,
             iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end},
         }, barsize = 0, state = 'CLOSE', name = 'bufferslist_expander'}
-        cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0', expand = 'NO', propagatefocus = 'YES', action = function() fillWindow(curSide) end, tip = 'Сортировка списка'}
-        iup.SetAttribute(cmb_Sort, 1, "Нет")
-        iup.SetAttribute(cmb_Sort, 2, "Имя")
-        iup.SetAttribute(cmb_Sort, 3, "Расширение")
-        iup.SetAttribute(cmb_Sort, 4, "Путь")
+        cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0', expand = 'NO', propagatefocus = 'YES', action = function() fillWindow(curSide) end, tip = _T'List Sorting'}
+        iup.SetAttribute(cmb_Sort, 1, _TH"Нет")
+        iup.SetAttribute(cmb_Sort, 2, _T"Name")
+        iup.SetAttribute(cmb_Sort, 3, _T"Extension")
+        iup.SetAttribute(cmb_Sort, 4, _T"Path")
         --cmb_Sort.value = 1
         dlg = iup.scitedialog{iup.vbox{
             hbTitle,
             list_windows,
             iup.hbox{
-                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = 'Закрыть все отмеченные' },
-                iup.flatbutton{title = "кроме", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = 'Закрыть все НЕотмеченные'  },
-                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip='Переместить отмеченные на другое окно' }, cmb_Sort,
+                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T"Close All Checked" },
+                iup.flatbutton{title = _T"except", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T'Close All NOT Checked'  },
+                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip=_T'extension' }, cmb_Sort,
                 --iup.flatbutton{title = "Cancel", expand = 'NO', padding = '9x', flat_action = function() dlg:hide() end, propagatefocus = 'YES'},
         scrollbar = 'NO', minsize = 'x35', maxsize = 'x35', expand = "HORIZONTAL", margin = "20x0", gap = "20", alignment='ACENTER'};};
         sciteparent = "SCITE", sciteid = "bufferslist", dropdown = true, shrink = "YES",
@@ -210,9 +210,9 @@ local function InitWndDialog()
 
         menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
             {'Window_bar', plane = 1,{
-                {"Close Checked", ru = "Закрыть все отмеченные", action = CORE.DoForFileSet('1', CloseFileSet)},
-                {"Read Only", ru = "Закрыть все НЕ отмеченные", action = CORE.DoForFileSet('0', CloseFileSet)},
-                {"Move Checked", ru = "Переместить на другое окно", action = MoveSet},
+                {"Close Checked", ru = _T"Close All Checked", action = CORE.DoForFileSet('1', CloseFileSet)},
+                {"Read Only", ru = _T"Close All NOT Checked", action = CORE.DoForFileSet('0', CloseFileSet)},
+                {"Move Checked", ru = _T"Move to Another View", action = MoveSet},
         }})
 
         dlg.resize_cb = function(h)

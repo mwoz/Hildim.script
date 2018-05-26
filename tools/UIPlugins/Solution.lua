@@ -57,9 +57,9 @@ end
 
 local function InsertProject()
     local title, ret = 'New'
-    ret, title = iup.GetParam('Новый Проект',
+    ret, title = iup.GetParam(_T'Новый Проект',
       function(h,i) if iup.GetParamParam(h,0).value:find('["\'\\]') then return 0 end return 1 end,
-      "Имя%s\n", title)
+      _T"Имя%s\n", title)
     if ret then
         iup.SetAttributeId(tree_sol, "ADDBRANCH", tree_sol.value, title)
     end
@@ -70,9 +70,9 @@ end
 local function DeleteNode(i)
     local ret
     if i == 0 then
-        ret = iup.Alarm("Удаление проекта", "Вы действительно хотите удалить проект\nсо всем его содержимым?", "Да", "Нет")
+        ret = iup.Alarm(_T"Удаление проекта", _T"Вы действительно хотите удалить проект\nсо всем его содержимым?", _TH"Да", _TH"Нет")
     else
-        ret = iup.Alarm("Удаление элемента", "Исключить файл из проекта?", "Да", "Нет")
+        ret = iup.Alarm(_T"Удаление элемента", _T"Исключить файл из проекта?", _TH"Да", _TH"Нет")
     end
 
     if ret == 1 then
@@ -104,7 +104,7 @@ local function AddCurentIn(val)
        iup.TreeSetUserId(tree_sol, val + 1, props['FilePath']:from_utf8())
        is_chanjed = true
    else
-       iup.Alarm("Добавдение файла в проект", "Файл еще не сохранен на диск", "OK"
+       iup.Alarm(_T"Добавление файла в проект", _T"Файл еще не сохранен на диск", "OK"
        )
    end
 end
@@ -316,30 +316,30 @@ local function Solution_Init(h)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Solution_sidebar', plane = 1,{
-            {'Solution', ru = 'Рабочая область', {
-                {'Save as', ru = 'Сохранить как', action = SaveSolAs},
-                {'Open', ru = 'Открыть', action = OpenSol},
+            {'Solution', ru = _T'Рабочая область', {
+                {'Save as', ru = _T'Сохранить как', action = SaveSolAs},
+                {'Open', ru = _T'Открыть', action = OpenSol},
             }},
-            {'Insert Project', ru = 'Новый  проект', action = InsertProject},
-            {'Delete Project', ru = 'Удалить  проект', action = function() DeleteNode(0) end, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and tree_sol.value~='0' end},
-            {'Open All Projects Files', ru = 'Открыть все файлы проекта', action = OpenAll, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and tree_sol.value~='0' end},
-            {'Set As Active Project', ru = 'Установить активным', action = ActivateProject, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and iup.GetAttribute(tree_sol, "COLOR") ~= CLR_ACTIVE end},
+            {'Insert Project', ru = _T'Новый  проект', action = InsertProject},
+            {'Delete Project', ru = _T'Удалить  проект', action = function() DeleteNode(0) end, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and tree_sol.value~='0' end},
+            {'Open All Projects Files', ru = _T'Открыть все файлы проекта', action = OpenAll, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and tree_sol.value~='0' end},
+            {'Set As Active Project', ru = _T'Установить активным', action = ActivateProject, visible = function() return iup.GetAttribute(tree_sol, "KIND") == "BRANCH" and iup.GetAttribute(tree_sol, "COLOR") ~= CLR_ACTIVE end},
 
             {'s_FindTextOnSel', separator = 1},
-            {'Add...', ru = 'Добавить...', action = Add},
-            {'Add Curent File', ru = 'Добавить текущтй файл', action = AddCurent, visible = function() return shell.fileexists(props["FilePath"]) end },
-            {'Add All Opened Files', ru = 'Добавить все открытые файлы', action = function() AddAll(tree_sol.value) end},
-            {'Remove File', ru = 'Исключить файл из проекта', action = function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
+            {'Add...', ru = _T'Добавить...', action = Add},
+            {'Add Curent File', ru = _T'Добавить текущий файл - '..props['FilePath'], action = AddCurent, visible = function() return shell.fileexists(props["FilePath"]) end },
+            {'Add All Opened Files', ru = _T'Добавить все открытые файлы', action = function() AddAll(tree_sol.value) end},
+            {'Remove File', ru = _T'Исключить файл из проекта', action = function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
             {'s1_FindTextOnSel', separator = 1},
-            {'Go To Directory', ru = 'Перейти в директорию', action = function() h.fileman.OpenDir(iup.TreeGetUserId(tree_sol, tree_sol.value):gsub('([^\\]*)$', '')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~= "BRANCH" and (h.fileman ~= nil) end},
+            {'Go To Directory', ru = _T'Перейти в директорию', action = function() h.fileman.OpenDir(iup.TreeGetUserId(tree_sol, tree_sol.value):gsub('([^\\]*)$', '')) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~= "BRANCH" and (h.fileman ~= nil) end},
     }})
 
     menuhandler:InsertItem('TABBAR', 'slast', {'project', plane = 1, {
-        {'Save As New Project', ru = 'Сохранить все как новый проект', action=SaveAsNew},
-        {'Add To Active Project', ru = 'Добавить в активный проект', action=AddToActive},
+        {'Save As New Project', ru = _T'Сохранить все как новый проект', action=SaveAsNew},
+        {'Add To Active Project', ru = _T'Добавить в активный проект', action=AddToActive},
     }})
     menuhandler:InsertItem('TABBAR', 's1',
-        {'Save As New Project', ru = 'Закрыть и добавить в активный проект', action = function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
+        {'Save As New Project', ru = _T'Закрыть и добавить в активный проект', action = function() AddToActive(); scite.MenuCommand(IDM_CLOSE) end}
 
     )
 
@@ -363,8 +363,8 @@ local function Solution_Init(h)
     menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_|Window_bar|sxxx',
         {'solution', plane = 1, {
             {'s_comptemp', separator = 1},
-            {"Add Checked To Project", ru = "Добавить отмеченные в солюшн", action = function() CORE.DoForFileSet('1', AddAll)() end,},
-            {"Add Un Checked To Project", ru = "Добавить НЕотмеченные в солюшн", action = function() CORE.DoForFileSet('0', AddAll)() end,},
+            {"Add Checked To Project", ru = _T"Добавить отмеченные в солюшн", action = function() CORE.DoForFileSet('1', AddAll)() end,},
+            {"Add Un Checked To Project", ru = _T"Добавить НЕотмеченные в солюшн", action = function() CORE.DoForFileSet('0', AddAll)() end,},
     }})
     return {   -- iup.vbox{   };
         handle = iup.flatscrollbox{tree_sol, border='NO'};

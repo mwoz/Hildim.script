@@ -100,11 +100,11 @@ local function init()
         blockReselect = true
 
         iup.menu{
-            iup.item{title = "Удалить", action =(function()
+            iup.item{title = _T"Delete", action =(function()
                 lst_clip.dellin = lin
                 if lin == 1 then clipboard.text = lst_clip:getcell(1, 2) end
             end)},
-            iup.item{title = "Вставить верх списка как блок", action =(function()
+            iup.item{title = _T"Insert Upper List as Block", action =(function()
                 local text = ''
                 for i = 1, lin do
                     text = text..lst_clip:getcell(i, 2)
@@ -119,11 +119,11 @@ local function init()
                 blockReselect = false
                 iup.PassFocus()
             end)},
-            iup.item{title = "Вставить верх списка через сепаратор", action =(function()
-                local bok, res, bside = iup.GetParam('Вставить через сепаратор',
+            iup.item{title = _T"Insert Upper List via Separator", action =(function()
+                local bok, res, bside = iup.GetParam(_T'Insert via Separator',
                     nil,
-                    "Сепаратор: %s\n"..
-                    "Объединять в обратном порядке %b\n"
+                    _T"Separator"..": %s\n"..
+                    _T"Join Upside Down".." %b\n"
                     , ', ', 0
                 )
                 iup.SetFocus(lst_clip)
@@ -147,7 +147,7 @@ local function init()
                 end
             end)},
             iup.separator{},
-            iup.item{title = "Верх списка в обратном порядке", action = function()
+            iup.item{title = _T"Upper List Upside Down", action = function()
                 if lin == 1 then return end
                 for i = 2, lin do
                     lst_clip.addlin = 0
@@ -171,7 +171,7 @@ local function init()
                 end
             end,
             active = Iif(lin > 1, 'YES', 'NO'),},
-            iup.item{title = "Вставлять по Ctrl+0", action = function()
+            iup.item{title = _T"Insert with Ctrl+0", action = function()
                 lin0 = lin
                 for i = 1, lst_clip.numlin do
                     lst_clip:setcell(i, 0, Iif(i == lin0, 0, i))
@@ -180,11 +180,11 @@ local function init()
                 blockReselect = false
             end,
             active = Iif(lin >= 10, 'YES', 'NO')},
-            iup.item{title = "Разрезать по подстроке", action = function()
-                local bok, res, bside = iup.GetParam('Разделить клип на несколько',
+            iup.item{title = _T"Split on Separator", action = function()
+                local bok, res, bside = iup.GetParam(_T'Split Clip into Several',
                     nil,
-                    "Сепаратор: %s\n"..
-                    "Вставлять в обратном порядке %b\n"
+                    _T"Separator"..": %s\n"..
+                    _T"Insert Upside Down".." %b\n"
                     , '\\n', 1
                 )
                 if bok and res ~= '' then
@@ -192,7 +192,7 @@ local function init()
                     local tclp = lpeg.Ct(lpeg.P{p + 1 * lpeg.V(1)}^1)
                     local str = lst_clip:getcell(lin, 2)
                     local t = tclp:match(str, 1)
-                    if iup.Alarm("Итого", 'Клип будет разделен на '..#t..' фрагментов. Продолжить?', 'Yes', 'No') == 1 then
+                    if iup.Alarm(_T"Splitting clip", _FMT(_T'Клип будет разделен на %1 фрагментов. Продолжить?', #t), _TH'Yes', _TH'No') == 1 then
                         local I, I1, S = #t, 1, -1
                         if bside == 1 then I, I1, S = 1, #t, 1 end
                         lst_clip.marked = nil
@@ -211,7 +211,7 @@ local function init()
                 end
                 iup.SetFocus(lst_clip)
             end};
-            iup.item{title = "Конвертировать формат: Блок < - > Текст", action = function()
+            iup.item{title = _T"Convert Format: Block < - > Text", action = function()
                 local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
 
                 if bCol then
@@ -474,7 +474,7 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',
-        {'Clipboard History...', ru = 'История буфера обмена...', action = function() iup.ShowInMouse(dlg) end, key="Alt+Shift+C", image = "clipboard_list_µ"}
+        {'Clipboard History...', ru = _T'Clipboard History...', action = function() iup.ShowInMouse(dlg) end, key="Alt+Shift+C", image = "clipboard_list_µ"}
     )
     return dlg
 end

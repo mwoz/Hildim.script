@@ -100,10 +100,10 @@ local function InitIndicDialog()
     rasterwidth5 = 0, rasterwidth6 = 0, rasterwidth7 = 0,}
     iup.SetAttribute(list_indic, "TYPE*:2", "COLOR")
 
-	list_indic:setcell(0, 1, "Индикатор")         -- ,size="400x400"
-	list_indic:setcell(0, 2, "Цвет")
-	list_indic:setcell(0, 3, "Прозрачность")
-	list_indic:setcell(0, 4, "Стиль")
+	list_indic:setcell(0, 1, _T"Indicator")         -- ,size="400x400"
+	list_indic:setcell(0, 2, _T"Color")
+	list_indic:setcell(0, 3, _T"Transparency")
+	list_indic:setcell(0, 4, _T"Style")
 
     local droppedLin = nil
     local clickPos = ""
@@ -176,15 +176,15 @@ local function InitIndicDialog()
                 c_clr,
                 iup.vbox{
                     c_lbl,
-                    iup.hbox{iup.label{title = 'Прозрачность: '}, c_alfa},
-                    iup.hbox{iup.label{title = 'Стиль: '}, c_style},
+                    iup.hbox{iup.label{title = _T'Transparency'..': '}, c_alfa},
+                    iup.hbox{iup.label{title = _T'Style'..': '}, c_style},
                     iup.hbox{
-                        iup.flatbutton{title = "Применить", expand = 'NO', padding = '9x', flat_action = applySettings, propagatefocus = 'YES'},
+                        iup.flatbutton{title = _TH"Apply", expand = 'NO', padding = '9x', flat_action = applySettings, propagatefocus = 'YES'},
                     }
                 },
         scrollbar = 'NO', expand = "HORIZONTAL", margin = "20x", gap = "20"};};
         sciteparent = "SCITE", sciteid = "indiccolors",
-        size = '300x280', bgcolor = '255 255 255', resize = 'NO', title = 'Свойства индикаторов',
+        size = '300x280', bgcolor = '255 255 255', resize = 'NO', title = _T'Indicator Preferences',
         show_cb = function(h, state)
             if state == 4 then
                 dlg:postdestroy()

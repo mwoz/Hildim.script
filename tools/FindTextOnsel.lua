@@ -10,7 +10,7 @@ wholeWord = false
 ,replaceWhat = ''
 }
 -----------------------------------
-local current_mark_number = CORE.InidcFactory('FindOnSel.mark', 'Подсветка выделенного слова по всему тексту', INDIC_ROUNDBOX, 6750054, 30)
+local current_mark_number = CORE.InidcFactory('FindOnSel.mark', _T'Highlight the selected word throughout the text', INDIC_ROUNDBOX, 6750054, 30)
 
 local function SelectMethod(bModified, bSelection, flag)
 --подсветка слова, если оно выделено целиком

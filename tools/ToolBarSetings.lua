@@ -45,8 +45,8 @@ end
 local function Show()
 
     local list_lex, dlg, bBlockReset, tree_btns, tree_hk
-    local btn_ok = iup.button  {title="OK"}
-    local btn_esc = iup.button  {title="Cancel"}
+    local btn_ok = iup.button  {title=_TH"OK"}
+    local btn_esc = iup.button  {title=_TH"Cancel"}
     iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
     iup.SetHandle("TOOLBARSETT_BTN_ESC",btn_esc)
     btn_esc.action = function()
@@ -142,7 +142,7 @@ local function Show()
         iup.hbox{iup.vbox{tree_hk},tree_btns};
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
-    dlg = iup.scitedialog{vbox; title="Настройка пользовательской панели инструментов",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
+    dlg = iup.scitedialog{vbox; title=_T"User Toolbar Preferences",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="usertb", minsize='300x600'}
 
     dlg.show_cb=(function(h,state)

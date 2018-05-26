@@ -74,9 +74,9 @@ local function OpenSelectedFilename()
 end
 
 return {
-    title = 'Открыть выделенный файл',
+    title = _T'Open Selected Filename',
     run = OpenSelectedFilename,
-    path = 'File|&Revert',
+    path = 'File|Reopen File',
     description = [[Обрабатывает явно заданный путь и относительные пути
 переменные SciTE, переменные окружения, конструкции LUA]]
 }
