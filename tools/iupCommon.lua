@@ -874,15 +874,13 @@ end
 iup.hi_toggle = function(t)
     t.toggle = 'YES'
     local fg, bg
+    t.image = "uncheck_t_µ"
+    t.imagepress = "check_t_µ"
     if t.ctrl then
-        t.image = "uncheck_t_µ"
-        t.imagepress = "check_t_µ"
         t.imageinactive = "uncheck_µ"
         fg = props['layout.txtfgcolor']
         bg = props['layout.txtbgcolor']
     else
-        t.image = "uncheck_µ"
-        t.imagepress = "check_µ"
         t.imageinactive = "uncheck_µ"
         fg = props['layout.fgcolor']
         bg = props['layout.bgcolor']
@@ -1383,8 +1381,8 @@ iup.scitedetachbox = function(t)
 end
 
 iup.ShowXY = function(h, x, y)
-    x = tonumber(x)
-    y = tonumber(y)
+    x = math.floor(tonumber(x))
+    y = math.floor(tonumber(y))
     local xNew, yNew
     if x == -2000 and y == -2000 then goto ok end
     for x11, y11, x12, y12 in iup.GetGlobal('MONITORSINFO'):gmatch('(%-?%d*) (%-?%d*) (%-?%d*) (%-?%d*)') do
