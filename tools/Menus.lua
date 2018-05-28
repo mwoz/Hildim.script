@@ -171,8 +171,8 @@ _G.sys_Menus.TABBAR = {
 	{link='File|Save As...'},
 	{link='File|Save Copy...'},
     {'s1', separator = 1},
-    {link= 'File|Move to another window'},
-    {link='File|Clone to another window'},
+    {link= 'File|Move to another view'},
+    {link='File|Clone to another view'},
 	{'s2', separator=1},
 	{'Copy to Clipboard', {
 		{'All Text', action = function() CopyPathToClipboard("text") end,},
@@ -258,10 +258,6 @@ _G.sys_Menus.MainWindowMenu = {
 	{'_HIDDEN_', {
 		{'Next Tab', key = 'Ctrl+Tab', action = function() if iup.GetFocus() then iup.PassFocus() end scite.MenuCommand(IDM_NEXTFILESTACK) end},
 		{'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = function() if iup.GetFocus() then iup.PassFocus() end scite.MenuCommand(IDM_PREVFILESTACK) end},
-		{'Block Up', key = 'Alt+Up', action = function() editor:LineUpRectExtend() end},
-		{'Block Down', key = 'Alt+Down', action = function() editor:LineDownRectExtend() end},
-		{'Block Left', key = 'Alt+Left', action = function() editor:CharLeftRectExtend() end},
-		{'Block Right', key = 'Alt+Right', action = function() editor:CharRightRectExtend() end},
 		{'Block Home', key = 'Alt+Home', action = function() editor:VCHomeRectExtend() end},
 		{'Block End', key = 'Alt+End', action = function() editor:LineEndRectExtend() end},
 		{'Block Page Up', key = 'Alt+PageUp', action = function() editor:PageUpRectExtend() end},
@@ -539,8 +535,9 @@ _G.sys_Menus.MainWindowMenu = {
 		{'s1', separator = 1},
 	},},
 	{'Window', {
-		{'Previous',  key = 'Shift+F6', action = IDM_PREVFILE},
-		{'Next',  key = 'F6', action = IDM_NEXTFILE},
+		{'Previous', action = IDM_PREVFILE},
+		{'Next',  action = IDM_NEXTFILE},
+		{'Switch to Anoter View', key = 'F6', action = function() coeditor:GrabFocus() end, active = function() return scite.buffers.SecondEditorActive() == 1 end},
 		{'Move Tab Left',  action = IDM_MOVETABLEFT},
 		{'Move Tab Right',  action = IDM_MOVETABRIGHT},
         {'Tabbar Settings',  action = function() DoSett('ResetTabbarProps') end, image='ui_tab__pencil_µ'},

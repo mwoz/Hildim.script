@@ -134,6 +134,8 @@ local function Init_hidden()
         tCompare.left[fPath(tabL)] = nil
         tCompare.right[fPath(tabR)] = nil
         bActive = 0
+        editor.CaretLineVisibleAlways = false
+        coeditor.CaretLineVisibleAlways = false
 
         CORE.SetFindMarkers()
     end
@@ -148,6 +150,8 @@ local function Init_hidden()
         if bActive == 7 then Reset() end
 
         bActive = 7
+        editor.CaretLineVisibleAlways = true
+        coeditor.CaretLineVisibleAlways = true
 
         CompareSetInd()
         tCompare.left[fPath(tabL)] = fPath(tabR)
@@ -175,6 +179,8 @@ local function Init_hidden()
         if tCompare.left[fPath(tabL)] then bActive = bActive | 1 end
         if tCompare.right[fPath(tabR)] then bActive = bActive | 2 end
         if bActive == 3 and tCompare.right[fPath(tabR)] == fPath(tabL) then bActive = bActive | 4 end
+        editor.CaretLineVisibleAlways = (bActive == 7)
+        coeditor.CaretLineVisibleAlways = (bActive == 7)
         if bActive > 0 then
             SetAnnotationStiles(editor)
             SetAnnotationStiles(coeditor)
@@ -324,8 +330,8 @@ local function Init_hidden()
         local pStart = editor.SelectionStart
         local pCoStart
 
+        pStart = editor:PositionFromLine(lStart)
         if editor.CharAt[pStart] ~= 10 and editor.CharAt[pStart] ~= 13 then
-            pStart = editor:PositionFromLine(lStart)
             pCoStart = coeditor:PositionFromLine(lCoStart)
 
             if Marker(editor, lStart) & maskLinesADM > 0 then
@@ -339,7 +345,6 @@ local function Init_hidden()
 
         local pEnd = editor.SelectionEnd
         local pCoEnd
-
         pEnd = MoveEnd(editor, pEnd)
         pCoEnd = MoveEnd(coeditor, coeditor:PositionFromLine(lCoEnd))
 
@@ -354,6 +359,7 @@ local function Init_hidden()
             editor:ReplaceTarget(coeditor:textrange(pCoStart, pCoEnd))
         end
         StartCompare()
+        CompareSetInd()
     end
 
     local function CompareToFile(strName, bTmp)
@@ -577,6 +583,12 @@ local function Init_hidden()
             if not lastEditLine and bModified == 1 then
                 lastEditLine = editor:LineFromPosition(editor.CurrentPos)
             end
+            if flag & SC_UPDATE_SELECTION > 0 then
+                local coP = coeditor:PositionFromLine(coeditor:DocLineFromVisible(editor:VisibleFromDocLine(editor:LineFromPosition(editor.CurrentPos))))
+                coeditor.SelectionStart = coP
+                coeditor.SelectionEnd = coP
+                coeditor.CurrentPos = coP
+            end
         end
     end)
 
@@ -636,10 +648,10 @@ local function Init_hidden()
         {'Compare to Self-Titled', ru = _T'Compare to same named from ', action = CompareSelfTitled, active = function() return ((tSet.selfTitledDir or '' and bCanNewComp())) ~= '' end},
         {'Directory For Comparing', ru = _T'Directory to Compare', action = SetSelfTitledDir, active = function() return true end},
         {'s2', separator = 1},
-		{'Next Difference', ru = _T'Next Difference', key = 'Alt+D', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
-		{'Prevouse Difference', ru = _T'Previous Difference', key = 'Alt+U', action = prevDif, active = function() return bActive == 7 end, image='IMAGE_ArrowUp'},
-		{'Copy To Left', ru = _T'Copy Right', key = 'Alt+L', action = function() copyToSide(0) end, active = bCanCpyLeft, image='control_double_180_µ'},
-		{'Copy To Right', ru = _T'Copy Left', key = 'Alt+R', action = function() copyToSide(1) end, active = bCanCpyRight, image='control_double_µ'},
+		{'Next Difference', ru = _T'Next Difference', key = 'Alt+Down', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
+		{'Prevouse Difference', ru = _T'Previous Difference', key = 'Alt+Up', action = prevDif, active = function() return bActive == 7 end, image = 'IMAGE_ArrowUp'},
+		{'Copy To Left', ru = _T'Copy Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
+		{'Copy To Right', ru = _T'Copy Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
         {'s3', separator = 1},
 		{'Recompare by changing line', ru = _T'Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare end},
 		{'Ignore Space', ru = _T'Ignore Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{} end},

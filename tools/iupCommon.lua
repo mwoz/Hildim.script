@@ -18,12 +18,12 @@ if shell.fileexists(file) then
     end
     local bSuc, tMsg = pcall(dostring, text:from_utf8())
 
-    if bRepit and (_G.iuprops['_VERSION'] or 1) ~= 2 then
+    if bRepit and (_G.iuprops['_VERSION'] or 1) ~= 3 then
         bRepit = false
 
         local sucs, msg = pcall(dofile, props["SciteDefaultHome"].."\\tools\\upgradesettings.lua")
         if sucs then
-            print("Convert settings - 2.0")
+            --print("Convert settings - 3.0")
             goto repit
         else
             print("Convert settings failed:", msg)
@@ -322,7 +322,7 @@ local function SaveIup()
     if not _G.g_session['LOADED'] then return end
     local file = props["scite.userhome"]..'\\settings.lua'
     if pcall(io.output, file) then
-        _G.iuprops['_VERSION'] = 2
+        _G.iuprops['_VERSION'] = 3
         local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
         io.write(s:to_utf8())
     else

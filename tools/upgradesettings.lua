@@ -98,101 +98,127 @@ end
 
 local function Run(a, b)
     local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.config")
+    local version = (_G.iuprops['_VERSION'] or 1)
 
-    for i, filenameT in ipairs(files) do
-        local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
-        local s = f:read('*a')
-        f:close()
-        if s:find('_G.iuprops["_VERSION"] = 2', 1, true) then print('Scipped '..filenameT.name); goto continue1 end
-        s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,'):gsub('] = {,','] = {' ):gsub('}\n','},\n' )..'\n}'
-
-        local bsuc, fun = pcall(assert, load(s))
-        if not bsuc then
-            print(filenameT.name, fun)
-            goto continue1
-        end
-
-        tMsg = fun()
-        if not pcall(Convert, tMsg) then
-            print("File '"..filenameT.name.." 'convertion failed")
-            goto continue1
-        end
-
-        tOut = {}
-        for n, v in pairs(tMsg) do
-            table.insert(tOut, '_G.iuprops["'..n..'"] = '..CORE.tbl2Out(v, ' ', true, true))
-        end
-        tOut['_VERSION'] = 2
-
-        f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
-        if f then
-            f:write(table.concat(tOut, '\n'):to_utf8())
+    if version < 2 then
+        for i, filenameT in ipairs(files) do
+            local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
+            local s = f:read('*a')
             f:close()
-        else
-            print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
-        end
-::continue1::
-    end
-    local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.fileset")
+            if s:find('_G.iuprops["_VERSION"] = 2', 1, true) then print('Scipped '..filenameT.name); goto continue1 end
+            s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,'):gsub('] = {,', '] = {' ):gsub('}\n', '},\n' )..'\n}'
 
-    for i, filenameT in ipairs(files or {}) do
-        local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
+            local bsuc, fun = pcall(assert, load(s))
+            if not bsuc then
+                print(filenameT.name, fun)
+                goto continue1
+            end
+
+            tMsg = fun()
+            if not pcall(Convert, tMsg) then
+                print("File '"..filenameT.name.." 'convertion failed")
+                goto continue1
+            end
+
+            tOut = {}
+            for n, v in pairs(tMsg) do
+                table.insert(tOut, '_G.iuprops["'..n..'"] = '..CORE.tbl2Out(v, ' ', true, true))
+            end
+            tOut['_VERSION'] = 2
+
+            f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
+            if f then
+                f:write(table.concat(tOut, '\n'):to_utf8())
+                f:close()
+            else
+                print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
+            end
+            ::continue1::
+        end
+        local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.fileset")
+
+        for i, filenameT in ipairs(files or {}) do
+            local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
+            local s = f:read('*a')
+            f:close()
+            s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,'):gsub('] = {,', '] = {' ):gsub('}\n', '},\n' )..'\n}'
+
+            local bsuc, fun = pcall(assert, load(s))
+            if not bsuc then
+                print(filenameT.name, fun)
+                goto continue
+            end
+
+            tMsg = fun()
+            if tMsg['_VERSION'] == 2 then goto continue end
+            ConvertBuffers(tMsg)
+
+            tOut = {}
+            for n, v in pairs(tMsg) do
+                table.insert(tOut, '_G.iuprops["'..n..'"] = '..CORE.tbl2Out(v, ' ', true, true))
+            end
+            f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
+            if f then
+                f:write(table.concat(tOut, '\n'):to_utf8())
+                f:close()
+            else
+                print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
+            end
+            ::continue::
+        end
+        local f = io.open(props['SciteUserHome']..'\\settings.lua')
         local s = f:read('*a')
         f:close()
-        s = 'return {\n'..s:gsub('_G.iuprops([^\n]+)', '%1,'):gsub('] = {,','] = {' ):gsub('}\n','},\n' )..'\n}'
+        s = s:gsub('^_G.iuprops = ', 'return')
 
-        local bsuc, fun = pcall(assert, load(s))
-        if not bsuc then
-            print(filenameT.name, fun)
-            goto continue
-        end
-
-        tMsg = fun()
-        if tMsg['_VERSION'] == 2 then goto continue end
+        tMsg = assert(load(s))()
+        if tMsg['_VERSION'] == 2 then return end
+        Convert(tMsg)
         ConvertBuffers(tMsg)
+        tMsg['_VERSION'] = 2
 
-        tOut = {}
-        for n, v in pairs(tMsg) do
-            table.insert(tOut, '_G.iuprops["'..n..'"] = '..CORE.tbl2Out(v, ' ', true, true))
+        f = io.open(props['SciteUserHome']..'\\favorites.lst')
+        local sf = f:read('*a')
+        f:close()
+
+        local tf = {}
+        for ff in sf:gmatch('[^\n\r]+') do
+            table.insert(tf, {ff, alias = ff:gsub('^.-([^\\]+)\\?$', '%1')})
         end
-        f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
-        if f then
-            f:write(table.concat(tOut, '\n'):to_utf8())
+
+        tMsg['FileMan.Favorits'] = tf
+        f = io.open(props['SciteUserHome']..'\\settings.lua', "w")
+
+        s = CORE.tbl2Out(tMsg, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
+
+        f:write(s:to_utf8())
+        f:flush()
+        f:close()
+    end
+    if version < 3 then
+        for i, filenameT in ipairs(files or {}) do
+            local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)
+            local s = f:read('*a')
             f:close()
-        else
-            print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
+            s = s:gsub('MainWindowMenu|Edit|Conventional', 'MainWindowMenu|Edit|Regular'):gsub('(%[._VERSION.%][ =]+)2', '%13')
+
+            f = io.open(props['SciteUserHome']..'\\'..filenameT.name, "w")
+            if f then
+                f:write(s)
+                f:close()
+            else
+                print('Cant write: '..props['SciteUserHome']..'\\'..filenameT.name)
+            end
         end
-::continue::
+        local f = io.open(props['SciteUserHome']..'\\settings.lua')
+        local s = f:read('*a')
+        f:close()
+        s = s:gsub('MainWindowMenu|Edit|Conventional', 'MainWindowMenu|Edit|Regular'):gsub('(%[._VERSION.%][ =]+)2', '%13')
+        f = io.open(props['SciteUserHome']..'\\settings.lua', "w")
+        f:write(s)
+        f:flush()
+        f:close()
     end
-    local f = io.open(props['SciteUserHome']..'\\settings.lua')
-    local s = f:read('*a')
-    f:close()
-    s = s:gsub('^_G.iuprops = ', 'return')
-
-    tMsg = assert(load(s))()
-    if tMsg['_VERSION'] == 2 then return end
-    Convert(tMsg)
-    ConvertBuffers(tMsg)
-    tMsg['_VERSION'] = 2
-
-    f = io.open(props['SciteUserHome']..'\\favorites.lst')
-    local sf = f:read('*a')
-    f:close()
-
-    local tf = {}
-    for ff in sf:gmatch('[^\n\r]+') do
-        table.insert(tf, {ff, alias = ff:gsub('^.-([^\\]+)\\?$', '%1')})
-    end
-
-    tMsg['FileMan.Favorits'] = tf
-    f = io.open(props['SciteUserHome']..'\\settings.lua', "w")
-
-    s = CORE.tbl2Out(tMsg, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
-
-    f:write(s:to_utf8())
-    f:flush()
-    f:close()
-
 end
 
 Run()
