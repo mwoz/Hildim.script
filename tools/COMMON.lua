@@ -641,6 +641,47 @@ function _FMT(s, ...)
     return s
 end
 
+function _HildiAlarm(msg, t, p1, p2, p3)
+    msg = _FMT(_TH(msg), p1, p2, p3)
+    local b1, b2, b3
+--MB_OK                       0x00000000L
+--MB_OKCANCEL                 0x00000001L
+--MB_YESNOCANCEL              0x00000003L
+--MB_YESNO                    0x00000004L
+    t = t & 0xf
+ print(t)
+
+    if t == 0 then
+        b1 = _TH"OK"
+    elseif t == 1 then
+        b1 = _TH"OK"
+        b2 = _TH"Cancel"
+    else
+        b1 = _TH"Yes"
+        b2 = _TH"No"
+    if t == 3 then b3 = _TH"Cancel" end
+    end
+    local ret = iup.Alarm('HildiM', msg, b1, b2, b3)
+--IDOK                1
+--IDCANCEL            2
+--IDABORT             3
+--IDRETRY             4
+--IDIGNORE            5
+--IDYES               6
+--IDNO                7
+    local rez = 1
+    if t == 1 then
+        rez = ret
+    elseif t == 3 or t == 4 then
+        rez = ret + 5
+    if rez == 8 then rez = 2 end
+    end
+    return rez
+end
+
+function _LocalizeText(msg)
+    return string.to_utf8(_TH(msg))
+end
 
 function dolocale(s)
     local s_name = s:gsub('.lua$', '')

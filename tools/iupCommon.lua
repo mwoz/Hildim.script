@@ -1440,6 +1440,11 @@ end
 _G.dialogs = {}
 iup.scitedialog = function(t)
     local dlg = _G.dialogs[t.sciteid]
+    t.txtbgcolor = props['layout.txtbgcolor']
+    t.txtinactivcolor = props['layout.txtinactivcolor']
+    t.txtfgcolor = props['layout.txtfgcolor']
+    t.bordercolor = props['layout.bordercolor']
+    t.borderhlcolor = props['layout.borderhlcolor']
     if dlg == nil then
         dlg = iup.dialog(t)
         iup.SetNativeparent(dlg, t.sciteparent)
