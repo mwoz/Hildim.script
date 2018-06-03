@@ -89,7 +89,7 @@ end
 
 local cv = (function(s) return iup.GetDialogChild(containers[2],s).value end)
 
-local function ReadSettings()
+local function ReadSettings(bScipCheckRegEx)
     findSettings:Reset{
         wholeWord = (cv("chkWholeWord") == "ON")
         ,matchCase = (cv("chkMatchCase") == "ON")
@@ -104,8 +104,10 @@ local function ReadSettings()
     if Ctrl("chkRegExp").value == 'ON' then
         local err = scite.CheckRegexp(Ctrl("cmbFindWhat").value)
         if err then
-            print(err)
-            SetInfo('regex_error', 'E')
+            if not bScipCheckRegEx then
+                print(err)
+                SetInfo('regex_error', 'E')
+            end
             return true
         end
     end
@@ -161,8 +163,8 @@ end
 
 local function FindMark_onTimer()
     CORE.ClearLiveFindMrk()
-    if ReadSettings() then return end
     tmr.run="NO"
+    if ReadSettings(true) then return end
     findSettings:MarkAll(false, tMarks[6], 10)
 end
 
