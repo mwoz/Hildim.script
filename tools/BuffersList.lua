@@ -102,7 +102,7 @@ local function InitWndDialog()
         end
     end
 
-    list_windows = iup.matrix{ name = 'list_buffers', fgcolor=props["tabctrl.forecolor"],
+    list_windows = iup.matrix{ name = 'list_buffers', fgcolor = props["tabctrl.forecolor"],
         numcol = 6, numcol_visible = 4, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
         readonly = "NO"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255", resizematrix = "YES", propagatefocus = 'YES'  ,
         rasterwidth0 = 0 ,
@@ -124,8 +124,31 @@ local function InitWndDialog()
     list_windows.edition_cb = function(c, lin, col, mode, update)
         return iup.IGNORE
     end
+    local multisheck
+    list_windows.keypress_cb = function(h, c, press)
+        if c == iup.K_LSHIFT and press==0 then multisheck = nil end
+        return iup.MatKeyPressCb(h, c, press)
+    end
     list_windows.click_cb = function(h, lin, col, status)
-        if iup.isdouble(status) and iup.isbutton1(status) and lin > 0 then
+        if iup.isshift(status) and iup.isbutton1(status) and col == 1 and not iup.isdouble(status) then
+            if multisheck then
+                local up, down
+                if multisheck > lin then
+                    up = lin + 1
+                    down = multisheck
+                else
+                    up = multisheck
+                    down = lin - 1
+                end
+                local newVal = (iup.GetAttributeId2(h, 'TOGGLEVALUE', multisheck, 1) or '0')
+                for i = up, down do
+                    iup.SetAttributeId2(h, 'TOGGLEVALUE', i, 1, newVal)
+                end
+                multisheck = nil
+            else
+                multisheck = lin
+            end
+        elseif iup.isdouble(status) and iup.isbutton1(status) and lin > 0 then
             scite.buffers.SetDocumentAt(tonumber(iup.GetAttributeId2(list_windows, '', lin, 5)))
             fillWindow(curSide)
             list_windows.redraw = 'ALL'
