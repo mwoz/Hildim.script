@@ -653,11 +653,11 @@ local function Init_hidden()
 		{'Copy To Left', ru = _T'Copy Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
 		{'Copy To Right', ru = _T'Copy Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
         {'s3', separator = 1},
-		{'Recompare by changing line', ru = _T'Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare end},
-		{'Ignore Space', ru = _T'Ignore Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{} end},
-		{'Detect Move', ru = _T'Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings() end},
-		{'Add Empty Line', ru = _T'Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings() end},
-		{'Use Icons', ru = _T'Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings() end},
+		{'Recompare by changing line', ru = _T'Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare; _G.iuprops['compare_settings'] = tSet end},
+		{'Ignore Space', ru = _T'Ignore Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{}; _G.iuprops['compare_settings'] = tSet  end},
+		{'Detect Move', ru = _T'Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
+		{'Add Empty Line', ru = _T'Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
+		{'Use Icons', ru = _T'Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
 		{'Color Settings', ru = _T'Color Preferences', action = ColorSettings, image='color_µ'},
     }}
     menuhandler:AddMenu(item)

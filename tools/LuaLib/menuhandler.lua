@@ -4,8 +4,8 @@ local activeLabel = nil
 local reselectedItem = nil
 local clr_hgl = props['layout.txthlcolor']
 
-local clr_select = props['layout.fgcolor']
-local clr_normal = props['layout.txtinactivcolor']
+local clr_select = props['layout.txtinactivcolor']
+local clr_normal = props['layout.fgcolor']
 local s = class()
 local r_button
 

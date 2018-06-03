@@ -51,8 +51,12 @@ local function InitWndDialog()
                     elseif cmb_Sort.value == '3' then
                         local _, _, ext = n:find('([^%.]*)$')
                         row.order = (ext..n):upper()
-                    else
+                    elseif cmb_Sort.value == '4' then
                         row.order = p:upper()..' '..n:upper()
+                    elseif cmb_Sort.value == '5' then
+                        row.order = scite.buffers.GetBufferOrder(i)
+                    else
+                        row.order = -scite.buffers.GetBufferModTime(i)
                     end
                     n = n..Iif(scite.buffers.SavedAt(i), '', '*')
 
@@ -80,6 +84,7 @@ local function InitWndDialog()
         end
         local t = windowsList()
         iup.SetAttribute(list_windows, "DELLIN", "1-"..list_windows.numlin)
+        list_windows.fgcolor = Iif((tonumber(props['tabctrl.colorized']) or 0) == 1, props['tabctrl.forecolor'], props['layout.txtfgcolor'])
         iup.SetAttribute(list_windows, "ADDLIN", "1-"..#t)
         for i = 1,  #t do
             list_windows:setcell(i, 2, Iif(t[i].side == 0, _T"Main", _T"Additional"))
@@ -90,13 +95,14 @@ local function InitWndDialog()
             if (tonumber(props['tabctrl.colorized']) or 0) == 1 then
                 iup.SetAttribute(list_windows, "BGCOLOR"..i..":*", t[i].bgcolor)
                 if t[i].active then
-                    iup.SetAttribute(list_windows, "BGCOLOR"..i..":1", "255 255 255")
+                    iup.SetAttribute(list_windows, "BGCOLOR"..i..":1", props['layout.txtbgcolor'])
+                    iup.SetAttribute(list_windows, "FGCOLOR"..i..":1", props['layout.txtfgcolor'])
                 end
             end
         end
     end
 
-    list_windows = iup.matrix{ name = 'list_buffers',
+    list_windows = iup.matrix{ name = 'list_buffers', fgcolor=props["tabctrl.forecolor"],
         numcol = 6, numcol_visible = 4, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
         readonly = "NO"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255", resizematrix = "YES", propagatefocus = 'YES'  ,
         rasterwidth0 = 0 ,
@@ -190,11 +196,13 @@ local function InitWndDialog()
             btn_attach,
             iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end},
         }, barsize = 0, state = 'CLOSE', name = 'bufferslist_expander'}
-        cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0', expand = 'NO', propagatefocus = 'YES', action = function() fillWindow(curSide) end, tip = _T'List Sorting'}
+        cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0',visibleitems=10, expand = 'NO', propagatefocus = 'YES', action = function() fillWindow(curSide) end, tip = _T'List Sorting'}
         iup.SetAttribute(cmb_Sort, 1, _TH"Нет")
         iup.SetAttribute(cmb_Sort, 2, _T"Name")
         iup.SetAttribute(cmb_Sort, 3, _T"Extension")
         iup.SetAttribute(cmb_Sort, 4, _T"Path")
+        iup.SetAttribute(cmb_Sort, 5, _T"Last View")
+        iup.SetAttribute(cmb_Sort, 6, _T"Last Modified")
         --cmb_Sort.value = 1
         dlg = iup.scitedialog{iup.vbox{
             hbTitle,

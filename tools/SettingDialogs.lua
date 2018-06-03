@@ -87,7 +87,7 @@ end
 function sett.ResetFontSize()
 	local ret, size = iup.GetParam(_T"Interface Font".."^InterfaceFontSize",
 					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 5 then return 0 end return 1 end,
-					_T'Size'..'%i[1,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
+					_T'Size'..'%i[5,19,1]\n', tonumber(props['iup.defaultfontsize']) or 9)
 	if ret then
 		props['iup.defaultfontsize'] = size
 		if 1 == iup.Alarm(_T'Interface Font', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
@@ -114,7 +114,7 @@ function sett.ResetTabbarProps()
     end
 
     local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref,
-    tabctrl_forecolor, ROColor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color
+    tabctrl_forecolor, ROColor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color, opencmd
     = iup.GetParam(_T"Tabbar Preferenses".."^TabbarProperties",
             function(h, id)
                 local bact = Iif(iup.GetParamParam(h, 5).control.value == 'ON', 'YES', 'NO')
@@ -144,7 +144,9 @@ function sett.ResetTabbarProps()
         _T'Background'..'%c\n'..
         _T'Foreground'..'%c\n'..
         _T'Foreground Read-Only'..'%c\n'..
-        _T'Draged-and-Droped'..' %c\n'
+        _T'Draged-and-Droped'..' %c\n'..
+        _T'Command line for "Open File Folder"'..'%t\n'..
+        _T'Use %%P as folder path placeholder'..'%s\n'
         ,
         tonumber(props['tabbar.tab.close.on.doubleclick']) or 0,
         tonumber(props['buffers']) or 100,
@@ -161,7 +163,8 @@ function sett.ResetTabbarProps()
         oldClr('tabctrl.active.bakcolor' , '255 255 255'),
         oldClr('tabctrl.active.forecolor' , '0 0 255'),
         oldClr('tabctrl.active.readonly.forecolor' , '120 120 255'),
-        oldClr('tabctrl.moved.color' , '120 120 255')
+        oldClr('tabctrl.moved.color' , '120 120 255'),
+        _G.iuprops['settings.tabmenu.opencmd'] or 'explorer "%P"'
     )
     if ret then
         props['tabbar.tab.close.on.doubleclick'] = ondbl
@@ -180,6 +183,7 @@ function sett.ResetTabbarProps()
         props['tabctrl.active.forecolor'] = tabctrl_active_forecolor
         props['tabctrl.active.readonly.forecolor'] = tabctrl_active_readonly_forecolor
         props['tabctrl.moved.color'] = tabctrl_moved_color
+        _G.iuprops['settings.tabmenu.opencmd'] = opencmd
 
         iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
         iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
@@ -192,7 +196,7 @@ end
 function sett.ResetGlobalColors()
 
     local ret, bgcolor, txtbgcolor, fgcolor, txtfgcolor, txthlcolor, txtinactivcolor, hlcolor, borderhlcolor, bordercolor,
-    scroll_forecolor , scroll_presscolor, scroll_highcolor , scroll_backcolor
+    splittercolor, scroll_forecolor , scroll_presscolor, scroll_highcolor , scroll_backcolor
     = iup.GetParam(_T"Main Window Colors".."^MainWindowColor",
         nil,
         _T'Bar Background'..'%c\n'..
@@ -204,6 +208,7 @@ function sett.ResetGlobalColors()
         _T'Control Highlight'..'%c\n'..
         _T'Highlighted Control Border'..'%c\n'..
         _T'Control Border'..'%c\n'..
+        _T'Splitters'..'%c\n'..
         _T'Scrollbar Slider'..'%c\n'..
         _T'Scrollbar Slider - Pressed'..'%c\n'..
         _T'Scrollbar Slider - Highlighted'..'%c\n'..
@@ -218,6 +223,7 @@ function sett.ResetGlobalColors()
         props['layout.hlcolor']          ,
         props['layout.borderhlcolor']    ,
         props['layout.bordercolor']      ,
+        props['layout.splittercolor']    ,
         props['layout.scroll.forecolor'] ,
         props['layout.scroll.presscolor'],
         props['layout.scroll.highcolor'] ,
@@ -234,10 +240,11 @@ function sett.ResetGlobalColors()
         props['layout.txthlcolor']        = txthlcolor
         props['layout.txtinactivcolor']   = txtinactivcolor
         props['layout.bordercolor']       = bordercolor
+        props['layout.splittercolor']     = splittercolor
         props['layout.scroll.forecolor']  = scroll_forecolor
         props['layout.scroll.presscolor'] = scroll_presscolor
         props['layout.scroll.highcolor']  = scroll_highcolor
-        props['layout.scroll.backcolor'] = scroll_backcolor
+        props['layout.scroll.backcolor']  = scroll_backcolor
 
         if 1 == iup.Alarm(_T'Interface Color', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
             scite.SetRestart('  -cmd scite.RunAsync(CORE.ResetGlobalColors)')
@@ -271,7 +278,7 @@ function sett.AutoScrollingProps()
     local ret,
     caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xjumps, caret_policy_xeven,
     caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yjumps, caret_policy_yeven,
-    caret_sticky, end_at_last_lin
+    caret_sticky, end_at_last_lin, iup_scrollbarsize
     = iup.GetParam(_T"Autoscroll Preferenses".."^AutiscrollSettings",
         nil,
         _T'Horizontal Autoscroll'..'%t\n'..
@@ -293,7 +300,9 @@ function sett.AutoScrollingProps()
         '%t\n'..
         _T'Save Horizontal Position'..'%b\n'..
         _T'Maximum Vertical Scroll Position'..'%t\n'..
-        _T'Page Below Last Line'..'%b\n'
+        _T'Page Below Last Line'..'%b\n'..
+        '%t\n'..
+        _T'Scrollbar Size'..'%i[11,21,1]\n'
         ,
         tonumber(props['caret.policy.xslop']) or 0,
         tonumber(props['caret.policy.width']) or 0,
@@ -309,7 +318,8 @@ function sett.AutoScrollingProps()
 
         tonumber(props['caret.sticky']) or 0,
 
-        tonumber(props['end.at.last.line']) or 0
+        tonumber(props['end.at.last.line']) or 0,
+        tonumber(props['iup.scrollbarsize'])
     )
     if ret then
         props['caret.policy.xslop']    = caret_policy_x
@@ -328,6 +338,13 @@ function sett.AutoScrollingProps()
 
         props['end.at.last.line'] = end_at_last_lin
         scite.ReloadProperties()
+        if iup_scrollbarsize ~= tonumber(props['iup.scrollbarsize']) then
+            if 1 == iup.Alarm(_T'Autoscroll Preferenses', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
+                props['iup.scrollbarsize'] = iup_scrollbarsize
+                scite.SetRestart('')
+                scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+            end
+        end
     end
 end
 
@@ -371,6 +388,7 @@ function sett.CreateColorSettings()
 'tabctrl.active.readonly.forecolor',
 'tabctrl.cut.illumination',
 'tabctrl.cut.saturation',
+'tabctrl.forecolor',
 'tabctrl.readonly.color',
 'tabctrl.moved.color',
 'tabctrl.readonly.color',
@@ -383,7 +401,7 @@ function sett.CreateColorSettings()
 'layout.txtfgcolor',
 'layout.txthlcolor',
 'layout.txtinactivcolor',
-'layout.bordercolor',
+'layout.splittercolor',
 'layout.scroll.forecolor',
 'layout.scroll.presscolor',
 'layout.scroll.highcolor',
@@ -437,9 +455,10 @@ function sett.Colors_Default()
     props["layout.txthlcolor"] = "15 60 195"
     props["layout.txtinactivcolor"] = "70 70 70"
     props["layout.bordercolor"] = "200 200 200"
-    props["layout.scroll.forecolor"] = "220 220 220"
-    props["layout.scroll.presscolor"] = "190 190 190"
-    props["layout.scroll.highcolor"] = "200 200 200"
+    props["layout.splittercolor"] = "220 220 220"
+    props["layout.scroll.forecolor"] = "190 190 190"
+    props["layout.scroll.presscolor"] = "150 150 150"
+    props["layout.scroll.highcolor"] = "170 170 170"
     props["layout.scroll.backcolor"] = "240 240 240"
     scite.SetRestart('')
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
@@ -467,6 +486,7 @@ function sett.Colors_Atrium()
     props["layout.txthlcolor"] = "15 60 195"
     props["layout.txtinactivcolor"] = "97 97 97"
     props["layout.bordercolor"] = "221 157 216"
+    props["layout.splittercolor"] = "178 223 218"
     props["layout.scroll.forecolor"] = "173 181 211"
     props["layout.scroll.presscolor"] = "81 102 178"
     props["layout.scroll.highcolor"] = "134 148 198"
@@ -479,11 +499,12 @@ function sett.Colors_Darkblue()
     props["tabctrl.active.bakcolor"] = "255 255 255"
     props["tabctrl.active.forecolor"] = "0 0 255"
     props["tabctrl.active.readonly.forecolor"] = "120 120 255"
-    props["tabctrl.cut.illumination"] = "44"
-    props["tabctrl.cut.saturation"] = "67"
-    props["tabctrl.readonly.color"] = "229 229 229"
+    props["tabctrl.cut.illumination"] = "28"
+    props["tabctrl.cut.saturation"] = "30"
+    props["tabctrl.forecolor"] = "255 255 255"
+    props["tabctrl.readonly.color"] = "214 214 214"
     props["tabctrl.moved.color"] = "213 213 254"
-    props["tabctrl.readonly.color"] = "229 229 229"
+    props["tabctrl.readonly.color"] = "214 214 214"
     props["layout.hlcolor"] = "94 180 189"
     props["layout.borderhlcolor"] = "51 146 156"
     props["layout.bordercolor"] = "1 148 143"
@@ -491,9 +512,9 @@ function sett.Colors_Darkblue()
     props["layout.txtbgcolor"] = "255 255 255"
     props["layout.fgcolor"] = "255 255 255"
     props["layout.txtfgcolor"] = "0 0 0"
-    props["layout.txthlcolor"] = "255 216 75"
+    props["layout.txthlcolor"] = "255 149 239"
     props["layout.txtinactivcolor"] = "183 183 183"
-    props["layout.bordercolor"] = "1 148 143"
+    props["layout.splittercolor"] = "35 63 113"
     props["layout.scroll.forecolor"] = "120 165 125"
     props["layout.scroll.presscolor"] = "61 114 66"
     props["layout.scroll.highcolor"] = "81 139 87"

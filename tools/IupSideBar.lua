@@ -202,7 +202,7 @@ local function CreateBox()
             l = iup.vbox(t)
         elseif t.type == "SPLIT" then
             t.layoutdrag = 'NO'
-            t.color = props['layout.scroll.forecolor']
+            t.color = props['layout.splittercolor']
             t.showgrip = 'LINES'
             l = iup.split(t)
         elseif t.type == "FIND" then
@@ -238,7 +238,7 @@ local function CreateBox()
         t.k_any = (function(h, c) if c == iup.K_ESC then iup.PassFocus() end end)
         t.extrabuttons = 1
         t.extraimage1 = "property_µ"
-        t.extrapresscolor1 = props["layout.scroll.forecolor"]
+        t.extrapresscolor1 = props["layout.splittercolor"]
         t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu|View|'..sciteid) end end
 
         local j = 1
@@ -255,7 +255,7 @@ local function CreateBox()
         t.forecolor = iup.GetLayout().fgcolor
         t.tabsforecolor = props['layout.fgcolor']
         t.bgcolor = iup.GetLayout().bgcolor
-        t.tabsbackcolor = props["layout.scroll.forecolor"]
+        t.tabsbackcolor = props["layout.splittercolor"]
         return iup.flattabs(t)
     end
 

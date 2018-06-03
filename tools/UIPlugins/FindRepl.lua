@@ -602,7 +602,7 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visibleitems = "18",
-      edit_cb=onFindEdit,
+      edit_cb = onFindEdit,
       k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return iup.IGNORE; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],

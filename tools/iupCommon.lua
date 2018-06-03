@@ -301,10 +301,12 @@ function iup.SaveChProps(bReset)
 'layout.txthlcolor',
 'layout.txtinactivcolor',
 'layout.bordercolor',
+'layout.splittercolor',
 'layout.scroll.forecolor',
 'layout.scroll.presscolor',
 'layout.scroll.highcolor',
 'layout.scroll.backcolor',
+'iup.scrollbarsize',
 'locale',
     }
     for i = 1, #t do
@@ -877,6 +879,7 @@ iup.hi_toggle = function(t)
     local fg, bg
     t.image = "uncheck_t_µ"
     t.imagepress = "check_t_µ"
+    t.spacing = 5
     if t.ctrl then
         t.imageinactive = "uncheck_µ"
         fg = props['layout.txtfgcolor']
@@ -910,7 +913,7 @@ iup.matrix = function(t)
     t['bgcolor0:*'] = props['layout.scroll.backcolor']
     t['fgcolor0:*'] = iup.GetLayout().fgcolor
     t.bgcolor = props['layout.txtbgcolor'];
-    t.fgcolor = props['layout.txtfgcolor'];
+    t.fgcolor = props['layout.txtfgcolor']
 
     local mtr = old_matrix(t)
     function mtr:SetCommonCB(act_act,act_resel, act_esc, act_right)
@@ -1022,7 +1025,7 @@ local old_iup_GetParam = iup.GetParam
 local indGetParam
 iup.GetParam = function(...)
     local tParams = table.pack(...)
-    local _, _, capt, fName = ('GetParam_'..tParams[1]):find('([^^]*)^(.*)')
+    local _, _, capt, fName = (tParams[1]):find('([^^]*)^(.*)')
     indGetParam = fName
     if fName then
         tParams[1] = capt
@@ -1042,10 +1045,18 @@ function OnParamKeyPress()
     end
 end
 
+local old_iup_text = iup.text
+iup.text = function(t)
+    if not t.bgcolor then t.bgcolor = props['layout.txtbgcolor'] end
+    if not t.fgcolor and not (t.readonly or t.readonly == 'NO') then t.fgcolor = props['layout.txtfgcolor'] end
+    return old_iup_text(t)
+end
+
 local old_iup_list = iup.list
 iup.list = function(t)
     if not t.flat then t.flat = 'YES' end
-    -- if not t.nohidesel then t.nohidesel = 'NO' end
+    if not t.bgcolor then t.bgcolor = props['layout.txtbgcolor'] end
+    if not t.fgcolor and t.editbox == 'YES' then t.fgcolor = props['layout.txtfgcolor'] end
     local cmb = old_iup_list(t)
     function cmb:FillByDir(pathmask, strSel)
         local current_path = props["sys.calcsybase.dir"]..pathmask
