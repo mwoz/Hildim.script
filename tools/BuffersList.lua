@@ -226,7 +226,7 @@ local function InitWndDialog()
         iup.SetAttribute(cmb_Sort, 4, _T"Path")
         iup.SetAttribute(cmb_Sort, 5, _T"Last View")
         iup.SetAttribute(cmb_Sort, 6, _T"Last Modified")
-        --cmb_Sort.value = 1
+        cmb_Sort.value = _G.iuprops['buffers.sortorder'] or '2'
         dlg = iup.scitedialog{iup.vbox{
             hbTitle,
             list_windows,
@@ -255,7 +255,6 @@ local function InitWndDialog()
                 list_windows.rasterwidth4 = nil
                 list_windows.fittosize = 'COLUMNS'
                 blockClose = false
-                cmb_Sort.value = _G.iuprops['buffers.sortorder'] or 2
             elseif state == 4 then
                 _G.iuprops['buffers.sortorder'] = cmb_Sort.value
             end

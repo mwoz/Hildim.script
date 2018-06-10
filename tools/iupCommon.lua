@@ -1056,7 +1056,7 @@ local old_iup_list = iup.list
 iup.list = function(t)
     if not t.flat then t.flat = 'YES' end
     if not t.bgcolor then t.bgcolor = props['layout.txtbgcolor'] end
-    if not t.fgcolor and t.editbox == 'YES' then t.fgcolor = props['layout.txtfgcolor'] end
+    if not t.fgcolor then t.fgcolor = props['layout.txtfgcolor'] end
     local cmb = old_iup_list(t)
     function cmb:FillByDir(pathmask, strSel)
         local current_path = props["sys.calcsybase.dir"]..pathmask
@@ -1197,7 +1197,10 @@ iup.scitedetachbox = function(t)
     end
 
     dtb.detachPos = (function(bShow)
+        dtb.detached = 1
         dtb.detachhidden = 1
+        dtb.detached = nil
+
         _G.iuprops[dtb.sciteid..'.win'] = Iif(bShow, '1', '2')
         hbTitle.state = 'OPEN'
         dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
@@ -1211,6 +1214,7 @@ iup.scitedetachbox = function(t)
         end
         _G.dialogs[dtb.sciteid] = dtb
         dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
+
         if bShow then
             iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
         else
@@ -1219,7 +1223,7 @@ iup.scitedetachbox = function(t)
         if not bShow and dtb.Dlg_Show_Cb then dtb.Dlg_Show_Cb(dtb.Dialog, 0) end
     end)
 
-    dtb.detached_cb=(function(h, hNew, x, y)
+    dtb.detached_cb =(function(h, hNew, x, y)
         dtb.Dialog = hNew
         if h.On_Detach then h.On_Detach(h, hNew, x, y) end
         hNew.resize ="YES"
@@ -1236,6 +1240,8 @@ iup.scitedetachbox = function(t)
         hNew.hlcolor = iup.GetLayout().hlcolor
         hNew.bordercolor = iup.GetLayout().bordercolor
         hNew.flat = 'YES'
+        hNew.customframedraw = 'YES'
+        hNew.customframecaptionheight = -1
   --[[      hNew.title= t.Dlg_Title or "dialog"]]
         hNew.x=10
         hNew.y=10
@@ -1263,12 +1269,41 @@ iup.scitedetachbox = function(t)
         if tonumber(_G.iuprops['dialogs.'..h.sciteid..'.x'])== nil or tonumber(_G.iuprops['dialogs.'..h.sciteid..'.y']) == nil then _G.iuprops['dialogs.'..h.sciteid..'.x']=0;_G.iuprops['dialogs.'..h.sciteid..'.y']=0 end
         hNew.button_cb = function(h, button, pressed, x, y, status) end
         hNew.move_cb = function(h, x, y)
-            _G.iuprops['dialogs.'..dtb.sciteid..'.y']= y
-            _G.iuprops['dialogs.'..dtb.sciteid..'.x']= x
+            if not dtb.detached then
+                _G.iuprops['dialogs.'..dtb.sciteid..'.y'] = y
+                _G.iuprops['dialogs.'..dtb.sciteid..'.x'] = x
+            end
         end
         hNew.resize_cb = function(h, x, y)
             _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize'] = h.rastersize
             if OnResizeSideBar then OnResizeSideBar(t.sciteid) end
+        end
+
+        hNew.customframedraw_cb = function(h)
+            local _, _, xD, yD = h.RASTERSIZE:find('(%d+)x(%d+)')
+            iup.DrawBegin(h)
+            iup.DrawSetClipRect(h, 0, 0, xD, yD)
+            h.drawcolor = props['layout.bgcolor']
+            h.drawstyle = "FILL"
+            iup.DrawRectangle(h, 0, 0, xD - 1, yD - 1)
+            local w = tonumber(props['layout.wndframesize']) + 2
+            h.drawcolor = props['layout.splittercolor']
+            h.drawstyle = "STROKE"
+            h.drawlinewidth = w
+            w = w / 2
+            iup.DrawRectangle(h, w, w, xD - w, yD - w)
+            if h.drawactive == '1' then
+                h.drawcolor = props['layout.bordercolor']
+                h.drawlinewidth = 1
+                iup.DrawRectangle(h, 0, 0, xD - 1, yD - 1)
+
+            end
+            iup.DrawEnd(h)
+        end
+
+        hNew.customframeactivate_cb = function(h, active)
+            h.drawactive = active
+            hNew.customframedraw_cb(h)
         end
     end)
     dtb.HideDialog = function()
