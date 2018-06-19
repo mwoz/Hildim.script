@@ -428,7 +428,8 @@ local function createDlg()
     expd = iup.expander{iup.hbox{txt_live, iup.label{title = '<PgDn>-Next'},iup.label{}, gap = 10, alignment='ACENTER'}, barposition = 'BOTTOM', barsize = '0', state = 'CLOSE', visible = 'NO'}
 
     local dlg = iup.scitedialog{iup.vbox{expd, lst_clip}, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true, shrink="YES",
-                maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',}
+                maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',
+                customframedraw = Iif(props['layout.standard.decoration'] == '1', 'NO', 'YES') , customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(nil)}
 
     local tmr = iup.timer{time = 10, run = 'NO', action_cb = function(h)
         expd.state = 'CLOSE'

@@ -52,6 +52,7 @@ return {
 ["Selected Text - Color"] = "Выделенный текст - цвет";
 ["Size"] = "Размер";
 ["Splitters"] = "Сплиттеры";
+["Standart Windows Decoration"] = "Стандартное оформление окон";
 ["Strore Search Results"] = "Хранить результатов поиска";
 ["Switching in Order of Usage"] = "Переключать в порядке использования";
 ["Tab Preferenses"] = "Текущие настройки отступа";

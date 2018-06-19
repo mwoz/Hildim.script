@@ -306,6 +306,7 @@ function iup.SaveChProps(bReset)
 'layout.scroll.presscolor',
 'layout.scroll.highcolor',
 'layout.scroll.backcolor',
+'layout.standard.decoration',
 'iup.scrollbarsize',
 'locale',
     }
@@ -1099,12 +1100,47 @@ iup.list = function(t)
         end
         self.value = s
     end
+    cmb.staticfgcolor = props['layout.fgcolor']
     return cmb
 end
 
 iup.scitedeatach = function(dtb)
     dtb.detachhidden = 1
     iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
+end
+
+
+CORE.paneldraw_cb = function(h)
+    local _, _, xD, yD = h.RASTERSIZE:find('(%d+)x(%d+)')
+    iup.DrawBegin(h)
+    iup.DrawSetClipRect(h, 0, 0, xD, yD)
+    h.drawcolor = props['layout.bgcolor']
+    h.drawstyle = "FILL"
+    iup.DrawRectangle(h, 0, 0, xD - 1, yD - 1)
+    local w = tonumber(props['layout.wndframesize']) + 2
+    h.drawcolor = props['layout.splittercolor']
+    h.drawstyle = "STROKE"
+    h.drawlinewidth = w
+    w = w / 2
+    iup.DrawRectangle(h, w, w, xD - w, yD - w)
+    if h.drawactive == '1' then
+        h.drawcolor = props['layout.bordercolor']
+        h.drawlinewidth = 2
+        iup.DrawRectangle(h, 1, 1, xD - 1, yD - 1)
+
+    end
+    iup.DrawEnd(h)
+end
+
+CORE.panelactivate_cb = function(flat_title)
+    return function(h, active)
+        h.drawactive = active
+        if(flat_title) then
+            flat_title.fgcolor = Iif(active == 1, props['layout.fgcolor'], props['layout.txtinactivcolor'])
+            iup.Redraw(flat_title, 1)
+        end
+        h.customframedraw_cb(h)
+    end
 end
 
 iup.scitedetachbox = function(t)
@@ -1141,11 +1177,12 @@ iup.scitedetachbox = function(t)
     local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() cmd_Attach() end}
 
     btn_attach.image.bgcolor = iup.GetLayout().bgcolor
-    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetLayout().bgcolor, name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
-
-        iup.flatbutton{title = ' '..t.Dlg_Title,name='Title', image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
+    local flat_title = iup.flatbutton{title = ' '..t.Dlg_Title,name='Title',fgcolor=props['layout.fgcolor'], image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
-        leavewindow_cb=function() end,},
+        leavewindow_cb = function() end,}
+
+    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetLayout().bgcolor, name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+        flat_title,
         btn_attach,
         iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() cmd_Hide() end},
     }, barsize = 0, state='CLOSE', name = t.sciteid..'_expander'}
@@ -1242,7 +1279,7 @@ iup.scitedetachbox = function(t)
         hNew.flat = 'YES'
         hNew.customframedraw = 'YES'
         hNew.customframecaptionheight = -1
-  --[[      hNew.title= t.Dlg_Title or "dialog"]]
+
         hNew.x=10
         hNew.y=10
         x=10;y=10
@@ -1279,32 +1316,10 @@ iup.scitedetachbox = function(t)
             if OnResizeSideBar then OnResizeSideBar(t.sciteid) end
         end
 
-        hNew.customframedraw_cb = function(h)
-            local _, _, xD, yD = h.RASTERSIZE:find('(%d+)x(%d+)')
-            iup.DrawBegin(h)
-            iup.DrawSetClipRect(h, 0, 0, xD, yD)
-            h.drawcolor = props['layout.bgcolor']
-            h.drawstyle = "FILL"
-            iup.DrawRectangle(h, 0, 0, xD - 1, yD - 1)
-            local w = tonumber(props['layout.wndframesize']) + 2
-            h.drawcolor = props['layout.splittercolor']
-            h.drawstyle = "STROKE"
-            h.drawlinewidth = w
-            w = w / 2
-            iup.DrawRectangle(h, w, w, xD - w, yD - w)
-            if h.drawactive == '1' then
-                h.drawcolor = props['layout.bordercolor']
-                h.drawlinewidth = 1
-                iup.DrawRectangle(h, 0, 0, xD - 1, yD - 1)
+        hNew.customframedraw_cb = CORE.paneldraw_cb
 
-            end
-            iup.DrawEnd(h)
-        end
+        hNew.customframeactivate_cb = CORE.panelactivate_cb(flat_title)
 
-        hNew.customframeactivate_cb = function(h, active)
-            h.drawactive = active
-            hNew.customframedraw_cb(h)
-        end
     end)
     dtb.HideDialog = function()
         if dtb.Dialog then
@@ -1491,6 +1506,7 @@ iup.scitedialog = function(t)
     t.txtfgcolor = props['layout.txtfgcolor']
     t.bordercolor = props['layout.bordercolor']
     t.borderhlcolor = props['layout.borderhlcolor']
+    t.icon = 'SCITE'
     if dlg == nil then
         dlg = iup.dialog(t)
         iup.SetNativeparent(dlg, t.sciteparent)

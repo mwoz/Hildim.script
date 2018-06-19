@@ -169,7 +169,8 @@ end
 
 local function createDlg()
     local dlg = iup.scitedialog{list_navigation, sciteparent = "SCITE", sciteid = "navigation", dropdown = true, shrink="YES",
-                maxbox='NO', minbox='NO', menubox='NO', minsize = '100x200',  bgcolor=iup.GetLayout().txtbgcolor,}
+                maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = iup.GetLayout().txtbgcolor,
+                customframedraw = Iif(props['layout.standard.decoration'] == '1', 'NO', 'YES'), customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(flat_title)}
     list_navigation.killfocus_cb = function()
         dlg:hide()
     end

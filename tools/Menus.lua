@@ -548,7 +548,7 @@ _G.sys_Menus.MainWindowMenu = {
 		{'s2', separator = 1},
 		{'l1', CORE.windowsList, plane = 1},
         {'s2', separator = 1},
-        {'Window...',  action = function() CORE.showWndDialog() end, image = 'property_µ' },
+        {'Windows...', action = function() CORE.showWndDialog() end, image = 'property_µ' },
 
 	},},
 	{'Help', {

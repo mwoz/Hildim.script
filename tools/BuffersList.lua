@@ -211,11 +211,11 @@ local function InitWndDialog()
                 blockClose = nil
             end
         end
-        hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = 'bufferslist_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
-
-            iup.flatbutton{title = ' ¬ÍÎ‡‰ÍË',name='Title', image='property_µ', maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
+        local flat_title = iup.flatbutton{title = _T'Windows', name = 'Title', image = 'property_µ', maxsize = 'x20', fontsize = '9', flat = 'YES', border = 'NO', padding = '3x', alignment='ALEFT',
             canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
-            leavewindow_cb=function() end,},
+            leavewindow_cb=function() end,}
+        hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = 'bufferslist_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+            flat_title,
             btn_attach,
             iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end},
         }, barsize = 0, state = 'CLOSE', name = 'bufferslist_expander'}
@@ -229,15 +229,16 @@ local function InitWndDialog()
         cmb_Sort.value = _G.iuprops['buffers.sortorder'] or '2'
         dlg = iup.scitedialog{iup.vbox{
             hbTitle,
-            list_windows,
+            iup.backgroundbox{list_windows, bgcolor = iup.GetLayout().txtbgcolor},
             iup.hbox{
                 iup.flatbutton{expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T"Close All Checked" },
-                iup.flatbutton{title = _T"except", expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T'Close All NOT Checked'  },
-                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip=_T'extension' }, cmb_Sort,
+                iup.flatbutton{title = _T"except", expand = 'NO', padding = '9x', fgcolor = props['layout.fgcolor'], flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T'Close All NOT Checked'  },
+                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip = _T'extension' }, cmb_Sort,
                 --iup.flatbutton{title = "Cancel", expand = 'NO', padding = '9x', flat_action = function() dlg:hide() end, propagatefocus = 'YES'},
         scrollbar = 'NO', minsize = 'x35', maxsize = 'x35', expand = "HORIZONTAL", margin = "20x0", gap = "20", alignment='ACENTER'};};
         sciteparent = "SCITE", sciteid = "bufferslist", dropdown = true, shrink = "YES",
-        maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255', customframedraw = 'NO'}
+        maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',
+        customframedraw = Iif(props['layout.standard.decoration'] == '1', 'NO', 'YES'), customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(flat_title)}
 
         menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
             {'Window_bar', plane = 1,{
@@ -245,7 +246,13 @@ local function InitWndDialog()
                 {"Read Only", ru = _T"Close All NOT Checked", action = CORE.DoForFileSet('0', CloseFileSet)},
                 {"Move Checked", ru = _T"Move to Another View", action = MoveSet},
         }})
-
+        dlg.bgcolor = iup.GetLayout().bgcolor
+        dlg.txtbgcolor = iup.GetLayout().txtbgcolor
+        dlg.txtfgcolor = iup.GetLayout().txtfgcolor
+        dlg.borderhlcolor = iup.GetLayout().borderhlcolor
+        dlg.hlcolor = iup.GetLayout().hlcolor
+        dlg.bordercolor = iup.GetLayout().bordercolor
+        dlg.flat = 'YES'
         dlg.resize_cb = function(h)
             list_windows.rasterwidth4 = nil
             list_windows.fittosize = 'COLUMNS'
