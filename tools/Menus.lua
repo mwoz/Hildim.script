@@ -555,7 +555,7 @@ _G.sys_Menus.MainWindowMenu = {
 		{'Context Help',  key = 'F1', action = IDM_HELP},
 		{'HildiM Help',  action = function() scite.ExecuteHelp(props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html', 0) end},
 		{'slast', separator = 1},
-        {'About HildiM',  action = IDM_ABOUT},
+        {'About HildiM',  action = function() dolocale('tools\\AboutBox.lua') end},
 	},},
 }
 

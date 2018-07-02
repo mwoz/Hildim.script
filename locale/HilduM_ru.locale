@@ -250,7 +250,6 @@ __LOCALE ={
         ["Text"] = "Текст";
         ["TranslationCredit"] = "\n    Сборка Ru-Board\n";
         ["Untitled"] = "Безымянный";
-        ["Version"] = "Версия";
         ["Wrong file name!"] = "Неправильное имя файла!";
         ["by"] = "Автор:";
 
@@ -270,6 +269,10 @@ __LOCALE ={
         ['Output'] = 'Консоль',
         ['Left Side Bar'] = 'Левая панель',
         ['Right Side Bar'] = 'Правая панель',
+    },
+    ['tools\\AboutBox'] ={
+        ["Version"] = "Версия";
+        ["Based"] = "На базе";
     },
     ['tools\\UIPlugins\\FindRepl'] ={
         [" - all"] = " - все";

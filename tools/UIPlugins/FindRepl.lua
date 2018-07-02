@@ -1048,7 +1048,7 @@ local function create_dialog_FindReplace()
     iup.hi_toggle{
       title = _T"Whole Word",
       name = "chkWholeWord",
-      map_cb = (function(h)  h.value = _G["dialogs.findreplace."..h.name] end),
+      map_cb = (function(h) h.value = _G["dialogs.findreplace."..h.name] end),
       ldestroy_cb = (function(h) _G["dialogs.findreplace."..h.name] = h.value end),
     },
     iup.hi_toggle{
@@ -1190,9 +1190,10 @@ local function Init(h)
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
             end
         end);
-        Dlg_Show_Cb=function(h, state) SetStaticControls() end
+        Dlg_Show_Cb = function(h, state) SetStaticControls() end;
         }
     local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')
+
     if hboxPane then
         local pin = Ctrl("zPin")
         iup.Detach(pin)

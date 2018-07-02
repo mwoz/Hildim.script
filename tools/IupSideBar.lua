@@ -208,7 +208,7 @@ local function CreateBox()
         elseif t.type == "FIND" then
             SideBar_Plugins.findrepl.Bar_obj = pane_curObj
             table.insert(sb_elements, SideBar_Plugins.findrepl)
-            l = iup.backgroundbox{iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name = 'FinReplScroll', expand = "HORIZONTAL", scrollbar = 'NO', size = 'x108'}, barsize = '0', name = "FinReplExp"}}
+            l = iup.backgroundbox{iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name = 'FinReplScroll', expand = "HORIZONTAL", scrollbar = 'NO', size = 'x118'}, barsize = '0', name = "FinReplExp"}}
         elseif t.type == nil then
             l = t[1]
         else print('Unsupported type:'..t.type) end

@@ -1277,7 +1277,7 @@ iup.scitedetachbox = function(t)
         hNew.hlcolor = iup.GetLayout().hlcolor
         hNew.bordercolor = iup.GetLayout().bordercolor
         hNew.flat = 'YES'
-        hNew.customframedraw = 'YES'
+        hNew.customframedraw = Iif(props['layout.standard.decoration'] == '1', 'NO', 'YES')
         hNew.customframecaptionheight = -1
 
         hNew.x=10
@@ -1441,10 +1441,11 @@ iup.scitedetachbox = function(t)
     return dtb
 end
 
-iup.ShowXY = function(h, x, y)
+iup.ShowXY = function(h, x, y, bOrig)
+    local xNew, yNew
+    if bOrig then goto ok end
     x = math.floor(tonumber(x))
     y = math.floor(tonumber(y))
-    local xNew, yNew
     if x == -2000 and y == -2000 then goto ok end
     for x11, y11, x12, y12 in iup.GetGlobal('MONITORSINFO'):gmatch('(%-?%d*) (%-?%d*) (%-?%d*) (%-?%d*)') do
         x11 = tonumber(x11)
@@ -1876,7 +1877,7 @@ function Splash_Screen()
     dlg_SPLASH = iup.dialog{iup.hbox{
     iup.label{
       padding = "5x5",
-      image = props["SciteDefaultHome"].."\\tools\\HildiM.bmp",
+      image = "HildiM_µ",
       font = "Arial, 33",
     },
   }; maxbox="NO",minbox ="NO",resize ="NO", menubox = "NO", border = "NO",opacity= "123",

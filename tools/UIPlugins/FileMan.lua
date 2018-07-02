@@ -15,6 +15,7 @@ local chkByTime
 local bListOpened = false
 local m_prevSel = 0
 local _Plugins
+local zPath, zMemo
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
 	local i, j = 1
@@ -284,7 +285,7 @@ local function FileMan_OpenItem()
 		else
 			current_path = current_path..dir_or_file..'\\'
 		end
-        memo_mask.value = ''
+        if zMemo.valuepos == '0' then memo_mask.value = '' end
 		FileMan_ListFILLByMask(memo_mask.value)
 	else
         local _,_,ext = dir_or_file:find('%.([^%.]*)$')
@@ -533,7 +534,7 @@ local function OnSwitch(bForse, bRelist)
             current_path = path:from_utf8():gsub('\\$', '')..'\\'
             -- print(current_path, current_path)
             -- if bClearMask then memo_mask:set_text = "" end
-            FileMan_ListFILL()
+            if zPath.valuepos == '0' then FileMan_ListFILL() end
             local sel = 1
             if list_dir.marked then sel = list_dir.marked:find('1') end
             sel = sel - 1
@@ -734,11 +735,19 @@ local function FileManTab_Init(h)
             list_favorites.FitColumns(3, false, 1)()
         end
     end)
-
+    zPath = iup.zbox{
+        iup.flatbutton{  impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "1" end), },
+        iup.flatbutton{ impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "0"; OnSwitch(false,true) end), },
+    }
+    zMemo = iup.zbox{
+        iup.flatbutton{  impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "1" end), },
+        iup.flatbutton{ impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "0" end), },
+    }
     local res = {
+
         handle = iup.vbox{
-                   iup.scrollbox{iup.vbox{iup.hbox{iup.label{title = _T"Path:",size="40x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
-                   iup.hbox{iup.label{title = _T"File Mask:",size="40x"},memo_mask,chkByTime,expand="HORIZONTAL", alignment="ACENTER"}},
+                   iup.scrollbox{iup.vbox{iup.hbox{zPath, iup.label{title = _T"Path:",size="30x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
+                   iup.hbox{zMemo, iup.label{title = _T"Mask:", size = "30x"}, memo_mask, chkByTime, expand = "HORIZONTAL", alignment = "ACENTER"}},
                    scrollbar='NO', minsize='x54', maxsize='x54', expand="HORIZONTAL",};
                    split_s
                  };

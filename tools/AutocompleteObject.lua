@@ -365,7 +365,8 @@ end
 
 local function GetInputObject(line)
 --получим конструкцию слева от курсора.одного из типов : object, .field, .metod(), function()
-    if string.find(line,"[%s=<>%+%*%-&%%/]$") ~=nil or line == '\n' then
+
+    if string.find(line, "[%s=<>%+%*%-&%%/]$") ~= nil or line == '\n' then
         --будем двигаться по строкам вверх в поисках with, sub, function
         local wrdEndUp = {"^%s*sub%W","^%s*function%W","^%s*end%s+with%W"}
         local strwith = "^%s*with%s+(.+)"
@@ -390,7 +391,7 @@ local function GetInputObject(line)
             nLine = nLine-1
         end
     end
-    local lineLen = string.len(line)
+    local lineLen = string.len(line:to_utf8())
     local inputObject = {"","","",nil}
     if props["autocomplete."..editor_LexerLanguage()..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] or editor.CharAt[editor.SelectionStart] == 60 then
         inputObject = {"noobj", "", "", nil}
@@ -398,7 +399,9 @@ local function GetInputObject(line)
     end
     local char = string.sub(line,lineLen,lineLen)
     local bracketsCounter = 0
+
     if char == ')' then -- ищем object.metod() :TODO - возможно стоит добавить []
+
         bracketsCounter = 1
         while lineLen > 0 and bracketsCounter > 0  do
             lineLen = lineLen - 1
@@ -410,9 +413,9 @@ local function GetInputObject(line)
         inputObject[2] = "("--признаком метода или функции в алиасах будет служить (
         inputObject[3] = string.gsub(string.sub(line,lineLen+1,-2),'^[%s]*','')
         lineLen = lineLen - 1
-        line = string.sub(line,1,lineLen)
+        line = string.sub(line, 1, lineLen)
     end
-    if bracketsCounter ~= 0 or lineLen <= 0 then return {"","","", nil} end --в строке неправильно расставлены скобки, либо выражение продолженоиз другой строки - вылетаем, нам тут не светит
+    if bracketsCounter ~= 0 or lineLen <= 0 then return {"","","", nil} end --в строке неправильно расставлены скобки, либо выражение продолжено из другой строки - вылетаем, нам тут не светит
     local _start, _end, sVar = string.find(line, objPatern, 1)
 
     if sVar ~= nil then inputObject[1] = sVar end
@@ -818,6 +821,7 @@ local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
     local sB = string.upper(strMetBeg:gsub('[^%w_.:]', ''))
     local last = nil
     local tblobj = EnrichFromInheritors(obj_names, inh_table)
+
     for upObj, _ in pairs(tblobj) do
         if ob_tbl[upObj] ~=nil then
             if ob_tbl[upObj]["last"] ~= nil then last = ob_tbl[upObj]["last"] end
