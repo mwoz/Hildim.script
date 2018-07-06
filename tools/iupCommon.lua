@@ -449,12 +449,22 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     else return true end
 end
 
+local function fixMarks(bReset)
+    local mrk = editor:MarkerNext(-1, 1 << MARKER_NOTSAVED)
+    while mrk > -1 do
+        editor:MarkerDelete(mrk, MARKER_NOTSAVED)
+        if bReset then editor:MarkerAdd(mrk, MARKER_SAVED) end
+        mrk = editor:MarkerNext(mrk, 1 << MARKER_NOTSAVED)
+    end
+end
+
 local function onOpen_local(source)
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8()) then return end
     end
     iuprops['resent.files.list']:check(source:from_utf8())
+    fixMarks(false)
 end
 
 local function onNavigate_local(item)
@@ -769,15 +779,6 @@ function CORE.CoToChange(dif)
     end
     OnNavigation("Change-")
     print(Iif(dif > 0, 'Next', 'Previous')..' change not found')
-end
-
-local function fixMarks(bReset)
-    local mrk = editor:MarkerNext(-1, 1 << MARKER_NOTSAVED)
-    while mrk > -1 do
-        editor:MarkerDelete(mrk, MARKER_NOTSAVED)
-        if bReset then editor:MarkerAdd(mrk, MARKER_SAVED) end
-        mrk = editor:MarkerNext(mrk, 1 << MARKER_NOTSAVED)
-    end
 end
 
 AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)

@@ -649,7 +649,7 @@ function _HildiAlarm(msg, t, p1, p2, p3)
 --MB_YESNOCANCEL              0x00000003L
 --MB_YESNO                    0x00000004L
     t = t & 0xf
- print(t)
+ -- print(t)
 
     if t == 0 then
         b1 = _TH"OK"
