@@ -2,7 +2,7 @@ require 'shell'
 require "luacom"
 local function Init()
     local bLocalDir = false
-    local p_vsscompare, p_vsspath
+    local p_vsscompare, p_vsspath, curProj
     VSS = {}
     do
         local bOk
@@ -33,14 +33,16 @@ local function Init()
         local strFile = fil:read("*a")
         fil:close()
         local _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
+        curProj = strProgect
         local ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
         if ierr ~= 0 then print(strerr) end
         return ierr == 0
     end
 
     local function reset_err(ierr, strerr)
-        if ierr == 0 then
+        if ierr + 0 == 0 then
             CORE.DoRevert()
+            return true
         else
             print(strerr)
         end
@@ -48,7 +50,9 @@ local function Init()
 
     local function vss_add()
         if vss_SetCurrentProject() then
-            reset_err(shell.exec(p_vsspath..' Add "'..props['FileDir']..'\\'..props['FileNameExt']..'" -C-', nil, true, true))
+            if reset_err(shell.exec(p_vsspath..' Add "'..props['FileDir']..'\\'..props['FileNameExt']..'" -C-', nil, true, true)) and On_vss_CheckIn then
+                On_vss_CheckIn(curProj)
+            end
         end
     end
 
@@ -173,7 +177,9 @@ local function Init()
 
     local function vss_checkin()
         if vss_SetCurrentProject() then
-            reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']..' -C-', nil, true, true))
+            if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']..' -C-', nil, true, true)) and On_vss_CheckIn then
+                On_vss_CheckIn(curProj)
+            end
         end
     end
 

@@ -35,11 +35,9 @@ local function viewMenu(tMnu, tView, path)
                     tui.title = menuhandler:get_title(t, true)
                 end
             elseif type(t[2]) == 'table' then
-                --tSub = {}
                 tN = {}
                 tN.branchname = menuhandler:get_title(t, true)
                 viewMenu(t[2], tN, path..'|'..t[1])
-                ---tN[1] = tSub
                 tui.disabled = true
             end
         end
@@ -312,7 +310,7 @@ local function Show()
     tblView.branchname = 'Menus'
     --viewMenu(sys_Menus.MainWindowMenu, tblView, 'MainWindowMenu')
 
-    for ups,submnu in pairs(sys_Menus) do
+    for ups, submnu in pairs(sys_Menus) do
         local tb = {}
         tb.branchname = submnu.title --ups
         table.insert(tblView, 1, tb)

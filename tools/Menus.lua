@@ -160,7 +160,7 @@ if _G.iuprops['settings.lexers'] then
     end
 end
 
-_G.sys_Menus.TABBAR = {
+_G.sys_Menus.TABBAR = { title = _TM"Tabbar Context Menu",
 	{link='File|Close'},
 	{link='File|Close All'},
 	{'Close All But Curent',   action=function() iup.CloseFilesSet(9132); OnSwitchFile(props['FilePath']) end, },
@@ -188,7 +188,7 @@ _G.sys_Menus.TABBAR = {
 	{'slast', separator=1},
 }
 
-_G.sys_Menus.OUTPUT = {
+_G.sys_Menus.OUTPUT = {title = _TM"Console Context Menu",
 	{link = 'Edit|Regular|Cut'},
 	{link = 'Edit|Regular|Copy'},
 	{link = 'Edit|Regular|Paste'},
@@ -215,7 +215,7 @@ _G.sys_Menus.OUTPUT = {
 	{'slast', separator = 1},
 }
 
-_G.sys_Menus.FINDRES = {
+_G.sys_Menus.FINDRES = {title = _TM"Find Results Context Menu",
 	{link = 'Edit|Regular|Cut'},
 	{link = 'Edit|Regular|Copy'},
 	{link = 'Edit|Regular|Paste'},
@@ -238,7 +238,7 @@ _G.sys_Menus.FINDRES = {
 
 }
 
-_G.sys_Menus.EDITOR = {
+_G.sys_Menus.EDITOR = {title = _TM"Editor Context Menu",
 	{'s0', link='Edit|Regular|Undo'},
 	{link='Edit|Regular|Redo'},
 	{'s1', separator=1},
@@ -255,7 +255,7 @@ _G.sys_Menus.EDITOR = {
 	{link='Search|Go to definition(Shift+Click)'},
 }
 
-_G.sys_Menus.MainWindowMenu = {
+_G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 	{'_HIDDEN_', {
 		{'Next Tab', key = 'Ctrl+Tab', action = function() if iup.GetFocus() then iup.PassFocus() end scite.MenuCommand(IDM_NEXTFILESTACK) end},
 		{'Prevouse Tab', key = 'Ctrl+Shift+Tab', action = function() if iup.GetFocus() then iup.PassFocus() end scite.MenuCommand(IDM_PREVFILESTACK) end},

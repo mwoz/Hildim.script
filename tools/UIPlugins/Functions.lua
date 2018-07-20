@@ -111,17 +111,26 @@ local function Func_Init(h)
         lpExt.m__CLASS = '~~ROOT'
         table_functions = {}
         if editor.Length == 0 then return end
-
-        if not Lang2lpeg[props['lexer$']] then
-            local strOut = props['functions.lpeg.'..props['lexer$']]
-            if strOut ~= '' then
-                Lang2lpeg[props['lexer$']] = load(strOut, 'func_lpeg', 't', lpExt)()
-            else
-                Lang2lpeg[props['lexer$']] = Lang2lpeg['*']
+        local lex = props['lexer$']
+        if not Lang2lpeg[lex] or Lang2lpeg[lex] == Lang2lpeg['*'] then
+            local strOut = props['functions.lpeg.'..lex]
+            if strOut == '' then
+                lex = props['FileExt']
+                if not Lang2lpeg[lex] then
+                    strOut = props['functions.lpeg.'..lex]
+                else
+                    strOut = nil
+                end
             end
-
+            if strOut then
+                if strOut ~= '' then
+                    Lang2lpeg[lex] = load(strOut, 'func_lpeg', 't', lpExt)()
+                else
+                    Lang2lpeg[lex] = Lang2lpeg['*']
+                end
+            end
         end
-        local out = Lang2lpeg[props['lexer$']]
+        local out = Lang2lpeg[lex]
         local start_code = out.start_code
         lpegPattern = out.pattern
         fnTryGroupName = out.GroupName or (function(s) return s end)
@@ -510,7 +519,7 @@ local function Func_Init(h)
         layout[w] = 'COLLAPSED'
     end
     local line = nil --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_func = iup.sc_tree{expand = 'YES'}
+    tree_func = iup.sc_tree{expand = 'YES', fgcolor = props['layout.txtfgcolor']}
     --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
     tree_func.size = nil
     tree_func.button_cb = function(_, but, pressed, x, y, status)

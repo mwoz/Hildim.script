@@ -669,6 +669,7 @@ local function InitTabbar()
             local clr = props['tabctrl.active.bakcolor']
             if clr == '' then clr = '255 255 255' end
             iup.SetAttribute(h, "BGCOLOR", clr)
+            props["tabctrl.moved"] = 0
             h.cursor = 'ARROW'
             iup.Update(h)
             if (tabDrag > -1 and tab == -4) or (hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' )) then
@@ -692,6 +693,7 @@ local function InitTabbar()
             local clr = props['tabctrl.moved.color']
             if clr == '' then clr = '208 231 255' end
             iup.SetAttribute(h, "BGCOLOR", clr)
+            props["tabctrl.moved"] = 1
             iup.Update(h)
         end
         if start > 0 then
@@ -1145,3 +1147,20 @@ end
 AddEventHandler("OnBeforeOpen", function(file, ext)
     if _ENCODINGCOOKIE then return _ENCODINGCOOKIE end
 end)
+
+local tmConsole
+
+function CORE.ResetConcoleTimer(bStop)
+    tmConsole.run = "NO"
+    if not bStop then tmConsole.run="YES" end
+end
+
+tmConsole = iup.timer{time = 60000}
+tmConsole.action_cb = (function()
+    if output.LineCount > 200 and output.FirstVisibleLine + 2*output.LinesOnScreen > output.LineCount then
+        output.TargetStart = 0
+        output.TargetEnd = output:PositionFromLine(output.LineCount-200)
+        output:ReplaceTarget('')
+    end
+end)
+tmConsole.run="YES"

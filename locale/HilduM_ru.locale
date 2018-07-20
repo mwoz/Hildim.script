@@ -207,6 +207,14 @@ __LOCALE ={
         ["Wrap Output"] = "Перенос по словам в консоли",
         ["Wrap settings"] = "Настройки переноса по словам...",
         ["Xml"] = "Xml",
+
+
+        ['Console Context Menu'] = 'Контекстное меню консоли',
+        ['Find Results Context Menu'] = 'Контекстное меню результатов поиска',
+        ['Editor Context Menu'] = 'Контекстное меню окна редактора',
+        ['Tabbar Context Menu'] = 'Контекстное меню закладок',
+        ['Editor Context Menu'] = 'Контекстное меню окна редактора',
+        ['Main Window Menu'] = 'Главное меню программы',
     },
     ['HildiM'] ={
         ["Block comment variable '%1' is not defined in SciTE *.properties!"] = "Переменная строкового комментария\n\n%1\n\nне задана в SciTE *.properties!";
@@ -340,12 +348,14 @@ __LOCALE ={
         ['Open with HildiM'] = 'Открыть в HildiM',
         ['Path'] = 'Путь',
         ['Path:'] = 'Путь:',
+        ['Mask:'] = 'Маска:',
+        ['Time Sort'] = 'по времени',
+        ['Fixed'] = 'Зафиксировать',
         ['Read Only'] = 'Только чтение',
         ['Rename'] = 'Переименовать',
         ['Run'] = 'Выполнить',
         ['Switch To First Tab'] = 'Переключиться на первый таб',
         ['Switch To Previous Tab'] = 'Переключиться на предыдущий таб',
-        ['Time Sort'] = 'По времени',
     },
     ['tools\\UIPlugins\\Functions'] ={
         ['Sort By'] = 'Сортировать по',

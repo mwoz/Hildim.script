@@ -47,9 +47,9 @@ end
 
 function FILEMAN.FullPath()
     local ld = getListDir()
-    if not ld.marked then return '' end
+    if not ld or not ld.marked then return '' end
     local lin = ld.marked:sub(2):find("1")
-    return current_path..ld:getcell(lin, 2)
+    return (current_path..ld:getcell(lin, 2)):gsub('\\%.%.', '')
 end
 function FILEMAN.IsDirectory()
     local lin = list_dir.marked:sub(2):find("1")
@@ -290,7 +290,7 @@ local function FileMan_OpenItem()
 	else
         local _,_,ext = dir_or_file:find('%.([^%.]*)$')
         ext = (ext or ''):lower()
-        if string.find('.exe.lnk.doc.xsl.pdf.chm.', '%.'..ext..'%.') then
+        if string.find('.exe.lnk.doc.docx.xls.xlsx.pdf.chm.', '%.'..ext..'%.') then
             FileMan_FileExec()
             return
         end
@@ -736,12 +736,12 @@ local function FileManTab_Init(h)
         end
     end)
     zPath = iup.zbox{
-        iup.flatbutton{  impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "1" end), },
-        iup.flatbutton{ impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "0"; OnSwitch(false,true) end), },
+        iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "1" end), },
+        iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "0"; OnSwitch(false,true) end), },
     }
     zMemo = iup.zbox{
-        iup.flatbutton{  impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "1" end), },
-        iup.flatbutton{ impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "0" end), },
+        iup.flatbutton{tip = _T'Fixed',  impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "1" end), },
+        iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "0"; memo_mask.value = ''; FileMan_ListFILLByMask(''); zPath.valuepos = p end), },
     }
     local res = {
 

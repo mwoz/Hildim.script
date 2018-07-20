@@ -14,7 +14,9 @@ Author: mozers™, VladVRO, TymurGubayev, nail333
 
 --]]----------------------------------------------------
 local function Init()
+    XMLTOOLS = {}
     local t = {}
+    local pathXSLT, pathXSD, firstTag
     -- t.tag_start, t.tag_end, t.paired_start, t.paired_end  -- positions
     -- t.begin, t.finish  -- contents of tags (when copying)
     local old_current_pos
@@ -409,9 +411,6 @@ local function Init()
             local xmldoc = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument.6.0")
             local SchemaCache = luacom.CreateObject("Msxml2.XMLSchemaCache.6.0")
 
-            --xmldoc.async = false;
-            --xmldoc.validateOnParse = false;
-
             bOk, msg = pcall(function() SchemaCache:add("", props['FilePath']) end)
             if not bOk then
                 print(msg)
@@ -432,15 +431,7 @@ local function Init()
                     print("Can't open file "..pathXsd)
                 end
             end
---[[
-            xmldoc:loadXml(txt)
-            if xmldoc.parseError.errorCode ~= 0 then
-                print(xmldoc.parseError.reason)
-            else
-                print('OK')
-            end
-]]
-            --xmldoc:loadXml(txt)
+
             if not xmldoc:loadXml(txt) then
                 local path = pathXsd
                 if srcXsd == 1 then
@@ -455,6 +446,57 @@ local function Init()
     end
 
     local src, path, out = 0, '', 0
+
+    local function processXsd(txtXml, pathXsd)
+        local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
+        if not xmlSrc:loadXml(txtXml) then
+            local xmlErr = xmlSrc.parseError
+            print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+            return
+        end
+
+        local xmldoc = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument.6.0")
+        local SchemaCache = luacom.CreateObject("Msxml2.XMLSchemaCache.6.0")
+
+        bOk, msg = pcall(function() SchemaCache:add("", pathXsd) end)
+        if not bOk then
+            print(msg)
+            return
+        end
+        xmldoc.schemas = SchemaCache;
+
+        if not xmldoc:loadXml(txtXml) then
+            return xmldoc.parseError.line - 1, xmldoc.parseError.linepos, xmldoc.parseError.reason;
+        else
+            return nil
+        end
+    end
+
+    local function processXslt(txtXml, txtXslt)
+        local xslt = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument")
+        xslt.async = false
+        if not xslt:loadXml(txtXslt) then
+            local xmlErr = xslt.parseError
+            print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+            return
+        end
+        local xsl = luacom.CreateObject("Msxml2.XSLTemplate")
+        xsl.styleSheet = xslt
+        local xslProc = xsl:createProcessor()
+
+        local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
+
+        if not xmlSrc:loadXml(txtXml) then
+            local xmlErr = xmlSrc.parseError
+            print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+            return
+        end
+
+        xslProc.input = xmlSrc
+        xslProc:transform()
+        return xslProc.output
+    end
+
     local function Xslt()
         local ret, src1, path1, out1 = iup.GetParam("Test Xslt",
             function(h, id)
@@ -503,11 +545,13 @@ local function Init()
                 end
             end
             local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
+
             if not xmlSrc:loadXml(txt) then
                 local xmlErr = xmlSrc.parseError
                 print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
                 return
             end
+
             xslProc.input = xmlSrc
             xslProc:transform()
             if out == 0 then
@@ -590,6 +634,54 @@ local function Init()
         CloseTag(1)
     end
 
+    local function CheckInternal(txtXml)
+        local bCheck = true
+        if firstTag then
+            local s, e = editor:findtext("<\\w+", SCFIND_REGEXP)
+            bCheck = editor:textrange(s, e) == '<'..firstTag
+        end
+        if not bCheck or XMLTOOLS.blockXsdTest then return comhelper.CheckXml(txtXml) end
+
+        if not txtXml then txtXml = editor:GetText() end
+
+        if pathXSLT then
+            local txtXslt
+            local f = io.open(pathXSLT)
+            if f then
+                txtXslt = f:read('*a')
+                f:close()
+            else
+                print("Can't open file "..pathXSLT)
+                return
+            end
+
+            txtXml = processXslt(txtXml, txtXslt)
+        end
+        txtXml = txtXml:gsub('>%s+</Field_', '></Field_')
+--print(txtXml)
+         return processXsd(txtXml, pathXSD)
+    end
+
+    local function CheckCurrent()
+        local line, linepos, reason = CheckInternal()
+        if line then
+            print(props['FilePath']..':'..line..':'..linepos, reason)
+        else
+            print(props['FilePath']..': OK')
+        end
+    end
+
+    function XMLTOOLS.SetPathes(xsd, xsl, tag)
+        pathXSD = xsd
+        pathXSLT = xsl
+        firstTag = tag
+    end
+
+    function XMLTOOLS.CheckXml(strXml)
+        if pathXSD then return CheckInternal(strXml) end
+        return comhelper.CheckXml(strXml)
+    end
+
     AddEventHandler("OnUpdateUI", function()
         if bEnable and (tonumber(_G.iuprops['pariedtag.on']) == 1) then PairedTagsFinder() end
     end)
@@ -602,6 +694,7 @@ local function Init()
             {'Close Unpaired Tag', ru = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
         }}
     )
+
     local function isXsd()
         local fs = seacher{
             wholeWord = false
@@ -614,7 +707,7 @@ local function Init()
             , replaceWhat = ''
             , findWhat = "xmlns.*=.*http://www\\.w3\\.org/2001/XMLSchema"
         }
-        return fs:FindNext(true) > 0
+        return fs:Count() > 0
     end
     local function isXslt()
         local fs = seacher{
@@ -628,16 +721,21 @@ local function Init()
             , replaceWhat = ''
             , findWhat = "xmlns.*=.*http://www\\.w3\\.org/1999/XSL/Transform"
         }
-        return fs:FindNext(true) > 0
+        return fs:Count() > 0
     end
     menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',{'Xml',
         visible = function() return editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'formenjine' end, {
             {'Tag Highlighting', ru = 'Подсветка тэгов', check_iuprops = 'pariedtag.on'},
-            {'XPath Test', ru = 'XPath тест', action = XPath, },
-            {'Xslt Test', ru = 'Xslt тест', action = Xslt, active = isXslt},
-            {'Xsd Test', ru = 'Xsd тест', action = Xsd, active = isXsd }
+            {'BlockXsdTest', ru = 'Блокировать проверку по Xsd схеме', action = function() XMLTOOLS.blockXsdTest = not XMLTOOLS.blockXsdTest end, check = function() return XMLTOOLS.blockXsdTest end },
+            {'s1', separator = 1},
+            {'XPath Test', ru = 'Тестировать XPath выражение', action = XPath, },
+            {'Xslt Test', ru = 'Тестировать Xslt шаблон', action = Xslt, active = isXslt},
+            {'Xsd Test', ru = 'Тестировать Xsd схему', action = Xsd, active = isXsd },
+            {'Check', ru = 'Проверить по схеме', action = CheckCurrent, },
         }}
     )
+
+
 end
 
 return {

@@ -687,6 +687,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         RestoreIup()
         scite.RunAsync(function()
                 print("Reload IDM...")
+                CORE.ResetConcoleTimer(true)
                 scite.ReloadStartupScript()
                 OnSwitchFile("")
                 print("...Ok")
@@ -913,7 +914,6 @@ iup.matrix = function(t)
     t.presscolor = props['layout.scroll.presscolor'];
     t.backcolor = props['layout.scroll.backcolor']
     t['bgcolor0:*'] = props['layout.scroll.backcolor']
-    t['fgcolor0:*'] = iup.GetLayout().fgcolor
     t.bgcolor = props['layout.txtbgcolor'];
     t.fgcolor = props['layout.txtfgcolor']
 
@@ -1428,8 +1428,8 @@ iup.scitedetachbox = function(t)
     end
 
     local tSub = {radio = 1,
-        {'Attached', ru='Закреплено', action=cmd_Attach, check = function() return get_scId()=="0" end,},
-        {'Pop Up', ru='Всплывающее окно', action=cmd_PopUp, check = function() return get_scId()=="1" end, },
+        {'Attached', ru = 'Закреплено', action = cmd_Attach, check = function() return get_scId() == "0" end,},
+        {'Pop Up', ru = 'Всплывающее окно', action = cmd_PopUp, check = function() return get_scId() == "1" end, },
         {'Hidden', ru = 'Скрыто', action = cmd_Hide, check = function() return get_scId() == "2" end },
         {'s1', separator = 1},
         {'Show/Hide', ru = 'Скрыть/Показать', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
@@ -1641,6 +1641,7 @@ function iup.ReloadScript()
     iup.DestroyDialogs();
     SaveIup()
     RestoreIup()
+    CORE.ResetConcoleTimer(true)
     scite.ReloadStartupScript()
     scite.RunAsync(function()
     if OnScriptReload then OnScriptReload(false, tblDat) end

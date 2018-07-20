@@ -33,17 +33,11 @@ local function OnSwitch()
     needCoding = (editor.CodePage ~= 0)
 end
 
+
+
 local function Init(ToolBar_obj)
     local tm = iup.timer{time=300}
-    local tmConsole = iup.timer{time=600000}
-    tmConsole.action_cb = (function()
-        if output.LineCount > 200 then
-            output.TargetStart = 0
-            output.TargetEnd = output:PositionFromLine(output.LineCount-200)
-            output:ReplaceTarget('')
-        end
-    end)
-    tmConsole.run="YES"
+
     txt_search = iup.text{name='livesearch_bar', expand='YES', tip='"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
     iup.SetAttribute(txt_search, 'HISTORIZED', "NO")
     local function Find_onTimer()
@@ -93,7 +87,7 @@ local function Init(ToolBar_obj)
     btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
 
     menuhandler:InsertItem('MainWindowMenu', 'Search|s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-    {'Live Search', ru="Живой поиск", key='Alt+F', action=sidebar_Find, image = 'binocular__pencil_µ',})
+    {'Live Search', ru = "Живой поиск", key='Alt+F', action=sidebar_Find, image = 'binocular__pencil_µ',})
 
     return {
         handle = iup.hbox{
@@ -114,6 +108,7 @@ return {
     code = 'livesearch',
     toolbar = Init,
     statusbar = Init,
+    destroy = onDestroy,
     description = [[Поиск текста по мере набора с выводом
 найденных строк в результатах поиска]]
 }
