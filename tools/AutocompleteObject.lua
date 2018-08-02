@@ -57,6 +57,7 @@ local m_tblFilters = {}
 local curr_fillup_char = ''
 local inheritors, inheritorsX = {}, {} --таблицы наследования объектов
 local objPatern
+local tipStartParam = 0
 local Ext2Ptrn = {}
 do
     local patterns = {
@@ -193,6 +194,16 @@ do
 
     PATT = (def + IGNORED^1 + IDENTIFIER + (1-NL)^1 + NL)^0 * EOF
 
+end
+
+local stringsStyless = {
+    [SCLEX_FORMENJINE] = {[14] =true },
+    [SCLEX_LUA] = {[7] = true, [8] = true}
+}
+
+local function isString(pos)
+    if stringsStyless[editor.Lexer] == nil then return false end
+    return stringsStyless[editor.Lexer][editor.StyleAt[pos]] == true
 end
 ------------------------------------------------------
 function cmpobj_GetFMDefault()
@@ -901,11 +912,12 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
                 --разобьем на параметры
                 local poz = string.len(strMethodName)
                 table.insert(pozes, poz)
-                sParam = poz
+
                 for w in string.gmatch(p, "[^%,%)]*[%,%)]") do
+                    if nParams == tipStartParam then sParam = poz end
                     poz = poz + string.len(w)
                     table.insert(pozes, poz)
-                    if nParams == 0 then eParam = poz end
+                    if nParams == tipStartParam then eParam = poz end
                     nParams = nParams + 1
                 end
             end
@@ -1097,6 +1109,7 @@ local function CallTip(char, pos)
     end
     if objects_table._fill == nil then return false end
     local strLine = editor:textrange(editor:PositionFromLine(af_current_line), pos - 1)
+
     if not strLine then return end -- возможно для ридонли файлов
     --найдем, что у нас слева - метод или функция
     local _start, _end, sSep, sMetod = string.find(strLine, "("..autocom_chars.."?)([%w%_]+)$")
@@ -1338,6 +1351,36 @@ function ShowTipManualy()
     local cp = current_pos
     if false then
     else
+        local brCount = 0
+        local spaceCT = (string.find(calltip_start_characters, ' ', 1, true) ~= nil)
+        repeat
+            --print(123)
+            while isString(cp - 1) do cp = cp - 1 end
+            char = editor:textrange(cp - 1, cp)
+
+            if spaceCT and brCount == 0 and (char == ',' or char == ' ') then
+                local cp1 = cp
+                local char1 = char
+                local isPar = false
+                repeat
+                    char1 = editor:textrange(cp1 - 1, cp1)
+                    if char1 == ',' then isPar = true; tipStartParam = tipStartParam + 1 end
+                    cp1 = cp1 - 1
+                until char1 ~= ' ' and char1 ~= ','
+                if isPar then
+                    cp = cp1
+                    char = char1
+                end
+            elseif brCount == 0 and char == ',' then
+                tipStartParam = tipStartParam + 1
+            end
+
+            if char == ')' then brCount = brCount + 1
+            elseif char == '(' then brCount = brCount - 1 end
+            cp = cp - 1
+
+        until string.find(calltip_start_characters, char, 1, true) ~= nil and (brCount <= 0 and char ~= '(' or brCount < 0)
+
         repeat
             char = editor:textrange(cp - 1, cp)
             cp = cp - 1
@@ -1346,6 +1389,7 @@ function ShowTipManualy()
         pos = editor:WordEndPosition(cp) + 1
         char = editor:textrange(pos - 1, pos)
         CallTip(char, pos)
+        tipStartParam = 0
     end
 end
 

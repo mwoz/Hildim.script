@@ -21,8 +21,7 @@ local function BSave(FN)
 	local FileAttr = props['FileAttr']
 	props['FileAttrNumber'] = 0
 	if string.find(FileAttr, '[RHS]') then --  Если в файл нельзя записать, то спросим
-		if shell.msgbox("Файл доступен только для чтения. Все равно сохранить?\n"
-			.."Аттрибуты файла: "..FileAttr, "SciTE", 65)==1 then
+		if iup.Alarm("HildiM", "Файл доступен только для чтения. Все равно сохранить?\n".."Аттрибуты файла: "..FileAttr, 'Да', 'Нет')==1 then
 			-- сохраним текущии, затем снимем все аттрибуты
 			local FileAttrNumber, err = shell.getfileattr(FN)
 			if (FileAttrNumber == nil) then

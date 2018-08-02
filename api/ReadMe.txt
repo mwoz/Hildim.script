@@ -34,4 +34,4 @@ WScript.Network.MapNetworkDrive "E:", "\\Server\Public"
 Зато через меню срабатывает команда "Завершить символ - Сtrl+I" но результат ее действия - завершение слова.
 В итоге я так и не понял что это за команда "Завершить символ - Сtrl+I", как она работает и как ее вообще можно вызвать.
 
-Обсудим?: http://forum.ru-board.com/topic.cgi?forum=5&topic=3215&glp
+Обсудим?: http://forum.ru-board.com/topic.cgi?forum=5&topic=3215&glp    

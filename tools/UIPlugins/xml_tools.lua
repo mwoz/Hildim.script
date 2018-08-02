@@ -658,7 +658,7 @@ local function Init()
             txtXml = processXslt(txtXml, txtXslt)
         end
         txtXml = txtXml:gsub('>%s+</Field_', '></Field_')
---print(txtXml)
+
          return processXsd(txtXml, pathXSD)
     end
 

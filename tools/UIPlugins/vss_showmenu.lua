@@ -58,6 +58,17 @@ local function Init()
 
     local function vss_getlatest()
         if vss_SetCurrentProject() then
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
+            local stropt = ""
+            if ierr == 1 then
+                local rez = iup.Alarm('Get Latest Version', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"Cancel")
+                if rez ~= 1 then return end
+
+                local attr = shell.getfileattr(props['FilePath'])
+                if (attr & 1) ~= 1 then
+                    shell.setfileattr(props['FilePath'], attr + 1)
+                end
+            end
             reset_err(shell.exec(p_vsspath..' Get '..props['FileNameExt'], nil, true, true))
         end
     end
@@ -73,13 +84,12 @@ local function Init()
             local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
             local stropt = ""
             if ierr == 1 then
-                local rez = shell.msgbox("Файл отличается от базы.\nЗаменить существующий файл?","CheckOut",3)
-                if rez ~= 2 then
-                    -- print(rez)
-                    if rez == 7 then
-                        stropt = " -G-"
-                    end
-                    ierr = 0
+                local rez = iup.Alarm('Check Out', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"Cancel")
+                if rez ~= 1 then return end
+                ierr = 0
+                local attr = shell.getfileattr(props['FilePath'])
+                if (attr & 1) ~= 1 then
+                    shell.setfileattr(props['FilePath'], attr + 1)
                 end
             end
             if ierr == 0 then
@@ -110,13 +120,12 @@ local function Init()
                 local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
                 local stropt = ""
                 if ierr == 1 then
-                    local rez = shell.msgbox("Файл отличается от базы.\nЗаменить существующий файл?","CheckOut",3)
-                    if rez ~= 2 then
-                        -- print(rez)
-                        if rez == 7 then
-                            stropt = " -G-"
-                        end
-                        ierr = 0
+                    local rez = iup.Alarm('Check Out', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"Cancel")
+                    if rez ~= 1 then return end
+                    ierr = 0
+                    local attr = shell.getfileattr(props['FilePath'])
+                    if (attr & 1) ~= 1 then
+                        shell.setfileattr(props['FilePath'], attr + 1)
                     end
                 end
                 if ierr == 0 then

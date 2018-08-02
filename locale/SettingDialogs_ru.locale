@@ -8,7 +8,7 @@ return {
 ["Background"] = "Фон";
 ["Bar Background"] = "Панели";
 ["Bar Foreground"] = "Шрифт панелей";
-["Close with DblClick"] = "Закрывать по DblClick";
+["Close with Mouse Click%l|None|Left DblClick|Middle Click|Bouth..|"] = "Закрывать по клику мыши%l|Нет|Левый двойной|Средний|Оба..|";
 ['Command line for "Open File Folder"'] = 'Командная строка для "Открыть папку с файлом"';
 ["Control Border"] = "Границы контролов";
 ["Control Highlight"] = "Подсветка кнопки, контрола";

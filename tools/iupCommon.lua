@@ -108,7 +108,7 @@ function rfl:GetMenu()
     local t = {}
     local function OpenMenu(i)
         return function()
-            scite.Open(self.data.lst[i])
+            scite.Open(self.data.lst[i]:to_utf8())
         end
     end
 
@@ -140,12 +140,12 @@ function rfl:GetMenu()
     end
     table.insert(t,{'s0', separator = 1})
     table.insert(t,{'List Settings', ru = "Свойства списка", action = function()
-        local res, loc, len, pathAfter, bClear = iup.GetParam('Recent List Settings',
+        local res, loc, len, pathAfter, bClear = iup.GetParam(_TH'Recent List Settings',
             nil,
-            "Location in File menu: %o|Submenu|Bottom|\n"..
-            "Length: %i[5,30,1]\n"..
-            "Path After Name: %b\n"..
-            "Clear Now: %b\n",
+            _TH"Location in File menu: %o|Submenu|Bottom|\n"..
+            _TH"Length: %i[5,30,1]".."\n"..
+            _TH"Path After Name: ".."%b\n"..
+            _TH"Clear Now: ".."%b\n",
             _G.iuprops['resent.files.list.location'] or 0,
             _G.iuprops['resent.files.list.length'] or 10,
             _G.iuprops['resent.files.list.pathafter'] or 10,
@@ -662,6 +662,33 @@ function CORE.SetText(t)
     BlockEventHandler"OnTextChanged"
     editor:SetText(t)
     UnBlockEventHandler"OnTextChanged"
+end
+
+function CORE.SetRO(fname)
+    if shell.fileexists(fname) then
+        local attr = shell.getfileattr(fname)
+        if (attr & 1) == 1 then
+            shell.setfileattr(fname, attr - 1)
+        end
+    end
+end
+
+function CORE.OpenRO(fname)
+    CORE.SetRO(fname)
+    return io.open(fname, "w")
+end
+
+function CORE.AskReWriteFile(fname)
+    if shell.fileexists(fname) then
+        local attr = shell.getfileattr(fname)
+        local msg, ro
+        msg = _TH"The file \n'%1'\n already exists%2. Overwrite?"
+        ro = ''
+        if (attr & 1) == 1 then ro = _TH" and is read-only" end
+        return 1 == iup.Alarm('HildiM', _FMT(msg, fname, ro), _TH"OK", _TH"Cancel")
+    else
+        return true
+    end
 end
 
 function CORE.CloseListSet(sel, lst, column)

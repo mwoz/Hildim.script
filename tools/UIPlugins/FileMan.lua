@@ -406,9 +406,8 @@ local function FileMan_Delete()
     local fname, d, attr = FileMan_GetSelectedItem()
 	if fname == '' or d == 'd' then return end
 	fname = current_path..fname
-    local msb = iup.messagedlg{buttons='YESNO', value='Delete file\n'..fname..'\n?'}
-    msb.popup(msb)
-    if msb.buttonresponse == '1' then
+    local msb = iup.Alarm(_T"Delete File", _T'Do You really want to delete the selected file\n'..fname..'?', _TH'Yes', _TH'No')
+    if msb == 1 then
         local lRes = shell.delete_file(fname)
         --local lRes = shell.rename_file(fname, current_path..'aa')
         if lRes == 0 then
@@ -417,7 +416,6 @@ local function FileMan_Delete()
             print('File '..fname..' not deleted!')
         end
     end
-    msb:destroy(msb)
 end
 
 local prevName

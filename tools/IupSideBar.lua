@@ -676,7 +676,8 @@ local function InitTabbar()
                 scite.MenuCommand(IDM_CHANGETAB)
             end
         elseif (button == iup.BUTTON1 and iup.isdouble(status) and not CORE.visibleWndDialog() ) or (button == iup.BUTTON2 and pressed == 0 ) then
-            if tab > - 1 and (tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1 then scite.MenuCommand(IDM_CLOSE)
+            local dblFlag = (tonumber(props['tabbar.tab.close.on.doubleclick']) or 0)
+            if tab > - 1 and (((dblFlag & 1) == 1 and button == iup.BUTTON1) or ((dblFlag & 2) == 2 and button == iup.BUTTON2) ) then scite.MenuCommand(IDM_CLOSE)
             elseif tab == -1 then scite.MenuCommand(IDM_NEW) end
         elseif button == iup.BUTTON3 and pressed == 1 and tab >= -1 then
             menuhandler:ContextMenu(iup.MOUSEPOS, iup.MOUSEPOS, 'TABBAR')
@@ -739,7 +740,7 @@ local function InitTabbar()
     end
 
     local function SetTab(tab)
-        tab.showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
+        tab.showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) > 0, 'NO', 'YES')
         tab.tab_button_cb = onButton
         tab.extraimage1 = "property_µ"
         tab.extrapresscolor1 = props['layout.bgcolor']

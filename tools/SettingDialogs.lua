@@ -127,10 +127,10 @@ function sett.ResetTabbarProps()
                 iup.GetParamParam(h, 9).control.active = bext
                 return 1
             end,
-        _T'Close with DblClick'..'%b\n'..
+        _T'Close with Mouse Click%l|None|Left DblClick|Middle Click|Bouth..|'..'\n'..
         _T'Maximum Tabs Amount:'..'%i[10,500,1]\n'..
         _T'Switching in Order of Usage'..'%b\n'..
-        _T'Open New Tab%l|At End of List|After Current|At Begining of List|'..'%b\n'..
+        _T'Open New Tab%l|At End of List|After Current|At Begining of List|'..'\n'..
         _T'Move Active Tab To Begining'..'%b\n'..
         _T'Inactive Tabs'..'%t\n'..
         _T'Highlight by Extension'..'%b\n'..
@@ -185,8 +185,8 @@ function sett.ResetTabbarProps()
         props['tabctrl.moved.color'] = tabctrl_moved_color
         _G.iuprops['settings.tabmenu.opencmd'] = opencmd
 
-        iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
-        iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) == 1, 'NO', 'YES')
+        iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) > 0, 'NO', 'YES')
+        iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight').showclose = Iif((tonumber(props['tabbar.tab.close.on.doubleclick']) or 0) > 0, 'NO', 'YES')
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight'), 1)
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft'), 1)
         scite.BlockUpdate(UPDATE_FORCE)
@@ -280,26 +280,26 @@ end
 
 function sett.AutoScrollingProps()
     local ret,
-    caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xjumps, caret_policy_xeven,
-    caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yjumps, caret_policy_yeven,
+    caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xeven, caret_policy_xjumps,
+    caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yeven, caret_policy_yjumps,
     caret_sticky, end_at_last_lin, iup_scrollbarsize
     = iup.GetParam(_T"Autoscroll Preferenses".."^AutiscrollSettings",
         nil,
         _T'Horizontal Autoscroll'..'%t\n'..
 
         _T'Unwanted Zone (UZ)'..'%b\n'..
-        _T'UZ Width, px'..'%i[1,500,20]\n'..
+        _T'UZ Width, px'..'%i[0,500,20]\n'..
         _T'UZ - Enforce Strictly'..'%b\n'..
-        _T'Autoscroll for 3 UZ'..'%b\n'..
         _T'Asymmetric UZ'..'%b\n'..
+        _T'Autoscroll for 3 UZ'..'%b\n'..
 
         _T'Vertical Autoscroll'..'%t\n'..
 
         _T'Unwanted Zone (UZ)'..'%b\n'..
-        _T'UZ Height, lines'..'%i[1,500,20]\n'..
+        _T'UZ Height, lines'..'%i[0,500,20]\n'..
         _T'UZ - Enforce Strictly'..'%b\n'..
-        _T'Autoscroll for 3 UZ'..'%b\n'..
         _T'Asymmetric UZ'..'%b\n'..
+        _T'Autoscroll for 3 UZ'..'%b\n'..
 
         '%t\n'..
         _T'Save Horizontal Position'..'%b\n'..
