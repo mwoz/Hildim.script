@@ -58,7 +58,7 @@ local function init()
     local for_open
     local function launch_open()
         if for_open then
-            scite.Open(shell.to_utf8(for_open))
+            scite.Open(for_open:to_utf8())
             for_open = nil
         end
     end

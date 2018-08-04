@@ -163,7 +163,7 @@ end
 _G.sys_Menus.TABBAR = { title = _TM"Tabbar Context Menu",
 	{link='File|Close'},
 	{link='File|Close All'},
-	{'Close All But Curent',   action=function() iup.CloseFilesSet(9132); OnSwitchFile(props['FilePath']) end, },
+	{'Close All But Curent',   action=function() iup.CloseFilesSet(9132, nil, true); OnSwitchFile(props['FilePath']) end, },
 	{'Close All Temporally',   action=function() iup.CloseFilesSet(9134) end, visible=IsOpenTemporaly },
 	{'s1', separator=1},
 	{link='File|Save'},

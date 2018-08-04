@@ -270,9 +270,11 @@ function iup.SaveChProps(bReset)
 'selection.additional.back',
 'selection.alpha',
 'selection.back',
+'tabbar.tab.close.on.doubleclick',
 'tabctrl.active.bakcolor',
 'tabctrl.active.forecolor',
 'tabctrl.active.readonly.forecolor',
+'tabctrl.alwayssavepos',
 'tabctrl.colorized',
 'tabctrl.cut.ext',
 'tabctrl.cut.illumination',
@@ -357,6 +359,7 @@ end
 iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     local cur = -1   --9132 - закрыть все, кроме текущего, поэтому запомним текущий
     if cmd == 9132 then cur = scite.buffers.GetCurrent() end
+    if cmd == IDM_CLOSEALL then bAddToRecent = true end
 
     local function MastClose(i)
         if tForClose then return tForClose[i] end

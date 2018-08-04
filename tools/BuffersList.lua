@@ -85,6 +85,7 @@ local function InitWndDialog()
         local t = windowsList()
         iup.SetAttribute(list_windows, "DELLIN", "1-"..list_windows.numlin)
         list_windows.fgcolor = Iif((tonumber(props['tabctrl.colorized']) or 0) == 1, props['tabctrl.forecolor'], props['layout.txtfgcolor'])
+        list_windows['fgcolor0:*'] = iup.GetLayout().txtfgcolor
         iup.SetAttribute(list_windows, "ADDLIN", "1-"..#t)
         for i = 1,  #t do
             list_windows:setcell(i, 2, Iif(t[i].side == 0, _T"Main", _T"Additional"))
@@ -211,10 +212,28 @@ local function InitWndDialog()
                 blockClose = nil
             end
         end
+
+        local function OrderTab()
+
+            local tOrder, tI, tV = {}, {}, {}
+            for i = 1, tonumber(iup.GetAttribute(list_windows, "NUMLIN")) do
+                --tOrder[i - 1] = math.tointeger(list_windows:getcell(i, 5))
+                table.insert(tI, math.tointeger(list_windows:getcell(i, 5)))
+                table.insert(tV, math.tointeger(list_windows:getcell(i, 5)))
+            end
+
+            table.sort(tI)
+
+            for i = 1,  #tI do
+                tOrder[tI[i]] = tV[i]
+            end
+            scite.OrderTab(tOrder)
+        end
+
         local flat_title = iup.flatbutton{title = _T'Windows', name = 'Title', image = 'property_µ', maxsize = 'x20', fontsize = '9', flat = 'YES', border = 'NO', padding = '3x', alignment='ALEFT',
             canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
             leavewindow_cb=function() end,}
-        hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetGlobal('DLGBGCOLOR'), name = 'bufferslist_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+        hbTitle = iup.expander{iup.hbox{ alignment = 'ACENTER', bgcolor = iup.GetGlobal('DLGBGCOLOR'), name = 'bufferslist_title_hbox', fontsize = iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
             flat_title,
             btn_attach,
             iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end},
@@ -233,9 +252,9 @@ local function InitWndDialog()
             iup.hbox{
                 iup.flatbutton{expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T"Close All Checked" },
                 iup.flatbutton{title = _T"except", expand = 'NO', padding = '9x', fgcolor = props['layout.fgcolor'], flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T'Close All NOT Checked'  },
-                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip = _T'extension' }, cmb_Sort,
-                --iup.flatbutton{title = "Cancel", expand = 'NO', padding = '9x', flat_action = function() dlg:hide() end, propagatefocus = 'YES'},
-        scrollbar = 'NO', minsize = 'x35', maxsize = 'x35', expand = "HORIZONTAL", margin = "20x0", gap = "20", alignment='ACENTER'};};
+                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip = _T'Move Checked to Another View' }, cmb_Sort,
+                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = OrderTab, propagatefocus = 'YES', image = 'IMAGE_FormRun'},
+        scrollbar = 'NO', minsize = 'x35', maxsize = 'x35', expand = "HORIZONTAL", margin = "5x0", gap = "1", alignment='ACENTER'};};
         sciteparent = "SCITE", sciteid = "bufferslist", dropdown = true, shrink = "YES",
         maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',
         customframedraw = Iif(props['layout.standard.decoration'] == '1', 'NO', 'YES'), customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(flat_title)}
@@ -244,7 +263,7 @@ local function InitWndDialog()
             {'Window_bar', plane = 1,{
                 {"Close Checked", ru = _T"Close All Checked", action = CORE.DoForFileSet('1', CloseFileSet)},
                 {"Read Only", ru = _T"Close All NOT Checked", action = CORE.DoForFileSet('0', CloseFileSet)},
-                {"Move Checked", ru = _T"Move to Another View", action = MoveSet},
+                {"Move Checked", ru = _T"Move Checked to Another View", action = MoveSet},
         }})
         dlg.bgcolor = iup.GetLayout().bgcolor
         dlg.txtbgcolor = iup.GetLayout().txtbgcolor

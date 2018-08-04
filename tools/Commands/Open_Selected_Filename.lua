@@ -59,7 +59,7 @@ local function OpenSelectedFilename()
         if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then
             return text
         else
-            return shell.from_utf8(text)
+            return text:from_utf8()
         end
     end
 
@@ -69,7 +69,7 @@ local function OpenSelectedFilename()
 	if filename == nil then return end
 	filename = string.gsub(filename, '\\\\', '\\')
     if not shell.fileexists(filename) then print('Файл не найден: '..filename); return end
-	scite.Open (shell.to_utf8(filename))
+	scite.Open (filename:to_utf8())
 	return true
 end
 

@@ -27,11 +27,11 @@ e.g.
 require 'shell'
 
 local function GetPath()
-	local path = shell.from_utf8(props['backup.path'])
+	local path = (props['backup.path']):from_utf8()
 
 -- 	if set relative path
 	if string.find(path, '^%a:\\') == nil then
-		path = shell.from_utf8(props['FileDir'])..'\\'..path
+		path = (props['FileDir']):from_utf8()..'\\'..path
 	end
 
 -- 	if backup folder not exist
@@ -47,7 +47,7 @@ local function BakupFile(filename)
 	if sbck == nil or sbck == 0 then
 		return false
 	end
-	filename = shell.from_utf8(filename)
+	filename = filename:from_utf8()
 	local sfilename = filename
 	filename = GetPath().."\\"..string.gsub(filename,'.*\\','')
 	local nbck = 1
@@ -64,7 +64,7 @@ local function BakupFile(filename)
 	end
 	os.remove (filename..".bak")
 	if not shell.fileexists(sfilename) then
-		io.output(shell.to_utf8(sfilename))
+		io.output(sfilename:to_utf8())
 		io.close()
 	end
 	os.rename (sfilename, filename..".bak")

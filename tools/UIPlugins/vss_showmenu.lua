@@ -84,57 +84,22 @@ local function Init()
             local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
             local stropt = ""
             if ierr == 1 then
-                local rez = iup.Alarm('Check Out', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"Cancel")
-                if rez ~= 1 then return end
+                local rez = iup.Alarm('Check Out', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"No", _TH"Cancel")
+                if rez == 3 then return end
                 ierr = 0
-                local attr = shell.getfileattr(props['FilePath'])
-                if (attr & 1) ~= 1 then
-                    shell.setfileattr(props['FilePath'], attr + 1)
+                if rez == 1 then
+                    local attr = shell.getfileattr(props['FilePath'])
+                    if (attr & 1) ~= 1 then
+                        shell.setfileattr(props['FilePath'], attr + 1)
+                    end
+                else
+                    stropt = " -G-"
                 end
             end
             if ierr == 0 then
                 reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']..stropt, nil, true, true))
             elseif ierr ~= 1 then
                 print(strerr)
-            end
-        end
-    end
-
-    local function vss_checkoutundif()
-        if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
-            if ierr == 1 then
-
-                local _, tmppath = shell.exec('CMD /c set TEMP', nil, true, true)
-                tmppath = string.sub(tmppath, 6, string.len(tmppath) - 2)
-                local cmd = p_vsspath..' Get '..props['FileNameExt']..' -GL"'..tmppath..'"'
-                ierr, strerr = shell.exec(cmd, nil, true, true)
-                if ierr~= 0 then print(strerr) end
-                ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\sstmp"', nil, true, true)
-                if ierr~= 0 then print(strerr) end
-                ierr, strerr = shell.exec('CMD /c rename "'..tmppath..'\\'..props['FileNameExt']..'" sstmp', nil, true, true)
-                if ierr~= 0 then print(strerr) end
-                cmd = string.gsub(string.gsub(p_vsscompare, '%%bname', '"'..tmppath..'\\sstmp"'), '%%yname', '"'..props['FileDir']..'\\'..props['FileNameExt']..'"')
-                shell.exec(cmd)
-            elseif strerr == '' then
-                local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
-                local stropt = ""
-                if ierr == 1 then
-                    local rez = iup.Alarm('Check Out', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"Cancel")
-                    if rez ~= 1 then return end
-                    ierr = 0
-                    local attr = shell.getfileattr(props['FilePath'])
-                    if (attr & 1) ~= 1 then
-                        shell.setfileattr(props['FilePath'], attr + 1)
-                    end
-                end
-                if ierr == 0 then
-                    reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']..stropt, nil, true, true))
-                elseif ierr ~= 1 then
-                    print(strerr)
-                end
-            else
-                print(strerr, 22)
             end
         end
     end
@@ -211,8 +176,6 @@ local function Init()
                 {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
                 {'Diff Internal', ru = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
                 {'History', ru = 'Показать историю', action = vss_hist ,},
-                {'s', separator = 1},
-                {'Check Out Undiff', action = vss_checkoutundif ,},
             }
         elseif ierr == 1 then --взят
             t = {

@@ -1018,7 +1018,7 @@ AddEventHandler("OnRightEditorVisibility", function(show)
         local expand = iup.GetDialogChild(hMainLayout, "RightTabExpander")
         local split = iup.GetDialogChild(hMainLayout, "TabBarSplit")
         if show == 1 then
-            editor.Zoom = coeditor.Zoom
+            coeditor.Zoom = editor.Zoom
             Splitter_CB()
             expand.state = "OPEN"
         else

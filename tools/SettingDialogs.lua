@@ -127,7 +127,7 @@ function sett.ResetTabbarProps()
                 iup.GetParamParam(h, 9).control.active = bext
                 return 1
             end,
-        _T'Close with Mouse Click%l|None|Left DblClick|Middle Click|Bouth..|'..'\n'..
+        _T'Close with Mouse Click%l|None|Left DblClick|Middle Click|Both|'..'\n'..
         _T'Maximum Tabs Amount:'..'%i[10,500,1]\n'..
         _T'Switching in Order of Usage'..'%b\n'..
         _T'Open New Tab%l|At End of List|After Current|At Begining of List|'..'\n'..

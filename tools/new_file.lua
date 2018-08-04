@@ -113,7 +113,7 @@ AddEventHandler("OnBeforeSave", function(file)
 		editor.TargetStart = 0
 		editor.TargetEnd = editor.Length
 		local txt_in = editor:GetText()
-		editor:ReplaceTarget(shell.to_utf8(txt_in))
+		editor:ReplaceTarget(txt_in:to_utf8())
 		scite.MenuCommand(IDM_ENCODING_UCOOKIE)
 	end
 	-- if unsaved_files[file:upper()] then -- если это созданный нами несохраненный буфер
