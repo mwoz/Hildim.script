@@ -513,7 +513,7 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Edit|s3',
-        {'Abbreviation List...', ru = 'Список сокращений...', action = function() iup.ShowInMouse(dlg) end, key='Alt+Shift+B'}
+        {'Abbreviation List...', cpt = 'Список сокращений...', action = function() iup.ShowInMouse(dlg) end, key='Alt+Shift+B'}
     )
     bIsList = true
     return dlg

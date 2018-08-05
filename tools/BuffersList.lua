@@ -261,9 +261,9 @@ local function InitWndDialog()
 
         menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
             {'Window_bar', plane = 1,{
-                {"Close Checked", ru = _T"Close All Checked", action = CORE.DoForFileSet('1', CloseFileSet)},
-                {"Read Only", ru = _T"Close All NOT Checked", action = CORE.DoForFileSet('0', CloseFileSet)},
-                {"Move Checked", ru = _T"Move Checked to Another View", action = MoveSet},
+                {"Close Checked", cpt = _T"Close All Checked", action = CORE.DoForFileSet('1', CloseFileSet)},
+                {"Read Only", cpt = _T"Close All NOT Checked", action = CORE.DoForFileSet('0', CloseFileSet)},
+                {"Move Checked", cpt = _T"Move Checked to Another View", action = MoveSet},
         }})
         dlg.bgcolor = iup.GetLayout().bgcolor
         dlg.txtbgcolor = iup.GetLayout().txtbgcolor

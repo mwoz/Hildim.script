@@ -475,7 +475,7 @@ local function Init()
         menuhandler:InsertItem('EDITOR', 's0',
             {'Spelling Variants', plane = 1,
                 visible = function() return editor:IndicatorValueAt(mark, editor.CurrentPos) == 1 end,
-                bottom ={"Context Menu", ru = _T"Context Menu"}, {
+                bottom ={"Context Menu", cpt = _T"Context Menu"}, {
                     {'list', plane = 1, FillVariantsMenu},
                     {cADDYODIC, action = function() ApplyVariant(cADDYODIC) end,},
                     {cADDBYZXAMPLE, action = function() ApplyVariant(cADDBYZXAMPLE) end,},
@@ -483,17 +483,17 @@ local function Init()
             }}
         )
         menuhandler:InsertItem('MainWindowMenu', 'Tools|s1',
-            {'Spelling', ru = _T'Spelling',{
-                {'Auto Spell Check', ru = _T'Spell Check Automatically', action = ResetAutoSpell,
+            {'Spelling', cpt = _T'Spelling',{
+                {'Auto Spell Check', cpt = _T'Spell Check Automatically', action = ResetAutoSpell,
                     check = "tonumber(_G.iuprops['spell.autospell']) == 1 and (editor.Length < 10 ^(_G.iuprops['spell.maxsize'] or 7))",
                     active = 'editor.Length < 10 ^(_G.iuprops["spell.maxsize"] or 7)', key = 'Ctrl+Alt+F12',
                 },
                 {'s1', separator = 1,},
-                {'Check Selection', ru = _T'Check Selection', action = spell_Selected, key = 'Ctrl+F12', image = 'IMAGE_CheckSpelling',},
-                {'Check Selection, By Highlighting', ru = _T'Check Selection Considering Highlight', action=spell_ByLex,},
-                {'List Errors', ru = _T'Show error list', action = spell_ErrorList, key = 'Ctrl+Shift+F12', image = 'report__exclamation_µ'},
+                {'Check Selection', cpt = _T'Check Selection', action = spell_Selected, key = 'Ctrl+F12', image = 'IMAGE_CheckSpelling',},
+                {'Check Selection, By Highlighting', cpt = _T'Check Selection Considering Highlight', action=spell_ByLex,},
+                {'List Errors', cpt = _T'Show error list', action = spell_ErrorList, key = 'Ctrl+Shift+F12', image = 'report__exclamation_µ'},
                 {'s1', separator = 1,},
-                {'Max Size', ru = _T'Maximum file size for auto spell check', action = SetMaxSize},
+                {'Max Size', cpt = _T'Maximum file size for auto spell check', action = SetMaxSize},
         }}
     )
     _G.g_session["spell.runned"] = true

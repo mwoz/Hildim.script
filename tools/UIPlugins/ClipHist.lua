@@ -475,7 +475,7 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',
-        {'Clipboard History...', ru = _T'Clipboard History...', action = function() iup.ShowInMouse(dlg) end, key="Alt+Shift+C", image = "clipboard_list_µ"}
+        {'Clipboard History...', cpt = _T'Clipboard History...', action = function() iup.ShowInMouse(dlg) end, key="Alt+Shift+C", image = "clipboard_list_µ"}
     )
     return dlg
 end

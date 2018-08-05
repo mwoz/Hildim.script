@@ -139,7 +139,7 @@ function rfl:GetMenu()
         end
     end
     table.insert(t,{'s0', separator = 1})
-    table.insert(t,{'List Settings', ru = "Свойства списка", action = function()
+    table.insert(t,{'List Settings', cpt = "Свойства списка", action = function()
         local res, loc, len, pathAfter, bClear = iup.GetParam(_TH'Recent List Settings',
             nil,
             _TH"Location in File menu: %o|Submenu|Bottom|\n"..
@@ -1458,16 +1458,16 @@ iup.scitedetachbox = function(t)
     end
 
     local tSub = {radio = 1,
-        {'Attached', ru = 'Закреплено', action = cmd_Attach, check = function() return get_scId() == "0" end,},
-        {'Pop Up', ru = 'Всплывающее окно', action = cmd_PopUp, check = function() return get_scId() == "1" end, },
-        {'Hidden', ru = 'Скрыто', action = cmd_Hide, check = function() return get_scId() == "2" end },
+        {'Attached', cpt = 'Закреплено', action = cmd_Attach, check = function() return get_scId() == "0" end,},
+        {'Pop Up', cpt = 'Всплывающее окно', action = cmd_PopUp, check = function() return get_scId() == "1" end, },
+        {'Hidden', cpt = 'Скрыто', action = cmd_Hide, check = function() return get_scId() == "2" end },
         {'s1', separator = 1},
-        {'Show/Hide', ru = 'Скрыть/Показать', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
+        {'Show/Hide', cpt = 'Скрыть/Показать', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
     }
 
-    menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, ru = t.Dlg_Title, visible = t.MenuVisible, tSub})
+    menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, cpt = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
-    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', ru = 'Вид', visible = t.MenuVisibleEx, tSub}) end
+    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', cpt = 'Вид', visible = t.MenuVisibleEx, tSub}) end
 
     return dtb
 end
@@ -1780,7 +1780,7 @@ iup.ConfigList = function()
         end
         mnu_i = {'s1', separator = 1}
         table.insert(mnu_configs, mnu_i)
-        mnu_i = {'Load...', ru = 'Загрузить...', action=LoadIuprops, image = 'folder_open_document_µ'}
+        mnu_i = {'Load...', cpt = 'Загрузить...', action=LoadIuprops, image = 'folder_open_document_µ'}
         table.insert(mnu_configs, mnu_i)
     end
     return mnu_configs

@@ -681,7 +681,7 @@ local function Init_hidden()
             end
             if FILEMAN then
                 table.insert(macro_list, {'s2', separator = 1})
-                table.insert(macro_list, {'Open Macro Folder', ru = _T'Open Macro Folder', action = function() FILEMAN.OpenFolder(props["SciteDefaultHome"]..'\\data\\Macros\\') end, image = 'folder_search_result_µ'})
+                table.insert(macro_list, {'Open Macro Folder', cpt = _T'Open Macro Folder', action = function() FILEMAN.OpenFolder(props["SciteDefaultHome"]..'\\data\\Macros\\') end, image = 'folder_search_result_µ'})
             end
         end
         return macro_list
@@ -752,30 +752,30 @@ local function Init_hidden()
         nextMC()
     end
 
-    local item = {'Macros', ru = _T'Macro', {
-		{'Start Record', ru = _T'Start Recording', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end, image = "control_record_µ"},
-		{'Play Current', ru = _T'Playback Current Macro', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "control_µ"},
-		{'Delete Current', ru = _T'Delete Current Macro', action = function() if iup.Alarm("Macros", _T'Delete Macro?', _TH'Äà', _TH'Íåò') == 1 then recordet_macros = nil end end, visible = function() return not MACRO.Record and recordet_macros end, image = "cross_script_µ"},
-		{'Save Current', ru = _T'Save Current Macro', action = SaveCurrent, visible = function() return not MACRO.Record and recordet_macros  end, image = "disk_µ" },
-		{'View Current', ru = _T'View Current Macro', action = function() print(GetScript()) end, visible = function() return not MACRO.Record and recordet_macros  end },
-		{'Stop Record', ru = _T'Stop Recording', action = StopRecord, visible = function() return MACRO.Record end, image = "control_stop_square_µ" },
+    local item = {'Macros', cpt = _T'Macro', {
+		{'Start Record', cpt = _T'Start Recording', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end, image = "control_record_µ"},
+		{'Play Current', cpt = _T'Playback Current Macro', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "control_µ"},
+		{'Delete Current', cpt = _T'Delete Current Macro', action = function() if iup.Alarm("Macros", _T'Delete Macro?', _TH'Äà', _TH'Íåò') == 1 then recordet_macros = nil end end, visible = function() return not MACRO.Record and recordet_macros end, image = "cross_script_µ"},
+		{'Save Current', cpt = _T'Save Current Macro', action = SaveCurrent, visible = function() return not MACRO.Record and recordet_macros  end, image = "disk_µ" },
+		{'View Current', cpt = _T'View Current Macro', action = function() print(GetScript()) end, visible = function() return not MACRO.Record and recordet_macros  end },
+		{'Stop Record', cpt = _T'Stop Recording', action = StopRecord, visible = function() return MACRO.Record end, image = "control_stop_square_µ" },
         {'s1', separator = 1},
         {'macrolist', plane = 1,  visible = function() return not MACRO.Record end , get_macro_list},
         {'OnRecord', plane = 1, visible = function() return MACRO.Record end, {
-            {'Keep Position in line', ru = _T'Store Position in String', action = do_KeepPosition, image = "marker_µ"},
-            {'Restore position', ru = _T'Go to Position in String', visible = function() return #positions_t > 0 end, submenu_positions},
+            {'Keep Position in line', cpt = _T'Store Position in String', action = do_KeepPosition, image = "marker_µ"},
+            {'Restore position', cpt = _T'Go to Position in String', visible = function() return #positions_t > 0 end, submenu_positions},
         },},
-        {'Insert string', ru = _T'Insert User-Defined String...', visible = function() return MACRO.Record end, {
+        {'Insert string', cpt = _T'Insert User-Defined String...', visible = function() return MACRO.Record end, {
             {'StringList', plane = 1, string_block_content},
-            {'New String Parameter', ru = _T'Set New String Parameter', action = do_NewStringPar}
+            {'New String Parameter', cpt = _T'Set New String Parameter', action = do_NewStringPar}
         }},
-        {'Repeat Next Block', ru = _T'Repeat Next Command Block...', visible = function() return MACRO.Record end, {
+        {'Repeat Next Block', cpt = _T'Repeat Next Command Block...', visible = function() return MACRO.Record end, {
             {'ForList', plane = 1, for_block_content},
-            {'New Repeat Parameter', ru = _T'Set New Repeatition Parameter', action = do_BeginFor}
+            {'New Repeat Parameter', cpt = _T'Set New Repeatition Parameter', action = do_BeginFor}
         }},
-        {'Call By Condition...', ru = _T'Playback Commands on Condition...', visible = function() return MACRO.Record end, {
+        {'Call By Condition...', cpt = _T'Playback Commands on Condition...', visible = function() return MACRO.Record end, {
             {'IfList', plane = 1, if_block_content},
-            {'New Condition', ru = _T'Set New Condition', action = do_BeginIf}
+            {'New Condition', cpt = _T'Set New Condition', action = do_BeginIf}
         }},
         {'StopRecordBlock', plane = 1, visible = function() return MACRO.Record and pCurBlock.id end, function()
             return {
@@ -783,18 +783,18 @@ local function Init_hidden()
             }
         end},
         {'Commands', plane = 1, visible = function() return MACRO.Record end, {
-            {'Select Word', ru = _T'Select Word Under Cursor', action = do_SelectWord},
-            {'Copy', ru = _T'Copy', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
-            {'Cut', ru = _T'Cut', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
-            {'Paste', ru = _T'Paste', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
-            {'Paste from History', ru = _T'Paste from Clip History', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
-            {'Find &Next', ru = _T'Find Next', action = function() do_FindNextBack(false) end},
-            {'Find &Back', ru = _T'Find Previous', action = function() do_FindNextBack(true) end},
-            {'Find Next Word/Selection', ru = _T'Find Next Word/Selection', action = function() do_Find_FindInDialog(true) end, image = "IMAGE_search" },
-            {'Find Prev Word/Selection', ru = _T'Find Prev Word/Selection', action = function() do_Find_FindInDialog(false) end, image = "IMAGE_search"},
-            {'Next Word/Selection', ru = _T'Next Word/Selection', action = function() do_FindNextWrd(1) end, image = "IMAGE_search"},
-            {'Prevous Word/Selection', ru = _T'Prevous Word/Selection', action = function() do_FindNextWrd(2) end, image = "IMAGE_search"} ,
-            {'Undo', ru = _T'Undo', active = function() return MC and (MC.typ == "F" or MC.typ == "P") end, action = do_Undo, image = "arrow_return_270_left_µ"} ,
+            {'Select Word', cpt = _T'Select Word Under Cursor', action = do_SelectWord},
+            {'Copy', cpt = _T'Copy', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
+            {'Cut', cpt = _T'Cut', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
+            {'Paste', cpt = _T'Paste', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
+            {'Paste from History', cpt = _T'Paste from Clip History', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
+            {'Find &Next', cpt = _T'Find Next', action = function() do_FindNextBack(false) end},
+            {'Find &Back', cpt = _T'Find Previous', action = function() do_FindNextBack(true) end},
+            {'Find Next Word/Selection', cpt = _T'Find Next Word/Selection', action = function() do_Find_FindInDialog(true) end, image = "IMAGE_search" },
+            {'Find Prev Word/Selection', cpt = _T'Find Prev Word/Selection', action = function() do_Find_FindInDialog(false) end, image = "IMAGE_search"},
+            {'Next Word/Selection', cpt = _T'Next Word/Selection', action = function() do_FindNextWrd(1) end, image = "IMAGE_search"},
+            {'Prevous Word/Selection', cpt = _T'Prevous Word/Selection', action = function() do_FindNextWrd(2) end, image = "IMAGE_search"} ,
+            {'Undo', cpt = _T'Undo', active = function() return MC and (MC.typ == "F" or MC.typ == "P") end, action = do_Undo, image = "arrow_return_270_left_µ"} ,
         }},
     }}
     menuhandler:AddMenu(item)

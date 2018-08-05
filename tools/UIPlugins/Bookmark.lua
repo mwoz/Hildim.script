@@ -233,7 +233,7 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|xxxx',
-        {'Bookmarks List...', ru = _T'Bookmark List'..'...', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
+        {'Bookmarks List...', cpt = _T'Bookmark List'..'...', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
     )
     return dlg
 end

@@ -19,7 +19,7 @@ local function Init(h)
         iup.PassFocus()
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
-        {'Go to...', ru = _T'Go to...', key = 'Ctrl+G', action = IDM_GOTO}
+        {'Go to...', cpt = _T'Go to...', key = 'Ctrl+G', action = IDM_GOTO}
     )
     AddEventHandler("OnMenuCommand", function(cmd)
         if cmd == IDM_GOTO then

@@ -690,8 +690,8 @@ local function Init()
 
     require "menuhandler"
     menuhandler:InsertItem('MainWindowMenu', 'Edit|Xml|l1',{'Xml', plane = 1,{
-            {'Close Incomplete Node', ru = 'Закрыть незавершенную ноду', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
-            {'Close Unpaired Tag', ru = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
+            {'Close Incomplete Node', cpt = 'Закрыть незавершенную ноду', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
+            {'Close Unpaired Tag', cpt = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
         }}
     )
 
@@ -725,13 +725,13 @@ local function Init()
     end
     menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',{'Xml',
         visible = function() return editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'formenjine' end, {
-            {'Tag Highlighting', ru = 'Подсветка тэгов', check_iuprops = 'pariedtag.on'},
-            {'BlockXsdTest', ru = 'Блокировать проверку по Xsd схеме', action = function() XMLTOOLS.blockXsdTest = not XMLTOOLS.blockXsdTest end, check = function() return XMLTOOLS.blockXsdTest end },
+            {'Tag Highlighting', cpt = 'Подсветка тэгов', check_iuprops = 'pariedtag.on'},
+            {'BlockXsdTest', cpt = 'Блокировать проверку по Xsd схеме', action = function() XMLTOOLS.blockXsdTest = not XMLTOOLS.blockXsdTest end, check = function() return XMLTOOLS.blockXsdTest end },
             {'s1', separator = 1},
-            {'XPath Test', ru = 'Тестировать XPath выражение', action = XPath, },
-            {'Xslt Test', ru = 'Тестировать Xslt шаблон', action = Xslt, active = isXslt},
-            {'Xsd Test', ru = 'Тестировать Xsd схему', action = Xsd, active = isXsd },
-            {'Check', ru = 'Проверить по схеме', action = CheckCurrent, },
+            {'XPath Test', cpt = 'Тестировать XPath выражение', action = XPath, },
+            {'Xslt Test', cpt = 'Тестировать Xslt шаблон', action = Xslt, active = isXslt},
+            {'Xsd Test', cpt = 'Тестировать Xsd схему', action = Xsd, active = isXsd },
+            {'Check', cpt = 'Проверить по схеме', action = CheckCurrent, },
         }}
     )
 

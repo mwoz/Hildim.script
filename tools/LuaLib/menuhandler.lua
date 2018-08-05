@@ -19,7 +19,7 @@ function s:Init()
 end
 
 function s:get_title(t, bShort)
-    local s = t.ru or _TM(t[1])
+    local s = t.cpt or _TM(t[1])
     if not bShort and (t.user_hk or t.key) then s = s..'\t'..(t.user_hk or t.key) end
     return s
 end
@@ -111,7 +111,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
                         end
                     end
                     if itm.bottom then
-                        local tBtm = {itm.bottom[1], ru = itm.bottom.ru, {}}
+                        local tBtm = {itm.bottom[1], cpt = itm.bottom.cpt, {}}
                         for j = i + 1,  #m do
                             table.insert(tBtm[2], m[j])
                         end

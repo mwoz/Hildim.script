@@ -172,23 +172,23 @@ local function Init()
         if ierr == 0 then -- не взят
             t = {
                 {'Check Out', action = vss_checkout, image = 'arrow_curve_270_µ'  ,},
-                {'Get Latest Version', ru = 'Получить последнюю версию', action = vss_getlatest ,},
-                {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
-                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
-                {'History', ru = 'Показать историю', action = vss_hist ,},
+                {'Get Latest Version', cpt = 'Получить последнюю версию', action = vss_getlatest ,},
+                {'Diff', cpt = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
+                {'Diff Internal', cpt = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
+                {'History', cpt = 'Показать историю', action = vss_hist ,},
             }
         elseif ierr == 1 then --взят
             t = {
                 {'Check In', action = vss_checkin, image = 'arrow_curve_090_µ' ,},
-                {'Undo Check Out', ru = 'Отменить Check Out', action = vss_undocheckout,},
+                {'Undo Check Out', cpt = 'Отменить Check Out', action = vss_undocheckout,},
                 {'Get Latest Version', action = vss_getlatest ,},
-                {'Diff', ru = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
-                {'Diff Internal', ru = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
-                {'History', ru = 'Показать историю', action = vss_hist ,},
+                {'Diff', cpt = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
+                {'Diff Internal', cpt = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
+                {'History', cpt = 'Показать историю', action = vss_hist ,},
             }
         elseif ierr == 100 then --новый
             t = {
-                {'Add', ru = 'Добавить в Source Safe', action = vss_add ,},
+                {'Add', cpt = 'Добавить в Source Safe', action = vss_add ,},
             }
         else
             print(strerr)

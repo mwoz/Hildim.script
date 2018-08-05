@@ -638,22 +638,22 @@ local function FileManTab_Init(h)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
         {'Fileman_sidebar', plane = 1,{
-            {"Change Dir", ru = _T"Change Folder", action = FileMan_ChangeDir},
-            {"Delete", ru = _T"Delete", action = FileMan_Delete},
-            {"Rename", ru = _T"Rename", action = FileMan_Rename},
+            {"Change Dir", cpt = _T"Change Folder", action = FileMan_ChangeDir},
+            {"Delete", cpt = _T"Delete", action = FileMan_Delete},
+            {"Rename", cpt = _T"Rename", action = FileMan_Rename},
             {'s_OpenwithHildiM', separator = 1},
-            {"Open with HildiM", ru = _T"Open with HildiM", action = FileMan_OpenSelectedItems},
-            {"Execute", ru = _T"Run", action =(function() FileMan_FileExec(nil) end)},
+            {"Open with HildiM", cpt = _T"Open with HildiM", action = FileMan_OpenSelectedItems},
+            {"Execute", cpt = _T"Run", action =(function() FileMan_FileExec(nil) end)},
             {'s_AddtoFavorites', separator = 1},
-            {"Add to Favorites", ru = _T"Add to Favorites", action = Favorites_AddFile},
+            {"Add to Favorites", cpt = _T"Add to Favorites", action = Favorites_AddFile},
             {'s_ReadOnly', separator = 1},
-            {"Read Only", ru = _T"Read Only", action = FileMan_ChangeReadOnly, check = GetReadOnly},
-            {'When open file', ru = _T"After File Open",{
-                {"Stay Here", ru = _T"No Tab's switching", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF'"},
-                {"Restore First Tab", ru = _T'Switch To First Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1'"},
-                {"Restore Prev. Tab", ru = _T'Switch To Previous Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON'"},
+            {"Read Only", cpt = _T"Read Only", action = FileMan_ChangeReadOnly, check = GetReadOnly},
+            {'When open file', cpt = _T"After File Open",{
+                {"Stay Here", cpt = _T"No Tab's switching", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF'"},
+                {"Restore First Tab", cpt = _T'Switch To First Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1'"},
+                {"Restore Prev. Tab", cpt = _T'Switch To Previous Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON'"},
             }},
-            {"Insert Relative Path", ru = _T"Insert Relative Path", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
+            {"Insert Relative Path", cpt = _T"Insert Relative Path", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
     }})
 
     list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(key) end)
