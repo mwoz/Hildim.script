@@ -245,6 +245,7 @@ function iup.SaveChProps(bReset)
 'caret.policy.ystrict',
 'caret.sticky',
 'caret.width',
+'clear.before.execute',
 'end.at.last.lin',
 'findres.caret.line.back',
 'findres.caret.line.back.alpha',
@@ -257,6 +258,7 @@ function iup.SaveChProps(bReset)
 'magnification',
 'output.caret.line.back',
 'output.caret.line.back.alpha',
+'output.code.page.oem2ansi',
 'output.magnification',
 'output.vertical.size',
 'output.wrap',
@@ -707,7 +709,10 @@ end
 
 AddEventHandler("OnMenuCommand", function(cmd, source)
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
-        if cmd == IDM_QUIT then scite.SavePosition() end
+        if cmd == IDM_QUIT then
+            if MACRO and MACRO.Record then MACRO.StopRecord() return true end
+            scite.SavePosition()
+        end
         return iup.CloseFilesSet(cmd)
     elseif cmd == 9117 or cmd == IDM_REBOOT then  --перезагрузка скрипта
         if dlg_SPLASH then dlg_SPLASH:hide(); dlg_SPLASH:destroy(); dlg_SPLASH = nil; end
@@ -1495,10 +1500,16 @@ iup.ShowXY = function(h, x, y, bOrig)
     return old_iup_ShowXY(h, x, y)
 end
 
-iup.ShowInMouse = function(dlg)
+iup.ShowInMouse = function(dlg, bIupCtrl)
     local cPos = editor.SelectionEnd
+    local hCtrl
+    if bIupCtrl then hCtrl = iup.GetFocus() end
     local _, _, xC, yC, dY
-    if editor.FirstVisibleLine <= editor:LineFromPosition(cPos) and
+    if hCtrl then
+        _, _, _, dY = hCtrl.RASTERSIZE:find('(%d+)x(%d+)')
+        _, _, xC, yC = hCtrl.Screenposition:find('(%d+),(%d+)')
+        yC = yC + dY
+    elseif editor.FirstVisibleLine <= editor:LineFromPosition(cPos) and
         editor:LineFromPosition(cPos) <= editor.FirstVisibleLine + editor.LinesOnScreen then
         dY = editor:TextHeight(editor:LineFromPosition(cPos))
         _, _, xC, yC = iup.GetDialogChild(iup.GetLayout(), "Source").Screenposition:find('(%d+),(%d+)')
@@ -1523,10 +1534,11 @@ iup.ShowInMouse = function(dlg)
             if xC + xD > xS then xC = xC - xD if xC < x0S then xC = x0S end end
             if yC + yD > yS then yC = yC - yD - dY if yC < y0S then yC = y0S end end
             dlg:showxy(xC, yC)
-            return
+            return hCtrl
         end
     end
     dlg:showxy(10, 10)
+    return hCtrl
 end
 ---Расширение iup
 

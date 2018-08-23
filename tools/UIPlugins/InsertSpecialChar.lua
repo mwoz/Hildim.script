@@ -92,8 +92,8 @@ local function Init()
         end
     end)
     menuhandler:InsertItem('MainWindowMenu', 'Edit|s2',
-        {'Insert Special Character', cpt = 'Вставить спецсимвол', action = function() SpecialChar() end, image = 'edit_symbol_µ'}
-    )
+        {'Insert Special Character', action = function() SpecialChar() end, image = 'edit_symbol_µ'}
+    , "hildim/ui/InsertSpecialChar.html", _T)
 end
 
 return {

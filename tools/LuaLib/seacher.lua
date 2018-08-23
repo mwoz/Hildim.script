@@ -95,7 +95,7 @@ function s:FindInTarget(findWhat, lenFind, startPosition, endPosition)
 	return posFind;
 end
 
-function s:FindNext(fireEvent)
+function s:FindNext(fireEvent, bScipSelect)
 
     if self.findWhat == nil or self.findWhat:len() == 0 then
         return -1
@@ -127,7 +127,7 @@ function s:FindNext(fireEvent)
 		posFind = self:FindInTarget(findTarget, findLen, startPosition, endPosition)
 		-- WarnUser(warnFindWrapped);
 	end
-	if posFind ~= -1 then
+	if posFind ~= -1 and not bScipSelect then
 
 		-- //Вызовем нотификацию в скрипте
 		if fireEvent then OnNavigation("Find") end

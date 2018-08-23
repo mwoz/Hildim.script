@@ -374,7 +374,7 @@ end
         map_cb = (function(h) h.size = "1x1" end), rasterwidth0 = 0 ,
         rasterwidth1 = _G.iuprops['list_abbrev.rw1'] or 60 ,
         rasterwidth2 = _G.iuprops['list_abbrev.rw2'] or 600,
-    tip = 'В главном окне введите\nкод из [Abbrev] + (Ctrl+B)'}
+    tip = _T'In the main window, enter the code\nfrom [Abbrev] and press (Ctrl+B)'}
 
 	list_abbrev:setcell(0, 1, "Abbrev")         -- ,size="400x400"
 	list_abbrev:setcell(0, 2, "Expansion")
@@ -458,14 +458,14 @@ end
             local col = iup.ConvertXYToPos(list_abbrev, x, y) % 3
             list_abbrev.focus_cell = lin..':'..col
             local mnu = iup.menu{
-                iup.item{title = "Создать", action = function() bMenuMode = false ;EditAbbrev(true) end},
-                iup.item{title = "Изменить", action = function() bMenuMode = false ;EditAbbrev(false) end},
-                iup.item{title = "Удалить", action =(function()
+                iup.item{title = _T"Create", action = function() bMenuMode = false ;EditAbbrev(true) end},
+                iup.item{title = _T"Change", action = function() bMenuMode = false ;EditAbbrev(false) end},
+                iup.item{title = _T"Delte", action =(function()
                     local l = list_getvaluenum(list_abbrev)
                     list_abbrev.dellin = ''..l
                 end)},
                 iup.separator{},
-                iup.item{title = "Сохранить все", active = Iif(bListModified, 'YES', 'NO'), action =(function()
+                iup.item{title = _T"Save All", active = Iif(bListModified, 'YES', 'NO'), action =(function()
                     local maxN = tonumber(list_abbrev.numlin)
                     local strOut = ''
                     for i = 1, maxN do
@@ -513,8 +513,8 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Edit|s3',
-        {'Abbreviation List...', cpt = 'Список сокращений...', action = function() iup.ShowInMouse(dlg) end, key='Alt+Shift+B'}
-    )
+        {'Abbreviation List', action = function() iup.ShowInMouse(dlg) end, key = 'Alt+Shift+B'}
+    , nil, _T)
     bIsList = true
     return dlg
 end
@@ -524,7 +524,7 @@ local function ToolBar_Init(h)
     local onselect = Init()
     local dlg = createDlg()
 
-    local fbutton = iup.flatbutton{title = 'Список сокращений', flat_action=(function(h)
+    local fbutton = iup.flatbutton{title = _T'Abbreviation List', flat_action =(function(h)
                 local _, _, left, top = h.screenposition:find('(-*%d+),(-*%d+)')
                 if iup.GetParent(iup.GetParent(h)).name == 'StatusBar' then
                     local _, _, _, dy = dlg.rastersize:find('(%d*)x(%d*)')

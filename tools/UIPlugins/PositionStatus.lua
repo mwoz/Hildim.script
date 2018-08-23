@@ -19,8 +19,8 @@ local function Init(h)
         iup.PassFocus()
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
-        {'Go to...', cpt = _T'Go to...', key = 'Ctrl+G', action = IDM_GOTO}
-    )
+        {'Go to...', key = 'Ctrl+G', action = IDM_GOTO}
+    , "hildim/ui/positionstatus.html", _T)
     AddEventHandler("OnMenuCommand", function(cmd)
         if cmd == IDM_GOTO then
             iup.SetFocus(txtLine)
@@ -37,10 +37,9 @@ local function Init(h)
         txtLine.value = editor:LineFromPosition(editor.CurrentPos) + 1
     end)
 
-    local sTip = '(Ctrl+G) Нажмите Enter для перехода на позицию'
-    txtCol = iup.text{size = '25x'; mask = '[0-9]*', tip = sTip, killfocus_cb = GoToPos,
+    txtCol = iup.text{size = '25x'; mask = '[0-9]*', tip = _T'Press Enter to go to position...', killfocus_cb = GoToPos,
     k_any =(function(_, c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
-    txtLine = iup.text{size = '25x'; mask = '[0-9]*', tip = sTip, killfocus_cb = GoToPos,
+    txtLine = iup.text{size = '25x'; mask = '[0-9]*', tip = _T'(Ctrl+G) Press Enter to go to line...', killfocus_cb = GoToPos,
     k_any =(function(_, c) if c == iup.K_CR then iup.PassFocus() end end)}
     txtSel = iup.text{size = '25x'; readonly = 'YES', bgcolor = iup.GetLayout().bgcolor, canfocus = "NO", border = "NO"}
 

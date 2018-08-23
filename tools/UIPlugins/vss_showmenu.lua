@@ -23,6 +23,31 @@ local function Init()
         end
     end
 
+    local function GetComment()
+        if _G.iuprops['vss_showmenu.ask_comment'] == 1 then
+            local ret, txt = iup.GetParam(_T"Comment",
+                function(h, id)
+                    if id == -6 then
+                        h.rastersize = '700x200'
+                    end
+                    return 1
+                end,
+                _T'Text'..'%m\n'
+                ,
+                ''
+            )
+            if ret then
+                --txt = txt:from_utf8()
+                txt = txt:gsub('^%s', ""):gsub('%s$', "")
+                if txt == '' then txt = "-" end
+                return '"'..txt..'"'
+            end
+            return nil
+        else
+            return "-"
+        end
+    end
+
     function vss_SetCurrentProject(dir)
         local d = dir or props['FileDir']
         if not shell.fileexists(d..'\\'..'mssccprj.scc') then
@@ -50,7 +75,9 @@ local function Init()
 
     local function vss_add()
         if vss_SetCurrentProject() then
-            if reset_err(shell.exec(p_vsspath..' Add "'..props['FileDir']..'\\'..props['FileNameExt']..'" -C-', nil, true, true)) and On_vss_CheckIn then
+            local cmnt = GetComment()
+            if not cmnt then return end
+            if reset_err(shell.exec(p_vsspath..' Add "'..props['FileDir']..'\\'..props['FileNameExt']..'" -C'..cmnt, nil, true, true)) and On_vss_CheckIn then
                 On_vss_CheckIn(curProj)
             end
         end
@@ -61,7 +88,7 @@ local function Init()
             local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
             local stropt = ""
             if ierr == 1 then
-                local rez = iup.Alarm('Get Latest Version', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"Cancel")
+                local rez = iup.Alarm(_T'Get Latest Version', _T"File differs from Source Safe\nReplace an existing file?", _TH"OK", _TH"Cancel")
                 if rez ~= 1 then return end
 
                 local attr = shell.getfileattr(props['FilePath'])
@@ -84,19 +111,20 @@ local function Init()
             local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt'], nil, true, true)
             local stropt = ""
             if ierr == 1 then
-                local rez = iup.Alarm('Check Out', "Файл отличается от базы.\nЗаменить существующий файл?", _TH"OK", _TH"No", _TH"Cancel")
+                local rez = iup.Alarm(_T'Check Out', _T"File differs from Source Safe\nReplace an existing file?", _TH"OK", _TH"No", _TH"Cancel")
                 if rez == 3 then return end
                 ierr = 0
                 if rez == 1 then
-                    local attr = shell.getfileattr(props['FilePath'])
-                    if (attr & 1) ~= 1 then
-                        shell.setfileattr(props['FilePath'], attr + 1)
-                    end
+
                 else
                     stropt = " -G-"
                 end
             end
             if ierr == 0 then
+                local attr = shell.getfileattr(props['FilePath'])
+                if (attr & 1) ~= 1 then
+                    shell.setfileattr(props['FilePath'], attr + 1)
+                end
                 reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']..stropt, nil, true, true))
             elseif ierr ~= 1 then
                 print(strerr)
@@ -151,7 +179,9 @@ local function Init()
 
     local function vss_checkin()
         if vss_SetCurrentProject() then
-            if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']..' -C-', nil, true, true)) and On_vss_CheckIn then
+            local cmnt = GetComment()
+            if not cmnt then return end
+            if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']..' -C'..cmnt, nil, true, true)) and On_vss_CheckIn then
                 On_vss_CheckIn(curProj)
             end
         end
@@ -172,27 +202,32 @@ local function Init()
         if ierr == 0 then -- не взят
             t = {
                 {'Check Out', action = vss_checkout, image = 'arrow_curve_270_µ'  ,},
-                {'Get Latest Version', cpt = 'Получить последнюю версию', action = vss_getlatest ,},
-                {'Diff', cpt = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
-                {'Diff Internal', cpt = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
-                {'History', cpt = 'Показать историю', action = vss_hist ,},
+                {'Get Latest Version', action = vss_getlatest ,},
+                {'Show Differences', action = vss_diff, image = 'edit_diff_µ' ,},
+                {'Show Differences by HildiM', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
+                {'Show History', action = vss_hist ,},
+                {'s', separator = 1},
+                {'Request Comment', check_iuprops = 'vss_showmenu.ask_comment' ,},
             }
         elseif ierr == 1 then --взят
             t = {
                 {'Check In', action = vss_checkin, image = 'arrow_curve_090_µ' ,},
-                {'Undo Check Out', cpt = 'Отменить Check Out', action = vss_undocheckout,},
+                {'Undo Check Out', action = vss_undocheckout,},
                 {'Get Latest Version', action = vss_getlatest ,},
-                {'Diff', cpt = 'Показать различия', action = vss_diff, image = 'edit_diff_µ' ,},
-                {'Diff Internal', cpt = 'Показать различия(в редакторе)', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
-                {'History', cpt = 'Показать историю', action = vss_hist ,},
+                {'Show Differences', action = vss_diff, image = 'edit_diff_µ' ,},
+                {'Show Differences by HildiM', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
+                {'Show History', action = vss_hist ,},
+                {'s', separator = 1},
+                {'Request Comment', check_iuprops = 'vss_showmenu.ask_comment' ,},
             }
         elseif ierr == 100 then --новый
             t = {
-                {'Add', cpt = 'Добавить в Source Safe', action = vss_add ,},
+                {'Add to Project', action = vss_add ,},
             }
         else
             print(strerr)
         end
+        for i = 1,  #t do t[i].cpt = _T(t[i][1]); t[i].hlp = "hildim/ui/vss_showmenu.html" end
         return t
     end
 

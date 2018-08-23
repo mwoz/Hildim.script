@@ -501,7 +501,7 @@ local function Func_Init(h)
         local ret, sz =
         iup.GetParam("Max Size for Autoufill",
             nil,
-            'Символов * 10 ^ %r[5,10,0.2]\n'
+            _T'Characters'..' * 10 ^ %r[5,10,0.2]\n'
             ,
             (_G.iuprops['sidebar.functions.maxsize'] or 7)
         )
@@ -525,26 +525,7 @@ local function Func_Init(h)
     tree_func.button_cb = function(_, but, pressed, x, y, status)
 
         if but == 51 and pressed == 0 then --right
-
-            local mnu = iup.menu
-            {
-                iup.submenu
-                {
-                    iup.menu
-                    {
-                        iup.item{title = _T"Order", value = Iif(_sort == "order", "ON", "OFF"), action = Functions_SortByOrder},
-                        iup.item{title = _T"Name", value = Iif(_sort == "name", "ON", "OFF"), action = Functions_SortByName}
-                    }
-                    ;title = _T"Sort By"
-                },
-                iup.item{title = _T"Show Parameters", value = Iif(_show_params, "ON", "OFF"), action = Functions_ToggleParams},
-                iup.item{title = _T"Group By Type", value = Iif(_group_by_flags, "ON", "OFF"), action = Functions_ToggleGroup},
-                iup.item{title = _T"Display To Console", action = Functions_Print},
-                iup.item{title = _T"Max Size for Auto Show", action = SetMaxSize},
-                Iif(editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7),
-                    iup.item{title = _T"(Max size exceeded) Display", action = function() OnSwitch('Y') end}, nil
-                )
-            }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
+            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
         elseif but == 49 and iup.isdouble(status) then --dbl left
             line = Functions_GotoLine()
         end
@@ -553,6 +534,19 @@ local function Func_Init(h)
             line = nil
         end
     end
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
+        {'Functions_sidebar', plane = 1,{
+            {"Sort By", {radio = 1;
+                {'Order', action = Functions_SortByOrder, check = function() return _sort == 'order' end},
+                {'Name', action = Functions_SortByName, check = function() return _sort == 'name' end},
+            }},
+            {"Show Parameters", check = function() return _show_params end, action = Functions_ToggleParams},
+            {"Group By Type", check = function() return _group_by_flags end, action = Functions_ToggleGroup},
+            {"Display To Console", action = Functions_Print},
+            {"Max Size for Auto Show", action = SetMaxSize},
+            {"(Max size exceeded) Display", visible = function() return editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7) end, action = function() OnSwitch('Y') end}
+    }}, "hildim/ui/functions.html", _T)
+
     tree_func.k_any = function(_, number)
         if number == 13 then
             Functions_GotoLine()

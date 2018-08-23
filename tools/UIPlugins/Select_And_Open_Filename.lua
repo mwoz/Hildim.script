@@ -162,7 +162,7 @@ local function init()
         end
     end)
     menuhandler:InsertItem('MainWindowMenu', 'File|Reopen File',
-    {'Select And Open Filename', cpt = _T'Select And Open Filename', action = function() Select_And_Open_File(true) end, key = 'Ctrl+Shift+O',})
+    {'Select And Open Filename', action = function() Select_And_Open_File(true) end, key = 'Ctrl+Shift+O',}, "hildim/ui/select_and_open_filename.html", _T)
 
 end
 

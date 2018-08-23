@@ -14,4 +14,5 @@ return {
 ["Add according to model"] = "Добавление по образцу";
 ["Context Menu"] = "Контекстное меню";
 ["Add to Dictionary"] = "Добавить в словарь";
+['Characters'] = 'Символов';
 }

@@ -250,10 +250,10 @@ local function InitWndDialog()
             hbTitle,
             iup.backgroundbox{list_windows, bgcolor = iup.GetLayout().txtbgcolor},
             iup.hbox{
-                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T"Close All Checked" },
-                iup.flatbutton{title = _T"except", expand = 'NO', padding = '9x', fgcolor = props['layout.fgcolor'], flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T'Close All NOT Checked'  },
-                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip = _T'Move Checked to Another View' }, cmb_Sort,
-                iup.flatbutton{expand = 'NO', padding = '9x', flat_action = OrderTab, propagatefocus = 'YES', image = 'IMAGE_FormRun'},
+                iup.flatbutton{expand = 'NO', name = 'closecheck', padding = '9x', flat_action = CORE.DoForFileSet('1', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T"Close All Checked" },
+                iup.flatbutton{title = _T"except", expand = 'NO', name = 'closeuncheck', padding = '9x', fgcolor = props['layout.fgcolor'], flat_action = CORE.DoForFileSet('0', CloseFileSet), propagatefocus = 'YES', image = 'cross_script_µ', tip = _T'Close All NOT Checked'  },
+                iup.flatbutton{expand = 'NO', name = 'move', padding = '9x', flat_action = MoveSet, propagatefocus = 'YES', image = 'navigation_µ', tip = _T'Move Checked to Another View' }, cmb_Sort,
+                iup.flatbutton{expand = 'NO', name = 'sort', padding = '9x', flat_action = OrderTab, propagatefocus = 'YES', image = 'IMAGE_FormRun', tip = _T'Apply sorting to Tabs'},
         scrollbar = 'NO', minsize = 'x35', maxsize = 'x35', expand = "HORIZONTAL", margin = "5x0", gap = "1", alignment='ACENTER'};};
         sciteparent = "SCITE", sciteid = "bufferslist", dropdown = true, shrink = "YES",
         maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',

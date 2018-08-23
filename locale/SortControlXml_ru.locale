@@ -1,0 +1,5 @@
+return {
+["4->3 Tab size Indent"] = "Отступ 4->3";
+["Set KeyWords To StandartCase"] = "Ключевые слова в стандартный кэйс";
+["Sort Xml Tags In Node"] = "Упорядочить тэги в ноде";
+}

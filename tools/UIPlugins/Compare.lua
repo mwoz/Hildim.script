@@ -363,6 +363,11 @@ local function Init_hidden()
     end
 
     local function CompareToFile(strName, bTmp)
+        if scite.CompareEncodingFile(strName, editor:GetText()) then
+            print(_T"Files are identical")
+            if bTmp then shell.delete_file(strName) end
+            return
+        end
         local strCur = props['FilePath']
         local strExt = props['FileExt']
         local zoom = editor.Zoom
@@ -449,8 +454,8 @@ local function Init_hidden()
         VSS.diff(CompareToFile, prepareTmpPath():gsub('\\[^\\]+$', ''))
     end
 
-    local function CompareSelfTitled()
-        local strfile = (tSet.selfTitledDir or '')..'\\'..props['FileNameExt']
+    local function CompareSelfTitled(strPath)
+        local strfile = (strPath or ((tSet.selfTitledDir or '')..'\\'))..props['FileNameExt']
         local s = strfile
         if shell.fileexists(strfile) then
             CompareToFile(strfile)
@@ -459,26 +464,9 @@ local function Init_hidden()
         end
     end
 
-    local function SetSelfTitledDir()
-        local ret, dir =
-        iup.GetParam(_T"Выбор директории для сравнения с одноименным'..'^compare",
-            function(ih, param_index)
-                if param_index == -2 then
-                    local p = iup.GetParamHandle(ih, 'PARAM0')
-                    p.dialogtype = 'DIR'
-                    p.directory = tSet.selfTitledDir or ''
-                end
-                return 1
-            end,
-            'Directory:%f\n',
-            tSet.selfTitledDir or ''
-        )
-        if ret then tSet.selfTitledDir = dir end
-    end
-
     local function ColorSettings()
         local ret, added, deleted, changed, moved, blank =
-        iup.GetParam(_T"Настройки цветов сравнения'..'^compare",
+        iup.GetParam(_T"Comparison Color Preferences'..'^compare",
             nil,
             _T'Lines color'..'%t\n'..
             _T'Added'..':%c\n'..
@@ -639,28 +627,55 @@ local function Init_hidden()
         return ((_G.iuprops['coeditor.win'] or '')~= '2') and (bActive == 0 or bActive == 7)
     end
 
-    local item = {'Compare', cpt = _T'Comparison', {
-		{'Compare', cpt = _T'Compare to Other View', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
-		{'Clear backlight', cpt = _T'Clear Highlighting', action = Reset, image='cross_script_µ' },
+    local item = {'Comparison', {
+		{'Compare to Other View', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
+		{'Clear Highlighting', action = Reset, image='cross_script_µ' },
         {'s1', separator = 1},
-        {'Compare to Git', cpt = _T'Compare to Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end, image='edit_diff_µ'},
-        {'Compare to Vss', cpt = _T'Compare to Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp, image = 'edit_diff_µ'},
-        {'Compare to Self-Titled', cpt = _T'Compare to same named from ', action = CompareSelfTitled, active = function() return ((tSet.selfTitledDir or '' and bCanNewComp())) ~= '' end},
-        {'Directory For Comparing', cpt = _T'Directory to Compare', action = SetSelfTitledDir, active = function() return true end},
+        {'Compare to Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end, image='edit_diff_µ'},
+        {'Compare to Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp, image = 'edit_diff_µ'},
         {'s2', separator = 1},
-		{'Next Difference', cpt = _T'Next Difference', key = 'Alt+Down', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
-		{'Prevouse Difference', cpt = _T'Previous Difference', key = 'Alt+Up', action = prevDif, active = function() return bActive == 7 end, image = 'IMAGE_ArrowUp'},
-		{'Copy To Left', cpt = _T'Copy Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
-		{'Copy To Right', cpt = _T'Copy Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
+		{'Next Difference', key = 'Alt+Down', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
+		{'Previous Difference', key = 'Alt+Up', action = prevDif, active = function() return bActive == 7 end, image = 'IMAGE_ArrowUp'},
+		{'Copy Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
+		{'Copy Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
         {'s3', separator = 1},
-		{'Recompare by changing line', cpt = _T'Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare; _G.iuprops['compare_settings'] = tSet end},
-		{'Ignore Space', cpt = _T'Ignore Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{}; _G.iuprops['compare_settings'] = tSet  end},
-		{'Detect Move', cpt = _T'Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
-		{'Add Empty Line', cpt = _T'Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
-		{'Use Icons', cpt = _T'Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
-		{'Color Settings', cpt = _T'Color Preferences', action = ColorSettings, image='color_µ'},
+		{'Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare; _G.iuprops['compare_settings'] = tSet end},
+		{'Ignore Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{}; _G.iuprops['compare_settings'] = tSet  end},
+		{'Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
+		{'Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
+		{'Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
+		{'Color Preferences', action = ColorSettings, image='color_µ'},
     }}
-    menuhandler:AddMenu(item)
+    menuhandler:AddMenu(item, "hildim/ui/compare.html", _T)
+    local function compareVis(bFavor)
+        local path = FILEMAN.Directory(bFavor)
+        if not path then return false end
+        if path:upper() == (props['FileDir']..'\\'):upper() then return false end
+        if path:find('^\\\\') then return true end
+        return shell.fileexists(path..props['FileNameExt'])
+    end
+    local function compareVisFile()
+        if FILEMAN.Directory() then return false end
+        return (FILEMAN.FullPath() or ''):upper() ~= (props['FileDir']..'\\'):upper()
+    end
+    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_|Fileman_sidebar|sxxx',
+        {'Compare', plane = 1, {
+            {"Compare to same named from this folder",  action = function()
+                CompareSelfTitled(FILEMAN.Directory())
+            end, visible = compareVis},
+            {"Compare to Active", action = function()
+                local path = FILEMAN.FullPath()
+                CompareToFile(path, false)
+            end, visible = compareVisFile},
+    }}, "sysm/ui/Atrium.html", _T)
+
+    menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_|Favorites_sidebar|sxxx',
+        {'Compare', plane = 1, visible = function() return compareVis(true) end, {
+            {'s_cmp', separator = 1},
+            {"Compare to same named from this folder",  action = function()
+                CompareSelfTitled(FILEMAN.Directory(true))
+            end},
+    }}, "sysm/ui/Atrium.html", _T)
 
 end
 return {

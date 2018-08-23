@@ -700,6 +700,7 @@ function dolocale(s)
     end
     if trans then
         local f = io.open(props["SciteDefaultHome"]..'\\'..s)
+        if not f then print("Can't open "..props["SciteDefaultHome"]..s); return nil end
         local t = 'local _T = _GetLocale("'..s_name:gsub('\\', '\\\\')..'")\r\n'..f:read('*a')
         f:close()
         return dostring(t)

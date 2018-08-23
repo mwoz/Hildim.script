@@ -297,7 +297,7 @@ __LOCALE ={
         ["*** Bookmarks"] = "*** Закладками";
         ["Case Sensitive"] = "Учитывать регистр";
         ["Change Folder"] = "Выбор папки";
-        ["Clouse with ESC"] = "Закрывать по ESC" ;
+        ["Cloue with ESC"] = "Закрывать по ESC" ;
         ["Count"] = "Подсчитать";
         ["Count..."] = "Подсчет...";
         ["Delete All"] = "Удалить все";
@@ -340,7 +340,7 @@ __LOCALE ={
         ["Whole Word"] = "Слово целиком";
         ["Wrap around"] = "Зациклить поиск";
         ['Found an entry "'] = 'Найдено вхождение "';
-
+        ["Mark when Search"] = "Маркировать при поиске";
     };
     ['tools\\UIPlugins\\FileMan'] ={
         ["No Tab's switching"] = 'Не переключать табы',
@@ -364,11 +364,17 @@ __LOCALE ={
         ['Run'] = 'Выполнить',
         ['Switch To First Tab'] = 'Переключиться на первый таб',
         ['Switch To Previous Tab'] = 'Переключиться на предыдущий таб',
+        ['* - any character sequence\nArrow Up/Down, Ctrl+Home/End - movement through the file list'] = '* - любая последовательность символов\nArrow Up/Down, Ctrl+Home/End - движение по списку файлов',
+        ['Arrow Up/Down, Ctrl+Home/End - movement through the file list'] = 'Arrow Up/Down, Ctrl+Home/End - движение по списку файлов',
+        ['Favorites - Files and Folders'] = 'Избранное - файлы и директории',
+        ['Change Dir'] = 'Изменить директорию',
+        ['Execute'] = 'Выполнить',
     },
     ['tools\\UIPlugins\\Functions'] ={
         ['Sort By'] = 'Сортировать по',
         ['Order'] = 'порядку',
         ['Name'] = 'имени',
+        ['Characters'] = 'Символов',
         ['Show Parameters'] = 'Показывать парамтеры',
         ['Group By Type'] = 'Сгруппировать по типу',
         ['Max Size for Auto Show'] = 'Максимальный размер для автопоказа',
@@ -386,12 +392,15 @@ __LOCALE ={
         ['Alignment'] = 'Выравнивание',
         ['Substring:'] = 'Подстрока:',
         ['Position:'] = 'Позиция:',
+        ['Alignment by symbol...'] = 'Выровнять строки по символу...',
     },
     ['tools\\UIPlugins\\PositionStatus'] ={
         ['Go to...'] = 'Перейти...',
         ['Line: '] = 'Строка: ',
         ['Column: '] = 'Позиция: ',
         ['Selection: '] = 'Выделено: ',
+        ['Press Enter to go to position...'] = 'Нажмите Enter для перехода на позицию...',
+        ['(Ctrl+G) Press Enter to go to line...'] = '(Ctrl+G) Нажмите Enter для перехода на строку...',
     },
     ['tools\\UIPlugins\\FindTextOnsel'] ={
         ["Highlight the selected word throughout the text"] = "Подсветка выделенного слова по всему тексту";
@@ -399,8 +408,24 @@ __LOCALE ={
     ['tools\\UIPlugins\\Select_And_Open_Filename'] ={
         ["Select And Open Filename"] = "Выделить и открыть файл",
     },
+    ['tools\\UIPlugins\\Abbrev'] ={
+        ["Abbreviation List"] = "Список сокращений";
+        ["Save All"] = "Сохранить все";
+        ["Delte"] = "Удалить";
+        ["Change"] = "Изменить";
+        ["Create"] = "Создать";
+        ["In the main window, enter the code\nfrom [Abbrev] and press (Ctrl+B)"] = "В главном окне введите\nкод из [Abbrev] + (Ctrl+B)";
+    },
+    ['tools\\UIPlugins\\LiveSearch'] ={
+        ["Live Search"] = "Живой поиск";
+        ["Repeat search by selected word"] = "Повторить поиск по выбранному слову";
+        ['"Live" Search(Alt+F)\nArrow Up/Down - movement through the results list\nEnter - Go to search result\nEsc - exit search'] = '"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результатов\nEnter - переход к найденному\nEsc - прервать поиск';
+    },
+    ['tools\\UIPlugins\\InsertSpecialChar'] ={
+        ["Insert Special Character"] = "Вставить спецсимвол";
+    },
     ['tools\\UIPlugins\\Bookmark'] ={
-        ["Bookmark List"] = "Список закладок";
+        ["Bookmarks List"] = "Список закладок";
         ["Bookmarks"] = "Закладки";
     },
     ['tools\\Commands\\Open_Selected_Filename'] ={

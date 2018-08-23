@@ -7,6 +7,7 @@ local droppedLin = nil
 local lin0 = 10
 local onDraw_cb
 local bToolBar = false
+local hIUpCtrl
 
 local function renum()
     for i = 1,  lst_clip.numlin do
@@ -21,7 +22,7 @@ local function MarkList(i)
 end
 
 local function setClipboard(lin)
-    if lin> 0 and lin <= tonumber(lst_clip.numlin) then
+    if lin > 0 and lin <= tonumber(lst_clip.numlin) then
         local text =  iup.GetAttributeId2(lst_clip, "", lin, 2)
         local bCol = (iup.GetAttributeId2(lst_clip, "FGCOLOR", lin, 1) == colcolor)
         lst_clip.addlin = 0
@@ -41,7 +42,11 @@ local function setClipboard(lin)
         end
 
         local h = iup.GetFocus()
-        if h then h.insert= text
+        if h then h.insert = text
+        elseif findres.Focus then
+            findres:Paste()
+        elseif output.Focus then
+            output:Paste()
         else scite.MenuCommand(IDM_PASTE) end
         if onDraw_cb then onDraw_cb(text:sub(1, 200):gsub('[\n\r\t]', ' '):gsub('^ +', '')) end
 
@@ -96,6 +101,15 @@ local function init()
         droppedLin = nil;
     end
 
+    local function PassFocus()
+        if hIUpCtrl then
+            iup.SetFocus(hIUpCtrl)
+        else
+            iup.PassFocus()
+        end
+        hIUpCtrl = nil
+    end
+
     local function contextMenu(lin)
         blockReselect = true
 
@@ -117,7 +131,7 @@ local function init()
                 OnDrawClipboard(2)
                 scite.MenuCommand(IDM_PASTE)
                 blockReselect = false
-                iup.PassFocus()
+                PassFocus()
             end)},
             iup.item{title = _T"Insert Upper List via Separator", action =(function()
                 local bok, res, bside = iup.GetParam(_T'Insert via Separator',
@@ -143,7 +157,7 @@ local function init()
                     OnDrawClipboard(1)
                     scite.MenuCommand(IDM_PASTE)
                     blockReselect = false
-                    iup.PassFocus()
+                    PassFocus()
                 end
             end)},
             iup.separator{},
@@ -192,7 +206,7 @@ local function init()
                     local tclp = lpeg.Ct(lpeg.P{p + 1 * lpeg.V(1)}^1)
                     local str = lst_clip:getcell(lin, 2)
                     local t = tclp:match(str, 1)
-                    if iup.Alarm(_T"Splitting clip", _FMT(_T'Клип будет разделен на %1 фрагментов. Продолжить?', #t), _TH'Yes', _TH'No') == 1 then
+                    if iup.Alarm(_T"Splitting clip", _FMT(_T'Clip will be split into %1 fragments. Continue?', #t), _TH'Yes', _TH'No') == 1 then
                         local I, I1, S = #t, 1, -1
                         if bside == 1 then I, I1, S = 1, #t, 1 end
                         lst_clip.marked = nil
@@ -261,11 +275,11 @@ local function init()
         elseif k == iup.K_CR or k == iup.K_TAB then
             local l = tonumber(lst_clip.marked:find('1') or '0') - 1
             if l > 0 then
-                iup.PassFocus()
+                PassFocus()
                 setClipboard(l)
             end
         elseif k == iup.K_ESC then
-            iup.PassFocus()
+            PassFocus()
         elseif k == iup.K_PGDN and txt_live then
             if expd.state == 'OPEN' then
                 txt_live:valuechanged_cb()
@@ -284,7 +298,7 @@ local function init()
 
     function lst_clip:button_cb(button, pressed, x, y, status)
         if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and lst_clip.cursor == "ARROW")) then
-            iup.PassFocus(); setClipboard(math.floor(iup.ConvertXYToPos(lst_clip, x, y) / 3))
+            PassFocus(); setClipboard(math.floor(iup.ConvertXYToPos(lst_clip, x, y) / 3))
         elseif button == iup.BUTTON1 and pressed == 0 then
             droppedLin = nil; lst_clip.cursor = "ARROW"
         elseif button == iup.BUTTON3 and pressed == 0 then
@@ -475,8 +489,8 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',
-        {'Clipboard History...', cpt = _T'Clipboard History...', action = function() iup.ShowInMouse(dlg) end, key="Alt+Shift+C", image = "clipboard_list_µ"}
-    )
+        {'Clipboard History...', action = function() hIUpCtrl = iup.ShowInMouse(dlg, true) end, key = "Alt+Shift+C", image = "clipboard_list_µ"}
+    , nil, _T)
     return dlg
 end
 

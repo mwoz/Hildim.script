@@ -1,0 +1,18 @@
+return {
+["Close Incomplete Tag"] = "Закрыть незавершенный тег";
+["Convert Single Tag into Double"] = "Превратить одиночный тег в двойной";
+["Tags Highlighting"] = "Подсветка тэгов";
+["Block XSD Scheme Validation"] = "Блокировать проверку по Xsd схеме";
+["Test XPATH expression"] = "Тестировать XPath выражение";
+["Test XSLT Template"] = "Тестировать Xslt шаблон";
+["Test XSD Scheme"] = "Тестировать Xsd схему";
+["XSD Scheme Validation"] = "Проверить по Xsd схеме";
+["Sourse File"] = "Файл источника";
+["Sourse%o|File|Anoter View|"] = "Источник%o|Файл|Другое окно|";
+["Output%o|Log|New Window|"] = "Вывод%o|Лог|Новое окно|";
+["Highlight"] = "Подсветить";
+["XML - Paired Tags - Error"] = "Xml - Парные теги - ошибка";
+["XML - Paired Tags - Found"] = "Xml - Парные теги - найдено";
+["Can't highlight attribute"] = "Невозможно подсветить атрибут";
+}
+

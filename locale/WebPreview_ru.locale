@@ -1,6 +1,7 @@
 return {
 ["Referens"] = "Ссылка";
-["New Line"] = "Новая строка";
+["New Paragrafh"] = "Новый параграф";
+["Line Break"] = "Новая строка";
 ["Insert as Link"] = "Вставить как ссылку";
 ["Paragrafh"] = "Параграф";
 ["Strike"] = "Зачеркнутый";

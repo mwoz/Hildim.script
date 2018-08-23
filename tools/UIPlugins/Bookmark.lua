@@ -198,7 +198,7 @@ local function Init()
             if list_bookmarks:getcell(lin, 4) then
                 list_bookmarks.tip = list_bookmarks:getcell(lin, 2)..'\n\n File: '..list_bookmarks:getcell(lin, 3)..'\nLine:  '..(tonumber(list_bookmarks:getcell(lin, 4)) + 1)
             else
-                list_bookmarks.tip = _T'Bookmark List'
+                list_bookmarks.tip = _T'Bookmarks List'
             end
         end
     end
@@ -233,8 +233,8 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|xxxx',
-        {'Bookmarks List...', cpt = _T'Bookmark List'..'...', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
-    )
+        {'Bookmarks List', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
+    , nil, _T)
     return dlg
 end
 

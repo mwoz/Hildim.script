@@ -8,6 +8,7 @@ local clr_select = props['layout.txtinactivcolor']
 local clr_normal = props['layout.fgcolor']
 local s = class()
 local r_button
+local bListenmouseHook = false
 
 function s:Init()
     sys_KeysToMenus = {}
@@ -32,24 +33,29 @@ local function getParam(p, bDef)
     return v
 end
 
-local function GetAction(mnu, bForse)
-    iup.PassFocus()
+local function GetAction(mnu, bForse, bHotKey)
+    if not bHotKey then iup.PassFocus() end
     if bForse or getParam(mnu.active, true) then
+        local rez
         if mnu.action then
             local tp = type(mnu.action)
-            if tp == 'number' then return function() scite.MenuCommand(mnu.action) end end
-            if tp == 'string' then return assert(load('return '..mnu.action)) end
-            return mnu.action
-        elseif mnu.check_idm then
+            if tp == 'number' then rez = function() scite.MenuCommand(mnu.action) end end
+            if tp == 'string' then rez = assert(load('return '..mnu.action)) end
+            if tp == 'function' then rez = mnu.action end
+        end
+        if mnu.check_idm then
         elseif mnu.check_prop then
             return assert(load("CheckChange('"..mnu.check_prop.."', true)"))
         elseif mnu.check_iuprops then
-            return assert(load("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1,0,1)))
+            local rez2 = assert(load("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1 or _G.iuprops[mnu.check_iuprops] == true or _G.iuprops[mnu.check_iuprops] == 'ON' , 0, 1)))
+            if rez then return function() rez2(); rez() end end
+            return rez2
         elseif mnu.check_boolean then
             return assert(load("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
-        else
+        elseif not rez then
             return function() debug_prnArgs('Error in menu format!!',mnu) end
         end
+        return rez
     else
         return function() end
     end
@@ -80,12 +86,11 @@ local function r_button_state()
 end
 
 function s:PopMnu(smnu, x, y, bToolBar)
---debug_prnArgs(smnu)
-
+    bListenmouseHook = bToolBar
     local CreateMenu, CreateItems
     local bPrevSepar = false
     local bShoIcons = (_G.iuprops['menus.show.icons'] == 1)
-    CreateItems = function(m,t)
+    CreateItems = function(m, t, bPl)
         for i = 1, #m do
             local itm
             if m[i].link then itm = FindMenuItem('MainWindowMenu|'..m[i].link)
@@ -103,7 +108,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
                         end
                     elseif type(itm[2]) == 'function' then
                         if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
-                            CreateItems(itm[2](),t)
+                            CreateItems(itm[2](), t, true)
                         else
                             local t2 = itm[2]()
                             table.insert(t, iup.submenu{title = s:get_title(itm), CreateMenu(t2)})
@@ -120,7 +125,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
                         break
                     end
                 elseif itm.separator then
-                    if not bPrevSepar and i > 1 and i < #m then table.insert(t, iup.separator{}) end
+                    if not bPrevSepar and (bPl or (i > 1 and i < #m)) then table.insert(t, iup.separator{}) end
                 else --вставка пункта меню - только видимые
 
                     local titem = {title = s:get_title(itm)} --заголовок
@@ -136,7 +141,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
 
                     if itm.check_iuprops then
                         titem.radio = 'YES'
-                        if tonumber(_G.iuprops[itm.check_iuprops]) == 1 then titem.value = 'ON' end
+                        if tonumber(_G.iuprops[itm.check_iuprops]) == 1 or _G.iuprops[itm.check_iuprops] == true or _G.iuprops[itm.check_iuprops] == 'ON' then titem.value = 'ON' end
                     elseif itm.check_boolean then
                         if _G.iuprops[itm.check_boolean] then titem.value = 'ON' end
                     elseif itm.check_prop then
@@ -152,16 +157,21 @@ function s:PopMnu(smnu, x, y, bToolBar)
                     if not titem.active then --'экшны обрабатываем только для активных меню
                         titem.action = function()
                             if r_button_state() > 0 then
-                                if shell.fileexists(props['SciteDefaultHome']..'/help/HildiM.chm') then
-                                    scite.ExecuteHelp((props['SciteDefaultHome']..'/help/HildiM.chm::ui/Menues.html#'..itm[1]):to_utf8(), 0)
+                                local chm, path = "HildiM", "ui/Menues.html"
+                                if itm.hlp then
+                                    _, _, chm, path = itm.hlp:find('^([^/]*)/(.*)')
+                                end
+                                if shell.fileexists(props['SciteDefaultHome']..'/help/'..chm..'.chm') then
+                                    scite.ExecuteHelp((props['SciteDefaultHome']..'/help/'..chm..'.chm::'..path..'#'..itm[1]):to_utf8(), 0)
                                 else
-                                    local url = '"file:///'..props['SciteDefaultHome']..'/help/HildiM/ui/Menues.html#'..itm[1]..'"'
+                                    local url = '"file:///'..props['SciteDefaultHome']..'/help/'..chm..'/'..path..'#'..itm[1]..'"'
                                     print(url)
                                     shell.exec(url)
                                 end
                             else
                                 GetAction(itm)()
                             end
+                            scite.SwitchMouseHook(false) --на всякий случай
                         end
                     end
                     --debug_prnArgs(titem)
@@ -178,12 +188,8 @@ function s:PopMnu(smnu, x, y, bToolBar)
         return iup.menu(t)
     end
 
-    if bToolBar then
-        waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
-        scite.RunAsync(function() s:ContinuePopUp() end)
-    else
-        CreateMenu(smnu):popup(x,y)
-    end
+    waited_mnu, w_x, w_y = CreateMenu(smnu),x,y
+    scite.RunAsync(function() s:ContinuePopUp() end)
 end
 
 local function GetItemPos(i)
@@ -197,6 +203,7 @@ function s:OnMouseHook(x,y)
 --при движении мыши - x,y - координаты курсора
 --при нажатии кнопок влево.вправо y - -1/1, x = -70000
 --при нажатии кнопки Alt - оба параметра - -70000
+    if not bListenmouseHook then return end
     local left, top, width, height
     if x>-65536 and y>-65536 then
         for i = 1, #labels do
@@ -279,8 +286,22 @@ local function InsertItem(mnu, path, t)
     end
 end
 
-function s:InsertItem(id, path, t)
+local function prepareItems(t, helpPath, tf)
+    t.hlp = helpPath
+    if tf then t.cpt = tf(t[1]) end
+    if type(t[2]) == 'table' then
+        if tf then t[2].cpt = tf(t[2][1]) end
+        for i = 1,  #(t[2]) do
+            if type(t[2][i]) == 'table' then prepareItems(t[2][i], helpPath, tf) end
+        end
+    end
+end
+
+function s:InsertItem(id, path, t, helpPath, tf)
+
     if sys_Menus then
+        if helpPath or tf then prepareItems(t, helpPath, tf) end
+
         if id == 'MainWindowMenu' then
             InsertItem(sys_Menus[id], path, t)
         else
@@ -290,12 +311,13 @@ function s:InsertItem(id, path, t)
     end
 end
 
-function s:PostponeInsert(id, path, t)
-    table.insert(tPostponed, {id, path, t})
+function s:PostponeInsert(id, path, t, helpPath, tf)
+    table.insert(tPostponed, {id, path, t, helpPath, tf})
 end
 
 function s:DoPostponedInsert(id, path, t)
     for _, t in ipairs(tPostponed) do
+        if t[4] or t[5] then prepareItems(t[3], t[4], t[5]) end
         s:InsertItem(t[1], t[2], t[3])
     end
 end
@@ -346,7 +368,7 @@ function s:RegistryHotKeys()
 end
 
 function s:OnHotKey(cmd)
-    GetAction(FindMenuItem(sys_KeysToMenus[cmd]))()
+    GetAction(FindMenuItem(sys_KeysToMenus[cmd]), nil, true)()
 end
 
 function s:GreateMenuLabel(item, ind)
@@ -371,7 +393,8 @@ function s:GreateMenuLabel(item, ind)
     table.insert(labels, ind or (#labels + 1), l)
     return l
 end
-function s:AddMenu(item)
+function s:AddMenu(item, helpPath, tf)
+    if helpPath or tf then prepareItems(item, helpPath, tf) end
     local hMainLayout = iup.GetLayout()
     local hMainMenu = iup.GetDialogChild(hMainLayout, "Hildim_MenuBar")
     local hWinMenu = iup.GetDialogChild(hMainMenu, "menu_fill")

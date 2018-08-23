@@ -13,8 +13,8 @@ local tTwo]]
 local chLeftSide = '([%%),<>%/%=%+%-%%%*])%s*([%w%d%"])'
 local chRightSide = '([%w%d%"])%s*([<>%/%=%+%-%%%*])'
 -- local chRightSide = '([%w%d%"])%s*([%}<>%/%=%+%-&%%%*])'
-goodmark = CORE.InidcFactory('FormatVbs.ok', 'Формат VBS - ОК', INDIC_BOX, 4834854, 0)
-errmark = CORE.InidcFactory('FormatVbs.Error', 'Формат VBS - ошибка', INDIC_STRIKE, 13311, 0)
+goodmark = CORE.InidcFactory('FormatVbs.ok', 'VBS AutoFormat - ОК', INDIC_BOX, 4834854, 0)
+errmark = CORE.InidcFactory('FormatVbs.Error', 'VBS AutoFormat - Error', INDIC_STRIKE, 13311, 0)
 --local chTwoSide = '(%w)%s*([<>%/%=%+%-&%%%*])%s*(%w)'
 
 -- 3 таблицы wrdBeginIndent wrdEndIndent wrdMidleInent -  в каждой строке - таблица

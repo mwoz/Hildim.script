@@ -158,12 +158,14 @@ end
 
 function CORE.FindMarkAll(fnd, maxlines, bLive, bMark)
     CORE.ClearLiveFindMrk()
-    fnd:FindAll(maxlines, bLive, false, Iif(bMark, 10, nil), Iif(bMark, tMarks[6], nil))
+    bMark = bMark and Ctrl("chkMarkSearch").value == 'ON'
+    fnd:FindAll(maxlines, bLive, false, Iif(bMark, 10, nil), Iif(bMark , tMarks[6], nil))
 end
 
 local function FindMark_onTimer()
     CORE.ClearLiveFindMrk()
     tmr.run="NO"
+    if Ctrl("chkMarkSearch").value ~= 'ON' then return end
     if ReadSettings(true) then return end
     findSettings:MarkAll(false, tMarks[6], 10)
 end
@@ -566,7 +568,7 @@ local function kf_cb(h)
             end
             if _G.dialogs['findrepl'] then popUpFind.opacity = _G.iuprops['settings.findrepl.opacity'] or 200 end
         end}
-        tmr.run = 'YES'
+        tmr.run = "YES"
     end
 end
 
@@ -604,7 +606,8 @@ local function create_dialog_FindReplace()
       editbox = "YES",
       dropdown = "YES",
       visibleitems = "18",
-      edit_cb = onFindEdit,
+      --edit_cb = onFindEdit,
+      valuechanged_cb = function(h) onFindEdit(h, nil, h.value) end,
       k_any = (function(_,c) if c..'' == iup.K_PGUP..'' then FolderUp() return iup.IGNORE; elseif c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end; end),
     },
     containers["zPin"],
@@ -854,7 +857,7 @@ local function create_dialog_FindReplace()
     },
     fb_find{
       padding = "3x",
-      title = _T"*** Закладками",
+      title = _T"*** Bookmarks",
       flat_action = BookmarkAll,
     },
     gap = "4",
@@ -924,6 +927,10 @@ local function create_dialog_FindReplace()
               ctrl = true,
           name = "chkFindProgress", },
           iup.fill{},
+          iup.hi_toggle{
+              title = _T"Mark when Search",
+              ctrl = true,
+          name = "chkMarkSearch" },
           margin = "0x0", padding = '0x0'
       };
       iup.hbox{expand = 'HORIZONTAL',
@@ -933,7 +940,7 @@ local function create_dialog_FindReplace()
           name = "chkPassFocus", },
           iup.fill{},
           iup.hi_toggle{
-              title = _T"Clouse with ESC",
+              title = _T"Close with ESC",
               ctrl = true,
           name = "chkCloseOnESC" },
           margin = "0x0", padding = '0x0'
@@ -966,6 +973,7 @@ local function create_dialog_FindReplace()
                   dialPrev = 0
               end;
           },
+          iup.fill{},
           iup.hi_toggle{
               title = _T"When lost focus",
               name = "chkTranspFocus",
@@ -974,7 +982,7 @@ local function create_dialog_FindReplace()
                   if _G.iuprops['findrepl.win'] ~= '0' and Ctrl("chkTransparency").value == 'ON' then popUpFind.opacity = Iif(h.value == 'OFF', _G.iuprops['settings.findrepl.opacity'] or 200, 255) end
               end
           },
-          margin = "0x0", padding = '0x0'
+           expand = "HORIZONTAL", margin = "0x0", padding = '0x0'
       }},
 
       margin = "10x5",

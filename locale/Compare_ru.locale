@@ -4,17 +4,16 @@ return {
 ["Previous Difference"] = "Предыдущее различие";
 ["Comparison Color Preferences"] = "Настройки цветов сравнения";
 ["Copy Left"] = "Скопировать вправо";
-["Directory to Compare"] = "Директория для сравнения";
 ["Clear Highlighting"] = "Очистить подсветку";
 ["Color Preferences"] = "Настройки цветов";
 ["Comparison"] = "Сравнение";
-["Compare to same named from "] = "Сравнить с одноименным из...";
 ["Selecting a directory for comparison to same named"] = "Выбор директории для сравнения с одноименным";
 ["File Comparison"] = "Сравнение файлов";
 ["Add Blank Lines"] = "Добавлять пустые строки";
 ["Recompare when moved to other line"] = "Сравнивать заново при изменении строки";
 ["Use Icons"] = "Использовать иконки";
-["Compare to Other View"] = "Сравнить";
+["Compare to Other View"] = "Сравнить с другим окном";
+["Compare to Active"] = "Сравнить c активным";
 ["Identify moved lines"] = "Определять перемещенные строки";
 ["Ignore Spaces"] = "Игнорировать пробелы";
 ["Marking differences in the compared line"] = "Маркировка различий в строке сравнения";
@@ -25,5 +24,7 @@ return {
 ["Changed"] = "Измененные";
 ["Deleted"] = "Удаленные";
 ["Added"] = "Добавленные";
+["Files are identical"] = "Файлы идентичны";
 ["Lines color"] = "Цвета строк";
+["Compare to same named from this folder"] = "Сравнить с одноименным из этоой директории";
 }

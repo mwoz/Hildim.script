@@ -14,4 +14,5 @@ return {
 ["except"] = "кроме";
 ["Move Checked to Another View"] = "Переместить отмеченные на другое окно";
 ["Windows"] = "Вкладки";
+["Apply sorting to Tabs"] = "Применить сортировку к вкладкам";
 }

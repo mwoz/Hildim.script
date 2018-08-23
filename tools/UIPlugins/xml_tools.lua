@@ -20,8 +20,8 @@ local function Init()
     -- t.tag_start, t.tag_end, t.paired_start, t.paired_end  -- positions
     -- t.begin, t.finish  -- contents of tags (when copying)
     local old_current_pos
-    local blue_indic = CORE.InidcFactory('XmlTools.ok', 'Xml - Парные теги - найдено', INDIC_BOX, 4834854, 0) -- номера используемых маркеров
-    local red_indic = CORE.InidcFactory('XmlTools.Error', 'Xml - Парные теги - ошибка', INDIC_STRIKE, 13311, 0)
+    local blue_indic = CORE.InidcFactory('XmlTools.ok', _T'XML - Paired Tags - Found', INDIC_BOX, 4834854, 0) -- номера используемых маркеров
+    local red_indic = CORE.InidcFactory('XmlTools.Error', _T'XML - Paired Tags - Error', INDIC_STRIKE, 13311, 0)
     local xpath_indic = CORE.InidcFactory('XmlTools.XPath', 'Xml - Xpath', INDIC_ROUNDBOX, 14538301, 50)
 
     local bEnable, styleSpace, styleBracket, styleBracketClose = false, 0, 1, 11
@@ -271,7 +271,7 @@ local function Init()
 
             local btn_ok = iup.button{title = "Test"}
             local radio_single = iup.radio{iup.hbox{iup.toggle{title = 'SelectSingleNode', name = 'Single'}, iup.toggle{title = 'SelectNodes', name = 'All'}, } }
-            local chk_higl = iup.toggle{title = 'Подсветить', value = 'ON'}
+            local chk_higl = iup.toggle{title = _T'Highlight', value = 'ON'}
 
             iup.SetHandle("XPATH_BTN_OK", btn_ok)
             local btn_esc = iup.button  {title = "Cancel"}
@@ -295,7 +295,7 @@ local function Init()
             function btn_ok:action()
                 EditorClearMarks(xpath_indic)
                 local function selectInText(xml)
-                    if xml.nodeType == 2 then print('Невозможно подсветить атрибут'); return end
+                    if xml.nodeType == 2 then print(_T'Can not highlight attribute'); return end
 
                     while xml and xml.nodeType ~= 1 do xml = xml.parentNode end
                     local s, e = (math.tointeger(xml:getAttribute('__start')) or 0), (math.tointeger(xml:getAttribute('__end')) or 0 )
@@ -391,8 +391,8 @@ local function Init()
                 end
                 return 1
             end,
-            'Источник%o|Файл|Другое окно|\n'..
-            'Файл источника%f\n'
+            _T'Sourse%o|File|Anoter View|'..'\n'..
+            _T'Sourse File'..'%f\n'
             ,
             srcXsd,
             pathXsd
@@ -511,9 +511,9 @@ local function Init()
                 end
                 return 1
             end,
-            'Источник%o|Файл|Другое окно|\n'..
-            'Файл источника%f\n'..
-            'Вывод%o|Лог|Новое окно|\n'
+            _T'Sourse%o|File|Anoter View|'..'\n'..
+            _T'Sourse File'..'%f\n'..
+            _T'Output%o|Log|New Window|'..'\n'
             ,
             src,
             path,
@@ -690,9 +690,9 @@ local function Init()
 
     require "menuhandler"
     menuhandler:InsertItem('MainWindowMenu', 'Edit|Xml|l1',{'Xml', plane = 1,{
-            {'Close Incomplete Node', cpt = 'Закрыть незавершенную ноду', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
-            {'Close Unpaired Tag', cpt = 'Превратить одиночную ноду в двойную', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
-        }}
+            {'Close Incomplete Tag', action = CloseIncompleteTag, key = 'Ctrl+>', image = 'node_insert_µ',},
+            {'Convert Single Tag into Double', action = CloseUnbodyTag, key = 'Ctrl+Shift+>', image = 'node_insert_next_µ',},
+        }}, nil, _T
     )
 
     local function isXsd()
@@ -725,14 +725,14 @@ local function Init()
     end
     menuhandler:InsertItem('MainWindowMenu', 'Tools|s2',{'Xml',
         visible = function() return editor.LexerLanguage == 'xml' or editor.LexerLanguage == 'formenjine' end, {
-            {'Tag Highlighting', cpt = 'Подсветка тэгов', check_iuprops = 'pariedtag.on'},
-            {'BlockXsdTest', cpt = 'Блокировать проверку по Xsd схеме', action = function() XMLTOOLS.blockXsdTest = not XMLTOOLS.blockXsdTest end, check = function() return XMLTOOLS.blockXsdTest end },
+            {'Tags Highlighting', check_iuprops = 'pariedtag.on'},
+            {'Block XSD Scheme Validation', action = function() XMLTOOLS.blockXsdTest = not XMLTOOLS.blockXsdTest end, check = function() return XMLTOOLS.blockXsdTest end },
             {'s1', separator = 1},
-            {'XPath Test', cpt = 'Тестировать XPath выражение', action = XPath, },
-            {'Xslt Test', cpt = 'Тестировать Xslt шаблон', action = Xslt, active = isXslt},
-            {'Xsd Test', cpt = 'Тестировать Xsd схему', action = Xsd, active = isXsd },
-            {'Check', cpt = 'Проверить по схеме', action = CheckCurrent, },
-        }}
+            {'Test XPATH expression', action = XPath, },
+            {'Test XSLT Template', action = Xslt, active = isXslt},
+            {'Test XSD Scheme', action = Xsd, active = isXsd },
+            {'XSD Scheme Validation', action = CheckCurrent, },
+        }}, nil, _T
     )
 
 

@@ -38,7 +38,7 @@ end
 local function Init(ToolBar_obj)
     local tm = iup.timer{time=300}
 
-    txt_search = iup.text{name='livesearch_bar', expand='YES', tip='"Живой" поиск(Alt+F)\nСтрелки "вверх"/"вниз" - перемещение по списку результаов\nEnter - переход к найденному\nEsc - вернуться'}
+    txt_search = iup.list{name='livesearch_bar', expand='YES', editbox = "YES", dropdown = "YES", tip=_T'"Live" Search(Alt+F)\nArrow Up/Down - movement through the results list\nEnter - Go to search result\nEsc - exit search'}
     iup.SetAttribute(txt_search, 'HISTORIZED', "NO")
     local function Find_onTimer()
         tm.run="NO"
@@ -68,6 +68,7 @@ local function Init(ToolBar_obj)
             findres.TargetStart = a
             findres.TargetEnd = a+3
             findres:ReplaceTarget('<')
+            txt_search:SaveHist()
         end
     end)
     txt_search.k_any = (function(c, key)
@@ -84,10 +85,10 @@ local function Init(ToolBar_obj)
             CORE.ClearLiveFindMrk()
         end
     end)
-    btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip='Повторить поиск по введенному слову'}
+    btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);iup.PassFocus() end), tip=_T'Repeat search by selected word'}
 
     menuhandler:InsertItem('MainWindowMenu', 'Search|s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
-    {'Live Search', cpt = "Живой поиск", key='Alt+F', action=sidebar_Find, image = 'binocular__pencil_µ',})
+    {'Live Search', key = 'Alt+F', action = sidebar_Find, image = 'binocular__pencil_µ',}, "hildim/ui/livesearch.html", _T)
 
     return {
         handle = iup.hbox{

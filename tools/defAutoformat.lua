@@ -242,6 +242,8 @@ AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
         prevFold = nil
     end
 end)
+
+_G.g_session['custom.autoformat.lexers'][SCLEX_MSSQL] = true
 local function OnSwitchFile_local()
     CurMap = stylesMap[editor_LexerLanguage()] or stylesMap.default
     curLine = nil

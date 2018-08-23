@@ -51,10 +51,6 @@ function FILEMAN.FullPath()
     local lin = ld.marked:sub(2):find("1")
     return (current_path..ld:getcell(lin, 2)):gsub('\\%.%.', '')
 end
-function FILEMAN.IsDirectory()
-    local lin = list_dir.marked:sub(2):find("1")
-    return (list_dir:getcell(lin, 4) or '') == 'd'
-end
 
 function FILEMAN.RelativePath(sep)
     local lin = list_dir.marked:sub(2):find("1")
@@ -182,6 +178,20 @@ local function FileMan_GetSelectedItem(idx)
     if idx == nil then idx = l end
 	if idx == -1 then return '' end
 	return list_dir:getcell(idx, 2), list_dir:getcell(idx, 4), tonumber(list_dir:getcell(idx, 3))
+end
+
+function FILEMAN.Directory(bFavorit)
+    if bFavorit then
+        local idx = list_getvaluenum(list_favorites)
+        if idx == null then return nil end
+        local path = list_favorites:getcell(idx , 3)
+        if path:gsub('.+\\', '') ~= '' then return nil end
+        return path
+    else
+        if not list_dir.marked then return false end
+        local lin = list_dir.marked:sub(2):find("1")
+        return Iif((list_dir:getcell(lin, 4) or '') == 'd', current_path..FileMan_GetSelectedItem()..'\\', nil)
+    end
 end
 
 local function FileMan_ChangeDir()
@@ -553,34 +563,53 @@ local function OnSwitch(bForse, bRelist)
     end
 end
 
-local function memoNav(key)
-    if key == iup.K_DOWN then  --down
+local function memoNav(h, key)
+    local deltaUpDown = Iif(h == list_dir, 0, 1)
+    if key == iup.K_DOWN then --down
         local sel = 1
         if list_dir.marked then sel = list_dir.marked:find('1') end
         sel = sel - 1
         if sel < list_dir.count - 1 then
             iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 0)
-            iup.SetAttribute(list_dir, 'MARK'..(sel+1)..':0', 1)
-            list_dir.focus_cell = (sel + 1)..":1"
+            iup.SetAttribute(list_dir, 'MARK'..(sel + 1)..':0', 1)
+            list_dir.focus_cell = (sel + deltaUpDown)..":1"
             list_dir.show = (sel + 2)..':*'
             list_dir.redraw = "ALL"
         end
-        return -1
-    elseif key == iup.K_UP then  --up
+        return - 1
+    elseif key == iup.K_UP then --up
         local sel = list_dir.marked:find('1')
         if sel == nil then sel = list_dir.count + 2 end
         sel = sel - 1
         if sel > 1 then
             iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 0)
-            iup.SetAttribute(list_dir, 'MARK'..(sel-1)..':0', 1)
-            list_dir.focus_cell = (sel - 1)..":1"
+            iup.SetAttribute(list_dir, 'MARK'..(sel - 1)..':0', 1)
+            list_dir.focus_cell = (sel - deltaUpDown)..":1"
             list_dir.show = (sel - 2)..':*'
             list_dir.redraw = "ALL"
         end
-        return -1
+        return - 1
+    elseif (key == iup.K_HOME and deltaUpDown == 0) or iup.XkeyCtrl(iup.K_HOME) == key then --up
+        local sel = list_dir.marked:find('1')
+        if sel ~= nil then iup.SetAttribute(list_dir, 'MARK'..(sel - 1)..':0', 0) end
+        sel = 2
+        iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 1)
+        list_dir.focus_cell = (sel)..":1"
+        list_dir.redraw = "ALL"
+        list_dir.show = (sel)..':*'
+        return - 1
+    elseif (key == iup.K_END and deltaUpDown == 0) or iup.XkeyCtrl(iup.K_END)==key then --up
+        local sel = list_dir.marked:find('1')
+        if sel ~= nil then iup.SetAttribute(list_dir, 'MARK'..(sel - 1)..':0', 0) end
+        sel = list_dir.count - 1
+        iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 1)
+        list_dir.focus_cell = (sel)..":1"
+        list_dir.show = (sel)..':*'
+        list_dir.redraw = "ALL"
+        return - 1
     elseif key == iup.K_CR then
         if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
-            current_path = memo_path.value:gsub('[\\/][^\\/]*$','')..'\\'
+            current_path = memo_path.value:gsub('[\\/][^\\/]*$', '')..'\\'
             FileMan_OpenItem()
             memo_path.caretpos = memo_path.count
         end
@@ -591,6 +620,7 @@ local function memoNav(key)
 end
 
 local function GetReadOnly()
+    if not list_dir.marked then return false end
     local lin = list_dir.marked:sub(2):find("1")
     return (tonumber(list_dir:getcell(lin, 3) or 0) & 1) == 1
 end
@@ -636,27 +666,27 @@ local function FileManTab_Init(h)
         end
     end)
 
-    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
         {'Fileman_sidebar', plane = 1,{
-            {"Change Dir", cpt = _T"Change Folder", action = FileMan_ChangeDir},
-            {"Delete", cpt = _T"Delete", action = FileMan_Delete},
-            {"Rename", cpt = _T"Rename", action = FileMan_Rename},
+            {"Change Dir", action = FileMan_ChangeDir},
+            {"Delete", action = FileMan_Delete},
+            {"Rename", action = FileMan_Rename},
             {'s_OpenwithHildiM', separator = 1},
-            {"Open with HildiM", cpt = _T"Open with HildiM", action = FileMan_OpenSelectedItems},
-            {"Execute", cpt = _T"Run", action =(function() FileMan_FileExec(nil) end)},
+            {"Open with HildiM", action = FileMan_OpenSelectedItems},
+            {"Execute", action =(function() FileMan_FileExec(nil) end)},
             {'s_AddtoFavorites', separator = 1},
-            {"Add to Favorites", cpt = _T"Add to Favorites", action = Favorites_AddFile},
+            {"Add to Favorites", action = Favorites_AddFile},
             {'s_ReadOnly', separator = 1},
-            {"Read Only", cpt = _T"Read Only", action = FileMan_ChangeReadOnly, check = GetReadOnly},
-            {'When open file', cpt = _T"After File Open",{
-                {"Stay Here", cpt = _T"No Tab's switching", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF'"},
-                {"Restore First Tab", cpt = _T'Switch To First Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1'"},
-                {"Restore Prev. Tab", cpt = _T'Switch To Previous Tab', action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON'"},
+            {"Read Only", action = FileMan_ChangeReadOnly, check = GetReadOnly},
+            {'After File Open', { radio = 1,
+                {"No Tab's switching", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'OFF' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'OFF'"},
+                {"Switch To First Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = '1' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1'"},
+                {"Switch To Previous Tab", action = function() _G.iuprops['sidebarfileman.restoretab'] = 'ON' end, check = "(_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON'"},
             }},
-            {"Insert Relative Path", cpt = _T"Insert Relative Path", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
-    }})
+            {"Insert Relative Path", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
+    }}, "hildim/ui/fileman.html", _T)
 
-    list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(key) end)
+    list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(h, key) end)
     list_dir.value_edit_cb = FileMan_DoRename
     list_dir.edition_cb = FileMan_CheckRename
     iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')
@@ -671,7 +701,7 @@ local function FileManTab_Init(h)
     list_favorites.colresize_cb = list_favorites.FitColumns(3, true, 1)
     list_favorites.tips_cb = (function(h, x, y)
         local l = iup.TextConvertPosToLinCol(h, iup.ConvertXYToPos(h, x, y))
-        if l == 0 then h.tip = 'Избранное - файлы и директории'
+        if l == 0 then h.tip = _T'Favorites - Files and Folders'
         else h.tip = iup.GetAttributeId2(h, '', l, 3)
         end
     end)
@@ -691,36 +721,45 @@ local function FileManTab_Init(h)
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
             iup.SetAttribute(list_dir, 'MARK'..col..':0', 1)
-            local mnu = iup.menu
-            {
-              iup.item{title = _T"Add Current File", action = Favorites_AddCurrentBuffer},
-              iup.item{title = _T"Delete from Favorites", action = Favorites_DeleteItem},
-              iup.item{title = _T"Rename", action = Favorites_Rename},
-            }:popup(iup.MOUSEPOS,iup.MOUSEPOS)
+            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Favorites_sidebar')
         end
     end)
+
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
+        {'Favorites_sidebar', plane = 1,{
+            {"Add Current File", action = Favorites_AddCurrentBuffer},
+            {"Delete from Favorites", action = Favorites_DeleteItem},
+            {"Rename", action = Favorites_Rename},
+    }}, "hildim/ui/fileman.html", _T)
+
+
+
     split_s = iup.split{iup.backgroundbox{list_dir, bgcolor = iup.GetLayout().txtbgcolor}, iup.backgroundbox{list_favorites, bgcolor = iup.GetLayout().txtbgcolor}, orientation="HORIZONTAL", name='splitFileMan',layoutdrag = 'NO',color = props['layout.splittercolor'], showgrip = 'LINES'}
-    memo_path = iup.text{expand='YES'}
+    memo_path = iup.text{expand='YES', tip = _T'Arrow Up/Down, Ctrl+Home/End - movement through the file list'}
     memo_path.action = (function(h,s,new_value)
         if new_value:find('^%w:[\\/]') or new_value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
             FileMan_ListFillDir(new_value)
         end
     end)
     memo_path.getfocus_cb = (function(h)
-        iup.SetAttribute(list_dir, 'MARK1:0', 1)
-        list_dir.redraw = "1:1"
+        local sel = list_dir.marked:find('1')
+        if sel ~= nil then iup.SetAttribute(list_dir, 'MARK'..(sel - 1)..':0', 0) end
+        sel = 1
+        iup.SetAttribute(list_dir, 'MARK'..(sel)..':0', 1)
+        list_dir.focus_cell = (sel)..":1"
+        list_dir.redraw = "ALL"
     end)
 
     memo_path.k_any=(function(h,k)
-        return memoNav(k)
+        return memoNav(h, k)
     end)
 
-    memo_mask = iup.text{expand='YES',tip='* - любая последовательность...'}
+    memo_mask = iup.text{expand = 'YES', tip = _T'* - any character sequence\nArrow Up/Down, Ctrl+Home/End - movement through the file list'}
     memo_mask.action = (function(h,s,new_value)
         FileMan_ListFILLByMask(new_value)
     end)
     memo_mask.k_any=(function(h,k)
-        return memoNav(k)
+        return memoNav(h, k)
     end)
     chkByTime = iup.hi_toggle{title=_T"Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", flat_action=FileMan_ToggleSort}
     -- memo_mask.killfocus_cb = (function(h)

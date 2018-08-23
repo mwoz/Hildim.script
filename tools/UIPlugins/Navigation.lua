@@ -143,11 +143,11 @@ local function internal_Init()
 
     iup.drop_cb_to_list(list_navigation, Navigation_Go)
     menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
-        {'Navigation', cpt = _T'Navigation', plane = 1,{
+        {'Navigation', plane = 1,{
             {'s_Navigation', separator = 1,},
-            {'Navigate Backward', cpt = _T'Navigation: Backward', action = function() walk_Navigation(true) end, key = 'Alt+<', active = function() return currentItem ~= 0 and currentItem < tonumber(list_navigation.numlin) end, image = 'navigation_180_µ',},
-            {'Navigate Forward', cpt = _T'Navigation: Forward', action = function() walk_Navigation(false) end, key = 'Alt+>', active = function() return currentItem > 1 end, image = 'navigation_µ',},
-        }}
+            {'Navigation: Backward', action = function() walk_Navigation(true) end, key = 'Alt+<', active = function() return currentItem ~= 0 and currentItem < tonumber(list_navigation.numlin) end, image = 'navigation_180_µ',},
+            {'Navigation: Forward', action = function() walk_Navigation(false) end, key = 'Alt+>', active = function() return currentItem > 1 end, image = 'navigation_µ',},
+        }}, "hildim/ui/navigation.html", _T
     )
     AddEventHandler("OnMenuCommand", function(msg) if msg == 2316 then OnNavigation("Home") elseif msg == 2318 then OnNavigation("End") end end)
     AddEventHandler("OnNavigation", OnNavigate)
@@ -185,8 +185,8 @@ local function createDlg()
         end
     end
     menuhandler:InsertItem('MainWindowMenu', 'Search|s1',
-        {'Navigation History...', cpt = _T'Navigation History...', action = function() iup.ShowInMouse(dlg) end, key = "Alt+Shift+N"}
-    )
+        {'Navigation History...', action = function() iup.ShowInMouse(dlg) end, key = "Alt+Shift+N"}
+    , "hildim/ui/navigation.html", _T)
     return dlg
 end
 
