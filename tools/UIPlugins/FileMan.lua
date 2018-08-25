@@ -532,6 +532,7 @@ function FILEMAN.OpenFolder(fname)
 end
 
 local function OnSwitch(bForse, bRelist)
+    if zPath.valuepos == '1' then return end
     if prev_filename:upper() == props['FilePath']:upper() then return end
     prev_filename = ''
     if bForse or (_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.fileman.id) then
@@ -651,7 +652,7 @@ local function FileManTab_Init(h)
         local l = (tonumber(list_dir:getcell(lin, 3) or 0) & 1)
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
-            if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
+            if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('^[\\/][\\/]%w+') then
                 if list_dir:getcell(1, 2) ~= '..' then
                     current_path = memo_path.value:gsub('[\\/][^\\/]*$','')..'\\'
                 end
