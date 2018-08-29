@@ -43,7 +43,7 @@ local function InitWndDialog()
             for i = 0, maxN do
                 if not side or side == scite.buffers.GetBufferSide(i) then
                     local row = {}
-                    local _, _, p, n = scite.buffers.NameAt(i):from_utf8():find('(.-)([^\\]*)$')
+                    local _, _, p, n = scite.buffers.NameAt(i):find('(.-)([^\\]*)$')
                     if cmb_Sort.value == '1' then
                         row.order = i
                     elseif cmb_Sort.value == '2' then
@@ -239,7 +239,7 @@ local function InitWndDialog()
             iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end},
         }, barsize = 0, state = 'CLOSE', name = 'bufferslist_expander'}
         cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0',visibleitems=10, expand = 'NO', propagatefocus = 'YES', action = function() fillWindow(curSide) end, tip = _T'List Sorting'}
-        iup.SetAttribute(cmb_Sort, 1, _TH"Нет")
+        iup.SetAttribute(cmb_Sort, 1, _TH"No")
         iup.SetAttribute(cmb_Sort, 2, _T"Name")
         iup.SetAttribute(cmb_Sort, 3, _T"Extension")
         iup.SetAttribute(cmb_Sort, 4, _T"Path")

@@ -1,18 +1,18 @@
 return {
-["Close Incomplete Tag"] = "Закрыть незавершенный тег";
-["Convert Single Tag into Double"] = "Превратить одиночный тег в двойной";
-["Tags Highlighting"] = "Подсветка тэгов";
-["Block XSD Scheme Validation"] = "Блокировать проверку по Xsd схеме";
-["Test XPATH expression"] = "Тестировать XPath выражение";
-["Test XSLT Template"] = "Тестировать Xslt шаблон";
-["Test XSD Scheme"] = "Тестировать Xsd схему";
-["XSD Scheme Validation"] = "Проверить по Xsd схеме";
-["Sourse File"] = "Файл источника";
-["Sourse%o|File|Anoter View|"] = "Источник%o|Файл|Другое окно|";
-["Output%o|Log|New Window|"] = "Вывод%o|Лог|Новое окно|";
-["Highlight"] = "Подсветить";
-["XML - Paired Tags - Error"] = "Xml - Парные теги - ошибка";
-["XML - Paired Tags - Found"] = "Xml - Парные теги - найдено";
-["Can't highlight attribute"] = "Невозможно подсветить атрибут";
+["Close Incomplete Tag"] = "Р—Р°РєСЂС‹С‚СЊ РЅРµР·Р°РІРµСЂС€РµРЅРЅС‹Р№ С‚РµРі";
+["Convert Single Tag into Double"] = "РџСЂРµРІСЂР°С‚РёС‚СЊ РѕРґРёРЅРѕС‡РЅС‹Р№ С‚РµРі РІ РґРІРѕР№РЅРѕР№";
+["Tags Highlighting"] = "РџРѕРґСЃРІРµС‚РєР° С‚СЌРіРѕРІ";
+["Block XSD Scheme Validation"] = "Р‘Р»РѕРєРёСЂРѕРІР°С‚СЊ РїСЂРѕРІРµСЂРєСѓ РїРѕ Xsd СЃС…РµРјРµ";
+["Test XPATH expression"] = "РўРµСЃС‚РёСЂРѕРІР°С‚СЊ XPath РІС‹СЂР°Р¶РµРЅРёРµ";
+["Test XSLT Template"] = "РўРµСЃС‚РёСЂРѕРІР°С‚СЊ Xslt С€Р°Р±Р»РѕРЅ";
+["Test XSD Scheme"] = "РўРµСЃС‚РёСЂРѕРІР°С‚СЊ Xsd СЃС…РµРјСѓ";
+["XSD Scheme Validation"] = "РџСЂРѕРІРµСЂРёС‚СЊ РїРѕ Xsd СЃС…РµРјРµ";
+["Sourse File"] = "Р¤Р°Р№Р» РёСЃС‚РѕС‡РЅРёРєР°";
+["Sourse%o|File|Anoter View|"] = "РСЃС‚РѕС‡РЅРёРє%o|Р¤Р°Р№Р»|Р”СЂСѓРіРѕРµ РѕРєРЅРѕ|";
+["Output%o|Log|New Window|"] = "Р’С‹РІРѕРґ%o|Р›РѕРі|РќРѕРІРѕРµ РѕРєРЅРѕ|";
+["Highlight"] = "РџРѕРґСЃРІРµС‚РёС‚СЊ";
+["XML - Paired Tags - Error"] = "Xml - РџР°СЂРЅС‹Рµ С‚РµРіРё - РѕС€РёР±РєР°";
+["XML - Paired Tags - Found"] = "Xml - РџР°СЂРЅС‹Рµ С‚РµРіРё - РЅР°Р№РґРµРЅРѕ";
+["Can't highlight attribute"] = "РќРµРІРѕР·РјРѕР¶РЅРѕ РїРѕРґСЃРІРµС‚РёС‚СЊ Р°С‚СЂРёР±СѓС‚";
 }
 

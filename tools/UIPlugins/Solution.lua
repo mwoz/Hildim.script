@@ -99,9 +99,9 @@ end
 
 local function AddCurentIn(val)
    if shell.fileexists(props["FilePath"]) then
-       iup.SetAttributeId(tree_sol, "ADDLEAF", val, props['FileNameExt']:from_utf8())
+       iup.SetAttributeId(tree_sol, "ADDLEAF", val, props['FileNameExt'])
        iup.SetAttributeId(tree_sol, "IMAGE", val + 1, GetExtImage(props['FileNameExt']))
-       iup.TreeSetUserId(tree_sol, val + 1, props['FilePath']:from_utf8())
+       iup.TreeSetUserId(tree_sol, val + 1, props['FilePath'])
        is_chanjed = true
    else
        iup.Alarm(_T"Adding a file to Project", _T"File not yet saved to disk", "OK"
@@ -138,7 +138,7 @@ local function OpenFile(filename)
     if string.find(',exe,lnk,doc,xsl,pdf,chm,', ','..(ext or ''):lower()..',') then
         exec(filename)
     else
-        scite.Open(filename:to_utf8())
+        scite.Open(filename)
     end
 end
 
@@ -149,7 +149,7 @@ local function OpenAll()
             local path = iup.TreeGetUserId(tree_sol, i)
             local _,_,ext = path:find('([^%.]*)$')
             if not string.find(',exe,lnk,doc,xsl,pdf,chm,', ','..(ext or ''):lower()..',') then
-                scite.Open(path:to_utf8())
+                scite.Open(path)
             end
         end
     end
@@ -348,7 +348,7 @@ local function Solution_Init(h)
         local maxN = scite.buffers.GetCount() - 1
         for i = 0, maxN do
             if tbl[i] then
-                local pth = scite.buffers.NameAt(i):from_utf8()
+                local pth = scite.buffers.NameAt(i)
                 if shell.fileexists(pth) then
                     local _, _, fnExt = pth:find('([^\\]*)$')
 

@@ -16,7 +16,7 @@ if shell.fileexists(file) then
         text = pF:read('*a')
         pF:close()
     end
-    local bSuc, tMsg = pcall(dostring, text:from_utf8())
+    local bSuc, tMsg = pcall(dostring, text)
 
     if bRepit and (_G.iuprops['_VERSION'] or 1) ~= 3 then
         bRepit = false
@@ -108,7 +108,7 @@ function rfl:GetMenu()
     local t = {}
     local function OpenMenu(i)
         return function()
-            scite.Open(self.data.lst[i]:to_utf8())
+            scite.Open(self.data.lst[i])
         end
     end
 
@@ -120,7 +120,7 @@ function rfl:GetMenu()
     for i = 1, cnt do
         local bSet = true
         for j = 0,maxN do
-            if ts[i] == scite.buffers.NameAt(j):from_utf8() then
+            if ts[i] == scite.buffers.NameAt(j) then
                 bSet = false
                 break
             end
@@ -129,7 +129,8 @@ function rfl:GetMenu()
             local l = {}
             local s = ''
             if k < 11 then s = '&'..k..'.' end
-            l[1] = s..ts[i]
+            l[1] = s..ts[i] --:to_utf8()
+            --print(ts[i])
             if ((_G.iuprops['resent.files.list.pathafter'] or 1) == 1) then
                 l[1] = l[1]:gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
             end
@@ -139,7 +140,7 @@ function rfl:GetMenu()
         end
     end
     table.insert(t,{'s0', separator = 1})
-    table.insert(t,{'List Settings', cpt = "Свойства списка", action = function()
+    table.insert(t,{_TH'List Settings', action = function()
         local res, loc, len, pathAfter, bClear = iup.GetParam(_TH'Recent List Settings',
             nil,
             _TH"Location in File menu: %o|Submenu|Bottom|\n"..
@@ -331,7 +332,7 @@ local function SaveIup()
     if pcall(io.output, file) then
         _G.iuprops['_VERSION'] = 3
         local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
-        io.write(s:to_utf8())
+        io.write(s)
     else
         iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!", "Ok")
     end
@@ -373,9 +374,9 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
 
     local maxN = scite.buffers.GetCount() - 1
     for i = 0,maxN do
-        local pth = scite.buffers.NameAt(i):from_utf8()
+        local pth = scite.buffers.NameAt(i)
         local _,_,fnExt = pth:find('([^\\]*)$')
-        if not scite.buffers.SavedAt(i) and MastClose(i) and (cmd ~= 9134 or pth:find('Безымянный')) and not fnExt:find('^%^') then
+        if not scite.buffers.SavedAt(i) and MastClose(i) and (cmd ~= 9134 or pth:find(_TH'Untitled')) and not fnExt:find('^%^') then
             msg = msg..pth:gsub('(.+)[\\]([^\\]*)$', '%2(%1)')..'\n'
             table.insert(notSaved, i)
         end
@@ -383,8 +384,8 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
 
     local result = 2
     if msg ~= '' then
-        msg = msg..'Сохранить все?'
-        result = tonumber(iup.Alarm('Некоторые файлы не сохранены:', msg, 'Да', 'Нет', 'Отмена'))
+        msg = msg.._TH'Save all?'
+        result = tonumber(iup.Alarm(_TH'Some files are not saved:', msg, _TH'Yes', _TH'No', _TH'Cancel'))
         --result = shell.msgbox(msg, "Close", 3) --YESNOCANCEL Yes - 6, NO - 7 CANCEL - 2
         if result == 3 then return true end
         if result == 1 then
@@ -413,9 +414,9 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     local tblBuff = {lst = {}, pos = {}, layouts = {}, bmk = {}, enc = {}}
     local cloused = {}
     DoForBuffers(function(i)
-        if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:from_utf8():find('Безымянный') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
+        if i and MastClose(i) and (cmd ~= 9134 or ((props['FilePath']:find(_TH'Untitled') or props['FileNameExt']:find('^%^')) and editor.Modify)) then
             editor:SetSavePoint()
-            if not props['FileNameExt']:from_utf8():find('Безымянный') and not props['FileNameExt']:find('^%^') then
+            if not props['FileNameExt']:find(_TH'Untitled') and not props['FileNameExt']:find('^%^') then
                 if not cloned[props['FilePath']] then
                     local pref = ''
                     if scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 1 then
@@ -425,7 +426,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
                     if scite.ActiveEditor() == 1 then
                         pref = pref..'>'
                     end
-                    table.insert(tblBuff.lst, pref..props['FilePath']:from_utf8())
+                    table.insert(tblBuff.lst, pref..props['FilePath'])
                     table.insert(tblBuff.pos, editor.FirstVisibleLine)
                     table.insert(tblBuff.layouts, SaveLayOut())
                     table.insert(tblBuff.bmk, pref..iup.GetBookmarkLst())
@@ -433,7 +434,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
                     nf = true
                     table.insert(cloused, pref..props['FilePath'])
                     if bAddToRecent then
-                        iuprops['resent.files.list']:ins(props['FilePath']:from_utf8(), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
+                        iuprops['resent.files.list']:ins(props['FilePath'], editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
                     end
                 end
             else
@@ -863,7 +864,7 @@ AddEventHandler("OnClose", function(source)
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8()) then return end
     end
-    iuprops['resent.files.list']:ins(source:from_utf8(), editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
+    iuprops['resent.files.list']:ins(source, editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
     if scite.buffers.GetCount() == 1 and editor.ReadOnly then scite.MenuCommand(IDM_READONLY) end
 end)
 
@@ -1098,7 +1099,7 @@ iup.list = function(t)
     function cmb:FillByDir(pathmask, strSel)
         local current_path = props["sys.calcsybase.dir"]..pathmask
 
-        local files = shell.findfiles(current_path)
+        local files = scite.findfiles(current_path)
         if not files then return end
         table.sort(files, function(a, b) return a.name:lower() < b.name:lower() end)
         if files then
@@ -1463,16 +1464,16 @@ iup.scitedetachbox = function(t)
     end
 
     local tSub = {radio = 1,
-        {'Attached', cpt = 'Закреплено', action = cmd_Attach, check = function() return get_scId() == "0" end,},
-        {'Pop Up', cpt = 'Всплывающее окно', action = cmd_PopUp, check = function() return get_scId() == "1" end, },
-        {'Hidden', cpt = 'Скрыто', action = cmd_Hide, check = function() return get_scId() == "2" end },
+        {'Attached', action = cmd_Attach, check = function() return get_scId() == "0" end,},
+        {'Pop Up', action = cmd_PopUp, check = function() return get_scId() == "1" end, },
+        {'Hidden', action = cmd_Hide, check = function() return get_scId() == "2" end },
         {'s1', separator = 1},
-        {'Show/Hide', cpt = 'Скрыть/Показать', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
+        {'Show/Hide', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
     }
 
     menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, cpt = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
-    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', cpt = 'Вид', visible = t.MenuVisibleEx, tSub}) end
+    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', visible = t.MenuVisibleEx, tSub}) end
 
     return dtb
 end
@@ -1757,7 +1758,7 @@ local function SaveIuprops_local(filename)
             end
         end
     end
-    table.insert(t, '_G.iuprops["_VERSION"] = 2')
+    table.insert(t, '_G.iuprops["_VERSION"] = 3')
 
 
  	if pcall(io.output, filename) then
@@ -1783,7 +1784,7 @@ end
 
 iup.ConfigList = function()
     if not mnu_configs then
-        local t = (shell.findfiles(props["scite.userhome"].."\\*.config") or {})
+        local t = (scite.findfiles(props["scite.userhome"].."\\*.config") or {})
         mnu_configs = {}
         local mnu_i
         for i = 1,  #t do
@@ -1792,7 +1793,7 @@ iup.ConfigList = function()
         end
         mnu_i = {'s1', separator = 1}
         table.insert(mnu_configs, mnu_i)
-        mnu_i = {'Load...', cpt = 'Загрузить...', action=LoadIuprops, image = 'folder_open_document_µ'}
+        mnu_i = {'Load...', action = LoadIuprops, image = 'folder_open_document_µ'}
         table.insert(mnu_configs, mnu_i)
     end
     return mnu_configs

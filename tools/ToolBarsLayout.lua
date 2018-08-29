@@ -62,7 +62,7 @@ local function Show()
     local function onTip(h, x, y)
         local l = iup.ConvertXYToPos(h, x, y)
         local t = tPlugins[h:GetUserId(l)]
-        if t then h.tip = t.description
+        if t then h.tip = (t.description or ''):to_utf8()
         else h.tip = "" end
     end
 
@@ -220,7 +220,7 @@ local function Show()
 
     tree_right:SetUserId(0, '')
 
-    local table_dir = shell.findfiles(defpath..'*.lua')
+    local table_dir = scite.findfiles(defpath..'*.lua')
 
     local j = 0
     local function RestoreTree(h, tbl)
@@ -249,7 +249,7 @@ local function Show()
                 if bFound then
                     local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
                     if pI then tPlugins[pname] = pI end
-                    iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
+                    iup.SetAttributeId(h, "ADDLEAF", k, pI.title:to_utf8())
                     k = k + 1
                     h:SetUserId(k, pname)
                 end
@@ -265,7 +265,7 @@ local function Show()
             if type(pI) == 'table'then
                 if pI then tPlugins[table_dir[i].name] = pI end
                 if pI and pI.toolbar then
-                    iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
+                    iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title:to_utf8())
                     j = j + 1
                     tree_plugins:SetUserId(j, table_dir[i].name)
                     if CheckInstall(table_dir[i].name, false) then

@@ -657,9 +657,9 @@ local function Init()
 
             txtXml = processXslt(txtXml, txtXslt)
         end
-        txtXml = txtXml:gsub('>%s+</Field_', '></Field_')
+        txtXml = (txtXml or ''):gsub('>%s+</Field_', '></Field_')
 
-         return processXsd(txtXml, pathXSD)
+        return processXsd(txtXml, pathXSD)
     end
 
     local function CheckCurrent()

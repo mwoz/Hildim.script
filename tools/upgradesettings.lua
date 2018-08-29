@@ -97,7 +97,7 @@ local function ConvertBuffers(tMsg)
 end
 
 local function Run(a, b)
-    local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.config")
+    local files = scite.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.config")
     local version = (_G.iuprops['_VERSION'] or 1)
 
     if version < 2 then
@@ -135,7 +135,7 @@ local function Run(a, b)
             end
             ::continue1::
         end
-        local files = shell.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.fileset")
+        local files = scite.findfiles(props["SciteDefaultHome"].."\\data\\home\\*.fileset")
 
         for i, filenameT in ipairs(files or {}) do
             local f = io.open(props['SciteUserHome']..'\\'..filenameT.name)

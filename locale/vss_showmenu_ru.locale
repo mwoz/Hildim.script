@@ -1,15 +1,15 @@
 return {
 
-["Show History"] = "Показать историю";
-["Show Differences by HildiM"] = "Показать различия(в редакторе)";
-["Show Differences"] = "Показать различия";
-["Get Latest Version"] = "Получить последнюю версию";
-["Check Out"] = "Захватить";
-["Check In"] = "Отпустить";
-["Undo Check Out"] = "Отменить захват";
-["Add to Project"] = "Добавить в проект";
-["File differs from Source Safe\nReplace an existing file?"] = "Файл отличается от Source Safe.\nЗаменить существующий файл?";
-["Request Comment"] = "Запрашивать комментарий";
-["Comment"] = "Комментарий";
-["Text"] = "Текст";
+["Show History"] = "РџРѕРєР°Р·Р°С‚СЊ РёСЃС‚РѕСЂРёСЋ";
+["Show Differences by HildiM"] = "РџРѕРєР°Р·Р°С‚СЊ СЂР°Р·Р»РёС‡РёСЏ(РІ СЂРµРґР°РєС‚РѕСЂРµ)";
+["Show Differences"] = "РџРѕРєР°Р·Р°С‚СЊ СЂР°Р·Р»РёС‡РёСЏ";
+["Get Latest Version"] = "РџРѕР»СѓС‡РёС‚СЊ РїРѕСЃР»РµРґРЅСЋСЋ РІРµСЂСЃРёСЋ";
+["Check Out"] = "Р—Р°С…РІР°С‚РёС‚СЊ";
+["Check In"] = "РћС‚РїСѓСЃС‚РёС‚СЊ";
+["Undo Check Out"] = "РћС‚РјРµРЅРёС‚СЊ Р·Р°С…РІР°С‚";
+["Add to Project"] = "Р”РѕР±Р°РІРёС‚СЊ РІ РїСЂРѕРµРєС‚";
+["File differs from Source Safe\nReplace an existing file?"] = "Р¤Р°Р№Р» РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ Source Safe.\nР—Р°РјРµРЅРёС‚СЊ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С„Р°Р№Р»?";
+["Request Comment"] = "Р—Р°РїСЂР°С€РёРІР°С‚СЊ РєРѕРјРјРµРЅС‚Р°СЂРёР№";
+["Comment"] = "РљРѕРјРјРµРЅС‚Р°СЂРёР№";
+["Text"] = "РўРµРєСЃС‚";
 }

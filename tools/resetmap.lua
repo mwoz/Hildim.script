@@ -44,7 +44,7 @@ end
 
 local function dir(strPath)
     local p = strPath
-    local files = shell.findfiles(p.."*")
+    local files = scite.findfiles(p.."*")
     if not files then return end
     if #files < 3 then return end
 

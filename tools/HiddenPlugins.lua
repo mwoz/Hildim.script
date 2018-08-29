@@ -43,7 +43,7 @@ local function Run(flag)
         local function onTip(h, x, y)
             local l = iup.ConvertXYToPos(h, x, y)
             local t = tPlugins[h:GetUserId(l)]
-            if t then h.tip = t.description
+            if t then h.tip = (t.description or ''):to_utf8()
             else h.tip = "" end
         end
 
@@ -179,7 +179,7 @@ local function Run(flag)
 
         tree_right:SetUserId(0, '')
 
-        local table_dir = shell.findfiles(defpath..'*.lua')
+        local table_dir = scite.findfiles(defpath..'*.lua')
 
         local j = 0
         local function RestoreTree(h, tbl)
@@ -201,7 +201,7 @@ local function Run(flag)
                     local r, err = pcall( function()
                         local pI = dofile(defpath..p)
                         if pI then tPlugins[p] = pI end
-                        iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
+                        iup.SetAttributeId(h, "ADDLEAF", k, pI.title:to_utf8())
                         k = k + 1
                         h:SetUserId(k, p)
                     end)
@@ -218,7 +218,7 @@ local function Run(flag)
                     if pI then tPlugins[table_dir[i].name] = pI end
 
                     if pI and fCond(pI) then
-                        iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title)
+                        iup.SetAttributeId(tree_plugins, "ADDLEAF", j, pI.title:to_utf8())
                         j = j + 1
                         tree_plugins:SetUserId(j, table_dir[i].name)
                         if flag ~= 'Commands' and CheckInstall(table_dir[i].name, false) then

@@ -7,7 +7,7 @@ local function Init(h)
 
     onSetFindRes = function(what, count, sels)
         if count > 0 then
-            if (editor.CodePage ~= 0) then what = what:from_utf8() end
+            if (editor.CodePage == 0) then what = what:to_utf8() end
             lblSel.value = what..'   :'..Iif(sels > 1, sels..' from ', '')..count..' entry'
         else lblSel.value = ''
         end
@@ -133,9 +133,9 @@ local function Init(h)
     --AddEventHandler("OnSwitchFile", ShowCurrentColour)
     --AddEventHandler("OnDwellStart", ShowCurrentColour)
     lblSel = iup.text{size = '200x0'; readonly = 'YES', canfocus = "NO", bgcolor = iup.GetLayout().bgcolor, border = 'NO',
-        tip = 'Число вхождений выделенного слова',
+        tip = _T'Selected word repetition count',
         tips_cb =(function(h, x, y)
-            h.tip = 'Число вхождений выделенного слова'..Iif(editor.Lexer == SCLEX_FORMENJINE, '\nПоказ цвета под курсором', '')
+            h.tip = _T'Selected word repetition count'..Iif(editor.Lexer == SCLEX_FORMENJINE, '\n'.._T'Show color under the cursor', '')
         end);
         button_cb = (function(h, but, pressed, x, y, status)
             if iup.isdouble(status) and iup.isbutton1(status) then
@@ -143,7 +143,7 @@ local function Init(h)
             elseif iup.isbutton3(status) then
                 local mnu = iup.menu
                 {
-                    iup.item{title = "Открыть палитру", action = ColorDlg}
+                    iup.item{title = _T"Open Palette", action = ColorDlg}
                 }:popup(iup.MOUSEPOS, iup.MOUSEPOS)
                 return - 1
             end

@@ -49,7 +49,7 @@ local function Init(ToolBar_obj)
             findres:ReplaceTarget('')
         end
         local str = txt_search.value
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
+        if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then str = str:from_utf8() end
         findSettings.findWhat = str
         CORE.FindMarkAll(findSettings, 50, true, Iif(#str > 1, 10, nil))
     end

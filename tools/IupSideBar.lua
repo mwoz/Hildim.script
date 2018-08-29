@@ -961,7 +961,11 @@ for i = 1, #tbl do
     end
     if pI and pI.run then
         local t = {}
-        t[1] = pI.title
+        if pI.title_utf then
+            t[1] = pI.title
+        else
+            t[1] = pI.title:to_utf8()
+        end
         t.visible = pI.visible
         if pI.key then t.key = pI.key end
         t.action = function() dolocale("tools\\Commands\\"..p).run() end
@@ -1133,7 +1137,7 @@ function CORE.SetCP(unicmode, codepage)
     if unicmode ~= math.tointeger(props['editor.unicode.mode']) then scite.MenuCommand(unicmode) end
     local cp = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
     if cp == 0 then cp = math.tointeger(props['system.code.page']) end
-    if cp ~= codepage then
+    if cp ~= (codepage or math.tointeger(props['system.code.page']) ) then
         if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
             _ENCODINGCOOKIE = codepage
             if _ENCODINGCOOKIE == math.tointeger(props['system.code.page']) then _ENCODINGCOOKIE = 0 end

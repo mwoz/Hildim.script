@@ -67,6 +67,13 @@ local function Ctrl(s)
     return iup.GetDialogChild(containers[2],s)
 end
 
+AddEventHandler("OnInitHildiM", function()
+    Ctrl("cmbFindWhat").Selection = "1:1"
+    Ctrl("cmbReplaceWhat").Selection = "1:1"
+    Ctrl("cmbFolders").Selection = "1:1"
+    Ctrl("cmbFilter").Selection = "1:1"
+end)
+
 local function PrepareFindText(s)
     s = (s or ''):gsub('[\n\r]+$', '')
     if s:find('[\n\r]') then
@@ -331,10 +338,10 @@ local function FindInFiles()
     if Ctrl("cmbFindWhat").value == '' then return end
 
     if Ctrl("cmbFilter").value == '' then Ctrl("cmbFilter").value = '*.*' end
-    if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir']:from_utf8() end
-    local fWhat = Ctrl("cmbFindWhat").value:to_utf8()
+    if Ctrl("cmbFolders").value == '' then Ctrl("cmbFolders").value = props['FileDir'] end
+    local fWhat = Ctrl("cmbFindWhat").value
     local fFilter = Ctrl("cmbFilter").value
-    local fDir = Ctrl("cmbFolders").value:to_utf8()
+    local fDir = Ctrl("cmbFolders").value
     local params = Iif(Ctrl("chkWholeWord").value=='ON', 'w','~')..
                    Iif(Ctrl("chkMatchCase").value=='ON', 'c','~')..'~'..
                    Iif(Ctrl("chkRegExp").value=='ON', 'r','~')..
@@ -468,7 +475,15 @@ end
 
 --перехватчики команд меню
 local function ActivateFind_l(nTab)
+
     Ctrl("tabFindRepl").valuepos = nTab
+
+    if nTab == 1 then
+        Ctrl("cmbReplaceWhat").Selection = "1:1"
+    elseif nTab == 2 then
+        Ctrl("cmbFolders").Selection = "1:1"
+        Ctrl("cmbFilter").Selection = "1:1"
+    end
 
     local wnd = editor
     if output.Focus then wnd = output
@@ -477,7 +492,7 @@ local function ActivateFind_l(nTab)
     local s
     if wnd.SelectionStart == wnd.SelectionEnd then s = GetCurrentWord()
     else s = wnd:GetSelText() end
-    if wnd.CodePage ~= 0 then s = s:from_utf8() end
+    if wnd.CodePage == 0 then s = s:to_utf8() end
     s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
@@ -504,7 +519,7 @@ local function ActivateFind_l(nTab)
     if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
     else iup.SetFocus(Ctrl('cmbFindWhat')) end
 
-    if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir']:from_utf8() end
+    if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir'] end
     SetStaticControls()
     if Ctrl('byInput').value == 'ON' and Ctrl('byInputAll').value == 'ON' then onFindEdit(Ctrl("cmbFindWhat"), '', Ctrl("cmbFindWhat").value) end
 
@@ -1002,7 +1017,18 @@ local function create_dialog_FindReplace()
     ["tabtitle4"] = _T"Preferences",
     canfocus  = "NO",
     name = "tabFindRepl",
-    tabchange_cb = function() scite.RunAsync(function() iup.SetFocus(Ctrl("cmbFindWhat")); SetStaticControls() end) end,
+    tabchange_cb = function(h)
+        scite.RunAsync(function()
+            if h.valuepos == '1' then
+                Ctrl("cmbReplaceWhat").Selection = "1:1"
+            elseif h.valuepos == '2' then
+                Ctrl("cmbFolders").Selection = "1:1"
+                Ctrl("cmbFilter").Selection = "1:1"
+            end
+            iup.SetFocus(Ctrl("cmbFindWhat"));
+            SetStaticControls()
+        end)
+    end,
     forecolor = props['layout.txtfgcolor'],
     highcolor = props['layout.txthlcolor'],
     tabslinecolor = iup.GetLayout().bordercolor,

@@ -429,7 +429,7 @@ local function Init()
         tblVariants = {}
         for _, v in ipairs(t) do
             --if s == sRu then v = shell.to_utf8(v) end
-            table.insert(lst, {v, action = function() ApplyVariant(v) end})
+            table.insert(lst, {v:to_utf8(), action = function() ApplyVariant(v) end})
         end
         if #t > 0 then end table.insert(lst,{'sSpell1', separator = 1})
         current_poslst = editor.CurrentPos

@@ -30,7 +30,7 @@ local function viewMenu(tMnu, tView, path)
                         tui.user = tblUsers[tui.path]
                         keyStr = tblUsers[tui.path]
                     end
-                    if keyStr then tN.leafname = tN.leafname..'  ‹'..keyStr..'›' end
+                    if keyStr then tN.leafname = tN.leafname..'  <'..keyStr..'>' end
                     if t.image then tN.image = t.image end
                     tui.title = menuhandler:get_title(t, true)
                 end
@@ -123,7 +123,7 @@ local function Show()
             if iup.GetAttributeId(tree_hk, 'KIND', id) == 'BRANCH' then return end
             local tuid = tree_hk:GetUserId(id)
             local t = tuid.title
-            if edit_hk.value ~= '' then t = t..' ‹'..edit_hk.value..'›' end
+            if edit_hk.value ~= '' then t = t..' <'..edit_hk.value..' >' end
             if edit_hk.value ~= (tuid.default or '') then
                 tuid.user = edit_hk.value
                 iup.SetAttributeId(tree_hk, 'COLOR', id, '92 92 255')
@@ -184,7 +184,7 @@ local function Show()
         if not bBlockReset then
             for i = 1,  iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
                 local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
-                if title:find('‹'..h.value..'›', 1, true) then
+                if title:find('<'..h.value..'>', 1, true) then
                     if tree_hk.value == i..'' then return end
                     result = iup.Alarm(_FMT(_T'"%1" uses this hotkey', title),
                         _FMT(_T'Go to"%1"?\n', title:gsub('‹.*', ''))..
@@ -225,7 +225,7 @@ local function Show()
             if tuid.default then
                 for i = 1, iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
                     local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
-                    if title:find('‹'..tuid.default..'›', 1, true) then
+                    if title:find('<'..tuid.default..'>', 1, true) then
                         if tree_hk.value == i..'' then return end
                         result = iup.Alarm(_FMT(_T'"%1" uses hotkey %2' , title ,tuid.default),
                             _FMT(_T'Go to"%1"?\n', title:gsub('‹.*', ''))..
@@ -250,7 +250,7 @@ local function Show()
                         end
                     end
                 end
-                t = t..' ‹'..tuid.default..'›'
+                t = t..' <'..tuid.default..'>'
                 edit_hk.value = tuid.default
             else
                 edit_hk.value = ''
@@ -266,7 +266,7 @@ local function Show()
     tree_hk.selection_cb = function(h,id, status)
         if status == 1 then
             bBlockReset = false
-            local _,_,k = iup.GetAttributeId(tree_hk, "TITLE", id):find('‹(.*)›')
+            local _, _, k = iup.GetAttributeId(tree_hk, "TITLE", id):find('<(.*)>')
             local tuid = tree_hk:GetUserId(id)
             if not tuid or tuid.disabled then
                 edit_hk.active = 'NO'

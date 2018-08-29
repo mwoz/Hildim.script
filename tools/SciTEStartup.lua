@@ -100,5 +100,6 @@ scite.RunAsync(function()
         scite.RunAsync(function() OnCommandLine(props['hildim.command.line']); props['hildim.command.line'] = '' end)
     end
     scite.EnsureVisible()
+    OnInitHildiM()
     _G.g_session['LOADED'] = true
 end)

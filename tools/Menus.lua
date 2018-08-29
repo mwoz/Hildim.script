@@ -31,7 +31,7 @@ function CORE.windowsList(side)
 	for i = 0, maxN do
         if not side or (scite.buffers.GetBufferSide(i) == side) then
             local row = {}
-            local s = scite.buffers.NameAt(i):from_utf8():gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
+            local s = scite.buffers.NameAt(i):gsub('(.+)[\\]([^\\]*)$', '%2\t%1')
             local md = Iif(scite.buffers.SavedAt(i), '', '*')
 
             row[1] = md..s
@@ -342,8 +342,8 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'Complete Word(from Text)',  key = 'Ctrl+Enter', action = IDM_COMPLETEWORD},
 		{'Autocomplete List Autodisplay',  check_prop = 'autocompleteword.automatic'},
 		{'s2', separator = 1},
-        {'Expand Abbreviation (‹‡›=selection)',  key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
-		{'Expand Abbreviation (‹‡›=Clipboard)',  key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
+        {('Expand Abbreviation (‹‡›=selection)'):to_utf8(), key = 'Ctrl+B', action = IDM_ABBREV, image = 'key_µ'},
+		{('Expand Abbreviation (‹‡›=Clipboard)'):to_utf8(), key = 'Ctrl+Alt+B', action = IDM_INS_ABBREV, image = 'key__plus_µ'},
 		{'s3', separator = 1},
         {'Comment or Uncomment',  key = 'Ctrl+Q', action = CORE.xComment, image = 'edit_signiture_µ'},
 		{'Block Comment',  action = IDM_BLOCK_COMMENT, visible = "props['comment.stream.start.'..editor_LexerLanguage()]~='' and props['comment.block.'..editor_LexerLanguage()]~=''"},

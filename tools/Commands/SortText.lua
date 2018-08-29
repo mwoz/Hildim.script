@@ -73,6 +73,7 @@ end
 
 return {
     title = _T'Sort Lines A...z/z...A',
+    title_utf = true,
     run = Run,
     path = 'Edit|s2',
     description = [[Sorting selected lines_tbl alphabetically and vice versa

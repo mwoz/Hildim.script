@@ -1024,7 +1024,7 @@ local function Init_hidden()
         local path = props["SciteDefaultHome"].."\\data\\Macros\\"
         if not shell.fileexists(path) then return {} end
         if not macro_list and shell.fileexists(props["SciteDefaultHome"].."\\data\\Macros\\") then
-            local t = shell.findfiles(props["SciteDefaultHome"].."\\data\\Macros\\*.macro")
+            local t = scite.findfiles(props["SciteDefaultHome"].."\\data\\Macros\\*.macro")
             macro_list = {}
             local mnu_i
             for i = 1,  #t do

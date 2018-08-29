@@ -26,7 +26,7 @@ local function viewMenu(tMnu, tView, path)
                         tui.user = tblUsers[tui.path]
                         keyStr = tblUsers[tui.path]
                     end
-                    if keyStr then tN.leafname = tN.leafname..'  ‹'..keyStr..'›' end
+                    if keyStr then tN.leafname = tN.leafname..'  <'..keyStr..'>' end
                     if t.image then tN.image = t.image; tui.image = t.image; end
                     tui.title = menuhandler:get_title(t, true)
                 end

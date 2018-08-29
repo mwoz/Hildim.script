@@ -72,7 +72,7 @@ local function Show()
     end)
 
     local tbl_lex = {}
-    local table_dir = shell.findfiles(props['SciteDefaultHome']..'\\languages\\*.properties')
+    local table_dir = scite.findfiles(props['SciteDefaultHome']..'\\languages\\*.properties')
     for i = 1, #table_dir do
         local f = io.open(props['SciteDefaultHome']..'\\languages\\'..table_dir[i].name)
         local s = f:read('*a')

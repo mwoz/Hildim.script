@@ -1,7 +1,7 @@
 return {
-["Color"] = "Цвет";
-["Indicator Preferences"] = "Свойства индикаторов";
-["Indicator"] = "Индикатор";
-["Transparency"] = "Прозрачность";
-["Style"] = "Стиль";
+["Color"] = "Р¦РІРµС‚";
+["Indicator Preferences"] = "РЎРІРѕР№СЃС‚РІР° РёРЅРґРёРєР°С‚РѕСЂРѕРІ";
+["Indicator"] = "РРЅРґРёРєР°С‚РѕСЂ";
+["Transparency"] = "РџСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ";
+["Style"] = "РЎС‚РёР»СЊ";
 }

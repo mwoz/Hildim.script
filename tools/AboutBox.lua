@@ -104,7 +104,7 @@ body, html {
     t = scite.FileVersionInfo(props['SciteDefaultHome']..'/SciLexer.dll')
     templ = templ:gsub('{ScintillaVer}', t.FileVersion):gsub('{HildiMDate}', dt)
 
-    local tdll = shell.findfiles(props['SciteDefaultHome']..'/tools/lualib/*.dll')
+    local tdll = scite.findfiles(props['SciteDefaultHome']..'/tools/lualib/*.dll')
 
     local strPlug = ''
     for i = 1,  #tdll do

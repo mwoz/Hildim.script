@@ -1,5 +1,5 @@
 return {
-["4->3 Tab size Indent"] = "ŒÚÒÚÛÔ 4->3";
-["Set KeyWords To StandartCase"] = " Î˛˜Â‚˚Â ÒÎÓ‚‡ ‚ ÒÚ‡Ì‰‡ÚÌ˚È Í˝ÈÒ";
-["Sort Xml Tags In Node"] = "”ÔÓˇ‰Ó˜ËÚ¸ Ú˝„Ë ‚ ÌÓ‰Â";
+["4->3 Tab size Indent"] = "–û—Ç—Å—Ç—É–ø 4->3";
+["Set KeyWords To StandartCase"] = "–ö–ª—é—á–µ–≤—ã–µ —Å–ª–æ–≤–∞ –≤ —Å—Ç–∞–Ω–¥–∞—Ä—Ç–Ω—ã–π –∫—ç–π—Å";
+["Sort Xml Tags In Node"] = "–£–ø–æ—Ä—è–¥–æ—á–∏—Ç—å —Ç—ç–≥–∏ –≤ –Ω–æ–¥–µ";
 }

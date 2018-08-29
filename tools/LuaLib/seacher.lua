@@ -28,7 +28,7 @@ function s:UnSlashAsNeeded(strIn)
 end
 
 function s:encode(s)
-    if self.e.CodePage ~= 0 then return s:to_utf8() end
+    if self.e.CodePage == 0 then return s:from_utf8() end
     return s
 end
 

@@ -75,6 +75,7 @@ end
 
 return {
     title = _T'Open Selected Filename',
+    title_utf = true,
     run = OpenSelectedFilename,
     path = 'File|Reopen File',
     description = [[Обрабатывает явно заданный путь и относительные пути

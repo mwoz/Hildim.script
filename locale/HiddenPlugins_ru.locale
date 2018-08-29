@@ -1,7 +1,7 @@
 return {
-["Connection of Commands"] = "Загрузка команд";
-["Connection of Statusbar Plugins"] = "Загрузка плагинов строки состояния";
-["Available Plugins"] = "Неиспользуемые элементы";
-["Connected Plugins"] = "Загружаемые элементы";
-["Connection of Background Plugins"] = "Загрузка фоновых плагинов";
+["Connection of Commands"] = "Р—Р°РіСЂСѓР·РєР° РєРѕРјР°РЅРґ";
+["Connection of Statusbar Plugins"] = "Р—Р°РіСЂСѓР·РєР° РїР»Р°РіРёРЅРѕРІ СЃС‚СЂРѕРєРё СЃРѕСЃС‚РѕСЏРЅРёСЏ";
+["Available Plugins"] = "РќРµРёСЃРїРѕР»СЊР·СѓРµРјС‹Рµ СЌР»РµРјРµРЅС‚С‹";
+["Connected Plugins"] = "Р—Р°РіСЂСѓР¶Р°РµРјС‹Рµ СЌР»РµРјРµРЅС‚С‹";
+["Connection of Background Plugins"] = "Р—Р°РіСЂСѓР·РєР° С„РѕРЅРѕРІС‹С… РїР»Р°РіРёРЅРѕРІ";
 }

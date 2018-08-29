@@ -72,7 +72,7 @@ FileMan_ListFILL = function()
     memo_path.value = current_path
 	if current_path == '' then return end
 
-    local table_dir = shell.findfiles(current_path..'*')
+    local table_dir = scite.findfiles(current_path..'*')
     if not table_dir then return end
     table.sort(table_dir, function(a, b)
         if a.isdirectory ~= b.isdirectory then return a.isdirectory end
@@ -144,7 +144,7 @@ end
 local function FileMan_ListFillDir(strPath)
     current_path = strPath:match('(.*\\)')
     if current_path == nil then current_path = '' end
-    local table_folders = shell.findfiles(strPath..'*')
+    local table_folders = scite.findfiles(strPath..'*')
     if not table_folders then
         iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
         return  strPath:len()-(strPath:find('[:%$]') or strPath:len())>0
@@ -276,7 +276,7 @@ local function mybar_Switch(n)
 end
 
 local function OpenFile(filename)
-    scite.Open(filename:to_utf8())
+    scite.Open(filename)
     if iup.GetGlobal("SHIFTKEY") == 'OFF' then
         if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON' then scite.RunAsync(function() mybar_Switch(m_prevSel + 1) end)
         elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1' then scite.RunAsync(function()  mybar_Switch(1) end)
