@@ -48,7 +48,7 @@ local function CreateUntitledFile()
     local fName1 = props['scite.new.file']
     local bPreset = false
     if fName1 == '' then
-        fName1 = scite.GetTranslation("Untitled")
+        fName1 = _TH"Untitled"
     elseif fName1:find('(.*)(%.[^.]*)$') then
         bPreset = true
         _, _, fName1, file_ext = fName1:find('(.*)(%.[^.]*)$')

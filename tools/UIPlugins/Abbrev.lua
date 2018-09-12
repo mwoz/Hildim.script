@@ -84,15 +84,15 @@ local function Init()
         local btn_esc = iup.button  {title = "Cancel"}
         iup.SetHandle("EDIT_BTN_ESC", btn_esc)
 
-        local txt_exp = iup.text{multiline = 'YES', wordwrap = 'YES', expand = 'YES', fontsize = '12', value = expan:gsub('\\n', '\n'):gsub('\\r', ''):gsub('\\t', '\t'):gsub('ђ', '\\')}
+        local txt_exp = iup.text{multiline = 'YES', wordwrap = 'YES', expand = 'YES', fontsize = '12', value = expan:gsub('\\n', '\n'):gsub('\\r', ''):gsub('\\t', '\t'):gsub(('ђ'):to_utf8(), '\\')}
         local txt_abr = iup.text{expand = 'NO', fontsize = '12', value = abb, size = '90x0'}
 
-        local bCur = iup.flatbutton{title = ' ¶ Cursor', flat_action = function() txt_exp.insert = '¶' end}
-        local bSC = iup.flatbutton{title = ' ЛЗЫ Sel/Clip', flat_action = function() txt_exp.insert = 'ЛЗЫ' end}
-        local bTxt = iup.flatbutton{title = ' Л@1Ы Text', flat_action = function() txt_exp.insert = 'Л@1Ы' end}
-        local bNum = iup.flatbutton{title = ' Л#1ЗЫ Numeric', flat_action = function() txt_exp.insert = 'Л#1З'..(txt_exp.selectedtext or '')..'Ы' end}
-        local bChoise = iup.flatbutton{title = ' Л?1ЗЗЫ Choice', flat_action = function() txt_exp.insert = 'Л?1З'..(txt_exp.selectedtext or '')..'ЗЫ' end}
-        local bForm = iup.flatbutton{title = ' Л...Ы Form', flat_action = function() txt_exp.append = [[Л
+        local bCur = iup.flatbutton{title = (' ¶ Cursor'):to_utf8(), flat_action = function() txt_exp.insert = ('¶'):to_utf8() end}
+        local bSC = iup.flatbutton{title = (' ЛЗЫ Sel/Clip'):to_utf8(), flat_action = function() txt_exp.insert = ('ЛЗЫ'):to_utf8() end}
+        local bTxt = iup.flatbutton{title = (' Л@1Ы Text'):to_utf8(), flat_action = function() txt_exp.insert = ('Л@1Ы'):to_utf8() end}
+        local bNum = iup.flatbutton{title = (' Л#1ЗЫ Numeric'):to_utf8(), flat_action = function() txt_exp.insert = ('Л#1З'):to_utf8()..(txt_exp.selectedtext or '')..('Ы'):to_utf8() end}
+        local bChoise = iup.flatbutton{title = (' Л?1ЗЗЫ Choice'):to_utf8(), flat_action = function() txt_exp.insert = ('Л?1З'):to_utf8()..(txt_exp.selectedtext or '')..('ЗЫ'):to_utf8() end}
+        local bForm = iup.flatbutton{title = (' Л...Ы Form'):to_utf8(), flat_action = function() txt_exp.append = ([[Л
 "Title",
 nil,
 "Boolean(0,1): %b\n"..
@@ -105,47 +105,47 @@ nil,
 "Options-int: %O|item0|item1|item2|\n"..
 "List-int: %L|item0|item1|item2|item3|item4|item5|item6|\n",
 0,0,0,'',0,0,0,0
-Ы]] end}
+Ы]]):to_utf8() end}
 
-local vbox = iup.vbox{
-    iup.hbox{txt_abr, bCur, bSC, bTxt, bNum, bChoise, bForm, gap = '20'};
-    iup.hbox{iup.vbox{txt_exp}};
+    local vbox = iup.vbox{
+        iup.hbox{txt_abr, bCur, bSC, bTxt, bNum, bChoise, bForm, gap = '20'};
+        iup.hbox{iup.vbox{txt_exp}};
 
-    iup.hbox{btn_upd, iup.fill{}, btn_esc, expand = 'HORIZONTAL'},
-expandchildren = 'YES', gap = 2, margin = "4x4"}                                    --[[txt_exp.insert = 'Л?1З'..'(txt_exp.selectedtext or '')'..'З.....Ы' ]]
-local dlg = iup.scitedialog{vbox; title = "Edit Abbrev", defaultenter = "MOVE_BTN_OK", defaultesc = "MOVE_BTN_ESC", tabsize = editor.TabWidth,
-maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "abbreveditor", minsize = '600x300'}
+        iup.hbox{btn_upd, iup.fill{}, btn_esc, expand = 'HORIZONTAL'},
+    expandchildren = 'YES', gap = 2, margin = "4x4"}                                    --[[txt_exp.insert = 'Л?1З'..'(txt_exp.selectedtext or '')'..'З.....Ы' ]]
+    local dlg = iup.scitedialog{vbox; title = "Edit Abbrev", defaultenter = "MOVE_BTN_OK", defaultesc = "MOVE_BTN_ESC", tabsize = editor.TabWidth,
+    maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "abbreveditor", minsize = '600x300'}
 
-dlg.show_cb =(function(h, state)
-    if state == 4 then
+    dlg.show_cb =(function(h, state)
+        if state == 4 then
+            dlg:postdestroy()
+            if bToolBar then showPopUp() end
+        end
+    end)
+
+    function btn_upd:action()
+        if editMode == 'CHANGE' then
+            list_abbrev:setcell(l, 1, txt_abr.value)
+            list_abbrev:setcell(l, 2, txt_exp.value:gsub('\\', ('ђ'):from_utf8()):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
+            list_abbrev.redraw = l
+        else
+            list_abbrev.addlin = ''..l
+            list_abbrev:setcell(l + 1, 1, txt_abr.value)
+            list_abbrev:setcell(l + 1, 2, txt_exp.value:gsub('\\', ('ђ'):from_utf8()):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
+            list_abbrev.redraw = l + 1
+        end
+        SetModif()
+        dlg:postdestroy()
+        if bToolBar then showPopUp() end
+        editMode = nil
+    end
+
+    function btn_esc:action()
         dlg:postdestroy()
         if bToolBar then showPopUp() end
     end
-end)
 
-function btn_upd:action()
-    if editMode == 'CHANGE' then
-        list_abbrev:setcell(l, 1, txt_abr.value)
-        list_abbrev:setcell(l, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
-        list_abbrev.redraw = l
-    else
-        list_abbrev.addlin = ''..l
-        list_abbrev:setcell(l + 1, 1, txt_abr.value)
-        list_abbrev:setcell(l + 1, 2, txt_exp.value:gsub('\\', 'ђ'):gsub('\r', '\\r'):gsub('\n', '\\n'):gsub('\t', '\\t'))
-        list_abbrev.redraw = l + 1
-    end
-    SetModif()
-    dlg:postdestroy()
-    if bToolBar then showPopUp() end
-    editMode = nil
 end
-
-function btn_esc:action()
-    dlg:postdestroy()
-    if bToolBar then showPopUp() end
-end
-
-    end
 
     local function getParamProxy(...)
         local t = {}
@@ -340,9 +340,9 @@ end
         if not abbr_table then return end
         iup.SetAttribute(list_abbrev, "ADDLIN", "1-"..#abbr_table)
         for i, v in ipairs(abbr_table) do
-            list_abbrev:setcell(i, 1, v.abbr)         -- ,size="400x400"
+            list_abbrev:setcell(i, 1, v.abbr:to_utf8())         -- ,size="400x400"
             --print(iup.GetAttribute(list_abbrev, "FONT"..i..':1'))
-            list_abbrev:setcell(i, 2, v.exp:gsub('\t', '\\t'))
+            list_abbrev:setcell(i, 2, v.exp:to_utf8():gsub('\t', '\\t'))
         end
         table.sort(abbr_table, function(a, b)
             if a.abbr:len() == b.abbr:len() then return a.abbr < b.abbr end
@@ -358,7 +358,7 @@ end
         local lin = list_abbrev.marked:sub(2):find("1")
         if not lin then return end
 
-        local expansion = iup.GetAttribute(list_abbrev, lin..':2')
+        local expansion = iup.GetAttribute(list_abbrev, lin..':2'):from_utf8()
         local sel = editor:GetSelText()
         editor:ReplaceSel('')
         local pos = editor.SelectionStart
@@ -384,19 +384,6 @@ end
         h.tip = s:gsub('\\r', ''):gsub('\\t', '\t'):gsub('\\n', '\r\n'):gsub('ђ', '\\')
     end)
 
-	--[[list_abbrev.map_cb = function(h)
-        h.size = "1x1"
-    end
-
-	list_abbrev.keypress_cb = function(_, key, press)
-        if press == 0 then return end
-        if key == iup.K_CR then --enter
-            Abbreviations_InsertExpansion()
-        elseif k == iup.K_ESC then
-            iup.PassFocus()
-        end
-	end]]
-
     local droppedLin = nil
     local clickPos = ""
     function list_abbrev:leavewindow_cb()
@@ -408,13 +395,6 @@ end
         droppedLin = nil;
     end
     function list_abbrev:mousemove_cb(lin, col)
---[[        if lin == 0 then return end
-
-        if iup.GetAttributeId2(list_abbrev, 'MARK', lin, 0) ~= '1' then
-            list_abbrev.marked = nil
-            iup.SetAttributeId2(list_abbrev, 'MARK', lin, 0, 1)
-            list_abbrev.redraw = 'ALL'
-        end]]
 
         if clickPos == iup.GetGlobal("CURSORPOS") then
             --ѕри первом клике ложно посылаетс€  mousemove - если установлен тултип. тут отсекаем это сообщение, чтобы нормально сработал клик
@@ -469,7 +449,7 @@ end
                     local maxN = tonumber(list_abbrev.numlin)
                     local strOut = ''
                     for i = 1, maxN do
-                        strOut = strOut..list_abbrev:getcell(i, 1)..'='..list_abbrev:getcell(i, 2)..'\n'
+                        strOut = strOut..list_abbrev:getcell(i, 1):from_utf8()..'='..list_abbrev:getcell(i, 2):from_utf8()..'\n'
                     end
                     local file = io.open(abrPath(), "w")
                     file:write(strOut)

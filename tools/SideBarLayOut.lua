@@ -241,9 +241,9 @@ local function Show()
 
         for i = 1,  #tbl do
             if i > 1 then
-                iup.SetAttributeId(h, "INSERTBRANCH", lastBr, tbl[i].title:to_utf8())
+                iup.SetAttributeId(h, "INSERTBRANCH", lastBr, tbl[i].title)
             else
-                iup.SetAttributeId(h, "ADDBRANCH", k, tbl[i].title:to_utf8())
+                iup.SetAttributeId(h, "ADDBRANCH", k, tbl[i].title)
             end
             k = k + 1
             lastBr = k
@@ -260,7 +260,7 @@ local function Show()
                 if bFound then
                     local pI = dofile(props["SciteDefaultHome"].."\\tools\\UIPlugins\\"..pname)
                     if pI then tPlugins[pname] = pI end
-                    iup.SetAttributeId(h, "ADDLEAF", k, pI.title:to_utf8())
+                    iup.SetAttributeId(h, "ADDLEAF", k, pI.title)
                     k = k + 1
                     h:SetUserId(k, pname)
                 end

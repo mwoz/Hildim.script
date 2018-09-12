@@ -862,7 +862,7 @@ end)
 AddEventHandler("OnClose", function(source)
     if source:find('^%^') or source:find('\\%^^') then return end
     if not source:find('^\\\\') then
-        if not shell.fileexists(source:from_utf8()) then return end
+        if not shell.fileexists(source) then return end
     end
     iuprops['resent.files.list']:ins(source, editor.FirstVisibleLine, SaveLayOut(), iup.GetBookmarkLst(), scite.buffers.EncodingAt(scite.buffers.GetCurrent()))
     if scite.buffers.GetCount() == 1 and editor.ReadOnly then scite.MenuCommand(IDM_READONLY) end

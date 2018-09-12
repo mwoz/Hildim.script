@@ -642,9 +642,7 @@ function _FMT(s, ...)
 end
 
 function _HildiAlarm(msg, t, p1, p2, p3)
-    if p1 then p1 = p1:from_utf8() end
-    if p2 then p2 = p2:from_utf8() end
-    if p3 then p3 = p3:from_utf8() end
+
     msg = _FMT(_TH(msg), p1, p2, p3)
     local b1, b2, b3
 --MB_OK                       0x00000000L
@@ -683,7 +681,7 @@ function _HildiAlarm(msg, t, p1, p2, p3)
 end
 
 function _LocalizeText(msg)
-    return string.to_utf8(_TH(msg))
+    return _TH(msg)
 end
 
 function dolocale(s)

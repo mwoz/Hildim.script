@@ -364,7 +364,7 @@ local function Init_hidden()
 
     local function CompareToFile(strName, bTmp)
         if scite.CompareEncodingFile(strName, editor:GetText()) then
-            print(_T"Files are identical")
+            print((_T"Files are identical"):from_utf8())
             if bTmp then shell.delete_file(strName) end
             return
         end
@@ -667,7 +667,7 @@ local function Init_hidden()
                 local path = FILEMAN.FullPath()
                 CompareToFile(path, false)
             end, visible = compareVisFile},
-    }}, "sysm/ui/Atrium.html", _T)
+    }}, "hildim/ui/compare.html", _T)
 
     menuhandler:PostponeInsert('MainWindowMenu', '_HIDDEN_|Favorites_sidebar|sxxx',
         {'Compare', plane = 1, visible = function() return compareVis(true) end, {
@@ -675,7 +675,7 @@ local function Init_hidden()
             {"Compare to same named from this folder",  action = function()
                 CompareSelfTitled(FILEMAN.Directory(true))
             end},
-    }}, "sysm/ui/Atrium.html", _T)
+    }}, "hildim/ui/compare.html", _T)
 
 end
 return {

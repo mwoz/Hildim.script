@@ -401,7 +401,7 @@ local function CreateBox()
     pane_curObj = SideBar_obj
     local tbArgRight = settings2tbl(_G.iuprops["settings.user.rightbar"] or {}, "tbArgRight")
 
-    tabs = SideBar(tbArgLeft, LeftBar_obj, 'leftbar')
+    local tabs = SideBar(tbArgLeft, LeftBar_obj, 'leftbar')
 
     if tabs then
         LeftBar_obj.TabCtrl = tabs
@@ -1125,7 +1125,7 @@ function CORE.DoRevert()
 end
 
 function CORE.Revert()
-    if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
+    if not editor.Modify or (iup.Alarm(_TM'Reopen File', _FMT(_TH"The file \n'%1'\n has been modified. Should it be reloaded?", props["FilePath"]:to_utf8()), _TH'Yes', _TH'No') == 1) then
         _ENCODINGCOOKIE = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
         CORE.DoRevert()
         _ENCODINGCOOKIE = nil
@@ -1138,7 +1138,7 @@ function CORE.SetCP(unicmode, codepage)
     local cp = scite.buffers.EncodingAt(scite.buffers.GetCurrent())
     if cp == 0 then cp = math.tointeger(props['system.code.page']) end
     if cp ~= (codepage or math.tointeger(props['system.code.page']) ) then
-        if not editor.Modify or (iup.Alarm('Перезагрузка файла', 'Изменения не сохранены.\nПродолжить?', 'Да', 'Нет') == 1) then
+        if not editor.Modify or (iup.Alarm(_TM'Reopen File', _FMT(_TH"The file \n'%1'\n has been modified. Should it be reloaded?", props["FilePath"]:to_utf8()), _TH'Yes', _TH'No') == 1) then
             _ENCODINGCOOKIE = codepage
             if _ENCODINGCOOKIE == math.tointeger(props['system.code.page']) then _ENCODINGCOOKIE = 0 end
             CORE.DoRevert()

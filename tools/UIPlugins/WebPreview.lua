@@ -148,7 +148,7 @@ local function init()
 
             luacom.Connect(web.com.document, body_events)
         else
-            web.html = pt_all:match(editor:GetText(), 1)
+            web.html = pt_all:match(editor:GetText(), 1):to_utf8()
             pBody = web.com.document.body
             events_obj = luacom.Connect(pBody, body_events)
             -- events_obj = luacom.Connect(web.com.document, body_events)

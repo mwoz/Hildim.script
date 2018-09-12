@@ -488,7 +488,7 @@ local function Init()
 
         if not xmlSrc:loadXml(txtXml) then
             local xmlErr = xmlSrc.parseError
-            print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+            print(props['FilePath']..':'..xmlErr.line..':'..xmlErr.linepos, xmlErr.reason)
             return
         end
 
