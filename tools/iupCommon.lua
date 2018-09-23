@@ -33,7 +33,7 @@ if shell.fileexists(file) then
     end
 
     if not bSuc then
-        print('Ошибка в файле settings.lua:', tMsg..'\nсохраним текущий settings.lua в settings.lua.bak')
+        print('Error in settings.lua:', tMsg..'\nsave current settings.lua to settings.lua.bak')
         io.output(props["scite.userhome"]..'\\settings.lua.bak')
         io.write(text:to_utf8())
         io.close()
@@ -334,7 +334,7 @@ local function SaveIup()
         local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
         io.write(s)
     else
-        iup.Alarm("HidlM", "Невозможно сохранить настройки в файл Settings.lua!", "Ok")
+        iup.Alarm("HidlM", _TH"Unable to save settings to file Settings.lua!", "Ok")
     end
     io.close()
     iup.SaveChProps()

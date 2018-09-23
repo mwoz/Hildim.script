@@ -292,6 +292,7 @@ __LOCALE ={
         ['Output'] = 'Консоль',
         ['Left Side Bar'] = 'Левая панель',
         ['Right Side Bar'] = 'Правая панель',
+        ['Unable to save settings to file Settings.lua!'] = 'Невозможно сохранить настройки в файл  Settings.lua!',
     },
     ['tools\\AboutBox'] ={
         ["Version"] = "Версия";

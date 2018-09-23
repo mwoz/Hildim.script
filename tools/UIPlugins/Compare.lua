@@ -14,6 +14,7 @@ local function Init_hidden()
     local tmpPath
     tmpFiles = {}
     local gitInstall, bGitActive
+    local onUpdateUI_local
 
     for i = 0, 4 do
         --markerMask = markerMask | (1 << (Compare.Markers['MARKER_CHANGED_SYMBOL'] + i))
@@ -140,15 +141,16 @@ local function Init_hidden()
         CORE.SetFindMarkers()
     end
 
-    local function StartCompare()
-        SetAnnotationStiles(editor)
-        SetAnnotationStiles(coeditor)
+    local function StartCompare(bScipReset)
+        if not bScipReset then
+            SetAnnotationStiles(editor)
+            SetAnnotationStiles(coeditor)
 
-        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
-        addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
+            addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
+            addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
 
-        if bActive == 7 then Reset() end
-
+            if bActive == 7 then Reset() end
+        end
         bActive = 7
         editor.CaretLineVisibleAlways = true
         coeditor.CaretLineVisibleAlways = true
@@ -358,8 +360,9 @@ local function Init_hidden()
             editor.TargetEnd = pEnd
             editor:ReplaceTarget(coeditor:textrange(pCoStart, pCoEnd))
         end
-        StartCompare()
-        CompareSetInd()
+        StartCompare(true)
+        lastEditLine = editor.LineCount + 1
+        onUpdateUI_local(false, true, 0)
     end
 
     local function CompareToFile(strName, bTmp)
@@ -551,7 +554,7 @@ local function Init_hidden()
     end)
 
     local bInvertCE = false
-    AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
+    onUpdateUI_local = function(bModified, bSelection, flag)
         ScrollWindows(editor, coeditor, flag)
         if (bActive & 4) == 4 and tSet.Recompare then
             if coeditor.Zoom ~= editor.Zoom then coeditor.Zoom = editor.Zoom end
@@ -578,9 +581,8 @@ local function Init_hidden()
                 coeditor.CurrentPos = coP
             end
         end
-    end)
-
-
+    end
+    AddEventHandler("OnUpdateUI", onUpdateUI_local)
 
     AddEventHandler("CoOnUpdateUI", function(bModified, bSelection, flag)
         if bInvertCE then
