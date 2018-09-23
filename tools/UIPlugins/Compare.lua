@@ -41,6 +41,7 @@ local function Init_hidden()
         tSet.DetectMove = true
         tSet.IncludeSpace = true
         tSet.AddLine = true
+        tSet.UseSymbols = true
         tSet.Color_added = 14745568
         tSet.Color_deleted = 14737663
         tSet.Color_changed = 14811135
