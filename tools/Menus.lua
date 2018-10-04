@@ -183,7 +183,7 @@ _G.sys_Menus.TABBAR = { title = _TM"Tabbar Context Menu",
     {link='Options|Tabbar Settings'},
 	{link='File|Encoding'},
 	{link = 'Options|Read-Only'},
-    {'Open File Folder', action=function() shell.exec(Iif(not _G.iuprops['settings.tabmenu.opencmd'], 'explorer "'..props['FileDir']..'"', _G.iuprops['settings.tabmenu.opencmd']:gsub('%%P', props['FileDir']))) end},
+    {'Open File Folder', action=function() shell.exec(Iif(not _G.iuprops['settings.tabmenu.opencmd'], 'explorer "'..props['FileDir']..'"', (_G.iuprops['settings.tabmenu.opencmd'] or ''):gsub('%%P', props['FileDir']))) end},
 
 	{'slast', separator=1},
 }

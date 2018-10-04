@@ -1,5 +1,7 @@
 require 'shell'
 require "luacom"
+--SSDIR \\SOURCESAFE\SourceSafe\Main\
+-- *.sln, *.vbproj, *.xml, *.cform, *.vcproj, *.dsp, *.mdp, *.mak, *.wiki, *.vdp, *.vdproj, *.dbp, *.vsmproj, *.vsmacros, *.hwproj, *.etp, *.cform, *.rform, *.wform, *.mdmp, *.dsw, *.vjsproj, *.csdproj, *.inc, *.m, *.sql, *.incl, *.xml, *.form
 local function Init()
     local bLocalDir = false
     local p_vsscompare, p_vsspath, curProj

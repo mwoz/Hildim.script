@@ -833,6 +833,8 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
                  if (e:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then e:MarkerAdd(i, MARKER_NOTSAVED) end
             end
         end
+    else
+        _G.g_session['OPENING'] = nil
     end
 end)
 
@@ -860,6 +862,7 @@ AddEventHandler("OnSave", function(cmd, source)
 end)
 
 AddEventHandler("OnClose", function(source)
+    _G.g_session['OPENING'] = true
     if source:find('^%^') or source:find('\\%^^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source) then return end
