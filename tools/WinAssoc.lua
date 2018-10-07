@@ -15,17 +15,17 @@ if dlg == nil then
     tbl_ass = {}
     tbl_ass_set = {}
     txt_listass = iup.text{size = '250x0', mask = "(/d|/w|_|;|[а-я]|[А-Я])+"}
-    chk_ass = iup.toggle{title = _T"Связать с расширениями:"; action = function(h)
+    chk_ass = iup.toggle{title = _T"Associate with extensions:"; action = function(h)
         txt_listass.active = Iif(h.value == 'ON', 'YES', 'NO')
     end}
 
     txt_listass_set = iup.text{size = '180x0', mask = "(/d|/w|_|;|[а-я]|[А-Я])+"}
-    chk_ass_set = iup.toggle{title = _T"Обрабатывать конфигурационные файлы:"; action = function(h)
+    chk_ass_set = iup.toggle{title = _T"Process configuration files:"; action = function(h)
         txt_listass_set.active = Iif(h.value == 'ON', 'YES', 'NO')
     end}
 
     local btn_ok = iup.button  {title = _TH"OK"}
-    chk_sendTo = iup.toggle{title = _T'Добавить HildiM в контекстное меню "Отправить"'}
+    chk_sendTo = iup.toggle{title = _T'Add HildiM to context menu "Send To.."'}
 
     iup.SetHandle("WININT_BTN_OK", btn_ok)
 
@@ -39,7 +39,7 @@ if dlg == nil then
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
     gap = 2, margin = "4x4" }
     local result = false
-    dlg = iup.scitedialog{vbox; title = _T"Интеграция с Windows", defaultenter = "WININT_BTN_OK", defaultesc = "WININT_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid = "winint" }
+    dlg = iup.scitedialog{vbox; title = _T"Windows Integration", defaultenter = "WININT_BTN_OK", defaultesc = "WININT_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid = "winint" }
 
     function btn_ok:action()
         local function WriteReg(txt, chk, tbl, strBack, strType, strCapt, strIcon)
@@ -128,7 +128,7 @@ if dlg == nil then
                         tbl[t] = 1
                     end
                 end
-                if #tblEr > 0 then iup.Message("Warning", _T"Изменены ассоциации для сдедующих расширений:\n".. table.concat(tblEr, '\n') ) end
+                if #tblEr > 0 then iup.Message("Warning", _T"Associations for the following extensions were changed:\n".. table.concat(tblEr, '\n') ) end
             end
         end
 

@@ -451,4 +451,11 @@ __LOCALE ={
         ["Starting from Position"] = "Начиная с позиции";
         ["Order%o|Direct|Reverce|\n"] = "Порядок%o|Прямой|Обратный|\n";
     },
+    ['tools\\WinAssoc'] ={
+        ['Associations for the following extensions were changed:\n'] = 'Изменены ассоциации для следующих расширений:\n',
+        ['Windows Integration'] = 'Интеграция с Windows',
+        ['Process configuration files:'] = 'Обрабатывать конфигурационные файлы:',
+        ['Associate with extensions:'] = 'Связать с расширениями:',
+        ['Add HildiM to context menu "Send To.."'] = 'Добавить HildiM в контекстное меню "Отправить"',
+    },
 }
