@@ -163,7 +163,7 @@ local function Init()
         else
             CheckNeedSpell = CheckNeedSpellAll
             commentsStyles = comment[props['Language']]
-            if commentsStyles == nil then commentsStyles = {[1] = true} end
+            if commentsStyles == nil then commentsStyles = {[0] = true} end
         end
     end
 

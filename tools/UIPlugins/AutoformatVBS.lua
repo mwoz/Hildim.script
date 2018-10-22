@@ -27,8 +27,8 @@ local wrdBeginIndent = {
     {"^(%s*)Select Case%W", 3},
     {"^(%s*)Sub%W", 4},{"^(%s*)Private Sub%W", 4},
     {"^(%s*)Function%W", 5},{"^(%s*)Private Function%W", 5},
-    {"^(%s*)Do%W%s*(%'?)(.*)$", 6},
-    {"^(%s*)Do While%W", 7}, {"^(%s*)Do Until%W", 7},
+    {"^(%s*)Do%W", 6},
+    --[[{"^(%s*)Do While%W", 7}, {"^(%s*)Do Until%W", 7},]]
     {"^(%s*)With%W", 8},
     {"^(%s*)While%W", 9},
     {"^(%s*)Class%W", 10},
@@ -38,7 +38,7 @@ local wrdEndIndent = {
     {"^(%s*)Next%W%s*(%'?)(.*)$", 2},
     {"^(%s*)End Select%W%s*(%'?)(.*)$", 3},
     {"^(%s*)End Sub%W%s*(%'?)(.*)$", 4},{"^(%s*)End Function%W%s*(%'?)(.*)$", 5},
-    {"^(%s*)Loop%W%s*(%'?)(.*)$", 7}, {"^(%s*)Loop While%W", 6}, {"^(%s*)Loop Until%W", 6},
+    {"^(%s*)Loop%W", 6}, --[[{"^(%s*)Loop While%W", 6}, {"^(%s*)Loop Until%W", 6},]]
     {"^(%s*)End With%W%s*(%'?)(.*)$", 8},
     {"^(%s*)Wend%W%s*(%'?)(.*)$", 9},
     {"^(%s*)End Class%W%s*(%'?)(.*)$", 10},
@@ -424,7 +424,7 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
             editor.FirstVisibleLine = iline
             editor:SetSel(s, e)
             iChangedLine = -1
-        elseif curFold and curFold > FoldLevel(-1) --[[and FoldLevel(-1) < FoldLevel(0)]] and editor.StyleAt[editor.CurrentPos - 1] == 13 then
+        elseif curFold and curFold > FoldLevel(-1) --[[and FoldLevel(-1) < FoldLevel(0)]] and editor.StyleAt[editor.CurrentPos - 2] == 13 then
             curFold = nil
             local bSet = true
             for i = editor.CurrentPos, editor.Length - 1 do
@@ -455,17 +455,35 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
                             elseif lUp:find('^with') then endWhat = 'With'
                             end
                         end
-                        local newPos = curS - (curI - LineIndent(ls - i))
-                        editor.TargetStart = editor:PositionFromLine(ls)
-                        if endWhat ~= '' then curIPos = curIPos + 3 end
-                        editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
                         local li = LineIndent(ls - i)
-                        editor:ReplaceTarget(string.rep(' ', li)..Iif(endWhat == '', '', 'End '..endWhat))
-                        if endWhat ~= '' then newPos = newPos + #endWhat + 1 end
-                        editor.SelectionStart = newPos
-                        editor.SelectionEnd = newPos
-                        prevFold = nil
-                        editor:AutoCCancel()
+                        if endWhat ~= '' then
+                            local newPos = curS - (curI - LineIndent(ls - i))
+                            editor.TargetStart = editor:PositionFromLine(ls)
+                            if endWhat ~= '' then curIPos = curIPos + 3 end
+                            editor.TargetEnd = editor:PositionFromLine(ls) + curIPos + 1
+
+                            editor:ReplaceTarget(string.rep(' ', li)..Iif(endWhat == '', '', 'End '..endWhat))
+                            if endWhat ~= '' then newPos = newPos + #endWhat end
+                            editor.SelectionStart = newPos
+                            editor.SelectionEnd = newPos
+                            prevFold = nil
+                            editor:AutoCCancel()
+                        else
+                            local curL = editor:GetCurLine(ls):lower()
+                            local strRep = string.rep(' ', li)
+                            if curL:find('next') then strRep = strRep..'Next'
+                            elseif curL:find('wend') then strRep = strRep..'Wend'
+                            elseif curL:find('loop') then strRep = strRep..'Loop'
+                            else return
+                            end
+                            editor:AutoCCancel()
+                            editor.TargetStart = editor:PositionFromLine(ls)
+                            curIPos = curIPos + 4
+                            editor.TargetEnd = editor:PositionFromLine(ls) + curIPos
+                            editor:ReplaceTarget(strRep)
+                            editor.SelectionStart = editor:PositionFromLine(ls) + li + 4
+                            editor.SelectionEnd = editor.SelectionStart
+                        end
                         if (_G.iuprops['autoformat.indent'] or 1) == 1 then IndentBlockUp() end
                         return
                     end

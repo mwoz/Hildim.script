@@ -74,6 +74,10 @@ AddEventHandler("OnInitHildiM", function()
     Ctrl("cmbFilter").Selection = "1:1"
 end)
 
+AddEventHandler("OnSwitchFile", function()
+    scite.RunAsync(function()Ctrl("cmbFolders").Selection = "1:1" end)
+end)
+
 local function PrepareFindText(s)
     s = (s or ''):gsub('[\n\r]+$', '')
     if s:find('[\n\r]') then
@@ -1131,7 +1135,8 @@ local function create_dialog_FindReplace()
         --iup.progressbar{
             name = "progress",
             expand = "HORIZONTAL",
-            size = "x8"
+            size = "x8",
+            fgcolor = props["layout.borderhlcolor"]
         },
     },
   }

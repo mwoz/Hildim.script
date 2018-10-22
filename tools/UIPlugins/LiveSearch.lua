@@ -33,7 +33,9 @@ local function OnSwitch()
     needCoding = (editor.CodePage ~= 0)
 end
 
-
+AddEventHandler("OnSwitchFile", function()
+    scite.RunAsync(function() txt_search.Selection = "1:1"end)
+end)
 
 local function Init(ToolBar_obj)
     local tm = iup.timer{time=300}
