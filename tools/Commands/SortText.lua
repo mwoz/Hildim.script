@@ -9,7 +9,7 @@ local function Run()
 
     local ret, pDirect, position, pIgnore = iup.GetParam(_T"Sorting",
         nil,
-        _T'Order%o|Direct|Reverce|\n'..
+        _T'Order%o|Direct|Reverse|\n'..
         _T'Starting from Position'..'%i[1,100,1]\n'..
         _T'Ignore%o|Spaces and Quotes|+all Operators|Nothing|\n'
         ,

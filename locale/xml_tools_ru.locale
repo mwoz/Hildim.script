@@ -7,8 +7,8 @@ return {
 ["Test XSLT Template"] = "Тестировать Xslt шаблон";
 ["Test XSD Scheme"] = "Тестировать Xsd схему";
 ["XSD Scheme Validation"] = "Проверить по Xsd схеме";
-["Sourse File"] = "Файл источника";
-["Sourse%o|File|Anoter View|"] = "Источник%o|Файл|Другое окно|";
+["Source File"] = "Файл источника";
+["Source%o|File|Another View|"] = "Источник%o|Файл|Другое окно|";
 ["Output%o|Log|New Window|"] = "Вывод%o|Лог|Новое окно|";
 ["Highlight"] = "Подсветить";
 ["XML - Paired Tags - Error"] = "Xml - Парные теги - ошибка";

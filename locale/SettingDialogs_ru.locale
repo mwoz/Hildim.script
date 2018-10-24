@@ -1,9 +1,9 @@
 return {
 ["- transparency"] = "- прозрачность";
-["<Home>,<End> up to Nearest Wraped up Line"] = "<Home>,<End> до ближайшего переноса";
+["<Home>,<End> up to Nearest Wrapped up Line"] = "<Home>,<End> до ближайшего переноса";
 ["Active Tab"] = "Активная вкладка";
 ["Asymmetric UZ"] = "Асимметричная НЗ";
-["Autoscroll Preferenses"] = "Настройки автопрокрутки";
+["Autoscroll Preferences"] = "Настройки автопрокрутки";
 ["Autoscroll for 3 UZ"] = "Автопрокрутка на 3 НЗ";
 ["Background"] = "Фон";
 ["Bar Background"] = "Панели";
@@ -27,16 +27,16 @@ return {
 ["Inactive Text Foreground"] = "Шрифт неактивного элемента";
 ["Indentation Size"] = "Отступ";
 ["Intensity:"] = "Насыщенность:";
-["Interface Color"] = "Цвета интефейса";
+["Interface Color"] = "Цвета интерфейса";
 ["Interface Font"] = "Шрифт диалогов и элементов интерфейса";
-["Interface Font"] = "Шрифт интефейса";
+["Interface Font"] = "Шрифт интерфейса";
 ["Line Containing Caret - Color"] = "Строка под курсором - цвет";
 ["Main Window Colors"] = "Цвета главного окна";
 ["Maximum Tabs Amount:"] = "Максимальное количество вкладок:";
 ["Maximum Vertical Scroll Position"] = "Прокрутка вниз на страницу";
-["Move Active Tab To Begining"] = "Активный таб - в начало";
+["Move Active Tab To Beginning"] = "Активный таб - в начало";
 ["Not Longer then"] = "Не более";
-["Open New Tab%l|At End of List|After Current|At Begining of List|"] = "Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|";
+["Open New Tab%l|At End of List|After Current|At Beginning of List|"] = "Открывать новую вкладку%l|В конце списка|Следующей за текущей|В начале списка|";
 ["Output - Line Containing Caret - Color"] = "Консоль - Строка под курсором - цвет";
 ["Page Below Last Line"] = "Запрещено end.at.last.line";
 ["Restart HildiM to apply the changes?"] = "Перезапустить программу для применения изменений?";
@@ -52,12 +52,12 @@ return {
 ["Selected Text - Color"] = "Выделенный текст - цвет";
 ["Size"] = "Размер";
 ["Splitters"] = "Сплиттеры";
-["Standart Windows Decoration"] = "Стандартное оформление окон";
-["Strore Search Results"] = "Хранить результатов поиска";
+["Standard Windows Decoration"] = "Стандартное оформление окон";
+["Store Search Results"] = "Хранить результатов поиска";
 ["Switching in Order of Usage"] = "Переключать в порядке использования";
-["Tab Preferenses"] = "Текущие настройки отступа";
+["Tab Preferences"] = "Текущие настройки отступа";
 ["Tab Size"] = "Табуляция";
-["Tabbar Preferenses"] = "Свойства панели закладок";
+["Tabbar Preferences"] = "Свойства панели закладок";
 ["Text Colors - Selection"] = "Цвета текста - выделение";
 ["UZ - Enforce Strictly"] = "Никогда не помешать каретку в НЗ";
 ["UZ Height, lines"] = "Высота НЗ, lines";
@@ -66,11 +66,11 @@ return {
 ['Use %%P as folder path placeholder'] = 'Используйте %%P для подстановки пути';
 ["Use Tab"] = "Использовать таб";
 ["Vertical Autoscroll"] = "Автопрокрутка по высоте";
-["Visual Flags-Draw:%l|No|At Begining|At End|At Begining and End|In Line Number|Line Number and End|Line Number and Begining|All|\n"] = "Символы переноса-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n";
-["Visual Flags-In Line:%l|All Near Border|At End - Near Text|At Begining - Near Text|All - Near Text|\n"] = "Символы переноса-в тексте:%l|По границам окна|В конце - по тексту|В начале - по тексту|Оба по тексту|\n";
+["Visual Flags-Draw:%l|No|At Begining|At End|At Beginning and End|In Line Number|Line Number and End|Line Number and Beginning|All|\n"] = "Символы переноса-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n";
+["Visual Flags-In Line:%l|All Near Border|At End - Near Text|At Beginning - Near Text|All - Near Text|\n"] = "Символы переноса-в тексте:%l|По границам окна|В конце - по тексту|В начале - по тексту|Оба по тексту|\n";
 ["Wrap Line Settings"] = "Настройки переноса по словам";
 ["Wrap by:%l|Word Boundaries|Any Charactersу|Whitespaces|\n"] = "Переносить:%l|По границам слов|По любому символу|По пробелам|\n";
-["Wraped Line Indent:"] = "Величина отступа:";
+["Wrapped Line Indent:"] = "Величина отступа:";
 ["Wrapped sublines aligned to%l|Left of Window|First Subline Indent|First Subline Indent + 1 level|\n"] = "Выравнивание после переноса%l|Отступ от края|По Предыдущей строке|Отступ от пред. строки|\n";
 
 }

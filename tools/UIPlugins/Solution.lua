@@ -327,7 +327,7 @@ local function Solution_Init(h)
 
             {'s_FindTextOnSel', separator = 1},
             {'Add...', action = Add},
-            {'Add Curent File', action = AddCurent, visible = function() return shell.fileexists(props["FilePath"]) end },
+            {'Add Current File', action = AddCurent, visible = function() return shell.fileexists(props["FilePath"]) end },
             {'Add all open files', action = function() AddAll(tree_sol.value) end},
             {'Exclude file from project', action = function() DeleteNode(1) end, visible = function() return iup.GetAttribute(tree_sol, "KIND")~="BRANCH" end},
             {'s1_FindTextOnSel', separator = 1},

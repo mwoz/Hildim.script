@@ -17,7 +17,7 @@ return {
 ['Open All Projects Files'] = 'Открыть все файлы проекта';
 ['Set Active'] = 'Установить активным';
 ['Add...'] = 'Добавить...';
-['Add Curent File'] = 'Добавить текущий файл';
+['Add Current File'] = 'Добавить текущий файл';
 ['Add all open files'] = 'Добавить все открытые файлы';
 ['Exclude file from project'] = 'Исключить файл из проекта';
 ['Change Folder'] = 'Перейти в директорию';

@@ -1,9 +1,9 @@
 return {
-["Referens"] = "Ссылка";
-["New Paragrafh"] = "Новый параграф";
+["Referenс"] = "Ссылка";
+["New Paragraph"] = "Новый параграф";
 ["Line Break"] = "Новая строка";
 ["Insert as Link"] = "Вставить как ссылку";
-["Paragrafh"] = "Параграф";
+["Paragraph"] = "Параграф";
 ["Strike"] = "Зачеркнутый";
 ["Insert as Image"] = "Вставить как изображение";
 ["Underlined"] = "Подчеркнутый";

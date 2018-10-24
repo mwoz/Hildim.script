@@ -233,7 +233,7 @@ end
 local function ReplaceAll(h)
     if ReadSettings() then return end
     local count = findSettings:ReplaceAll(false)
-    SetInfo(_T'Replacments: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Replacements: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     PassFocus_local()
@@ -244,7 +244,7 @@ end
 local function ReplaceSel(h)
     if ReadSettings() then return end
     local count = findSettings:ReplaceAll(true)
-    SetInfo(_T'Replacments: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Replacements: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
     PassFocus_local()
@@ -298,7 +298,7 @@ function CORE.ReplaceNext(h)
     if not pos then SetInfo(_T'Found an entry "'..Ctrl("cmbFindWhat").value..'"', '') return end
 
     if pos < 0 then SetInfo(_T'Nothing Found', 'E')
-    else SetInfo(_T'Replacment done', 'E') end
+    else SetInfo(_T'Replacement done', 'E') end
 
     Ctrl("cmbFindWhat"):SaveHist()
     Ctrl("cmbReplaceWhat"):SaveHist()
@@ -373,7 +373,7 @@ end
 local function ReplaceInBuffers()
     if ReadSettings() then return end
     local count = DoForBuffers_Stack(findSettings:ReplaceInBufer())
-    SetInfo(_T'Replacments: '..count, Iif(count == 0, 'E', ''))
+    SetInfo(_T'Replacements: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
     Ctrl("cmbFindWhat"):SaveHist()
     scite.BlockUpdate(UPDATE_FORCE)

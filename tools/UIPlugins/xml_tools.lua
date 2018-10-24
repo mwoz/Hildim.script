@@ -392,7 +392,7 @@ local function Init()
                 return 1
             end,
             _T'Sourse%o|File|Anoter View|'..'\n'..
-            _T'Sourse File'..'%f\n'
+            _T'Source File'..'%f\n'
             ,
             srcXsd,
             pathXsd
@@ -511,8 +511,8 @@ local function Init()
                 end
                 return 1
             end,
-            _T'Sourse%o|File|Anoter View|'..'\n'..
-            _T'Sourse File'..'%f\n'..
+            _T'Source%o|File|Another View|'..'\n'..
+            _T'Source File'..'%f\n'..
             _T'Output%o|Log|New Window|'..'\n'
             ,
             src,

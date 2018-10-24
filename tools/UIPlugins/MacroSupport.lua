@@ -118,7 +118,7 @@ local function Init_hidden()
 
     local function do_BeginFor()
         local ret, num, isConst, cap =
-        iup.GetParam(_T"New Command Block Repeatition".."^macros",
+        iup.GetParam(_T"New Command Block Repetition".."^macros",
             function(h, id)
                 if id == iup.GETPARAM_BUTTON1 then
                     local cap = iup.GetParamParam(h, 1).value
@@ -131,7 +131,7 @@ local function Init_hidden()
                 end
                 return 1
             end,
-            _T'Number of Repeatition'..'%i[1,1000,1]\n'..
+            _T'Number of Repetition'..'%i[1,1000,1]\n'..
             _T'Constant'..'%b\n'..
             _T'Caption'..'%s\n'
             ,
@@ -176,7 +176,7 @@ local function Init_hidden()
             _T"In Selection".."%b\n"..
             _T"Whole Word".."%b\n"..
             "RegExp%b\n"..
-            _T"Case Sensetive".."%b\n"..
+            _T"Case Sensitive".."%b\n"..
             _T"Call next Block If".."%o".._T"|Found|Not Found|".."\n"..
             _T"Else Exit Macro".."%b\n",
             "", "<Find "..(#params + 1)..">", 0, 0, 0, 0, 0, 0, 0, 0
@@ -281,7 +281,7 @@ local function Init_hidden()
         local ret, num, fix, reverce =
         iup.GetParam(_T"Pasting From History".."^macros",
             nil,
-            _T'Repeatition Parameter'..'%l|'..table.concat(tItems, '|')..'|\n'..
+            _T'Repetition Parameter'..'%l|'..table.concat(tItems, '|')..'|\n'..
             _T'Fixed'..'%i[1,100,1]\n'..
             _T'Move Up the list'..'%b\n'
             ,
@@ -841,7 +841,7 @@ local function Init_hidden()
         if GetPropsFromScr(scr) == '1' then
             local ret
             ret, cnt =
-            iup.GetParam(_T"Number of Repeatition".."^macros", nil,
+            iup.GetParam(_T"Number of Repetition".."^macros", nil,
                 _T"Repeat"..": %i[1,100,1]\n",
             1)
             if not ret then return end
@@ -1200,9 +1200,9 @@ local function Init_hidden()
             }},
             {'Repeat Next Command Block...', {
                 {'ForList', plane = 1, for_block_content},
-                {'Set New Repeatition Parameter', action = do_BeginFor},
+                {'Set New Repetition Parameter', action = do_BeginFor},
             }},
-            {'Insert Repeation Counter Value...', {
+            {'Insert Repetition Counter Value...', {
                 {'CounterList', plane = 1, counter_block_content},
             }, visible = counter_block_visible},
             {'Playback Commands on Condition...', {

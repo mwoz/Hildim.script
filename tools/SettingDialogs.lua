@@ -4,11 +4,11 @@ function sett.ResetWrapProps()
                     iup.GetParam(_T"Wrap Line Settings".."^WrapSettings",
 					nil,
 					_T'Wrap by:%l|Word Boundaries|Any Charactersó|Whitespaces|\n'..
-					_T'Visual Flags-Draw:%l|No|At Begining|At End|At Begining and End|In Line Number|Line Number and End|Line Number and Begining|All|\n'..
-					_T'Visual Flags-In Line:%l|All Near Border|At End - Near Text|At Begining - Near Text|All - Near Text|\n'..
+					_T'Visual Flags-Draw:%l|No|At Beginning|At End|At Beginning and End|In Line Number|Line Number and End|Line Number and Beginning|All|\n'..
+					_T'Visual Flags-In Line:%l|All Near Border|At End - Near Text|At Beginning - Near Text|All - Near Text|\n'..
 					_T'Wrapped sublines aligned to%l|Left of Window|First Subline Indent|First Subline Indent + 1 level|\n'..
-					_T'Wraped Line Indent:'..'%i[1,10,1]\n'..
-					_T'<Home>,<End> up to Nearest Wraped up Line'..' %b\n',
+					_T'Wrapped Line Indent:'..'%i[1,10,1]\n'..
+					_T'<Home>,<End> up to Nearest Wrapped up Line'..' %b\n',
                    (tonumber(props['wrap.style']) or 1) - 1,
                     tonumber(props['wrap.visual.flags']) or 0,
                     tonumber(props['wrap.visual.flags.location']) or 0,
@@ -98,7 +98,7 @@ function sett.ResetFontSize()
 end
 
 function sett.SetFindresCount()
-	local ret, size = iup.GetParam(_T"Strore Search Results",
+	local ret, size = iup.GetParam(_T"Store Search Results",
 					function(h,i) if i == -1 and tonumber(iup.GetParamParam(h,0).value) < 3 then return 0 end return 1 end,
 					_T'Not Longer then'..'%i[1,30,1]\n', tonumber(_G.iuprops['findres.maxresultcount']) or 10)
 	if ret then
@@ -115,7 +115,7 @@ function sett.ResetTabbarProps()
 
     local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref,
     tabctrl_forecolor, ROColor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color, opencmd
-    = iup.GetParam(_T"Tabbar Preferenses".."^TabbarProperties",
+    = iup.GetParam(_T"Tabbar Preferences".."^TabbarProperties",
             function(h, id)
                 local bact = Iif(iup.GetParamParam(h, 5).control.value == 'ON', 'YES', 'NO')
                 iup.GetParamParam(h, 6).control.active = bact
@@ -130,8 +130,8 @@ function sett.ResetTabbarProps()
         _T'Close with Mouse Click%l|None|Left DblClick|Middle Click|Both|'..'\n'..
         _T'Maximum Tabs Amount:'..'%i[10,500,1]\n'..
         _T'Switching in Order of Usage'..'%b\n'..
-        _T'Open New Tab%l|At End of List|After Current|At Begining of List|'..'\n'..
-        _T'Move Active Tab To Begining'..'%b\n'..
+        _T'Open New Tab%l|At End of List|After Current|At Beginning of List|'..'\n'..
+        _T'Move Active Tab To Beginning'..'%b\n'..
         _T'Inactive Tabs'..'%t\n'..
         _T'Highlight by Extension'..'%b\n'..
         _T'Saturation:'..'%i[10,99,1]\n'..
@@ -214,7 +214,7 @@ function sett.ResetGlobalColors()
         _T'Scrollbar Slider - Highlighted'..'%c\n'..
         _T'Scrollbar Background'..'%c\n'..
         '%t\n'..
-        _T'Standart Windows Decoration'..'%b\n'
+        _T'Standard Windows Decoration'..'%b\n'
         ,
         props['layout.bgcolor']          ,
         props['layout.txtbgcolor']       ,
@@ -260,7 +260,7 @@ end
 
 function sett.CurrentTabSettings()
     local ret, TabWidth, Indent, UseTabs =
-    iup.GetParam(_T"Tab Preferenses".."^CurrentTabSettings",
+    iup.GetParam(_T"Tab Preferences".."^CurrentTabSettings",
         nil,
         _T'Tab Size'..'%i[2,16,1]\n'..
         _T'Indentation Size'..'%i[2,16,1]\n'..
@@ -283,7 +283,7 @@ function sett.AutoScrollingProps()
     caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xeven, caret_policy_xjumps,
     caret_policy_yslop, caret_policy_lines, caret_policy_ystrict, caret_policy_yeven, caret_policy_yjumps,
     caret_sticky, end_at_last_lin, iup_scrollbarsize
-    = iup.GetParam(_T"Autoscroll Preferenses".."^AutiscrollSettings",
+    = iup.GetParam(_T"Autoscroll Preferences".."^AutiscrollSettings",
         nil,
         _T'Horizontal Autoscroll'..'%t\n'..
 
@@ -343,7 +343,7 @@ function sett.AutoScrollingProps()
         props['end.at.last.line'] = end_at_last_lin
         scite.ReloadProperties()
         if iup_scrollbarsize ~= tonumber(props['iup.scrollbarsize']) then
-            if 1 == iup.Alarm(_T'Autoscroll Preferenses', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
+            if 1 == iup.Alarm(_T'Autoscroll Preferences', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
                 props['iup.scrollbarsize'] = iup_scrollbarsize
                 scite.SetRestart('')
                 scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
