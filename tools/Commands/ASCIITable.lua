@@ -25,7 +25,7 @@ function Run()
 end
 
 return {
-    title = 'Таблица ASCII символов',
+    title = 'ASCII table',
     run = Run,
-    description =[[Таблица ASCII символов в новой вкладке]]
+    description =[[ASCII character table in new tab]]
 }

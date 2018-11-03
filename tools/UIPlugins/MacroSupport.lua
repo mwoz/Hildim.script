@@ -1,4 +1,4 @@
-local tSet, onDestroy
+local tSet
 local function Init_hidden()
 
     MACRO = {}
@@ -1236,6 +1236,5 @@ local function Init_hidden()
 end
 return {
     title = _T'Macro Support',
-    destroy = onDestroy,
     hidden = Init_hidden,
 }

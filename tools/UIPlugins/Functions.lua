@@ -1,4 +1,6 @@
+local onDestroy
 local function Func_Init(h)
+    require "lpeg"
     local _isXform = false
     local _show_flags = tonumber(_G.iuprops['sidebar.functions.flags']) == 1
     local _show_params = tonumber(_G.iuprops['sidebar.functions.params']) == 1
@@ -25,124 +27,165 @@ local function Func_Init(h)
     local _backjumppos -- store position if jumping
     local line_count = 0
     local layout --имена полей - имена бранчей, значения - true/false, если отсутствует - значит открыто
-    layout = {}
-    local m__CLASS = '~~ROOT'
-    local m_Par1
-    local Lang2lpeg = {}
 
-    local lpExt = {}
-    do
-        lpExt._G = _G
-        lpExt.m__CLASS = '~~ROOT'
-        local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
-        lpExt.P, lpExt.V, lpExt.Cg, lpExt.Ct, lpExt.Cc, lpExt.S, lpExt.R, lpExt.C, lpExt.Carg, lpExt.Cf, lpExt.Cb, lpExt.Cp, lpExt.Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
-        function lpExt.AnyCase(str)
-            local res = P'' --empty pattern to start with
-            local ch, CH
-            for i = 1, #str do
-                ch = str:sub(i, i):lower()
-                CH = ch:upper()
-                res = res * S(CH..ch)
-            end
-            assert(res:match(str))
-            return res
-        end
-
-        lpExt.PosToLine = function (pos) return editor:LineFromPosition(pos - 1) end
-        --v------- common patterns -------v--
-        -- basics
-        lpExt.EOF = P(-1)
-        lpExt.BOF = P(function(s, i) return (i == 1) and 1 end)
-        lpExt.NL = P"\n"-- + P"\f" -- pattern matching newline, platform-specific. \f = page break marker
-        lpExt.AZ = R('AZ', 'az') + "_"
-        lpExt.N = R'09'
-        lpExt.ANY = P(1)
-        lpExt.ESCANY = P'\\' * lpExt.ANY + lpExt.ANY
-        lpExt.SINGLESPACE = S'\n \t\r\f'
-        lpExt.SPACE = lpExt.SINGLESPACE^1
-
-        -- simple tokens
-        lpExt.IDENTIFIER = lpExt.AZ * (lpExt.AZ + lpExt.N)^0 -- simple identifier, without separators
-
-        lpExt.Str1 = P'"' * ( lpExt.ESCANY - (S'"' + lpExt.NL) )^0 * (P'"' + lpExt.NL)--NL == error'unfinished string')
-        lpExt.Str2 = P"'" * ( lpExt.ESCANY - (S"'" + lpExt.NL) )^0 * (P"'" + lpExt.NL)--NL == error'unfinished string')
-        lpExt.STRING = lpExt.Str1 + lpExt.Str2
-
-        -- c-like-comments
-        lpExt.line_comment = '//' * (lpExt.ESCANY - lpExt.NL)^0 * lpExt.NL
-        lpExt.block_comment = '/*' * (lpExt.ESCANY - P'*/')^0 * (P('*/') + lpExt.EOF)
-        lpExt.COMMENT = (lpExt.line_comment + lpExt.block_comment)^1
-
-        lpExt.SC = lpExt.SPACE + lpExt.COMMENT
-        lpExt.IGNORED = lpExt.SPACE + lpExt.COMMENT + lpExt.STRING
-        -- special captures
-        lpExt.cp = Cp() -- pos capture, Carg(1) is the shift value, comes from start_code_pos
-        lpExt.cl = lpExt.cp / lpExt.PosToLine -- line capture, uses editor:LineFromPosition
-        lpExt.par = C(P"(" *(1 - P")")^0 * P")") -- captures parameters in parentheses
-
-        do --v----- * ------v--
-            -- redefine common patterns
-            local NL = P"\r\n" + P"\n" + P"\f"
-            local SC = S" \t\160" -- без понятия что за символ с кодом 160, но он встречается в SciTEGlobal.properties непосредственно после [Warnings] 10 раз.
-            local COMMENT = P'#' *(lpExt.ANY - NL)^0 * NL
-            -- define local patterns
-            local somedef = S'fFsS' * S'uU' * S'bBnN' * lpExt.AZ^0 --пытаемся поймать что-нибудь, похожее на определение функции...
-            local section = P'[' *(lpExt.ANY - P']')^1 * P']'
-            -- create flags
-            local somedef = Cg(somedef, '')
-            -- create additional captures
-            local I = C(lpExt.IDENTIFIER) * lpExt.cl
-            section = C(section) * lpExt.cl
-            local tillNL = C((lpExt.ANY - NL)^0)
-            -- definitions to capture:
-            local def1 = Ct(somedef * SC^1 * I * SC^0 *(lpExt.par + tillNL))
-            local def2 = (NL + lpExt.BOF) * Ct(section * SC^0 * tillNL) *NL
-
-            -- resulting pattern, which does the work
-            local patt = (def2 + def1 + COMMENT + lpExt.IDENTIFIER + 1)^0 * lpExt.EOF
-            -- local patt = (def2 + def1 + IDENTIFIER + 1)^0 * EOF -- чуть медленнее
-
-            Lang2lpeg['*'] = {pattern = lpeg.Ct(patt)}
-        end --^----- * ------^--
-
+    if not lanes then
+        lanes = require("lanes").configure()
     end
+
+    local linda = lanes.linda()
+
+    layout = {}
 
     local function Functions_GetNames()
-        lpExt.m__CLASS = '~~ROOT'
         table_functions = {}
         if editor.Length == 0 then return end
-        local lex = props['lexer$']
-        if not Lang2lpeg[lex] or Lang2lpeg[lex] == Lang2lpeg['*'] then
-            local strOut = props['functions.lpeg.'..lex]
-            if strOut == '' then
-                lex = props['FileExt']
-                if not Lang2lpeg[lex] then
-                    strOut = props['functions.lpeg.'..lex]
-                else
-                    strOut = nil
+        local val = {}
+        linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'], fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']]})
+    end
+
+    local function LanesLoop(l)
+        --lpeg = l
+        --print(mblua.CreateMessage)
+        local lpExt = {}
+        local Lang2lpeg = {}
+        local m__CLASS, fnTryGroupName, table_functions
+        do
+            lpExt._G = _G
+            lpExt.m__CLASS = '~~ROOT'
+            local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
+            lpExt.P, lpExt.V, lpExt.Cg, lpExt.Ct, lpExt.Cc, lpExt.S, lpExt.R, lpExt.C, lpExt.Carg, lpExt.Cf, lpExt.Cb, lpExt.Cp, lpExt.Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
+            function lpExt.AnyCase(str)
+                local res = P'' --empty pattern to start with
+                local ch, CH
+                for i = 1, #str do
+                    ch = str:sub(i, i):lower()
+                    CH = ch:upper()
+                    res = res * S(CH..ch)
+                end
+                assert(res:match(str))
+                return res
+            end
+
+            lpExt.PosToLine = function (pos) return editor:LineFromPosition(pos - 1) end
+            --v------- common patterns -------v--
+            -- basics
+            lpExt.EOF = P(-1)
+            lpExt.BOF = P(function(s, i) return (i == 1) and 1 end)
+            lpExt.NL = P"\n"-- + P"\f" -- pattern matching newline, platform-specific. \f = page break marker
+            lpExt.AZ = R('AZ', 'az') + "_"
+            lpExt.N = R'09'
+            lpExt.ANY = P(1)
+            lpExt.ESCANY = P'\\' * lpExt.ANY + lpExt.ANY
+            lpExt.SINGLESPACE = S'\n \t\r\f'
+            lpExt.SPACE = lpExt.SINGLESPACE^1
+
+            -- simple tokens
+            lpExt.IDENTIFIER = lpExt.AZ * (lpExt.AZ + lpExt.N)^0 -- simple identifier, without separators
+
+            lpExt.Str1 = P'"' * ( lpExt.ESCANY - (S'"' + lpExt.NL) )^0 * (P'"' + lpExt.NL)--NL == error'unfinished string')
+            lpExt.Str2 = P"'" * ( lpExt.ESCANY - (S"'" + lpExt.NL) )^0 * (P"'" + lpExt.NL)--NL == error'unfinished string')
+            lpExt.STRING = lpExt.Str1 + lpExt.Str2
+
+            -- c-like-comments
+            lpExt.line_comment = '//' * (lpExt.ESCANY - lpExt.NL)^0 * lpExt.NL
+            lpExt.block_comment = '/*' * (lpExt.ESCANY - P'*/')^0 * (P('*/') + lpExt.EOF)
+            lpExt.COMMENT = (lpExt.line_comment + lpExt.block_comment)^1
+
+            lpExt.SC = lpExt.SPACE + lpExt.COMMENT
+            lpExt.IGNORED = lpExt.SPACE + lpExt.COMMENT + lpExt.STRING
+            -- special captures
+            lpExt.cp = Cp() -- pos capture, Carg(1) is the shift value, comes from start_code_pos
+            lpExt.cl = lpeg.Cl() -- line capture, uses editor:LineFromPosition
+            lpExt.par = C(P"(" *(1 - P")")^0 * P")") -- captures parameters in parentheses
+
+            do --v----- * ------v--
+                -- redefine common patterns
+                local NL = P"\r\n" + P"\n" + P"\f"
+                local SC = S" \t\160" -- без понятия что за символ с кодом 160, но он встречается в SciTEGlobal.properties непосредственно после [Warnings] 10 раз.
+                local COMMENT = P'#' *(lpExt.ANY - NL)^0 * NL
+                -- define local patterns
+                local somedef = S'fFsS' * S'uU' * S'bBnN' * lpExt.AZ^0 --пытаемся поймать что-нибудь, похожее на определение функции...
+                local section = P'[' *(lpExt.ANY - P']')^1 * P']'
+                -- create flags
+                local somedef = Cg(somedef, '')
+                -- create additional captures
+                local I = C(lpExt.IDENTIFIER) * lpExt.cl
+                section = C(section) * lpExt.cl
+                local tillNL = C((lpExt.ANY - NL)^0)
+                -- definitions to capture:
+                local def1 = Ct(somedef * SC^1 * I * SC^0 *(lpExt.par + tillNL))
+                local def2 = (NL + lpExt.BOF) * Ct(section * SC^0 * tillNL) * NL
+
+                -- resulting pattern, which does the work
+                local patt = (def2 + def1 + COMMENT + lpExt.IDENTIFIER + 1)^0 * lpExt.EOF
+                -- local patt = (def2 + def1 + IDENTIFIER + 1)^0 * EOF -- чуть медленнее
+
+                Lang2lpeg['*'] = {pattern = lpeg.Ct(patt)}
+            end --^----- * ------^--
+
+        end
+
+        local function getNames(textAll, lex, fileExt, funcExt)
+            lpExt.m__CLASS = '~~ROOT'
+            table_functions = {}
+
+            if not Lang2lpeg[lex] or Lang2lpeg[lex] == Lang2lpeg['*'] then
+                local strOut = funcExt
+                if strOut == '' then
+                    lex = fileExt
+                    if not Lang2lpeg[lex] then
+                        strOut = funcExt
+                    else
+                        strOut = nil
+                    end
+                end
+                if strOut then
+                    if strOut ~= '' then
+                        Lang2lpeg[lex] = load(strOut, 'func_lpeg', 't', lpExt)()
+                    else
+                        Lang2lpeg[lex] = Lang2lpeg['*']
+                    end
                 end
             end
-            if strOut then
-                if strOut ~= '' then
-                    Lang2lpeg[lex] = load(strOut, 'func_lpeg', 't', lpExt)()
-                else
-                    Lang2lpeg[lex] = Lang2lpeg['*']
+
+
+            local out = Lang2lpeg[lex]
+
+
+
+
+            lpExt.m__CLASS = '~~ROOT'
+            table_functions = {}
+
+            local start_code = out.start_code
+            local lpegPattern = out.pattern
+            fnTryGroupName = out.GroupName or (function(s) return s end)
+
+            local start_code_pos = start_code and textAll:find(start_code) or 0
+
+            m__CLASS = '~~ROOT'
+            -- lpegPattern = nil
+            table_functions = lpegPattern:match(textAll, start_code_pos + 1) -- 2nd arg is the symbol index to start with
+
+        end
+
+        while true do
+            local key, val = linda:receive( 100, "_Functions")
+            if val ~= nil then
+                if val.cmd == "UPD" then
+                    getNames(val.textAll, val.lex, val.fileExt, val.funcExt)
+                    linda:send("Functions", {table_functions, fnTryGroupName})
+                elseif val.cmd == "EXIT" then
+                    break;
                 end
             end
         end
-        local out = Lang2lpeg[lex]
-        local start_code = out.start_code
-        lpegPattern = out.pattern
-        fnTryGroupName = out.GroupName or (function(s) return s end)
-
-        local textAll = editor:GetText()
-        local start_code_pos = start_code and editor:findtext(start_code, SCFIND_REGEXP) or 0
-
-        m__CLASS = '~~ROOT'
-        -- lpegPattern = nil
-        table_functions = lpegPattern:match(textAll, start_code_pos + 1) -- 2nd arg is the symbol index to start with
 
     end
+
+    local a = lanes.gen( "package,string", {required = {"lpeg"}}, LanesLoop)()
+
+    onDestroy = function() linda:send("_Functions", {cmd = 'EXIT',}) end
 
     local function GetFlags (funcitem)
         if not _show_flags then return '' end
@@ -340,7 +383,9 @@ local function Func_Init(h)
     -- По имени функции находим строку с ее объявлением (инфа берется из table_functions)
     local function Func2Line(funcname)
         if not next(table_functions) then
+            print("table_functions not found!")
             Functions_GetNames()
+            return
         end
         for i = 1, #table_functions do
             if funcname == table_functions[i][1] then
@@ -366,7 +411,6 @@ local function Func_Init(h)
         end
         _isXform = props['FileExt']:find('.form')
         Functions_GetNames()
-        Functions_ListFILL()
         line_count = editor.LineCount
         curSelect = -1
     end
@@ -433,6 +477,15 @@ local function Func_Init(h)
         end
     end
 
+    AddEventHandler("OnLindaNotify", function(key)
+        if key == 'Functions' then
+            local key, val = linda:receive( 1.0, "Functions")    -- timeout in seconds
+            table_functions = val[1]
+            fnTryGroupName = val[2]
+            Functions_ListFILL()
+        end
+    end)
+
     local function OnMySave()
         OnSwitch()
         currentLine = -1
@@ -452,7 +505,6 @@ local function Func_Init(h)
         end
 
         Functions_GetNames()
-        Functions_ListFILL()
     end
 
     function menu_GoToObjectDefenition()    --TODO!!! - перенести в этот файл создание пункта менб!
@@ -586,6 +638,7 @@ return {
     code = 'functions',
     sidebar = Func_Init,
     tabhotkey = "Alt+Shift+U",
+    destroy = function() onDestroy() end,
     description = [[Дерево функций открытого файла]]
 }
 

@@ -111,7 +111,6 @@ return {
     code = 'livesearch',
     toolbar = Init,
     statusbar = Init,
-    destroy = onDestroy,
     description = [[ѕоиск текста по мере набора с выводом
 найденных строк в результатах поиска]]
 }

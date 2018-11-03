@@ -1,27 +1,20 @@
-local sRu
-local sEn
-local mark
+local sRu, sEn, mark, linda
 
 local function Init()
-    local spell = require "luahunspell"
+    require "luahunspell"
     require "shell"
+    if not lanes then
+        lanes = require("lanes").configure()
+    end
+    linda = lanes.linda()
 
-    sRu = spell(props["SciteDefaultHome"]..'\\dics\\ru_RU.aff', props["SciteDefaultHome"]..'\\dics\\ru_RU.dic')
-    sEn = spell(props["SciteDefaultHome"]..'\\dics\\en_US.aff', props["SciteDefaultHome"]..'\\dics\\en_US.dic')
-    local pUserRu = props["SciteDefaultHome"]..'\\dics\\user_RU.dic'
-    local pUserEn = props["SciteDefaultHome"]..'\\dics\\user_EN.dic'
-
-    sRu:add_dic(pUserRu)
-    sEn:add_dic(pUserEn)
-    assert(sRu, 'dict Ru not loaded')
-    assert(sEn, 'dict En not loaded')
     local tblVariants = {}
 
     mark = CORE.InidcFactory('Spell.Errors', _T'Spelling errors', INDIC_SQUIGGLE, 255, 0)
     local cHeck, cSpell, cSkip = 0, 1,2
     local commentsStyles
     local cADDYODIC, cADDBYZXAMPLE = '<'.._T'Add to Dictionary'..'>', '<'.._T'Add according to model'..'>'
-    local constFirstSpell = 65000     --65535 - максимально возможная кмманда
+    local constFirstSpell = 65000     --65535 - максимально вазможная кмманда
     local constAddToDic = 65500
     local constWithExample = 65501
     local SpellRange
@@ -94,24 +87,23 @@ local function Init()
 
     local function SpellRange1251(posStart, posEnd)
         if posStart == 0 then posStart = 1 end
-        local e, s = posStart, 0
         local bSpell
         local str = editor:textrange(posStart - 1, posEnd)
-        for s, word, e in str:gmatch('[ \t\n\r!-/:-?\\[-^{-§]()([A-Za-zА-яЁё]+)()') do
-            if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\\[-^{-»]') then
-                if word:byte() >= 160 then
-                    bSpell = sRu:spell(word)
-                else
-                    if(word:sub(2) == word:sub(2):lower()) then
-                        bSpell = sEn:spell(word)
-                    else bSpell = true end
-                end
-                if not bSpell then
-                    EditorMarkText(posStart + s - 2, e - s, mark)
-                end
+        linda:send("_Spell", {cmd = "SPELL_WIN", posStart = posStart, posEnd = posEnd, str = str})
+    end
+
+    AddEventHandler("OnLindaNotify", function(key)
+        if key == 'Spell' then
+            local key, val = linda:receive( 1.0, "Spell")    -- timeout in seconds
+            if val.cmd == 'SPELL_ERR_WIN' then
+                EditorMarkText(val[1], val[2], mark)
+            elseif val.cmd == 'SPELL_ERR_UTF' then
+                local sb = editor:WordStartPosition(val[1], val[2], true)
+                local se = editor:WordEndPosition(val[1], val[2], true) - sb
+                EditorMarkText(sb, se, mark)
             end
         end
-    end
+    end)
 
     local function ProbabblyFromUT(str)
         if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then return str end
@@ -120,40 +112,171 @@ local function Init()
 
     local function SpellRangeUTF8(posStart, posEnd)
         if posStart == 0 then posStart = 1 end
-        local e, s = posStart, 0
-        local bSpell
         local str = editor:textrange(posStart - 1, posEnd + 1):from_utf8()
-        local iUt = 2
-        local t = nil
-        --local str2 = editor:textrange(posStart-1, posEnd+1)
-        for s, word, e in str:gmatch('[ \t\n\r!-/:-?\\[-^{-§]()([A-Za-zА-яЁё]+)()') do
-            if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\\[-^{-»]') then
-                if word:byte() >= 160 then
-                    bSpell = sRu:spell(word)
-                else
-                    if(word:sub(2) == word:sub(2):lower()) then
-                        bSpell = sEn:spell(word)
-                    else bSpell = true end
-                end
-                if not bSpell then
-                    if t == nil then
-                        t = {}
-                        t[0] = 0
-                        for i = 1, #str do
-                            if (iUt == 2) ~= (str:byte(i) > 127) then if iUt == 2 then iUt = 1 else iUt = 2 end end
-                            t[i] = t[i - 1] + iUt
-                        end
+        linda:send("_Spell", {cmd = "SPELL_UTF", posStart = posStart, posEnd = posEnd, str = str})
+
+    end
+
+    local function SpellLoop(defHome)
+        local sRu, sEn
+        sRu = luahunspell.Create(defHome..'\\dics\\ru_RU.aff', defHome..'\\dics\\ru_RU.dic')
+        sEn = luahunspell.Create(defHome..'\\dics\\en_US.aff', defHome..'\\dics\\en_US.dic')
+        local pUserRu = defHome..'\\dics\\user_RU.dic'
+        local pUserEn = defHome..'\\dics\\user_EN.dic'
+        sRu:add_dic(pUserRu)
+        sEn:add_dic(pUserEn)
+        assert(sRu, 'dict Ru not loaded')
+        assert(sEn, 'dict En not loaded')
+
+        local function saveDic(newWord, pUser)
+            local text = ''
+            local tbl = {}
+            local file
+            if shell.fileexists(pUser) then
+                file = io.input(pUser)
+                text = file:read('*a')
+                text = text:gsub('^.-\n', '')
+                text = text..'\n'
+                file:close()
+            end
+            text = text..newWord
+            for w in string.gmatch(text, "[^\n\r]+") do
+                table.insert(tbl, w)
+            end
+            table.sort(tbl)
+            text = #tbl..'\n'..table.concat(tbl, '\n')
+            file = io.output(pUser)
+            file:write(text)
+
+            file:flush()
+            file:close()
+        end
+
+        local function spellRangeWin(posStart, posEnd, str)
+            if posStart == 0 then posStart = 1 end
+            local e, s = posStart, 0
+            local bSpell
+
+            for s, word, e in str:gmatch('[ \t\n\r!-/:-?\\[-^{-§]()([A-Za-zА-яЁё]+)()') do
+                if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\\[-^{-»]') then
+                    if word:byte() >= 160 then
+                        bSpell = sRu:spell(word)
+                    else
+                        if(word:sub(2) == word:sub(2):lower()) then
+                            bSpell = sEn:spell(word)
+                        else bSpell = true end
                     end
-                    local sb = editor:WordStartPosition(posStart + t[s - 2], t[e - s] + 1, true)
-                    local se = editor:WordEndPosition(posStart + t[s - 2], t[e - s] + 1, true) - sb
-                    -- print(editor:WordStartPosition(posStart+t[s-2],t[e-s]+ 1,true), editor:WordEndPosition(posStart+t[s-2],t[e-s]+ 1,true) - editor:WordStartPosition(posStart+t[s-2],t[e-s]+ 1,true),posStart+t[s-2],t[e-s]+ 1)
-                    -- EditorMarkText(posStart+t[s-2],t[e-s]+ 1, mark)
-                    EditorMarkText(sb, se, mark)
-                    --EditorMarkText(editor:WordStartPosition(posStart+t[s-2],t[e-s]+ 1,true), editor:WordEndPosition(posStart+t[s-2],t[e-s]+ 1,true))
+                    if not bSpell then
+                        linda:send("Spell", {cmd = "SPELL_ERR_WIN", posStart + s - 2, e - s})
+                        --EditorMarkText(posStart + s - 2, e - s, mark)
+                    end
+                end
+            end
+        end
+
+        local function spellRangeUTF(posStart, posEnd, str)
+            if posStart == 0 then posStart = 1 end
+            local e, s = posStart, 0
+            local bSpell
+            local iUt = 2
+            local t = nil
+            --local str2 = editor:textrange(posStart-1, posEnd+1)
+            for s, word, e in str:gmatch('[ \t\n\r!-/:-?\\[-^{-§]()([A-Za-zА-яЁё]+)()') do
+                if string.find(str:sub(e, e), '[ \t\n\r!-/:-?\\[-^{-»]') then
+                    if word:byte() >= 160 then
+                        bSpell = sRu:spell(word)
+                    else
+                        if(word:sub(2) == word:sub(2):lower()) then
+                            bSpell = sEn:spell(word)
+                        else bSpell = true end
+                    end
+                    if not bSpell then
+                        if t == nil then
+                            t = {}
+                            t[0] = 0
+                            for i = 1, #str do
+                                if (iUt == 2) ~= (str:byte(i) > 127) then if iUt == 2 then iUt = 1 else iUt = 2 end end
+                                t[i] = t[i - 1] + iUt
+                            end
+                        end
+                        linda:send("Spell", {cmd = "SPELL_ERR_UTF", posStart + t[s - 2], t[e - s] + 1})
+
+                    end
+                end
+            end
+        end
+
+        local function fillVariantsMenu(word)
+            local s
+            if word:byte() >= 192 then --eror
+                s = sRu
+            else
+                s = sEn
+            end
+            local t = s:suggest(word)
+            tblVariants = {}
+
+            linda:send("_Spell_Variants", t)
+        end
+
+        local function add(word)
+            local sPel, pUser
+            if word:byte() >= 160 then
+                sPel = sRu
+                pUser = pUserRu
+            else
+                sPel = sEn
+                pUser = pUserEn
+            end
+            sPel:add_word(word)
+            saveDic(word, pUser)
+            linda:send("_Spell_Add", true)
+        end
+        local function addWithExample(word, ex)
+            local s
+            if word:byte() >= 192 then --eror
+                s = sRu
+                pUser = pUserRu
+            else
+                s = sEn
+                pUser = pUserRu
+            end
+            local bOk = false
+            if(s:spell(ex)) then
+                local t = s:stem(ex)
+                for _, v in ipairs(t) do
+                    if(ex == v) then bOk = true; break end
+                end
+                if bOk then
+                    local strFlag = s:add_with_affix(word, ex)
+                    saveDic(word..'/'..strFlag, pUser)
+                end
+            end
+            linda:send("_Spell_AddWithExample", bOk)
+        end
+
+        while true do
+            local key, val = linda:receive( 100, "_Spell")
+            if val ~= nil then
+                if val.cmd == "SPELL_WIN" then
+                    spellRangeWin(val.posStart, val.posEnd, val.str)
+                elseif val.cmd == "SPELL_UTF" then
+                    spellRangeUTF(val.posStart, val.posEnd, val.str)
+                elseif val.cmd == "VARIANTS" then
+                    fillVariantsMenu(val.word)
+                elseif val.cmd == "ADDWITHEXAMPLE" then
+                    addWithExample(val.word, val.ex)
+                elseif val.cmd == "ADD" then
+                    add(val.word)
+                elseif val.cmd == "EXIT" then
+                    sRu:destroy(); sEn:destroy();
+                    break;
                 end
             end
         end
     end
+
+    local a = lanes.gen( "package,string,table,io", {required = {"luahunspell", "shell"}}, SpellLoop)(props["SciteDefaultHome"])
 
     local function OnSwitch_local()
         bReset = false
@@ -199,29 +322,7 @@ local function Init()
     local sPel, pUser, curLine
     local function ApplyVariant(str)
         if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
-        local function saveDic(newWord, pUser)
-            local text = ''
-            local tbl = {}
-            local file
-            if shell.fileexists(pUser) then
-                file = io.input(pUser)
-                text = file:read('*a')
-                text = text:gsub('^.-\n', '')
-                text = text..'\n'
-                file:close()
-            end
-            text = text..newWord
-            for w in string.gmatch(text, "[^\n\r]+") do
-                table.insert(tbl, w)
-            end
-            table.sort(tbl)
-            text = #tbl..'\n'..table.concat(tbl, '\n')
-            file = io.output(pUser)
-            file:write(text)
 
-            file:flush()
-            file:close()
-        end
         local s = editor:IndicatorStart(mark, editor.CurrentPos)
         local e = editor:IndicatorEnd(mark, editor.CurrentPos)
         if str == cADDBYZXAMPLE then
@@ -245,47 +346,35 @@ local function Init()
                             local e = editor:IndicatorEnd(mark, editor.CurrentPos)
 
                             local word = ProbabblyFromUT(editor:textrange(s, e))
-                            txt_sorse.value = word
+                            txt_sorse.value = word:to_utf8()
 
                             txt_example.value = ''
-                            if word:byte() >= 160 then
-                                sPel = sRu
-                                pUser = pUserRu
-                            else
-                                sPel = sEn
-                                pUser = pUserEn
-                            end
+
                             curLine = editor:LineFromPosition(s)
                         end
             end) }
 
             function btn_ok:action()                        -- о вазможная комманда      coow
                 local bOk = false
-                local ex = txt_example.value
+                local ex = txt_example.value:from_utf8()
+                local word = txt_sorse.value:from_utf8()
                 if #ex > 0 then
-                    if(sPel:spell(ex)) then
-                        local t = sPel:stem(ex)
-                        for _, v in ipairs(t) do
-                            if(ex == v) then bOk = true; break end
-                        end
-                        if bOk then
-                            local word = txt_sorse.value
-                            local strFlag = sPel:add_with_affix(word, ex)
-                            saveDic(word..'/'..strFlag, pUser)
-                            SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
-                        end
-                    end
+
+                    linda:send("_Spell", {cmd = "ADDWITHEXAMPLE", word = word, ex = ex})
+                    local key
+                    key, bOk = linda:receive(3.0, "_Spell_AddWithExample")
+
                 end
 
                 if bOk then
+                    SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
                     dlg:hide()
-                    --[[iup.Destroy(dlg)]]
                 else
                     txt_example.value = '<bAd>'
                 end
             end
 
-            function btn_esc:action() --фрейм
+            function btn_esc:action() --фреймаа
                 dlg:hide()
                 txt_sorse.value = 'sdsdsds'
                 --[[iup.Destroy(dlg)]];
@@ -295,17 +384,10 @@ local function Init()
             end
         elseif str == cADDYODIC then
             local word = ProbabblyFromUT(editor:textrange(s, e))
-            --EditorClearMarks(mark,s,e-s)
-            local sPel, pUser
-            if word:byte() >= 160 then
-                sPel = sRu
-                pUser = pUserRu
-            else
-                sPel = sEn
-                pUser = pUserEn
-            end
-            sPel:add_word(word)
-            saveDic(word, pUser)
+
+            linda:send("_Spell", {cmd = "ADD", word = word})
+            local key, bOk = linda:receive(3.0, "_Spell_Add")
+
             curLine = editor:LineFromPosition(s)
             SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
 
@@ -415,24 +497,18 @@ local function Init()
     end
 
     local function FillVariantsMenu()
-        local lst = {}
+        local lst = {}     --65535 - максимально возможная кмманда
 
         local word = ProbabblyFromUT(editor:textrange(editor:IndicatorStart(mark, editor.CurrentPos), editor:IndicatorEnd(mark, editor.CurrentPos)))
+        linda:send("_Spell", {cmd = "VARIANTS", word = word})
+        local key, val = linda:receive(3.0, "_Spell_Variants")
+        if val then
+            for i = 1,  #val do
+                table.insert(lst, {(val[i]):to_utf8(), action = function() ApplyVariant(val[i]) end})
+            end
+            if #val > 0 then end table.insert(lst,{'sSpell1', separator = 1})
+        end
 
-        local s
-        if word:byte() >= 192 then --eror
-            s = sRu
-        else
-            s = sEn
-        end
-        local t = s:suggest(word)
-        tblVariants = {}
-        for _, v in ipairs(t) do
-            --if s == sRu then v = shell.to_utf8(v) end
-            table.insert(lst, {v:to_utf8(), action = function() ApplyVariant(v) end})
-        end
-        if #t > 0 then end table.insert(lst,{'sSpell1', separator = 1})
-        current_poslst = editor.CurrentPos
         return lst
     end
 
@@ -458,7 +534,7 @@ local function Init()
         end
 
         AddEventHandler("OnColorized", OnColorise_local)
-        AddEventHandler("OnOpen", OnSwitch_local)
+        AddEventHandler("OnOpen", function() spellStart, spellEnd = 0, 0; OnSwitch_local() end)
         AddEventHandler("OnSwitchFile", OnSwitch_local)
         AddEventHandler("OnIdle", OnIdle_local)
 
@@ -529,5 +605,5 @@ return {
     hidden = Init,
     code = 'spell',
     statusbar = Init_status,
-    destroy = function() sRu:destroy(); sEn:destroy(); CORE.FreeIndic(mark) end,
+    destroy = function() linda:send("_Spell", {cmd = "EXIT"}) CORE.FreeIndic(mark) end,
 }

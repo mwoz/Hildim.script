@@ -11,8 +11,9 @@ end
 
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 
-if not lpeg then lpeg = require"lpeg" end
+--if not lpeg then lpeg =  end
 --Расширения, загружаемые в любом случае
+require"lpeg"
 require "menuhandler"
 _G.g_session = {}
 dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")

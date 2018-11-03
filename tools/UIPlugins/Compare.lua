@@ -683,6 +683,6 @@ local function Init_hidden()
 end
 return {
     title = _T'File Comparison',
-    destroy = onDestroy,
+    destroy = function() onDestroy() end,
     hidden = Init_hidden,
 }
