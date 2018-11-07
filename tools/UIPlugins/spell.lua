@@ -471,12 +471,15 @@ local function Init()
 
     local function OnIdle_local()
         if spellEnd then
+            local dP = editor:PositionFromLine(editor:LineFromPosition(spellStart) + 500)
+            if dP < 0 or dP >= spellEnd then dP = nil end
             if not bReset then
                 if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then SpellRange = SpellRange1251 else SpellRange = SpellRangeUTF8 end
                 bReset = true
             end
-            SpellLexer(spellStart, spellEnd)
-            spellStart, spellEnd = nil, nil
+            SpellLexer(spellStart, dP or spellEnd)
+            if dP then spellStart = dP
+            else spellStart, spellEnd = nil, nil end
         end
         if bNeedList then bNeedList = false; ListErrors() end
     end
@@ -534,9 +537,10 @@ local function Init()
         end
 
         AddEventHandler("OnColorized", OnColorise_local)
-        AddEventHandler("OnOpen", function() spellStart, spellEnd = 0, 0; OnSwitch_local() end)
-        AddEventHandler("OnSwitchFile", OnSwitch_local)
+        AddEventHandler("OnOpen", function() OnSwitch_local() end)
+        AddEventHandler("OnSwitchFile", function() spellStart = nil; spellEnd = nil; OnSwitch_local() end)
         AddEventHandler("OnIdle", OnIdle_local)
+        AddEventHandler("OnBeforeOpen", function() spellStart = nil; spellEnd = nil end)
 
         local function ResetAutoSpell()
             CheckChange('spell.autospell', true)

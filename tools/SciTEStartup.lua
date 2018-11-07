@@ -11,7 +11,6 @@ end
 
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 
---if not lpeg then lpeg =  end
 --Расширения, загружаемые в любом случае
 require"lpeg"
 require "menuhandler"

@@ -43,7 +43,7 @@ local function Func_Init(h)
         linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'], fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']]})
     end
 
-    local function LanesLoop(l)
+    local function LanesLoop()
         --lpeg = l
         --print(mblua.CreateMessage)
         local lpExt = {}

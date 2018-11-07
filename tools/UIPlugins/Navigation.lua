@@ -34,6 +34,7 @@ local function internal_Init()
         end
 
         local line_text = editor:GetLine(line_)
+        if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then line_text = line_text:to_utf8() end
         if line_text == nil then line_text = '' end
         line_text = line_text:gsub('^%s+', ''):gsub('%s+', ' ')
         if line_text == '' then

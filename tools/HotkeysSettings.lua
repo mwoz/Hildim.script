@@ -66,9 +66,10 @@ local function Show()
     local edit_hk, tree_hk, edit_find
 
     local function findMenu(start, val)
+        val = val:from_utf8()
         local v = StringLower(val, 1251)
         for i = start, iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
-            local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
+            local title = iup.GetAttributeId(tree_hk, 'TITLE', i):from_utf8()
             if StringLower(title, 1251):find('^'..v) then
                 edit_hk.value = ''
                 tree_hk.value = i

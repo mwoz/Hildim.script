@@ -165,7 +165,7 @@ end
 local function loadList()
     mLst.numlin = #tblView
     for i = 1, #tblView do
-        iup.SetAttributeId(mLst, "", i, tblView[i].name.." #"..(tblView[i].comment or ''))
+        iup.SetAttributeId(mLst, "", i, (tblView[i].name.." #"..(tblView[i].comment or '')):to_utf8())
         iup.SetAttributeId(mLst, "COLOR", i, iup.GetGlobal('TXTBGCOLOR'))
 
         local t = enrichRow(tblView[i])

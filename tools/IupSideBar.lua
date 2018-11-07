@@ -590,14 +590,6 @@ local function InitSideBar()
     end
 
     bSplitter = function() return iup.GetDialogChild(hMainLayout, Iif((_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 1, 'SourceSplitBtm', 'SourceSplitMiddle')) end
-    if props['session.reload'] ~= '1' and (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 1 then
-
-        local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
-        iup.Reparent(hBx, iup.GetDialogChild(hMainLayout, "CoSourceExpanderBtm"), nil)
-        iup.GetDialogChild(hMainLayout, "SourceSplitBtm").barsize = '5'
-        CORE.RemapTab(false)
-        iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
-    end
 
     CoEditor = iup.scitedetachbox{
         HANDLE = iup.GetDialogChild(hMainLayout, "SourceExDetach"); buttonImage='edit_µ';
@@ -618,18 +610,6 @@ local function InitSideBar()
         MenuVisibleEx = (function() return scite.buffers.SecondEditorActive() == 1 and scite.ActiveEditor() == 1 end);
     }
     _G.g_session['coeditor'] = CoEditor
-
-    iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").valuechanged_cb = function(h)
-        if h.value == '1000' then
-            CoEditor.cmdHide()
-        end
-    end
-    iup.GetDialogChild(hMainLayout, "SourceSplitBtm").valuechanged_cb = function(h)
-        if h.value == '1000' then
-            CoEditor.cmdHide()
-        end
-    end
-
 
 end
 
@@ -979,6 +959,16 @@ InitSideBar()
 InitTabbar()
 InitToolBar()
 InitStatusBar()
+local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
+if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 1 then          -- props['session.reload'] ~= '1' and
+    if iup.GetChild(iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm'), 1) == nil then
+        CORE.RemapCoeditor()
+    end
+else
+    if iup.GetChild(iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm'), 1) ~= nil then
+        CORE.RemapCoeditor()
+    end
+end
 RestoreNamedValues(hMainLayout, 'sidebarctrl')
 RestoreNamedValues(hMainLayout, 'findreplace')
 iup.Refresh(hMainLayout)
@@ -1002,6 +992,9 @@ try{
         print
     }
 }
+
+iup.GetDialogChild(hMainLayout, "BottomBarSplit").flat_button_cb = function(h, button, pressed, x, y, status) if button == iup.BUTTON1 and iup.isdouble(status) then scite.MenuCommand(IDM_TOGGLEOUTPUT) end end
+
 
 menuhandler:DoPostponedInsert()
 

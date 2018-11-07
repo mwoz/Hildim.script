@@ -777,7 +777,9 @@ local function ReCreateStructures(strText, tblFiles)
         fillup_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".fillup.characters"])
         autocom_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".start.characters"])
         inheritors = {}
+        --local ts = shell.clockStart()
         str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
+        --print(shell.clockDiff(ts))
     end
     if Favorites_Clear ~= nil then Favorites_Clear() end
     -----------
@@ -802,7 +804,7 @@ local function ReCreateStructures(strText, tblFiles)
         scite.SendEditor(3996, 15, kw)
         editor:Colourise(0, editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen + 2))
     else
-        RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
+        --RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
     end
 	get_api = false
 	return false

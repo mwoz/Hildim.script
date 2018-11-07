@@ -1470,9 +1470,22 @@ iup.scitedetachbox = function(t)
         {'Attached', action = cmd_Attach, check = function() return get_scId() == "0" end,},
         {'Pop Up', action = cmd_PopUp, check = function() return get_scId() == "1" end, },
         {'Hidden', action = cmd_Hide, check = function() return get_scId() == "2" end },
+		{'Main Window split', visible = "(_G.iuprops['coeditor.win'] or '')=='0' and '"..dtb.sciteid.."'=='coeditor'",{radio = 1,
+            {'Horizontal',  action = function() CORE.RemapCoeditor() end, check = "iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'),1)", },
+            {'Vertical',  action = function() CORE.RemapCoeditor() end, check = "not iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'),1)", },
+		},},
         {'s1', separator = 1},
         {'Show/Hide', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
     }
+
+    if dtb.Split_h then
+        dtb.Split_h().flat_button_cb = function(h, button, pressed, x, y, status)
+            if button == iup.BUTTON1 and iup.isdouble(status) then cmd_Switch()
+            elseif button == iup.BUTTON3 then
+                menuhandler:PopUp('MainWindowMenu|View|'..t.sciteid)
+            end
+        end
+    end
 
     menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, cpt = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
