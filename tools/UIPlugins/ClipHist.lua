@@ -297,7 +297,7 @@ local function init()
     end
 
     function lst_clip:button_cb(button, pressed, x, y, status)
-        if button == iup.BUTTON1 and (iup.isdouble(status) or (bToolBar and pressed == 0 and lst_clip.cursor == "ARROW")) then
+        if button == iup.BUTTON1 and ((iup.isdouble(status) and not bToolBar) or (bToolBar and pressed == 0 and lst_clip.cursor == "ARROW")) then
             PassFocus(); setClipboard(math.floor(iup.ConvertXYToPos(lst_clip, x, y) / 3))
         elseif button == iup.BUTTON1 and pressed == 0 then
             droppedLin = nil; lst_clip.cursor = "ARROW"

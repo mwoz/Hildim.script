@@ -27,7 +27,7 @@ document - имя этого же объекта, заданное в api файле
 local current_pos = 0    -- текущая позиция курсора
 local current_poslst = 0    -- текущая позиция курсора - при активации листа
 local autocom_chars = '' -- паттерн, содержащий экранированные символы из параметра autocomplete.lexer.start.characters - по эти
-local fillup_chars = ''  -- паттерн, содержащий экранированные символы из параметра autocomplete.lexer.fillup.characters
+local fillup_chars, fillup_chars_cur = '', ''  -- паттерн, содержащий экранированные символы из параметра autocomplete.lexer.fillup.characters
 local get_api = true     -- флаг, определяющий необходимость перезагрузки api файла
 local api_table = {}     -- все строки api файла (очищенные от ненужной нам информации)
 local objects_table = {} -- все "объекты", найденные в api файле
@@ -257,9 +257,19 @@ local function isXmlLine(cp)
     return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[CUR_POS:Get('SelectionStart')] == 1 and editor.CharAt[CUR_POS:Get('SelectionStart')] == 62)
 end
 
+-- Преобразовывает стринг в паттерн для поиска
+local function fPattern(str)
+	local str_out = ''
+	for i = 1, string.len(str) do
+		str_out = str_out..'%'..string.sub(str, i, i)
+	end
+    if str_out ~= '' then str_out = "["..str_out.."]" end
+	return str_out
+end
+
 local function ShowCallTip(pos, str, s, e, reshow)
     local s1, _, list = str:find('{{(.-)}}', s)
-    local function ls(l)
+    local function ls(l, seps)
         if not l:find('|') then
             editor:ReplaceSel(l)
             return
@@ -269,13 +279,19 @@ local function ShowCallTip(pos, str, s, e, reshow)
             table.insert(tl, w)
         end
         tl = TableSort(tl)
-        l = table.concat(tl, ',')
-        editor.AutoCSeparator = string.byte(',')
+        l = table.concat(tl, '\t')
+        editor.AutoCSeparator = string.byte('\t')
         current_poslst = current_pos
         pasteFromXml = false
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8() end
+        --if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8() end
         editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
         editor:UserListShow(constListIdXmlPar, l)
+        SetListVisibility(true)
+        if seps then
+            fillup_chars_cur = fPattern(seps)
+        else
+            fillup_chars_cur = fillup_chars
+        end
     end
     local function IsWordCharParam()
         for i = editor.CurrentPos, 0, -1 do
@@ -297,7 +313,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
             calltipinfo['attr']['e'] = e
         end
         if sub then list = m_tblSubstitution[sub]
-            if type(list) == 'function' then list = list(function(strList) ls(strList) end) end
+            if type(list) == 'function' then list = list(function(strList, seps) ls(strList, seps) end) end
         end
         if not list then return end
         local cp = editor.CurrentPos
@@ -322,12 +338,14 @@ local function ShowCallTip(pos, str, s, e, reshow)
                         table.insert(tl, w)
                     end
                     tl = TableSort(tl)
-                    ulFromCT_data = table.concat(tl, ',')
-                    editor.AutoCSeparator = string.byte(',')
+                    ulFromCT_data = table.concat(tl, '\t')
+                    editor.AutoCSeparator = string.byte('\t')
                     current_poslst = current_pos
                     pasteFromXml = false
                     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8() end
                     editor:UserListShow(constListIdXmlPar, ulFromCT_data)
+                    fillup_chars_cur = fillup_chars
+                    SetListVisibility(true)
                 end
             end)
             return
@@ -360,16 +378,6 @@ local function HideCallTip()
     editor:CallTipCancel()
     table.remove(calltipinfo)
     if #calltipinfo == 1 then calltipinfo[1] = 0 end
-end
-
--- Преобразовывает стринг в паттерн для поиска
-local function fPattern(str)
-	local str_out = ''
-	for i = 1, string.len(str) do
-		str_out = str_out..'%'..string.sub(str, i, i)
-	end
-    if str_out ~= '' then str_out = "["..str_out.."]" end
-	return str_out
 end
 
 ------------------------------------------------------
@@ -867,13 +875,14 @@ local function ShowUserList(nPos, iId, last)
                 end
             end
         end
-        local sep = '‡'--'Только для этого сепаратора будет производится поиск по аббревиатуре!'
+        local sep = '\t'--'Только для этого сепаратора будет производится поиск по аббревиатуре!'
 		local s = table.concat(methods_table, sep)
 		if s ~= '' then
             editor.AutoCSeparator = string.byte(sep)
             editor.AutoCMaxHeight = maxListsItems
             if nPos > 0 then editor.CurrentPos = editor.CurrentPos - nPos end
             editor:UserListShow(iId or 7, s)
+            fillup_chars_cur = fillup_chars
             if nPos > 0 then editor.CurrentPos = editor.CurrentPos + nPos end
 
             if iSel ~= 0 then
@@ -1240,7 +1249,7 @@ end
 -- ОСНОВНАЯ ПРОЦЕДУРА (обрабатываем нажатия на клавиши)
 local function OnChar_local(char)
 
-    if bIsListVisible and not pasteFromXml and fillup_chars ~= '' and string.find(char, fillup_chars) then
+    if bIsListVisible and not pasteFromXml and fillup_chars_cur ~= '' and string.find(char, fillup_chars_cur) then
         --обеспечиваем вставку выбранного в листе значения вводе одного из завершающих символов(fillup_chars - типа (,. ...)
         --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживается пробел, и  start_chars==fillup_chars - лист сразу же закрывается,
         if editor:AutoCActive() then
