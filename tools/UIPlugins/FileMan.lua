@@ -540,7 +540,7 @@ local function OnSwitch(bForse, bRelist)
         local path = props['FileDir']
         if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
         if path ~= '' then
-            current_path = path:from_utf8():gsub('\\$', '')..'\\'
+            current_path = path:gsub('\\$', '')..'\\'
             -- print(current_path, current_path)
             -- if bClearMask then memo_mask:set_text = "" end
             if zPath.valuepos == '0' then FileMan_ListFILL() end

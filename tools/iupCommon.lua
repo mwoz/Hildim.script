@@ -4,6 +4,36 @@ local RestoreIup
 local old_iup_ShowXY = iup.ShowXY
 CORE.old_iup_ShowXY = old_iup_ShowXY
 
+if not lanes then
+    lanes = require("lanes").configure()
+end
+local linda = lanes.linda()
+
+local function runAsync(cmd, key, dir)
+    local ierr, strerr
+    local proc, err, errdesc = shell.startProc(cmd, dir)
+    if proc then
+        while true do
+            local c, msg, exitcode = proc:Continue()
+            if c == "C" then
+                linda:send( "CORE_CMD_"..key.."_C", msg)
+            elseif c == "S" then
+                linda:send( "CORE_CMD_"..key.."_S", msg..' '..math.tointeger(exitcode))
+                return
+            else
+                linda:send( "CORE_CMD_"..key.."_E", msg..' '..math.tointeger(exitcode))
+                return
+            end
+        end
+    else
+        print("Error: Command "..cmd, err, errdesc)
+        linda:send( "CORE_CMD_"..key.."_E","Error: Command "..cmd..' '..err..' '..(errdesc or ''))
+        return - 1
+    end
+end
+
+local lanesgen = lanes.gen("package,io,string,math", {required = {"shell"}}, runAsync)
+
 _G.iuprops = {}
 local iuprops_read_ok = false
 local file = props["scite.userhome"]..'\\settings.lua'
@@ -708,6 +738,34 @@ function CORE.CloseListSet(sel, lst, column)
     lst.redraw = 'ALL'
 end
 
+local cmdCounter = 0
+local cmdMap = {}
+
+function CORE.AsyncProc(cmd, fCallBack, dir)
+    local function prn(k, v)
+        if k == 'S' then v = 'Exit: '..v
+        elseif k == 'E' then  v = 'Error: '..v end
+        output:SetSel(output.TextLength, output.TextLength)
+        output:ReplaceSel(v)
+    end
+    cmdCounter = #cmdMap
+    cmdMap[''..cmdCounter] = fCallBack or prn
+    lanesgen(cmd, ''..cmdCounter, dir)
+   -- return
+    --cmdCounter = cmdCounter + 1
+end
+
+AddEventHandler("OnLindaNotify", function(key)
+    if key:find("^CORE_CMD_") then
+        local _, _, id, k = key:find('(%d+)_(.)')
+        if id and cmdMap[id] then
+            local key, val = linda:receive( 1.0, key)
+            cmdMap[id](k, val)
+            if k ~= 'C' then table.remove(cmdMap, id) end
+        end
+    end
+end)
+
 AddEventHandler("OnMenuCommand", function(cmd, source)
     if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
         if cmd == IDM_QUIT then
@@ -904,7 +962,6 @@ local old_flatscrollbox = iup.flatscrollbox
 iup.flatscrollbox = function(t)
     t.forecolor = props['layout.scroll.forecolor']
     t.highcolor = props['layout.scroll.highcolor']
-    t.backcolor = props['layout.scroll.backcolor']
     t.presscolor = props['layout.scroll.presscolor']
     return old_flatscrollbox(t)
 end

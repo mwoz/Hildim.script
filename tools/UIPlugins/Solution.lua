@@ -366,10 +366,12 @@ local function Solution_Init(h)
             {"Add marked to Solution", action = function() CORE.DoForFileSet('1', AddAll)() end,},
             {"Add NOT marked to Solution", action = function() CORE.DoForFileSet('0', AddAll)() end,},
     }}, "sysm/ui/solution.html", _T)
+    local bgbox = iup.backgroundbox{iup.flatscrollbox{tree_sol, border='NO'}, bgcolor = props['layout.scroll.backcolor']};
     return {   -- iup.vbox{   };
-        handle = iup.flatscrollbox{tree_sol, border='NO'};
+        handle = bgbox,
         OnSwitchFile = Initialize,
         OnOpen = Initialize,
+        OnCreate = function() bgbox.bgcolor = props['layout.scroll.backcolor'] end;
         on_SelectMe = Initialize
     }
 

@@ -437,6 +437,8 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
                 end
             end
 
+            if editor:textrange(editor:PositionFromLine(editor:LineFromPosition(editor.CurrentPos)), editor.CurrentPos):find('%S +%S') then bSet = false end
+
             if bSet then
                 local curS = editor.SelectionStart
                 local ls = editor:LineFromPosition(curS)

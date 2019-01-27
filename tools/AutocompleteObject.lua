@@ -722,6 +722,8 @@ local function ReCreateStructures(strText, tblFiles)
     local rootTag
     if editor:GetLine(0) then _,_,rootTag = (editor:GetLine(0)..''):find('^<(%w+)') end
     rootTag = rootTag or ''
+    local strPathNew, iFind = props['FileDir']:gsub('(\\Templates[^\\]*).*', '%1', 1)
+    if (strPathNew:find('\\\\') or 2) == 1 then iFind = 0 end
 
     local tbl_fList= {}
     local function RecrReCreateStructures(strTxt,tblFiles)
@@ -737,8 +739,8 @@ local function ReCreateStructures(strText, tblFiles)
             if tblFiles[string.lower(fName)] == nil then
                 tblFiles[string.lower(fName)] = 1
                 local fName2 = get_precomp_tblFiles(string.lower(fName))
-                if fName2 ~= nil then
-                    incPath = props["precomp_strRootDir"]..'\\'..fName2
+                if fName2 ~= nil and iFind > 0 then
+                    incPath = strPathNew..'\\'..fName2
                     if Favorites_AddFileName ~= nil then -- and StatusBar_obj ~= nil
                         Favorites_AddFileName(incPath)
                     end

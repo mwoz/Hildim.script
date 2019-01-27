@@ -515,6 +515,8 @@ local function InitSideBar()
         end
     end
 
+    if OnCreate then OnCreate() end
+
     local bSplitter = iup.GetDialogChild(hMainLayout, "BottomSplit")
 
     local function toggleOf()
@@ -999,9 +1001,23 @@ iup.GetDialogChild(hMainLayout, "BottomBarSplit").flat_button_cb = function(h, b
 menuhandler:DoPostponedInsert()
 
 local bMenu,bToolBar,bStatusBar
-local bSideBar,bLeftBar,bconsoleBar,bFindResBar,bFindRepl
+local bSideBar, bLeftBar, bconsoleBar, bFindResBar, bFindRepl
+
+local function CheckExists()
+    if props['FilePath']:find('\\') == 1 then return end
+    local i = scite.buffers.GetCurrent()
+    if not shell.fileexists(props['FilePath']) and scite.buffers.FileTimeAt(i) ~= 0 then
+        local msg = _TH"File \n'%1'\n is missing or not available.\nDo you wish to keep the file open in the editor?"
+        if 2 == iup.Alarm('HildiM', _FMT(msg, props['FilePath']), _TH"OK", _TH"No") then
+            scite.MenuCommand(IDM_CLOSE)
+        else
+            scite.buffers.ClearFileTimeAt(i)
+        end
+    end
+end
 
 AddEventHandler("OnSwitchFile", function(file)
+    scite.RunAsync(CheckExists)
     if scite.ActiveEditor() == 1 then
         if (_G.iuprops['coeditor.win'] or '0') == '2' and scite.buffers.SecondEditorActive() == 1 then CoEditor.Switch();
         elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']:from_utf8(); iup.Redraw(b, 1) end

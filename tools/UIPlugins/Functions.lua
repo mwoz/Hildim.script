@@ -620,14 +620,16 @@ local function Func_Init(h)
     AddEventHandler("OnClose",
         function() tree_func.delnode0 = "CHILDREN"; tree_func.title0 = ""
     end)
-
+    local bgbox = iup.backgroundbox{iup.flatscrollbox{tree_func, border = 'NO'}};
     return {   -- iup.vbox{   };
-        handle = iup.flatscrollbox{tree_func, border = 'NO'};
+
+        handle = bgbox;
         OnSwitchFile = OnSwitch;
         OnSave = OnMySave;
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
+        OnCreate = function() bgbox.bgcolor = props['layout.scroll.backcolor'] end;
         on_SelectMe = function() OnSwitch(); iup.SetFocus(tree_func); iup.Flush();end
     }
 
