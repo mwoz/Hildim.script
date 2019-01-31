@@ -515,8 +515,6 @@ local function InitSideBar()
         end
     end
 
-    if OnCreate then OnCreate() end
-
     local bSplitter = iup.GetDialogChild(hMainLayout, "BottomSplit")
 
     local function toggleOf()

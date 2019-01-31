@@ -629,7 +629,6 @@ local function Func_Init(h)
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
-        OnCreate = function() bgbox.bgcolor = props['layout.scroll.backcolor'] end;
         on_SelectMe = function() OnSwitch(); iup.SetFocus(tree_func); iup.Flush();end
     }
 

@@ -960,9 +960,10 @@ end
 
 local old_flatscrollbox = iup.flatscrollbox
 iup.flatscrollbox = function(t)
-    t.forecolor = props['layout.scroll.forecolor']
-    t.highcolor = props['layout.scroll.highcolor']
-    t.presscolor = props['layout.scroll.presscolor']
+    t.sb_forecolor = props['layout.scroll.forecolor']
+    t.sb_highcolor = props['layout.scroll.highcolor']
+    t.sb_presscolor = props['layout.scroll.presscolor']
+    t.sb_backcolor = props['layout.scroll.backcolor']
     return old_flatscrollbox(t)
 end
 
@@ -1005,10 +1006,10 @@ local old_matrix = iup.matrix
 iup.matrix = function(t)
     t.hlcolor="255 255 255"
     t.hlcoloralpha = "255"
-    t.forecolor = props['layout.scroll.forecolor'];
-    t.highcolor = props['layout.scroll.highcolor'];
-    t.presscolor = props['layout.scroll.presscolor'];
-    t.backcolor = props['layout.scroll.backcolor']
+    t.sb_forecolor = props['layout.scroll.forecolor'];
+    t.sb_highcolor = props['layout.scroll.highcolor'];
+    t.sb_presscolor = props['layout.scroll.presscolor'];
+    t.sb_backcolor = props['layout.scroll.backcolor']
     t['bgcolor0:*'] = props['layout.scroll.backcolor']
     t.bgcolor = props['layout.txtbgcolor'];
     t.fgcolor = props['layout.txtfgcolor']
