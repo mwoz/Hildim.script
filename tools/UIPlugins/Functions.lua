@@ -40,7 +40,7 @@ local function Func_Init(h)
         table_functions = {}
         if editor.Length == 0 then return end
         local val = {}
-        linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'], fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']]})
+        linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'], fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']], funcExt2 = props['functions.lpeg.'..props['FileExt']]})
     end
 
     local function LanesLoop()
@@ -125,31 +125,26 @@ local function Func_Init(h)
 
         end
 
-        local function getNames(textAll, lex, fileExt, funcExt)
+        local function getNames(textAll, lex, fileExt, funcExt, funcExt2)
             lpExt.m__CLASS = '~~ROOT'
             table_functions = {}
 
-            if not Lang2lpeg[lex] or Lang2lpeg[lex] == Lang2lpeg['*'] then
-                local strOut = funcExt
-                if strOut == '' then
-                    lex = fileExt
-                    if not Lang2lpeg[lex] then
-                        strOut = funcExt
-                    else
-                        strOut = nil
-                    end
-                end
-                if strOut then
-                    if strOut ~= '' then
-                        Lang2lpeg[lex] = load(strOut, 'func_lpeg', 't', lpExt)()
-                    else
-                        Lang2lpeg[lex] = Lang2lpeg['*']
-                    end
+            local l = lex
+            if funcExt2 == '' then funcExt2 = nil end
+            if funcExt2 then l = lex..'.'..fileExt end
+
+            if not Lang2lpeg[l] then
+                local strOut = funcExt2 or funcExt or ''
+
+                if strOut ~= '' then
+                    Lang2lpeg[l] = load(strOut, 'func_lpeg', 't', lpExt)()
+                else
+                    Lang2lpeg[l] = Lang2lpeg['*']
                 end
             end
 
 
-            local out = Lang2lpeg[lex]
+            local out = Lang2lpeg[l]
 
 
 
@@ -173,7 +168,7 @@ local function Func_Init(h)
             local key, val = linda:receive( 100, "_Functions")
             if val ~= nil then
                 if val.cmd == "UPD" then
-                    getNames(val.textAll, val.lex, val.fileExt, val.funcExt)
+                    getNames(val.textAll, val.lex, val.fileExt, val.funcExt, val.funcExt2)
                     linda:send("Functions", {table_functions, fnTryGroupName})
                 elseif val.cmd == "EXIT" then
                     break;

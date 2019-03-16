@@ -416,6 +416,9 @@ local function Init_hidden()
     function COMPARE.To(strName)
         CompareToFile(strName, false)
     end
+    function COMPARE.Start()
+        StartCompare()
+    end
 
     local function prepareTmpPath()
         if not tmpPath then

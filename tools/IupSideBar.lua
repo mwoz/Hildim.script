@@ -1018,7 +1018,7 @@ AddEventHandler("OnSwitchFile", function(file)
     scite.RunAsync(CheckExists)
     if scite.ActiveEditor() == 1 then
         if (_G.iuprops['coeditor.win'] or '0') == '2' and scite.buffers.SecondEditorActive() == 1 then CoEditor.Switch();
-        elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']:from_utf8(); iup.Redraw(b, 1) end
+        elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']; iup.Redraw(b, 1) end
     end
 end)
 

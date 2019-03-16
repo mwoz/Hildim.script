@@ -260,9 +260,13 @@ local function Init()
         local bAddComon = false
 
         if ierr == -3 then
-            receiveVssInfo()
-            ierr, strerr = tState.ierr, tState.strerr
-            if ierr >= -1 then tState.blocked = true end
+            if not shell.fileexists(props['FilePath']) then
+                return {}
+            else
+                receiveVssInfo()
+                ierr, strerr = tState.ierr, tState.strerr
+                if ierr >= -1 then tState.blocked = true end
+            end
         end
 
         if ierr == 0 then -- не взят

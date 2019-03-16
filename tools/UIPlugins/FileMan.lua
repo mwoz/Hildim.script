@@ -16,6 +16,7 @@ local bListOpened = false
 local m_prevSel = 0
 local _Plugins
 local zPath, zMemo
+local bIsRenamed
 
 local function ReplaceWithoutCase(text, s_find, s_rep)
 	local i, j = 1
@@ -177,7 +178,7 @@ local function FileMan_GetSelectedItem(idx)
     local l = list_getvaluenum(list_dir)
     if idx == nil then idx = l end
 	if idx == -1 then return '' end
-	return list_dir:getcell(idx, 2), list_dir:getcell(idx, 4), tonumber(list_dir:getcell(idx, 3))
+	return list_dir:getcell(idx, 2), list_dir:getcell(idx, 4), tonumber(list_dir:getcell(idx, 3)), idx
 end
 
 function FILEMAN.Directory(bFavorit)
@@ -436,14 +437,23 @@ local function FileMan_CheckRename(c,lin, col, mode, update)
 end
 
 local function FileMan_DoRename(c, lin, col)
-    local fname, d, attr = FileMan_GetSelectedItem()
+    local fname, d, attr, idx = FileMan_GetSelectedItem()
     if fname ~= prevName then
-        local lRes = shell.rename_file(current_path..prevName, current_path..fname)
-        if lRes ~= 0 then
-            FileMan_ListFILL()
-            print('File '..prevName..' not renamed!')
+        if bIsRenamed then
+            list_dir:setcell(idx, 2, prevName)
+        else
+            local lRes = shell.rename_file(current_path..prevName, current_path..fname)
+            if lRes ~= 0 then
+                FileMan_ListFILL()
+                print('File '..prevName..' not renamed!')
+            end
+            list_dir.focus_cell = (idx - 1)..":1"
+            if prevName == props['FileNameExt'] then
+                OnSwitchFile(props['FileNamePath'])
+            end
         end
     end
+    bIsRenamed = nil
     prevName = nil
 end
 
@@ -455,6 +465,7 @@ local function FileMan_Rename()
 
     list_dir.focus_cell = l..":2"
     iup.SetAttribute(list_dir, 'READONLY', 'NO')
+    bIsRenamed = true
     iup.SetAttribute(list_dir, 'EDIT_MODE', 'YES')
 end
 
@@ -532,7 +543,7 @@ function FILEMAN.OpenFolder(fname)
 end
 
 local function OnSwitch(bForse, bRelist)
-    if zPath.valuepos == '1' then return end
+    if zPath.valuepos == '1' or bIsRenamed then return end
     if prev_filename:upper() == props['FilePath']:upper() then return end
     prev_filename = ''
     if bForse or (_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.fileman.id) then
@@ -609,10 +620,12 @@ local function memoNav(h, key)
         list_dir.redraw = "ALL"
         return - 1
     elseif key == iup.K_CR then
-        if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
+        if not bIsRenamed and (memo_path.value:find('^%w:[\\/]') or memo_path.value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]')) then
             current_path = memo_path.value:gsub('[\\/][^\\/]*$', '')..'\\'
             FileMan_OpenItem()
             memo_path.caretpos = memo_path.count
+        elseif bIsRenamed then
+            bIsRenamed = nil
         end
     elseif key == iup.K_ESC then --escape
         iup.PassFocus()
