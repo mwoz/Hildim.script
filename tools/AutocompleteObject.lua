@@ -698,7 +698,7 @@ local function FillTableFromText(tblfList, tStruct)
     tblins = objects_table[constObjGlobal]
     if tblins then
         for i = 1,  #tStruct do
-            if tStruct[i].CLASS == '~~ROOT' then
+            if tStruct[i].CLASS == '~~ROOT' or props['FileExt']:lower() == 'incl' then
                 table.insert(tblins, {tStruct[i].ID, (tStruct[i].params or '')..'\n'..tStruct[i].comment})
                 table.insert(tblfList, tStruct[i].ID)
                 if alias_table and tStruct[i].output then

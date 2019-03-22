@@ -40,7 +40,7 @@ local function Func_Init(h)
         table_functions = {}
         if editor.Length == 0 then return end
         local val = {}
-        linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'], fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']], funcExt2 = props['functions.lpeg.'..props['FileExt']]})
+        linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'], fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']], funcExt2 = props['functions.lpeg.'..props['FileExt']], grp = _group_by_flags})
     end
 
     local function LanesLoop()
@@ -48,10 +48,13 @@ local function Func_Init(h)
         --print(mblua.CreateMessage)
         local lpExt = {}
         local Lang2lpeg = {}
-        local m__CLASS, fnTryGroupName, table_functions
+        local fnTryGroupName, table_functions
         do
             lpExt._G = _G
             lpExt.m__CLASS = '~~ROOT'
+            lpExt._isXform = false
+            lpExt.print = print
+            lpExt._group_by_flags = false
             local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
             lpExt.P, lpExt.V, lpExt.Cg, lpExt.Ct, lpExt.Cc, lpExt.S, lpExt.R, lpExt.C, lpExt.Carg, lpExt.Cf, lpExt.Cb, lpExt.Cp, lpExt.Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
             function lpExt.AnyCase(str)
@@ -146,9 +149,6 @@ local function Func_Init(h)
 
             local out = Lang2lpeg[l]
 
-
-
-
             lpExt.m__CLASS = '~~ROOT'
             table_functions = {}
 
@@ -158,8 +158,6 @@ local function Func_Init(h)
 
             local start_code_pos = start_code and textAll:find(start_code) or 0
 
-            m__CLASS = '~~ROOT'
-            -- lpegPattern = nil
             table_functions = lpegPattern:match(textAll, start_code_pos + 1) -- 2nd arg is the symbol index to start with
 
         end
@@ -168,6 +166,8 @@ local function Func_Init(h)
             local key, val = linda:receive( 100, "_Functions")
             if val ~= nil then
                 if val.cmd == "UPD" then
+                    lpExt._isXform = val.fileExt:lower():find('.form')
+                    lpExt._group_by_flags = val.grp
                     getNames(val.textAll, val.lex, val.fileExt, val.funcExt, val.funcExt2)
                     linda:send("Functions", {table_functions, fnTryGroupName})
                 elseif val.cmd == "EXIT" then
@@ -404,7 +404,6 @@ local function Func_Init(h)
             tree_func.title0 = props['FileName']..' (Autoufill disabled by size)'
             return
         end
-        _isXform = props['FileExt']:find('.form')
         Functions_GetNames()
         line_count = editor.LineCount
         curSelect = -1

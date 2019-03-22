@@ -3,6 +3,7 @@ require "luacom"
 --SSDIR \\SOURCESAFE\SourceSafe\Main\
 -- *.sln, *.vbproj, *.xml, *.cform, *.vcproj, *.dsp, *.mdp, *.mak, *.wiki, *.vdp, *.vdproj, *.dbp, *.vsmproj, *.vsmacros, *.hwproj, *.etp, *.cform, *.rform, *.wform, *.mdmp, *.dsw, *.vjsproj, *.csdproj, *.inc, *.m, *.sql, *.incl, *.xml, *.form
 local function Init()
+    local lanesgen
     local bLocalDir = false
     local p_vsscompare, p_vsspath, curProj
     VSS = {}
@@ -59,7 +60,7 @@ local function Init()
         end
     end
 
-    function vss_SetCurrentProject(dir)
+    local function vss_SetCurrentProject(dir)
         local d = dir or props['FileDir']
         if not shell.fileexists(d..'\\'..'mssccprj.scc') then
             print('"mssccprj.scc" not found in current dir')
@@ -71,37 +72,52 @@ local function Init()
         fil:close()
         local _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
         curProj = strProgect
-        local ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
-        if ierr ~= 0 then print(strerr) end
-        return ierr == 0
-    end
 
-    local function getStatAsync(d, f, dbg, dutf)
-        __DEBUG = dbg
-        local ierr, strerr
-        shell.set_curent_dir(d) bLocalDir = true
-        if not shell.fileexists(dutf..'\\'..'mssccprj.scc') then
-            strerr = '"mssccprj.scc" not found in current dir'
-            ierr = -2
+        local cmd = p_vsspath..' CP "'..strProgect..'"'
+        local lane_h = lanesgen('cmd', nil, p_vsspath, __DEBUG__, cmd)
+        local key, val = linda:receive( 7.0, "VSS_Command")
+        if val == nil then
+            lane_h:cancel()
+            print( "Vss Set Project time out: ", cmd)
+            __DEBUG__ = true
         else
-            local fil = io.open(d..'\\'..'mssccprj.scc')
-            local strFile = fil:read("*a")
-            fil:close()
-            local _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
-
-            ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
-            if __DEBUG then print("DEBUG:", p_vsspath..' CP "'..strProgect..'"') end
-            if ierr ~= 0 then
-                ierr = -1
-            else
-                if __DEBUG then print("DEBUG:", p_vsspath..' Status '..f) end
-                ierr, strerr = shell.exec(p_vsspath..' Status '..f, nil, true, true)
-            end
+            if val.ierr ~= 0 then print(val.strerr) end
+            return val.ierr == 0
         end
-        linda:send( "VSS_ChangeFile", {ierr = ierr, strerr = strerr, file = f})
     end
 
-    local lanesgen = lanes.gen("package,io,string", {required = {"shell"}}, getStatAsync)
+    local function getStatAsync(cmd, d, f, dbg, dutf)
+        __DEBUG = dbg
+        if cmd == "menu" then
+            local ierr, strerr
+            shell.set_curent_dir(d) bLocalDir = true
+            if not shell.fileexists(dutf..'\\'..'mssccprj.scc') then
+                strerr = '"mssccprj.scc" not found in current dir'
+                ierr = -2
+            else
+                local fil = io.open(d..'\\'..'mssccprj.scc')
+                local strFile = fil:read("*a")
+                fil:close()
+                local _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
+
+                ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
+                if __DEBUG then print("DEBUG:", p_vsspath..' CP "'..strProgect..'"') end
+                if ierr ~= 0 then
+                    ierr = -1
+                else
+                    if __DEBUG then print("DEBUG:", p_vsspath..' Status '..f) end
+                    ierr, strerr = shell.exec(p_vsspath..' Status '..f, nil, true, true)
+                end
+            end
+            linda:send( "VSS_ChangeFile", {ierr = ierr, strerr = strerr, file = f})
+        elseif cmd == 'cmd' then
+            if d then shell.set_curent_dir(d) end
+            local ierr, strerr = shell.exec(dutf, nil, true, true)
+            linda:send( "VSS_Command", {ierr = ierr, strerr = strerr})
+        end
+    end
+
+    lanesgen = lanes.gen("package,io,string", {required = {"shell"}}, getStatAsync)
 
     local function receiveVssInfo()
         local key, val = linda:receive( 5.0, "VSS_ChangeFile")    -- timeout in seconds
@@ -113,13 +129,6 @@ local function Init()
         end
     end
 
-    AddEventHandler("OnLindaNotify", function(key)
-        if key == 'VSS_ChangeFile' then
-            if not tState.blocked then receiveVssInfo() end
-            tState.blocked = false
-        end
-    end)
-
     local function reset_err(ierr, strerr)
         if ierr + 0 == 0 then
             CORE.DoRevert()
@@ -128,6 +137,13 @@ local function Init()
             print(strerr)
         end
     end
+
+    AddEventHandler("OnLindaNotify", function(key, val)
+        if key == 'VSS_ChangeFile' then
+            if not tState.blocked then receiveVssInfo() end
+            tState.blocked = false
+        end
+    end)
 
     local function vss_add()
         if vss_SetCurrentProject() then
@@ -181,7 +197,17 @@ local function Init()
                 if (attr & 1) ~= 1 then
                     shell.setfileattr(props['FilePath'], attr + 1)
                 end
-                reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']:from_utf8()..stropt, nil, true, true))
+                local cmd = p_vsspath..' Checkout '..props['FileNameExt']:from_utf8()..stropt
+                local lane_h = lanesgen('cmd', props['FileDir']:from_utf8(), p_vsspath, __DEBUG__, cmd)
+                local key, val = linda:receive( 7.0, "VSS_Command")
+                if val == nil then
+                    lane_h:cancel()
+                    print( "Vss Checkout time out: ", cmd)
+                    __DEBUG__ = true
+                else
+                    reset_err(val.ierr, val.strerr)
+                end
+
             elseif ierr ~= 1 then
                 print(strerr)
             end
@@ -237,8 +263,17 @@ local function Init()
         if vss_SetCurrentProject() then
             local cmnt = GetComment()
             if not cmnt then return end
-            if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt, nil, true, true)) and On_vss_CheckIn then
-                On_vss_CheckIn(curProj)
+            local cmd = p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt
+            local lane_h = lanesgen('cmd', props['FileDir']:from_utf8(), p_vsspath, __DEBUG__, cmd)
+            local key, val = linda:receive( 7.0, "VSS_Command")
+            if val == nil then
+                lane_h:cancel()
+                print( "Vss CheckIn time out: ", cmd)
+                __DEBUG__ = true
+            else
+                if reset_err(val.ierr, val.strerr) and On_vss_CheckIn then
+                    On_vss_CheckIn(curProj)
+                end
             end
         end
     end
@@ -319,7 +354,7 @@ local function Init()
         else
             shell.set_curent_dir(props['FileDir']:from_utf8()) bLocalDir = true
             tState.ierr = -3
-            lanesgen(props['FileDir']:from_utf8(), props['FileNameExt']:from_utf8(), __DEBUG__, props['FileDir'])
+            lanesgen('menu', props['FileDir']:from_utf8(), props['FileNameExt']:from_utf8(), __DEBUG__, props['FileDir'])
         end
     end
 

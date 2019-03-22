@@ -417,6 +417,7 @@ local function Init_hidden()
         CompareToFile(strName, false)
     end
     function COMPARE.Start()
+        Reset()
         StartCompare()
     end
 

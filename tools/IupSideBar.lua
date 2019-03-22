@@ -620,6 +620,8 @@ local function InitTabbar()
     local SSM = iup.GetDialogChild(hMainLayout, 'SourceSplitMiddle')
     local TBS = iup.GetDialogChild(hMainLayout, 'TabBarSplit')
     local Exp = iup.GetDialogChild(hMainLayout, 'CoSourceExpander')
+    if tonumber(SSM.value) < 1000 then SSM.barsize = "5" end
+
     Splitter_CB = function(h)
         if h then
             if tonumber(SSM.value) > 999 and SSM.barsize ~= '0' then SSM.value = "999"
@@ -767,9 +769,10 @@ function CORE.RemapCoeditor()
     hPrOld.barsize = '0'
     hPrOld.value = '1000'
 
+    hPr.flat_button_cb = hPrOld.flat_button_cb
+
     iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
     _G.iuprops['dialogs.coeditor.splithorizontal'] = Iif(bIsH, 0, 1)
-
 end
 
 local function InitToolBar()
@@ -1176,3 +1179,5 @@ tmConsole.action_cb = (function()
     end
 end)
 tmConsole.run="YES"
+
+
