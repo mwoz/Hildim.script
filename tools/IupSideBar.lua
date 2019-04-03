@@ -44,7 +44,7 @@ function sidebar_Switch(n)
     if SideBar_obj.handle and n > 0 then
         if SideBar_obj.handle.Dialog then SideBar_obj.handle.ShowDialog() end
         SideBar_obj.TabCtrl.valuepos = n -1
-        for _,tbs in pairs(SideBar_Plugins) do
+        for _, tbs in pairs(SideBar_Plugins) do
             if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
         end
     end

@@ -82,7 +82,7 @@ local function PrepareFindText(s)
     s = (s or ''):gsub('[\n\r]+$', '')
     if s:find('[\n\r]') then
         return ''
-    elseif Ctrl("chkRegExp").value == "ON" or Ctrl("chkBackslash").value == "ON" then
+    elseif (Ctrl("chkRegExp").value == "ON" and Ctrl("chkRegExp").active == "YES") or (Ctrl("chkBackslash").value == "ON" and Ctrl("chkBackslash").active == "YES") then
         return s:gsub('\\', '\\\\'):gsub('\t', '\\t')
     else
         return s
@@ -441,10 +441,23 @@ end
 local function SetStaticControls()
     local notInFiles = (Ctrl("tabFindRepl").valuepos ~= '2')
     local notRE = (Ctrl("chkRegExp").value == 'OFF')
+    local notBS = (Ctrl("chkBackslash").value == 'OFF') or not notInFiles
+    local notWW = (Ctrl("chkWholeWord").value == 'OFF')
+
+    if (not notBS) and (not notRE) then
+        Ctrl("chkBackslash").value = 'OFF'
+        notBS = true
+    end
+
+    if (not notWW) and (not notRE) then
+        Ctrl("chkWholeWord").value = 'OFF'
+        notWW = true
+    end
     Ctrl("numStyle").active = Iif(Ctrl("chkInStyle").value == 'ON' and notInFiles, 'YES', 'NO')
     Ctrl("chkInStyle").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("chkWrapFind").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("chkWholeWord").active = Iif(notRE, 'YES', 'NO')
+    Ctrl("chkRegExp").active = Iif(notBS and notWW, 'YES', 'NO')
     Ctrl("chkBackslash").active = Iif(notInFiles and notRE, 'YES', 'NO')
     Ctrl("btnArrowUp").active = Iif(notInFiles, 'YES', 'NO')
     Ctrl("btnArrowDown").active = Iif(notInFiles, 'YES', 'NO')
@@ -493,6 +506,8 @@ local function ActivateFind_l(nTab)
     if output.Focus then wnd = output
     elseif findres.Focus then wnd = findres end
 
+    SetStaticControls()
+
     local s
     if wnd.SelectionStart == wnd.SelectionEnd then s = GetCurrentWord()
     else s = wnd:GetSelText() end
@@ -524,7 +539,7 @@ local function ActivateFind_l(nTab)
     else iup.SetFocus(Ctrl('cmbFindWhat')) end
 
     if nTab == 2 then Ctrl('cmbFolders').value = props['FileDir'] end
-    SetStaticControls()
+
     if Ctrl('byInput').value == 'ON' and Ctrl('byInputAll').value == 'ON' then onFindEdit(Ctrl("cmbFindWhat"), '', Ctrl("cmbFindWhat").value) end
 
     onFindEdit(Ctrl('cmbFindWhat'), c, Ctrl("cmbFindWhat").value)
@@ -1086,6 +1101,7 @@ local function create_dialog_FindReplace()
     iup.hi_toggle{
       title = _T"Whole Word",
       name = "chkWholeWord",
+      flat_action = SetStaticControls,
       map_cb = (function(h) h.value = _G["dialogs.findreplace."..h.name] end),
       ldestroy_cb = (function(h) _G["dialogs.findreplace."..h.name] = h.value end),
     },
@@ -1119,6 +1135,7 @@ local function create_dialog_FindReplace()
     iup.hi_toggle{
       title = "Backslash (\\n,\\r,\\t...)",
       name = "chkBackslash",
+      flat_action = SetStaticControls,
     },
     iup.hi_toggle{
       title = _T"Regular expressions",

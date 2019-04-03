@@ -936,9 +936,7 @@ AddEventHandler("OnNavigation", onNavigate_local)
 local old_TreeSetNodeAttrib = iup.TreeSetNodeAttrib
 iup.TreeSetNodeAttrib = function (handle, tnode, id)
   old_TreeSetNodeAttrib(handle, tnode, id)
-  if tnode.userdata then iup.SetAttribute(handle, "USERDATA"..id, tnode.userdata) end
-  if tnode.imageid then iup.SetAttribute(handle, "IMAGE"..(id), tnode.imageid) end
-
+  if tnode.userdata then iup.SetAttributeId(handle, "USERDATA", id, tnode.userdata) end
 end
 --Переопределяем iup сообщение об ошибке - чтобы не было их всплывающего окна, печатаем все к нам в output
 iup._ERRORMESSAGE = function(msg,traceback)

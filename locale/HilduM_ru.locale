@@ -386,8 +386,8 @@ __LOCALE ={
         ['Show Parameters'] = 'Показывать параметры',
         ['Group By Type'] = 'Сгруппировать по типу',
         ['Max Size for Auto Show'] = 'Максимальный размер для автопоказа',
-        ['Display To Console'] = 'Отображать в консоли',
         ['(Max size exceeded) Show'] = '(Превышение максимального размера) Показать',
+        ['Copy Name to Clipboard'] = 'Копировать имя в буфер обмена',
     },
     ['tools\\UIPlugins\\Navigation'] ={
         ["Navigation: Backward"] = "Навигация: Назад";

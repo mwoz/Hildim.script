@@ -1,6 +1,8 @@
+
 local onDestroy
 local function Func_Init(h)
     require "lpeg"
+
     local _isXform = false
     local _show_flags = tonumber(_G.iuprops['sidebar.functions.flags']) == 1
     local _show_params = tonumber(_G.iuprops['sidebar.functions.params']) == 1
@@ -11,44 +13,74 @@ local function Func_Init(h)
     local i
     local _Plugins
 
-    local fnTryGroupName
-
-    local tree_func
+    local tree_func, txt_live, expd
 
     local currentLine = -1
-    local currFuncData = -1
+    local currFuncId = -1
 
     local currentItem = 0
-    local lineMap  -- падает дерево на userdata(((
-    lineMap = {}
-
-    local table_functions = {}
 
     local _backjumppos -- store position if jumping
     local line_count = 0
     local layout --имена полей - имена бранчей, значения - true/false, если отсутствует - значит открыто
-
+ layout = {}
     if not lanes then
         lanes = require("lanes").configure()
     end
-
+    local lane_h
     local linda = lanes.linda()
-
-    layout = {}
+    local tmr = iup.timer{time = 3000, run = 'NO', action_cb = function(h)
+        h.run = 'NO'
+        lane_h:cancel()
+        print('Canceled Functions Tree Lane ')
+        lane_h = nil
+    end}
 
     local function Functions_GetNames()
+        if not lane_h then return end
         table_functions = {}
         if editor.Length == 0 then return end
         local val = {}
-        linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'], fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']], funcExt2 = props['functions.lpeg.'..props['FileExt']], grp = _group_by_flags})
+
+        linda:send("_Functions", {textAll = editor:GetText(), cmd = 'UPD', lex = props['lexer$'],
+            fileExt = props['FileExt'], funcExt = props['functions.lpeg.'..props['lexer$']],
+            funcExt2 = props['functions.lpeg.'..props['FileExt']], funcName = props['FileNameExt'],
+            grp = _group_by_flags, srt = _sort, shp = _show_params, layout = layout})
+        tmr.run = 'NO'
+        tmr.run = 'YES'
     end
 
     local function LanesLoop()
-        --lpeg = l
-        --print(mblua.CreateMessage)
+
+        -- local function debug_prnTb(tb, n)
+        --     local s = string.rep('    ', n)
+        --     for k, v in pairs(tb) do
+        --         if type(v) == 'table' then
+        --             print(s..k..'->  Table')
+        --             --debug_prnTb(v, n + 1)
+        --             if k ~= 'Next' then debug_prnTb(v, n + 1) else print(s..'NextId->'..v.Id) end
+        --         else
+        --             print(s..k..'->  ', v)
+        --         end
+        --     end
+        -- end
+
+        -- local function debug_prnArgs(...)
+        --     print('-------------')
+        --     local arg = table.pack(...)
+        --     for i = 1, #arg do
+        --         if type(arg[i]) == 'table' then
+        --             print(i..'->  Table')
+        --             debug_prnTb(arg[i], 1)
+        --         else
+        --             print(i..'->  ', arg[i])
+        --         end
+        --     end
+        -- end
+
         local lpExt = {}
         local Lang2lpeg = {}
-        local fnTryGroupName, table_functions
+        local fnTryGroupName
         do
             lpExt._G = _G
             lpExt.m__CLASS = '~~ROOT'
@@ -68,8 +100,6 @@ local function Func_Init(h)
                 assert(res:match(str))
                 return res
             end
-
-            lpExt.PosToLine = function (pos) return editor:LineFromPosition(pos - 1) end
             --v------- common patterns -------v--
             -- basics
             lpExt.EOF = P(-1)
@@ -128,13 +158,14 @@ local function Func_Init(h)
 
         end
 
-        local function getNames(textAll, lex, fileExt, funcExt, funcExt2)
+        local function getNames(textAll, lex, fileExt, funcExt, funcExt2, tPar)
             lpExt.m__CLASS = '~~ROOT'
             table_functions = {}
 
             local l = lex
             if funcExt2 == '' then funcExt2 = nil end
             if funcExt2 then l = lex..'.'..fileExt end
+
 
             if not Lang2lpeg[l] then
                 local strOut = funcExt2 or funcExt or ''
@@ -146,20 +177,230 @@ local function Func_Init(h)
                 end
             end
 
+            local function GetTypeItem (funcitem)
+                local res = ''
+                for flag, value in pairs(funcitem) do
+                    if type(flag) == 'string' then
+                        if type(value) == 'boolean' then
+                            if value then
+                                res = flag
+                                break
+                            end
+                        end
+                    end
+                end
+                return res
+            end
+
+            local function GetFlags (funcitem)
+                if not _show_flags then return '' end
+                local res = ''
+                local add = ''
+                local res2 = ''
+                for flag, value in pairs(funcitem) do
+                    if type(flag) == 'string' and not flag:find('^_') then
+                        if type(value) == 'boolean' then	if value then add = flag else res2 = res2..flag; add = '' end
+                        elseif type(value) == 'string' then	add = flag .. value
+                        elseif type(value) == 'number' then add = flag..':'..value
+                        else add = flag end
+                        res = res .. add
+                    end
+                end
+
+                --if res~='' then res = res .. ' ' end
+                return (res or ''), res2
+            end
+
+            local tblAllUI ={}
+            local function prepareTree(tOut, tIn, lay, lMask)
+                local isBranch = type(tIn[#tIn]) == 'table'
+                if not isBranch and tIn._uiId then
+                    tOut.userid = tblAllUI[tIn._uiId]
+                else
+                    tOut.userid = {}
+                end
+
+                local imgId, flag = GetFlags(tIn)
+                if type(tIn[2]) == 'number' then tOut.userid.start = tIn[2] end
+
+                if isBranch then
+                    local tOutNew
+                    tOut._order = tIn._order
+                    if lay then  end
+                    if type(tIn[1]) == 'string' then
+                        if lMask and lMask[tIn[1]] then
+                            if not lay then lay = {} end
+                            lay[1] = 'COLLAPSED'
+                        end
+                        if lay and lay[1] == 'COLLAPSED' then tOut.state = 'COLLAPSED' end
+                    end
+                    for i = 1, #tIn do
+                        if type(tIn[i]) == 'table' then
+                            tOutNew = {}
+                            local tLast
+                            local layNew
+                            if not lMask and type(tIn[i][1]) == 'string' and lay then
+                                layNew = lay[tIn[i][1]]
+                            end
+                            table.insert(tOut, tOutNew)
+                            layNew = prepareTree(tOutNew, tIn[i], layNew, lMask)
+                            if lMask and layNew then
+                                if not lay then lay = {} end
+                                lay[tIn[i][1]] = layNew
+                            end
+                        end
+                    end
+
+                    table.sort(tOut, function(a, b)
+                        if (a._order or 0) ~= (b._order or 0) then
+                            return (a._order or 0) < (b._order or 0)
+                        elseif tPar.srt == 'name' or (not a.userid.start and not b.userid.start) then
+                            return (a.leafname or a.branchname):lower() < (b.leafname or b.branchname):lower()
+                        else
+                            return (a.userid.start or 9999999) < (b.userid.start or 9999999)
+                        end
+                    end)
+
+                    if type(tIn[2]) == 'number' then
+                        --дубль папки - метка в верхней части, по которой можно кликнуть
+                        local tt = {}
+                        tt.leafname = '^'..tIn[1]..flag
+                        tt.image = "IMAGE_"..imgId
+                        if tPar.shp and type(tIn[3]) == 'string' then
+                            tt.leafname = tt.leafname..' '..tIn[3]
+                        end
+                        if tIn._uiId then
+                            tt.userid = tblAllUI[tIn._uiId]
+                        else
+                            tt.userid = {}
+                        end
+                        tt.userid.start = tIn[2]
+                        tt.userid._name = tIn[1]
+                        table.insert(tOut, 1, tt)
+                    end
+
+                else
+                    if imgId:find('_$') then
+                        tOut.image = imgId..'µ'
+                    else
+                        tOut.image = "IMAGE_"..imgId
+                    end
+                end
+
+                if type(tIn[1]) == 'string' then
+                    if isBranch then
+                        tOut.branchname = tIn[1]
+                    else
+                        tOut.leafname = (tIn[1]..flag)
+                        if tPar.shp and type(tIn[3]) == 'string' then
+                            tOut.leafname = tOut.leafname..' '..tIn[3]
+                        end
+                    end
+                end
+                if type(tIn[1]) == 'string' then tOut.userid._name = tIn[1] or '' end
+                return lay
+            end
+
+            local function countFunctions(tblLevel)
+                for i = 1,  #tblLevel do
+                    if type(tblLevel[i]) == 'table' then
+                        if type(tblLevel[i][2]) == 'number' then
+                            local tNewUI = {}
+                            table.insert(tblAllUI, tNewUI)
+                            tblLevel[i]._uiId = #tblAllUI
+                            if #tblAllUI > 1 then tblAllUI[#tblAllUI - 1].Next = tNewUI end
+                        end
+                        countFunctions(tblLevel[i])
+                    end
+                end
+            end
+
+            local iCounter = 1
+            local function countTree(tbl)
+                for i = 1,  #tbl do
+                    if type(tbl[i]) == 'table' then
+                        tbl[i].userid.Id = iCounter
+                        iCounter = iCounter + 1
+                        countTree(tbl[i])
+                    end
+                end
+            end
+
+            local function groupFunctions(tbl)
+                local tblFld = {}
+                for i = #tbl, 1, -1 do
+                    if type(tbl[i]) == 'table' then
+                        local fldName = fnTryGroupName(GetTypeItem(tbl[i]), tbl[i][4])
+                        if fldName ~= '' and fldName ~= '~~ROOT' then
+                            if not tblFld[fldName] then
+                                tblFld[fldName] = {}
+                                tblFld[fldName]._order = (tbl[i]._order or 0)
+                            end
+                            table.insert(tblFld[fldName], 1, tbl[i])
+                            table.remove(tbl, i)
+                        end
+                    end
+                end
+
+                for i = 1,  #tbl do
+                    if type(tbl[i]) == 'table' and type(tbl[i][#(tbl[i])]) == 'table' then
+                        groupFunctions(tbl[i])
+                    end
+                end
+
+                for capt, tIn in pairs(tblFld) do
+                    local t = {}
+                    t[1] = capt
+                    t._order = tIn._order
+                    for i = 1, #tIn do
+                        table.insert(t, tIn[i])
+                    end
+                    table.insert(tbl, t)
+                end
+            end
 
             local out = Lang2lpeg[l]
+            if not out then
+                print('Lang2lpeg error!')
+                linda:send("Functions", {{}, nil, {}})
+                return
+            end
 
             lpExt.m__CLASS = '~~ROOT'
             table_functions = {}
 
             local start_code = out.start_code
+
             local lpegPattern = out.pattern
             fnTryGroupName = out.GroupName or (function(s) return s end)
 
             local start_code_pos = start_code and textAll:find(start_code) or 0
 
-            table_functions = lpegPattern:match(textAll, start_code_pos + 1) -- 2nd arg is the symbol index to start with
+            table_functions = lpegPattern:match(textAll, start_code_pos + 1) or {} -- 2nd arg is the symbol index to start with
+            --debug_prnArgs(table_functions)
 
+            countFunctions(table_functions)
+
+            if lpExt._group_by_flags then groupFunctions(table_functions) end --группировка
+
+            --debug_prnArgs(table_functions)
+            local tblOut = {}
+            tblOut.branchname = tPar.funcName
+
+            local lOut, lMask = tPar.layout
+            if not lOut then
+                lMask = out.collapsed_branches
+                lOut = {}
+            end
+            --debug_prnArgs(tPar.layout)
+
+            prepareTree(tblOut, table_functions, lOut, lMask)
+            tblOut.userid.Next = tblAllUI[1]
+            tblOut.userid.Id = 0
+            countTree(tblOut)
+
+            --debug_prnArgs(lOut)
+            linda:send("Functions", {tblOut, lOut, out.options or {}})
         end
 
         while true do
@@ -168,188 +409,42 @@ local function Func_Init(h)
                 if val.cmd == "UPD" then
                     lpExt._isXform = val.fileExt:lower():find('.form')
                     lpExt._group_by_flags = val.grp
-                    getNames(val.textAll, val.lex, val.fileExt, val.funcExt, val.funcExt2)
-                    linda:send("Functions", {table_functions, fnTryGroupName})
+                    getNames(val.textAll, val.lex, val.fileExt, val.funcExt, val.funcExt2, val)
                 elseif val.cmd == "EXIT" then
                     break;
                 end
             end
         end
-
     end
 
-    local a = lanes.gen( "package,string", {required = {"lpeg"}}, LanesLoop)()
+    lane_h = lanes.gen( "package,string,table", {required = {"lpeg"}}, LanesLoop)()
 
     onDestroy = function() linda:send("_Functions", {cmd = 'EXIT',}) end
 
-    local function GetFlags (funcitem)
-        if not _show_flags then return '' end
-        local res = ''
-        local add = ''
-        local res2 = ''
-        for flag, value in pairs(funcitem) do
-            if type(flag) == 'string' then
-                if type(value) == 'boolean' then	if value then add = flag else res2 = res2..flag; add = '' end
-                elseif type(value) == 'string' then	add = flag .. value
-                elseif type(value) == 'number' then add = flag..':'..value
-                else add = flag end
-                res = res .. add
-            end
-        end
-
-        --if res~='' then res = res .. ' ' end
-        return (res or ''), res2
-    end
-
-    local function GetParams (funcitem)
-        if not _show_params then return '' end
-        return (funcitem[3] and ' '..funcitem[3]) or ''
-    end
-
-    local function fixname (funcitem)
-        local flag, flag2 = GetFlags(funcitem)
-        return funcitem[1]..(flag2 or '')..GetParams(funcitem), flag
-    end
-
-    local function getPath(id)
-        if iup.GetAttributeId(tree_func, 'KIND', id) == 'BRANCH' then return '' end
-        local id2 = iup.GetAttributeId(tree_func, 'PARENT', id)
-        if id2 == nil then return '' end
-        return iup.GetAttributeId(tree_func, 'TITLE', id2)..':'..iup.GetAttributeId(tree_func, 'TITLE', id)
-    end
-
-    local function Functions_ListFILL()
-        local function SortFuncList(a, b)
-            if _group_by_flags then --Если установлено, сначала сортируем по флагу
-                local fa = fnTryGroupName(GetFlags(a), a[4])
-                local fb = fnTryGroupName(GetFlags(b), b[4])
-                if fa ~= fb then return fa < fb end
-            end
-            if _sort == 'order' then
-                return a[2] < b[2]
-            else
-                return a[1]:lower() < b[1]:lower()
-            end
-        end
-
-        table.sort(table_functions, SortFuncList)
-
-        -- remove duplicates
-        for i = #table_functions, 2, -1 do
-            if table_functions[i][2] == table_functions[i - 1][2] then
-                table.remove (table_functions, i)
-            end
-        end
-        local tbFolders = {}
-
-        local prevFoderFlag = "_NO_FLAG_"
-        local cp = editor.CodePage
-
-        lineMap = {}
-        local j = 1
-        local tbBranches = {}
+    local function Functions_ListFILL(table_functions)
         tree_func.autoredraw = 'NO'
         tree_func.delnode0 = "CHILDREN"
-        tree_func.title0 = props['FileName']
-        local rootCount = 0
-        --debug_prnArgs(table_functions)
-        for i, a in ipairs(table_functions) do
-            local t, f = fixname(a)
-
-            local node = {}
-            node.leafname = t
-            node.imageid = f
-
-            if _group_by_flags then
-
-                if tbFolders[fnTryGroupName(f, a[4])] == nil then
-                    j = j + 1
-                    tbBranches[#tbBranches + 1] = fnTryGroupName(f, a[4])
-                    if fnTryGroupName(f, a[4]) == '~~ROOT' then
-                        tbFolders[fnTryGroupName(f, a[4])] = -i + 1
-                    else tbFolders[fnTryGroupName(f, a[4])] = #tbBranches end
-                end
-            else
-
-                iup.SetAttribute(tree_func, 'ADDLEAF'..j - 1, t)
-                iup.SetAttribute(tree_func, 'IMAGE'..j, 'IMAGE_'..f)
-                lineMap[getPath(j)] = a[2]
-            end
-            j = j + 1
-        end
-
-        if _group_by_flags then
-            for i = #tbBranches, 1, -1 do
-                if tbBranches[i] ~= '~~ROOT' then
-                    iup.SetAttribute(tree_func, 'ADDBRANCH0', tbBranches[i])
-                end
-            end
-
-            --[[local f2 = 0
-        if tbFolders['~~ROOT'] ~= nil then f2 = tbFolders['~~ROOT'] + #table_functions  end]]
-            for i, a in ipairs(table_functions) do
-                local t, f = fixname(a)
-                local node = {}
-                node.leafname = t
-                node.imageid = f
-
-                local f1 = tbFolders[fnTryGroupName(f, a[4])]
-
-                iup.SetAttribute(tree_func, 'ADDLEAF'..i + f1 - 1, t)
-                iup.SetAttribute(tree_func, 'IMAGE'..i + f1, 'IMAGE_'..f)
-
---[[            if fnTryGroupName(f, a[4]) == '~~ROOT' then
-                k = i + f1
-            else
-                k = i + f1 + f2
-            end]]
-
-                lineMap[getPath(i + f1)] = a[2]
-            end
-        end
-        -- Восстановим  лэйаут
-        for i = 1, tree_func.count do
-            if iup.GetAttribute(tree_func, 'KIND'..i) == 'BRANCH' then
-                if layout[iup.GetAttribute(tree_func, 'TITLE'..i)] == 'COLLAPSED' then
-                    iup.SetAttribute(tree_func, 'STATE'..i, 'COLLAPSED')
-                end
-            end
-        end
+        iup.TreeAddNodes(tree_func, table_functions)
         tree_func.resetscroll = 1
         tree_func.autoredraw = 'YES'
-        --сортируем по ордеру, чтобы удобнее искать имя по строке
-        table.sort(table_functions, function(a, b) return a[2] < b[2] end)
-        currFuncData = -1
     end
 
     local function Functions_SortByOrder()
         _sort = 'order'
         _G.iuprops['sidebar.functions.sort'] = _sort
-        Functions_ListFILL()
+        Functions_GetNames()
     end
 
     local function Functions_SortByName()
         _sort = 'name'
         _G.iuprops['sidebar.functions.sort'] = _sort
-        Functions_ListFILL()
+        Functions_GetNames()
     end
 
     local function Functions_ToggleParams ()
         _show_params = not _show_params
         _G.iuprops['sidebar.functions.params'] = Iif(_show_params, 1, 0)
-        Functions_ListFILL()
-    end
-
-    local function Functions_ToggleFlags ()
-        _show_flags = not _show_flags
-        if not _show_flags then
-            _group_by_flags = false
-            _G.iuprops['sidebar.functions.flags'] = 0
-            _G.iuprops['sidebar.functions.group'] = 1
-        else
-            _G.iuprops['sidebar.functions.flags'] = 1
-        end
-        Functions_ListFILL()
+        Functions_GetNames()
     end
 
     local function ShowCompactedLine(line_num)
@@ -365,8 +460,9 @@ local function Func_Init(h)
     end
 
     local function Functions_GotoLine()
-        local pos = lineMap[getPath(tree_func.value)]
-        if pos ~= nil then
+        local t, pos = iup.TreeGetUserId(tree_func, tree_func.value)
+        if t then pos = t.start end
+        if pos then
             OnNavigation("Func")
             ShowCompactedLine(pos)
             editor:GotoLine(pos)
@@ -377,15 +473,12 @@ local function Func_Init(h)
 
     -- По имени функции находим строку с ее объявлением (инфа берется из table_functions)
     local function Func2Line(funcname)
-        if not next(table_functions) then
-            print("table_functions not found!")
-            Functions_GetNames()
-            return
-        end
-        for i = 1, #table_functions do
-            if funcname == table_functions[i][1] then
-                return table_functions[i][2]
+        local t = iup.TreeGetUserId(tree_func, 0)
+        while t do
+            if t._name == funcname then
+                return tonumber(t.start)
             end
+            t = t.Next
         end
     end
 
@@ -398,12 +491,13 @@ local function Func_Init(h)
         end
     end
 
-    local function OnSwitch(bForce)
+    local function OnSwitch(bForce, bSaveLay)
         if (bForce ~= 'Y') and (editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7)) then
             tree_func.delnode0 = "CHILDREN"
             tree_func.title0 = props['FileName']..' (Autoufill disabled by size)'
             return
         end
+        if not bSaveLay then layout = nil end
         Functions_GetNames()
         line_count = editor.LineCount
         curSelect = -1
@@ -419,53 +513,53 @@ local function Func_Init(h)
                 local def_line_count = line_count_new - line_count
                 if def_line_count ~= 0 then --С прошлого раза увеличилось количество строк в файле
                     local cur_line = editor:LineFromPosition(editor.CurrentPos)
-                    for i = 1, tree_func.count - 1 do
-                        --if lineMap[i] ~=nil and lineMap[i] > cur_line then
-                        local iDx = getPath(i)
-                        if lineMap[iDx] ~= nil and lineMap[iDx] ~= '' and lineMap[iDx] >= cur_line then
-                            -- в мэпе для всех функций ниже текущей строки изменим значение на сдвиг
-                            lineMap[iDx] = lineMap[iDx] + def_line_count
+                    local tUid = iup.TreeGetUserId(tree_func, 0)
+                    local startPrev = 0
+                    while tUid do
+                        if (tUid.start or 0) > cur_line then
+                            -- print(tUid.start, def_line_count, startPrev)
+                            -- if tUid.start + def_line_count <= startPrev then
+                            --     --Functions_GetNames()
+                            --     --return
+                            -- end
+                            break
                         end
+                        startPrev = tUid.start
+                        tUid = tUid.Next
                     end
+                    while tUid do
+                        tUid.start = tUid.start + def_line_count
+                        tUid = tUid.Next
+                    end
+
                     line_count = line_count_new
                 end
             end
 
             local l = editor:LineFromPosition(editor.SelectionStart)
             if currentLine ~= l then
-                currentLine = l
                 local i, tb, fData , t,f
                 fData = -1
-                for i, f in pairs(lineMap) do
-                    -- найдем ближайшую сверху функцию к текущей строке (строку, содержащую функцию)
-                    if f <= currentLine and f > fData then fData = f end
+                local tUid = iup.TreeGetUserId(tree_func, 0)
+                local idPrev = 0
+                while tUid do
+                    if (tUid.start or 0) > l then break end
+                    idPrev = tUid.Id
+                    tUid = tUid.Next
                 end
-                if fData ~= currFuncData then
-                    -- выяснилось, что с прошлого раза мы переместились в другую функцию
-                    if currFuncData > - 1 then
-                        iup.SetAttribute(tree_func, "MARK"..currFuncData, "NO")
-                    end
-                    for i = 0, tree_func.count do
-                        local iDx = getPath(i)
-                        if lineMap[iDx] == fData then
 
-                            currFuncData = fData
-                            tree_func.flat_topitem = i
-                            iup.SetAttribute(tree_func, "MARKED"..i, "YES")
-                            iup.SetAttribute(tree_func, "COLOR"..i, "0 0 255")
-                            if curSelect > - 1 then iup.SetAttribute(tree_func, "COLOR"..curSelect, tree_func.fgcolor);--[[iup.SetAttribute(tree_func, "COLOR"..curSelect, "0 0 0") ]]end
-                            curSelect = i
-                            tree_func.topitem = "YES"
-                            return
-                        end
+                if idPrev ~= currFuncId then
+                    -- выяснилось, что с прошлого раза мы переместились в другую функцию
+                    if currFuncId > - 1 then
+                        iup.SetAttributeId(tree_func, "MARKED", currFuncId, "NO")
+                        iup.SetAttributeId(tree_func, "COLOR", currFuncId, "0 0 0")
                     end
-                    -- мы находимся над первой функцией - пометим корневую папку
-                    iup.SetAttribute(tree_func, "MARKED0", "YES")
-                    iup.SetAttribute(tree_func, "COLOR0", "0 0 255")
-                    iup.SetAttribute(tree_func, "COLOR"..curSelect, tree_func.fgcolor)
-                    curSelect = 0
-                    currFuncData =- 1
+                    tree_func.flat_topitem = idPrev
+                    iup.SetAttributeId(tree_func, "MARKED", idPrev, "YES")
+                    iup.SetAttributeId(tree_func, "COLOR", idPrev, "0 0 255")
+                    currFuncId = idPrev
                 end
+                currentLine = l
                 return
             end
         end
@@ -474,14 +568,30 @@ local function Func_Init(h)
     AddEventHandler("OnLindaNotify", function(key)
         if key == 'Functions' then
             local key, val = linda:receive( 1.0, "Functions")    -- timeout in seconds
-            table_functions = val[1]
-            fnTryGroupName = val[2]
-            Functions_ListFILL()
+            tmr.run = 'NO'
+            if val[2] and not layout then layout = val[2] end
+            if val[3].toutf8 then
+                local function toutf8(t)
+                    if t.branchname then t.branchname = t.branchname:to_utf8() end
+                    if t.leafname then t.leafname = t.leafname:to_utf8() end
+                    for i = 1,  #t do
+                        if type(t[i]) == 'table' then
+                            toutf8(t[i])
+                        end
+                    end
+                end
+                toutf8(val[1])
+            end
+
+            Functions_ListFILL(val[1])
+            currentLine = -1
+            currFuncId = -1
+            _OnUpdateUI()
         end
     end)
 
     local function OnMySave()
-        OnSwitch()
+        OnSwitch(nil, true)
         currentLine = -1
         curSelect = -1
         _OnUpdateUI()
@@ -495,7 +605,7 @@ local function Func_Init(h)
             _G.iuprops['sidebar.functions.group'] = 1
             _G.iuprops['sidebar.functions.flags'] = 1
         else
-            _G.iuprops['sidebar.functions.group'] = 1
+            _G.iuprops['sidebar.functions.group'] = 0
         end
 
         Functions_GetNames()
@@ -510,6 +620,7 @@ local function Func_Init(h)
         if GoToObjectDefenition then
             handled = GoToObjectDefenition(strFunc)
         end
+
         if not handled then
             OnNavigation("Def")
             handled = JumpToFuncDefinition(strFunc)
@@ -525,22 +636,13 @@ local function Func_Init(h)
     end
 
     local function SaveLayoutToProp()
+        do return end
         local i, s, prp
         prp = ""
         for i, s in pairs(layout) do
             if s == 'COLLAPSED' then prp = prp..'|'..i end
         end
         _G.iuprops['sidebar.functions.layout'] = prp
-    end
-
-    local function Functions_Print()
-        for i, v in ipairs(table_functions) do
-            if type(v) == 'table' and ( v.Property or v.Function or v.Sub) then
-                print(v[4]..' '..v[1]..v[3])
-            elseif type(v) == 'table' then
-                print(v[1])
-            end
-        end
     end
 
     local function SetMaxSize()
@@ -559,20 +661,23 @@ local function Func_Init(h)
     -----
 
     _Plugins = h
-    local prp = _G.iuprops['sidebar.functions.layout'] or ""
-    local w
-    for w in string.gmatch(prp, "[^|]+") do
-        layout[w] = 'COLLAPSED'
-    end
+
     local line = nil --RGB(73, 163, 83)  RGB(30,180,30)
     tree_func = iup.sc_tree{expand = 'YES', fgcolor = props['layout.txtfgcolor']}
     --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
     tree_func.size = nil
+
+    tree_func.rightclick_cb = function(_, id)
+        menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
+        iup.SetAttributeId(tree_func, "MARKED", id, "YES")
+    end
+
     tree_func.button_cb = function(_, but, pressed, x, y, status)
 
-        if but == 51 and pressed == 0 then --right
-            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
-        elseif but == 49 and iup.isdouble(status) then --dbl left
+        -- if but == 51 and pressed == 0 then --right
+        --     menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
+        -- else
+        if but == 49 and iup.isdouble(status) then --dbl left
             line = Functions_GotoLine()
         end
         if pressed == 0 and line ~= nil then
@@ -588,33 +693,106 @@ local function Func_Init(h)
             }},
             {"Show Parameters", check = function() return _show_params end, action = Functions_ToggleParams},
             {"Group By Type", check = function() return _group_by_flags end, action = Functions_ToggleGroup},
-            {"Display To Console", action = Functions_Print},
             {"Max Size for Auto Show", action = SetMaxSize},
-            {"(Max size exceeded) Display", visible = function() return editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7) end, action = function() OnSwitch('Y') end}
+            {"(Max size exceeded) Display", visible = function() return editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7) end, action = function() OnSwitch('Y') end},
+            {'s1', separator=1},
+            {"Copy Name to Clipboard", action = function()
+                local id = tree_func.markednodes:find('+') - 1;
+                local cpb = iup.clipboard{};
+                cpb.text = iup.TreeGetUserId(tree_func, id)._name or tree_func.title
+                iup.Destroy(cpb)
+            end},
     }}, "hildim/ui/functions.html", _T)
 
+    local prevval
     tree_func.k_any = function(_, number)
-        if number == 13 then
+        if number == iup.K_CR then
             Functions_GotoLine()
             iup.PassFocus()
         elseif number == iup.K_ESC then
             iup.PassFocus()
+        elseif tonumber(number) > 31 and tonumber(number) < 256 and txt_live then
+            prevval = tree_func.value
+            if expd.state == 'CLOSE' then
+                expd.state = 'OPEN'
+                iup.SetFocus(txt_live)
+                tree_func.flat_topitem = tree_func.value
+                iup.SetGlobal('KEY', number)
+            end
+            return iup.IGNORE
         end
     end
+
+    tree_func.flat_selection_cb = function(h, i, state)
+        if prevval then
+            iup.SetAttributeId(tree_func, "MARKED", prevval, "YES")
+            prevval = nil
+        end
+    end
+
+    local function StoreState(state, number)
+        local path = ''
+        local t = {}
+        repeat
+            table.insert(t, 1, iup.GetAttributeId(tree_func, 'TITLE', number))
+            number = iup.GetAttributeId(tree_func, 'PARENT', number)
+        until number == '0'
+        if not layout then layout = {} end
+        local l = layout
+        for i = 1, #t do
+            if not l[t[i]] then l[t[i]] = {} end
+            l = l[t[i]]
+        end
+
+        l[1] = state
+    end
     tree_func.flat_branchopen_cb = function(h, number)
-        layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'EXPANDED'
+        StoreState('EXPANDED', number)
         SaveLayoutToProp()
     end
     tree_func.flat_branchclose_cb = function(h, number)
-        if h.value == '0' then return - 1 end
-        layout[iup.GetAttribute(tree_func, 'TITLE'..number)] = 'COLLAPSED'
+        if number == 0 then return iup.IGNORE end
+        StoreState('COLLAPSED', number)
         SaveLayoutToProp()
     end
     iup.SetAttributeId(tree_func, 'IMAGEEXPANDED', 0, 'tree_µ')
     AddEventHandler("OnClose",
         function() tree_func.delnode0 = "CHILDREN"; tree_func.title0 = ""
     end)
-    local bgbox = iup.backgroundbox{iup.flatscrollbox{tree_func, border = 'NO'}};
+    txt_live = iup.text{size = '25x', expand = 'HORIZONTAL'}
+    expd = iup.expander{iup.hbox{txt_live, iup.label{title = 'PgDn-Next'}, iup.label{}, gap = 10, alignment = 'ACENTER'}, barposition = 'BOTTOM', barsize = '0', state = 'CLOSE', visible = 'NO'}
+    txt_live.killfocus_cb = function(h)
+        expd.state = 'CLOSE'
+        h.value = ''
+    end
+    txt_live.action = function(h, c, newvalue)
+        if newvalue == '' then return end
+        local v = tonumber(tree_func.value)
+        local tUid = iup.TreeGetUserId(tree_func, v)
+        local curv = v
+        repeat
+            if tUid._name and tUid._name:upper():find('^'..newvalue:upper()) then
+                iup.SetAttributeId(tree_func, "MARKED", curv, "YES")
+                tree_func.flat_topitem = curv
+                return
+            end
+            tUid = tUid.Next or iup.TreeGetUserId(tree_func, 0)
+            curv = tUid.Id
+        until curv == v
+        return iup.IGNORE
+    end
+    txt_live.k_any = function(h, k)
+        if k == iup.K_ESC then
+            iup.PassFocus();
+        elseif k == iup.K_CR then
+            Functions_GotoLine()
+            iup.PassFocus()
+        elseif k == iup.K_PGDN then
+            h.action(h, 0, h.value)
+        end
+    end
+
+    local bgbox = iup.backgroundbox{iup.vbox{expd, iup.flatscrollbox{tree_func, border = 'NO'}}};
     return {   -- iup.vbox{   };
 
         handle = bgbox;
@@ -623,7 +801,8 @@ local function Func_Init(h)
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
-        on_SelectMe = function() OnSwitch(); iup.SetFocus(tree_func); iup.Flush();end
+        on_SelectMe = function() OnSwitch(); scite.RunAsync(function() iup.SetFocus(tree_func) end); end,
+        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(tree_func) end); end
     }
 
 end
@@ -632,9 +811,10 @@ return {
     title = 'Functions',
     code = 'functions',
     sidebar = Func_Init,
-    tabhotkey = "Alt+Shift+U",
     destroy = function() onDestroy() end,
-    description = [[Дерево функций открытого файла]]
+    tabhotkey = "Alt+Shift+U",
+    description = [[Дерево функций открытого файла-test]]
+
 }
 
 

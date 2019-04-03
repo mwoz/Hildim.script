@@ -459,13 +459,15 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
                         end
                         local li = LineIndent(ls - i)
                         if endWhat ~= '' then
-                            local newPos = curS - (curI - LineIndent(ls - i))
-                            editor.TargetStart = editor:PositionFromLine(ls)
-                            if endWhat ~= '' then curIPos = curIPos + 3 end
+                            local newPos = editor:PositionFromLine(ls)
+                            editor.TargetStart = newPos
+                            curIPos = curIPos + 3
+
                             editor.TargetEnd = editor:PositionFromLine(ls) + curIPos + 1
 
-                            editor:ReplaceTarget(string.rep(' ', li)..Iif(endWhat == '', '', 'End '..endWhat))
-                            if endWhat ~= '' then newPos = newPos + #endWhat end
+                            local sRep = string.rep(' ', li)..Iif(endWhat == '', '', 'End '..endWhat)
+                            editor:ReplaceTarget(sRep)
+                            newPos = newPos + #sRep
                             editor.SelectionStart = newPos
                             editor.SelectionEnd = newPos
                             prevFold = nil

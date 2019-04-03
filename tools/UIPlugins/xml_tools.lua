@@ -17,6 +17,7 @@ local function Init()
     XMLTOOLS = {}
     local t = {}
     local pathXSLT, pathXSD, firstTag
+    local oXSLProc, oXSD
     -- t.tag_start, t.tag_end, t.paired_start, t.paired_end  -- positions
     -- t.begin, t.finish  -- contents of tags (when copying)
     local old_current_pos
@@ -448,6 +449,20 @@ local function Init()
     local src, path, out = 0, '', 0
 
     local function processXsd(txtXml, pathXsd)
+
+        if not oXSD then
+            local txtXsd
+            local f = io.open(pathXsd)
+            if f then
+                txtXsd = f:read('*a')
+                f:close()
+            else
+                print("Can't open file "..pathXsd)
+                return
+            end
+            XMLTOOLS.SetObjects(txtXsd, nil)
+        end
+
         local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
         if not xmlSrc:loadXml(txtXml) then
             local xmlErr = xmlSrc.parseError
@@ -458,7 +473,8 @@ local function Init()
         local xmldoc = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument.6.0")
         local SchemaCache = luacom.CreateObject("Msxml2.XMLSchemaCache.6.0")
 
-        bOk, msg = pcall(function() SchemaCache:add("", pathXsd) end)
+        bOk, msg = pcall(function() SchemaCache:add("", oXSD) end)
+        -- bOk, msg = pcall(function() SchemaCache:add("", pathXsd) end)
         if not bOk then
             print(msg)
             return
@@ -472,17 +488,7 @@ local function Init()
         end
     end
 
-    local function processXslt(txtXml, txtXslt)
-        local xslt = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument")
-        xslt.async = false
-        if not xslt:loadXml(txtXslt) then
-            local xmlErr = xslt.parseError
-            print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
-            return
-        end
-        local xsl = luacom.CreateObject("Msxml2.XSLTemplate")
-        xsl.styleSheet = xslt
-        local xslProc = xsl:createProcessor()
+    local function processXslt(txtXml)
 
         local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
 
@@ -492,9 +498,9 @@ local function Init()
             return
         end
 
-        xslProc.input = xmlSrc
-        xslProc:transform()
-        return xslProc.output
+        oXSLProc.input = xmlSrc
+        oXSLProc:transform()
+        return oXSLProc.output
     end
 
     local function Xslt()
@@ -645,17 +651,20 @@ local function Init()
         if not txtXml then txtXml = editor:GetText() end
 
         if pathXSLT then
-            local txtXslt
-            local f = io.open(pathXSLT)
-            if f then
-                txtXslt = f:read('*a')
-                f:close()
-            else
-                print("Can't open file "..pathXSLT)
-                return
+            if not oXSLProc then
+                local txtXslt
+                local f = io.open(pathXSLT)
+                if f then
+                    txtXslt = f:read('*a')
+                    f:close()
+                else
+                    print("Can't open file "..pathXSLT)
+                    return
+                end
+                XMLTOOLS.SetObjects(nil, txtXslt)
             end
 
-            txtXml = processXslt(txtXml, txtXslt)
+            txtXml = processXslt(txtXml)
         end
         txtXml = (txtXml or ''):gsub('>%s+</Field_', '></Field_')
 
@@ -672,9 +681,39 @@ local function Init()
     end
 
     function XMLTOOLS.SetPathes(xsd, xsl, tag)
+        local rez = (pathXSD ~= xsd) or (pathXSLT ~= xsl)
         pathXSD = xsd
         pathXSLT = xsl
         firstTag = tag
+        if rez then
+            oXSD = nil
+            oXSLProc = nil
+        end
+        return rez
+    end
+
+    function XMLTOOLS.SetObjects(xsd, xsl)
+        if xsd then
+            oXSD = luacom.CreateObject("MSXML2.DOMDocument.6.0")
+            if not oXSD:loadXml(xsd) then
+                local xmlErr = oXSD.parseError
+                print('Error when load xsd', xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                return
+            end
+        end
+        if xsl then
+            local oXSL = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument")
+            oXSL.async = false
+            if not oXSL:loadXml(xsl) then
+                local xmlErr = oXSL.parseError
+                print('Error when load xsd', xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                return
+            end
+            local xsl = luacom.CreateObject("Msxml2.XSLTemplate")
+            xsl.styleSheet = oXSL
+            oXSLProc = xsl:createProcessor()
+
+        end
     end
 
     function XMLTOOLS.CheckXml(strXml)
