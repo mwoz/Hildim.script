@@ -94,12 +94,11 @@ scite.RunAsync(function()
         iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
     end
 
-    scite.RunAsync(CORE.SetFindMarkers)
-
     if not dlg_SPLASH and props['hildim.command.line'] ~= '' then
         scite.RunAsync(function() OnCommandLine(props['hildim.command.line']); props['hildim.command.line'] = '' end)
     end
     scite.EnsureVisible()
-    OnInitHildiM()
+    if OnInitHildiM then OnInitHildiM() end
+    iup.Refresh(iup.GetLayout())
     _G.g_session['LOADED'] = true
 end)

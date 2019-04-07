@@ -437,6 +437,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     local slayout = ''
     if cmd == IDM_QUIT or cmd == 0 then sposes = '' end
     local curBuf = scite.buffers.GetCurrent()
+    local curCoBuf = scite.buffers.BufferByName(scite.buffers.CoName())
     local tmpFlag = props['load.on.activate']
     props['load.on.activate'] = 0
     scite.BlockUpdate(UPDATE_BLOCK)
@@ -469,6 +470,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
                 end
             else
                 if i <= curBuf then curBuf = curBuf - 1 end
+                if i <= curCoBuf then curCoBuf = curCoBuf - 1 end
             end
             if cmd ~= 0 then scite.Close() end
         end
@@ -478,6 +480,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
 
     props['load.on.activate'] = tmpFlag
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
+    _G.iuprops['buffers.cocurrent'] = curCoBuf
     if nf then    --если  buffers не сброшен в нул, значит была ошибка при загрузке
         _G.iuprops['buffers'] = tblBuff;
     end
@@ -485,7 +488,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     else return true end
 end
 
-local function fixMarks(bReset)
+function CORE.fixMarks(bReset)
     local mrk = editor:MarkerNext(-1, 1 << MARKER_NOTSAVED)
     while mrk > -1 do
         editor:MarkerDelete(mrk, MARKER_NOTSAVED)
@@ -500,7 +503,7 @@ local function onOpen_local(source)
         if not shell.fileexists(source:from_utf8()) then return end
     end
     iuprops['resent.files.list']:check(source:from_utf8())
-    fixMarks(false)
+    CORE.fixMarks(false)
 end
 
 local function onNavigate_local(item)
@@ -547,6 +550,7 @@ iup.RestoreFiles = function(bForce)
         end
         local bRight, bRightPrev, bCloned, bIsRight = false, false, false, false
         local curPos = tonumber(_G.iuprops['buffers.current'] or - 1)
+        local curCoPos = tonumber(_G.iuprops['buffers.cocurrent'] or - 1)
         for i = #t, 1,- 1 do
             if i == 1 then
                 OnOpen = fPrevOnOpen
@@ -582,7 +586,11 @@ iup.RestoreFiles = function(bForce)
             if bRight or bCloned then bIsRight = true end
 
             bRightPrev = bRight
-            if p[i] then editor.FirstVisibleLine = (math.tointeger(p[i]) or 0) end
+            if p[i] then
+                editor.FirstVisibleLine = (math.tointeger(p[i]) or 0)
+                editor.SelectionStart = editor:PositionFromLine(editor:DocLineFromVisible(editor.FirstVisibleLine + 5))
+                editor.SelectionEnd = editor.SelectionStart
+            end
 
             for bki in (bk[i] or ''):gmatch('%d+') do
                 editor:MarkerAdd(math.tointeger(bki), MARKER_BOOKMARK)
@@ -600,6 +608,7 @@ iup.RestoreFiles = function(bForce)
         if bNew then
             scite.buffers.SetDocumentAt(0)
         else
+            if curCoPos >= 0 then scite.buffers.SetDocumentAt(curCoPos) end
             if curPos >= 0 then scite.buffers.SetDocumentAt(curPos) end
         end
 
@@ -842,6 +851,7 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         elseif cmd == IDM_BUILD then strcmd = 'build'
         else strcmd = 'compile' end
         if props['command.'..strcmd..'.subsystem$'] == '10' then
+            if props["clear.before.execute"] == '1' then output:SetText('') end
             assert(load(props['command.'..strcmd..'$']))()
             return true
         end
@@ -881,7 +891,7 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
         local e = Iif(leg == scite.buffers.GetBufferSide(scite.buffers.GetCurrent()), editor, coeditor)
         if (flag & (SC_PERFORMED_UNDO | SC_PERFORMED_REDO)) ~= 0 then
             scite.RunAsync(function()
-                if scite.buffers.SavedAt(scite.buffers.GetCurrent()) then fixMarks(); return end
+                if scite.buffers.SavedAt(scite.buffers.GetCurrent()) then CORE.fixMarks(); return end
             end)
         end
         local bOk, lstart = pcall(function() return e:LineFromPosition(position) end)
@@ -897,7 +907,7 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
 end)
 
 AddEventHandler("OnSave", function(cmd, source)
-    fixMarks(true)
+    CORE.fixMarks(true)
 
     while editor:EndUndoAction() > 0 do
         print'!!!Warning!!! EndUndoAction from OnSave'
@@ -1106,6 +1116,7 @@ end
 
 local old_iup_expander = iup.expander
 iup.expander = function(t)
+    -- if not t.staterefresh then t.staterefresh = "NO" end
     local expand = old_iup_expander(t)
 
     function expand:switch()
@@ -1173,15 +1184,7 @@ iup.list = function(t)
             end
         end
     end
-    function cmb:FillByHist(sHist,sLast)
-        sHist = props[sHist]:gsub('||', 'З')..'З'
-        i = 1
-        for elem in sHist:gmatch('([^|]+)|') do
-            iup.SetAttribute(self, i, elem:gsub('З', '|'))
-            i = i + 1
-        end
-        if sLast then self.value = props[sLast] end
-    end
+
     function cmb:SaveHist()
         local s = self.value
         self.insertitem1 = s
@@ -1416,6 +1419,8 @@ iup.scitedetachbox = function(t)
 
         hNew.customframeactivate_cb = CORE.panelactivate_cb(flat_title)
 
+        scite.RunAsync(function() iup.Refresh(hNew) end)
+
     end)
     dtb.HideDialog = function()
         if dtb.Dialog then
@@ -1431,6 +1436,8 @@ iup.scitedetachbox = function(t)
             iup.ShowXY(dtb.Dialog, _G.iuprops['dialogs.'..dtb.sciteid..'.x'] or '100', _G.iuprops['dialogs.'..dtb.sciteid..'.y'] or '100')
             if statusBtn then statusBtn.visible = 'NO' end
         end
+        scite.RunAsync(function() iup.Refresh(dtb.Dialog) end)
+
     end
 
     dtb.onSetStaticControls = function()
@@ -1543,9 +1550,9 @@ iup.scitedetachbox = function(t)
         end
     end
 
-    menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, cpt = t.Dlg_Title, visible = t.MenuVisible, tSub})
+    menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, image = t.buttonImage, cpt = t.Dlg_Title, visible = t.MenuVisible, tSub})
 
-    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'View', visible = t.MenuVisibleEx, tSub}) end
+    if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'&View', visible = t.MenuVisibleEx, tSub}) end
 
     return dtb
 end

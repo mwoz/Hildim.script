@@ -182,10 +182,12 @@ local function Show()
     local btn_default
     edit_hk.killfocus_cb = function(h)
         if h.value:sub(#h.value) == '+' then h.value = '' end
-        if not bBlockReset then
+        if not bBlockReset and h.value ~= '' then
             for i = 1,  iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
                 local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
-                if title:find('<'..h.value..'>', 1, true) then
+                local tuid = tree_hk:GetUserId(i)
+
+                if tuid and ((tuid.user and tuid.user == h.value) or (not tuid.user and tuid.default and tuid.default == h.value)) then
                     if tree_hk.value == i..'' then return end
                     result = iup.Alarm(_FMT(_T'"%1" uses this hotkey', title),
                         _FMT(_T'Go to"%1"?\n', title:gsub('‹.*', ''))..
@@ -223,11 +225,14 @@ local function Show()
             if iup.GetAttributeId(tree_hk, 'KIND', id) == 'BRANCH' then return end
             local tuid = tree_hk:GetUserId(id)
             local t = tuid.title
-            if tuid.default then
+            if tuid.default and h.value ~= '' then
                 for i = 1, iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
                     local title = iup.GetAttributeId(tree_hk, 'TITLE', i)
-                    if title:find('<'..tuid.default..'>', 1, true) then
+                    local tui2 = tree_hk:GetUserId(i)
+
+                    if tui2 and ((tui2.user and tui2.user == h.value) or (not tui2.user and tui2.default and tui2.default == h.value)) then
                         if tree_hk.value == i..'' then return end
+
                         result = iup.Alarm(_FMT(_T'"%1" uses hotkey %2' , title ,tuid.default),
                             _FMT(_T'Go to"%1"?\n', title:gsub('‹.*', ''))..
                             _FMT(_T'Restore %1, for "%2" remove hotkey?\n', tuid.default, title:gsub('‹.*', ''))..

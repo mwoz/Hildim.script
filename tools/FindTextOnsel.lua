@@ -47,17 +47,31 @@ end
 
 AddEventHandler("OnUpdateUI", SelectMethod)
 
-CORE.FindSelToConcole = function()
-    needCoding = (editor.CodePage ~= 0)
-    local sText = editor:GetSelText()
+local function FindSelToConcoleL(id, ed, edfrom)
+    local uMod = scite.buffers.GetBufferUnicMode(id)
+    needCoding = (uMod ~= 0)
+
+    local sText = (edfrom or editor):GetSelText()
     findSettings.wholeWord = false
     if (sText == '') then
-        sText = GetCurrentWord()
+        sText = GetCurrentWord(edfrom or editor)
         findSettings.wholeWord= true
     end
 
     findSettings.findWhat = sText
+    findSettings.e = ed
+    findSettings.unicMode = uMod
+    findSettings.path = scite.buffers.NameAt(id)
     CORE.FindMarkAll(findSettings, 100, false, true)
+
+end
+
+CORE.FindSelToConcole = function()
+    FindSelToConcoleL(scite.buffers.GetCurrent(), editor)
+end
+
+CORE.FindCoSelToConcole = function()
+    FindSelToConcoleL(scite.buffers.BufferByName(scite.buffers.CoName()), coeditor)
 end
 
 CORE.ToggleSubfolders = function(bShow, line)
@@ -144,8 +158,16 @@ CORE.FindNextWrd = function(ud)
 end
 
 AddEventHandler("OnClick", function(shift, ctrl, alt)
-    if editor.Focus and not shift and ctrl and alt then
-        CORE.FindSelToConcole()
+    if --[[editor.Focus and]] not shift and ctrl and alt then
+        if not shift then
+            local id = scite.buffers.GetCurrent()
+            if editor.Focus then FindSelToConcoleL(id, editor, editor)
+            elseif findres.Focus then FindSelToConcoleL(id, editor, findres)
+            elseif output.Focus then FindSelToConcoleL(id, editor, output)
+            end
+        elseif scite.buffers.SecondEditorActive() == 1 and scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 0 then
+            CORE.FindCoSelToConcole()
+        end
     end
 end)
 

@@ -397,6 +397,7 @@ local function Func_Init(h)
             prepareTree(tblOut, table_functions, lOut, lMask)
             tblOut.userid.Next = tblAllUI[1]
             tblOut.userid.Id = 0
+            tblOut.userid.start = 0
             countTree(tblOut)
 
             --debug_prnArgs(lOut)
@@ -551,7 +552,6 @@ local function Func_Init(h)
                 if idPrev ~= currFuncId then
                     -- вы€снилось, что с прошлого раза мы переместились в другую функцию
                     if currFuncId > - 1 then
-                        iup.SetAttributeId(tree_func, "MARKED", currFuncId, "NO")
                         iup.SetAttributeId(tree_func, "COLOR", currFuncId, "0 0 0")
                     end
                     tree_func.flat_topitem = idPrev
@@ -559,7 +559,6 @@ local function Func_Init(h)
                     iup.SetAttributeId(tree_func, "COLOR", idPrev, "0 0 255")
                     currFuncId = idPrev
                 end
-                currentLine = l
                 return
             end
         end
@@ -673,13 +672,6 @@ local function Func_Init(h)
     end
 
     tree_func.button_cb = function(_, but, pressed, x, y, status)
-
-        -- if but == 51 and pressed == 0 then --right
-        --     menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
-        -- else
-        if but == 49 and iup.isdouble(status) then --dbl left
-            line = Functions_GotoLine()
-        end
         if pressed == 0 and line ~= nil then
             iup.PassFocus()
             line = nil
@@ -706,10 +698,7 @@ local function Func_Init(h)
 
     local prevval
     tree_func.k_any = function(_, number)
-        if number == iup.K_CR then
-            Functions_GotoLine()
-            iup.PassFocus()
-        elseif number == iup.K_ESC then
+        if number == iup.K_ESC then
             iup.PassFocus()
         elseif tonumber(number) > 31 and tonumber(number) < 256 and txt_live then
             prevval = tree_func.value
@@ -718,9 +707,15 @@ local function Func_Init(h)
                 iup.SetFocus(txt_live)
                 tree_func.flat_topitem = tree_func.value
                 iup.SetGlobal('KEY', number)
+                iup.RefreshChildren(iup.GetParent(expd))
             end
             return iup.IGNORE
         end
+    end
+
+    tree_func.executeleaf_cb = function(h, id)
+        Functions_GotoLine()
+        scite.RunAsync(iup.PassFocus)
     end
 
     tree_func.flat_selection_cb = function(h, i, state)
@@ -751,7 +746,10 @@ local function Func_Init(h)
         SaveLayoutToProp()
     end
     tree_func.flat_branchclose_cb = function(h, number)
-        if number == 0 then return iup.IGNORE end
+        if number == 0 then
+            editor:GotoLine(0)
+            return iup.IGNORE
+        end
         StoreState('COLLAPSED', number)
         SaveLayoutToProp()
     end
@@ -760,22 +758,24 @@ local function Func_Init(h)
         function() tree_func.delnode0 = "CHILDREN"; tree_func.title0 = ""
     end)
     txt_live = iup.text{size = '25x', expand = 'HORIZONTAL'}
-    expd = iup.expander{iup.hbox{txt_live, iup.label{title = 'PgDn-Next'}, iup.label{}, gap = 10, alignment = 'ACENTER'}, barposition = 'BOTTOM', barsize = '0', state = 'CLOSE', visible = 'NO'}
+    expd = iup.expander{iup.hbox{txt_live, iup.label{title = 'PgDn-Next'}, iup.label{}, gap = 10, alignment = 'ACENTER'}, barposition = 'BOTTOM', barsize = '0',staterefresh = 'NO', state = 'CLOSE', visible = 'NO'}
     txt_live.killfocus_cb = function(h)
         expd.state = 'CLOSE'
+        iup.RefreshChildren(iup.GetParent(expd))
         h.value = ''
     end
-    txt_live.action = function(h, c, newvalue)
+    txt_live.action = function(h, c, newvalue, block1st)
         if newvalue == '' then return end
         local v = tonumber(tree_func.value)
         local tUid = iup.TreeGetUserId(tree_func, v)
         local curv = v
         repeat
-            if tUid._name and tUid._name:upper():find('^'..newvalue:upper()) then
+            if not block1st and tUid._name and tUid._name:upper():find('^'..newvalue:upper()) then
                 iup.SetAttributeId(tree_func, "MARKED", curv, "YES")
                 tree_func.flat_topitem = curv
                 return
             end
+            block1st = nil
             tUid = tUid.Next or iup.TreeGetUserId(tree_func, 0)
             curv = tUid.Id
         until curv == v
@@ -788,7 +788,7 @@ local function Func_Init(h)
             Functions_GotoLine()
             iup.PassFocus()
         elseif k == iup.K_PGDN then
-            h.action(h, 0, h.value)
+            h.action(h, 0, h.value, true)
         end
     end
 

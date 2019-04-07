@@ -77,7 +77,7 @@ body, html {
     local function createDlg()
         local dlg
         web = iup.webbrowser{expand = 'YES'}
-        local fclose = iup.flatbutton{image = 'CLOSE_µ', bgcolor = props['layout.bgcolor']; flat_action = function(h) dlg:postdestroy() end}
+        local fclose = iup.flatbutton{image = 'CLOSE_µ', name = 'Close', bgcolor = props['layout.bgcolor']; flat_action = function(h) dlg:postdestroy() end; k_any = function(h) dlg:postdestroy() end}
 
         dlg = iup.scitedialog{iup.backgroundbox{iup.hbox{iup.vbox{
                 iup.hbox{iup.label{image = "HildiM_µ"},
@@ -95,6 +95,8 @@ body, html {
 
     local dlg = createDlg()
     iup.ShowXY(dlg, iup.CENTERPARENT, iup.CENTERPARENT, true)
+    iup.SetFocus(iup.GetDialogChild(dlg, "Close"))
+
     local t = scite.FileVersionInfo(props['SciteDefaultHome']..'/HildiM.exe')
 
     templ = templ:gsub('{HildiMVer}', t.FileVersion):gsub('{IUPVer}', t.IUPVersion):gsub('{Version}', _T'Version'):gsub('{Based}', _T'Based')

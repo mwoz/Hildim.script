@@ -608,12 +608,25 @@ local function Init_hidden()
         CORE.FreeIndic(mark)
     end
 
-    Compare.Init(iup.GetDialogChild(iup.GetLayout(), "Source").hwnd, iup.GetDialogChild(iup.GetLayout(), "CoSource").hwnd)
+    local tmr
+    AddEventHandler("OnInitHildiM", function()
+        local cnt = 0
+        tmr = iup.timer{time = 20, run = 'NO', action_cb = function()
+            cnt = cnt + 1
+            if cnt > 200 or Compare.Init(iup.GetDialogChild(iup.GetLayout(), "Source").hwnd, iup.GetDialogChild(iup.GetLayout(), "CoSource").hwnd) == 0 then
+                tmr.run = 'NO'
 
-    ApplySettings()
+                ApplySettings()
 
-
-    Compare.SetStyles()
+                Compare.SetStyles()
+            end
+            if cnt > 20 then
+                tmr.run = 'NO'
+                print("Compare plugin error: not connected")
+            end
+        end}
+        tmr.run = 'YES'
+    end)
 
     local function bCanCpyLeft()
         local e = Iif(scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) == 0, editor, coeditor)
@@ -634,24 +647,24 @@ local function Init_hidden()
         return ((_G.iuprops['coeditor.win'] or '')~= '2') and (bActive == 0 or bActive == 7)
     end
 
-    local item = {'Comparison', {
-		{'Compare to Other View', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
-		{'Clear Highlighting', action = Reset, image='cross_script_µ' },
+    local item = {'&Comparison', {
+		{'Compare to &Other View', key = 'Alt+=', action = StartCompare, active = bCanCompareSide},
+		{'C&lear Highlighting', action = Reset, image = 'cross_script_µ' },
         {'s1', separator = 1},
-        {'Compare to Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end, image='edit_diff_µ'},
-        {'Compare to Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp, image = 'edit_diff_µ'},
+        {'Compare to &Git', action = CompareGit, visible = function() return gitInstall == 1 end, active = function() return bGitActive end, image = 'edit_diff_µ'},
+        {'Compare to &Vss', action = COMPARE.CompareVss, visible = 'VSS', active = bCanNewComp, image = 'edit_diff_µ'},
         {'s2', separator = 1},
-		{'Next Difference', key = 'Alt+Down', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
-		{'Previous Difference', key = 'Alt+Up', action = prevDif, active = function() return bActive == 7 end, image = 'IMAGE_ArrowUp'},
-		{'Copy Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
-		{'Copy Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
+		{'&Next Difference', key = 'Alt+Down', action = nextDiff, active = function() return bActive == 7 end, image='IMAGE_ArrowDown'},
+		{'&Previous Difference', key = 'Alt+Up', action = prevDif, active = function() return bActive == 7 end, image = 'IMAGE_ArrowUp'},
+		{'Copy &Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
+		{'Copy &Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
         {'s3', separator = 1},
-		{'Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare; _G.iuprops['compare_settings'] = tSet end},
-		{'Ignore Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{}; _G.iuprops['compare_settings'] = tSet  end},
-		{'Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
-		{'Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
-		{'Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings(); _G.iuprops['compare_settings'] = tSet  end},
-		{'Color Preferences', action = ColorSettings, image='color_µ'},
+		{'&Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare; _G.iuprops['compare_settings'] = tSet end},
+		{'Ignore &Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{}; _G.iuprops['compare_settings'] = tSet end},
+		{'&Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
+		{'&Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
+		{'&Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
+		{'Color Pre&ferences', action = ColorSettings, image='color_µ'},
     }}
     menuhandler:AddMenu(item, "hildim/ui/compare.html", _T)
     local function compareVis(bFavor)

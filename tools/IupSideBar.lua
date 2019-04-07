@@ -218,6 +218,7 @@ local function CreateBox()
     end
 
     local hk_pointer
+    local strTip
     local function SideBar(t, Bar_Obj, sciteid)
         if not t then return end
         t.name = 'sidebartab_'..sciteid
@@ -242,12 +243,15 @@ local function CreateBox()
         t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu|View|'..sciteid) end end
 
         local j = 1
-        local s = 'Hotkeys for Tab Activation:'
-        for i = hk_pointer,  #tbl_hotkeys do
-            s = s..'\n Tab'..(i - hk_pointer + 1)..' - <'..Iif(tbl_hotkeys[i] == '', '', tbl_hotkeys[i])..'>'
+        if not strTip then
+            strTip = _TH'Hotkeys for Tab Activation:'
+            for i = hk_pointer,  #tbl_hotkeys do
+                strTip = strTip..'\n Tab'..(i - hk_pointer + 1)..' - <'..Iif(tbl_hotkeys[i] == '', '', tbl_hotkeys[i])..'>'
+            end
         end
+
         hk_pointer =  #tbl_hotkeys + 1
-        t.tip = s
+        t.tip = strTip
         t.tabspadding = '10x3'
         t.forecolor = props['layout.fgcolor']
         t.highcolor = props['layout.txthlcolor']
@@ -275,10 +279,15 @@ local function CreateBox()
             Dlg_Title = _TH(sSide.." Side Bar"); Dlg_Show_Cb = nil;
             On_Detach = (function(h, hNew, x, y)
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state = "CLOSE";
-                --h.visible
+                scite.RunAsync(Splitter_CB)
             end);
             Dlg_Close_Cb = (function(h)
                 iup.GetDialogChild(iup.GetLayout(), sExpander).state = "OPEN";
+                local tmr = iup.timer{time = 300, run = 'NO', action_cb = function(h)
+                   h.run = 'NO'
+                   Splitter_CB()
+                end}
+                tmr.run = 'YES'
             end);
             Dlg_Show_Cb =(function(h, state)
                 if state == 4 then
@@ -501,7 +510,7 @@ local function InitSideBar()
         bs2.barsize='5'
         if tonumber(bs2.value) > 980 then bs2.value = 800 end
         iup.GetDialogChild(hMainLayout, "FindPlaceHolder").yautohide = 'NO'
-        iup.Refresh(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
+        iup.RefreshChildren(iup.GetDialogChild(hMainLayout, "FindPlaceHolder"))
         iup.SetAttribute(hBx, "HELPID", 'findrepl')
     else
         bs2.barsize="0"
@@ -600,7 +609,7 @@ local function InitSideBar()
             elseif tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) < 20 then _G.iuprops['dialogs.coeditor.splitvalue'] = 100 end
         end);
         Dlg_Show_Cb = (function(h, state)
-            if state == 0 then CORE.RemapTab(false); iup.Refresh(h)
+            if state == 0 then CORE.RemapTab(false); iup.Refresh(h) -- ремапится только что отурытый диалог
             elseif state == 4 then scite.RunAsync(Splitter_CB) end
         end);
         Dlg_BeforeAttach = (function(h, state)
@@ -734,6 +743,7 @@ local function InitTabbar()
 
     SetTab(iup.GetDialogChild(hMainLayout, 'TabCtrlLeft'))
     SetTab(iup.GetDialogChild(hMainLayout, 'TabCtrlRight'))
+    AddEventHandler("OnInitHildiM", Splitter_CB)
 end
 
 function CORE.RemapTab(bIsH)
@@ -771,7 +781,7 @@ function CORE.RemapCoeditor()
 
     hPr.flat_button_cb = hPrOld.flat_button_cb
 
-    iup.Refresh(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
+    iup.RefreshChildren(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
     _G.iuprops['dialogs.coeditor.splithorizontal'] = Iif(bIsH, 0, 1)
 end
 
@@ -875,7 +885,7 @@ local function InitMenuBar()
     local hb = { alignment = 'ACENTER', expand = 'HORIZONTAL', name = 'Hildim_MenuBar'}
     for i = 1, #mnu do
         if mnu[i][1] ~='_HIDDEN_' then
-            table.insert(hb,menuhandler:GreateMenuLabel(mnu[i]))
+            table.insert(hb, menuhandler:CreateMenuLabel(mnu[i]))
             if i == #mnu - 1 then table.insert(hb,iup.fill{name = 'menu_fill'})
             elseif i < #mnu - 1 then table.insert(hb, iup.canvas{ maxsize = 'x18', rastersize = '1x', bgcolor = props['layout.bordercolor'], expand = 'NO', border = 'NO'}) end
             -- elseif i < #mnu - 1 then table.insert(hb, iup.label{separator = "VERTICAL",maxsize='x18'}) end
@@ -974,7 +984,7 @@ else
 end
 RestoreNamedValues(hMainLayout, 'sidebarctrl')
 RestoreNamedValues(hMainLayout, 'findreplace')
-iup.Refresh(hMainLayout)
+--iup.Refresh(hMainLayout)
 if not LeftBar_obj.handle then iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").value = '0'
 else iup.GetDialogChild(hMainLayout, "LeftBarExpander").state='OPEN'; iup.GetDialogChild(hMainLayout, "SourceSplitLeft").barsize = '5'   end
 if not SideBar_obj.handle then iup.GetDialogChild(hMainLayout, "RightBarExpander").state='CLOSE'; iup.GetDialogChild(hMainLayout, "SourceSplitRight").barsize = '0' ; iup.GetDialogChild(hMainLayout, "SourceSplitRight").value = '1000'

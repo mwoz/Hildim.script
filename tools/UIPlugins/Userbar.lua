@@ -43,6 +43,8 @@ local function Init(h)
                 table.insert(tBar, hBtn)
 
                 if #tCond > 0 then tAllConditions[hBtn] = tCond end
+            else
+                print('Userbar: Item "'..p..'" not found')
             end
         end
     end

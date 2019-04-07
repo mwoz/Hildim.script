@@ -3,7 +3,7 @@ new_file.lua
 mozers™, VladVRO
 version 3.3.0
 ----------------------------------------------
-Заменяет стандартную команду SciTE "File|New" (Ctrl+N)
+Заменяет стандартную команду SciTE "&File|New" (Ctrl+N)
 Создает новый буфер в текущем каталоге с расширением текущего файла
 Благодаря этому, сразу же включаются все фичи лексера (подсветка, подсказки и пр.)
 ----------------------------------------------
@@ -15,7 +15,7 @@ version 3.3.0
   file.make.as.utf8=htm,html
 
 -------------------------------------------------------------------
-Replaces SciTE command "File|New" (Ctrl+N)
+Replaces SciTE command "&File|New" (Ctrl+N)
 Creates new buffer in the current folder with current file extension
 ----------------------------------------------
 Connection:

@@ -67,17 +67,6 @@ local function Ctrl(s)
     return iup.GetDialogChild(containers[2],s)
 end
 
-AddEventHandler("OnInitHildiM", function()
-    Ctrl("cmbFindWhat").Selection = "1:1"
-    Ctrl("cmbReplaceWhat").Selection = "1:1"
-    Ctrl("cmbFolders").Selection = "1:1"
-    Ctrl("cmbFilter").Selection = "1:1"
-end)
-
-AddEventHandler("OnSwitchFile", function()
-    scite.RunAsync(function()Ctrl("cmbFolders").Selection = "1:1" end)
-end)
-
 local function PrepareFindText(s)
     s = (s or ''):gsub('[\n\r]+$', '')
     if s:find('[\n\r]') then
@@ -376,7 +365,6 @@ local function ReplaceInBuffers()
     SetInfo(_T'Replacements: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbReplaceWhat"):SaveHist()
     Ctrl("cmbFindWhat"):SaveHist()
-    scite.BlockUpdate(UPDATE_FORCE)
     PassFocus_local()
     PostAction()
 end
@@ -494,13 +482,6 @@ end
 local function ActivateFind_l(nTab)
 
     Ctrl("tabFindRepl").valuepos = nTab
-
-    if nTab == 1 then
-        Ctrl("cmbReplaceWhat").Selection = "1:1"
-    elseif nTab == 2 then
-        Ctrl("cmbFolders").Selection = "1:1"
-        Ctrl("cmbFilter").Selection = "1:1"
-    end
 
     local wnd = editor
     if output.Focus then wnd = output
@@ -1037,16 +1018,7 @@ local function create_dialog_FindReplace()
     canfocus  = "NO",
     name = "tabFindRepl",
     tabchange_cb = function(h)
-        scite.RunAsync(function()
-            if h.valuepos == '1' then
-                Ctrl("cmbReplaceWhat").Selection = "1:1"
-            elseif h.valuepos == '2' then
-                Ctrl("cmbFolders").Selection = "1:1"
-                Ctrl("cmbFilter").Selection = "1:1"
-            end
-            iup.SetFocus(Ctrl("cmbFindWhat"));
-            SetStaticControls()
-        end)
+        scite.RunAsync(SetStaticControls)
     end,
     forecolor = props['layout.txtfgcolor'],
     highcolor = props['layout.txthlcolor'],
@@ -1246,7 +1218,7 @@ local function Init(h)
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
             end
         end);
-        Dlg_Show_Cb = function(h, state) SetStaticControls() end;
+        Dlg_Show_Cb = function(h, state) scite.RunAsync(SetStaticControls) end;
         }
     local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')
 
@@ -1258,8 +1230,9 @@ local function Init(h)
 
     iup.SetAttribute(oDeattFnd, 'SAVEPREFIX', 'findreplace')
 
+    local bPrevBufSide = 0
     local res = {
-        handle = iup.vbox{oDeattFnd,font=iup.GetGlobal("DEFAULTFONT"), map_cb=SetStaticControls()};
+        handle = iup.vbox{oDeattFnd, font = iup.GetGlobal("DEFAULTFONT")};
         OnMenuCommand = (function(msg)
             if msg == IDM_FIND then return ActivateFind_l(0)
             elseif msg == IDM_REPLACE then return ActivateFind_l(1)
@@ -1283,7 +1256,10 @@ local function Init(h)
                 iup.SetFocus(Ctrl("cmbFindWhat"))
             end
         end);
-        OnSwitchFile = function(file) CORE.ClearLiveFindMrk() end;
+        OnSwitchFile = function(file)
+            if bPrevBufSide == scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) then CORE.ClearLiveFindMrk() end
+            bPrevBufSide = scite.buffers.GetBufferSide(scite.buffers.GetCurrent())
+            end;
         }
     res.handle_deattach = oDeattFnd
 
@@ -1303,6 +1279,9 @@ local function Init(h)
             findSettings:MarkResult()
         end
     end
+
+    AddEventHandler("OnInitHildiM", function() scite.RunAsync(CORE.SetFindMarkers); SetStaticControls() end)
+
     return res
 end
 g_Ctrl = Ctrl

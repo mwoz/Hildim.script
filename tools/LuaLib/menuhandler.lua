@@ -8,7 +8,8 @@ local clr_select = props['layout.txtinactivcolor']
 local clr_normal = props['layout.fgcolor']
 local s = class()
 local r_button
-local bListenmouseHook = false
+local bListenmouseHook = true
+local mnemoShow = false
 
 function s:Init()
     sys_KeysToMenus = {}
@@ -19,10 +20,11 @@ function s:Init()
     reselectedItem = nil
 end
 
-function s:get_title(t, bShort)
-    local s = t.cpt or _TM(t[1])
-    if not bShort and (t.user_hk or t.key) then s = s..'\t'..(t.user_hk or t.key) end
-    return s
+function s:get_title(t, bShort, bStayAmp)
+    local c = t.cpt or _TM(t[1])
+    if not bShort and (t.user_hk or t.key) then c = c..'\t'..(t.user_hk or t.key) end
+    if bStayAmp then return c end
+    return c:gsub('&([^& ])', '%1')
 end
 
 local function getParam(p, bDef)
@@ -34,31 +36,35 @@ local function getParam(p, bDef)
 end
 
 local function GetAction(mnu, bForse, bHotKey)
-    if not bHotKey then iup.PassFocus() end
-    if bForse or getParam(mnu.active, true) then
-        local rez
-        if mnu.action then
-            local tp = type(mnu.action)
-            if tp == 'number' then rez = function() scite.MenuCommand(mnu.action) end end
-            if tp == 'string' then rez = assert(load('return '..mnu.action)) end
-            if tp == 'function' then rez = mnu.action end
+    local function doGetAction(mnu, bForse, bHotKey)
+        if bForse or getParam(mnu.active, true) then
+            local rez
+            if mnu.action then
+                local tp = type(mnu.action)
+                if tp == 'number' then rez = function() scite.MenuCommand(mnu.action) end end
+                if tp == 'string' then rez = assert(load('return '..mnu.action)) end
+                if tp == 'function' then rez = mnu.action end
+            end
+            if mnu.check_idm then
+            elseif mnu.check_prop then
+                return assert(load("CheckChange('"..mnu.check_prop.."', true)"))
+            elseif mnu.check_iuprops then
+                local rez2 = assert(load("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1 or _G.iuprops[mnu.check_iuprops] == true or _G.iuprops[mnu.check_iuprops] == 'ON' , 0, 1)))
+                if rez then return function() rez2(); rez() end end
+                return rez2
+            elseif mnu.check_boolean then
+                return assert(load("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
+            elseif not rez then
+                return function() debug_prnArgs('Error in menu format!!', mnu) end
+            end
+            return rez
+        else
+            return function() end
         end
-        if mnu.check_idm then
-        elseif mnu.check_prop then
-            return assert(load("CheckChange('"..mnu.check_prop.."', true)"))
-        elseif mnu.check_iuprops then
-            local rez2 = assert(load("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1 or _G.iuprops[mnu.check_iuprops] == true or _G.iuprops[mnu.check_iuprops] == 'ON' , 0, 1)))
-            if rez then return function() rez2(); rez() end end
-            return rez2
-        elseif mnu.check_boolean then
-            return assert(load("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
-        elseif not rez then
-            return function() debug_prnArgs('Error in menu format!!',mnu) end
-        end
-        return rez
-    else
-        return function() end
     end
+    local r = doGetAction(mnu, bForse, bHotKey)
+    if not bHotKey then iup.PassFocus() end
+    return r
 end
 
 local function FindMenuItem(path)
@@ -67,10 +73,10 @@ local function FindMenuItem(path)
         _,_, strFld = path:find('^([^|]+)|')
         for i = 1, #mnu do
             if strFld then
-                if mnu[i][1] == strFld then
+                if mnu[i][1]:gsub('&([^& ])', '%1') == strFld then
                     return DropDown(path:gsub('^[^|]+|', ''), mnu[i][2])
                 end
-            elseif mnu[i][1] == path then
+            elseif mnu[i][1]:gsub('&([^& ])', '%1') == path then
                 return mnu[i]
             end
         end
@@ -97,21 +103,26 @@ function s:PopMnu(smnu, x, y, bToolBar)
             else itm = m[i] end
 
             if itm and getParam(itm.visible,true) and
-               (not itm.visible_ext or string.find(','..itm.visible_ext..',',','..props["FileExt"]..',')) then
+              (not itm.visible_ext or string.find(','..itm.visible_ext..',', ','..props["FileExt"]..',')) and
+              not (bPrevSepar and itm.separator) then
+                if bPrevSepar then
+                    table.insert(t, iup.separator{})
+                end
+                bPrevSepar = false
                 if itm[2] then
 
                     if type(itm[2]) == 'table' then
                         if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
                             CreateItems(itm[2],t)
                         else
-                            table.insert(t, iup.submenu{title = s:get_title(itm), CreateMenu(itm[2], itm.radio)})
+                            table.insert(t, iup.submenu{title = s:get_title(itm, false, true), image = itm.image, CreateMenu(itm[2], itm.radio)})
                         end
                     elseif type(itm[2]) == 'function' then
                         if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
                             CreateItems(itm[2](), t, true)
                         else
                             local t2 = itm[2]()
-                            table.insert(t, iup.submenu{title = s:get_title(itm), CreateMenu(t2)})
+                            table.insert(t, iup.submenu{title = s:get_title(itm, false, true), image = itm.image, CreateMenu(t2)})
                             if #t2 == 0 then t[#t].active = 'NO' end
                         end
                     end
@@ -121,14 +132,14 @@ function s:PopMnu(smnu, x, y, bToolBar)
                             table.insert(tBtm[2], m[j])
                         end
 
-                        table.insert(t, iup.submenu{title = s:get_title(tBtm), CreateMenu(tBtm[2])})
+                        table.insert(t, iup.submenu{title = s:get_title(tBtm, false, true), image = itm.image, CreateMenu(tBtm[2])})
                         break
                     end
                 elseif itm.separator then
-                    if not bPrevSepar and (bPl or (i > 1 and i < #m)) then table.insert(t, iup.separator{}) end
+                    if bPl or i > 1 then bPrevSepar = true end
                 else --вставка пункта меню - только видимые
 
-                    local titem = {title = s:get_title(itm)} --заголовок
+                    local titem = {title = s:get_title(itm, false, true)} --заголовок
                     if bShoIcons and itm.image then
                         -- if itm.check_iuprops or itm.check_boolean or itm.check_prop or itm.check_idm or itm.check then
                             -- titem.titleimage = itm.image
@@ -177,7 +188,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
                     --debug_prnArgs(titem)
                     table.insert(t, iup.item(titem))
                 end
-                bPrevSepar = (itm.separator ~= nil)
+                -- bPrevSepar = (itm.separator ~= nil)
             end
         end
     end
@@ -198,6 +209,49 @@ local function GetItemPos(i)
     return tonumber(left), tonumber(top), tonumber(width), tonumber(height)
 end
 
+function s:OnMenuChar(flag, key)
+    local function acivateItem(i)
+        left, top, width, height = GetItemPos(i)
+
+        reselectedItem = {id = i, x = left, y = top + height}
+        activeLabel = labels[reselectedItem.id]
+        scite.RunAsync(function() s:ContinuePopUp() end)
+    end
+
+    if flag == 0 then
+        key = '&'..key:upper()
+        for i = 1,  #labels do
+            if labels[i].title:upper():find(key) then
+                acivateItem(i)
+                return 1
+            end
+        end
+    elseif flag == 1 then
+        acivateItem(1) --показ меню по отпусканию alt
+    elseif flag == 2 then
+        local delta = tonumber(key)
+        for i = 1, #labels do
+            if activeLabel == labels[i] then
+                i = i + delta
+                if i <= 0 then i = #labels
+                elseif i > #labels then i = 1 end
+                left, top, width, height = GetItemPos(i)
+                scite.SwitchMouseHook(false)
+                reselectedItem = {id = i, x = left, y = top + height}
+                return
+            end
+        end
+    elseif flag == 3 then --переключение alt
+        if (key == 'YES') ~= mnemoShow then
+            mnemoShow = (key == 'YES')
+            for i = 1, #labels do
+                iup.SetAttribute(labels[i], 'FORCEMNEMONIC', key)
+            end
+            iup.Redraw(iup.GetDialogChild(iup.GetLayout(), "Hildim_MenuBar"), 1)
+        end
+    end
+end
+
 function s:OnMouseHook(x,y)
 --вызывается при активированном меню:
 --при движении мыши - x,y - координаты курсора
@@ -205,36 +259,16 @@ function s:OnMouseHook(x,y)
 --при нажатии кнопки Alt - оба параметра - -70000
     if not bListenmouseHook then return end
     local left, top, width, height
-    if x>-65536 and y>-65536 then
-        for i = 1, #labels do
-            left, top, width, height = GetItemPos(i)
-            if i == 1 and (top > y or y > top + height) then return end
-            if left <= x and x <= left + width then
-                if activeLabel ~= labels[i] then
-                    scite.SwitchMouseHook(false)
-                    reselectedItem = {id = i, x = left, y = top + height}
-                end
-                return
+    for i = 1, #labels do
+        left, top, width, height = GetItemPos(i)
+        if i == 1 and (top > y or y > top + height) then return end
+        if left <= x and x <= left + width then
+            if activeLabel ~= labels[i] then
+                scite.SwitchMouseHook(false)
+                reselectedItem = {id = i, x = left, y = top + height}
             end
+            return
         end
-    elseif y >- 65536 then
-        for i = 1, #labels do
-            if activeLabel == labels[i] then
-                i = i + y
-                if i <=0 then i = #labels
-                elseif i > #labels then i = 1 end
-                    left, top, width, height = GetItemPos(i)
-                    scite.SwitchMouseHook(false)
-                    reselectedItem = {id = i, x = left, y = top + height}
-                return
-            end
-        end
-    elseif not waited_mnu then   --нажали Alt
-        left, top, width, height = GetItemPos(1)
-
-        reselectedItem = {id = 1, x = left, y = top + height}
-        activeLabel = labels[reselectedItem.id]
-        scite.RunAsync(function() s:ContinuePopUp() end)
     end
 end
 
@@ -243,6 +277,7 @@ function s:ContinuePopUp()
     scite.SwitchMouseHook(true)
     if waited_mnu then waited_mnu:popup(w_x , w_y) end
     scite.SwitchMouseHook(false)
+    bListenmouseHook = true
     if activeLabel then iup.SetAttribute(activeLabel, 'FGCOLOR', clr_normal) end
     activeLabel, waited_mnu, w_x, w_y = nil, nil, nil, nil
     if reselectedItem then
@@ -264,7 +299,7 @@ local function InsertItem(mnu, path, t)
     local _,_, sItm = path:find('^([^|]+)|')
     if sItm then
         for i = 1, #mnu do
-            if mnu[i][1]==sItm then
+            if mnu[i][1] and mnu[i][1]:gsub('&([^& ])', '%1')==sItm then
                 if mnu[i][2] then
                     InsertItem(mnu[i][2], path:gsub('^[^|]+|', ''), t)
                 end
@@ -277,7 +312,7 @@ local function InsertItem(mnu, path, t)
         InsertItem(mnu[#mnu][2], path:gsub('^[^|]+|', ''), t)
     else
         for i = 1, #mnu do
-            if mnu[i][1]==path then
+            if mnu[i][1] and mnu[i][1]:gsub('&([^& ])', '%1')==path then
                 table.insert(mnu, i, t)
                 return
             end
@@ -288,7 +323,7 @@ end
 
 local function prepareItems(t, helpPath, tf)
     t.hlp = helpPath
-    if tf then t.cpt = tf(t[1]) end
+    if tf then t.cpt = tf(t[1]:gsub('&([^& ])', '%1')) end
     if type(t[2]) == 'table' then
         if tf then t[2].cpt = tf(t[2][1]) end
         for i = 1,  #(t[2]) do
@@ -350,7 +385,7 @@ function s:RegistryHotKeys()
                 end
                 if bSet then
                     if not id then print(mnu[i].key) end
-                    sys_KeysToMenus[id] = lp
+                    sys_KeysToMenus[id] = lp:gsub('&([^& ])', '%1')
                     if type(mnu[i].action) ~= 'number' then idm_loc = idm_loc + 1 end
                 end
 
@@ -371,8 +406,8 @@ function s:OnHotKey(cmd)
     GetAction(FindMenuItem(sys_KeysToMenus[cmd]), nil, true)()
 end
 
-function s:GreateMenuLabel(item, ind)
-    local l =  iup.label{title = menuhandler:get_title(item), padding = '11x3', font= fnt,fgcolor = clr_normal, button_cb=
+function s:CreateMenuLabel(item, ind)
+    local l = iup.label{title = menuhandler:get_title(item, false, true), padding = '11x3', font = fnt, fgcolor = clr_normal, button_cb =
             function(h,but, pressed, x, y, status)
                 if but == 49 and pressed == 0 then
                     activeLabel = h
@@ -403,7 +438,7 @@ function s:AddMenu(item, helpPath, tf)
     iup.Map(l)
     local n = #labels
     table.insert(_G.sys_Menus.MainWindowMenu, n + 1, item)
-    l = menuhandler:GreateMenuLabel(item, n)
+    l = menuhandler:CreateMenuLabel(item, n)
     iup.Insert(hMainMenu, hWinMenu, l)
     iup.Map(l)
 end
@@ -415,6 +450,10 @@ end
 function event_MenuMouseHook(x, y)
     menuhandler:OnMouseHook(x, y)
     _, _, r_button = shell.async_mouse_state()
+end
+
+function event_MenuChar(flag, key)
+    return menuhandler:OnMenuChar(flag, key)
 end
 
 function s:PopUp(strPath)
@@ -436,7 +475,7 @@ function s:GetMenuItem(path)
         _,_, strFld = path:find('^([^|]+)|')
         for i = 1, #mnu do
             if strFld then
-                if mnu[i][1] == strFld then
+                if mnu[i][1]:gsub('&([^& ])', '%1') == strFld then
                     if mnu[i].visible then
                         table.insert(tblConditions, getActVis(mnu[i].visible))
                     elseif mnu[i].visible_ext then
@@ -444,7 +483,7 @@ function s:GetMenuItem(path)
                     end
                     return DropDown(path:gsub('^[^|]+|', ''), mnu[i][2])
                 end
-            elseif mnu[i][1] == path then
+            elseif mnu[i][1]:gsub('&([^& ])', '%1') == path then
                 if mnu[i].active then
 
                     table.insert(tblConditions, getActVis(mnu[i].active))

@@ -292,6 +292,7 @@ local function init()
                 iup.SetFocus(txt_live)
                 iup.SetGlobal('KEY', k)
                 blockReselect = false
+                iup.RefreshChildren(iup.GetParent(expd))
             end
         end
     end
@@ -439,7 +440,7 @@ end
 
 local function createDlg()
     txt_live = iup.text{size = '25x', k_any = lst_clip.k_any, expand = 'HORIZONTAL'}
-    expd = iup.expander{iup.hbox{txt_live, iup.label{title = 'PgDn-Next'},iup.label{}, gap = 10, alignment='ACENTER'}, barposition = 'BOTTOM', barsize = '0', state = 'CLOSE', visible = 'NO'}
+    expd = iup.expander{iup.hbox{txt_live, iup.label{title = 'PgDn-Next'},iup.label{}, gap = 10, alignment='ACENTER'}, barposition = 'BOTTOM', barsize = '0', staterefresh = 'NO',state = 'CLOSE', visible = 'NO'}
 
     local dlg = iup.scitedialog{iup.vbox{expd, lst_clip}, sciteparent = "SCITE", sciteid = "cliphistory", dropdown = true, shrink = "YES",
                 maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = '255 255 255',

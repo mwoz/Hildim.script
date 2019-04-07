@@ -1,4 +1,4 @@
---[[ƒиалог редактировани€ гор€чих клавиш]]
+--[[ƒиалог редактировани€ пользовательской панели инструментов]]
 require "menuhandler"
 local tblView = {}, tblUsers
 local defpath = props["scite.userhome"].."\\userMenuBars.lua"
@@ -43,10 +43,17 @@ local function viewMenu(tMnu, tView, path)
 end
 
 local function Show()
+    local tDefault ={'MainWindowMenu|File|New', 'MainWindowMenu|File|Open...', 'MainWindowMenu|File|Save', '---',
+    'MainWindowMenu|Edit|Regular|Undo', 'MainWindowMenu|Edit|Regular|Redo', '---',
+    'MainWindowMenu|Edit|Regular|Cut', 'MainWindowMenu|Edit|Regular|Copy', 'MainWindowMenu|Edit|Regular|Paste',
+    'MainWindowMenu|Edit|Regular|Delete', '---', 'MainWindowMenu|Edit|Xml|Format Xml',
+    'MainWindowMenu|Edit|Alignment by symbol...', '---',}
+
 
     local list_lex, dlg, bBlockReset, tree_btns, tree_hk
     local btn_ok = iup.button  {title=_TH"OK"}
     local btn_esc = iup.button  {title=_TH"Cancel"}
+    local btn_def = iup.button  {title = _TH"Default"}
     iup.SetHandle("TOOLBARSETT_BTN_OK",btn_ok)
     iup.SetHandle("TOOLBARSETT_BTN_ESC",btn_esc)
     btn_esc.action = function()
@@ -57,10 +64,11 @@ local function Show()
     btn_ok.action = function()
         local tbl = {}
         for i = 1,  iup.GetAttribute(tree_btns, "TOTALCHILDCOUNT0") do
-            local p = tree_btns:GetUserId(i) or '---'
+            local p = (tree_btns:GetUserId(i) or '---'):gsub('&([^& ])', '%1')
             table.insert(tbl, p)
         end
         _G.iuprops["settings.user.toolbar"] = tbl
+        debug_prnArgs(tbl)
         dlg:hide()
         dlg:postdestroy()
         scite.RunAsync(iup.ReloadScript)
@@ -80,6 +88,39 @@ local function Show()
                 return t[i], iup.ConvertXYToPos(t[i], x, y)
             end
         end
+    end
+    local function showTbl(tbl)
+        local id = 0
+        for i = 1, #tbl do
+            local p = tbl[i]
+            if p == '---' then
+                iup.SetAttributeId(tree_btns, "ADDLEAF", id, '-----------')
+                id = iup.GetAttribute(tree_btns, 'LASTADDNODE')
+            else
+                for i = 1, iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
+                    local tui = tree_hk:GetUserId(i)
+                    if tui and tui.path and tui.path:gsub('&([^& ])', '%1') == p then
+                        iup.SetAttributeId(tree_hk, 'COLOR', i, '92 92 255')
+                        tui.added = true
+                        tree_hk:SetUserId(i, tui)
+
+
+                        iup.SetAttributeId(tree_btns, "ADDLEAF", id, iup.GetAttributeId(tree_hk, 'TITLE', i))
+                        id = iup.GetAttribute(tree_btns, 'LASTADDNODE')
+                        iup.SetAttributeId(tree_btns, "IMAGE", id, tui.image)
+
+                        tree_btns:SetUserId(id, tui.path)
+
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    btn_def.action = function()
+        tree_btns.delnode0 = "CHILDREN"
+        showTbl(tDefault)
     end
 
     tree_hk = iup.tree{minsize = '0x5', size='200x', showdragdrop = 'YES', dragdrop_cb = function() return -1 end,imageexpanded0 = 'tree_µ',
@@ -140,7 +181,7 @@ local function Show()
 
     local vbox = iup.vbox{
         iup.hbox{iup.vbox{tree_hk},tree_btns};
-        iup.hbox{btn_ok, iup.fill{}, btn_esc},
+        iup.hbox{btn_ok, iup.fill{}, btn_def, btn_esc},
         expandchildren ='YES',gap=2,margin="4x4"}
     dlg = iup.scitedialog{vbox; title=_T"User Toolbar Preferences",defaultenter="TOOLBARSETT_BTN_OK",defaultesc="TOOLBARSETT_BTN_ESC",tabsize=editor.TabWidth,
         maxbox="NO",minbox ="NO",resize ="YES",shrink ="YES",sciteparent="SCITE", sciteid="usertb", minsize='300x600'}
@@ -152,7 +193,6 @@ local function Show()
     end)
     if shell.fileexists(defpath) then tblUsers = assert(loadfile(defpath))() end
     tblView.branchname = 'Menus'
-    --viewMenu(sys_Menus.MainWindowMenu, tblView, 'MainWindowMenu')
 
     for ups,submnu in pairs(sys_Menus) do
         local tb = {}
@@ -166,32 +206,8 @@ local function Show()
     tree_hk.autoredraw = 'YES'
 
     local tbl = _G.iuprops["settings.user.toolbar"] or {}
-    local id = 0
-    for i = 1, #tbl do
-        local p = tbl[i]
-        if p == '---' then
-            iup.SetAttributeId(tree_btns,"ADDLEAF", id, '-----------')
-            id = iup.GetAttribute(tree_btns, 'LASTADDNODE')
-        else
-            for i = 1,  iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
-                local tui = tree_hk:GetUserId(i)
-                if tui and tui.path == p then
-                    iup.SetAttributeId(tree_hk, 'COLOR', i, '92 92 255')
-                    tui.added = true
-                    tree_hk:SetUserId(i, tui)
-
-
-                    iup.SetAttributeId(tree_btns,"ADDLEAF", id, iup.GetAttributeId(tree_hk, 'TITLE', i))
-                    id = iup.GetAttribute(tree_btns, 'LASTADDNODE')
-                    iup.SetAttributeId(tree_btns,"IMAGE", id, tui.image)
-
-                    tree_btns:SetUserId(id, tui.path)
-
-                    break
-                end
-            end
-        end
-    end
+    --debug_prnArgs(tbl)
+    showTbl(tbl)
 
 end
 

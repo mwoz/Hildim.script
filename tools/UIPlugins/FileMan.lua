@@ -71,7 +71,7 @@ end
 
 FileMan_ListFILL = function()
     memo_path.value = current_path
-	if current_path == '' then return end
+    if current_path == '' then return end
 
     local table_dir = scite.findfiles(current_path..'*')
     if not table_dir then return end
@@ -88,23 +88,23 @@ FileMan_ListFILL = function()
     maskVal = '^'..maskVal..'$'
     local j = 0
 
-	for i = 1, #table_dir do
+    for i = 1, #table_dir do
         if (not table_dir[i].isdirectory) and (not table_dir[i].name:lower():find(maskVal) or (table_dir[i].attributes & 2) == 2) then
             j = j + 1
         end
-	end
+    end
 
     iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
     iup.SetAttribute(list_dir, "ADDLIN", "1-"..(#table_dir - 1 - j))
     local prevL = #table_dir - 1 - j
-	list_dir:setcell(1, 1, 'IMAGE_UpFolder')
-	list_dir:setcell(1, 2, '..')
-	list_dir:setcell(1, 3, 0)
-	list_dir:setcell(1, 4, 'd')
+    list_dir:setcell(1, 1, 'IMAGE_UpFolder')
+    list_dir:setcell(1, 2, '..')
+    list_dir:setcell(1, 3, 0)
+    list_dir:setcell(1, 4, 'd')
     local j = 2
     local dc = 0
 
-	for i = 1, #table_dir do
+    for i = 1, #table_dir do
         if table_dir[i].isdirectory then
             dc = dc + 1
             local n, a = table_dir[i].name, table_dir[i].attributes
@@ -117,7 +117,7 @@ FileMan_ListFILL = function()
             end
         else
             if table_dir[i].name:lower():find(maskVal) and (table_dir[i].attributes & 2) ~= 2 then
-                list_dir:setcell(j, 1,  GetExtImage(table_dir[i].name))
+                list_dir:setcell(j, 1, GetExtImage(table_dir[i].name))
                 list_dir:setcell(j, 2, table_dir[i].name)
                 list_dir:setcell(j, 3, table_dir[i].attributes)
                 list_dir:setcell(j, 4, '')
@@ -127,11 +127,11 @@ FileMan_ListFILL = function()
                 j = j + 1
             end
         end
-	end
+    end
     list_dir.numlin_noscroll = 1
-    if j < prevL + 1 and (file_mask ~= '') then iup.SetAttribute(list_dir, 'DELLIN', (j)..'-'..prevL)  end
+    if j < prevL + 1 and (file_mask ~= '') then iup.SetAttribute(list_dir, 'DELLIN', (j)..'-'..prevL) end
     local d = Iif(file_mask == '', dc, 2)
-	list_dir.focus_cell = d..":1"
+    list_dir.focus_cell = d..":1"
     iup.SetAttributeId2(list_dir, 'MARK', d, 0, '1')
     list_dir.redraw = "ALL"
 end
@@ -830,9 +830,8 @@ local function FileManTab_Init(h)
             if _Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle ~= _Plugins.fileman.id then
                 m_prevSel = _Plugins.fileman.Bar_obj.TabCtrl.valuepos
             end
-            OnSwitch(true,false)
         end;
-        on_SelectMe = function() scite.RunAsync(function() iup.SetFocus(memo_mask) end) end;
+        on_SelectMe = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); OnSwitch(false, true) end) end;
     }
     Favorites_OpenList()
     return res

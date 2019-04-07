@@ -563,7 +563,7 @@ local function Init()
             }}
         )
         menuhandler:InsertItem('MainWindowMenu', 'Tools|s1',
-            {'Spelling',{
+            {'Spelling', image = 'IMAGE_CheckSpelling',{
                 {'Spell Check Automatically', action = ResetAutoSpell,
                     check = "tonumber(_G.iuprops['spell.autospell']) == 1 and (editor.Length < 10 ^(_G.iuprops['spell.maxsize'] or 7))",
                     active = 'editor.Length < 10 ^(_G.iuprops["spell.maxsize"] or 7)', key = 'Ctrl+Alt+F12',

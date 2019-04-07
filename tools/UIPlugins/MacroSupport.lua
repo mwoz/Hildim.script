@@ -1168,50 +1168,50 @@ local function Init_hidden()
         end
     end
 
-    local item = {'Macro', {
-		{'Start Recording', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end, image = "control_record_µ"},
-		{'Playback Current Macro', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "control_µ"},
-		{'Delete Current Macro', action = function() if iup.Alarm(_T"Macros", _T'Delete Macro?', _TH'Yes', _TH'No') == 1 then recordet_macros = nil;recorded_props = nil end end, visible = function() return not MACRO.Record and recordet_macros end, image = "cross_script_µ"},
-		{'Save Current Macro', action = SaveCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "disk_µ" },
-		{'View Current Macro', action = function() print(GetScript()) end, visible = function() return not MACRO.Record and recordet_macros end },
-		{'Stop Recording', action = StopRecord, visible = function() return MACRO.Record end, image = "control_stop_square_µ" },
+    local item = {'&Macro', {
+		{'Start &Recording', action = StartRecord, visible = function() return not MACRO.Record and not recordet_macros end, image = "control_record_µ"},
+		{'&Playback Current Macro', action = PlayCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "control_µ"},
+		{'&Delete Current Macro', action = function() if iup.Alarm(_T"Macros", _T'Delete Macro?', _TH'Yes', _TH'No') == 1 then recordet_macros = nil;recorded_props = nil end end, visible = function() return not MACRO.Record and recordet_macros end, image = "cross_script_µ"},
+		{'&Save Current Macro', action = SaveCurrent, visible = function() return not MACRO.Record and recordet_macros end, image = "disk_µ" },
+		{'&View Current Macro', action = function() print(GetScript()) end, visible = function() return not MACRO.Record and recordet_macros end },
+		{'S&top Recording', action = StopRecord, visible = function() return MACRO.Record end, image = "control_stop_square_µ" },
         {'s1', separator = 1},
         {'macrolist', plane = 1, visible = function() return not MACRO.Record end , get_macro_list},
-        {'Macro Properties', action = SetMacroProps, visible = function() return not MACRO.Record end},
+        {'&Macro Properties', action = SetMacroProps, visible = function() return not MACRO.Record end},
         {'Record', plane = 1, visible = function() return MACRO.Record end, {
-            {'Store Position in String', {
+            {'Store &Position in String', {
                 {'StringList', plane = 1, update_position_list},
-                {'New Position in String', action = do_KeepPosition, image = "marker_µ"},
+                {'New P&osition in String', action = do_KeepPosition, image = "marker_µ"},
             },},
-            {'Go to Position in String', submenu_positions},
-            {'Select to position', submenu_selto_positions},
+            {'&Go to Position in String', submenu_positions},
+            {'&Select to position', submenu_selto_positions},
             {'s2', separator = 1},
-            {'Save Line Number', {
+            {'Save &Line Number', {
                 {'LinesList', plane = 1, update_line_list},
-                {'New Line Number', action = do_KeepLine, image = "marker_µ"},
+                {'New &Line Number', action = do_KeepLine, image = "marker_µ"},
             },},
-            {'Go to Line', submenu_lines},
-            {'Select to Line', submenu_selto_line},
+            {'G&o to Line', submenu_lines},
+            {'S&elect to Line', submenu_selto_line},
             {'s3', separator = 1},
 
-            {'Insert User-Defined String...', {
+            {'Insert &User-Defined String...', {
                 {'StringList', plane = 1, string_block_content},
-                {'Set New String Parameter', action = do_NewStringPar}
+                {'Set New &String Parameter', action = do_NewStringPar}
             }},
-            {'Repeat Next Command Block...', {
+            {'Repeat Ne&xt Command Block...', {
                 {'ForList', plane = 1, for_block_content},
-                {'Set New Repetition Parameter', action = do_BeginFor},
+                {'Set New &Repetition Parameter', action = do_BeginFor},
             }},
-            {'Insert Repetition Counter Value...', {
+            {'Insert Repetition &Counter Value...', {
                 {'CounterList', plane = 1, counter_block_content},
             }, visible = counter_block_visible},
-            {'Playback Commands on Condition...', {
+            {'Play&back Commands on Condition...', {
                 {'IfList', plane = 1, if_block_content},
-                {'Set New Condition', action = do_BeginIf}
+                {'Set New &Condition', action = do_BeginIf}
             }},
-            {'Find And Playback Commands...', {
+            {'&Find And Playback Commands...', {
                 {'FindList', plane = 1, find_block_content},
-                {'New Find', action = function() do_NewFind() end, image = "IMAGE_search"},
+                {'New &Find', action = function() do_NewFind() end, image = "IMAGE_search"},
             }},
             {'StopRecordBlock', plane = 1, visible = function() return MACRO.Record and pCurBlock.id end, function()
                 return {
@@ -1219,12 +1219,12 @@ local function Init_hidden()
                 }
             end},
             {'s4', separator = 1},
-            {'Select Word Under Cursor', action = do_SelectWord},
-            {'Copy', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
-            {'Cut', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
-            {'Paste', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
-            {'Paste from Clip History', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
-            {'Undo', active = function() return MC and (MC.typ == "F" or MC.typ == "P") end, action = do_Undo, image = "arrow_return_270_left_µ"} ,
+            {'Select &Word Under Cursor', action = do_SelectWord},
+            {'C&opy', action = do_Copy, visible = function() return CLIPHISTORY end, image = 'document_copy_µ'},
+            {'C&ut', action = do_Cut, visible = function() return CLIPHISTORY end, image = 'scissors_µ'},
+            {'&Paste', action = do_Paste, visible = function() return CLIPHISTORY end, image = 'clipboard_paste_µ'},
+            {'Paste from Clip &History', action = do_PasteHist, visible = function() return CLIPHISTORY end, image = "clipboard_list_µ"},
+            {'&Undo', active = function() return MC and (MC.typ == "F" or MC.typ == "P") end, action = do_Undo, image = "arrow_return_270_left_µ"} ,
         }},
     }}
     menuhandler:AddMenu(item, "hildim/ui/macros.html", _T)

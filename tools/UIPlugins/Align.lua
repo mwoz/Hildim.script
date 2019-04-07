@@ -125,7 +125,7 @@ local function Init()
     end
 
     menuhandler:InsertItem('MainWindowMenu', 'Edit|xxx',
-    {'Alignment by symbol...', action = do_Align, key = 'Alt+A', active = 'editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)', image = 'edit_column_µ'}, nil, _T)
+    {'Alignment by symbol...', action = do_Align, key = 'Alt+Shift+A', active = 'editor:LineFromPosition(editor.SelectionStart) ~= editor:LineFromPosition(editor.SelectionEnd)', image = 'edit_column_µ'}, nil, _T)
 
 end
 return {

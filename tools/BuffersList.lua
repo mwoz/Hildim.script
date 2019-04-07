@@ -125,34 +125,54 @@ local function InitWndDialog()
     list_windows.edition_cb = function(c, lin, col, mode, update)
         return iup.IGNORE
     end
-    local multisheck
+    local multisheck, multicheckStop
     list_windows.keypress_cb = function(h, c, press)
         if c == iup.K_LSHIFT and press==0 then multisheck = nil end
         return iup.MatKeyPressCb(h, c, press)
     end
     list_windows.click_cb = function(h, lin, col, status)
-        if iup.isshift(status) and iup.isbutton1(status) and col == 1 and not iup.isdouble(status) then
-            if multisheck then
+        if  iup.isbutton1(status) and col == 1 and not iup.isdouble(status) then
+            if iup.isshift(status) and multisheck then
                 local up, down
+                local newVal = (iup.GetAttributeId2(h, 'TOGGLEVALUE', multisheck, 1) or '0')
+
+                if multicheckStop then
+                    local oldVal = Iif(newVal == '0', '1', '0')
+                    if multisheck > multicheckStop then
+                        up = multicheckStop
+                        down = multisheck
+                    else
+                        up = multisheck
+                        down = multicheckStop
+                    end
+                    for i = up, down do
+                        iup.SetAttributeId2(h, 'TOGGLEVALUE', i, 1, oldVal)
+                    end
+
+                end
+
                 if multisheck > lin then
-                    up = lin + 1
+                    up = lin
                     down = multisheck
                 else
                     up = multisheck
-                    down = lin - 1
+                    down = lin
                 end
-                local newVal = (iup.GetAttributeId2(h, 'TOGGLEVALUE', multisheck, 1) or '0')
+
                 for i = up, down do
                     iup.SetAttributeId2(h, 'TOGGLEVALUE', i, 1, newVal)
                 end
-                multisheck = nil
+
+                multicheckStop = lin
             else
                 multisheck = lin
+                multicheckStop = nil
             end
         elseif iup.isdouble(status) and iup.isbutton1(status) and lin > 0 then
             scite.buffers.SetDocumentAt(tonumber(iup.GetAttributeId2(list_windows, '', lin, 5)))
             fillWindow(curSide)
             list_windows.redraw = 'ALL'
+            if not iup.isshift(status) and not iup.iscontrol(status) then iup.PassFocus() end
         elseif iup.isbutton3(status) and lin > 0 then
             menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Window_bar')
         end

@@ -39,10 +39,11 @@ dofile (props["SciteDefaultHome"].."\\tools\\URL_detect.lua")
 
 --------------------------------------------------------
 -- Замена порой неработающего props['CurrentWord']
-function GetCurrentWord()
-	local current_pos = editor.CurrentPos
-	return editor:textrange(editor:WordStartPosition(current_pos, true),
-							editor:WordEndPosition(current_pos, true))
+function GetCurrentWord(ed)
+    ed = ed or editor
+	local current_pos = ed.CurrentPos
+	return ed:textrange(ed:WordStartPosition(current_pos, true),
+							ed:WordEndPosition(current_pos, true))
 end
 function OnNavigation() end
 function editor_LexerLanguage()
@@ -423,7 +424,7 @@ function CORE.RelativePath(current_path)
 end
 
 --Выполнение действия для всех документов
-local function DoForBuffers_local(func, bStc, ...)
+local function DoForBuffers_local(func, bStc, cmdEnd, ...)
     scite.BlockUpdate(UPDATE_BLOCK)
     BlockEventHandler"OnSwitchFile"
     BlockEventHandler"OnNavigation"
@@ -450,14 +451,14 @@ local function DoForBuffers_local(func, bStc, ...)
     UnBlockEventHandler"OnSwitchFile"
     UnBlockEventHandler"OnIdle"
     scite.buffers.SetDocumentAt(curBuf)
-    scite.BlockUpdate(UPDATE_UNBLOCK)
+    scite.BlockUpdate(cmdEnd)
     return func(nil)
 end
 function DoForBuffers(func, ...)
-    return DoForBuffers_local(func, true, ...)
+    return DoForBuffers_local(func, true, UPDATE_UNBLOCK, ...)
 end
 function DoForBuffers_Stack(func, ...)
-    return DoForBuffers_local(func, false, ...)
+    return DoForBuffers_local(func, false, UPDATE_FORCE, ...)
 end
 
 function CORE.tbl2Out(tIn, sSep, byIpairs, brashes, upLvl)
@@ -624,7 +625,7 @@ function _TM(s) return s end
 if shell.fileexists(props["SciteDefaultHome"]..'\\locale\\HilduM_'..props['locale']..'.locale') then
     dofile(props["SciteDefaultHome"]..'\\locale\\HilduM_'..props['locale']..'.locale')
     _TH = function(s) return __LOCALE.HildiM[s] or s end
-    _TM = function(s) return __LOCALE.Menu[s] or s end
+    _TM = function(s) return __LOCALE.Menu[s:gsub('&([^& ])', '%1')] or s end
 else
     props['locale'] = ''
 end
