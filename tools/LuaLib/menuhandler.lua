@@ -289,7 +289,7 @@ end
 
 function s:ContextMenu(x, y, element)
     if type(element) == 'string' then
-        s:PopMnu(_G.sys_Menus[element], x, y, false)
+        if _G.sys_Menus[element] then s:PopMnu(_G.sys_Menus[element], x, y, false) end
     else
         s:PopMnu(element, x, y, false)
     end

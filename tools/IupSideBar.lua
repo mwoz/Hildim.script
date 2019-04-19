@@ -1017,12 +1017,13 @@ local bSideBar, bLeftBar, bconsoleBar, bFindResBar, bFindRepl
 local function CheckExists()
     if props['FilePath']:find('\\') == 1 then return end
     local i = scite.buffers.GetCurrent()
+    local curName = props['FilePath']
     if not shell.fileexists(props['FilePath']) and scite.buffers.FileTimeAt(i) ~= 0 then
         local msg = _TH"File \n'%1'\n is missing or not available.\nDo you wish to keep the file open in the editor?"
         if 2 == iup.Alarm('HildiM', _FMT(msg, props['FilePath']), _TH"OK", _TH"No") then
-            scite.MenuCommand(IDM_CLOSE)
+            if curName == props['FilePath'] then scite.MenuCommand(IDM_CLOSE) end --сообщение может вылезти при двойном щелчке(закрытии) на неактивной вкладке - тот файл все равно закроется
         else
-            scite.buffers.ClearFileTimeAt(i)
+            if curName == props['FilePath'] then scite.buffers.ClearFileTimeAt(i) end
         end
     end
 end
@@ -1189,5 +1190,3 @@ tmConsole.action_cb = (function()
     end
 end)
 tmConsole.run="YES"
-
-

@@ -35,6 +35,7 @@ local function Func_Init(h)
         print('Canceled Functions Tree Lane ')
         lane_h = nil
     end}
+    local mark = CORE.InidcFactory('Function.GoToDef', _T'Link for Go To Definition', INDIC_COMPOSITIONTHICK, 255<<16, 0)
 
     local function Functions_GetNames()
         if not lane_h then return end
@@ -484,11 +485,19 @@ local function Func_Init(h)
     end
 
     -- ѕереход на строку с объ€влением функции
-    local function JumpToFuncDefinition(funcname)
+    local function JumpToFuncDefinition(funcname, bInfo)
         local line = Func2Line(funcname)
         if line then
-            editor:GotoLine(line)
-            return true -- обрываем дальнейшую обработку OnDoubleClick (выделение слова и пр.)
+            local rFunc = function()
+                OnNavigation("Def")
+                editor:GotoLine(line)
+                OnNavigation("Def-")
+            end
+            if bInfo then
+                return true, rFunc
+            end
+            rFunc()
+            return true
         end
     end
 
@@ -610,29 +619,120 @@ local function Func_Init(h)
         Functions_GetNames()
     end
 
-    function menu_GoToObjectDefenition()    --TODO!!! - перенести в этот файл создание пункта менб!
+    function menu_GoToObjectDefenition()
         local handled = false
+        local func
         local strFunc = GetCurrentWord()
         local current_pos = editor.CurrentPos
         editor:SetSel(editor:WordStartPosition(current_pos, true),
         editor:WordEndPosition(current_pos, true))
         if GoToObjectDefenition then
-            handled = GoToObjectDefenition(strFunc)
+            handled, func = GoToObjectDefenition(strFunc)
         end
 
         if not handled then
-            OnNavigation("Def")
-            handled = JumpToFuncDefinition(strFunc)
-            OnNavigation("Def-")
+            handled, func = JumpToFuncDefinition(strFunc)
         end
         return handled
     end
 
-    local function _OnDoubleClick(shift, ctrl, alt)
-        if shift then
-            return menu_GoToObjectDefenition()
-        end
+    local linked_info, linked_set, tmrCtrl, curPosTmr
+
+    local function releaseLink()
+        EditorClearMarks(mark, linked_info.pos, #(linked_info.word))
+        editor.MouseDwellTime = linked_info.period
+        linked_info = nil
+        editor.Cursor = -1
+        editor.MultipleSelection = true
     end
+
+    local function OnDwell_local(pos, word, ctrl)
+        if _G.iuprops["menus.not.ctrlclick"] then return end
+        if ctrl ~= 0 and word ~= '' and iup.GetGlobal("MODKEYSTATE") == ' C  ' then
+            if linked_info then
+                if pos~= linked_info.pos or word ~= linked_info.word then releaseLink() end
+            else
+                local handled, func, p, w
+                if GoToObjectDefenition then
+                    handled, func, p, w = GoToObjectDefenition(word, true, pos)
+                end
+
+                if not handled then
+                    handled, func = JumpToFuncDefinition(word, true, pos)
+                end
+                if func then
+                    pos = p or pos; word = w or word
+                    EditorMarkText(pos, #word, mark)
+                    linked_info = {pos = pos, word = word, period = editor.MouseDwellTime, func = func}
+                    editor.MouseDwellTime = linked_info.period / 10
+                    editor.Cursor = 8
+                end
+            end
+            tmrCtrl.run = 'NO'
+
+        elseif word == '' and linked_info and ctrl == 0 then
+            releaseLink()
+            tmrCtrl.run = 'NO'
+        end
+
+    end
+
+    tmrCtrl = iup.timer{time = 350, run = 'NO', action_cb =
+        function(h)
+            h.run = 'NO'
+            if iup.GetGlobal('CONTROLKEY') == 'ON' and curPosTmr == iup.GetGlobal('CURSORPOS') then
+                local _, _, xC, yC = curPosTmr:find('(%d+)x(%d+)')
+                local x, y, ed
+                if scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) == 0 then
+                    ed = 'Source'
+                else
+                    ed = 'CoSource'
+                end
+                _, _, x, y = iup.GetDialogChild(iup.GetLayout(), ed).screenposition:find('(%d+),(%d+)')
+                xC = math.tointeger(xC) - math.tointeger(x); yC = math.tointeger(yC) - math.tointeger(y)
+                --print(xC,yC)
+                local pos = editor:CharPositionFromPointClose(xC, yC)
+                OnDwell_local(editor:WordStartPosition(pos, true), GetCurrentWord(editor, pos), true)
+            end
+        end
+    }
+
+    AddEventHandler("OnClick", function(shift, ctrl, alt)
+        if linked_info then
+            editor.MultipleSelection = false
+            EditorClearMarks(mark, linked_info.pos, #(linked_info.word))
+            linked_info.func()
+            linked_set = {word = linked_info.word, pos = editor.SelectionStart}
+        end
+    end)
+
+    AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
+        if not editor.Focus then return end
+        if key == 17 and not shift and not alt and not linked_info and tmrCtrl.run == 'NO' then
+            tmrCtrl.run = 'YES'
+            curPosTmr = iup.GetGlobal('CURSORPOS')
+        elseif alt or shift then
+            tmrCtrl.run = 'NO'
+        end
+    end)
+
+    AddEventHandler("OnMouseButtonUp", function()
+        if linked_set then
+            scite.RunAsync(function()
+                local p = linked_set.pos
+                local s = editor:findtext(linked_set.word,0, p, editor:PositionFromLine(editor:LineFromPosition(p) + 1))
+                editor.SelectionStart = s or editor.SelectionStart
+                if s then
+                    editor.SelectionEnd = (s + #(linked_set.word))
+                else
+                    editor.SelectionEnd = editor.SelectionStart
+                end
+                linked_set = false
+            end)
+        end
+    end)
+
+    AddEventHandler("OnDwellStart", OnDwell_local)
 
     local function SaveLayoutToProp()
         do return end
@@ -796,7 +896,7 @@ local function Func_Init(h)
     return {   -- iup.vbox{   };
 
         handle = bgbox;
-        OnSwitchFile = OnSwitch;
+        OnSwitchFile = function() EditorClearMarks(mark)  OnSwitch() end;
         OnSave = OnMySave;
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;

@@ -39,9 +39,9 @@ dofile (props["SciteDefaultHome"].."\\tools\\URL_detect.lua")
 
 --------------------------------------------------------
 -- Замена порой неработающего props['CurrentWord']
-function GetCurrentWord(ed)
+function GetCurrentWord(ed, p)
     ed = ed or editor
-	local current_pos = ed.CurrentPos
+	local current_pos = p or ed.CurrentPos
 	return ed:textrange(ed:WordStartPosition(current_pos, true),
 							ed:WordEndPosition(current_pos, true))
 end
@@ -547,14 +547,14 @@ end
 -- Функции, выполняющиеся только один раз, при открытии первого файла
 --   ( Выполнить их сразу, при загрузке SciTEStartup.lua, нельзя
 --   получим сообщение об ошибке: "Editor pane is not accessible at this time." )
-AddEventHandler("OnOpen", function()
+AddEventHandler("OnInitHildiM", function()
 	string.lower = StringLower
 	string.upper = StringUpper
 	string.len = StringLen
 	EditorInitMarkStyles()
     CORE.InitMarkStyles()
 	SetMarginTypeN()
-end, 'RunOnce')
+end)
 
 local s = class()
 function s:lop()

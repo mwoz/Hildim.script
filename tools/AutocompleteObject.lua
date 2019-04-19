@@ -937,6 +937,7 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
             local brk = ''
             if p ~= '' and d ~= '' then brk = '\n' elseif p == '' and d == '' then return false end
             local str = strMethodName..l..p..brk..string.gsub(d, "\\n", "\n")
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:from_utf8() end
             table.insert(calltipinfo,{pos, str, nParams, 1, pozes})
             calltipinfo[1] = af_current_line
             ShowCallTip(pos, str, sParam, eParam)
@@ -1496,7 +1497,7 @@ AddEventHandler("OnAutocSelection", function(method, pos)
     end
 end)
 local function OnSwitchLocal()
-    editor.MouseDwellTime = 1000 --Пусть будет всегда, для всех, кто хочет
+    editor.MouseDwellTime = 350 --Пусть будет всегда, для всех, кто хочет
     CUR_POS.bymouse = nil
     CUR_POS:Use()
     bManualTip = false

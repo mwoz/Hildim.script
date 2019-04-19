@@ -240,7 +240,8 @@ local function Init()
             BlockEventHandler"OnSwitchFile"
             local cmnt = GetComment()
             if not cmnt then return end
-            if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt, nil, true, true)) and On_vss_CheckIn then
+            shell.set_curent_dir(props['FileDir']:from_utf8())
+            if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt, nil, false, true)) and On_vss_CheckIn then
                 On_vss_CheckIn(curProj)
             end
             UnBlockEventHandler"OnSwitchFile"

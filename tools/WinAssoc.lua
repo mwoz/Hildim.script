@@ -1,5 +1,12 @@
 require "luacom"
 
+if not scite.IsRunAsAdmin() and not _G.g_session['scip.plugins'] then
+    if not scite.NewInstance('-d-nP-nRF-nS -cmd dolocale("tools\\\\WinAssoc.lua")', 1) then
+        print("Not enough rights to perform the operation")
+    end
+    return
+end
+
 local dlg = _G.dialogs["winint"]
 
 local WshShell = luacom.CreateObject('WScript.Shell')
@@ -40,6 +47,13 @@ if dlg == nil then
     gap = 2, margin = "4x4" }
     local result = false
     dlg = iup.scitedialog{vbox; title = _T"Windows Integration", defaultenter = "WININT_BTN_OK", defaultesc = "WININT_BTN_ESC", maxbox = "NO", minbox = "NO", resize = "NO", sciteparent = "SCITE", sciteid = "winint" }
+    if _G.g_session['scip.plugins'] then dlg.topmost = 'YES' end
+
+    function dlg:show_cb( state)
+        if state == 4 and _G.g_session['scip.plugins'] then
+            scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+        end
+    end
 
     function btn_ok:action()
         local function WriteReg(txt, chk, tbl, strBack, strType, strCapt, strIcon)

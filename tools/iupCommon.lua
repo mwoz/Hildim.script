@@ -212,8 +212,10 @@ function OnCommandLine(line)
     end
     if line ~= '' then
         line = line:gsub('^ +', ''):gsub(' +$', '')
-        line = line:gsub('^"', ''):gsub('"$', '')
-        scite.Open(line)
+        if line ~= '' then
+            line = line:gsub('^"', ''):gsub('"$', '')
+            scite.Open(line)
+        end
     end
     if cmdLine then
         if lk == '/' then cmdLine = cmdLine:gsub('\\', '\\\\') end
@@ -429,7 +431,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     if cmd == IDM_QUIT then
         props['are.you.sure.close'] = 0
         props['check.if.already.open'] = 0
-        scite.HideForeReolad();
+        scite.HideForeReolad(1);--!!-с принудительной установкой таймера на закрытие
         ClearAllEventHandler();
     end
     local nf,spathes = false,'',''
@@ -529,7 +531,7 @@ end
 
 iup.RestoreFiles = function(bForce)
     local fPrevOnOpen
-    if _G.iuprops['session.reload'] ~= '1' then _G.iuprops['buffers'] = { lst = {'',}, pos = {0,}, enc = {0,}, bmk = {'',}, layouts = {'',},} end
+    if _G.iuprops['session.reload'] ~= '1' or _G.g_session['scip.restore.files'] then _G.iuprops['buffers'] = { lst = {'',}, pos = {0,}, enc = {0,}, bmk = {'',}, layouts = {'',},} end
     if props['session.started'] ~= '1' or bForce then
         local bNew = (props['FileName'] ~= '')
         local buf = (_G.iuprops['buffers'] or {})
@@ -614,7 +616,7 @@ iup.RestoreFiles = function(bForce)
 
         if not bIsRight then
             _G.iuprops['coeditor.win'] = '2';
-            _G.g_session['coeditor'].HideDialog();
+            if _G.g_session['coeditor'] then _G.g_session['coeditor'].HideDialog(); end
         else
             coeditor.Zoom = editor.Zoom
             editor:GrabFocus()
@@ -776,7 +778,7 @@ AddEventHandler("OnLindaNotify", function(key)
 end)
 
 AddEventHandler("OnMenuCommand", function(cmd, source)
-    if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or cmd == IDM_QUIT then
+    if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or (cmd == IDM_QUIT and not _G.g_session['scip.plugins']) then
         if cmd == IDM_QUIT then
             if MACRO and MACRO.Record then MACRO.StopRecord() return true end
             scite.SavePosition()
