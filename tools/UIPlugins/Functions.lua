@@ -639,7 +639,7 @@ local function Func_Init(h)
     local linked_info, linked_set, tmrCtrl, curPosTmr
 
     local function releaseLink()
-        EditorClearMarks(mark, linked_info.pos, #(linked_info.word))
+        EditorClearMarks(mark)
         editor.MouseDwellTime = linked_info.period
         linked_info = nil
         editor.Cursor = -1
@@ -700,7 +700,7 @@ local function Func_Init(h)
     AddEventHandler("OnClick", function(shift, ctrl, alt)
         if linked_info then
             editor.MultipleSelection = false
-            EditorClearMarks(mark, linked_info.pos, #(linked_info.word))
+            EditorClearMarks(mark)
             linked_info.func()
             linked_set = {word = linked_info.word, pos = editor.SelectionStart}
         end

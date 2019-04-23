@@ -1,7 +1,7 @@
 require "luacom"
 
 if not scite.IsRunAsAdmin() and not _G.g_session['scip.plugins'] then
-    if not scite.NewInstance('-d-nP-nRF-nS -cmd dolocale("tools\\\\WinAssoc.lua")', 1) then
+    if not scite.NewInstance('-d-nP-nRF-h -cmd dolocale("tools\\\\WinAssoc.lua")', 1) then
         print("Not enough rights to perform the operation")
     end
     return

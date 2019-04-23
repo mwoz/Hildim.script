@@ -86,7 +86,7 @@ if props['config.restore'] ~= '' then
         local bSuc, tMsg = pcall(dostring, text)
         if not bSuc then
             print('Îרטבךא ג פאיכו '..props['config.restore'], tMsg)
-        elseif l ~= _G.iuprops['settings.lexers'] or '' then
+        elseif not _G.g_session['scip.save.session'] and (l ~= _G.iuprops['settings.lexers'] or '') then
             local t = _G.iuprops['settings.lexers']
             local str = ''
 
@@ -200,6 +200,7 @@ end
 
 function OnCommandLine(line)
     local cmdLine
+    _G.g_session['scip.restore.files'] = false
     local _, l1, lk, l2
     if line:find('[-/]cmd ') then
         _, _, l1, lk, l2 = line:find('([^-]*)([-/])cmd (.+)')
@@ -255,6 +256,7 @@ iuprops['resent.files.list'] = rfl
 _G.iuprops['pariedtag.on'] = _G.iuprops['pariedtag.on'] or 1
 
 function iup.SaveChProps(bReset)
+    if _G.g_session['scip.save.session'] then return end
     local t = {
 'autocompleteword.automatic',
 'ext.lua.debug.traceback',
@@ -360,15 +362,17 @@ end
 
 local function SaveIup()
     if not _G.g_session['LOADED'] then return end
-    local file = props["scite.userhome"]..'\\settings.lua'
-    if pcall(io.output, file) then
-        _G.iuprops['_VERSION'] = 3
-        local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
-        io.write(s)
-    else
-        iup.Alarm("HidlM", _TH"Unable to save settings to file Settings.lua!", "Ok")
+    if not _G.g_session['scip.save.settings'] then
+        local file = props["scite.userhome"]..'\\settings.lua'
+        if pcall(io.output, file) then
+            _G.iuprops['_VERSION'] = 3
+            local s = CORE.tbl2Out(_G.iuprops, ' ', false, true, true):gsub('^return ', '_G.iuprops = ')
+            io.write(s)
+        else
+            iup.Alarm("HidlM", _TH"Unable to save settings to file Settings.lua!", "Ok")
+        end
+        io.close()
     end
-    io.close()
     iup.SaveChProps()
 end
 
@@ -477,6 +481,9 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
             if cmd ~= 0 then scite.Close() end
         end
     end)
+    --debug_prnArgs(tblBuff)
+    --print(debug.traceback())
+    --iup.Alarm("345", "qwe", "ddd")
     scite.BlockUpdate(UPDATE_FORCE)
     if OnCloseFileset then OnCloseFileset(cloused) end
 
@@ -1799,12 +1806,12 @@ local function LoadIuprops()
 end
 
 AddEventHandler("OnBeforeOpen", function(file, ext)
-    --if ext == "fileset" then
-    --    return LoadSession_local(file)
-    --elseif ext == "config" then
-    --    LoadIuprops_Local(file)
-    --    return true
-    --end
+    if ext == "fileset" then
+       return LoadSession_local(file)
+    elseif ext == "config" then
+       LoadIuprops_Local(file)
+       return true
+    end
 end)
 
 local function SaveIuprops_local(filename)

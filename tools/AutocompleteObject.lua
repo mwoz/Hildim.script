@@ -1369,7 +1369,7 @@ function ShowTipManualy()
         local spaceCT = (string.find(calltip_start_characters, ' ', 1, true) ~= nil)
         repeat
             --print(123)
-            while isString(cp - 1) do cp = cp - 1 end
+            while isString(cp - 1) and cp > 0 do cp = cp - 1 end
             char = editor:textrange(cp - 1, cp)
 
             if spaceCT and brCount == 0 and (char == ',' or char == ' ') then

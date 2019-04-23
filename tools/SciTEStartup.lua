@@ -11,10 +11,18 @@ while props['hildim.command.line']:find('^ *[-/]%w+') do
         break
     elseif s == 'nP' then
         _G.g_session['scip.plugins'] = true
-    elseif s == 'nS' then
+    elseif s == 'h' then
         _G.g_session['scip.show'] = true
     elseif s == 'nRF' then
         _G.g_session['scip.restore.files'] = true
+    elseif s == 'nSes' then
+        _G.g_session['scip.save.session'] = true
+    elseif s == 'nSet' then
+        _G.g_session['scip.save.settings'] = true
+    elseif s == 'props' then
+        _, _, cl = cl:find'^="[^"]+"(.*)'
+    elseif s == 'config' then
+        _, _, props['config.restore'], cl = cl:find'^="([^"]+)"(.*)'
     end
     props['hildim.command.line'] = cl
 end

@@ -46,12 +46,15 @@ function CORE.windowsList(side)
 	return t
 end
 
-local function DoSett(strMethod)
-    dolocale("tools\\SettingDialogs.lua")[strMethod]()
+local function DoSett(strMethod, ...)
+    dolocale("tools\\SettingDialogs.lua")[strMethod](...)
 end
 
 function CORE.ResetGlobalColors()
     DoSett('ResetGlobalColors')
+end
+function CORE.OpenNewInstance(f)
+    DoSett('OpenNewInstance', f)
 end
 
 local function CopyPathToClipboard(what)
@@ -176,7 +179,8 @@ _G.sys_Menus.TABBAR = { title = _TM"Tabbar Context Menu",
 	{link='File|Save Copy...'},
     {'s1', separator = 1},
     {link='File|Move to another view'},
-    {link='File|Clone to another view'},
+    {link = 'File|Clone to another view'},
+    {'Open in New Instance', action = function() DoSett('OpenNewInstance', props['FilePath']) end,},
 	{'s2', separator=1},
 	{'Copy to Clipboard', {
 		{'All Text', action = function() CopyPathToClipboard("text") end,},
@@ -258,6 +262,7 @@ _G.sys_Menus.EDITMARGIN = {title = _TM"Editor Margin Context Menu",
     {'slast', separator = 1},
 
 }
+
 _G.sys_Menus.EDITOR = {title = _TM"Editor Context Menu",
 	{'s0', link='Edit|Regular|Undo'},
 	{link='Edit|Regular|Redo'},
@@ -283,11 +288,19 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'Block End', key = 'Alt+End', action = function() editor:LineEndRectExtend() end},
 		{'Block Page Up', key = 'Alt+PageUp', action = function() editor:PageUpRectExtend() end},
 		{'Block Page Down', key = 'Alt+PageDown', action = function() editor:PageDownRectExtend() end},
+		{'EditVScroll', {
+            {link = 'Search|Search|Clear Live Search Markers'},
+            {'Scroll Here', action = function() _SCROLLTO() end},
+		},},
+		{'EditHScroll', {
+            {link = 'Search|Search|Clear Live Search Markers'},
+            {'Scroll Here', action = function() _SCROLLTO() end},
+		},},
 	},},
 	{'&File', {
 		{'&New', key = 'Ctrl+N', action = IDM_NEW, image = 'document__plus_µ'},
 		{'&Open...',  key = 'Ctrl+O', action = IDM_OPEN, image = 'folder_open_document_µ'},
-		--{'Open Selected &Filename',  key = 'Ctrl+Shift+O', action = IDM_OPENSELECTED, active = function() return editor:GetSelText():find('%w:[\\/][^"\n\r\t]') end,},
+		{'Open New Instan&ce', action = function() DoSett('OpenNewInstance','') end, },
 		{'&Recent Files', visible = "(_G.iuprops['resent.files.list.location'] or 0) == 0", function() if (_G.iuprops['resent.files.list.location'] or 0) == 0 then return iuprops['resent.files.list']:GetMenu() else return {} end end},
 		{'R&eopen File', key = 'Ctrl+Shift+O', action = function() CORE.Revert() end},
 		{'&Close', key = 'Ctrl+F4', action = IDM_CLOSE},

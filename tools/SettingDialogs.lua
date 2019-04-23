@@ -352,7 +352,8 @@ function sett.AutoScrollingProps()
     end
 end
 
-function sett.Colors_Work()
+function sett.Colors_Work(tOut)
+    local t = tOut or props
     props["tabctrl.active.bakcolor"] = "255 255 255"
     props["tabctrl.active.forecolor"] = "0 0 255"
     props["tabctrl.active.readonly.forecolor"] = "120 120 255"
@@ -377,6 +378,89 @@ function sett.Colors_Work()
     props["layout.scroll.backcolor"] = "240 240 240"
     scite.SetRestart('')
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+end
+
+function sett.OpenNewInstance(w)
+    local tCnf = iup.ConfigList()
+    local sSnf = '%l|<Curent>|'
+    for i = 1,  #tCnf do
+        if type(tCnf[i].action) ~= 'function' then break end
+        sSnf = sSnf..tCnf[i][1]..'|'
+    end
+
+    local asadm = ''
+    if not scite.IsRunAsAdmin() then
+        asadm = _T'As Administrator'..'%b\n'
+    end
+
+    local ret, fName, iSch, iCnf, bAsAdm =
+    iup.GetParam(_TM"Open New Instance".."^OpenInNewInstance",
+            function(h, id)
+                if id == iup.GETPARAM_INIT then
+                    iup.GetParent(h).clientsize = '700'
+                    local p = iup.GetParamHandle(h, 'PARAM2')
+                    p.control.visibleitems = 15
+                end
+                return 1
+            end,
+        _T'File'..'%f\n'..
+        _T'Color Scheme'..'%l|<Curent>|Default|Atrium|Darkblue|\n'..
+        _T'Configuration'..sSnf..'\n'..
+        asadm,
+        w,
+        (_G.iuprops['newinstance.colourscheme'] or 0),
+        (_G.iuprops['newinstance.configfile'] or 0),
+        (_G.iuprops['newinstance.as.administrator'] or 0)
+    )
+    if ret then
+        local s = ''
+        local strCommand = '-d-nSes-nSet-nRF'
+        _G.iuprops['newinstance.colourscheme'] = iSch
+        _G.iuprops['newinstance.configfile'] = iCnf
+
+        if scite.IsRunAsAdmin() then
+            bAsAdm = 0
+        else
+            _G.iuprops['newinstance.as.administrator'] = bAsAdm
+        end
+
+        if iSch > 0 then
+            local sch =({'Colors_Default', 'Colors_Atrium', 'Colors_Darkblue'})[iSch]
+            local tOut = {}
+            sett[sch](tOut)
+            for n, v in pairs(tOut) do
+                s = s..n..'='..v..'\n'
+            end
+        end
+        if iCnf > 0 then
+            local sfname = props["scite.userhome"]..'\\'..tCnf[iCnf][1]
+            strCommand = strCommand..'-config="'..sfname..'"'
+            local e = {}
+            e['_G'] = {}
+            e['_G'].iuprops = {}
+            loadfile(sfname, 't', e)()
+            local t = e['_G'].iuprops["settings.lexers"]
+
+            for i = 1, #t do
+                s = s..'import $(SciteDefaultHome)\\languages\\'..t[i].file..'\n'
+                local n = t[i].file:gsub('%.properties$', '.styles')
+                if shell.fileexists(props["SciteUserHome"]..'\\'..n) then
+                    s = s..'import $(scite.userhome)\\'..n..'\n'
+                end
+            end
+        end
+        if s ~= '' then
+            local fn = props["SciteUserHome"]..'\\tmp.properties'
+            local file = io.output(fn)
+            file:write(s)
+            file:close()
+            strCommand = strCommand..'-props="'..fn..'"'
+        end
+        if (fName or '') ~= '' then
+            strCommand = strCommand..' "'..fName..'"'
+        end
+        scite.NewInstance(strCommand, bAsAdm)
+    end
 end
 
 function sett.CreateColorSettings()
@@ -440,89 +524,95 @@ function sett.ApplyColorsSettings()
     end
 end
 
-function sett.Colors_Default()
-    props["tabctrl.active.bakcolor"] = "255 255 255"
-    props["tabctrl.active.forecolor"] = "90 33 33"
-    props["tabctrl.active.readonly.forecolor"] = "111 108 108"
-    props["tabctrl.cut.illumination"] = "90"
-    props["tabctrl.cut.saturation"] = "50"
-    props["tabctrl.forecolor"] = "0 0 0"
-    props["tabctrl.moved.color"] = "120 120 255"
-    props["tabctrl.readonly.color"] = "120 120 120"
-    props["layout.hlcolor"] = "200 225 245"
-    props["layout.borderhlcolor"] = "50 150 255"
-    props["layout.bordercolor"] = "200 200 200"
-    props["layout.bgcolor"] = "240 240 240"
-    props["layout.txtbgcolor"] = "255 255 255"
-    props["layout.fgcolor"] = "0 0 0"
-    props["layout.txtfgcolor"] = "0 0 0"
-    props["layout.txthlcolor"] = "15 60 195"
-    props["layout.txtinactivcolor"] = "70 70 70"
-    props["layout.bordercolor"] = "200 200 200"
-    props["layout.splittercolor"] = "220 220 220"
-    props["layout.scroll.forecolor"] = "190 190 190"
-    props["layout.scroll.presscolor"] = "150 150 150"
-    props["layout.scroll.highcolor"] = "170 170 170"
-    props["layout.scroll.backcolor"] = "240 240 240"
+function sett.Colors_Default(tOut)
+    local t = tOut or props
+    t["tabctrl.active.bakcolor"] = "255 255 255"
+    t["tabctrl.active.forecolor"] = "90 33 33"
+    t["tabctrl.active.readonly.forecolor"] = "111 108 108"
+    t["tabctrl.cut.illumination"] = "90"
+    t["tabctrl.cut.saturation"] = "50"
+    t["tabctrl.forecolor"] = "0 0 0"
+    t["tabctrl.moved.color"] = "120 120 255"
+    t["tabctrl.readonly.color"] = "120 120 120"
+    t["layout.hlcolor"] = "200 225 245"
+    t["layout.borderhlcolor"] = "50 150 255"
+    t["layout.bordercolor"] = "200 200 200"
+    t["layout.bgcolor"] = "240 240 240"
+    t["layout.txtbgcolor"] = "255 255 255"
+    t["layout.fgcolor"] = "0 0 0"
+    t["layout.txtfgcolor"] = "0 0 0"
+    t["layout.txthlcolor"] = "15 60 195"
+    t["layout.txtinactivcolor"] = "70 70 70"
+    t["layout.bordercolor"] = "200 200 200"
+    t["layout.splittercolor"] = "220 220 220"
+    t["layout.scroll.forecolor"] = "190 190 190"
+    t["layout.scroll.presscolor"] = "150 150 150"
+    t["layout.scroll.highcolor"] = "170 170 170"
+    t["layout.scroll.backcolor"] = "240 240 240"
+    if tOut then return end
     scite.SetRestart('')
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
 end
 
-function sett.Colors_Atrium()
-    props["tabctrl.active.bakcolor"] = "255 255 255"
-    props["tabctrl.active.forecolor"] = "0 0 255"
-    props["tabctrl.active.readonly.forecolor"] = "120 120 255"
-    props["tabctrl.colorized"] = "1"
-    props["tabctrl.cut.ext"] = "1"
-    props["tabctrl.cut.illumination"] = "81"
-    props["tabctrl.cut.prefix"] = "1"
-    props["tabctrl.cut.saturation"] = "55"
-    props["tabctrl.forecolor"] = "0 0 0"
-    props["tabctrl.moved.color"] = "213 213 254"
-    props["tabctrl.readonly.color"] = "82 82 82"
-    props["layout.hlcolor"] = "200 225 245"
-    props["layout.borderhlcolor"] = "50 150 255"
-    props["layout.bordercolor"] = "221 157 216"
-    props["layout.bgcolor"] = "165 211 206"
-    props["layout.txtbgcolor"] = "255 255 255"
-    props["layout.fgcolor"] = "0 0 0"
-    props["layout.txtfgcolor"] = "2 2 2"
-    props["layout.txthlcolor"] = "15 60 195"
-    props["layout.txtinactivcolor"] = "97 97 97"
-    props["layout.bordercolor"] = "221 157 216"
-    props["layout.splittercolor"] = "178 223 218"
-    props["layout.scroll.forecolor"] = "173 181 211"
-    props["layout.scroll.presscolor"] = "81 102 178"
-    props["layout.scroll.highcolor"] = "134 148 198"
-    props["layout.scroll.backcolor"] = "238 245 244"
+function sett.Colors_Atrium(tOut)
+    local t = tOut or props
+    t["tabctrl.active.bakcolor"] = "255 255 255"
+    t["tabctrl.active.forecolor"] = "0 0 255"
+    t["tabctrl.active.readonly.forecolor"] = "120 120 255"
+    t["tabctrl.colorized"] = "1"
+    t["tabctrl.cut.ext"] = "1"
+    t["tabctrl.cut.illumination"] = "81"
+    t["tabctrl.cut.prefix"] = "1"
+    t["tabctrl.cut.saturation"] = "55"
+    t["tabctrl.forecolor"] = "0 0 0"
+    t["tabctrl.moved.color"] = "213 213 254"
+    t["tabctrl.readonly.color"] = "82 82 82"
+    t["layout.hlcolor"] = "200 225 245"
+    t["layout.borderhlcolor"] = "50 150 255"
+    t["layout.bordercolor"] = "221 157 216"
+    t["layout.bgcolor"] = "165 211 206"
+    t["layout.txtbgcolor"] = "255 255 255"
+    t["layout.fgcolor"] = "0 0 0"
+    t["layout.txtfgcolor"] = "2 2 2"
+    t["layout.txthlcolor"] = "15 60 195"
+    t["layout.txtinactivcolor"] = "97 97 97"
+    t["layout.bordercolor"] = "221 157 216"
+    t["layout.splittercolor"] = "178 223 218"
+    t["layout.scroll.forecolor"] = "173 181 211"
+    t["layout.scroll.presscolor"] = "81 102 178"
+    t["layout.scroll.highcolor"] = "134 148 198"
+    t["layout.scroll.backcolor"] = "238 245 244"
+    if tOut then return end
     scite.SetRestart('')
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
 end
 
-function sett.Colors_Darkblue()
-    props["tabctrl.active.bakcolor"] = "255 255 255"
-    props["tabctrl.active.forecolor"] = "0 0 255"
-    props["tabctrl.active.readonly.forecolor"] = "120 120 255"
-    props["tabctrl.cut.illumination"] = "28"
-    props["tabctrl.cut.saturation"] = "30"
-    props["tabctrl.forecolor"] = "255 255 255"
-    props["tabctrl.readonly.color"] = "214 214 214"
-    props["tabctrl.moved.color"] = "213 213 254"
-    props["tabctrl.readonly.color"] = "214 214 214"
-    props["layout.hlcolor"] = "94 180 189"
-    props["layout.borderhlcolor"] = "51 146 156"
-    props["layout.bordercolor"] = "1 148 143"
-    props["layout.bgcolor"] = "76 95 129"
-    props["layout.txtbgcolor"] = "255 255 255"
-    props["layout.fgcolor"] = "255 255 255"
-    props["layout.txtfgcolor"] = "0 0 0"
-    props["layout.txthlcolor"] = "255 149 239"
-    props["layout.txtinactivcolor"] = "183 183 183"
-    props["layout.splittercolor"] = "35 63 113"
-    props["layout.scroll.forecolor"] = "120 165 125"
-    props["layout.scroll.presscolor"] = "61 114 66"
-    props["layout.scroll.highcolor"] = "81 139 87"
-    props["layout.scroll.backcolor"] = "238 245 244"
+function sett.Colors_Darkblue(tOut)
+    local t = tOut or props
+    t["tabctrl.active.bakcolor"] = "255 255 255"
+    t["tabctrl.active.forecolor"] = "0 0 255"
+    t["tabctrl.active.readonly.forecolor"] = "120 120 255"
+    t["tabctrl.cut.illumination"] = "28"
+    t["tabctrl.cut.saturation"] = "30"
+    t["tabctrl.forecolor"] = "255 255 255"
+    t["tabctrl.readonly.color"] = "214 214 214"
+    t["tabctrl.moved.color"] = "213 213 254"
+    t["tabctrl.readonly.color"] = "214 214 214"
+    t["layout.hlcolor"] = "94 180 189"
+    t["layout.borderhlcolor"] = "51 146 156"
+    t["layout.bordercolor"] = "1 148 143"
+    t["layout.bgcolor"] = "76 95 129"
+    t["layout.txtbgcolor"] = "255 255 255"
+    t["layout.fgcolor"] = "255 255 255"
+    t["layout.txtfgcolor"] = "0 0 0"
+    t["layout.txthlcolor"] = "255 149 239"
+    t["layout.txtinactivcolor"] = "183 183 183"
+    t["layout.splittercolor"] = "35 63 113"
+    t["layout.scroll.forecolor"] = "120 165 125"
+    t["layout.scroll.presscolor"] = "61 114 66"
+    t["layout.scroll.highcolor"] = "81 139 87"
+    t["layout.scroll.backcolor"] = "238 245 244"
+    if tOut then return end
     scite.SetRestart('')
     scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
 end

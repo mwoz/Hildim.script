@@ -9,12 +9,15 @@ return {
 ["Bar Background"] = "Панели";
 ["Bar Foreground"] = "Шрифт панелей";
 ["Close with Mouse Click%l|None|Left DblClick|Middle Click|Both|"] = "Закрывать по клику мыши%l|Нет|Левый двойной|Средний|Оба|";
+["Color Scheme"] = "Цветовая схема";
 ['Command line for "Open File Folder"'] = 'Командная строка для "Открыть папку с файлом"';
+["Configuration"] = "Конфигурация";
 ["Control Border"] = "Границы контролов";
 ["Control Highlight"] = "Подсветка кнопки, контрола";
 ["Draged-and-Droped"] = "Перемещаемая (drag-and-drop)";
 ["Edited Controls Background"] = "Поля редактирования";
 ["Edited Controls Foreground"] = "Шрифт полей редактирования";
+["File"] = "Файл";
 ["Foreground Read-Only"] = "Шрифт Read-Only";
 ["Foreground"] = "Шрифт";
 ["Hide Extension"] = "Не показывать расширение";

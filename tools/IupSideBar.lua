@@ -917,8 +917,26 @@ local function resetSBColors(sb)
     iup.SetAttributeId2(sb, "COLORID", 1, MARKER_SAVED, Iif(props["marker.saved.back"]~= '', CORE.Rgb2Str(props["marker.saved.back"]), '112 255 112', 0))
 end
 
-resetSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'))
-resetSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'))
+local function edit_scroll_menu(h, btn, pos, scroll)
+    if btn == iup.BUTTON3 then
+        if scroll == 'SB_VERT' then
+            _SCROLLTO = function() h.posy = pos; end
+           menuhandler:PopUp("MainWindowMenu|_HIDDEN_|EditVScroll")
+            -- menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
+        else
+            _SCROLLTO = function() h.posx = pos; end
+           menuhandler:PopUp("MainWindowMenu|_HIDDEN_|EditHScroll")
+        end
+    else
+    end
+end
+
+local ed = iup.GetDialogChild(iup.GetLayout(), 'Source')
+resetSBColors(ed)
+ed.contextmenu_cb = edit_scroll_menu
+local ed = iup.GetDialogChild(iup.GetLayout(), 'CoSource')
+resetSBColors(ed)
+ed.contextmenu_cb = edit_scroll_menu
 
 InitMenuBar()
 --Автозагрузка скрытых плагинов
