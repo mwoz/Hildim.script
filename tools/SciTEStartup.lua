@@ -5,6 +5,7 @@
 ----[[ C O M M O N ]]-------------------------------------------------------
 
 _G.g_session = {}
+local reloaded_config
 while props['hildim.command.line']:find('^ *[-/]%w+') do
     local _, l, s, cl = props['hildim.command.line']:find('^ *[-/](%w+)(.*)')
     if s == 'cmd' then
@@ -23,6 +24,7 @@ while props['hildim.command.line']:find('^ *[-/]%w+') do
         _, _, cl = cl:find'^="[^"]+"(.*)'
     elseif s == 'config' then
         _, _, props['config.restore'], cl = cl:find'^="([^"]+)"(.*)'
+        reloaded_config = props['config.restore']:gsub('^(.-)_?([^\\]-%.[^\\.]+)$', '%1%2')
     end
     props['hildim.command.line'] = cl
 end
@@ -48,7 +50,7 @@ if not _G.g_session['scip.plugins'] then
     dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")
 
     Splash_Screen()
-
+    if reloaded_config then _G.iuprops['current.config.restore'] = reloaded_config end
     dofile (props["SciteDefaultHome"].."\\tools\\Menus.lua")
 
 -- SideBar: Многофункциональная боковая панель
@@ -111,6 +113,7 @@ scite.RunAsync(function()
             end)
         end
         props['session.started'] = '1'
+
         if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0 then
             iup.GetDialogChild(hMainLayout, "SourceSplitBtm").value = '1000'
             if iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm').state == 'OPEN' and props["tab.oldstile"] == '' then

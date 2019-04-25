@@ -69,7 +69,7 @@ local function FileMan_ListFILLByMask(strMask)
     FileMan_ListFILL()
 end
 
-FileMan_ListFILL = function()
+FileMan_ListFILL = function(blockUpdate)
     memo_path.value = current_path
     if current_path == '' then return end
 
@@ -133,7 +133,7 @@ FileMan_ListFILL = function()
     local d = Iif(file_mask == '', dc, 2)
     list_dir.focus_cell = d..":1"
     iup.SetAttributeId2(list_dir, 'MARK', d, 0, '1')
-    list_dir.redraw = "ALL"
+    if not blockUpdate then list_dir.redraw = "ALL" end
 end
 
 local function FileMan_ToggleSort()
@@ -554,7 +554,7 @@ local function OnSwitch(bForse, bRelist)
             current_path = path:gsub('\\$', '')..'\\'
             -- print(current_path, current_path)
             -- if bClearMask then memo_mask:set_text = "" end
-            if zPath.valuepos == '0' then FileMan_ListFILL() end
+            if zPath.valuepos == '0' then FileMan_ListFILL(true) end
             local sel = 1
             if list_dir.marked then sel = list_dir.marked:find('1') end
             sel = sel - 1
@@ -567,6 +567,7 @@ local function OnSwitch(bForse, bRelist)
                     iup.SetAttribute(list_dir, 'SHOW', i..":1")
                 end
             end
+            list_dir.redraw = "ALL"
         end
     end
     if bRelist then

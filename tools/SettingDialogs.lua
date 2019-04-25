@@ -414,7 +414,7 @@ function sett.OpenNewInstance(w)
     )
     if ret then
         local s = ''
-        local strCommand = '-d-nSes-nSet-nRF'
+        local strCommand = '-d-nSes-nRF'
         _G.iuprops['newinstance.colourscheme'] = iSch
         _G.iuprops['newinstance.configfile'] = iCnf
 

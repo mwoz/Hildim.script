@@ -609,7 +609,7 @@ local function InitSideBar()
             elseif tonumber(_G.iuprops['dialogs.coeditor.splitvalue']) < 20 then _G.iuprops['dialogs.coeditor.splitvalue'] = 100 end
         end);
         Dlg_Show_Cb = (function(h, state)
-            if state == 0 then CORE.RemapTab(false); iup.Refresh(h) -- ремапится только что отурытый диалог
+            if state == 0 then CORE.RemapTab(false); iup.Refresh(h) -- ремапится только что отрытый диалог
             elseif state == 4 then scite.RunAsync(Splitter_CB) end
         end);
         Dlg_BeforeAttach = (function(h, state)
@@ -925,9 +925,10 @@ local function edit_scroll_menu(h, btn, pos, scroll)
             -- menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
         else
             _SCROLLTO = function() h.posx = pos; end
-           menuhandler:PopUp("MainWindowMenu|_HIDDEN_|EditHScroll")
+           menuhandler:PopUp("MainWindowMenu|_HIDDEN_|AllScroll")
         end
-    else
+    elseif btn == iup.BUTTON2 then
+        CORE.ClearLiveFindMrk()
     end
 end
 

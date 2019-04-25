@@ -486,6 +486,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     --iup.Alarm("345", "qwe", "ddd")
     scite.BlockUpdate(UPDATE_FORCE)
     if OnCloseFileset then OnCloseFileset(cloused) end
+    if scite.buffers.SecondEditorActive() == 0 then iup.GetDialogChild(iup.GetLayout(), 'barBtncoeditor').visible = 'NO' end
 
     props['load.on.activate'] = tmpFlag
     if curBuf >= 0 then _G.iuprops['buffers.current'] = curBuf end
@@ -1532,7 +1533,7 @@ iup.scitedetachbox = function(t)
 
     if t.buttonImage then
         if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
-        statusBtn = iup.flatbutton{image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_Switch,
+        statusBtn = iup.flatbutton{name = 'barBtn'..t.sciteid,image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_Switch,
                                    tip=t.Dlg_Title,}
         function statusBtn:flat_button_cb(button, pressed, x, y, status) if button==51 and pressed == 1 then menuhandler:PopUp('MainWindowMenu|View|'..t.sciteid) end end
         table.insert(_tmpSidebarButtons, statusBtn)

@@ -358,6 +358,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
     if str == '' then return end
     CUR_POS:OnShow()
     editor:CallTipShow(pos, str) --:gsub('[{}#@]', '_'))
+
     if s == nil or CUR_POS.use then return end
     if s > 0 then
         editor.CallTipForeHlt = 0xff0000
@@ -937,7 +938,7 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
             local brk = ''
             if p ~= '' and d ~= '' then brk = '\n' elseif p == '' and d == '' then return false end
             local str = strMethodName..l..p..brk..string.gsub(d, "\\n", "\n")
-            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:from_utf8() end
+            --if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:from_utf8() end
             table.insert(calltipinfo,{pos, str, nParams, 1, pozes})
             calltipinfo[1] = af_current_line
             ShowCallTip(pos, str, sParam, eParam)
