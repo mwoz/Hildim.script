@@ -153,6 +153,12 @@ local function ChangeCode(e, cp)
     return function() CORE.ChangeCode(e, cp) end
 end
 
+local function CanToggle()
+    local lStart = editor:LineFromPosition(editor.SelectionStart)
+    local baseLevel = (editor.FoldLevel[lStart] & SC_FOLDLEVELNUMBERMASK)
+    return (baseLevel > SC_FOLDLEVELBASE and (baseLevel & SC_FOLDLEVELHEADERFLAG) == 0)
+end
+
 local bCanPaste = true
 AddEventHandler("OnDrawClipboard", function(flag)
 	bCanPaste = (flag > 0)
@@ -248,11 +254,11 @@ _G.sys_Menus.FINDRES = {title = _TM"Find Results Context Menu",
 }
 
 _G.sys_Menus.EDITMARGIN = {title = _TM"Editor Margin Context Menu",
-    {'Toggle &current fold', action = IDM_EXPAND},
     {'Toggle &all folds', action = IDM_TOGGLE_FOLDALL},
-    {'Toggle &Recursively current fold', action = IDM_TOGGLE_FOLDRECURSIVE},
-    {'&Collapse Subfolders', key = 'Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false)"},
-    {'&Expand Subfolders', key = 'Ctrl+Shift++', action = "CORE.ToggleSubfolders(true)"},
+    {'Toggle &current fold', action = IDM_EXPAND, active = CanToggle},
+    {'Toggle &Recursively current fold', action = IDM_TOGGLE_FOLDRECURSIVE, active = CanToggle},
+    {'&Collapse...', key = 'Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false)"},
+    {'&Expand...', key = 'Ctrl+Shift++', action = "CORE.ToggleSubfolders(true)"},
     {'s1', separator = 1},
     {'Go to def&inition(Ctrl+Click)', key = 'F12', action = "menu_GoToObjectDefenition()"},
     {'Next &Bookmark', key = 'F2', action = IDM_BOOKMARK_NEXT, image = 'bookmark__arrow_µ'},

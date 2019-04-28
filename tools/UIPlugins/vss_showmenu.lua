@@ -92,12 +92,19 @@ local function Init()
             ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
             if __DEBUG then print("DEBUG:", p_vsspath..' CP "'..strProgect..'"') end
             if ierr ~= 0 then
+                strerr = ''..ierr..'   '..p_vsspath..' CP "'..strProgect..'"'
                 ierr = -1
             else
                 if __DEBUG then print("DEBUG:", p_vsspath..' Status '..f) end
-                ierr, strerr = shell.exec(p_vsspath..' Status '..f, nil, true, true)
+                ierr, strerr = 1, ''
+                for i = 1, 10 do
+                    ierr, strerr = shell.exec(p_vsspath..' Status '..f, nil, true, true)
+                    if ierr ~= 1 or strerr ~= '' then break end
+                end
+
             end
         end
+
         linda:send( "VSS_ChangeFile", {ierr = ierr, strerr = strerr, file = f})
     end
 

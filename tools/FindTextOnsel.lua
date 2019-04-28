@@ -83,12 +83,21 @@ CORE.ToggleSubfolders = function(bShow, line)
         lStart = editor.FoldParent[lStart]
     end
     local lEnd = editor:GetLastChild(lStart, -1)
+    if lStart == -1 then lEnd = editor.LineCount end
+
+    local bAct = false
     for l = lStart + 1, lEnd do
         local level = editor.FoldLevel[l]
         if ((level & SC_FOLDLEVELHEADERFLAG)~= 0 and baseLevel == (level & SC_FOLDLEVELNUMBERMASK)) then
             if not action then action = Iif(editor.FoldExpanded[l], 0, 1) end
             editor:FoldLine(l, action)
+            bAct = true
         end
+    end
+    if not bAct then
+        local l = editor.FoldParent[lStart]
+        if not action then action = Iif(editor.FoldExpanded[l], 0, 1) end
+        editor:FoldLine(l, action)
     end
     CORE.ShowCaretAfterFold()
 end

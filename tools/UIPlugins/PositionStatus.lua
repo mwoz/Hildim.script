@@ -7,6 +7,7 @@ local function Init(h)
         local line = (tonumber(txtLine.value) or 0) - 1
         local col = (tonumber(txtCol.value) or 0) - 1
         local lineStart = editor:PositionFromLine(line)
+        editor:EnsureVisibleEnforcePolicy(line)
         local ln = editor:PositionFromLine(line + 1) - 2 - lineStart
         if ln > col then
             editor:SetSel(lineStart + col, lineStart + col )
