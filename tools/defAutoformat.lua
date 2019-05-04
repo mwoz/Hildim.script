@@ -7,7 +7,7 @@ local chRightSide = '[\\w\\d\\_)\\]}"\']\\s*[<>\\/\\=\\+\\-%\\*]'
 local strunMin = '[,=(] \\- [\\d\\w_(]'
 local strunMin2 = '(\\- [\\d\\w_(]'
 
-local stylesMap = {default = {
+_AUTOFORMAT_STYLES = {default = {
     operStyle = {[10] = true},
     keywordStyle = {[5] = true},
     ignoredStyle = {[8] = true, [1] = true}
@@ -17,11 +17,9 @@ local stylesMap = {default = {
     ignoredStyle = {[8] = true, [6] = true, [3] = true}
 }}
 
-local CurMap = stylesMap.default
+local CurMap = _AUTOFORMAT_STYLES.default
 
-
-local operStyle = 10
-local keywordStyle = 5
+local operStyle, keywordStyle = 10, 5
 
 _G.g_session['custom.autoformat.lexers'] = {}
 
@@ -121,6 +119,7 @@ local bNewLine = false
 
 local function doIndentation(line, bSel)
     if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(line)]] then return end
+    if OnIndenation and OnIndenation(line, bSel) then return true end
     local dL = 1
     local dLine = 1
     for i = line - 1, 0, -1 do
@@ -190,7 +189,7 @@ AddEventHandler("OnChar", function(char)
         elseif string.byte(char) == 10 then
             curFold = nil
             bNewLine = true
-            if editor.EOLMode == SC_EOL_LF then  editor:BeginUndoAction() end
+            if editor.EOLMode == SC_EOL_LF then editor:BeginUndoAction() end
         elseif FoldLevel(-1) == FoldLevel(0) then
             curFold = FoldLevel(-1)
             if curFold == 0 then curFold = nil end
@@ -204,7 +203,6 @@ local prevFold
 AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
     if _G.g_session['custom.autoformat.lexers'][editor.Lexer] or (bModified == 0 and bSelection == 0) then return end
     if (_G.iuprops['autoformat.indent'] or 0) == 1 or (_G.iuprops['autoformat.line'] or 0) == 1 then
-
         if bNewLine then
             --editor:BeginUndoAction()
             if (_G.iuprops['autoformat.line'] or 0) == 1 then FormatString(curLine - 1) end
@@ -225,7 +223,7 @@ AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
                         editor.SelectionEnd = newPos
                         prevFold = curI
                         editor:AutoCCancel()
-                        if (_G.iuprops['autoformat.indent'] or 1) == 1 then Format_Block() end
+                        if (_G.iuprops['autoformat.indent.force'] or 1) == 1 then Format_Block() end
                         return
                     end
                 end
@@ -245,8 +243,12 @@ end)
 
 _G.g_session['custom.autoformat.lexers'][SCLEX_MSSQL] = true
 local function OnSwitchFile_local()
-    CurMap = stylesMap[editor_LexerLanguage()] or stylesMap.default
+    CurMap = _AUTOFORMAT_STYLES[editor_LexerLanguage()] or _AUTOFORMAT_STYLES.default
     curLine = nil
+    local f, t = pairs(CurMap.operStyle);
+    operStyle = f(t)
+    f, t = pairs(CurMap.keywordStyle);
+    keywordStyle = f(t)
 end
 AddEventHandler("OnSave", OnSwitchFile_local)
 AddEventHandler("OnSwitchFile", OnSwitchFile_local)

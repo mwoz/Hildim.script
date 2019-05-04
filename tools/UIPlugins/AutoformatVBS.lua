@@ -488,7 +488,7 @@ local function OnUpdateUI_local(bModified, bSelection, flag)
                             editor.SelectionStart = editor:PositionFromLine(ls) + li + 4
                             editor.SelectionEnd = editor.SelectionStart
                         end
-                        if (_G.iuprops['autoformat.indent'] or 1) == 1 then IndentBlockUp() end
+                        if (_G.iuprops['autoformat.indent.force'] or 1) == 1 then IndentBlockUp() end
                         return
                     end
                 end
@@ -609,6 +609,9 @@ end)
 AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
     if cmpobj_GetFMDefault() == SCE_FM_VB_DEFAULT or editor.Lexer == SCLEX_VB then
         OnUpdateUI_local(bModified, bSelection, flag)
+        _G.g_session['custom.autoformat.lexers'][SCLEX_FORMENJINE] = true
+    else
+        _G.g_session['custom.autoformat.lexers'][SCLEX_FORMENJINE] = false
     end
 end)
 AddEventHandler("OnSwitchFile", function() iChangedLine = -1 end)

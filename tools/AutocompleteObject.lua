@@ -989,6 +989,15 @@ local function OnUserListSelection_local(tp, str)
     elseif pasteFromXml then
         s = str..'=""'
     elseif editor_LexerLanguage() == 'xml' or editor_LexerLanguage() == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
+        if curr_fillup_char == '/' and XMLTOOLS and editor.CharAt[editor.SelectionEnd - 2] == 60 then
+            editor.SelectionStart = editor.SelectionEnd - 2
+            XMLTOOLS.CloseTag()
+            SetListVisibility(false)
+            editor:EndUndoAction()
+            curr_fillup_char = ''
+            return true
+        end
+
         local tip, sign, txt
         for _, t in ipairs(objects_table['NOOBJ']) do
             if t[1] == str then
@@ -1369,7 +1378,6 @@ function ShowTipManualy()
         local brCount = 0
         local spaceCT = (string.find(calltip_start_characters, ' ', 1, true) ~= nil)
         repeat
-            --print(123)
             while isString(cp - 1) and cp > 0 do cp = cp - 1 end
             char = editor:textrange(cp - 1, cp)
 

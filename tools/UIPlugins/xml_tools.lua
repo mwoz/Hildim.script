@@ -577,9 +577,9 @@ local function Init()
 
     end
 
-    local function CloseTag(nUnbodyScipped)
+    local function CloseTag(nUnbodyScipped, bFromGlobal)
         local pos = editor.CurrentPos
-        if (editor.StyleAt[pos] == styleSpace or editor.StyleAt[pos - 1] == styleSpace) or
+        if (editor.StyleAt[pos] == styleSpace or editor.StyleAt[pos - 1] == styleSpace) or bFromGlobal or
             (editor.StyleAt[pos] == styleBracket and editor.CharAt[pos - 1] == 62 and editor.CharAt[pos] == 60)
             then
             local tg_end, find_start = nil, pos
@@ -592,7 +592,6 @@ local function Init()
                 if not(tag_end == nil or editor.CharAt[tag_end] ~= 62) then -- [>]
                     t.tag_start = find_start
                     t.tag_end = tag_end
-
                     t.paired_start = nil
                     t.paired_end = nil
                     local tag = editor:textrange(editor:findtext("[\\w\\.:]+", SCFIND_REGEXP, t.tag_start, t.tag_end))
@@ -612,9 +611,19 @@ local function Init()
                         FindPairedTag(tag)
                         if not t.paired_start then
                             editor:ReplaceSel('</'..tag..'>')
+                            scite.RunAsync(Format_Block)
                             return
                         end
-                        if t.paired_start > pos then break end
+                        if t.paired_start > pos then
+                            if iup.Alarm(_T"Xml Tools", _FMT(_T"Tag '%1' (line %2)  is already closed\non the line %3. Close anyway?",
+                                tag, editor:LineFromPosition(find_start) + 1, editor:LineFromPosition(t.paired_start) + 1), _TH'Yes', _TH'No') == 1 then
+                                editor:ReplaceSel('</'..tag..'>')
+                                scite.RunAsync(Format_Block)
+                            elseif bFromGlobal then
+                                editor:ReplaceSel('</')
+                            end
+                            break
+                        end
                     end
                 end
             until false
@@ -638,6 +647,10 @@ local function Init()
     local function CloseUnbodyTag()
         -- iup.GetParam("sdfsd",(function(h, ind) print((iup.GetParamParam(h,0)).value); return 1 end), "Tag%i[1,100,1]{}\n", 1)
         CloseTag(1)
+    end
+
+    function XMLTOOLS.CloseTag()
+        CloseTag(0, true)
     end
 
     local function CheckInternal(txtXml)

@@ -681,14 +681,14 @@ local function Func_Init(h)
         function(h)
             h.run = 'NO'
             if iup.GetGlobal('CONTROLKEY') == 'ON' and curPosTmr == iup.GetGlobal('CURSORPOS') then
-                local _, _, xC, yC = curPosTmr:find('(%d+)x(%d+)')
+                local _, _, xC, yC = curPosTmr:find('(%-?%d+)x(%-?%d+)')
                 local x, y, ed
                 if scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) == 0 then
                     ed = 'Source'
                 else
                     ed = 'CoSource'
                 end
-                _, _, x, y = iup.GetDialogChild(iup.GetLayout(), ed).screenposition:find('(%d+),(%d+)')
+                _, _, x, y = iup.GetDialogChild(iup.GetLayout(), ed).screenposition:find('(%-?%d+),(%-?%d+)')
                 xC = math.tointeger(xC) - math.tointeger(x); yC = math.tointeger(yC) - math.tointeger(y)
                 --print(xC,yC)
                 local pos = editor:CharPositionFromPointClose(xC, yC)

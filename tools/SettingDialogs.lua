@@ -390,10 +390,10 @@ function sett.OpenNewInstance(w)
 
     local asadm = ''
     if not scite.IsRunAsAdmin() then
-        asadm = _T'As Administrator'..'%b\n'
+        asadm = _T'Run As Administrator'..'%b\n'
     end
 
-    local ret, fName, iSch, iCnf, bAsAdm =
+    local ret, fName, iSch, iCnf, bAllowSave, bAsAdm =
     iup.GetParam(_TM"Open New Instance".."^OpenInNewInstance",
             function(h, id)
                 if id == iup.GETPARAM_INIT then
@@ -406,23 +406,28 @@ function sett.OpenNewInstance(w)
         _T'File'..'%f\n'..
         _T'Color Scheme'..'%l|<Curent>|Default|Atrium|Darkblue|\n'..
         _T'Configuration'..sSnf..'\n'..
+        _T'Allow Autosave Configuration'..'%b\n'..
         asadm,
         w,
         (_G.iuprops['newinstance.colourscheme'] or 0),
         (_G.iuprops['newinstance.configfile'] or 0),
+        (_G.iuprops['newinstance.allow.save.config'] or 0),
         (_G.iuprops['newinstance.as.administrator'] or 0)
     )
     if ret then
-        local s = ''
-        local strCommand = '-d-nSes-nRF'
         _G.iuprops['newinstance.colourscheme'] = iSch
         _G.iuprops['newinstance.configfile'] = iCnf
+        _G.iuprops['newinstance.allow.save.config'] = bAllowSave
 
         if scite.IsRunAsAdmin() then
             bAsAdm = 0
         else
             _G.iuprops['newinstance.as.administrator'] = bAsAdm
         end
+
+        local s = ''
+        local strCommand = '-d-nSes-nRF'
+        if not bAllowSave then strCommand = strCommand..'-nP' end
 
         if iSch > 0 then
             local sch =({'Colors_Default', 'Colors_Atrium', 'Colors_Darkblue'})[iSch]

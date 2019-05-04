@@ -1189,12 +1189,14 @@ end
 local function Init(h)
     _Plugins = h
     CORE.ActivateFind = ActivateFind_l --глобальная ссылка на нашу функцию
+    bBlock4reload = false
+    AddEventHandler("OnScriptReload", function(bSave, t) bBlock4reload = bSave end)
 
     oDeattFnd = iup.scitedetachbox{
         create_dialog_FindReplace();
         orientation="HORIZONTAL";barsize=5;minsize="100x100";name="FindReplDetach";defaultesc="FIND_BTN_ESC";
         k_any= (function(h,c) if c == iup.K_CR then DefaultAction() elseif c == iup.K_ESC then PassOrClose() end end),
-        sciteid = 'findrepl';  Dlg_Title = _T"Find Replace"; expand='HORIZONTAL'; buttonImage='IMAGE_search'; onFormSetStaticControls = SetStaticControls;
+        sciteid = 'findrepl';  Dlg_Title = _T"Find Replace"; expand = 'HORIZONTAL'; buttonImage = 'IMAGE_search';
         On_Detach = (function(h, hNew, x, y)
             iup.SetHandle("FIND_BTN_ESC",Ctrl('btn_esc'))
             local hMainLayout = iup.GetLayout()
@@ -1218,7 +1220,7 @@ local function Init(h)
                 iup.GetDialogChild(hMainLayout, "FinReplExp").state="OPEN";
             end
         end);
-        Dlg_Show_Cb = function(h, state) scite.RunAsync(SetStaticControls) end;
+        Dlg_Show_Cb = function(h, state) scite.RunAsync(function() if(_G.g_session['LOADED'] and not bBlock4reload) then SetStaticControls() end end) end;
         }
     local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')
 

@@ -14,5 +14,6 @@ return {
 ["XML - Paired Tags - Error"] = "Xml - Парные теги - ошибка";
 ["XML - Paired Tags - Found"] = "Xml - Парные теги - найдено";
 ["Can't highlight attribute"] = "Невозможно подсветить атрибут";
+["Tag '%1' (line %2)  is already closed\non the line %3. Close anyway?"] = "Тэг '%1' (строка %2)  уже закрыт\nна строке %3. Все равно закрыть?";
 }
 

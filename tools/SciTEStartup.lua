@@ -135,4 +135,5 @@ scite.RunAsync(function()
     end
     if OnInitHildiM then OnInitHildiM() end
     _G.g_session['LOADED'] = true
+    _G.g_session['scip.restore.files'] = nil
 end)
