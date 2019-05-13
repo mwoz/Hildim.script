@@ -427,7 +427,7 @@ function sett.OpenNewInstance(w)
 
         local s = ''
         local strCommand = '-d-nSes-nRF'
-        if not bAllowSave then strCommand = strCommand..'-nP' end
+        if bAllowSave == 0 then strCommand = strCommand..'-nSet' end
 
         if iSch > 0 then
             local sch =({'Colors_Default', 'Colors_Atrium', 'Colors_Darkblue'})[iSch]

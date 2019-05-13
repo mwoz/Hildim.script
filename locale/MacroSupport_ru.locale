@@ -1,5 +1,6 @@
 return {
 ["Abbreviation"] = "Сокращение";
+["Add to Context Menu"] = "Добавить в контекстное меню";
 ["Call next Block If"] = "Выполнить следующий блок если";
 ["Caption"] = "Заголовок";
 ["Case Sensitive"] = "Учитывать регистр";

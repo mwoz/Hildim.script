@@ -261,7 +261,7 @@ local function init()
             {'H4', action = function() tagAround"h4" end, key = 'Alt+4', active = bHt, },
             {'H5', action = function() tagAround"h5" end, key = 'Alt+5', active = bHt, },
             {'H6', action = function() tagAround"h6" end, key = 'Alt+6', active = bHt, },
-            {'Referenñ', action = function() tagAround"a" end, key = 'Alt+Shift+A', active = bHt, },
+            {'Reference', action = function() tagAround"a" end, key = 'Alt+Shift+A', active = bHt, },
             {'Anchor', action = function() editor:ReplaceSel'<a id=""/>'; for i = 1, 3 do editor:CharLeft() end end, key = 'Ctrl+Shift+A', active = bHt, },
             {'New Paragraph', action = newLine, key = 'Alt+Enter', active = bHt, },
             {'Line Break', action = function() editor:ReplaceSel('<br>') end, key = 'Alt+Ctrl+Enter', active = bHt, },

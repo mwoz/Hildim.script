@@ -167,15 +167,16 @@ function s:PopMnu(smnu, x, y, bToolBar)
 
                     if not titem.active then --'экшны обрабатываем только для активных меню
                         titem.action = function()
-                            if r_button_state() > 0 then
+                            if r_button_state() ~= 0 then
                                 local chm, path = "HildiM", "ui/Menues.html"
                                 if itm.hlp then
                                     _, _, chm, path = itm.hlp:find('^([^/]*)/(.*)')
                                 end
+                                local anc = itm[1]:gsub("&", "")
                                 if shell.fileexists(props['SciteDefaultHome']..'/help/'..chm..'.chm') then
-                                    scite.ExecuteHelp((props['SciteDefaultHome']..'/help/'..chm..'.chm::'..path..'#'..itm[1]):to_utf8(), 0)
+                                    scite.ExecuteHelp((props['SciteDefaultHome']..'/help/'..chm..'.chm::'..path..'#'..anc):to_utf8(), 0)
                                 else
-                                    local url = '"file:///'..props['SciteDefaultHome']..'/help/'..chm..'/'..path..'#'..itm[1]..'"'
+                                    local url = '"file:///'..props['SciteDefaultHome']..'/help/'..chm..'/'..path..'#'..anc..'"'
                                     print(url)
                                     shell.exec(url)
                                 end
@@ -369,7 +370,7 @@ function s:RegistryHotKeys()
 
     local function DropDown(path, mnu)
         for i = 1, #mnu do
-            if not mnu[i].link then
+            if type(mnu[i]) == 'table' and not mnu[i].link then
                 local lp = path..'|'..mnu[i][1]
                 local id = Iif(type(mnu[i].action) == 'number', mnu[i].action, idm_loc)
                 local bSet
@@ -448,8 +449,17 @@ function event_MenuHotKey(cmd)
 end
 
 function event_MenuMouseHook(x, y)
-    menuhandler:OnMouseHook(x, y)
-    _, _, r_button = shell.async_mouse_state()
+    if x ==- 7000 and y ==- 7000 then
+        r_button = 1
+        scite.RunAsync(function() r_button = 0 end)
+    else
+
+        menuhandler:OnMouseHook(x, y)
+    end
+    --_, _, r_button = shell.async_mouse_state()
+   ---- if r_button ~= 0 then
+    --    print(r_button)
+    ----end
 end
 
 function event_MenuChar(flag, key)

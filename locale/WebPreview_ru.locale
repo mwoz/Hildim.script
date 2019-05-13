@@ -4,6 +4,7 @@ return {
 ["Line Break"] = "Новая строка";
 ["Insert as Link"] = "Вставить как ссылку";
 ["Paragraph"] = "Параграф";
+["Reference"] = "Ссылка";
 ["Strike"] = "Зачеркнутый";
 ["Insert as Image"] = "Вставить как изображение";
 ["Underlined"] = "Подчеркнутый";

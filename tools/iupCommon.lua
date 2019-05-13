@@ -681,7 +681,7 @@ function CORE.HelpUI(helpid, anchor)
     local dv, fl = 'Hildim', helpid
     local _, _, d, f = helpid:find('(.*)::(.*)')
     if d then dv, fl = d, f end
- --print(debug.traceback())
+    if(anchor) then anchor = anchor:gsub("&", "") end
     if shell.fileexists(props['SciteDefaultHome']..'/help/'..dv..'.chm') then
         local strCmd = props['SciteDefaultHome']..'/help/'..dv..'.chm::ui/'..fl..'.html'
         if anchor then strCmd = strCmd..'#'..anchor end

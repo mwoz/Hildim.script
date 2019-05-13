@@ -2,6 +2,7 @@ return {
 ["- transparency"] = "- прозрачность";
 ["<Home>,<End> up to Nearest Wrapped up Line"] = "<Home>,<End> до ближайшего переноса";
 ["Active Tab"] = "Активная вкладка";
+["Allow Autosave Configuration"] = "Разрешить автосохранение конфигурации";
 ["Asymmetric UZ"] = "Асимметричная НЗ";
 ["Autoscroll Preferences"] = "Настройки автопрокрутки";
 ["Autoscroll for 3 UZ"] = "Автопрокрутка на 3 НЗ";
@@ -43,6 +44,7 @@ return {
 ["Output - Line Containing Caret - Color"] = "Консоль - Строка под курсором - цвет";
 ["Page Below Last Line"] = "Запрещено end.at.last.line";
 ["Restart HildiM to apply the changes?"] = "Перезапустить программу для применения изменений?";
+["Run As Administrator"] = "Запустить от имени администратора";
 ["Saturation:"] = "Освещенность:";
 ["Save Horizontal Position"] = "Сохранять позицию по горизонтали";
 ["Scrollbar Background"] = "Фон панели прокрутки";

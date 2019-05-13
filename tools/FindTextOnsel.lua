@@ -296,7 +296,7 @@ function CORE.FindresClickPos(curpos)
         local exPath, lHeadPath
         local _,_,p = s:find('^%s+(%d*)')
         if not p then _,_,exPath,p = s:find('^%.\\([^:]*):(%d+)') end
-        if not p then _,_,lHeadPath,exPath,p = s:find('^([A-Z]:([^:]*)):(%d*)') end
+        if not p then _, _, lHeadPath, exPath, p = s:find('^([A-Z]:([^:]*)):(%d*)') end
         if not p then return end
         p = tonumber(p) - 1
         for i = lineNum, 0, -1 do
@@ -305,7 +305,8 @@ function CORE.FindresClickPos(curpos)
                 if not exPath then break end
                 if not lHeadPath then
                     lHeadPath = findres:textrange(findres:PositionFromLine(i), findres:PositionFromLine(i +1) -2)
-                    _,_,lHeadPath = lHeadPath:find(' in "([^"]+)')
+                    _, _, lHeadPath = lHeadPath:find(' in "([^"]+)')
+                    if not lHeadPath:find('\\') then lHeadPath = props['FileDir']..'\\'..lHeadPath end
                     if exPath ~= '' then _,_,lHeadPath = lHeadPath:find('(.-)[^\\]+$') end
                     lHeadPath = lHeadPath..exPath
                 end

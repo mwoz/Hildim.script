@@ -48,7 +48,7 @@ local function Init()
                 ''
             )
             if ret then
-                --txt = txt:from_utf8()
+                txt = txt:from_utf8()
                 txt = txt:gsub('^%s', ""):gsub('%s$', "")
                 if txt == '' then txt = "-" end
                 return '"'..txt..'"'

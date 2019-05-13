@@ -74,11 +74,11 @@ local function Init(ToolBar_obj)
         end
     end)
     txt_search.k_any = (function(c, key)
-        if key == iup.K_DOWN then --down
+        if key == iup.K_PGDN then --down
             CORE.FindResult(1)
             iup.SetFocus(c)
             return iup.IGNORE
-        elseif key == iup.K_UP then --up
+        elseif key == iup.K_PGUP then --up
             CORE.FindResult(-1)
             iup.SetFocus(c)
             return iup.IGNORE

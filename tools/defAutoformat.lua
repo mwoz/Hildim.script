@@ -10,11 +10,13 @@ local strunMin2 = '(\\- [\\d\\w_(]'
 _AUTOFORMAT_STYLES = {default = {
     operStyle = {[10] = true},
     keywordStyle = {[5] = true},
-    ignoredStyle = {[8] = true, [1] = true}
+    ignoredStyle = {[8] = true, [1] = true},
+    middles = {'else', 'elseif'}
 }, hypertext = {
-    operStyle = {[1] = true},
+    operStyle = {},
     keywordStyle = {[3] = true},
-    ignoredStyle = {[8] = true, [6] = true, [3] = true}
+    ignoredStyle = {[8] = true, [6] = true, [3] = true},
+    middles = {'else', 'elseif'}
 }}
 
 local CurMap = _AUTOFORMAT_STYLES.default
@@ -108,7 +110,11 @@ end
 
 local function checkMiddle(line)
     local l = editor:GetLine(line)
-    return l:find('^%s*else[^%w]') or l:find('^%s*elseif[^%w]')
+    local t = CurMap.middles
+    for i = 1,  #t do
+        if l:find('^%s*'..t[i]..'[^%w]') then return true end
+    end
+    return false
 end
 
 local function Indent(l)
@@ -132,6 +138,7 @@ local function doIndentation(line, bSel)
         end
     end
     local f0, f1 = FoldLevel(nil, line), FoldLevel(nil, line - dL)
+    if OnCheckNotIndent and OnCheckNotIndent(line - dL) then f1 = f0 end
 
     curFold = nil
     if f0 == f1 and checkMiddle(line - 1) then

@@ -59,7 +59,7 @@ local function Init_hidden()
         editor.SelectionEnd = editor.SelectionStart
     end
 
-    local SavedState, MC, pCurBlock, positions_t, lines_t, recordet_macros, recorded_props, started_overtype, macro_list
+    local SavedState, MC, pCurBlock, positions_t, lines_t, recordet_macros, recorded_props, started_overtype, macro_list, context_list
     local jCounter, caret_fore, started_cycle, params, overtype
 
     local function nextMC(force)
@@ -826,14 +826,15 @@ local function Init_hidden()
     function MACRO.StopRecord() StopRecord() end
 
     local function GetPropsFromScr(scr)
-        local dorepeat, abbr = '1', ''
+        local dorepeat, abbr, context = '1', '', nil
         local _, _, l = scr:find('^[-][-]([^\n\r]+)')
         if l then
             _, _, dorepeat = l:find('dorepeat=([01])')
             _, _, abbr = l:find('abbr=(%w+)')
+                  context = l:find('context=Y')
         end
         if not dorepeat then dorepeat = Iif(scr:find('iup%.GetParam%(_T"'), '0', '1') end
-        return dorepeat, abbr
+        return dorepeat, abbr, context ~= nil
     end
 
     local function play_scr(scr)
@@ -1026,25 +1027,28 @@ local function Init_hidden()
         if not macro_list and shell.fileexists(props["SciteDefaultHome"].."\\data\\Macros\\") then
             local t = scite.findfiles(props["SciteDefaultHome"].."\\data\\Macros\\*.macro")
             macro_list = {}
+            context_list = {}
             local mnu_i
             for i = 1,  #t do
-                local l, abbr = '', ''
+                local l, abbr, context = '', '', false
                 pcall(function()
                     local f = io.open(path..t[i].name)
                     l = f:read('l')
                     f:close()
                     _, _, abbr = l:find('abbr=(%w+)')
+                          context = l:find('context=Y')
                 end)
 
                 mnu_i = {t[i].name:gsub('%.[^.]*$', '')..'\t'..(abbr or ''), action = function() RunMacroFile(props["SciteDefaultHome"]..'\\data\\Macros\\'..t[i].name) end, abbr = abbr}
                 table.insert(macro_list, mnu_i)
+                if context then table.insert(context_list, mnu_i) end
             end
             if FILEMAN then
                 table.insert(macro_list, {'s2', separator = 1})
                 table.insert(macro_list, {'Open Macro Folder', cpt = _T'Open Macro Folder', action = function() FILEMAN.OpenFolder(props["SciteDefaultHome"]..'\\data\\Macros\\') end, image = 'folder_search_result_µ'})
             end
         end
-        return macro_list
+        return macro_list, context_list
     end
 
     local function TryInsAbbrev()
@@ -1111,7 +1115,7 @@ local function Init_hidden()
     end
 
     local function SetMacroProps()
-        local ret, dorepeat, abbr, scr, filename
+        local ret, dorepeat, abbr, scr, filename, context
         if recordet_macros then
             scr = GetBlock(recordet_macros)
             dorepeat = ''..(recorded_props.dorepeat or (Iif(scr:find('iup%.GetParam%(_T"'), 0, 1)))
@@ -1136,24 +1140,30 @@ local function Init_hidden()
                 scr = scr:gsub('^([-][-][^\n\r]+[\n\r]+)', "")
                 _, _, dorepeat = l:find('dorepeat=([01])')
                 _, _, abbr = l:find('abbr=(%w*)')
+                      context = l:find('context=Y')
+                print(l, context)
+                context = Iif(context, 1, 0)
             else
                 dorepeat = Iif(scr:find('iup%.GetParam%(_T"'), '0', '1')
                 abbr = ''
+                context = 0
             end
         end
-        ret, dorepeat, abbr = iup.GetParam(_T"Macro Properties".."^macros",
+        ret, dorepeat, abbr, context = iup.GetParam(_T"Macro Properties".."^macros",
             nil,
             _T'Request number of repetitions'..'%b\n'..
-            _T'Abbreviation'..'%s\n'
+            _T'Abbreviation'..'%s\n'..
+            _T'Add to Context Menu'..'%b\n'
             ,
-            tonumber(dorepeat), abbr
+            tonumber(dorepeat), abbr, context
         )
         if ret then
             if recordet_macros then
                 recorded_props.dorepeat = ''..dorepeat
                 recorded_props.abbr = ''..abbr
+                recorded_props.context = ''..context
             else
-                scr = '--dorepeat='..dorepeat..';abbr='..abbr..'\n'..scr
+                scr = '--dorepeat='..dorepeat..';abbr='..abbr..';context='..Iif(context == 1, 'Y', 'N')..'\n'..scr
                 if not pcall(function()
                     local f = io.open(filename, "w")
                     f:write(scr)
@@ -1232,7 +1242,8 @@ local function Init_hidden()
     menuhandler:InsertItem('MainWindowMenu', 'Edit|s3',
         {'Expand Abbreviation into Macro', action = TryInsAbbrev, key = 'Ctrl+\\'}
     , "hildim/ui/macros.html", _T)
-
+    menuhandler:PostponeInsert('EDITOR', 'sxxx',
+    {'Compare', plane = 1,function() local _,t = get_macro_list(); return t end })
 end
 return {
     title = _T'Macro Support',

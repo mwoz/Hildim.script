@@ -719,44 +719,12 @@ local function FillTableFromText(tblfList, tStruct)
     end
 end
 
+local needIdle, needXml, needMain = false, false, false
 local function ReCreateStructures(strText, tblFiles)
+local tt = shell.clockStart()
     local rootTag
     if editor:GetLine(0) then _,_,rootTag = (editor:GetLine(0)..''):find('^<(%w+)') end
     rootTag = rootTag or ''
-    local strPathNew, iFind = props['FileDir']:gsub('(\\Templates[^\\]*).*', '%1', 1)
-    if (strPathNew:find('\\\\') or 2) == 1 then iFind = 0 end
-
-    local tbl_fList= {}
-    local function RecrReCreateStructures(strTxt,tblFiles)
-        local _incStart,_incEnd,incFind,incPath, fName
-
-        local tblIncl = (INCL_DEF:match(strTxt or '', 1) or {})
-        local t = lpeg.Ct(PATT):match(strTxt, 1) or {}
-        FillTableFromText(tbl_fList, t)
-        for idx = 1, #tblIncl do
-        --while true do     --получим список всех доступных функций
-            fName = tblIncl[idx]
-
-            if tblFiles[string.lower(fName)] == nil then
-                tblFiles[string.lower(fName)] = 1
-                local fName2 = get_precomp_tblFiles(string.lower(fName))
-                if fName2 ~= nil and iFind > 0 then
-                    incPath = strPathNew..'\\'..fName2
-                    if Favorites_AddFileName ~= nil then -- and StatusBar_obj ~= nil
-                        Favorites_AddFileName(incPath)
-                    end
-                    if shell.fileexists(incPath) then
-                        local incF = io.input(incPath)
-                        local incText = incF:read('*a')
-                        incF:close()
-                        RecrReCreateStructures(incText,tblFiles)
-                    else
-                        print('File '..incPath..' not found!')
-                    end
-                end
-            end
-        end
-    end
     editor.AutoCHooseSingle = true
 
     local str_vbkwrd = nil
@@ -780,46 +748,118 @@ local function ReCreateStructures(strText, tblFiles)
 
     end
     m_tblSubstitution = {}
-    m_tblFilters = {}
-    if m_ext ~= editor.Lexer or str_vbkwrd ~= nil or m_ptrn ~= props['pattern.name$']  then
+
+    if m_ext ~= editor.Lexer or str_vbkwrd == ' ' or m_ptrn ~= props['pattern.name$'] then
         alias_table = {}
         objects_table = {}
         objectsX_table = {}
         fillup_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".fillup.characters"])
         autocom_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".start.characters"])
         inheritors = {}
-        --local ts = shell.clockStart()
-        str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
-        --print(shell.clockDiff(ts))
+        needIdle, needMain = true, true
     end
     if Favorites_Clear ~= nil then Favorites_Clear() end
     -----------
 
     -----------
-    if m_ext ~= editor.Lexer or str_xmlkwrd~= nil or m_ptrn ~= props['pattern.name$'] then
+    if m_ext ~= editor.Lexer or str_xmlkwrd == ' ' or m_ptrn ~= props['pattern.name$'] then
         inheritorsX = {}
-        str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix$"], str_xmlkwrd~= nil, inheritorsX)
+        needIdle, needXml = true, true
     end
-    if editor.Lexer == SCLEX_FORMENJINE then
-        RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
-        if str_vbkwrd ~= nil then
-            props['keywords6.$('..props['pattern.name$']..')'] = str_vbkwrd
-            editor.KeyWords[5] = str_vbkwrd:gsub('<<[^ ]->>', '')
-        end
-        if str_xmlkwrd ~= nil then
-            props['keywords4.$('..props['pattern.name$']..')'] = str_xmlkwrd
-            editor.KeyWords[3] = str_xmlkwrd:gsub('<<[^ ]->>', '')
-        end
-        local kw = string.lower(table.concat(tbl_fList,' '))
-        props['keywords16.$('..props['pattern.name$']..')'] = kw
-        scite.SendEditor(3996, 15, kw)
-        editor:Colourise(0, editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen + 2))
-    else
-        --RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
-    end
+    if editor.Lexer == SCLEX_FORMENJINE then needIdle = true end
 	get_api = false
+
 	return false
 end
+
+AddEventHandler("OnIdle", function()
+    if needIdle then
+        needIdle = false
+
+        local strPathNew, iFind = props['FileDir']:gsub('(\\Templates[^\\]*).*', '%1', 1)
+        if (strPathNew:find('\\\\') or 2) == 1 then iFind = 0 end
+        local tbl_fList = {}
+        local function RecrReCreateStructures(strTxt, tblFiles)
+            local _incStart, _incEnd, incFind, incPath, fName
+
+            local tblIncl = (INCL_DEF:match(strTxt or '', 1) or {})
+            local t = lpeg.Ct(PATT):match(strTxt, 1) or {}
+            FillTableFromText(tbl_fList, t)
+            for idx = 1, #tblIncl do
+                --while true do     --получим список всех доступных функций
+                fName = tblIncl[idx]
+
+                if tblFiles[string.lower(fName)] == nil then
+                    tblFiles[string.lower(fName)] = 1
+                    local fName2 = get_precomp_tblFiles(string.lower(fName))
+                    if fName2 ~= nil and iFind > 0 then
+                        incPath = strPathNew..'\\'..fName2
+                        if Favorites_AddFileName ~= nil then -- and StatusBar_obj ~= nil
+                            Favorites_AddFileName(incPath)
+                        end
+                        if shell.fileexists(incPath) then
+                            local incF = io.input(incPath)
+                            local incText = incF:read('*a')
+                            incF:close()
+                            RecrReCreateStructures(incText, tblFiles)
+                        else
+                            print('File '..incPath..' not found!')
+                        end
+                    end
+                end
+            end
+        end
+
+        local str_vbkwrd = nil
+        local str_xmlkwrd = nil
+        if editor.Lexer == SCLEX_FORMENJINE then
+            if props["keywords6$"]:len() < 10 then
+                str_vbkwrd = ' '
+            else
+                str_vbkwrd = props["keywords6$"]
+            end
+
+            if props["keywords4$"]:len() < 10 then
+                str_xmlkwrd = ' '
+            else
+                str_xmlkwrd = props["keywords4$"]
+            end
+            if m_ptrn ~= props['pattern.name$'] then
+                str_vbkwrd = ' '
+                str_xmlkwrd = ' '
+            end
+
+        end
+        if needMain then
+            str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
+        end
+        if needXml then
+            str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix$"], str_xmlkwrd~= nil, inheritorsX)
+        end
+
+        if editor.Lexer == SCLEX_FORMENJINE then
+            RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
+            if str_vbkwrd ~= nil then
+                props['keywords6.$('..props['pattern.name$']..')'] = str_vbkwrd
+                editor.KeyWords[5] = str_vbkwrd:gsub('<<[^ ]->>', '')
+            end
+            if str_xmlkwrd ~= nil then
+                props['keywords4.$('..props['pattern.name$']..')'] = str_xmlkwrd
+                editor.KeyWords[3] = str_xmlkwrd:gsub('<<[^ ]->>', '')
+            end
+            local kw = string.lower(table.concat(tbl_fList, ' '))
+            props['keywords16.$('..props['pattern.name$']..')'] = kw
+            scite.SendEditor(3996, 15, kw)
+            editor:Colourise(0, editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen + 2))
+        else
+            --RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
+        end
+        if Favorites_AddFileName ~= nil then --  and StatusBar_obj ~= nil
+            Favorites_ListFILL(true)
+        end
+        needXml, needMain = false, false, false
+    end
+end)
 
 local function EnrichFromInheritors(obj_names, inh_table)
     local tblobj = {}
@@ -1512,11 +1552,8 @@ local function OnSwitchLocal()
     bManualTip = false
 	get_api = true
     ReCreateStructures()
-    if Favorites_AddFileName ~=nil then  --  and StatusBar_obj ~= nil
-        Favorites_ListFILL(true)
-    end
     m_ext = editor.Lexer
-    if m_ext == SCLEX_FORMENJINE then m_ptrn = props['pattern.name$'] end
+    m_ptrn = props['pattern.name$']
     objPatern = Iif(editor_LexerLanguage() == 'css', '(%.?[%w%_-]+)$', '(%.?[%w%_]+)$')
 end
 AddEventHandler("OnSwitchFile", function(file)
