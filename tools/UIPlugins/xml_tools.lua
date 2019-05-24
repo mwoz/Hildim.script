@@ -103,6 +103,28 @@ local function Init()
         end
     end
 
+    local function GetLineMap(ltst)
+        local isTag = false
+        local tagStart
+        local delta = 0
+        for i = 0, editor.Length - 1 do
+            if isTag then
+                if editor.CharAt[i] == 62 and (editor.StyleAt[i] == 1 or editor.StyleAt[i] == 11) then -->
+                    delta = delta + (editor:LineFromPosition(i) - tagStart)
+                    isTag = false
+                end
+            else
+                if editor.CharAt[i] == 60 and editor.StyleAt[i] == 1 then --<
+                    tagStart = editor:LineFromPosition(i)
+                    isTag = true
+                elseif editor:LineFromPosition(i) + delta >= ltst then
+                    return ltst + delta
+                end
+            end
+        end
+        return ltst+ delta
+    end
+
     local function highlighting_paired_tags_switch()
         local prop_name = 'hypertext.highlighting.paired.tags'
         props[prop_name] = 1 - tonumber(props[prop_name])
@@ -379,6 +401,7 @@ local function Init()
 
     local srcXsd, pathXsd = 0, ''
     local function Xsd()
+        print(999)
         local ret, src1, path1 = iup.GetParam("Test Xsd",
             function(h, id)
                 local bSE = scite.buffers.SecondEditorActive() == 1
@@ -405,7 +428,7 @@ local function Init()
             local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
             if not xmlSrc:loadXml(editor:GetText()) then
                 local xmlErr = xmlSrc.parseError
-                print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                print(GetLineMap(xmlErr.line), xmlErr.linepos, xmlErr.reason)
                 return
             end
 
@@ -439,7 +462,7 @@ local function Init()
                     local tabR = iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight')
                     path = scite.buffers.NameAt(math.tointeger(iup.GetAttribute(tabR, "TABBUFFERID"..iup.GetAttribute(tabR, "VALUEPOS"))) or 0)
                 end
-                print(path..':'..xmldoc.parseError.line..':'..xmldoc.parseError.linepos, xmldoc.parseError.reason)
+                print(path..':'..GetLineMap(xmldoc.parseError.line)..':'..xmldoc.parseError.linepos, xmldoc.parseError.reason)
             else
                 print('OK')
             end
@@ -482,7 +505,7 @@ local function Init()
         xmldoc.schemas = SchemaCache;
 
         if not xmldoc:loadXml(txtXml) then
-            return xmldoc.parseError.line - 1, xmldoc.parseError.linepos, xmldoc.parseError.reason;
+            return GetLineMap(xmldoc.parseError.line - 1), xmldoc.parseError.linepos, xmldoc.parseError.reason;
         else
             return nil
         end

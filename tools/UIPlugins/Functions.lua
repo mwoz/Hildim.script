@@ -640,17 +640,20 @@ local function Func_Init(h)
 
     local function releaseLink()
         EditorClearMarks(mark)
+        editor:CallTipCancel()
         editor.MouseDwellTime = linked_info.period
         linked_info = nil
         editor.Cursor = -1
-        editor.MultipleSelection = true
+        --editor.MultipleSelection = true
     end
 
     local function OnDwell_local(pos, word, ctrl)
         if _G.iuprops["menus.not.ctrlclick"] then return end
         if ctrl ~= 0 and word ~= '' and iup.GetGlobal("MODKEYSTATE") == ' C  ' then
             if linked_info then
-                if pos~= linked_info.pos or word ~= linked_info.word then releaseLink() end
+                local p = linked_info.word:find(word)
+                if not p or pos ~= linked_info.pos + p - 1 then releaseLink() end
+                -- if pos~= linked_info.pos or word ~= linked_info.word then releaseLink() end
             else
                 local handled, func, p, w
                 if GoToObjectDefenition then
@@ -663,6 +666,11 @@ local function Func_Init(h)
                 if func then
                     pos = p or pos; word = w or word
                     EditorMarkText(pos, #word, mark)
+                    local ct = _T"Click here for hide link\n(For Add Selection)"
+                    if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then ct = ct:from_utf8() end
+                    editor:CallTipShow(pos, ct)
+                    editor.CallTipForeHlt = 0xff0000
+                    editor:CallTipSetHlt(1, ct:find('\n'))
                     linked_info = {pos = pos, word = word, period = editor.MouseDwellTime, func = func}
                     editor.MouseDwellTime = linked_info.period / 10
                     editor.Cursor = 8
@@ -699,10 +707,24 @@ local function Func_Init(h)
 
     AddEventHandler("OnClick", function(shift, ctrl, alt)
         if linked_info then
-            editor.MultipleSelection = false
+            --editor.MultipleSelection = false
             EditorClearMarks(mark)
-            linked_info.func()
-            linked_set = {word = linked_info.word, pos = editor.SelectionStart}
+            editor:CallTipCancel()
+            if not linked_info.scip then
+                linked_info.func()
+                linked_set = {word = linked_info.word, pos = editor.SelectionStart}
+            end
+        end
+    end)
+
+    AddEventHandler("OnCallTipClick", function(pos)
+        if linked_info then
+            EditorClearMarks(mark)
+            editor:CallTipCancel()
+            editor.Cursor = -1
+            -- editor.MultipleSelection = true
+            editor.MouseDwellTime = linked_info.period
+            linked_info.scip = true
         end
     end)
 

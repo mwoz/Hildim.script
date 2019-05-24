@@ -46,7 +46,7 @@ local constListId = 7
 local constListIdXml = 8
 local constListIdXmlPar = 88
 local maxListsItems = 16
-local bIsListVisible = false
+
 local AutocomplAutomatic
 local obj_names = {}
 local m_last = nil
@@ -283,8 +283,11 @@ local function ShowCallTip(pos, str, s, e, reshow)
         editor.AutoCSeparator = string.byte('\t')
         current_poslst = current_pos
         pasteFromXml = false
-        --if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then l = l:to_utf8() end
+
+        local wch = editor.WordChars
+        editor.WordChars = wch..'.:'
         editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
+        editor.WordChars = wch
         editor:UserListShow(constListIdXmlPar, l)
         SetListVisibility(true)
         if seps then
@@ -330,7 +333,10 @@ local function ShowCallTip(pos, str, s, e, reshow)
             end
         elseif not CUR_POS.use then
             ulFromCT_data = list
+            local wch = editor.WordChars
+            editor.WordChars = wch..'.:'
             editor:SetSel(editor:WordStartPosition(editor.CurrentPos, true), editor:WordEndPosition(editor.CurrentPos, true))
+            editor.WordChars = wch
             scite.RunAsync(function()
                 if #ulFromCT_data > 0 and not CUR_POS.use then
                     local tl = {}
@@ -357,7 +363,9 @@ local function ShowCallTip(pos, str, s, e, reshow)
     str = str:gsub('({{[^}]+}})', ''):gsub('^ +', ''):gsub(' +$', '')
     if str == '' then return end
     CUR_POS:OnShow()
-    editor:CallTipShow(pos, str) --:gsub('[{}#@]', '_'))
+    if s and s > 0 and not CUR_POS.use then str = str:gsub('%)', ')'..string.char(2), 1) end
+    -- if CUR_POS.dwell then pos = CUR_POS.use end
+    if not editor:CallTipActive() then editor:CallTipShow(pos, str) end --:gsub('[{}#@]', '_'))
 
     if s == nil or CUR_POS.use then return end
     if s > 0 then
@@ -655,7 +663,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
                                 o_tbl[upObj].normalName = sObj
                             end
                             local _, _, filterarg = c:find('(<<[^ ]+>>)')
-                            if filterarg then
+                            if filterarg  then
                                 sMet = sMet..filterarg
                                 c = c:gsub('<<[^ ]+>>', '')
                             end
@@ -721,9 +729,9 @@ end
 
 local needIdle, needXml, needMain = false, false, false
 local function ReCreateStructures(strText, tblFiles)
-local tt = shell.clockStart()
+    local tt = shell.clockStart()
     local rootTag
-    if editor:GetLine(0) then _,_,rootTag = (editor:GetLine(0)..''):find('^<(%w+)') end
+    if editor:GetLine(0) then _, _, rootTag = (editor:GetLine(0)..''):find('^<(%w+)') end
     rootTag = rootTag or ''
     editor.AutoCHooseSingle = true
 
@@ -774,6 +782,7 @@ end
 
 AddEventHandler("OnIdle", function()
     if needIdle then
+
         needIdle = false
 
         local strPathNew, iFind = props['FileDir']:gsub('(\\Templates[^\\]*).*', '%1', 1)
@@ -830,10 +839,10 @@ AddEventHandler("OnIdle", function()
             end
 
         end
-        if needMain then
+        if needMain or true then
             str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
         end
-        if needXml then
+        if needXml or true then
             str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix$"], str_xmlkwrd~= nil, inheritorsX)
         end
 
@@ -946,7 +955,7 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
     if api_t == nil then return false end
     local lLen = #api_t
     for i = 1, lLen do
-        local line = api_t[i][1]
+        local line = api_t[i][1]:gsub('<<[^ ]+>>$', '')
         -- ищем строки, которые начинаются с заданного "объекта"
         local _, _end = string.find(string.upper(line or ''), "^"..string.upper(sMet or '').."$")
         if _end ~= nil then
@@ -960,11 +969,10 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
             local pozes ={}
             local sParam = 0
             local eParam = 0
-            strMethodName = api_t[i][1]
-            --if sObj ~= constObjGlobal then strMethodName = sObj.."."..strMethodName end
+
             if l ~= '' then
                 --разобьем на параметры
-                local poz = string.len(strMethodName)
+                local poz = string.len(line)
                 table.insert(pozes, poz)
 
                 for w in string.gmatch(p, "[^%,%)]*[%,%)]") do
@@ -977,8 +985,8 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
             end
             local brk = ''
             if p ~= '' and d ~= '' then brk = '\n' elseif p == '' and d == '' then return false end
-            local str = strMethodName..l..p..brk..string.gsub(d, "\\n", "\n")
-            --if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:from_utf8() end
+            local str = line..l..p..brk..string.gsub(d, "\\n", "\n")
+
             table.insert(calltipinfo,{pos, str, nParams, 1, pozes})
             calltipinfo[1] = af_current_line
             ShowCallTip(pos, str, sParam, eParam)
@@ -1209,7 +1217,7 @@ local function TipXml()
     return false
 end
 
-ResetCallTipParams = function(bHidden)
+ResetCallTipParams = function(bHidden, bForce)
 
     if editor:AutoCActive() then return end
     local tip = calltipinfo[#calltipinfo]
@@ -1266,8 +1274,17 @@ ResetCallTipParams = function(bHidden)
     calltipinfo[#calltipinfo][4] = iParCount
     local s = tip[5][iParCount]
     local e = tip[5][iParCount + 1]
-    if not bHidden then ShowCallTip(tip[1], tip[2], s, e) else editor:CallTipCancel() end
+    if bForce or (not bHidden and  not editor:CallTipActive() and calltipinfo[1] ~= 0) then ShowCallTip(tip[1], tip[2], s, e) --[[else editor:CallTipCancel()]] end
 end
+
+AddEventHandler("OnCallTipClick", function(pos)
+    if calltipinfo[1] ~= 0 and pos == 2 then
+        editor.SelectionStart = calltipinfo[#calltipinfo][1]
+        editor.SelectionEnd = editor.SelectionStart
+        editor:ReplaceSel((calltipinfo[#calltipinfo][2] or ''):gsub('^[^%(]*%(([^%)]*).*', '%1'))
+        HideCallTip()
+    end
+end)
 
 local function OnUpdateUI_local(bChange, bSelect, flag)
     if (bChange == 0 and bSelect == 0) or blockCT then return end
@@ -1279,7 +1296,10 @@ local function OnUpdateUI_local(bChange, bSelect, flag)
             calltipinfo={0}
             return false
         else --обеспечим обработку передвижения
-            return ResetCallTipParams()
+            local l, m, r = shell.async_mouse_state()
+            if l == 0 and m == 0 and r == 0 then
+                return ResetCallTipParams()
+            end
         end
     elseif m_last ~= nil then
         editor:AutoCSelect(m_last)
@@ -1358,7 +1378,7 @@ local function OnChar_local(char)
 
         if (calltipinfo[#calltipinfo][3] or 0) > 0 and bResetCallTip then
             result = ((props['autocompleteword.automatic'] or '') ~= '1')
-            ResetCallTipParams(not resut)
+            ResetCallTipParams(not resut, char == ',')
         end
     end
     if char == '\n' then HideCallTip() end
@@ -1450,6 +1470,7 @@ function ShowTipManualy()
         until string.find(calltip_start_characters, char, 1, true) == nil
 
         pos = editor:WordEndPosition(cp) + 1
+
         char = editor:textrange(pos - 1, pos)
         CallTip(char, pos)
         tipStartParam = 0
@@ -1521,8 +1542,14 @@ local function OnDwellStart_local(pos, word)
         end
     else
         CUR_POS:Use(pos + 1)
-        ShowTipManualy()
+        CUR_POS.dwell = true
+        local p = editor:WordEndPosition(pos) + 1
+        af_current_line = editor:LineFromPosition(pos)
+        local char = editor:textrange(p - 1, p)
+        CallTip(char, p)
+        tipStartParam = 0
         CUR_POS:Use()
+        CUR_POS.dwell = false
     end
 end
 ------------------------------------------------------

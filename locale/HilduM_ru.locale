@@ -392,6 +392,7 @@ __LOCALE ={
         ['Max Size for Auto Show'] = 'Максимальный размер для автопоказа',
         ['Display To Console'] = 'Отображать в консоли',
         ['(Max size exceeded) Show'] = '(Превышение максимального размера) Показать',
+        ['Click here for hide link\n(For Add Selection)'] = 'Скрыть линк\n(Для использования функций мультивыделения)',
     },
     ['tools\\UIPlugins\\Navigation'] ={
         ["Navigation: Backward"] = "Навигация: Назад";

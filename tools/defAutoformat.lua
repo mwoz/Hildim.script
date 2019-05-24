@@ -11,11 +11,13 @@ _AUTOFORMAT_STYLES = {default = {
     operStyle = {[10] = true},
     keywordStyle = {[5] = true},
     ignoredStyle = {[8] = true, [1] = true},
+    fixedStyle = {[20] = 0},
     middles = {'else', 'elseif'}
 }, hypertext = {
     operStyle = {},
     keywordStyle = {[3] = true},
     ignoredStyle = {[8] = true, [6] = true, [3] = true},
+    fixedStyle = {},
     middles = {'else', 'elseif'}
 }}
 
@@ -26,7 +28,7 @@ local operStyle, keywordStyle = 10, 5
 _G.g_session['custom.autoformat.lexers'] = {}
 
 local function FormatString(line)
-    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart))]] then return end
+    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) - 1]] then return end
 
     local lStart = editor:PositionFromLine(line)
     local lEnd = lStart + (editor:GetLine(line) or ''):len()
@@ -109,7 +111,7 @@ local function FoldLevel(deltaL, L)
 end
 
 local function checkMiddle(line)
-    local l = editor:GetLine(line)
+    local l = editor:GetLine(line) or ''
     local t = CurMap.middles
     for i = 1,  #t do
         if l:find('^%s*'..t[i]..'[^%w]') then return true end
@@ -124,17 +126,20 @@ end
 local bNewLine = false
 
 local function doIndentation(line, bSel)
-    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(line)]] then return end
+    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(line) - 1]] then return end
     if OnIndenation and OnIndenation(line, bSel) then return true end
+    if CurMap.fixedStyle[editor.StyleAt[editor:PositionFromLine(line - 1) + editor.LineIndentation[line - 1]]] then
+        editor.LineIndentation[line - 1] = CurMap.fixedStyle[editor.StyleAt[editor:PositionFromLine(line - 1) + editor.LineIndentation[line - 1]]]
+    end
     local dL = 1
     local dLine = 1
     for i = line - 1, 0, -1 do
-        if not CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(i)]] then break end
+        if not CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(i) - 1]] and not CurMap.fixedStyle[editor.StyleAt[editor:PositionFromLine(i) + 1]] then break end
         dL = dL + 1
     end
     if bSel then
         for pl = line - 1, 0, -1 do
-            if editor:LineLength(pl) > 2 then dL = line - pl; break end
+            if editor:LineLength(pl) > 2 and not CurMap.fixedStyle[editor.StyleAt[editor:PositionFromLine(pl) + 1]]  then dL = line - pl; break end
         end
     end
     local f0, f1 = FoldLevel(nil, line), FoldLevel(nil, line - dL)
@@ -251,6 +256,7 @@ end)
 _G.g_session['custom.autoformat.lexers'][SCLEX_MSSQL] = true
 local function OnSwitchFile_local()
     CurMap = _AUTOFORMAT_STYLES[editor_LexerLanguage()] or _AUTOFORMAT_STYLES.default
+    _AUTOFORMAT_STYLES.current = CurMap
     curLine = nil
     local f, t = pairs(CurMap.operStyle);
     operStyle = f(t)
