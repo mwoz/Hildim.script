@@ -15,6 +15,7 @@ __LOCALE ={
         ["Autoformat"] = "Авто&формат",
         ["Autoscroll Settings"] = "Настройка ав&топрокрутки...",
         ["Autoshow When Output"] = "Автопоказ при выводе",
+        ["Bottom Bar Autohide"] = "Всплывающая нижняя панель",
         ["Block Comment"] = "Блочный комментарий",
         ["Bottom Bar"] = "Ни&жняя панель",
         ["Box Comment"] = "Бокс - комментарий",
@@ -210,6 +211,7 @@ __LOCALE ={
         ["Attached"] = "Закреплено",
         ["Show/Hide"] = "Скрыть/Показать",
         ["Pop Up"] = "Всплывающее окно",
+        ["Autohide panel"] = "Всплывающая панель",
         ["Hidden"] = "Скрыто",
 
         ['Load...'] = 'Загрузить...',

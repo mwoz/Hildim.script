@@ -282,6 +282,8 @@ local function OpenFile(filename)
         if (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == 'ON' then scite.RunAsync(function() mybar_Switch(m_prevSel + 1) end)
         elseif (_G.iuprops['sidebarfileman.restoretab'] or 'OFF') == '1' then scite.RunAsync(function()  mybar_Switch(1) end)
         end
+    else
+        CORE.ScipHidePannel()
     end
     iup.PassFocus()
 end
@@ -546,7 +548,7 @@ local function OnSwitch(bForse, bRelist)
     if zPath.valuepos == '1' or bIsRenamed then return end
     if prev_filename:upper() == props['FilePath']:upper() then return end
     prev_filename = ''
-    if bForse or (_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.fileman.id) then
+    if true or bForse or (_Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.fileman.id) then
         if bForse then iup.SetFocus(memo_mask) end
         local path = props['FileDir']
         if path == '' then path = _G.iuprops['sidebarfileman.restoretab'] end
@@ -554,6 +556,7 @@ local function OnSwitch(bForse, bRelist)
             current_path = path:gsub('\\$', '')..'\\'
             -- print(current_path, current_path)
             -- if bClearMask then memo_mask:set_text = "" end
+            --print(debug.traceback())
             if zPath.valuepos == '0' then FileMan_ListFILL(true) end
             local sel = 1
             if list_dir.marked then sel = list_dir.marked:find('1') end
@@ -647,12 +650,12 @@ local function FileManTab_Init(h)
     Favorites_Clear = Favorites_Clear_l
 
     list_dir = iup.matrix{
-    numcol=4, numcol_visible=2,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="YES" ,
-    readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,rasterwidth1 = 18,rasterwidth2= 450,rasterwidth3= 0, rasterwidth4= 0}
+        numcol = 4, numcol_visible = 2, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "YES" ,
+        readonly = "NO"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
+    width0 = 0 , rasterwidth1 = 18, rasterwidth2 = 450, rasterwidth3 = 0, rasterwidth4 = 0}
 
     list_dir.map_cb = (function(h)
-        h.size="1x1"
+        h.size = "1x1"
     end)
     --list_dir.
     --list_dir.hlcolor = ""
@@ -661,20 +664,20 @@ local function FileManTab_Init(h)
   	list_dir.click_cb = (function(h, lin, col, status)
         local sel = 0
         if h.marked then sel = h.marked:find('1') - 1 end
-        iup.SetAttribute(h,  'MARK'..sel..':0', 0)
+        iup.SetAttribute(h, 'MARK'..sel..':0', 0)
         iup.SetAttribute(h, 'MARK'..lin..':0', 1)
         local l = (tonumber(list_dir:getcell(lin, 3) or 0) & 1)
         h.redraw = lin..'*'
         if iup.isdouble(status) and iup.isbutton1(status) then
             if memo_path.value:find('^%w:[\\/]') or memo_path.value:find('^[\\/][\\/]%w+') then
                 if list_dir:getcell(1, 2) ~= '..' then
-                    current_path = memo_path.value:gsub('[\\/][^\\/]*$','')..'\\'
+                    current_path = memo_path.value:gsub('[\\/][^\\/]*$', '')..'\\'
                 end
                 FileMan_OpenItem()
             else
-                OnSwitch(false,false)
+                OnSwitch(false, false)
             end
-            return -1
+            return - 1
         elseif iup.isbutton3(status) then
             h.focus_cell = lin..':'..col
             menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Fileman_sidebar')
@@ -711,11 +714,11 @@ local function FileManTab_Init(h)
     iup.SetAttribute(list_dir, 'TYPE*:1', 'IMAGE')
 
     list_favorites = iup.matrix{name = 'filemam.listfavorites',
-    numcol=3, numcol_visible=3,  cursor="ARROW", alignment='ALEFT', heightdef=6,markmode='LIN', flatscrollbar="YES" ,
-    resizematrix = "YES", readonly="NO"  ,markmultiple="NO" ,height0 = 4, expand = "YES", framecolor="255 255 255",
-    width0 = 0 ,
-    rasterwidth1 = 18 , rasterwidth2 = _G.iuprops['filemam.listfavorites.rw2'] or 150 ,
-    rasterwidth3= _G.iuprops['filemam.listfavorites.rw3'] or 450, tip ='jj'}
+        numcol = 3, numcol_visible = 3, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "YES" ,
+        resizematrix = "YES", readonly = "NO"  , markmultiple = "NO" , height0 = 4, expand = "YES", framecolor = "255 255 255",
+        width0 = 0 ,
+        rasterwidth1 = 18 , rasterwidth2 = _G.iuprops['filemam.listfavorites.rw2'] or 150 ,
+    rasterwidth3 = _G.iuprops['filemam.listfavorites.rw3'] or 450, tip = 'jj'}
 
     list_favorites.colresize_cb = list_favorites.FitColumns(3, true, 1)
     list_favorites.tips_cb = (function(h, x, y)
@@ -725,7 +728,7 @@ local function FileManTab_Init(h)
         end
     end)
 	list_favorites.map_cb = (function(h)
-        h.size="1x1"
+        h.size = "1x1"
     end)
     list_favorites.edition_cb = (function(c, lin, col, mode, update)
         if mode == 1 and (not bRenameFavor or col ~= 2) then return iup.IGNORE; end bRenameFavor = false
@@ -753,9 +756,9 @@ local function FileManTab_Init(h)
 
 
 
-    split_s = iup.split{iup.backgroundbox{list_dir, bgcolor = iup.GetLayout().txtbgcolor}, iup.backgroundbox{list_favorites, bgcolor = iup.GetLayout().txtbgcolor}, orientation="HORIZONTAL", name='splitFileMan',layoutdrag = 'NO',color = props['layout.splittercolor'], showgrip = 'LINES'}
-    memo_path = iup.text{expand='YES', tip = _T'Arrow Up/Down, Ctrl+Home/End - movement through the file list'}
-    memo_path.action = (function(h,s,new_value)
+    split_s = iup.split{iup.backgroundbox{list_dir, bgcolor = iup.GetLayout().txtbgcolor}, iup.backgroundbox{list_favorites, bgcolor = iup.GetLayout().txtbgcolor}, orientation = "HORIZONTAL", name = 'splitFileMan', layoutdrag = 'NO', color = props['layout.splittercolor'], showgrip = 'LINES'}
+    memo_path = iup.text{expand = 'YES', tip = _T'Arrow Up/Down, Ctrl+Home/End - movement through the file list'}
+    memo_path.action = (function(h, s, new_value)
         if new_value:find('^%w:[\\/]') or new_value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
             FileMan_ListFillDir(new_value)
         end
@@ -769,20 +772,20 @@ local function FileManTab_Init(h)
         list_dir.redraw = "ALL"
     end)
 
-    memo_path.k_any=(function(h,k)
+    memo_path.k_any =(function(h, k)
         return memoNav(h, k)
     end)
 
     memo_mask = iup.text{expand = 'YES', tip = _T'* - any character sequence\nArrow Up/Down, Ctrl+Home/End - movement through the file list'}
-    memo_mask.action = (function(h,s,new_value)
+    memo_mask.action = (function(h, s, new_value)
         FileMan_ListFILLByMask(new_value)
     end)
-    memo_mask.k_any=(function(h,k)
+    memo_mask.k_any =(function(h, k)
         return memoNav(h, k)
     end)
-    chkByTime = iup.hi_toggle{title=_T"Time Sort", value=Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", flat_action=FileMan_ToggleSort}
+    chkByTime = iup.hi_toggle{title = _T"Time Sort", value = Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", flat_action = FileMan_ToggleSort}
     -- memo_mask.killfocus_cb = (function(h)
-        -- FileMan_ListFILLByMask(memo_mask.value)
+    -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)
     AddEventHandler("OnResizeSideBar", function(sciteid)
         if h.fileman.Bar_obj.sciteid == sciteid then
@@ -793,27 +796,29 @@ local function FileManTab_Init(h)
     end)
     zPath = iup.zbox{
         iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "1" end), },
-        iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "0"; OnSwitch(false,true) end), },
+        iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zPath.valuepos = "0"; OnSwitch(false, true) end), },
     }
     zMemo = iup.zbox{
-        iup.flatbutton{tip = _T'Fixed',  impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "1" end), },
+        iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_PinPush", visible = "NO", image = "IMAGE_Pin", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "1" end), },
         iup.flatbutton{tip = _T'Fixed', impress = "IMAGE_Pin", visible = "NO", image = "IMAGE_PinPush", canfocus = "NO", flat_action = (function(h) zMemo.valuepos = "0"; memo_mask.value = ''; FileMan_ListFILLByMask(''); zPath.valuepos = p end), },
     }
+    local m_bReset = false
+    AddEventHandler("OnIdle", function() if m_bReset then OnSwitch(false, true); m_bReset = false end end)
     local res = {
 
         handle = iup.vbox{
-                   iup.scrollbox{iup.vbox{iup.hbox{zPath, iup.label{title = _T"Path:",size="30x"},memo_path,expand="HORIZONTAL", alignment="ACENTER"},
-                   iup.hbox{zMemo, iup.label{title = _T"Mask:", size = "30x"}, memo_mask, chkByTime, expand = "HORIZONTAL", alignment = "ACENTER"}},
-                   scrollbar='NO', minsize='x54', maxsize='x54', expand="HORIZONTAL",};
-                   split_s
-                 };
-        OnSwitchFile = function()OnSwitch(false,true) end;
-        OnSave = function()OnSwitch(false,false) end;
-        OnOpen = function()OnSwitch(false,true) end;
-        OnSaveValues = (function() _G.iuprops['FileMan.Dir.restoretab']=memo_path.value end);
+            iup.scrollbox{iup.vbox{iup.hbox{zPath, iup.label{title = _T"Path:", size = "30x"}, memo_path, expand = "HORIZONTAL", alignment = "ACENTER"},
+                iup.hbox{zMemo, iup.label{title = _T"Mask:", size = "30x"}, memo_mask, chkByTime, expand = "HORIZONTAL", alignment = "ACENTER"}},
+            scrollbar = 'NO', minsize = 'x54', maxsize = 'x54', expand = "HORIZONTAL",};
+            split_s
+        };
+        OnSwitchFile = function() m_bReset = true end;
+        OnSave = function() OnSwitch(false, false) end;
+        OnOpen = function() m_bReset = true end;
+        OnSaveValues = (function() _G.iuprops['FileMan.Dir.restoretab'] = memo_path.value end);
         OpenDir = (function(newPath)
-            for i=1, _Plugins.fileman.Bar_obj.TabCtrl.count do
-                if iup.GetAttributeId(_Plugins.fileman.Bar_obj.TabCtrl,'TABTITLE',i) == _Plugins.fileman.id then
+            for i = 1, _Plugins.fileman.Bar_obj.TabCtrl.count do
+                if iup.GetAttributeId(_Plugins.fileman.Bar_obj.TabCtrl, 'TABTITLE', i) == _Plugins.fileman.id then
                     _Plugins.fileman.Bar_obj.TabCtrl.valuepos = i
                     break
                 end
@@ -826,7 +831,7 @@ local function FileManTab_Init(h)
                 end
                 FileMan_ListFILL()
 
-                for s,tbs in pairs(_Plugins) do
+                for s, tbs in pairs(_Plugins) do
                     if tbs.tabs_OnSelect and _Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle == tbs.id and s ~= 'fileman' then tbs.tabs_OnSelect() end
                 end
             end
@@ -836,7 +841,8 @@ local function FileManTab_Init(h)
                 m_prevSel = _Plugins.fileman.Bar_obj.TabCtrl.valuepos
             end
         end;
-        on_SelectMe = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); OnSwitch(false, true) end) end;
+        on_SelectMe = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); --[[OnSwitch(false, true)]] end) end;
+        tabs_OnSelect = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); --[[OnSwitch(false, true)]] end) end;
     }
     Favorites_OpenList()
     return res

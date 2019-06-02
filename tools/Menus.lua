@@ -159,6 +159,19 @@ local function CanToggle()
     return (baseLevel > SC_FOLDLEVELBASE and (baseLevel & SC_FOLDLEVELHEADERFLAG) == 0)
 end
 
+function CORE.switch_bottombar()
+    local bsplit = iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit")
+    if iup.GetAttribute(bsplit, "POPUPSIDE") == '0' then
+        _G.iuprops['settings.bottombar.autohide'] = 1
+        iup.SetAttribute(bsplit, "POPUPSIDE", "2")
+        CORE.BottomBarSwitch("NO")
+    else
+        _G.iuprops['settings.bottombar.autohide'] = 0
+        CORE.BottomBarSwitch("NO")
+        iup.SetAttribute(bsplit, "POPUPSIDE", "0")
+    end
+end
+
 local bCanPaste = true
 AddEventHandler("OnDrawClipboard", function(flag)
 	bCanPaste = (flag > 0)
@@ -435,8 +448,11 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'&Tool Bar', action = function() iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "toolbar_expander").isOpen() end},
 		{'&Status Bar', action = function() iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end, check = function() return iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").isOpen() end},
 		{'T&ab Bar', action = function() local h = iup.GetDialogChild(iup.GetLayout(), "TabbarExpander"); if h.state == 'OPEN' then h.state = 'CLOSE' else h.state = 'OPEN' end end, check = function() return iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state == 'OPEN' end},
-		{'&Bottom Bar', key = 'F10', action = IDM_TOGGLEOUTPUT, check = function() return (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) ~= 0) end},
-		{'s2', separator = 1},
+        {'BottomBar', plane = 1,{
+            {'&Bottom Bar', key = 'F10', action = IDM_TOGGLEOUTPUT, check = function() return (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) ~= 0) end},
+            {'Bottom Bar A&utohide', action = CORE.switch_bottombar, check = function() return iup.GetAttribute(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit"), "POPUPSIDE") ~= '0' end},
+		}},
+        {'s2', separator = 1},
 		{'&White Space and TAB', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},
 		{'En&d of Line', key = 'Ctrl+Shift+9', action = IDM_VIEWEOL, check = "editor.ViewEOL"},
 		{'Indentation G&uides', action = IDM_VIEWGUIDES, check = "props['view.indentation.guides']=='1'"},
@@ -444,7 +460,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'Mar&gin', action = IDM_SELMARGIN, check = "editor.MarginWidthN[1]>0"},
 		{'Fo&ld Margin',  action = IDM_FOLDMARGIN, check = "editor.MarginWidthN[2]>0"},
         {'s3', separator = 1},
-		{'slast', separator = 1},
+        {'slast', separator = 1},
 		{'Show &Menu Icons', check_iuprops = 'menus.show.icons'},
         {'Mark Chan&ged Lines', check_iuprops = "changes.mark.line"},
 		{'&Word Wrap', action = IDM_WRAP, check = "props['wrap']=='1'"},

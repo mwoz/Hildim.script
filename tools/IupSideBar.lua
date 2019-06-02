@@ -18,8 +18,34 @@ local fntSize = "10"
 if props['iup.defaultfontsize']~='' then if tonumber(props['iup.defaultfontsize']) > 4 then fntSize = props['iup.defaultfontsize'] end end
 iup.SetGlobal("DEFAULTFONTSIZE", fntSize)
 iup.SetGlobal("TXTHLCOLOR", "222 222 222")
-                               -- RGB(121, 161, 201)
+local leftsplit, rightsplit
 local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
+local bottomsplit = iup.GetDialogChild(hMainLayout, "BottomBarSplit")
+local scipPannCounter = 0;
+
+local function HidePannels()
+    if scipPannCounter > 0 then
+        scipPannCounter = scipPannCounter - 1
+        return
+    end
+    if rightsplit and iup.GetAttribute(rightsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(rightsplit, 'HIDDEN') == 'NO' then
+        iup.SetAttribute(rightsplit, 'HIDDEN', 'YES')
+    end
+    if leftsplit and iup.GetAttribute(leftsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(leftsplit, 'HIDDEN') == 'NO' then
+        iup.SetAttribute(leftsplit, 'HIDDEN', 'YES')
+    end
+    if iup.GetAttribute(bottomsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(bottomsplit, 'HIDDEN') == 'NO' then CORE.BottomBarSwitch('YES')end
+end
+
+function CORE.ScipHidePannel(i)
+    if (iup.GetAttribute(bottomsplit, 'POPUPSIDE') ~= '0') then
+        scipPannCounter = (i or 1)
+    end
+end
+
+function CORE.BottomBarHidden()
+    return (iup.GetAttribute(bottomsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(bottomsplit, 'HIDDEN') == 'YES')
+end
 
 iup.PassFocus =(function()
     if scite.buffers.GetCurrent() >= 0 then
@@ -27,6 +53,7 @@ iup.PassFocus =(function()
     else
         iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
     end
+    HidePannels()
 end)
 
 function sidebar_Switch(n)
@@ -36,7 +63,10 @@ function sidebar_Switch(n)
             if LeftBar_obj.handle.Dialog then LeftBar_obj.handle.ShowDialog() end
             LeftBar_obj.TabCtrl.valuepos = n -1
             for _,tbs in pairs(SideBar_Plugins) do
-                if tbs.tabs_OnSelect and LeftBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
+                if tbs.tabs_OnSelect and LeftBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then
+                    LeftBar_obj.TabCtrl:getfocus_cb()
+                    tbs.tabs_OnSelect()
+                end
             end
         end
         n = n - leftCount
@@ -45,7 +75,10 @@ function sidebar_Switch(n)
         if SideBar_obj.handle.Dialog then SideBar_obj.handle.ShowDialog() end
         SideBar_obj.TabCtrl.valuepos = n -1
         for _, tbs in pairs(SideBar_Plugins) do
-            if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then tbs.tabs_OnSelect() end
+            if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then
+                SideBar_obj.TabCtrl:getfocus_cb()
+                tbs.tabs_OnSelect()
+            end
         end
     end
 end
@@ -143,7 +176,8 @@ local function CreateStatusBar()
             table.insert(tblH, _tmpSidebarButtons[i])
         end
     end
-    return iup.expander{barsize = 0, state = "OPEN", name = "statusbar_expander", iup.hbox(tblH)}
+    iup.SetAttribute(bottomsplit, 'IUPUNDER', 'status_background')
+    return iup.expander{barsize = 0, state = "OPEN", name = "statusbar_expander", iup.backgroundbox{iup.hbox(tblH), name = 'status_background'}}
 end
 
 function iup.SaveNamedValues(h, root)
@@ -219,7 +253,7 @@ local function CreateBox()
 
     local hk_pointer
     local strTip
-    local function SideBar(t, Bar_Obj, sciteid)
+    local function SideBar(t, Bar_Obj, sciteid, splitter)
         if not t then return end
         t.name = 'sidebartab_'..sciteid
         Bar_Obj.sciteid = sciteid
@@ -260,6 +294,12 @@ local function CreateBox()
         t.tabsforecolor = props['layout.fgcolor']
         t.bgcolor = iup.GetLayout().bgcolor
         t.tabsbackcolor = props["layout.splittercolor"]
+        t.getfocus_cb = function(h)
+            local s = iup.GetDialogChild(hMainLayout, splitter)
+            if iup.GetAttribute(s, 'POPUPSIDE') ~= 0 and iup.GetAttribute(s, 'HIDDEN') == 'YES' then
+                iup.SetAttribute(s, 'HIDDEN', 'NO')
+            end
+        end
         return iup.flattabs(t)
     end
 
@@ -410,22 +450,24 @@ local function CreateBox()
     pane_curObj = SideBar_obj
     local tbArgRight = settings2tbl(_G.iuprops["settings.user.rightbar"] or {}, "tbArgRight")
 
-    local tabs = SideBar(tbArgLeft, LeftBar_obj, 'leftbar')
+    local tabs = SideBar(tbArgLeft, LeftBar_obj, 'leftbar', 'SourceSplitLeft')
 
     if tabs then
         LeftBar_obj.TabCtrl = tabs
 
         vbox = iup.vbox{tabs}       --SideBar_Plugins.livesearch.handle,
         LeftBar_obj.handle = SidePane(vbox, 'LeftBarSB','leftbar','SourceSplitLeft', 'LeftBarExpander', '0', LeftBar_obj, 'Left', 'application_sidebar_left_µ' )
+        leftsplit = iup.GetDialogChild(hMainLayout, 'SourceSplitLeft')
     end
 
-    local tabs =  SideBar(tbArgRight, SideBar_obj, 'sidebar')
+    local tabs = SideBar(tbArgRight, SideBar_obj, 'sidebar', 'SourceSplitRight')
 
     if tabs then
         SideBar_obj.TabCtrl = tabs
 
         vbox = iup.vbox{tabs}
         SideBar_obj.handle = SidePane(vbox, 'SideBarSB','sidebar','SourceSplitRight', 'RightBarExpander', '1000', SideBar_obj, 'Right', 'application_sidebar_right_µ' )
+        rightsplit = iup.GetDialogChild(hMainLayout, 'SourceSplitRight')
     end
 
     local tblMenus = {}
@@ -436,6 +478,10 @@ local function CreateBox()
         t.action = function() sidebar_Switch(i) end
         table.insert(tblMenus, t)
     end
+
+    AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag, bSwitch)
+        if bSelection == 1 and bSwitch == 0 then  HidePannels() end
+    end)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|xxx', {'Sidebar', tblMenus})
 
@@ -673,7 +719,7 @@ local function InitTabbar()
         elseif button == iup.BUTTON3 and pressed == 1 and tab >= -1 then
             menuhandler:ContextMenu(iup.MOUSEPOS, iup.MOUSEPOS, 'TABBAR')
         end
-        if pressed == 0 then scite.RunAsync(function() iup.PassFocus() end) end
+        if pressed == 0 then scite.RunAsync(function() CORE.ScipHidePannel() iup.PassFocus() end) end
     end
 
     local function onTabClose(h, tab)
@@ -928,7 +974,11 @@ local function edit_scroll_menu(h, btn, pos, scroll)
            menuhandler:PopUp("MainWindowMenu|_HIDDEN_|AllScroll")
         end
     elseif btn == iup.BUTTON2 then
-        CORE.ClearLiveFindMrk()
+        if scroll == 'SB_VERT' then
+            CORE.ClearLiveFindMrk()
+        else
+            CORE.BottomBarSwitch('NO')
+        end
     end
 end
 
@@ -1018,15 +1068,22 @@ hMainLayout.resize_cb = function()
     tmr.run = 'YES'
 end
 
+bottomsplit.flat_button_cb = function(h, button, pressed, x, y, status)
+    if button == iup.BUTTON3 and pressed == 1 then
+        menuhandler:PopUp('MainWindowMenu|View|BottomBar')
+    elseif button == iup.BUTTON2 and pressed ~= 1  then
+        CORE.switch_bottombar()
+    elseif button == iup.BUTTON1 and iup.isdouble(status) then
+        scite.MenuCommand(IDM_TOGGLEOUTPUT)
+    end
+end
+
 try{
     function() dolocale('tools\\BuffersList.lua') end,
     catch{
         print
     }
 }
-
-iup.GetDialogChild(hMainLayout, "BottomBarSplit").flat_button_cb = function(h, button, pressed, x, y, status) if button == iup.BUTTON1 and iup.isdouble(status) then scite.MenuCommand(IDM_TOGGLEOUTPUT) end end
-
 
 menuhandler:DoPostponedInsert()
 
@@ -1083,7 +1140,8 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         end
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
     elseif cmd == "SHOW_OUTPUT" then
-        if (_G.iuprops['concolebar.win'] or '0')=='1' or (_G.iuprops['concolebar.autoshow'] or 0) == 0 then return end
+        if (_G.iuprops['concolebar.win'] or '0') == '1' or (_G.iuprops['concolebar.autoshow'] or 0) == 0 then return end
+        if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='0' and CORE.BottomBarHidden() then scite.MenuCommand(IDM_TOGGLEOUTPUT) return end
         if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='2' and _G.dialogs['concolebar'] then _G.dialogs['concolebar'].Switch(); return end
         if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
     elseif cmd == "FULLSCREEN_ON" then

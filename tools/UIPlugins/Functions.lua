@@ -603,7 +603,7 @@ local function Func_Init(h)
         currentLine = -1
         curSelect = -1
         _OnUpdateUI()
-        iup.PassFocus()
+        --iup.PassFocus()
     end
 
     local function Functions_ToggleGroup()
@@ -837,6 +837,7 @@ local function Func_Init(h)
 
     tree_func.executeleaf_cb = function(h, id)
         Functions_GotoLine()
+        if iup.GetGlobal("SHIFTKEY") == "ON" then CORE.ScipHidePannel(2) end
         scite.RunAsync(iup.PassFocus)
     end
 

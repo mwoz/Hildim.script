@@ -310,7 +310,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker, 
 
             findres:SetSel(0, 0)
             findres.CurrentPos = 1
-            if findres.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
+            if findres.LinesOnScreen == 0 or CORE.BottomBarHidden() then scite.MenuCommand(IDM_TOGGLEOUTPUT)  end
 
             return wCount, lCount
         end

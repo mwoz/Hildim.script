@@ -209,6 +209,7 @@ end
 local function PassFocus_local()
     -- if Ctrl("chkPassFocus").value == 'ON' or (_G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1') then
     if Ctrl("chkPassFocus").value == 'ON' then
+        if _G.iuprops['findrepl.win'] == '0' then CORE.ScipHidePannel() end
         iup.PassFocus()
     end
 end
@@ -496,9 +497,10 @@ local function ActivateFind_l(nTab)
     s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
-    if _G.dialogs['findrepl'] then
-        if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and
-            ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 1000) and _G.iuprops['findrepl.win'] == '2' then
+    if CORE.BottomBarHidden()then
+        scite.MenuCommand(IDM_TOGGLEOUTPUT)
+    elseif _G.dialogs['findrepl'] then
+        if (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 1000) and _G.iuprops['findrepl.win'] == '2') then
             scite.MenuCommand(IDM_TOGGLEOUTPUT)
         else
             _G.dialogs['findrepl'].ShowDialog()

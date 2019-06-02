@@ -55,7 +55,7 @@ local function FindSelToConcoleL(id, ed, edfrom)
     findSettings.wholeWord = false
     if (sText == '') then
         sText = GetCurrentWord(edfrom or editor)
-        findSettings.wholeWord= true
+        findSettings.wholeWord = true
     end
 
     findSettings.findWhat = sText
@@ -63,7 +63,6 @@ local function FindSelToConcoleL(id, ed, edfrom)
     findSettings.unicMode = uMod
     findSettings.path = scite.buffers.NameAt(id)
     CORE.FindMarkAll(findSettings, 100, false, true)
-
 end
 
 CORE.FindSelToConcole = function()
@@ -167,17 +166,18 @@ CORE.FindNextWrd = function(ud)
 end
 
 AddEventHandler("OnClick", function(shift, ctrl, alt)
-    if --[[editor.Focus and]] not shift and ctrl and alt then
-        if not shift then
-            local id = scite.buffers.GetCurrent()
-            if editor.Focus then FindSelToConcoleL(id, editor, editor)
-            elseif findres.Focus then FindSelToConcoleL(id, editor, findres)
-            elseif output.Focus then FindSelToConcoleL(id, editor, output)
+        if --[[editor.Focus and]] not shift and ctrl and alt then
+            if not shift then
+                local id = scite.buffers.GetCurrent()
+                if editor.Focus then FindSelToConcoleL(id, editor, editor)
+                elseif findres.Focus then FindSelToConcoleL(id, editor, findres)
+                elseif output.Focus then FindSelToConcoleL(id, editor, output)
+                end
+            elseif scite.buffers.SecondEditorActive() == 1 and scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 0 then
+                CORE.FindCoSelToConcole()
             end
-        elseif scite.buffers.SecondEditorActive() == 1 and scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 0 then
-            CORE.FindCoSelToConcole()
+            CORE.ScipHidePannel()
         end
-    end
 end)
 
 CORE.OpenFoundFiles = function(msg)
@@ -253,6 +253,7 @@ function CORE.FindresClickPos(curpos)
     local style = findres.StyleAt[curpos]
     local lineNum = findres:LineFromPosition(curpos)
     local function perfGo(s, p, strI)
+        if iup.GetGlobal("SHIFTKEY") == "ON" then CORE.ScipHidePannel(2) end
         OnNavigation("Go")
         s = s:to_utf8()
         if s ~= props['FilePath'] then scite.Open(s) end

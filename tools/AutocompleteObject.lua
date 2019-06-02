@@ -286,7 +286,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
 
         local wch = editor.WordChars
         editor.WordChars = wch..'.:'
-        editor:SetSel(editor:WordStartPosition(editor.CurrentPos,true), editor:WordEndPosition(editor.CurrentPos,true))
+        editor:SetSel(editor:WordEndPosition(editor.CurrentPos,true), editor:WordStartPosition(editor.CurrentPos,true))
         editor.WordChars = wch
         editor:UserListShow(constListIdXmlPar, l)
         SetListVisibility(true)
@@ -335,7 +335,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
             ulFromCT_data = list
             local wch = editor.WordChars
             editor.WordChars = wch..'.:'
-            editor:SetSel(editor:WordStartPosition(editor.CurrentPos, true), editor:WordEndPosition(editor.CurrentPos, true))
+            editor:SetSel(editor:WordEndPosition(editor.CurrentPos, true), editor:WordStartPosition(editor.CurrentPos, true))
             editor.WordChars = wch
             scite.RunAsync(function()
                 if #ulFromCT_data > 0 and not CUR_POS.use then
@@ -1540,7 +1540,7 @@ local function OnDwellStart_local(pos, word)
             HideCallTip()
             CUR_POS.bymouse = nil
         end
-    else
+    elseif iup.GetGlobal('CONTROLKEY') == 'OFF' then
         CUR_POS:Use(pos + 1)
         CUR_POS.dwell = true
         local p = editor:WordEndPosition(pos) + 1

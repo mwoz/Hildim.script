@@ -5,6 +5,7 @@ local function InitWndDialog()
     local fillWindow
     local dlg
     local text = props['CurrentSelection']
+    local active = -1
 
     local sX, sY, bMoved, bRecurs
     local function button_cb(h, button, pressed, x, y, status)
@@ -87,6 +88,7 @@ local function InitWndDialog()
         list_windows.fgcolor = Iif((tonumber(props['tabctrl.colorized']) or 0) == 1, props['tabctrl.forecolor'], props['layout.txtfgcolor'])
         list_windows['fgcolor0:*'] = iup.GetLayout().txtfgcolor
         iup.SetAttribute(list_windows, "ADDLIN", "1-"..#t)
+        active = -1
         for i = 1,  #t do
             list_windows:setcell(i, 2, Iif(t[i].side == 0, _T"Main", _T"Additional"))
             list_windows:setcell(i, 3, t[i].name)
@@ -98,6 +100,7 @@ local function InitWndDialog()
                 if t[i].active then
                     iup.SetAttribute(list_windows, "BGCOLOR"..i..":1", props['layout.txtbgcolor'])
                     iup.SetAttribute(list_windows, "FGCOLOR"..i..":1", props['layout.txtfgcolor'])
+                    active = i
                 end
             end
         end
@@ -197,7 +200,10 @@ local function InitWndDialog()
         local _, _, w, h = h.rastersize:find('(%d*)x(%d*)')
         local _, _, w2, _ = dlg.rastersize:find('(%d*)x(%d*)')
         blockClose = true;
-        scite.RunAsync(function() iup.ShowXY(dlg, x + w - w2, y + h) end) --
+        scite.RunAsync(function()
+            iup.ShowXY(dlg, x + w - w2, y + h)
+            if active ~= -1 then iup.SetAttribute(list_windows, 'SHOW', active..":1"); active = -1 end
+        end) --
     end
     local function createDlg()
         local function MoveSet()
