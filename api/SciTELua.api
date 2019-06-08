@@ -308,6 +308,7 @@ editor:match
 editor:append
 editor:insert
 editor:remove
+editor:line
 
 textrange (startPos, endPos)\n gets the text in the specified range
 findtext (text, [flags], [startPos, [endPos]])\n returns the start and end of the first match, or nil if no match

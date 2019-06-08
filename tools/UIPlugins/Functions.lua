@@ -789,6 +789,7 @@ local function Func_Init(h)
     tree_func.size = nil
 
     tree_func.rightclick_cb = function(_, id)
+        CORE.ScipHidePannel()
         menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
         iup.SetAttributeId(tree_func, "MARKED", id, "YES")
     end
@@ -915,7 +916,7 @@ local function Func_Init(h)
         end
     end
 
-    local bgbox = iup.backgroundbox{iup.vbox{expd, iup.flatscrollbox{tree_func, border = 'NO'}}};
+    local bgbox = iup.scrollbox{iup.vbox{expd, iup.flatscrollbox{tree_func, border = 'NO'}}, scrollbar = 'NO', expand = "YES"};;
     return {   -- iup.vbox{   };
 
         handle = bgbox;

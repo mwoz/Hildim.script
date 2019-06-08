@@ -679,6 +679,7 @@ local function FileManTab_Init(h)
             end
             return - 1
         elseif iup.isbutton3(status) then
+            CORE.ScipHidePannel()
             h.focus_cell = lin..':'..col
             menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Fileman_sidebar')
         end
@@ -741,6 +742,7 @@ local function FileManTab_Init(h)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Favorites_OpenFile()
         elseif iup.isbutton3(status) then
+            CORE.ScipHidePannel()
             h.focus_cell = lin..':'..col
             iup.SetAttribute(list_dir, 'MARK'..col..':0', 1)
             menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Favorites_sidebar')

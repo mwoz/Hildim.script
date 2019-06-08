@@ -54,8 +54,12 @@ local function Init(h)
             lblCode.title = UpdateStatusCodePage(cmd)
         end
     end)
-
-    lblCode = iup.label{size = '50x'}
+    local function button_cb(_, but, pressed, x, y, status)
+        if but == iup.BUTTON1 and pressed == 1 then
+            CORE.BottomBarSwitch(Iif(iup.GetAttribute(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit"), "HIDDEN") == "YES", 'NO', "YES"))
+        end
+    end
+    lblCode = iup.label{size = '50x', button_cb = button_cb}
 
     return {
         handle = lblCode

@@ -509,7 +509,6 @@ local function GetObjectNamesXml()
     repeat
         local _s, _e, s, p = string.find(strLine, ".*<([%w:_]*)([^>]*)$") --".*<([%w]+)")
         if _s ~= nil and s ~= '' then
-
             table.insert(names,{s, s, '', ''})
             strLine = editor:textrange(editor:PositionFromLine(af_current_line - i), editor:PositionFromLine(af_current_line + 1) - 2)
             local _s, _e, s1 = string.find(strLine, ' type="([%w&]+)"')
@@ -524,7 +523,7 @@ local function GetObjectNamesXml()
             --table.insert(names,{"noobj", '', '', ''})
         --end
         i = i + 1
-        strLine = editor:textrange(editor:PositionFromLine(af_current_line - i), editor:PositionFromLine(af_current_line - i + 1) - 2)
+        strLine = editor:line(af_current_line - i)
     until af_current_line - i == 0
     return names
 end

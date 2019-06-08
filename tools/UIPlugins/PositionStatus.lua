@@ -44,13 +44,19 @@ local function Init(h)
     k_any =(function(_, c) if c == iup.K_CR then iup.PassFocus() end end)}
     txtSel = iup.text{size = '25x'; readonly = 'YES', bgcolor = iup.GetLayout().bgcolor, canfocus = "NO", border = "NO"}
 
+    local function button_cb(_, but, pressed, x, y, status)
+        if but == iup.BUTTON1 and pressed == 1 then
+            CORE.BottomBarSwitch(Iif(iup.GetAttribute(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit"), "HIDDEN") == "YES", 'NO', "YES"))
+        end
+    end
+
     return {
         handle = iup.hbox{
-            iup.label{title = _T'Line: '; fontstyle = 'Bold'};
+            iup.label{title = _T'Line: '; fontstyle = 'Bold', button_cb = button_cb};
             txtLine;
-            iup.label{title = _T'Column: '; fontstyle = 'Bold'};
+            iup.label{title = _T'Column: '; fontstyle = 'Bold', button_cb = button_cb};
             txtCol;
-            iup.label{title = _T'Selection: '; fontstyle = 'Bold'};
+            iup.label{title = _T'Selection: '; fontstyle = 'Bold', button_cb = button_cb};
             txtSel; alignment = 'ACENTER', gap = '8';
         };
     }

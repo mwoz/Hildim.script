@@ -1321,7 +1321,9 @@ iup.scitedetachbox = function(t)
     if t[1] then
         local vb = t[1]
         table.remove(t)
-        table.insert(t, iup.vbox{hbTitle, vb, fontsize=iup.GetGlobal("DEFAULTFONTSIZE"),})
+        --table.insert(t, iup.vbox{hbTitle, vb, fontsize=iup.GetGlobal("DEFAULTFONTSIZE"),})
+
+        table.insert(t, iup.vbox{iup.scrollbox{hbTitle, scrollbar = 'NO', expand = "HORIZONTAL", visible='NO'}, vb, fontsize = iup.GetGlobal("DEFAULTFONTSIZE"),})
     else
         local pVbx = iup.GetDialogChild(t.HANDLE, t.sciteid..'_vbox')
         local exOld = iup.GetDialogChild(pVbx, t.sciteid..'_expander')
@@ -1371,6 +1373,8 @@ iup.scitedetachbox = function(t)
 
         _G.iuprops[dtb.sciteid..'.win'] = Iif(bShow, '1', '2')
         hbTitle.state = 'OPEN'
+        iup.GetParent(hbTitle).visible = "YES"
+        iup.GetParent(hbTitle).size = hbTitle.size
         dtb.Dialog.rastersize = _G.iuprops['dialogs.'..dtb.sciteid..'.rastersize']
 
         if t.Split_h then
@@ -1488,6 +1492,8 @@ iup.scitedetachbox = function(t)
             end
 
             hbTitle.state = 'CLOSE'
+            iup.GetParent(hbTitle).size = "x0"
+            iup.GetParent(hbTitle).visible = "NO"
             dtb.visible = 'YES'
 
             dtb.restore = nil
@@ -1588,7 +1594,12 @@ iup.scitedetachbox = function(t)
 
     local function cmd_Switch()
         if (_G.iuprops[t.sciteid..'.win'] or "0") == "0" and (t.sciteid == 'findrepl' or t.sciteid == 'concolebar' or t.sciteid == 'findresbar') and iup.GetAttribute(iup.GetLayout("BottomBarSplit"), 'POPUPSIDE') ~= '0' then
-            CORE.BottomBarSwitch('NO')
+            if t.sciteid == 'findrepl' and _Plugins.findrepl.Bar_obj then
+                local s = _Plugins.findrepl.Bar_obj.handle.Split_h()
+                if s then iup.SetAttribute(s, "HIDDEN", "NO") end
+            else
+                CORE.BottomBarSwitch('NO')
+            end
         elseif (_G.iuprops[t.sciteid..'.win'] or "0") ~= "2" then
             cmd_Hide()
         elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "1" then
@@ -2099,29 +2110,34 @@ function Splash_Screen()
     local _, _, x2, y2 = iup.GetGlobal('SCREENSIZE'):find('(%d*)x(%d*)')
     dlg_SPLASH:showxy(tonumber(x2)/2 - 100,tonumber(y2)/2 - 100)
 end
+function CORE.WinFromId(wid)
+    if wid == IDM_SRCWIN then return editor
+    elseif wid == IDM_COSRCWIN then return coeditor
+    elseif wid == IDM_RUNWIN then return output
+    elseif wid == IDM_FINDRESWIN then return findres end
+    print("CORE.WinFromId: '"..wid.."' not found")
+end
 
-AddEventHandler("OnMarginClick", function(margin, modif, line)
-    if margin == 2 and editor.Focus then
-        local curLevel = editor.FoldLevel[line]
-        if (curLevel & SC_FOLDLEVELHEADERFLAG) == 0 then
-            if modif == 0 then return end
-            line = editor.FoldParent[line]
-            curLevel = editor.FoldLevel[line]
-        end
-        if modif > 3 then line = editor.FoldParent[line]; modif = modif - 4 end
-        if modif == 0 then
-            if line == -1 then scite.MenuCommand(IDM_TOGGLE_FOLDALL)
-            else editor:ToggleFold(line) end
-        elseif modif == 1 then
-            CORE.ToggleSubfolders(false, line + 1)
+AddEventHandler("OnMarginClick", function(margin, modif, line, wid)
+    local e = CORE.WinFromId(wid)
+    if margin == 2 and e.Focus then
+        if modif > 3 then line = e.FoldParent[line]; modif = modif - 4 end
+        local curLevel = e.FoldLevel[line]
+        if (curLevel & SC_FOLDLEVELHEADERFLAG) ~= 0 then
+            if modif == 0 then
+                if line == -1 then CORE.ToggleSubfolders(nil, -1, e)
+                else e:ToggleFold(line) end
+            elseif modif == 1 then
+                CORE.ToggleSubfolders(false, line, e)
+            elseif modif == 2 then
+                e:ToggleFold(line)
+                CORE.ToggleSubfolders(false, line, e, 100, Iif( e.FoldExpanded[line], 1, 0))
+            elseif modif == 3 then
+                CORE.ToggleSubfolders(nil, -1, e)
+            end
+            CORE.ShowCaretAfterFold()
             return "Y"
-        elseif modif == 2 then
-            editor:FoldChildren(line, 2)
-        elseif modif == 3 then
-            scite.MenuCommand(IDM_TOGGLE_FOLDALL)
         end
-        CORE.ShowCaretAfterFold()
-        return "Y"
     end
 end)
 

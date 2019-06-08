@@ -242,7 +242,7 @@ local function CreateBox()
         elseif t.type == "FIND" then
             SideBar_Plugins.findrepl.Bar_obj = pane_curObj
             table.insert(sb_elements, SideBar_Plugins.findrepl)
-            l = iup.backgroundbox{iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name = 'FinReplScroll', expand = "HORIZONTAL", scrollbar = 'NO', size = 'x118'}, barsize = '0', name = "FinReplExp"}}
+            l = iup.backgroundbox{iup.expander{iup.scrollbox{SideBar_Plugins.findrepl.handle, name = 'FinReplScroll', expand = "HORIZONTAL", scrollbar = 'NO', size = '0x118'}, barsize = '0', name = "FinReplExp"}}
         elseif t.type == nil then
             l = t[1]
         else print('Unsupported type:'..t.type) end
@@ -314,7 +314,7 @@ local function CreateBox()
 
         spl_h.valuechanged_cb = function(h) if OnResizeSideBar and tmr_Resize.run == 'NO' then tmr_Resize.run = 'YES' end end;
         local h = iup.scitedetachbox{
-            hVbox; orientation = "HORIZONTAL";barsize = 5;minsize = "100x100";name = sName; shrink = "yes"; buttonImage = buttonImage;
+            hVbox; orientation = "HORIZONTAL";barsize = 5;--[[minsize = "1x100";]]name = sName; shrink = "yes"; buttonImage = buttonImage;
             sciteid = sSciteId;Split_h = spl_h;Split_CloseVal = sSplit_CloseVal;
             Dlg_Title = _TH(sSide.." Side Bar"); Dlg_Show_Cb = nil;
             On_Detach = (function(h, hNew, x, y)
@@ -437,11 +437,13 @@ local function CreateBox()
                     end
 
                     table.insert(tArg, tSub)
+                    -- table.insert(tArg, iup.scrollbox{tSub, scrollbar = 'NO', expand = "YES"})
 
                 end
                 ::continue::
             end
         end
+        -- debug_prnArgs(tArg)
         return tArg
     end
     hk_pointer = 1
@@ -683,7 +685,11 @@ local function InitTabbar()
             elseif tonumber(SSM.value) < 1 then SSM.value = "1" end
         end
         if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' and ((_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0) then
-            TBS.value = ''..math.floor(tonumber(SSL.value) + (tonumber(SSM.value) / 1000) * (tonumber(SSR.value) / 1000) * (1000 - tonumber(SSL.value)))
+            local vSSR = 999
+            if iup.GetAttribute(SSR, "POUPSIDE") == "0" then vSSR = tonumber(SSR.value) end
+            local vSSL = 1
+            if iup.GetAttribute(SSL, "POUPSIDE") == "0" then vSSL = tonumber(SSL.value) end
+            TBS.value = ''..math.floor(vSSL + (tonumber(SSM.value) / 1000) * (vSSR / 1000) * (1000 - vSSL))
         end
     end
     local vc_SSL = SSL.valuechanged_cb
@@ -711,6 +717,7 @@ local function InitTabbar()
             iup.Update(h)
             if (tabDrag > -1 and tab == -4) or (hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' )) then
                 scite.MenuCommand(IDM_CHANGETAB)
+                iup.RefreshChildren(iup.GetDialogChild(iup.GetLayout(), 'SourceSplitBtm'))
             end
         elseif (button == iup.BUTTON1 and iup.isdouble(status) and not CORE.visibleWndDialog() ) or (button == iup.BUTTON2 and pressed == 0 ) then
             local dblFlag = (tonumber(props['tabbar.tab.close.on.doubleclick']) or 0)
@@ -825,7 +832,7 @@ function CORE.RemapCoeditor()
     hPrOld.barsize = '0'
     hPrOld.value = '1000'
 
-    hPr.flat_button_cb = hPrOld.flat_button_cb
+    if hPrOld.flat_button_cb then hPr.flat_button_cb = hPrOld.flat_button_cb end
 
     iup.RefreshChildren(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
     _G.iuprops['dialogs.coeditor.splithorizontal'] = Iif(bIsH, 0, 1)

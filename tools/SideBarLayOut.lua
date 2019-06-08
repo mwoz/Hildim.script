@@ -138,8 +138,11 @@ local function Show()
                     iup.SetAttributeId(h, 'DELNODE', idSrc, 'SELECTED')
                 else
                     local pPlase = CheckInstall(h:GetUserId(idSrc), false)
+                    if not(iup.GetAttributeId(hTarget, "KIND", 1)) then
+                        iup.SetAttributeId(hTarget, "ADDBRANCH", 0, "<New Tab>")
+                        idTarget = 1
+                    end
                     if idTarget == 0 and iup.GetAttributeId(hTarget, "KIND", 1) == 'BRANCH' then return end
-
                     iup.SetAttributeId(hTarget, "ADDLEAF", idTarget, iup.GetAttributeId(h, 'TITLE', idSrc))
                     hTarget:SetUserId(hTarget.lastaddnode, h:GetUserId(idSrc))
                     if pPlase and h == tree_plugins then
@@ -167,7 +170,6 @@ local function Show()
 
     local function dragdrop_cb(h, drag_id, drop_id, isshift, iscontrol)
         if iscontrol == 1 or h == tree_plugins or (drop_id == 0 and iup.GetAttributeId(h, 'KIND', drag_id) == 'LEAF') then return - 1 end
-
         if iup.GetAttributeId(h, 'KIND', drag_id) == 'BRANCH' then
             local iDelta = 0; mDelta = 0
             local dragCount = tonumber(iup.GetAttributeId(h, 'CHILDCOUNT', drag_id))
@@ -212,7 +214,7 @@ local function Show()
         iup.hbox{btn_ok, iup.fill{}, btn_esc},
     expandchildren = 'YES', gap = 2, margin = "4x4"}
     dlg = iup.scitedialog{vbox; title = _T"Sidebars Settings", defaultenter = "SIDEBARSETT_BTN_OK", defaultesc = "SIDEBARSETT_BTN_ESC", tabsize =editor.TabWidth,
-    maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "sidebarlayout", minsize = '800x400', helpbutton = 'YES'}
+    maxbox = "NO", minbox = "NO", resize = "YES", shrink = "YES", sciteparent = "SCITE", sciteid = "sidebarlayout", minsize = '800x400'}
 
 
     dlg.show_cb =(function(h, state)

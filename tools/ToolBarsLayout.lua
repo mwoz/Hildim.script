@@ -1,7 +1,6 @@
 --[[Диалог редактирования горячих клавиш]]
 local tblView = {}, tblUsers
 local defpath = props["SciteDefaultHome"].."\\tools\\UIPlugins\\"
-
 local function Show()
 
     local list_lex, dlg, bBlockReset, tree_right, tree_plugins
@@ -135,6 +134,10 @@ local function Show()
                 else
                     local pPlase = CheckInstall(h:GetUserId(idSrc), false)
 
+                    if not(iup.GetAttributeId(hTarget, "KIND", 1)) then
+                        iup.SetAttributeId(hTarget, "ADDBRANCH", 0, "<Bar>")
+                        idTarget = 1
+                    end
                     if idTarget == 0 and iup.GetAttributeId(hTarget, "KIND", 1) == 'BRANCH' then return end
                     local capt = iup.GetAttributeId(h, 'TITLE', idSrc)
 

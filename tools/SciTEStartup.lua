@@ -147,6 +147,8 @@ scite.RunAsync(function()
         scite.EnsureVisible()
         if (_G.iuprops['settings.bottombar.autohide'] or 0) == 1 then
             iup.SetAttribute(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit"), "POPUPSIDE", "2")
+            iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "YES"
+            iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "YES"
             scite.RunAsync(function() CORE.BottomBarSwitch("YES") end)
         end
         iup.Refresh(iup.GetLayout())

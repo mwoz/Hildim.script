@@ -156,7 +156,7 @@ end
 local function CanToggle()
     local lStart = editor:LineFromPosition(editor.SelectionStart)
     local baseLevel = (editor.FoldLevel[lStart] & SC_FOLDLEVELNUMBERMASK)
-    return (baseLevel > SC_FOLDLEVELBASE and (baseLevel & SC_FOLDLEVELHEADERFLAG) == 0)
+    return (baseLevel >= SC_FOLDLEVELBASE and (editor.FoldLevel[lStart] & SC_FOLDLEVELHEADERFLAG) ~= 0)
 end
 
 function CORE.switch_bottombar()
@@ -164,11 +164,15 @@ function CORE.switch_bottombar()
     if iup.GetAttribute(bsplit, "POPUPSIDE") == '0' then
         _G.iuprops['settings.bottombar.autohide'] = 1
         iup.SetAttribute(bsplit, "POPUPSIDE", "2")
+        iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "YES"
+        iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "YES"
         CORE.BottomBarSwitch("NO")
     else
         _G.iuprops['settings.bottombar.autohide'] = 0
         CORE.BottomBarSwitch("NO")
         iup.SetAttribute(bsplit, "POPUPSIDE", "0")
+        iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "NO"
+        iup.GetDialogChild(iup.GetLayout(), "BottomSplit3").layoutdrag = "NO"
     end
 end
 
@@ -267,11 +271,11 @@ _G.sys_Menus.FINDRES = {title = _TM"Find Results Context Menu",
 }
 
 _G.sys_Menus.EDITMARGIN = {title = _TM"Editor Margin Context Menu",
-    {'Toggle &all folds', action = IDM_TOGGLE_FOLDALL},
+    {'Toggle &all folds', action = "CORE.ToggleSubfolders(nil, -1, editor)"},
     {'Toggle &current fold', action = IDM_EXPAND, active = CanToggle},
-    {'Toggle &Recursively current fold', action = IDM_TOGGLE_FOLDRECURSIVE, active = CanToggle},
-    {'&Collapse...', key = 'Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false)"},
-    {'&Expand...', key = 'Ctrl+Shift++', action = "CORE.ToggleSubfolders(true)"},
+    {'Toggle &Recursively current fold', action = function() local l = editor:LineFromPosition(editor.SelectionStart); editor:ToggleFold(l); CORE.ToggleSubfolders(nil, l, editor, 100, Iif( editor.FoldExpanded[l], 1, 0)) end, active = CanToggle},
+    {'&Collapse Subfolders', key = 'Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false, nil, editor)"},
+    {'&Expand Subfolders', key = 'Ctrl+Shift++', action = "CORE.ToggleSubfolders(true, nil, editor)"},
     {'s1', separator = 1},
     {'Next &Bookmark', key = 'F2', action = IDM_BOOKMARK_NEXT, image = 'bookmark__arrow_µ'},
     {'Previous Boo&kmark', key = 'Shift+F2', action = IDM_BOOKMARK_PREV, image = 'bookmark__arrow_left_µ'},

@@ -419,7 +419,7 @@ local function Init()
         editor:LineScroll(1, fLine)
         editor:GotoLine(prLine)
         bNeedList = true
-        if CORE.BottomBarHidden() then print(333); CORE.BottomBarSwitch('NO') end
+        if CORE.BottomBarHidden() then CORE.BottomBarSwitch('NO') end
     end
 
     local function ListErrors()

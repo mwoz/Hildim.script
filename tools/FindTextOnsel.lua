@@ -73,30 +73,40 @@ CORE.FindCoSelToConcole = function()
     FindSelToConcoleL(scite.buffers.BufferByName(scite.buffers.CoName()), coeditor)
 end
 
-CORE.ToggleSubfolders = function(bShow, line)
-    local action
-    if not line then action = Iif(bShow, 1, 0) end
-    local lStart = line or editor:LineFromPosition(editor.SelectionStart)
-    local baseLevel = (editor.FoldLevel[lStart] & SC_FOLDLEVELNUMBERMASK)
-    if baseLevel > SC_FOLDLEVELBASE and (baseLevel & SC_FOLDLEVELHEADERFLAG) == 0 then
-        lStart = editor.FoldParent[lStart]
+CORE.ToggleSubfolders = function(bShow, line, e, maxlevel, action)
+    if not e then
+        if output.Focus then e = output
+        elseif findres.Focus then e = findres
+        else e = editor end
     end
-    local lEnd = editor:GetLastChild(lStart, -1)
-    if lStart == -1 then lEnd = editor.LineCount end
+    -- print(line, maxlevel, action)
+    maxlevel = maxlevel or 0
+    if not line and not action then action = Iif(bShow, 1, 0) end
+    local lStart = line or e:LineFromPosition(e.SelectionStart)
+    lStart = lStart + 1
+    local baseLevel = (e.FoldLevel[lStart] & SC_FOLDLEVELNUMBERMASK)
+    if baseLevel > SC_FOLDLEVELBASE and (baseLevel & SC_FOLDLEVELHEADERFLAG) == 0 then
+        lStart = e.FoldParent[lStart]
+    end
+    local lEnd = e:GetLastChild(lStart, -1)
+    if lStart == -1 then lEnd = e.LineCount end
 
     local bAct = false
     for l = lStart + 1, lEnd do
-        local level = editor.FoldLevel[l]
+        local level = e.FoldLevel[l]
         if ((level & SC_FOLDLEVELHEADERFLAG)~= 0 and baseLevel == (level & SC_FOLDLEVELNUMBERMASK)) then
-            if not action then action = Iif(editor.FoldExpanded[l], 0, 1) end
-            editor:FoldLine(l, action)
+            if not action then action = Iif(e.FoldExpanded[l], 0, 1) end
+            e:FoldLine(l, action)
             bAct = true
+            if maxlevel > 0 then
+                CORE.ToggleSubfolders(bShow, l + 1, e, maxlevel - 1, action)
+            end
         end
     end
     if not bAct then
-        local l = editor.FoldParent[lStart]
-        if not action then action = Iif(editor.FoldExpanded[l], 0, 1) end
-        editor:FoldLine(l, action)
+        local l = e.FoldParent[lStart]
+        if not action then action = Iif(e.FoldExpanded[l], 0, 1) end
+        e:FoldLine(l, action)
     end
     CORE.ShowCaretAfterFold()
 end
@@ -189,7 +199,7 @@ CORE.OpenFoundFiles = function(msg)
                 local style = findres.StyleAt[findres:PositionFromLine(lineNum) + 1]
                 if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
                 elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                    local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1)
+                    local s = findres:line(lineNum):gsub('^ ', '')
                     table.insert(t,s)
                 end
                 lineNum = lineNum + 1
@@ -224,8 +234,7 @@ CORE.OpenFoundFiles = function(msg)
                 local style = findres.StyleAt[findres:PositionFromLine(lineNum) + 1]
                 if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
                 elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                    local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1)
-                    scite.Open(s)
+                    scite.Open(findres:line(lineNum):gsub('^ ', ''))
                 end
                 lineNum = lineNum + 1
             end
@@ -284,7 +293,7 @@ function CORE.FindresClickPos(curpos)
     end
 
     if style == SCE_SEARCHRESULT_FILE_HEADER then
-        local s = findres:textrange(findres:PositionFromLine(lineNum) + 1, findres:PositionFromLine(lineNum + 1) -1):to_utf8()
+        local s = findres:line(lineNum):gsub('^ ', ''):to_utf8()
         if s ~= props['FilePath'] then
             OnNavigation("Go")
             scite.Open(s)
@@ -305,7 +314,7 @@ function CORE.FindresClickPos(curpos)
             if style == SCE_SEARCHRESULT_SEARCH_HEADER then
                 if not exPath then break end
                 if not lHeadPath then
-                    lHeadPath = findres:textrange(findres:PositionFromLine(i), findres:PositionFromLine(i +1) -2)
+                    lHeadPath = findres:line(i)
                     _, _, lHeadPath = lHeadPath:find(' in "([^"]+)')
                     if not lHeadPath:find('\\') then lHeadPath = props['FileDir']..'\\'..lHeadPath end
                     if exPath ~= '' then _,_,lHeadPath = lHeadPath:find('(.-)[^\\]+$') end
@@ -314,8 +323,7 @@ function CORE.FindresClickPos(curpos)
                 perfGo(lHeadPath, p, GetFindTxt(lS, lE))
                 break
             elseif style == SCE_SEARCHRESULT_FILE_HEADER then
-                local s = findres:textrange(findres:PositionFromLine(i) + 1, findres:PositionFromLine(i + 1) -1)
-                perfGo(s, p, GetFindTxt(lS, lE))
+                perfGo(findres:line(i):gsub('^ ', ''), p, GetFindTxt(lS, lE))
                 break
             end
         end

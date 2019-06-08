@@ -268,10 +268,12 @@ local function Solution_Init(h)
 
         if but == 51 and pressed == 0 then --right
             h.value = iup.ConvertXYToPos(h, x, y)
+            CORE.ScipHidePannel()
             menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Solution_sidebar')
 
         elseif but == 49 and iup.isdouble(status) then --dbl left
             if h.kind ~= 'BRANCH' then
+                if iup.GetGlobal("SHIFTKEY") == "ON" then CORE.ScipHidePannel() end
                 OpenFile(iup.TreeGetUserId(h, h.value))
                 iup.PassFocus()
             end
@@ -284,6 +286,7 @@ local function Solution_Init(h)
     tree_sol.k_any = (function(h, number)
         if number == 13 then
             OpenFile(iup.TreeGetUserId(h, h.value))
+            if iup.GetGlobal("SHIFTKEY") == "ON" then CORE.ScipHidePannel() end
             iup.PassFocus()
         elseif number == iup.K_ESC then
             iup.PassFocus()

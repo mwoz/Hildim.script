@@ -3,7 +3,7 @@ local containers
 local oDeattFnd
 local firstMark = tonumber(props["findtext.first.mark"])
 local popUpFind
-local _Plugins
+--local _Plugins
 
 local function fb_find(t)
   t.map_cb = function(h)h.bgcolor = props["layout.txtbgcolor"] end
@@ -250,6 +250,10 @@ local function FindSel(h)
     PostAction()
 end
 
+local function CheckBottomBar()
+    if _G.iuprops['findrepl.win'] ~= '0' or _Plugins.findrepl.Bar_obj then CORE.BottomBarSwitch('NO') end
+end
+
 local function FindAll(h)
     if ReadSettings() then return end
     local count = findSettings:FindAll(nil, false)
@@ -257,6 +261,7 @@ local function FindAll(h)
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
     PostAction()
+    CheckBottomBar()
 end
 
 local function GetCount(h)
@@ -358,6 +363,7 @@ local function FindInFiles()
         Ctrl("progress").text = _T'Count...'
         Ctrl("zbProgress").valuepos = 1
     end
+    CheckBottomBar()
 end
 
 local function ReplaceInBuffers()
@@ -378,6 +384,7 @@ local function FindInBuffers()
     Ctrl("cmbFindWhat"):SaveHist()
     PassFocus_local()
     PostAction()
+    CheckBottomBar()
 end
 
 local function GoToMarkDown()
@@ -497,9 +504,7 @@ local function ActivateFind_l(nTab)
     s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
 
-    if CORE.BottomBarHidden()then
-        scite.MenuCommand(IDM_TOGGLEOUTPUT)
-    elseif _G.dialogs['findrepl'] then
+    if _G.dialogs['findrepl'] then
         if (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 1000) and _G.iuprops['findrepl.win'] == '2') then
             scite.MenuCommand(IDM_TOGGLEOUTPUT)
         else
@@ -509,11 +514,18 @@ local function ActivateFind_l(nTab)
         local tabCtrl = _Plugins.findrepl.Bar_obj.TabCtrl
         local ind
         for i = 0, tabCtrl.count - 1 do
-            if iup.GetAttributeId(tabCtrl, "TABTITLE", i) == _Plugins.findrepl.id  then ind = i; break end
+            if iup.GetAttributeId(tabCtrl, "TABTITLE", i) == _Plugins.findrepl.id then ind = i; break end
         end
 
         tabCtrl.valuepos = ind; _Plugins.functions.OnSwitchFile()
-        if _G.iuprops[_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '2' then _Plugins.findrepl.Bar_obj.handle.ShowDialog() end
+        if _G.iuprops[_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '2' then
+            _Plugins.findrepl.Bar_obj.handle.ShowDialog()
+        elseif _G.iuprops[_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '3' then
+            local s = _Plugins.findrepl.Bar_obj.handle.Split_h()
+            if s then iup.SetAttribute(s, "HIDDEN", "NO") end
+        end
+    else
+        scite.MenuCommand(IDM_TOGGLEOUTPUT)
     end
 
     if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart];  end

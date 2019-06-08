@@ -173,7 +173,7 @@ local function doIndentation(line, bSel)
                 return
             end
         end
-    elseif bSel and editor:textrange(editor:PositionFromLine(line), editor:PositionFromLine(line) + editor:LineLength(line)):find('^%s*}%s*$') then
+    elseif bSel and editor:line(line):find('^%s*}%s*$') then
         editor.LineIndentation[line] = editor.LineIndentation[line - dL]
         editor:NewLine()
         editor.LineIndentation[line] = editor.LineIndentation[line - dL] + (tonumber(props['indent.size$']))
