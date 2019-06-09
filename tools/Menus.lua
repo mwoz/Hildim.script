@@ -161,18 +161,18 @@ end
 
 function CORE.switch_bottombar()
     local bsplit = iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit")
-    if iup.GetAttribute(bsplit, "POPUPSIDE") == '0' then
+    if bsplit.popupside == "0" then
         _G.iuprops['settings.bottombar.autohide'] = 1
-        iup.SetAttribute(bsplit, "POPUPSIDE", "2")
+        bsplit.popupside = "2"
         iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "YES"
         iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "YES"
         CORE.BottomBarSwitch("NO")
     else
         _G.iuprops['settings.bottombar.autohide'] = 0
         CORE.BottomBarSwitch("NO")
-        iup.SetAttribute(bsplit, "POPUPSIDE", "0")
+        bsplit.popupside = "0"
         iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "NO"
-        iup.GetDialogChild(iup.GetLayout(), "BottomSplit3").layoutdrag = "NO"
+        iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "NO"
     end
 end
 
@@ -454,7 +454,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'T&ab Bar', action = function() local h = iup.GetDialogChild(iup.GetLayout(), "TabbarExpander"); if h.state == 'OPEN' then h.state = 'CLOSE' else h.state = 'OPEN' end end, check = function() return iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state == 'OPEN' end},
         {'BottomBar', plane = 1,{
             {'&Bottom Bar', key = 'F10', action = IDM_TOGGLEOUTPUT, check = function() return (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) ~= 0) end},
-            {'Bottom Bar A&utohide', action = CORE.switch_bottombar, check = function() return iup.GetAttribute(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit"), "POPUPSIDE") ~= '0' end},
+            {'Bottom Bar A&utohide', action = CORE.switch_bottombar, check = function() return iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").popupside ~= '0' end},
 		}},
         {'s2', separator = 1},
 		{'&White Space and TAB', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},

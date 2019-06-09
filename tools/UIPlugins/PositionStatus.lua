@@ -46,7 +46,7 @@ local function Init(h)
 
     local function button_cb(_, but, pressed, x, y, status)
         if but == iup.BUTTON1 and pressed == 1 then
-            CORE.BottomBarSwitch(Iif(iup.GetAttribute(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit"), "HIDDEN") == "YES", 'NO', "YES"))
+            CORE.BottomBarSwitch(Iif(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").hidden == "YES", 'NO', "YES"))
         end
     end
 

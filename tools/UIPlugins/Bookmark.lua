@@ -272,8 +272,9 @@ local function Tab_Init(h)
         end
     end)
     return {
-        handle = iup.backgroundbox{list_bookmarks, bgcolor = iup.GetLayout().txtbgcolor};
-        On_SelectMe = onselect
+        handle = iup.vbox{iup.backgroundbox{list_bookmarks, bgcolor = iup.GetLayout().txtbgcolor}};
+        On_SelectMe = onselect;
+        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(list_bookmarks) end) end;
         }
 end
 

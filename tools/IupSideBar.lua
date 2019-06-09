@@ -28,23 +28,21 @@ local function HidePannels()
         scipPannCounter = scipPannCounter - 1
         return
     end
-    if rightsplit and iup.GetAttribute(rightsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(rightsplit, 'HIDDEN') == 'NO' then
-        iup.SetAttribute(rightsplit, 'HIDDEN', 'YES')
-    end
-    if leftsplit and iup.GetAttribute(leftsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(leftsplit, 'HIDDEN') == 'NO' then
-        iup.SetAttribute(leftsplit, 'HIDDEN', 'YES')
-    end
-    if iup.GetAttribute(bottomsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(bottomsplit, 'HIDDEN') == 'NO' then CORE.BottomBarSwitch('YES')end
+    if rightsplit and rightsplit.popupside ~= '0' and rightsplit.hidden == 'NO' then rightsplit.hidden = 'YES' end
+
+    if leftsplit and leftsplit.popupside ~= '0' and leftsplit.hidden == 'NO' then leftsplit.hidden = 'YES' end
+
+    if bottomsplit.popupside ~= '0' and bottomsplit.hidden == 'NO' then CORE.BottomBarSwitch('YES')end
 end
 
 function CORE.ScipHidePannel(i)
-    if (iup.GetAttribute(bottomsplit, 'POPUPSIDE') ~= '0') then
+    if bottomsplit.popupside ~= '0' then
         scipPannCounter = (i or 1)
     end
 end
 
 function CORE.BottomBarHidden()
-    return (iup.GetAttribute(bottomsplit, 'POPUPSIDE') ~= '0' and iup.GetAttribute(bottomsplit, 'HIDDEN') == 'YES')
+    return (bottomsplit.popupside ~= '0' and bottomsplit.hidden == 'YES')
 end
 
 iup.PassFocus =(function()
@@ -219,6 +217,7 @@ local function CreateBox()
     -- Creates boxes
     local sb_elements = {}
     local tbl_hotkeys = {}
+    local strTip = _TH'Hotkeys for Tab Activation:'
     local function Pane(t)
         for i = 1, #t do
             if type(t[i]) == 'string' then
@@ -231,7 +230,7 @@ local function CreateBox()
             for i = 1, #sb_elements do sb_elements[i].id = t.tabtitle end
             sb_elements = {}
         end
-        local b
+        local b, l
         if t.type == "VBOX" then
             l = iup.vbox(t)
         elseif t.type == "SPLIT" then
@@ -247,12 +246,14 @@ local function CreateBox()
             l = t[1]
         else print('Unsupported type:'..t.type) end
         l.tabtitle = t.tabtitle
-        table.insert(tbl_hotkeys, t.tabhotkey or '')
+        if t.tabhotkey then
+            table.insert(tbl_hotkeys, t.tabhotkey or '')
+            strTip = strTip..'\n'..t.tabtitle..' - < '..t.tabhotkey..' > '
+        end
         return l
     end
 
     local hk_pointer
-    local strTip
     local function SideBar(t, Bar_Obj, sciteid, splitter)
         if not t then return end
         t.name = 'sidebartab_'..sciteid
@@ -264,9 +265,9 @@ local function CreateBox()
         t.tabchange_cb = (function(_, new_tab, old_tab)
             --сначала найдем активный таб и установим его в SideBar_ob
             for _, tbs in pairs(SideBar_Plugins) do
-                if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
                 if tbs.id == new_tab.tabtitle then
-                    if tbs["on_SelectMe"] then tbs.on_SelectMe() end
+                    if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
+                    --if tbs["on_SelectMe"] then tbs.on_SelectMe() end
                 end
             end
         end)
@@ -275,14 +276,6 @@ local function CreateBox()
         t.extraimage1 = "property_µ"
         t.extrapresscolor1 = props["layout.splittercolor"]
         t.extrabutton_cb = function(h, button, state) if state == 1 then menuhandler:PopUp('MainWindowMenu|View|'..sciteid) end end
-
-        local j = 1
-        if not strTip then
-            strTip = _TH'Hotkeys for Tab Activation:'
-            for i = hk_pointer,  #tbl_hotkeys do
-                strTip = strTip..'\n Tab'..(i - hk_pointer + 1)..' - <'..Iif(tbl_hotkeys[i] == '', '', tbl_hotkeys[i])..'>'
-            end
-        end
 
         hk_pointer =  #tbl_hotkeys + 1
         t.tip = strTip
@@ -296,8 +289,26 @@ local function CreateBox()
         t.tabsbackcolor = props["layout.splittercolor"]
         t.getfocus_cb = function(h)
             local s = iup.GetDialogChild(hMainLayout, splitter)
-            if iup.GetAttribute(s, 'POPUPSIDE') ~= 0 and iup.GetAttribute(s, 'HIDDEN') == 'YES' then
-                iup.SetAttribute(s, 'HIDDEN', 'NO')
+            if s.popupside ~= 0 and s.hidden == 'YES' then s.hidden = 'NO' end
+        end
+
+        t.flat_motion_cb = function(h, x, y, status)
+            if not t.tmr then
+                t.tmr = iup.timer{time = 150, action_cb = function(ht)
+                    ht.run = 'NO'
+                    local old_tab = h.value
+                    h.valuepos = t.pos
+                    h.tabchange_cb(h, h.value, old_tab)
+                end}
+            end
+            t.tmr.run = 'NO'
+            local s = iup.GetDialogChild(hMainLayout, splitter)
+            if s.popupside ~= 0 and s.hidden == 'NO' then
+                local pos = iup.ConvertXYToPos(h,x,y)
+                if pos >= 0 and pos..'' ~= h.valuepos then
+                    t.tmr.run = 'YES'
+                    t.pos = pos
+                end
             end
         end
         return iup.flattabs(t)
@@ -369,6 +380,7 @@ local function CreateBox()
         local tCur
 
         local tArg = {}
+        --debug_prnArgs{tSide}
         for i = 1, #tSide do
             tCur = tSide[i]
             if tCur[1] then
@@ -427,6 +439,7 @@ local function CreateBox()
                             tSub.type = "SPLIT"
                             tSub.orientation = "HORIZONTAL"
                         end
+                        bfixedheigth = pI.fixedheigth and bfixedheigth
                         if j == #tCur then
 
                             tSub.tabtitle = tabName
@@ -443,7 +456,7 @@ local function CreateBox()
                 ::continue::
             end
         end
-        -- debug_prnArgs(tArg)
+        --debug_prnArgs(tArg)
         return tArg
     end
     hk_pointer = 1

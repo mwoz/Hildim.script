@@ -435,7 +435,9 @@ local function Sidebar_Init(h)
         end
     end)
     return {
-        handle = iup.backgroundbox{lst_clip, bgcolor = iup.GetLayout().txtbgcolor}; }
+        handle = iup.vbox{iup.backgroundbox{lst_clip, expand='YES', bgcolor = iup.GetLayout().txtbgcolor}};
+        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(lst_clip) end) end;
+    }
 end
 
 local function createDlg()
@@ -528,7 +530,7 @@ local function Toolbar_Init(h)
     end
 
     return {
-        handle = box
+        handle = box;
     }
 end
 

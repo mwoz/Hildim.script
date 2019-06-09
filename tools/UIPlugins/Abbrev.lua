@@ -521,7 +521,7 @@ local function ToolBar_Init(h)
     showPopUp = function() fbutton:flat_action() end
     return {
         handle = box;
-        on_SelectMe = onselect
+        on_SelectMe = onselect;
         }
 end
 
@@ -540,8 +540,9 @@ local function Tab_Init(h)
         if h.atrium.Bar_obj.sciteid == sciteid then onResize_local() end
     end)
     return {
-        handle = iup.backgroundbox{list_abbrev, bgcolor = iup.GetLayout().txtbgcolor};
-        on_SelectMe = onselect
+        handle = iup.vbox{iup.backgroundbox{list_abbrev, bgcolor = iup.GetLayout().txtbgcolor}};
+        --on_SelectMe = onselect;
+        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(list_abbrev) end) end;
         }
 
 end
@@ -560,7 +561,7 @@ return {
     toolbar = ToolBar_Init,
     statusbar = ToolBar_Init,
     hidden = Hidden_Init,
-    tabhotkey = "Alt+Shift+A",
+    tabhotkey = "Alt+Shift+B",
     destroy = function() ABBREV = nil end,
     description = [[Список сокращений. По нажатию горячей клавиши
 перед курсором ищется сокращение из списка

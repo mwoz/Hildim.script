@@ -522,7 +522,7 @@ local function ActivateFind_l(nTab)
             _Plugins.findrepl.Bar_obj.handle.ShowDialog()
         elseif _G.iuprops[_Plugins.findrepl.Bar_obj.sciteid..'.win'] == '3' then
             local s = _Plugins.findrepl.Bar_obj.handle.Split_h()
-            if s then iup.SetAttribute(s, "HIDDEN", "NO") end
+            if s then s.hidden = "NO" end
         end
     else
         scite.MenuCommand(IDM_TOGGLEOUTPUT)

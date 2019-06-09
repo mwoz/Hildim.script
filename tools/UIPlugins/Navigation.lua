@@ -163,7 +163,8 @@ local function Tab_Init(h)
         end
     end)
     return {
-        handle = iup.backgroundbox{list_navigation, bgcolor = iup.GetLayout().txtbgcolor};
+        handle = iup.vbox{iup.backgroundbox{list_navigation, bgcolor = iup.GetLayout().txtbgcolor}};
+        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(list_navigation) end) end;
         }
 
 end

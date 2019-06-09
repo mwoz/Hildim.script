@@ -810,8 +810,8 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
         local hMainLayout = iup.GetLayout()
         local split = iup.GetDialogChild(hMainLayout, "BottomBarSplit")
         local bHidden = (tonumber(split.barsize) == 0)
-        if iup.GetAttribute(split, 'POPUPSIDE') ~= '0' then
-            if iup.GetAttribute(split, 'HIDDEN') == 'YES' then
+        if split.popupside ~= '0' then
+            if split.hidden == 'YES' then
                 CORE.BottomBarSwitch('NO')
             else
                 CORE.BottomBarSwitch('YES')
@@ -1229,7 +1229,7 @@ function CORE.BottomBarSwitch(cmd)
     --if cmd== 'YES' then print(debug.traceback()) end
     local hMainLayout = iup.GetLayout()
     local bottomsplit = iup.GetDialogChild(hMainLayout, "BottomBarSplit")
-    iup.SetAttribute(bottomsplit, 'HIDDEN', cmd)
+    bottomsplit.hidden = cmd
     if (_G.iuprops['findresbar.win'] or '0') == '0' then
         iup.GetDialogChild(hMainLayout, "barBtnfindresbar").visible = cmd
     end
@@ -1524,9 +1524,9 @@ iup.scitedetachbox = function(t)
         tab.tabspadding = '3x10'
         local _, _, w1 = tab.rastersize:find('x(%d+)')
         local _, _, w2 = iup.GetChild(tab, 0).rastersize:find('x(%d+)')
-        iup.SetAttribute(split, 'HIDDENGAP', w1 - w2)
-        iup.SetAttribute(split, 'POPUPSIDE', Iif(right, '2', '1'))
-        iup.SetAttribute(split, 'HIDDEN', 'YES')
+        split.hiddengap = w1 - w2
+        split.popupside = Iif(right, '2', '1')
+        split.hidden = 'YES'
         CORE.BottomBarSwitch('YES')
     end
 
@@ -1538,8 +1538,8 @@ iup.scitedetachbox = function(t)
         tab.tabstextorientation = 0
         tab.tabspadding = '10x3'
 
-        iup.SetAttribute(s, 'POPUPSIDE', '0')
-        iup.SetAttribute(s, 'HIDDEN', 'NO')
+        s.popupside = '0'
+        s.hidden = 'NO'
     end
 
     cmd_Attach = function ()
@@ -1593,21 +1593,24 @@ iup.scitedetachbox = function(t)
     dtb.cmdHide = function() cmd_Hide() end
 
     local function cmd_Switch()
-        if (_G.iuprops[t.sciteid..'.win'] or "0") == "0" and (t.sciteid == 'findrepl' or t.sciteid == 'concolebar' or t.sciteid == 'findresbar') and iup.GetAttribute(iup.GetLayout("BottomBarSplit"), 'POPUPSIDE') ~= '0' then
+        if (_G.iuprops[t.sciteid..'.win'] or "0") == "0" and (t.sciteid == 'findrepl' or t.sciteid == 'concolebar' or t.sciteid == 'findresbar') and iup.GetLayout("BottomBarSplit").popupside ~= '0' then
             if t.sciteid == 'findrepl' and _Plugins.findrepl.Bar_obj then
                 local s = _Plugins.findrepl.Bar_obj.handle.Split_h()
-                if s then iup.SetAttribute(s, "HIDDEN", "NO") end
+                if s then s.hidden = "NO" end
             else
                 CORE.BottomBarSwitch('NO')
             end
-        elseif (_G.iuprops[t.sciteid..'.win'] or "0") ~= "2" then
+        elseif (_G.iuprops[t.sciteid..'.win'] or "0") ~= "2" and (_G.iuprops[t.sciteid..'.win'] or "0") ~= "3" then
             cmd_Hide()
         elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "1" then
             cmd_PopUp()
         elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "0" then
             cmd_Attach()
         elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "3" then
-            cmd_AutoHide()
+            --cmd_AutoHide()
+            local right = (dtb.sciteid == 'sidebar')
+            local split = t.Split_h
+            split.hidden = Iif(split.hidden == 'YES', 'NO', 'YES')
         end
         if t.onFormSetStaticControls then t.onFormSetStaticControls() end
     end
@@ -2013,11 +2016,11 @@ iup.DestroyDialogs = function()
         _G.dialogs['leftbar'] = nil
     end
     local split = iup.GetDialogChild(hMainLayout, 'SourceSplitRight')
-    if iup.GetAttribute(split, 'POPUPSIDE') ~= '0' then iup.SetAttribute(split, 'POPUPSIDE', '0') end
+    if split.popupside ~= '0' then split.popupside = '0' end
     split = iup.GetDialogChild(hMainLayout, 'SourceSplitLeft')
-    if iup.GetAttribute(split, 'POPUPSIDE') ~= '0' then iup.SetAttribute(split, 'POPUPSIDE', '0') end
+    if split.popupside ~= '0' then split.popupside = '0' end
     split = iup.GetDialogChild(hMainLayout, 'BottomBarSplit')
-    if iup.GetAttribute(split, 'POPUPSIDE') ~= '0' then iup.SetAttribute(split, 'POPUPSIDE', '0') end
+    if split.popupside ~= '0' then split.popupside = '0' end
 
     if _G.dialogs['concolebar'] ~= nil then
         iup.GetDialogChild(hMainLayout, "BottomSplit").value = _G.iuprops['dialogs.concolebar.splitvalue']
