@@ -503,9 +503,9 @@ local function ActivateFind_l(nTab)
     if wnd.CodePage == 0 then s = s:to_utf8() end
     s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
-
+    local spl = iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit")
     if _G.dialogs['findrepl'] then
-        if (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 1000) and _G.iuprops['findrepl.win'] == '2') then
+        if (tonumber(spl.barsize) == 0 and ((_G.iuprops['bottombar.layout'] or 700500) % 10000 ~= 1000) and _G.iuprops['findrepl.win'] == '2') then
             scite.MenuCommand(IDM_TOGGLEOUTPUT)
         else
             _G.dialogs['findrepl'].ShowDialog()
@@ -524,7 +524,7 @@ local function ActivateFind_l(nTab)
             local s = _Plugins.findrepl.Bar_obj.handle.Split_h()
             if s then s.hidden = "NO" end
         end
-    else
+    elseif spl.popupside  ~= '0' then
         scite.MenuCommand(IDM_TOGGLEOUTPUT)
     end
 

@@ -454,7 +454,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'T&ab Bar', action = function() local h = iup.GetDialogChild(iup.GetLayout(), "TabbarExpander"); if h.state == 'OPEN' then h.state = 'CLOSE' else h.state = 'OPEN' end end, check = function() return iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state == 'OPEN' end},
         {'BottomBar', plane = 1,{
             {'&Bottom Bar', key = 'F10', action = IDM_TOGGLEOUTPUT, check = function() return (tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) ~= 0) end},
-            {'Bottom Bar A&utohide', action = CORE.switch_bottombar, check = function() return iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").popupside ~= '0' end},
+            {'Bottom Bar A&utohide', key = 'Ctrl+F10', action = CORE.switch_bottombar, check = function() return iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").popupside ~= '0' end},
 		}},
         {'s2', separator = 1},
 		{'&White Space and TAB', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},

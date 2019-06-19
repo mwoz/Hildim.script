@@ -760,10 +760,16 @@ local function FileManTab_Init(h)
 
     split_s = iup.split{iup.backgroundbox{list_dir, bgcolor = iup.GetLayout().txtbgcolor}, iup.backgroundbox{list_favorites, bgcolor = iup.GetLayout().txtbgcolor}, orientation = "HORIZONTAL", name = 'splitFileMan', layoutdrag = 'NO', color = props['layout.splittercolor'], showgrip = 'LINES'}
     memo_path = iup.text{expand = 'YES', tip = _T'Arrow Up/Down, Ctrl+Home/End - movement through the file list'}
-    memo_path.action = (function(h, s, new_value)
-        if new_value:find('^%w:[\\/]') or new_value:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
-            FileMan_ListFillDir(new_value)
+    local path_timer = iup.timer{time = 300; action_cb = function(h)
+        h.run = 'NO'
+        local v = memo_path.value
+        if v:find('^%w:[\\/]') or v:find('[\\/][\\/]%w+[\\/]%w%$[\\/]') then
+            FileMan_ListFillDir(v)
         end
+    end}
+    memo_path.action = (function(h, s, new_value)
+        path_timer.run = 'NO'
+        path_timer.run = 'YES'
     end)
     memo_path.getfocus_cb = (function(h)
         local sel = list_dir.marked:find('1')
@@ -779,8 +785,13 @@ local function FileManTab_Init(h)
     end)
 
     memo_mask = iup.text{expand = 'YES', tip = _T'* - any character sequence\nArrow Up/Down, Ctrl+Home/End - movement through the file list'}
+    local mask_timer = iup.timer{time = 300; action_cb = function(h)
+        h.run = 'NO'
+        FileMan_ListFILLByMask(memo_mask.value)
+    end}
     memo_mask.action = (function(h, s, new_value)
-        FileMan_ListFILLByMask(new_value)
+        mask_timer.run = 'NO'
+        mask_timer.run = 'YES'
     end)
     memo_mask.k_any =(function(h, k)
         return memoNav(h, k)

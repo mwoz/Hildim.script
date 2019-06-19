@@ -1,5 +1,6 @@
 local list_bookmarks
 local Bookmarks_RefreshTable
+local OnSwitch
 
 local function Init()
     local tab2
@@ -72,7 +73,7 @@ local function Init()
                 iup.SetAttributeId2(list_bookmarks, 'FGCOLOR', i, 2, '0 0 255')
             end
             list_bookmarks:setcell(i, 1, bmk.BufferNumber)         -- ,size="400x400"
-            list_bookmarks:setcell(i, 2, bmk.LineText)
+            list_bookmarks:setcell(i, 2, bmk.LineText:to_utf8())
             list_bookmarks:setcell(i, 3, bmk.FilePath)
             list_bookmarks:setcell(i, 4, bmk.LineNumber)
         end
@@ -173,10 +174,9 @@ local function Init()
     end
     ----------------------------------------------------------
 
-    local function OnSwitch()
+    OnSwitch = function()
         isEditor = true
-        if _Plugins.bookmark.Bar_obj.ActiveTab == myId then
-            Abbreviations_ListFILL()
+        if not SideBar_Plugins.bookmark or SideBar_Plugins.bookmark.Bar_obj.ActiveTab == myId then
             Bookmarks_ListFILL()
         end
     end
@@ -257,7 +257,9 @@ local function ToolBar_Init(h)
     };
     return {
         handle = box;
-        On_SelectMe = onselect
+        On_SelectMe = onselect;
+        OnSwitchFile = OnSwitch;
+        OnOpen = OnSwitch;
         }
 end
 
@@ -274,7 +276,9 @@ local function Tab_Init(h)
     return {
         handle = iup.vbox{iup.backgroundbox{list_bookmarks, bgcolor = iup.GetLayout().txtbgcolor}};
         On_SelectMe = onselect;
-        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(list_bookmarks) end) end;
+        OnSwitchFile = OnSwitch;
+        OnOpen = OnSwitch;
+        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(list_bookmarks) end); OnSwitch() end;
         }
 end
 

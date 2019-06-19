@@ -73,24 +73,19 @@ CORE.FindCoSelToConcole = function()
     FindSelToConcoleL(scite.buffers.BufferByName(scite.buffers.CoName()), coeditor)
 end
 
-CORE.ToggleSubfolders = function(bShow, line, e, maxlevel, action)
+CORE.ToggleSubfolders = function(bShow, line, e, maxlevel, action, noParent)
     if not e then
         if output.Focus then e = output
         elseif findres.Focus then e = findres
         else e = editor end
     end
-    -- print(line, maxlevel, action)
     maxlevel = maxlevel or 0
     if not line and not action then action = Iif(bShow, 1, 0) end
     local lStart = line or e:LineFromPosition(e.SelectionStart)
-    lStart = lStart + 1
-    local baseLevel = (e.FoldLevel[lStart] & SC_FOLDLEVELNUMBERMASK)
-    if baseLevel > SC_FOLDLEVELBASE and (baseLevel & SC_FOLDLEVELHEADERFLAG) == 0 then
-        lStart = e.FoldParent[lStart]
-    end
+    local baseLevel = (e.FoldLevel[lStart + 1] & SC_FOLDLEVELNUMBERMASK)
+
     local lEnd = e:GetLastChild(lStart, -1)
     if lStart == -1 then lEnd = e.LineCount end
-
     local bAct = false
     for l = lStart + 1, lEnd do
         local level = e.FoldLevel[l]
@@ -99,11 +94,11 @@ CORE.ToggleSubfolders = function(bShow, line, e, maxlevel, action)
             e:FoldLine(l, action)
             bAct = true
             if maxlevel > 0 then
-                CORE.ToggleSubfolders(bShow, l + 1, e, maxlevel - 1, action)
+                CORE.ToggleSubfolders(bShow, l , e, maxlevel - 1, action, true)
             end
         end
     end
-    if not bAct then
+    if not bAct and not noParent then
         local l = e.FoldParent[lStart]
         if not action then action = Iif(e.FoldExpanded[l], 0, 1) end
         e:FoldLine(l, action)

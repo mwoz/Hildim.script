@@ -1527,7 +1527,8 @@ iup.scitedetachbox = function(t)
         split.hiddengap = w1 - w2
         split.popupside = Iif(right, '2', '1')
         split.hidden = 'YES'
-        CORE.BottomBarSwitch('YES')
+        local bottomsplit = iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit")
+        if bottomsplit then bottomsplit.hidden = "YES" end
     end
 
     dtb.UnAutoHide = function()
@@ -1546,12 +1547,15 @@ iup.scitedetachbox = function(t)
         local s = get_scId()
         if s ~= "0" and s ~= "3" then
             local sId = dtb.sciteid
-            if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and
-                (sId == 'findrepl' or sId == 'concolebar' or sId == 'findresbar') then
+            local bIsBotom = (sId == 'findrepl' or sId == 'concolebar' or sId == 'findresbar')
+            if tonumber(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").barsize) == 0 and bIsBotom  then
                 scite.MenuCommand(IDM_TOGGLEOUTPUT)
                 if get_scId() == "0" then return end
             end
             dtb.Attach()
+            if bIsBotom and iup.GetDialogChild(iup.GetLayout(), 'BottomBarSplit').popupside ~= '0' then
+                CORE.BottomBarSwitch('NO')
+            end
         end
         if s == '3' then
             dtb.UnAutoHide()
@@ -1563,8 +1567,14 @@ iup.scitedetachbox = function(t)
         local s =  get_scId()
         if s == "0" or s == '3' then
             if s == '3' then dtb.UnAutoHide() end
+            if dtb.sciteid == 'concolebar' then
+                iup.GetDialogChild(iup.GetLayout(), "Run").visible = "YES"
+            elseif dtb.sciteid == 'findresbar' then
+                iup.GetDialogChild(iup.GetLayout(), "FindRes").visible = "YES"
+            end
             dtb.detachPos(true)
         elseif s == "2" then
+
             dtb.ShowDialog()
         end
         if statusBtn then statusBtn.visible = 'NO' end
@@ -1592,6 +1602,14 @@ iup.scitedetachbox = function(t)
     end
     dtb.cmdHide = function() cmd_Hide() end
 
+    local function cmd_AttachPane()
+        if (_G.iuprops[t.sciteid..'.win'] or "0") == "3" then
+            cmd_Attach()
+        else
+            cmd_AutoHide()
+        end
+    end
+
     local function cmd_Switch()
         if (_G.iuprops[t.sciteid..'.win'] or "0") == "0" and (t.sciteid == 'findrepl' or t.sciteid == 'concolebar' or t.sciteid == 'findresbar') and iup.GetLayout("BottomBarSplit").popupside ~= '0' then
             if t.sciteid == 'findrepl' and _Plugins.findrepl.Bar_obj then
@@ -1602,15 +1620,15 @@ iup.scitedetachbox = function(t)
             end
         elseif (_G.iuprops[t.sciteid..'.win'] or "0") ~= "2" and (_G.iuprops[t.sciteid..'.win'] or "0") ~= "3" then
             cmd_Hide()
-        elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "1" then
-            cmd_PopUp()
-        elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "0" then
-            cmd_Attach()
-        elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "3" then
+        elseif (_G.iuprops[t.sciteid..'.win'] or "1") == "3" then
             --cmd_AutoHide()
             local right = (dtb.sciteid == 'sidebar')
             local split = t.Split_h
             split.hidden = Iif(split.hidden == 'YES', 'NO', 'YES')
+        elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "1" then
+            cmd_PopUp()
+        elseif (_G.iuprops[t.sciteid..'.visible.state'] or "1") == "0" then
+            cmd_Attach()
         end
         if t.onFormSetStaticControls then t.onFormSetStaticControls() end
     end
@@ -1636,6 +1654,7 @@ iup.scitedetachbox = function(t)
 		},},
         {'s1', separator = 1},
         {'Show/Hide', action = cmd_Switch, key = Iif(dtb.sciteid == 'leftbar', 'F8', Iif(dtb.sciteid == 'sidebar', 'F9', nil)) },
+        {'Attached/Autohide panel', action = cmd_AttachPane, visible= function() return dtb.sciteid == 'leftbar' or dtb.sciteid == 'sidebar' end, key = Iif(dtb.sciteid == 'leftbar', 'Ctrl+ F8', Iif(dtb.sciteid == 'sidebar', 'Ctrl+F9', nil)) },
     }
 
     if dtb.Split_h then
@@ -1683,26 +1702,27 @@ iup.ShowInMouse = function(dlg, bIupCtrl)
     if bIupCtrl then hCtrl = iup.GetFocus() end
     local _, _, xC, yC, dY
     if hCtrl then
-        _, _, _, dY = hCtrl.RASTERSIZE:find('(%d+)x(%d+)')
-        _, _, xC, yC = hCtrl.Screenposition:find('(%d+),(%d+)')
+        _, _, _, dY = hCtrl.RASTERSIZE:find('(%-?%d+)x(%-?%d+)')
+        _, _, xC, yC = hCtrl.Screenposition:find('(%-?%d+),(%-?%d+)')
         yC = yC + dY
     elseif editor.FirstVisibleLine <= editor:LineFromPosition(cPos) and
         editor:LineFromPosition(cPos) <= editor.FirstVisibleLine + editor.LinesOnScreen then
         dY = editor:TextHeight(editor:LineFromPosition(cPos))
-        _, _, xC, yC = iup.GetDialogChild(iup.GetLayout(), "Source").Screenposition:find('(%d+),(%d+)')
+        _, _, xC, yC = iup.GetDialogChild(iup.GetLayout(), "Source").Screenposition:find('(%-?%d+),(%-?%d+)')
         xC = tonumber(xC) + editor:PointXFromPosition(cPos) + editor:TextWidth(editor.StyleAt[cPos], ' ') * editor.SelectionNCaretVirtualSpace[0]
         yC = tonumber(yC) + editor:PointYFromPosition(cPos) + dY
     else
-        _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+        _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%-?%d+)x(%-?%d+)')
         dY = 0
     end
-    local _, _, xD, yD = dlg.RASTERSIZE:find('(%d+)x(%d+)')
+    local _, _, xD, yD = dlg.RASTERSIZE:find('(%-?%d+)x(%-?%d+)')
     xC = tonumber(xC)
     xD = tonumber(xD)
     yC = tonumber(yC)
     yD = tonumber(yD)
 
     for x0S, y0S, xS, yS in iup.GetGlobal('MONITORSINFO'):gmatch('(%-?%d+) (%-?%d+) (%-?%d+) (%-?%d+)') do
+
         x0S = tonumber(x0S)
         y0S = tonumber(y0S)
         xS = tonumber(xS) + x0S
@@ -2128,15 +2148,15 @@ AddEventHandler("OnMarginClick", function(margin, modif, line, wid)
         local curLevel = e.FoldLevel[line]
         if (curLevel & SC_FOLDLEVELHEADERFLAG) ~= 0 then
             if modif == 0 then
-                if line == -1 then CORE.ToggleSubfolders(nil, -1, e)
+                if line == -1 then CORE.ToggleSubfolders(nil, -1, e, nil, nil, true)
                 else e:ToggleFold(line) end
             elseif modif == 1 then
-                CORE.ToggleSubfolders(false, line, e)
+                CORE.ToggleSubfolders(false, line, e, nil, nil, true)
             elseif modif == 2 then
                 e:ToggleFold(line)
-                CORE.ToggleSubfolders(false, line, e, 100, Iif( e.FoldExpanded[line], 1, 0))
+                CORE.ToggleSubfolders(false, line, e, 100, Iif( e.FoldExpanded[line], 1, 0), true)
             elseif modif == 3 then
-                CORE.ToggleSubfolders(nil, -1, e)
+                CORE.ToggleSubfolders(nil, -1, e, nil, nil, true)
             end
             CORE.ShowCaretAfterFold()
             return "Y"

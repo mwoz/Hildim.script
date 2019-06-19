@@ -43,7 +43,7 @@ local function internal_Init()
 
         list_navigation.addlin = 0
         list_navigation:setcell(1, 1, line_text)
-        list_navigation:setcell(1, 2, fName)
+        list_navigation:setcell(1, 2, fName:to_utf8())
         list_navigation:setcell(1, 3, item)
         list_navigation:setcell(1, 4,(line_ + 1))
         list_navigation:setcell(1, 5, path_)

@@ -303,7 +303,7 @@ local function CreateBox()
             end
             t.tmr.run = 'NO'
             local s = iup.GetDialogChild(hMainLayout, splitter)
-            if s.popupside ~= 0 and s.hidden == 'NO' then
+            if s.popupside ~= 0 and _G.iuprops[sciteid..".win"] == '3' and s.hidden == 'NO' then
                 local pos = iup.ConvertXYToPos(h,x,y)
                 if pos >= 0 and pos..'' ~= h.valuepos then
                     t.tmr.run = 'YES'
