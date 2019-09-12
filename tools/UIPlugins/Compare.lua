@@ -458,8 +458,8 @@ local function Init_hidden()
         tmpFiles[pNew] = true
     end
 
-    function COMPARE.CompareVss()
-        VSS.diff(CompareToFile, prepareTmpPath():gsub('\\[^\\]+$', ''))
+    function COMPARE.CompareVss(ver)
+        VSS.diff(CompareToFile, prepareTmpPath():gsub('\\[^\\]+$', ''), ver)
     end
 
     local function CompareSelfTitled(strPath)

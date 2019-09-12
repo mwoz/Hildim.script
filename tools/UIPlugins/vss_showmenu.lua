@@ -1,8 +1,126 @@
 require 'shell'
 require "luacom"
+require "lpeg"
 --SSDIR \\SOURCESAFE\SourceSafe\Main\
 -- *.sln, *.vbproj, *.xml, *.cform, *.vcproj, *.dsp, *.mdp, *.mak, *.wiki, *.vdp, *.vdproj, *.dbp, *.vsmproj, *.vsmacros, *.hwproj, *.etp, *.cform, *.rform, *.wform, *.mdmp, *.dsw, *.vjsproj, *.csdproj, *.inc, *.m, *.sql, *.incl, *.xml, *.form
 local function Init()
+    local patt, dlg
+    do
+        local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
+
+        local AZ = R('AZ', 'az') + "_"
+        local N = R'09'
+        local NL = P'\n' + P'\r\n'
+        local SP = S' \t'^1
+        local ver = P'*'^1 * P'  Version ' * C(N^1) * S' *'^1 * NL * Cc('')
+        local usr = P'User: ' * C((1 - P' Date: ')^1)
+        local dt = ' Date:' * SP * C((N + P'.')^1) *(P' '^1 * P'Time:' * SP * C((N + P':')^1)) * NL
+        local ch = 'Checked in ' * C((1 - NL)^1) * NL + P'Created'
+        local cmt = (P'Comment:' + P'Label comment:') * C((1 - P'*****************')^1) + Cc('') *((1 - P'*****************')^1)
+        ver = Ct(ver * usr * dt * ch * cmt)
+
+        local lbl = P'*'^1 * NL * Cc('') * 'Label: ' * C((1 - NL)^1) *NL
+
+        lbl = Ct(lbl * usr * dt * Cc('') *((1 - NL)^1) * NL * cmt)
+
+        patt = Ct((1 - P'*****************')^1*(ver + lbl)^1)
+    end
+
+    local CompareVer, GetVer, vss_getlatest, vss_diff, CompareVerH, CommentVer
+    local function CreateDialog(strerr)
+        local list_vss = iup.matrix{ name = 'list_buffers', fgcolor = props["tabctrl.forecolor"],
+            numcol = 8, numcol_visible = 8, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
+            readonly = "YES"  , markmultiple = "NO" , height0 = 4, expand = "YES", resizematrix = "YES", propagatefocus = 'YES'  ,
+            rasterwidth0 = 30 ,
+            rasterwidth1 = 30,
+            rasterwidth2 = 100,
+            rasterwidth3 = 100,
+            rasterwidth4 = 100,
+            rasterwidth5 = 100,
+            rasterwidth6 = 100,
+            rasterwidth7 = 500,
+        }
+        list_vss:setcell(0, 1, "Ver")
+        list_vss:setcell(0, 2, "Label")
+        list_vss:setcell(0, 3, "User")
+        list_vss:setcell(0, 4, "Date")
+        list_vss:setcell(0, 5, "Time")
+        list_vss:setcell(0, 6, "Path")
+        list_vss:setcell(0, 7, "Comment")
+
+        local dlg = iup.scitedialog{list_vss, sciteparent = "SCITE", sciteid = "vsshist", dropdown = true,shrink="YES",
+                    maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = iup.GetLayout().txtbgcolor, tip = 'No Comment',
+                    customframedraw = 'YES', customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(nil)}
+        local tmax, bScipHide
+        bScipHide = false
+
+        dlg.show_cb = function(h, state)
+            if state == 0 then
+                local tRep = patt:match(strerr, 1) or {}
+                iup.SetAttribute(list_vss, "ADDLIN", "1-"..#tRep)
+                tmax = #tRep
+                for i = 1,  #tRep do
+                    list_vss:setcell(i, 0, i..'')
+                    for j = 1, 7 do
+                        list_vss:setcell(i, j, (tRep[i][j] or ''):to_utf8())
+                    end
+                end
+                list_vss.redraw = 'ALL'
+                dlg.focus_cb = function(h, focus)
+                    if focus == 0 and not bScipHide then scite.RunAsync(function() dlg:hide(); h:postdestroy() end) end
+                    bScipHide = false
+                end
+            elseif state == 4 then
+
+            end
+        end
+
+        local function click_cb(lin)
+            bScipHide = true
+            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|VSS')
+        end
+        list_vss:SetCommonCB(nil, nil, nil, click_cb)
+
+        list_vss.enteritem_cb = (function(h, l, c)
+            if l == 0 then h.tip = _T''
+            else h.tip = iup.GetAttributeId2(h, '', l, 7)
+            end
+        end)
+        local function ver()
+            local sel, v
+            sel = list_vss.marked:find('1') - 1
+            v = ''
+            while v == '' and sel <= tmax do
+                v = list_vss:getcell(sel, 1)
+                sel = sel + 1
+            end
+            if v ~= '' then v = ' -V'..v..' '  end
+            return v
+        end
+
+        dlg.k_any = function(h, k)
+            if k == iup.K_ESC then h:hide(); h:postdestroy() end
+        end
+        GetVer = function()
+            local v = ver()
+            if v ~= '' then   vss_getlatest(v) end
+        end
+        CompareVerH = function()
+            local v = ver()
+            if v ~= '' then   COMPARE.CompareVss(v) end
+        end
+        CompareVer = function()
+            local v = ver()
+            if v ~= '' then vss_diff(v) end
+        end
+        CommentVer = function()
+            local sel
+            sel = list_vss.marked:find('1') - 1
+            print((list_vss:getcell(sel, 7) or ''):from_utf8())
+        end
+        return dlg
+    end
+
     local bLocalDir = false
     local p_vsscompare, p_vsspath, curProj
     VSS = {}
@@ -110,19 +228,21 @@ local function Init()
 
     local lanesgen = lanes.gen("package,io,string", {required = {"shell"}}, getStatAsync)
 
-    local function receiveVssInfo()
-        local key, val = linda:receive( 5.0, "VSS_ChangeFile")    -- timeout in seconds
+    local function receiveVssInfo(t)
+        local key, val = linda:receive(t or 5.0, "VSS_ChangeFile")    -- timeout in seconds
         if val == nil then
-            print( "Vss Get Info time out")
-        elseif val.file == props['FileNameExt'] then
+            --print( "Vss Get Info time out", debug.traceback())
+        elseif val.file == props['FileNameExt']:from_utf8() then
             tState.ierr = val.ierr
             tState.strerr = val.strerr
+        else
+            receiveVssInfo(0)
         end
     end
 
     AddEventHandler("OnLindaNotify", function(key)
         if key == 'VSS_ChangeFile' then
-            if not tState.blocked then receiveVssInfo() end
+            if not tState.blocked then receiveVssInfo(0) end
             tState.blocked = false
         end
     end)
@@ -146,12 +266,13 @@ local function Init()
         end
     end
 
-    local function vss_getlatest()
+    vss_getlatest = function(ver)
         if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt']:from_utf8(), nil, true, true)
+            local v = ver or ''
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt']:from_utf8()..v, nil, true, true)
             local stropt = ""
             if ierr == 1 then
-                local rez = iup.Alarm(_T'Get Latest Version', _T"File differs from Source Safe\nReplace an existing file?", _TH"OK", _TH"Cancel")
+                local rez = iup.Alarm(Iif(v == '', _T'Get Latest Version', _T'Get Version'..v), _T"File differs from Source Safe\nReplace an existing file?", _TH"OK", _TH"Cancel")
                 if rez ~= 1 then return end
 
                 local attr = shell.getfileattr(props['FilePath'])
@@ -159,7 +280,7 @@ local function Init()
                     shell.setfileattr(props['FilePath'], attr + 1)
                 end
             end
-            reset_err(shell.exec(p_vsspath..' Get '..props['FileNameExt']:from_utf8(), nil, true, true))
+            reset_err(shell.exec(p_vsspath..' Get '..props['FileNameExt']:from_utf8()..v, nil, true, true))
         end
     end
 
@@ -197,15 +318,16 @@ local function Init()
         end
     end
 
-    VSS.diff = function(f, tmppath)
+    VSS.diff = function(f, tmppath, ver)
         if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt']:from_utf8(), nil, true, true)
+            local v = ver or ''
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt']:from_utf8()..v , nil, true, true)
             if ierr == 1 or strerr == '' or ierr == 0 then
 
                 ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\^^'..props['FileNameExt']:from_utf8()..'"', nil, true, true)
                 if ierr~= 0 then print(strerr, 1) end
 
-                local cmd = p_vsspath..' Get '..props['FileNameExt']:from_utf8()..' -GL"'..tmppath..'"'
+                local cmd = p_vsspath..' Get '..props['FileNameExt']:from_utf8()..v..' -GL"'..tmppath..'"'
                 ierr, strerr = shell.exec(cmd, nil, true, true)
                 if ierr~= 0 then print(strerr, 2) end
 
@@ -218,14 +340,15 @@ local function Init()
         end
     end
 
-    local function vss_diff()
+    vss_diff = function(ver)
         if vss_SetCurrentProject() then
-            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt']:from_utf8(), nil, true, true)
+            local v = ver or ''
+            local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt']:from_utf8()..v, nil, true, true)
             if ierr == 1 then
 
                 local _, tmppath = shell.exec('CMD /c set TEMP', nil, true, true)
                 tmppath = string.sub(tmppath, 6, string.len(tmppath) - 2)
-                local cmd = p_vsspath..' Get '..props['FileNameExt']:from_utf8()..' -GL"'..tmppath..'"'
+                local cmd = p_vsspath..' Get '..props['FileNameExt']:from_utf8()..v..' -GL"'..tmppath..'"'
                 ierr, strerr = shell.exec(cmd, nil, true, true)
                 if ierr~= 0 then print(strerr) end
                 ierr, strerr = shell.exec('CMD /c del /F "'..tmppath..'\\sstmp"', nil, true, true)
@@ -247,9 +370,12 @@ local function Init()
             BlockEventHandler"OnSwitchFile"
             local cmnt = GetComment()
             if not cmnt then return end
-            shell.set_curent_dir(props['FileDir']:from_utf8())
-            if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt, nil, false, true)) and On_vss_CheckIn then
-                On_vss_CheckIn(curProj)
+            if shell.set_curent_dir(props['FileDir']:from_utf8()) == props['FileDir']:from_utf8() then
+                if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt, nil, false, true)) and On_vss_CheckIn then
+                    On_vss_CheckIn(curProj)
+                end
+            else
+                print("Error: Can't set current dir")
             end
             UnBlockEventHandler"OnSwitchFile"
         end
@@ -258,7 +384,9 @@ local function Init()
     local function vss_hist()
         if vss_SetCurrentProject() then
             local _, strerr = shell.exec(p_vsspath..' History '..props['FileNameExt']:from_utf8(), nil, true, true)
-            print(strerr)
+            --print(strerr)
+            --iup.ShowXY(CreateDialog(strerr), 100, 100)
+            iup.ShowInMouse(CreateDialog(strerr))
         end
     end
 
@@ -267,7 +395,8 @@ local function Init()
         local VSSContectMenu
         --vss_SetCurrentProject()
         --local ierr, strerr = shell.exec(p_vsspath..' Status '..props['FileNameExt'], nil, true, true)
-
+        shell.set_curent_dir(props['FileDir']:from_utf8())
+        if not shell.fileexists(props['FilePath']) then return {} end
         local ierr, strerr = tState.ierr, tState.strerr
         local bAddComon = false
 
@@ -336,8 +465,14 @@ local function Init()
     end
 
     menuhandler:InsertItem('TABBAR', 'slast',
-    {'VSS', visible = function() return bLocalDir and shell.fileexists(props["FileDir"].."\\mssccprj.scc") end, CreateVSSMenu})
-
+    {'VSS', visible = function() return bLocalDir and shell.fileexists(props["FileDir"].."\\mssccprj.scc") and shell.fileexists(props['FilePath']) end, CreateVSSMenu})
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',{'VSS', plane = 1,{
+            {'Get Version', action = function() GetVer() end, },
+            {'Show Differences', action = function() CompareVer() end, },
+            {'Show Differences by HildiM', action = function() CompareVerH() end, },
+            {'Show Comment', action = function() CommentVer() end, },
+        }}, nil, _T
+    )
     AddEventHandler("OnSwitchFile", OnSwitch_local)
     AddEventHandler("OnOpen", OnSwitch_local)
 

@@ -321,7 +321,6 @@ local function Init()
 
     local sPel, pUser, curLine
     local function ApplyVariant(str)
-        if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
 
         local s = editor:IndicatorStart(mark, editor.CurrentPos)
         local e = editor:IndicatorEnd(mark, editor.CurrentPos)
@@ -392,6 +391,7 @@ local function Init()
             SpellLexer(editor:PositionFromLine(curLine), editor.LineEndPosition[curLine])
 
         else
+            if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then str = str:to_utf8() end
             editor.TargetStart = s
             editor.TargetEnd = e
             editor:ReplaceTarget(str)
@@ -533,9 +533,9 @@ local function Init()
         if msg < constFirstSpell then return end
         if msg == constAddToDic then str = cADDYODIC
         elseif msg == constWithExample then str = cADDBYZXAMPLE
-            else str = tblVariants[msg] end
-            OnUserListSelection_local(str)
-        end
+        else str = tblVariants[msg] end
+        OnUserListSelection_local(str)
+    end
 
         AddEventHandler("OnColorized", OnColorise_local)
         AddEventHandler("OnOpen", function() OnSwitch_local() end)

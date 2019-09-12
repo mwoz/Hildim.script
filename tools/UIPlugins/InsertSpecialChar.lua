@@ -46,13 +46,13 @@ local function Init()
     }
 
     local function f_char2html (char)
-        function f(index, value)
-            if (value == char) then
-                html = char2html[index + 3 - cp]
+        local d = 1
+        if editor.CodePage == 0 then d = 2 end
+        for i, a in ipairs(char2html) do
+            if a == char then
+                return char2html[i + d]
             end
         end
-        table.foreachi (char2html, f)
-        return html
     end
 
     local function InsertSpecialChar(sel_value)

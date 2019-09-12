@@ -97,7 +97,6 @@ function CORE.OpenAsNew(strName, strText, idm_encoding)
     scite.MenuCommand(IDM_NEW)
     if idm_encoding then scite.MenuCommand(idm_encoding) end
     CORE.SetText(strText)
-    OnSwitchFile()
     iup.PassFocus()
     if not editor.Focus then iup.PassFocus() print(222) end
 end

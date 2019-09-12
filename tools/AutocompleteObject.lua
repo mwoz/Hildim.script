@@ -281,12 +281,12 @@ local function ShowCallTip(pos, str, s, e, reshow)
         tl = TableSort(tl)
         l = table.concat(tl, '\t')
         editor.AutoCSeparator = string.byte('\t')
-        current_poslst = current_pos
         pasteFromXml = false
 
         local wch = editor.WordChars
         editor.WordChars = wch..'.:'
         editor:SetSel(editor:WordEndPosition(editor.CurrentPos,true), editor:WordStartPosition(editor.CurrentPos,true))
+        current_poslst = editor.SelectionStart
         editor.WordChars = wch
         editor:UserListShow(constListIdXmlPar, l)
         SetListVisibility(true)
@@ -726,7 +726,7 @@ local function FillTableFromText(tblfList, tStruct)
     end
 end
 
-local needIdle, needXml, needMain = false, false, false
+local needIdle = false
 local function ReCreateStructures(strText, tblFiles)
     local tt = shell.clockStart()
     local rootTag
@@ -756,23 +756,19 @@ local function ReCreateStructures(strText, tblFiles)
     end
     m_tblSubstitution = {}
 
-    if m_ext ~= editor.Lexer or str_vbkwrd == ' ' or m_ptrn ~= props['pattern.name$'] then
-        alias_table = {}
-        objects_table = {}
-        objectsX_table = {}
-        fillup_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".fillup.characters"])
-        autocom_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".start.characters"])
-        inheritors = {}
-        needIdle, needMain = true, true
-    end
-    if Favorites_Clear ~= nil then Favorites_Clear() end
-    -----------
+    alias_table = {}
+    objects_table = {}
+    objectsX_table = {}
+    fillup_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".fillup.characters"])
+    autocom_chars = fPattern(props["autocomplete."..editor_LexerLanguage()..".start.characters"])
+    inheritors = {}
+    needIdle = true
+    inheritorsX = {}
 
-    -----------
-    if m_ext ~= editor.Lexer or str_xmlkwrd == ' ' or m_ptrn ~= props['pattern.name$'] then
-        inheritorsX = {}
-        needIdle, needXml = true, true
-    end
+    collectgarbage("collect")
+
+    if Favorites_Clear ~= nil then Favorites_Clear() end
+
     if editor.Lexer == SCLEX_FORMENJINE then needIdle = true end
 	get_api = false
 
@@ -821,26 +817,21 @@ AddEventHandler("OnIdle", function()
         local str_vbkwrd = nil
         local str_xmlkwrd = nil
         if editor.Lexer == SCLEX_FORMENJINE then
-            if props["keywords6$"]:len() < 10 then
+            if props['keywords6.$('..props['pattern.name$']..')']:len() < 10 then
                 str_vbkwrd = ' '
             else
-                str_vbkwrd = props["keywords6$"]
+                str_vbkwrd = props['keywords6.$('..props['pattern.name$']..')']
             end
 
-            if props["keywords4$"]:len() < 10 then
+            if props['keywords4.$('..props['pattern.name$']..')']:len() < 10 then
                 str_xmlkwrd = ' '
             else
-                str_xmlkwrd = props["keywords4$"]
-            end
-            if m_ptrn ~= props['pattern.name$'] then
-                str_vbkwrd = ' '
-                str_xmlkwrd = ' '
+                str_xmlkwrd = props['keywords4.$('..props['pattern.name$']..')']
             end
 
         end
-        if needMain or true then
-            str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
-        end
+        str_vbkwrd = CreateTablesForFile(objects_table, alias_table, props["apii$"], str_vbkwrd ~= nil, inheritors)
+
         if needXml or true then
             str_xmlkwrd = CreateTablesForFile(objectsX_table, nil, props["apiix$"], str_xmlkwrd~= nil, inheritorsX)
         end
@@ -857,7 +848,7 @@ AddEventHandler("OnIdle", function()
             end
             local kw = string.lower(table.concat(tbl_fList, ' '))
             props['keywords16.$('..props['pattern.name$']..')'] = kw
-            scite.SendEditor(3996, 15, kw)
+            editor.KeyWords[15] = kw
             editor:Colourise(0, editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen + 2))
         else
             --RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
@@ -865,7 +856,7 @@ AddEventHandler("OnIdle", function()
         if Favorites_AddFileName ~= nil then --  and StatusBar_obj ~= nil
             Favorites_ListFILL(true)
         end
-        needXml, needMain = false, false, false
+
     end
 end)
 
@@ -1012,6 +1003,7 @@ local blockCT = false
 local ResetCallTipParams
 local function OnUserListSelection_local(tp, str)
     editor:BeginUndoAction()
+    if current_poslst == editor.SelectionStart and editor.SelectionStart ~= editor.SelectionEnd then editor:ReplaceSel('') end
     editor:SetSel(current_poslst, editor.CurrentPos)
     local fmDef = cmpobj_GetFMDefault()
     local s, shift = nil, 0
@@ -1031,7 +1023,6 @@ local function OnUserListSelection_local(tp, str)
                 break -- ["]  =   34 [,]  =   44 [(]  =   40
             end
         end
-
         editor:SetSel(sSt, editor.CurrentPos)
     elseif pasteFromXml then
         s = str..'=""'
@@ -1403,7 +1394,7 @@ function ShowTipManualy()
                 local str = editor:textrange(posLine, current_pos)
                 _s, _e, sMethod = string.find(str, '<(%w+)$')
                 if sMethod ~= nil then
-                    local _,tip, sign
+                    local _, tip, sign
                     for _, t in ipairs(objects_table['NOOBJ']) do
                         if t[1] == sMethod then
                             _, _ , tip = t[2]:find('^([^\\>]*)')
@@ -1423,7 +1414,7 @@ function ShowTipManualy()
             end
             bManualTip = true
             CallTipXml(sMethod)
-            return
+           return
         end
     end
 

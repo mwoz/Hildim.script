@@ -262,8 +262,9 @@ local function CreateBox()
         t.map_cb = (function(h)
             h.size = "1x1"
         end)
-        t.tabchange_cb = (function(_, new_tab, old_tab)
+        t.tabchange_cb = (function(h, new_tab, old_tab)
             --сначала найдем активный таб и установим его в SideBar_ob
+            --h.ONMOVE = true
             for _, tbs in pairs(SideBar_Plugins) do
                 if tbs.id == new_tab.tabtitle then
                     if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
@@ -289,28 +290,9 @@ local function CreateBox()
         t.tabsbackcolor = props["layout.splittercolor"]
         t.getfocus_cb = function(h)
             local s = iup.GetDialogChild(hMainLayout, splitter)
-            if s.popupside ~= 0 and s.hidden == 'YES' then s.hidden = 'NO' end
+            if s.popupside ~= 0 then s.hidden = 'NO'; end
         end
 
-        t.flat_motion_cb = function(h, x, y, status)
-            if not t.tmr then
-                t.tmr = iup.timer{time = 150, action_cb = function(ht)
-                    ht.run = 'NO'
-                    local old_tab = h.value
-                    h.valuepos = t.pos
-                    h.tabchange_cb(h, h.value, old_tab)
-                end}
-            end
-            t.tmr.run = 'NO'
-            local s = iup.GetDialogChild(hMainLayout, splitter)
-            if s.popupside ~= 0 and _G.iuprops[sciteid..".win"] == '3' and s.hidden == 'NO' then
-                local pos = iup.ConvertXYToPos(h,x,y)
-                if pos >= 0 and pos..'' ~= h.valuepos then
-                    t.tmr.run = 'YES'
-                    t.pos = pos
-                end
-            end
-        end
         return iup.flattabs(t)
     end
 
@@ -495,7 +477,7 @@ local function CreateBox()
     end
 
     AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag, bSwitch)
-        if bSelection == 1 and bSwitch == 0 then  HidePannels() end
+        if (bSelection == 1 or bModified == 1) and bSwitch == 0 then  HidePannels() end
     end)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|xxx', {'Sidebar', tblMenus})

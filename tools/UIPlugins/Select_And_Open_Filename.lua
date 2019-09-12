@@ -63,6 +63,10 @@ local function init()
         end
     end
 
+    local function loc_GoToObjectDefenition(word, true, pos)
+    end
+
+
     local function Select_And_Open_File(immediately)
         local sci
         if findres.Focus then
@@ -146,9 +150,10 @@ local function init()
         end
     end
 
+    AddEventHandler("GoToObjectDefenition", loc_GoToObjectDefenition)
     AddEventHandler("OnMouseButtonUp", launch_open)
 
-    AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
+    AddEventHandler("OnDoubleClick11", function(shift, ctrl, alt)
         if ctrl --[[and props["select.and.open.by.click"] == "1"]] then
             local sci
             if editor.Focus then

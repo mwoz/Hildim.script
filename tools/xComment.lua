@@ -75,7 +75,7 @@ local function IsBlock()
 -- Определение что выделено - блок или поток
 	if sel_text == "" then return true end
 	if sel_end > 0 and editor.CharAt[sel_start - 1] == 10 and (editor.CharAt[sel_end - 1] == 10 or editor.CharAt[sel_end + 1] == 10) then
-		if editor.CharAt[sel_end - 1] ~= 10 then
+		if editor.CharAt[sel_end - 1] ~= 10 and props['comment.block.'..props['Language']] ~= '' then
             sel_end = sel_end + 2
             editor:SetSel(sel_start, sel_end)
             line_sel_end = editor:LineFromPosition(sel_end)

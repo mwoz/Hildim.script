@@ -4,12 +4,14 @@ return {
 ["Show Differences by HildiM"] = "Показать различия(в редакторе)";
 ["Show Differences"] = "Показать различия";
 ["Get Latest Version"] = "Получить последнюю версию";
+["Get Version"] = "Получить версию";
 ["Check Out"] = "Захватить";
 ["Check In"] = "Отпустить";
 ["Undo Check Out"] = "Отменить захват";
 ["Add to Project"] = "Добавить в проект";
 ["File differs from Source Safe\nReplace an existing file?"] = "Файл отличается от Source Safe.\nЗаменить существующий файл?";
 ["Request Comment"] = "Запрашивать комментарий";
+["Show Comment"] = "Показать комментарий";
 ["Comment"] = "Комментарий";
 ["Text"] = "Текст";
 }

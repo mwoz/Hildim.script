@@ -403,6 +403,9 @@ local function Func_Init(h)
 
             --debug_prnArgs(lOut)
             linda:send("Functions", {tblOut, lOut, out.options or {}})
+            textAll = nil
+            tblOut = nil
+            collectgarbage("collect")
         end
 
         while true do
@@ -925,8 +928,7 @@ local function Func_Init(h)
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
         OnDoubleClick = _OnDoubleClick;
-        on_SelectMe = function() OnSwitch(); scite.RunAsync(function() iup.SetFocus(tree_func) end); end,
-        tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(tree_func) end); end
+        tabs_OnSelect = function() OnSwitch();scite.RunAsync(function() iup.SetFocus(tree_func) end) end
     }
 
 end

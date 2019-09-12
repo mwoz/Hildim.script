@@ -97,6 +97,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
     local bPrevSepar = false
     local bShoIcons = (_G.iuprops['menus.show.icons'] == 1)
     CreateItems = function(m, t, bPl)
+        if not m then return end
         for i = 1, #m do
             local itm
             if m[i].link then itm = FindMenuItem('MainWindowMenu|'..m[i].link)
