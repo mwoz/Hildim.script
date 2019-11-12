@@ -53,7 +53,7 @@ local keywords = {"If", "Then", "For", "To", "Each", "In", "Select", "Case", "Su
 local keywordsUp = {}
 local lk = #keywords
 for i = 1, lk do
-    table.insert(keywordsUp, "(%W)("..string.gsub(keywords[i], '.', function(s)
+    table.insert(keywordsUp, "([^%w_])("..string.gsub(keywords[i], '.', function(s)
         local r = ''
         if s~= ' ' then r = '['..string.upper(s)..string.lower(s)..']' end
         return r

@@ -27,6 +27,16 @@ local function Init()
     end
 
     local CompareVer, GetVer, vss_getlatest, vss_diff, CompareVerH, CommentVer
+    local function IsVSS()
+    end
+
+    local function GetVSSProgect()
+        local d = props["FileDir"]:from_utf8():upper()
+        if shell.fileexists(d.."\\mssccprj.scc") then return true end
+        if props['sybase.projects.dir'] ~= '' and d:find('^'..props['sybase.projects.dir']:upper()) then return true end
+        return false
+    end
+
     local function CreateDialog(strerr)
         local list_vss = iup.matrix{ name = 'list_buffers', fgcolor = props["tabctrl.forecolor"],
             numcol = 8, numcol_visible = 8, cursor = "ARROW", alignment = 'ALEFT', heightdef = 6, markmode = 'LIN', flatscrollbar = "VERTICAL" ,
@@ -48,38 +58,45 @@ local function Init()
         list_vss:setcell(0, 6, "Path")
         list_vss:setcell(0, 7, "Comment")
 
-        local dlg = iup.scitedialog{list_vss, sciteparent = "SCITE", sciteid = "vsshist", dropdown = true,shrink="YES",
-                    maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '100x200', bgcolor = iup.GetLayout().txtbgcolor, tip = 'No Comment',
-                    customframedraw = 'YES', customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(nil)}
+        local dlg
+        local curFile = props['FilePath']
+        dlg = iup.scitedialog{iup.vbox{CORE.panelCaption{title = "History: "..curFile, sciteid = "vsshist", action = function() dlg:postdestroy() end}, list_vss};
+                    shrink = "YES", sciteparent = "SCITE", sciteid = "vsshist", bgcolor = props['layout.bgcolor'],
+                    tip = 'No Comment',
+                    customframedraw = 'YES', customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb}
         local tmax, bScipHide
         bScipHide = false
 
-        dlg.show_cb = function(h, state)
-            if state == 0 then
-                local tRep = patt:match(strerr, 1) or {}
-                iup.SetAttribute(list_vss, "ADDLIN", "1-"..#tRep)
-                tmax = #tRep
-                for i = 1,  #tRep do
-                    list_vss:setcell(i, 0, i..'')
-                    for j = 1, 7 do
-                        list_vss:setcell(i, j, (tRep[i][j] or ''):to_utf8())
-                    end
-                end
-                list_vss.redraw = 'ALL'
-                dlg.focus_cb = function(h, focus)
-                    if focus == 0 and not bScipHide then scite.RunAsync(function() dlg:hide(); h:postdestroy() end) end
-                    bScipHide = false
-                end
-            elseif state == 4 then
-
+        local tRep = patt:match(strerr, 1) or {}
+        iup.SetAttribute(list_vss, "ADDLIN", "1-"..#tRep)
+        tmax = #tRep
+        for i = 1,  #tRep do
+            list_vss:setcell(i, 0, i..'')
+            for j = 1, 7 do
+                list_vss:setcell(i, j, (tRep[i][j] or ''):to_utf8())
             end
         end
+        list_vss.redraw = 'ALL'
 
-        local function click_cb(lin)
-            bScipHide = true
-            menuhandler:PopUp('MainWindowMenu|_HIDDEN_|VSS')
+        function list_vss.click_cb(h, lin, col, status)
+            local sel = 0
+            if h.marked then sel = h.marked:find('1') - 1 end
+            iup.SetAttribute(h,  'MARK'..sel..':0', 0)
+            iup.SetAttribute(h, 'MARK'..lin..':0', 1)
+            h.redraw = lin..'*'
+            if iup.isbutton3(status) then
+                bScipHide = true
+                menuhandler:PopUp('MainWindowMenu|_HIDDEN_|VSS')
+            end
         end
-        list_vss:SetCommonCB(nil, nil, nil, click_cb)
+        -- list_vss:SetCommonCB(nil, nil, nil, click_cb)
+        local function checkFile()
+            if curFile ~= props['FilePath'] then
+                print("This history for file: "..curFile..'\nCurrent file: '..props['FilePath'])
+                return false
+            end
+            return true
+        end
 
         list_vss.enteritem_cb = (function(h, l, c)
             if l == 0 then h.tip = _T''
@@ -106,10 +123,12 @@ local function Init()
             if v ~= '' then   vss_getlatest(v) end
         end
         CompareVerH = function()
+            if not checkFile() then return end
             local v = ver()
             if v ~= '' then   COMPARE.CompareVss(v) end
         end
         CompareVer = function()
+            if not checkFile() then return end
             local v = ver()
             if v ~= '' then vss_diff(v) end
         end
@@ -135,12 +154,16 @@ local function Init()
 
     do
         local bOk
+        p_vsscompare = props['vsscompare']
         local wsh = luacom.CreateObject('WScript.Shell')
-        bOk, p_vsscompare = pcall(function() return wsh:RegRead('HKCU\\Software\\Thingamahoochie\\WinMerge\\Executable') end)
-        if not bOk then
-            p_vsscompare = nil
-        else
-            p_vsscompare = '"'..p_vsscompare..'" -e -x -ub %bname %yname'
+        if p_vsscompare == '' then
+            bOk, p_vsscompare = pcall(function() return wsh:RegRead('HKCU\\Software\\Thingamahoochie\\WinMerge\\Executable') end)
+            if not bOk then
+                p_vsscompare = nil
+            else
+                p_vsscompare = '"'..p_vsscompare..'" -e -x -ub %bname %yname'
+            end
+            props['vsscompare'] = p_vsscompare
         end
 
         bOk, p_vsspath = pcall(function() return wsh:RegRead('HKLM\\Software\\Microsoft\\VisualStudio\\SxS\\VSS_8\\8.0') end)
@@ -179,33 +202,48 @@ local function Init()
 
     function vss_SetCurrentProject(dir)
         local d = dir or props['FileDir']
-        if not shell.fileexists(d..'\\'..'mssccprj.scc') then
+        local _, strProgect
+        d = d:from_utf8():upper()
+        local vssDir = props['sybase.projects.dir']:upper()
+        if shell.fileexists(d.."\\mssccprj.scc") then
+            local fil = io.open(d..'\\'..'mssccprj.scc')
+            local strFile = fil:read("*a")
+            fil:close()
+            _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
+        elseif vssDir ~= '' and d:find('^'..vssDir) then
+            strProgect = d:gsub('^'..vssDir, "$"):gsub("\\", "/")
+        end
+        if not strProgect then
             print('"mssccprj.scc" not found in current dir')
             return false
         end
-        d = d:from_utf8()
-        local fil = io.open(d..'\\'..'mssccprj.scc')
-        local strFile = fil:read("*a")
-        fil:close()
-        local _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
+
         curProj = strProgect
         local ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
         if ierr ~= 0 then print(strerr) end
         return ierr == 0
     end
 
-    local function getStatAsync(d, f, dbg, dutf)
+    local function getStatAsync(d, f, dbg, dutf, vssDir)
         __DEBUG = dbg
+
         local ierr, strerr
         shell.set_curent_dir(d) bLocalDir = true
-        if not shell.fileexists(dutf..'\\'..'mssccprj.scc') then
-            strerr = '"mssccprj.scc" not found in current dir'
-            ierr = -2
-        else
+
+        local _, strProgect
+        if shell.fileexists(d.."\\mssccprj.scc") then
             local fil = io.open(d..'\\'..'mssccprj.scc')
             local strFile = fil:read("*a")
             fil:close()
-            local _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
+            _, _, strProgect = string.find(strFile, 'SCC_Project_Name = "([^"]+)')
+        elseif vssDir ~= '' and d:find('^'..vssDir) then
+            strProgect = d:gsub('^'..string.rep('.', string.len(vssDir)), "$"):gsub("\\", "/")
+        end
+
+        if not strProgect then
+            strerr = '"mssccprj.scc" not found in current dir'
+            ierr = -2
+        else
 
             ierr, strerr = shell.exec(p_vsspath..' CP "'..strProgect..'"', nil, true, true)
             if __DEBUG then print("DEBUG:", p_vsspath..' CP "'..strProgect..'"') end
@@ -386,7 +424,7 @@ local function Init()
             local _, strerr = shell.exec(p_vsspath..' History '..props['FileNameExt']:from_utf8(), nil, true, true)
             --print(strerr)
             --iup.ShowXY(CreateDialog(strerr), 100, 100)
-            iup.ShowInMouse(CreateDialog(strerr))
+            CreateDialog(strerr)
         end
     end
 
@@ -412,7 +450,7 @@ local function Init()
 
         if ierr == 0 then -- íå âçÿò
             t = {
-                {'Check Out', action = vss_checkout, image = 'arrow_curve_270_µ'  ,},
+                {link = '_HIDDEN_|VSS_TAB|Check Out'},
             }
             bAddComon = true
         elseif ierr == 1 then --âçÿò
@@ -421,8 +459,8 @@ local function Init()
                 local _, _, strChecked = strerr:lower():find('exc[%s%d%.:]+([^\n\r]*)')
                 if strChecked == props['FileDir']:lower() then
                     t = {
-                        {'Check In', action = vss_checkin, image = 'arrow_curve_090_µ' ,},
-                        {'Undo Check Out', action = vss_undocheckout,},
+                        {link = '_HIDDEN_|VSS_TAB|Check In'},
+                        {link = '_HIDDEN_|VSS_TAB|Undo Check Out'},
                     }
                 else
                     t = {
@@ -438,18 +476,18 @@ local function Init()
             end
         elseif ierr == 100 then --íîâûé
             t = {
-                {'Add to Project', action = vss_add ,},
+                {link = '_HIDDEN_|VSS_TAB|Add to Project',},
             }
         elseif ierr >= -1 then
             print(strerr)
         end
         if bAddComon then
-            table.insert(t, {'Get Latest Version', action = vss_getlatest ,})
-            table.insert(t, {'Show Differences', action = vss_diff, image = 'edit_diff_µ' ,})
-            table.insert(t, {'Show Differences by HildiM', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,})
-            table.insert(t, {'Show History', action = vss_hist ,})
+            table.insert(t, {link = '_HIDDEN_|VSS_TAB|Get Latest Version', })
+            table.insert(t, {link = '_HIDDEN_|VSS_TAB|Show Differences', })
+            table.insert(t, {link = '_HIDDEN_|VSS_TAB|Show Differences by HildiM', })
+            table.insert(t, {link = '_HIDDEN_|VSS_TAB|Show History', })
             table.insert(t, {'s', separator = 1})
-            table.insert(t, {'Request Comment', check_iuprops = 'vss_showmenu.ask_comment' ,})
+            table.insert(t, {link = '_HIDDEN_|VSS_TAB|Request Comment',})
         end
         for i = 1,  #t do t[i].cpt = _T(t[i][1]); t[i].hlp = "hildim/ui/vss_showmenu.html" end
         return t
@@ -460,17 +498,29 @@ local function Init()
         else
             shell.set_curent_dir(props['FileDir']:from_utf8()) bLocalDir = true
             tState.ierr = -3
-            lanesgen(props['FileDir']:from_utf8(), props['FileNameExt']:from_utf8(), __DEBUG__, props['FileDir'])
+            lanesgen(props['FileDir']:from_utf8():upper(), props['FileNameExt']:from_utf8(), __DEBUG__, props['FileDir'], props['sybase.projects.dir']:upper())
         end
     end
 
     menuhandler:InsertItem('TABBAR', 'slast',
-    {'VSS', visible = function() return bLocalDir and shell.fileexists(props["FileDir"].."\\mssccprj.scc") and shell.fileexists(props['FilePath']) end, CreateVSSMenu})
+    {'VSS', visible = function() return bLocalDir and GetVSSProgect() and shell.fileexists(props['FilePath']) end, CreateVSSMenu})
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',{'VSS', plane = 1,{
             {'Get Version', action = function() GetVer() end, },
             {'Show Differences', action = function() CompareVer() end, },
             {'Show Differences by HildiM', action = function() CompareVerH() end, },
             {'Show Comment', action = function() CommentVer() end, },
+        }}, nil, _T
+    )
+    menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',{'VSS_TAB', plane = 1,{
+            {'Add to Project', action = vss_add ,},
+            {'Check In', action = vss_checkin, image = 'arrow_curve_090_µ' , },
+            {'Check Out', action = vss_checkout, image = 'arrow_curve_270_µ'  , },
+            {'Undo Check Out', action = vss_undocheckout,},
+            {'Get Latest Version', action = vss_getlatest ,},
+            {'Show Differences', action = vss_diff, image = 'edit_diff_µ' ,},
+            {'Show Differences by HildiM', action = function() if COMPARE then COMPARE.CompareVss() end end, visible = 'COMPARE', image = 'edit_diff_µ' ,},
+            {'Show History', action = vss_hist ,},
+            {'Request Comment', check_iuprops = 'vss_showmenu.ask_comment' ,},
         }}, nil, _T
     )
     AddEventHandler("OnSwitchFile", OnSwitch_local)

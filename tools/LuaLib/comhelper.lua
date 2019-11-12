@@ -23,7 +23,7 @@ function s.CheckXml(strXml)
     end
 end
 
-function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, clbExt)
+function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, clbExt, encoding)
     chNODE_TEXT = 3
     local clb = clbExt or function(n, i) return i end
     strInd0 = ','..(strInd0 or '')..','
@@ -131,7 +131,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
 
     local xml = luacom.CreateObject("MSXML.DOMDocument")
     if not strXml then strXml = editor:GetText() end
-    if(tonumber(props['editor.unicode.mode']) == IDM_ENCODING_DEFAULT) then
+    if( (encoding or tonumber(props['editor.unicode.mode'])) == IDM_ENCODING_DEFAULT) then
         strXml = strXml:to_utf8()
     end
     xml.preserveWhiteSpace = true
@@ -142,7 +142,7 @@ function s.FormatXml(strXml, lenInd, strInd0, strNoNewLineBgn, strNoNewLineEnd, 
     end
 
     FormatNode(xml, xml.firstChild, '\r\n', lenInd)
-    if(tonumber(props['editor.unicode.mode']) == IDM_ENCODING_DEFAULT) then
+    if((encoding or tonumber(props['editor.unicode.mode'])) == IDM_ENCODING_DEFAULT) then
         return xml.xml
     else
         return xml.xml:to_utf8()

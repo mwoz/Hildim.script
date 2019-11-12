@@ -746,6 +746,32 @@ function CORE.AskReWriteFile(fname)
     end
 end
 
+function CORE.AskCreatePath(fname)
+    local p = fname:gsub('[^\\]*$', '')
+    if not shell.fileexists(p) then
+        local msg = _TH"The directory \n'%1'\n is not exists. Create?"
+
+        if 1 == iup.Alarm('HildiM', _FMT(msg, p), _TH"OK", _TH"Cancel") then
+            local pNew = ''
+            for pNext in p:gmatch('[^\\]+') do
+                pNew = pNew..pNext
+                if not shell.fileexists(pNew..'\\') then
+                    if not shell.greateDirectory(pNew) then
+                        iup.Alarm('HildiM', _TH"The directory \n'%1'\n can't be created.", _TH"OK", _TH"Cancel")
+                        return false
+                    end
+                end
+                pNew = pNew..'\\'
+            end
+            return true
+        else
+            return false
+        end
+    else
+        return true
+    end
+end
+
 function CORE.CloseListSet(sel, lst, column)
     for i = lst.numlin, 1,- 1 do
         if (iup.GetAttributeId2(lst, 'TOGGLEVALUE', i, column) or '0') == sel then
@@ -1036,6 +1062,7 @@ iup.matrix = function(t)
     t.sb_presscolor = props['layout.scroll.presscolor'];
     t.sb_backcolor = props['layout.scroll.backcolor']
     t['bgcolor0:*'] = props['layout.scroll.backcolor']
+    t['bgcolor*:0'] = props['layout.scroll.backcolor']
     t.bgcolor = props['layout.txtbgcolor'];
     t.fgcolor = props['layout.txtfgcolor']
 
@@ -1274,6 +1301,58 @@ CORE.panelactivate_cb = function(flat_title)
     end
 end
 
+function CORE.panelCaption(ts)
+    local pDlg, sX, sY, bMoved, hbTitle, flat_title
+    local function fDlg()
+        if not pDlg then
+            pDlg = iup.GetParent(hbTitle)
+            while iup.GetParent(pDlg) do pDlg = iup.GetParent(pDlg ) end
+            pDlg.customframeactivate_cb = CORE.panelactivate_cb(flat_title)
+        end
+        return pDlg
+    end
+    local function button_cb(h, button, pressed, x, y, status)
+        h.value = 0
+        if not fDlg() then return end
+        if button == 49  then
+            bMoved = pressed; sX = x; sY = y
+            if bMoved == 0 then
+                _G.iuprops['dialogs.'..ts.sciteid..'.x'] = fDlg().x
+                _G.iuprops['dialogs.'..ts.sciteid..'.y'] = fDlg().y
+            end
+        end
+    end
+
+    local function motion_cb(h, x, y, status)
+    h.value=1
+        if not fDlg() then return end
+        if bMoved == 1 and sX and sY and not bRecurs then
+            local _,_,wx,wy = fDlg().screenposition:find('(%-?%d*),(%-?%d*)')
+            local nX, nY = tonumber(wx) + (x - sX), tonumber(wy) + (y - sY)
+            bRecurs = true
+            if nX ~= wx or nY ~= wy then old_iup_ShowXY(fDlg(), nX, nY) end
+            bRecurs = false
+        end
+    end
+
+    local btn_attach
+    if ts.attach_action then
+        btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus = 'NO', name = ts.sciteid..'_title_btnattach', tip = 'Attach', flat_action = ts.attach_action}
+        btn_attach.image.bgcolor = iup.GetLayout().bgcolor
+    end
+
+    flat_title = iup.flatbutton{title = ' '..ts.title, name = 'Title', fgcolor = props['layout.fgcolor'], image = ts.buttonImage, maxsize = 'x20', fontsize = '9', flat = 'YES', border = 'NO', padding = '3x', alignment = 'ALEFT',
+        canfocus = 'NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb = function() end,
+    leavewindow_cb = function() end,}
+
+    hbTitle = iup.expander{iup.hbox{ alignment = 'ACENTER', bgcolor = iup.GetLayout().bgcolor, name = ts.sciteid..'_title_hbox', fontsize = iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+        flat_title,
+        btn_attach,
+        iup.flatbutton{image = 'cross_button_µ', tip = 'Hide', canfocus = 'NO', flat_action = ts.action},
+    }, barsize = 0, state = ts.state, name = ts.sciteid..'_expander'}
+    return hbTitle
+end
+
 iup.scitedetachbox = function(t)
     local dtb, statusBtn, cmd_Hide, cmd_Attach
     local bMoved = 0, sX, sY, bRecurs
@@ -1305,25 +1384,26 @@ iup.scitedetachbox = function(t)
     local function get_scId()
         return _G.iuprops[dtb.sciteid..'.win'] or '0'
     end
-    local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() cmd_Attach() end}
+     local btn_attach = iup.flatbutton{image = 'ui_toolbar__arrow_µ', canfocus='NO', name = t.sciteid..'_title_btnattach', tip='Attach', flat_action = function() cmd_Attach() end}
 
-    btn_attach.image.bgcolor = iup.GetLayout().bgcolor
-    local flat_title = iup.flatbutton{title = ' '..t.Dlg_Title,name='Title',fgcolor=props['layout.fgcolor'], image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
-        canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
-        leavewindow_cb = function() end,}
+     btn_attach.image.bgcolor = iup.GetLayout().bgcolor
+     local flat_title = iup.flatbutton{title = ' '..t.Dlg_Title,name='Title',fgcolor=props['layout.fgcolor'], image=t.buttonImage, maxsize = 'x20', fontsize='9',flat='YES',border='NO',padding='3x', alignment='ALEFT',
+         canfocus='NO', expand = 'HORIZONTAL', size = '100x20', button_cb = button_cb, motion_cb = motion_cb, enterwindow_cb=function() end,
+         leavewindow_cb = function() end,}
 
-    local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetLayout().bgcolor, name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
-        flat_title,
-        btn_attach,
-        iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() cmd_Hide() end},
-    }, barsize = 0, state='CLOSE', name = t.sciteid..'_expander'}
+     local hbTitle = iup.expander{iup.hbox{ alignment='ACENTER',bgcolor=iup.GetLayout().bgcolor, name = t.sciteid..'_title_hbox', fontsize=iup.GetGlobal("DEFAULTFONTSIZE"), gap = 5,
+         flat_title,
+         btn_attach,
+         iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() cmd_Hide() end},
+     }, barsize = 0, state='CLOSE', name = t.sciteid..'_expander'}
+    --local hbTitle = iup.dialog{CORE.panelCaption{title = ' '..t.Dlg_Title, sciteid = t.sciteid, attach_action = function() cmd_Attach() end, state = 'CLOSE', action = function() cmd_Hide() end}}
 
     if t[1] then
         local vb = t[1]
         table.remove(t)
         --table.insert(t, iup.vbox{hbTitle, vb, fontsize=iup.GetGlobal("DEFAULTFONTSIZE"),})
 
-        table.insert(t, iup.vbox{iup.scrollbox{hbTitle, scrollbar = 'NO', expand = "HORIZONTAL", visible='NO'}, vb, fontsize = iup.GetGlobal("DEFAULTFONTSIZE"),})
+        table.insert(t, iup.vbox{iup.scrollbox{hbTitle, scrollbar = 'NO', state='CLOSE', expand = "HORIZONTAL", visible='NO'}, vb, fontsize = iup.GetGlobal("DEFAULTFONTSIZE"),})
     else
         local pVbx = iup.GetDialogChild(t.HANDLE, t.sciteid..'_vbox')
         local exOld = iup.GetDialogChild(pVbx, t.sciteid..'_expander')
@@ -1331,7 +1411,9 @@ iup.scitedetachbox = function(t)
             iup.Detach(exOld)
             iup.Destroy(exOld)
         end
+
         local hTmp = iup.dialog{hbTitle}
+
         local hBT = iup.GetDialogChild(hTmp, t.sciteid..'_expander')
         iup.Detach(hBT)
         iup.Destroy(hTmp);hTmp = nil
@@ -1370,7 +1452,7 @@ iup.scitedetachbox = function(t)
         dtb.detached = 1
         dtb.detachhidden = 1
         dtb.detached = nil
-
+local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
         _G.iuprops[dtb.sciteid..'.win'] = Iif(bShow, '1', '2')
         hbTitle.state = 'OPEN'
         iup.GetParent(hbTitle).visible = "YES"
@@ -1490,6 +1572,7 @@ iup.scitedetachbox = function(t)
                 canvasbar = iup.GetChild(iup.GetChild(_G.dialogs[dtb.sciteid], 1), 1)
                 canvasbar.visible = 'NO'
             end
+ local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
 
             hbTitle.state = 'CLOSE'
             iup.GetParent(hbTitle).size = "x0"

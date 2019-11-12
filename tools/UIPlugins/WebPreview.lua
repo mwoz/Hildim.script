@@ -53,22 +53,42 @@ local function init()
     end
 
 	local pBody
+    local function doCopy()
+        local text = web.com.document:getSelection():toString():to_utf8()
+
+        if text ~= '' then
+            local clipboard = iup.clipboard{}
+            clipboard.text = text
+        end
+    end
+
     function body_events:oncontextmenu(e)
             local mnu = iup.menu
             {
-              iup.item{title = "Help", action = function() CORE.HelpUI("htmlpreview", nil) end}
+              iup.item{title = _TM"Help", action = function() CORE.HelpUI("htmlpreview", nil) end},
+              iup.item{title = _TM"Copy", action = doCopy},
+              iup.item{title = _TM"Search", action = function() CORE.ActivateFindDialog(web.com.document:getSelection():toString()) end}
             }
             mnu:popup(iup.MOUSEPOS, iup.MOUSEPOS)
         return true
     end
 
+    function body_events:onkeypress()
+        local e = web.com.document.parentWindow.event
+        if e.keyCode == 3 and not e.altKey and e.ctrlKey and not e.shiftKey then doCopy() end
+    end
+
     function body_events:ondblclick()
         OnNavigation("Html")
         if editor.LexerLanguage ~= "hypertext" then return end
-        local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
-        local _, _, xP, yP = web.screenposition:find('(%d+),(%d+)')
-        local z = 100.0 / tonumber(web.zoom)
-        local el = web.com.document:elementFromPoint((tonumber(xC) - tonumber(xP)) * z, (tonumber(yC) - tonumber(yP)) * z)
+        -- local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
+        -- local _, _, xP, yP = web.screenposition:find('(%d+),(%d+)')
+        -- local z = 100.0 / tonumber(web.zoom)
+        -- local el = web.com.document:elementFromPoint((tonumber(xC) - tonumber(xP)) * z, (tonumber(yC) - tonumber(yP)) * z)
+
+        local e = web.com.document.parentWindow.event
+        local el = e.srcElement
+
         local tblPath = {}
         table.insert(tblPath, el)
         local findTag = el.tagName

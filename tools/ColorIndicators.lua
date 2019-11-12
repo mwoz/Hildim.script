@@ -39,17 +39,6 @@ local function InitIndicDialog()
         return '#'..v2s(rgb & 255)..v2s((rgb >> 8) & 255)..v2s((rgb >> 16) & 255)
     end
 
-    local function button_cb(h, button, pressed, x, y, status)
-        h.value = 0
-        if button == 49 then
-            bMoved = pressed; sX = x; sY = y
-            if bMoved == 0 then
-                _G.iuprops['dialogs.bufferslist.xv'] = dlg.x
-                _G.iuprops['dialogs.bufferslist.yv'] = dlg.y
-            end
-        end
-    end
-
     local c_clr = iup.colorbrowser{
         bgcolor = "255 255 255",
         rastersize = "181x181",

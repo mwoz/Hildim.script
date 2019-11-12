@@ -50,7 +50,7 @@ body, html {
         <a target="_blank" href="http://iup.sourceforge.net">http://iup.sourceforge.net</a>
       </div>
       <div>
-        <span class="hl">Lua 5.3</span> scripting language by TeCGraf, PUC-Rio</a>
+        <span class="hl">{Lua}</span> scripting language by TeCGraf, PUC-Rio</a>
         <a target="_blank" href="http://www.lua.org">http://www.lua.org</a>
       </div>
       <div>
@@ -104,7 +104,7 @@ body, html {
     t = shell.getfiletime(props['SciteDefaultHome']..'/HildiM.exe')
     local dt = string.format('%02d.%02d.%4d %02d:%02d', t.Day, t.Month, t.Year, t.Hour, t.Minute)
     t = scite.FileVersionInfo(props['SciteDefaultHome']..'/SciLexer.dll')
-    templ = templ:gsub('{ScintillaVer}', t.FileVersion):gsub('{HildiMDate}', dt)
+    templ = templ:gsub('{ScintillaVer}', t.FileVersion):gsub('{HildiMDate}', dt):gsub('{Lua}', _VERSION..'.'.._VERSION_RELEASE)
 
     local tdll = scite.findfiles(props['SciteDefaultHome']..'/tools/lualib/*.dll')
 

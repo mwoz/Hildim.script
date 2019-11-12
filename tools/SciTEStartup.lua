@@ -151,7 +151,7 @@ scite.RunAsync(function()
             iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "YES"
             scite.RunAsync(function() CORE.BottomBarSwitch("YES") end)
         end
-        iup.Refresh(iup.GetLayout())
+        scite.RunAsync(function() iup.Refresh(iup.GetLayout()) end)
     end
     if OnInitHildiM then OnInitHildiM() end
     _G.g_session['LOADED'] = true

@@ -270,6 +270,8 @@ __LOCALE ={
         ["by"] = "Автор:";
         ["The file \n'%1'\n already exists%2. Overwrite?"] = "Файл \n'%1'\n уже существует%2. Перезаписать?";
         [" and is read-only"] = " и помечен только для чтения";
+        ["The directory \n'%1'\n is not exists. Create?"] = "Директория \n'%1'\n не существует. Создать?";
+        ["The directory \n'%1'\n can't be created."] = "Директория \n'%1'\n не сможет быть создана";
 
         ['Export File As XML'] = 'Сохранить файл как XML',
         ['Export File As LaTeX'] = 'Сохранить файл как LaTeX',

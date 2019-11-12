@@ -487,7 +487,7 @@ local function FolderUp()
 end
 
 --перехватчики команд меню
-local function ActivateFind_l(nTab)
+local function ActivateFind_l(nTab, s)
 
     Ctrl("tabFindRepl").valuepos = nTab
 
@@ -497,9 +497,10 @@ local function ActivateFind_l(nTab)
 
     SetStaticControls()
 
-    local s
-    if wnd.SelectionStart == wnd.SelectionEnd then s = GetCurrentWord()
-    else s = wnd:GetSelText() end
+    if not s then
+        if wnd.SelectionStart == wnd.SelectionEnd then s = GetCurrentWord()
+        else s = wnd:GetSelText() end
+    end
     if wnd.CodePage == 0 then s = s:to_utf8() end
     s = PrepareFindText(s)
     if s ~= '' then Ctrl("cmbFindWhat").value = s end
@@ -539,6 +540,10 @@ local function ActivateFind_l(nTab)
 
     onFindEdit(Ctrl('cmbFindWhat'), c, Ctrl("cmbFindWhat").value)
     return true
+end
+
+function CORE.ActivateFindDialog(s)
+    ActivateFind_l(0, s)
 end
 
 local function FindNextSel(bUp)
