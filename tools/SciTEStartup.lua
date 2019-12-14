@@ -93,7 +93,7 @@ scite.RunAsync(function()
         if (_G.iuprops['coeditor.win'] or '0')~= '0' then bHide = (_G.iuprops['coeditor.win'] == '2'); local h = iup.GetDialogChild(hMainLayout, "SourceExDetach"); h.detachPos(not bHide) end
 
         if (_G.iuprops['findresbar.win'] or '0') == '0' and _G.iuprops['concolebar.win'] or '0' == '0' then iup.GetDialogChild(hMainLayout, "BottomSplit").barsize = '5' end
-        if (_G.iuprops['findresbar.win'] or '0') == '0' and _G.iuprops['findrepl.win'] or '0' == '0' then iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize = '5' end
+        -- if (_G.iuprops['findresbar.win'] or '0') == '0' and _G.iuprops['findrepl.win'] or '0' == '0' then iup.GetDialogChild(hMainLayout, "BottomSplit2").barsize = '5' end
 
         if _G.dialogs['findresbar'] and _G.dialogs['concolebar'] then
             iup.GetDialogChild(hMainLayout, "BottomExpander").state = 'CLOSE'

@@ -374,7 +374,7 @@ local function Solution_Init(h)
         handle = bgbox,
         OnSwitchFile = Initialize,
         OnOpen = Initialize,
-        on_SelectMe = Initialize
+        tabs_OnSelect = Initialize
     }
 
 end

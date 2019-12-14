@@ -731,7 +731,7 @@ local function Init_hidden()
             if ((_G.iuprops['leftbar.win'] or '0')~= '2') and LeftBar_obj.handle then SavedState.LeftBar = _G.iuprops['leftbar.win'] end
             if (_G.iuprops['concolebar.win'] or '0')~= '2' then SavedState.consoleBar = _G.iuprops['concolebar.win'] end
             if (_G.iuprops['findresbar.win'] or '0')~= '2' then SavedState.FindResBar = _G.iuprops['findresbar.win'] end
-            if (_G.iuprops['findrepl.win'] or '0')~= '2' then SavedState.FindRepl = _G.iuprops['findrepl.win'] end
+            if (_G.iuprops['findrepl.win'] or '0')~= '2' and not SideBar_Plugins.findrepl.Bar_obj then SavedState.FindRepl = _G.iuprops['findrepl.win'] end
             if (_G.iuprops['coeditor.win'] or '0')~= '2' then SavedState.Coeditor = _G.iuprops['coeditor.win'] end
 
 
@@ -769,13 +769,15 @@ local function Init_hidden()
         if SavedState.bStatusBar then iup.GetDialogChild(iup.GetLayout(), "statusbar_expander").switch() end
         if SavedState.bTabBar then iup.GetDialogChild(iup.GetLayout(), "TabbarExpander").state = 'OPEN' end
 
-        if SavedState.SideBar then SideBar_obj.handle.Switch() end
-        if SavedState.LeftBar then LeftBar_obj.handle.Switch() end
+        if (SavedState.SideBar or '') == '3' then SideBar_obj.handle.AttachPane()
+        elseif SavedState.SideBar then SideBar_obj.handle.Switch() end
+        if (SavedState.LeftBar or '') == '3' then LeftBar_obj.handle.AttachPane()
+        elseif SavedState.LeftBar then LeftBar_obj.handle.Switch() end
         if SavedState.consoleBar then if SavedState.consoleBar == '0' then iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "ConsoleDetach").ShowDialog() end end
         if SavedState.FindResBar then if SavedState.FindResBar == '0' then iup.GetDialogChild(iup.GetLayout(), "FindResDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "FindResDetach").ShowDialog() end end
         if SavedState.Coeditor then if SavedState.Coeditor == '0' then iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "SourceExDetach").ShowDialog() end end
         if SavedState.FindRepl then if SavedState.FindRepl == '0' then iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").Attach() else iup.GetDialogChild(iup.GetLayout(), "FindReplDetach").ShowDialog() end end
-
+        if iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").hidden == "YES" then CORE.BottomBarSwitch('YES') end
         editor.Overtype = started_overtype
         editor.CaretFore = caret_fore
         iup.GetDialogChild(iup.GetLayout(), "chkWholeWord").value = started_cycle

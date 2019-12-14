@@ -26,7 +26,8 @@ end
 CORE = {}
 CORE.onDestroy_event = {}
 -- Пути поиска подключаемых lua-библиотек и модулей
-package.path  = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.lua;"..package.path
+local lib = props["SciteDefaultHome"].."\\tools\\LuaLib\\"
+package.path  = lib.."?.lua;"..lib.."?\\?.lua;"..lib.."?\\init.lua;"
 package.cpath = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.dll;"..package.cpath
 
 require 'shell'

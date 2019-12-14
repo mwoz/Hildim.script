@@ -489,6 +489,7 @@ end
 --перехватчики команд меню
 local function ActivateFind_l(nTab, s)
 
+    if nTab < 0 then nTab = Ctrl("tabFindRepl").valuepos end
     Ctrl("tabFindRepl").valuepos = nTab
 
     local wnd = editor
@@ -542,8 +543,8 @@ local function ActivateFind_l(nTab, s)
     return true
 end
 
-function CORE.ActivateFindDialog(s)
-    ActivateFind_l(0, s)
+function CORE.ActivateFindDialog(s, nTab)
+    ActivateFind_l(nTab or 0, s)
 end
 
 local function FindNextSel(bUp)
@@ -1240,6 +1241,9 @@ local function Init(h)
             end
         end);
         Dlg_Show_Cb = function(h, state) scite.RunAsync(function() if(_G.g_session['LOADED'] and not bBlock4reload) then SetStaticControls() end end) end;
+        focus_cb = function(h, f)
+            if not _Plugins.findrepl.Bar_obj and CORE.curTopSplitter ~= "BottomBar" then iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").hidden = 'NO'; CORE.curTopSplitter = "BottomBar" end
+        end;
         }
     local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')
 

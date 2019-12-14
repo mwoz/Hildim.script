@@ -165,6 +165,7 @@ local function Init_hidden()
     local function OnSwitch_local()
         if (gitInstall or 0) == 1 then
             local p = props['FilePath']
+            if p:find('^\\') then return end
             bGitActive = false
             repeat
                 p = p:gsub('\\[^\\]*$', '')

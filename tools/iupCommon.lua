@@ -1253,7 +1253,7 @@ iup.scitedeatach = function(dtb)
 end
 
 function CORE.BottomBarSwitch(cmd)
-    --if cmd== 'YES' then print(debug.traceback()) end
+    if cmd== 'NO' then CORE.curTopSplitter = 'BottomBar' end
     local hMainLayout = iup.GetLayout()
     local bottomsplit = iup.GetDialogChild(hMainLayout, "BottomBarSplit")
     bottomsplit.hidden = cmd
@@ -1403,7 +1403,7 @@ iup.scitedetachbox = function(t)
         table.remove(t)
         --table.insert(t, iup.vbox{hbTitle, vb, fontsize=iup.GetGlobal("DEFAULTFONTSIZE"),})
 
-        table.insert(t, iup.vbox{iup.scrollbox{hbTitle, scrollbar = 'NO', state='CLOSE', expand = "HORIZONTAL", visible='NO'}, vb, fontsize = iup.GetGlobal("DEFAULTFONTSIZE"),})
+        table.insert(t, iup.backgroundbox{iup.vbox{iup.scrollbox{hbTitle, scrollbar = 'NO', state = 'CLOSE', expand = "HORIZONTAL", visible = 'NO'}, vb, fontsize = iup.GetGlobal("DEFAULTFONTSIZE"),}, focus_cb = t.focus_cb})
     else
         local pVbx = iup.GetDialogChild(t.HANDLE, t.sciteid..'_vbox')
         local exOld = iup.GetDialogChild(pVbx, t.sciteid..'_expander')
@@ -1422,6 +1422,18 @@ iup.scitedetachbox = function(t)
         iup.Map(hBT)
     end
     dtb = t.HANDLE or iup.sc_detachbox(t)
+
+    if t.focus_cb then
+        local function Sropagatefocus(h)
+            for i = 0, iup.GetChildCount(h) - 1 do
+                local h1 = iup.GetChild(h, i)
+                Sropagatefocus(h1)
+                if h1.propagatefocus == 'NO' and not h1.setfocus_cb and not h1.getfocus_cb then h1.propagatefocus = 'YES' end
+            end
+        end
+        Sropagatefocus(dtb)
+    end
+
     dtb.sciteid = t.sciteid
     dtb.Dlg_Close_Cb = t.Dlg_Close_Cb
     dtb.Dlg_Show_Cb = t.Dlg_Show_Cb
@@ -1717,12 +1729,19 @@ local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
     end
 
     dtb.Switch = cmd_Switch
+    dtb.AttachPane = cmd_AttachPane
 
     if t.buttonImage then
         if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
-        statusBtn = iup.flatbutton{name = 'barBtn'..t.sciteid,image = t.buttonImage, visible = "NO", canfocus  = "NO", flat_action=cmd_Switch,
-                                   tip=t.Dlg_Title,}
-        function statusBtn:flat_button_cb(button, pressed, x, y, status) if button==51 and pressed == 1 then menuhandler:PopUp('MainWindowMenu|View|'..t.sciteid) end end
+        statusBtn = iup.flatbutton{name = 'barBtn'..t.sciteid, image = t.buttonImage, visible = "NO", canfocus = "NO", flat_action = function()
+                if t.sciteid == 'findrepl' then CORE.ActivateFindDialog('', -1) else cmd_Switch() end
+            end,
+            tip = t.Dlg_Title,}
+        function statusBtn:flat_button_cb(button, pressed, x, y, status)
+            if button == 51 and pressed == 1 and (t.sciteid ~= 'findrepl' or not SideBar_Plugins.findrepl.Bar_obj) then
+                menuhandler:PopUp('MainWindowMenu|View|'..t.sciteid)
+            end
+        end
         table.insert(_tmpSidebarButtons, statusBtn)
     end
 
@@ -1749,7 +1768,9 @@ local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
         end
     end
 
-    menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, image = t.buttonImage, cpt = t.Dlg_Title, visible = t.MenuVisible, tSub})
+    menuhandler:InsertItem('MainWindowMenu', 'View|slast',  {dtb.sciteid, image = t.buttonImage, cpt = t.Dlg_Title,
+    visible = t.MenuVisible or function() return  t.sciteid ~= 'findrepl' or not SideBar_Plugins.findrepl.Bar_obj end,
+    tSub})
 
     if t.MenuEx then menuhandler:InsertItem(t.MenuEx, 'xxxxxx', {'&View', visible = t.MenuVisibleEx, tSub}) end
 

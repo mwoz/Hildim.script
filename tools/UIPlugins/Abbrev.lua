@@ -275,6 +275,9 @@ end
         if bClip then
             local cpb = iup.clipboard{};
             curSel = iup.GetAttribute(cpb, "TEXT")
+            if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then
+                curSel = curSel:from_utf8()
+            end
             iup.Destroy(cpb)
         else curSel = editor:GetSelText() end
 
@@ -521,7 +524,6 @@ local function ToolBar_Init(h)
     showPopUp = function() fbutton:flat_action() end
     return {
         handle = box;
-        on_SelectMe = onselect;
         }
 end
 
@@ -537,11 +539,10 @@ local function Tab_Init(h)
         end
     end)
     AddEventHandler("OnResizeSideBar", function(sciteid)
-        if h.atrium.Bar_obj.sciteid == sciteid then onResize_local() end
+        if h.abbreviations.Bar_obj.sciteid == sciteid then onResize_local() end
     end)
     return {
         handle = iup.vbox{iup.backgroundbox{list_abbrev, bgcolor = iup.GetLayout().txtbgcolor}};
-        --on_SelectMe = onselect;
         tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(list_abbrev) end) end;
         }
 

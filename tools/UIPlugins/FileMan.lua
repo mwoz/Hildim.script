@@ -849,12 +849,11 @@ local function FileManTab_Init(h)
                 end
             end
         end),
-        tabs_OnSelect = function()
+        tabs_OnSelchange = function()
             if _Plugins.fileman.Bar_obj.TabCtrl.value_handle.tabtitle ~= _Plugins.fileman.id then
                 m_prevSel = _Plugins.fileman.Bar_obj.TabCtrl.valuepos
             end
         end;
-        on_SelectMe = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); --[[OnSwitch(false, true)]] end) end;
         tabs_OnSelect = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); --[[OnSwitch(false, true)]] end) end;
     }
     Favorites_OpenList()

@@ -59,7 +59,7 @@ local function Func_Init(h)
         --         if type(v) == 'table' then
         --             print(s..k..'->  Table')
         --             --debug_prnTb(v, n + 1)
-        --             if k ~= 'Next' then debug_prnTb(v, n + 1) else print(s..'NextId->'..v.Id) end
+        --             if k ~= 'Next' then debug_prnTb(v, n + 1) else print(s..'NextId->'..(v.Id or '')) end
         --         else
         --             print(s..k..'->  ', v)
         --         end
@@ -251,12 +251,12 @@ local function Func_Init(h)
                             end
                         end
                     end
-
+    --debug_prnArgs(tOut)
                     table.sort(tOut, function(a, b)
                         if (a._order or 0) ~= (b._order or 0) then
                             return (a._order or 0) < (b._order or 0)
                         elseif tPar.srt == 'name' or (not a.userid.start and not b.userid.start) then
-                            return (a.leafname or a.branchname):lower() < (b.leafname or b.branchname):lower()
+                            return (a.leafname or a.branchname or ''):lower() < (b.leafname or b.branchname or ''):lower()
                         else
                             return (a.userid.start or 9999999) < (b.userid.start or 9999999)
                         end
@@ -331,7 +331,7 @@ local function Func_Init(h)
                 local tblFld = {}
                 for i = #tbl, 1, -1 do
                     if type(tbl[i]) == 'table' then
-                        local fldName = fnTryGroupName(GetTypeItem(tbl[i]), tbl[i][4])
+                        local fldName = fnTryGroupName(GetTypeItem(tbl[i]), tbl[i][4]) or ''
                         if fldName ~= '' and fldName ~= '~~ROOT' then
                             if not tblFld[fldName] then
                                 tblFld[fldName] = {}
@@ -557,7 +557,7 @@ local function Func_Init(h)
                 local idPrev = 0
                 while tUid do
                     if (tUid.start or 0) > l then break end
-                    idPrev = tUid.Id
+                    idPrev = tUid.Id or 0
                     tUid = tUid.Next
                 end
 

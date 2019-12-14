@@ -257,7 +257,6 @@ local function ToolBar_Init(h)
     };
     return {
         handle = box;
-        On_SelectMe = onselect;
         OnSwitchFile = OnSwitch;
         OnOpen = OnSwitch;
         }
@@ -275,7 +274,6 @@ local function Tab_Init(h)
     end)
     return {
         handle = iup.vbox{iup.backgroundbox{list_bookmarks, bgcolor = iup.GetLayout().txtbgcolor}};
-        On_SelectMe = onselect;
         OnSwitchFile = OnSwitch;
         OnOpen = OnSwitch;
         tabs_OnSelect = function() scite.RunAsync(function() iup.SetFocus(list_bookmarks) end); OnSwitch() end;

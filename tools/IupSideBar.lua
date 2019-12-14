@@ -23,6 +23,8 @@ local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
 local bottomsplit = iup.GetDialogChild(hMainLayout, "BottomBarSplit")
 local scipPannCounter = 0;
 
+CORE.curTopSplitter = ''
+
 local function HidePannels()
     if scipPannCounter > 0 then
         scipPannCounter = scipPannCounter - 1
@@ -61,6 +63,7 @@ function sidebar_Switch(n)
             if LeftBar_obj.handle.Dialog then LeftBar_obj.handle.ShowDialog() end
             LeftBar_obj.TabCtrl.valuepos = n -1
             for _,tbs in pairs(SideBar_Plugins) do
+                if tbs.tabs_OnSelchange then tbs.tabs_OnSelchange{} end
                 if tbs.tabs_OnSelect and LeftBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then
                     LeftBar_obj.TabCtrl:getfocus_cb()
                     tbs.tabs_OnSelect()
@@ -73,6 +76,7 @@ function sidebar_Switch(n)
         if SideBar_obj.handle.Dialog then SideBar_obj.handle.ShowDialog() end
         SideBar_obj.TabCtrl.valuepos = n -1
         for _, tbs in pairs(SideBar_Plugins) do
+            if tbs.tabs_OnSelchange then tbs.tabs_OnSelchange{} end
             if tbs.tabs_OnSelect and SideBar_obj.TabCtrl.value_handle.tabtitle == tbs.id then
                 SideBar_obj.TabCtrl:getfocus_cb()
                 tbs.tabs_OnSelect()
@@ -266,9 +270,9 @@ local function CreateBox()
             --сначала найдем активный таб и установим его в SideBar_ob
             --h.ONMOVE = true
             for _, tbs in pairs(SideBar_Plugins) do
+                if tbs.tabs_OnSelchange then tbs.tabs_OnSelchange{} end
                 if tbs.id == new_tab.tabtitle then
                     if tbs["tabs_OnSelect"] then tbs.tabs_OnSelect() end
-                    --if tbs["on_SelectMe"] then tbs.on_SelectMe() end
                 end
             end
         end)
@@ -289,8 +293,7 @@ local function CreateBox()
         t.bgcolor = iup.GetLayout().bgcolor
         t.tabsbackcolor = props["layout.splittercolor"]
         t.getfocus_cb = function(h)
-            local s = iup.GetDialogChild(hMainLayout, splitter)
-            if s.popupside ~= 0 then s.hidden = 'NO'; end
+            if CORE.curTopSplitter ~= sciteid then iup.GetDialogChild(hMainLayout, splitter).hidden = 'NO'; CORE.curTopSplitter = sciteid end
         end
 
         return iup.flattabs(t)
@@ -329,6 +332,9 @@ local function CreateBox()
                     end
                 end
             end);
+            focus_cb = function(h, f)
+                if CORE.curTopSplitter ~= sSciteId then spl_h.hidden = 'NO'; CORE.curTopSplitter = sSciteId end
+            end;
             k_any =(function(_, key)
                 if key == iup.K_ESC then iup.PassFocus() end
             end);
@@ -477,7 +483,12 @@ local function CreateBox()
     end
 
     AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag, bSwitch)
-        if (bSelection == 1 or bModified == 1) and bSwitch == 0 then  HidePannels() end
+        if (bSelection == 1 or bModified == 1) and bSwitch == 0 then HidePannels(); CORE.curTopSplitter = '' end
+    end)
+    AddEventHandler("PaneOnUpdateUI", function(bModified, bSelection, flag, bSwitch)
+        if (bSelection == 1 ) then
+            if CORE.curTopSplitter ~= "BottomBar" then iup.GetDialogChild(hMainLayout, "BottomBarSplit").hidden = 'NO'; CORE.curTopSplitter = "BottomBar" end
+        end
     end)
 
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|xxx', {'Sidebar', tblMenus})
@@ -586,23 +597,23 @@ local function InitSideBar()
     end
 
     ConsoleBar = iup.scitedetachbox{
-        HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach"); buttonImage='terminal_µ';
+        HANDLE = iup.GetDialogChild(hMainLayout, "ConsoleDetach"); buttonImage = 'terminal_µ';
         sciteid = 'concolebar';Split_h = bSplitter;Split_CloseVal = "0";
         Dlg_Title = _TH"Output"; Dlg_Show_Cb = nil; MenuEx = "OUTPUT";
         Dlg_Close_Cb = (function(h)
         end);
         Dlg_Show_Cb = (function(h, state)
-            if state == 0 and (_G.iuprops['findresbar.win'] or '0')~='0' then
-                if (_G.iuprops['findrepl.win'] or '0')=='0' and not SideBar_Plugins.findrepl.Bar_obj then
+            if state == 0 and (_G.iuprops['findresbar.win'] or '0')~= '0' then
+                if (_G.iuprops['findrepl.win'] or '0') == '0' and not SideBar_Plugins.findrepl.Bar_obj then
                     SideBar_Plugins.findrepl.handle_deattach.detachPos(false)
                     _G.iuprops['findrepl.visible.state'] = "0"
                 end
-                 _G.iuprops['dialogs.concolebar.splitvalue'] =  _G.iuprops['dialogs.findresbar.splitvalue']
+                _G.iuprops['dialogs.concolebar.splitvalue'] = _G.iuprops['dialogs.findresbar.splitvalue']
                 toggleOf()
-             end
+            end
         end);
         Dlg_BeforeAttach = (function()
-            if _G.iuprops['findresbar.win']~='0' then
+            if _G.iuprops['findresbar.win']~= '0' then
                 toggleOn()
                 _G.iuprops['dialogs.concolebar.splitvalue'] = '1000'
             end
@@ -714,7 +725,7 @@ local function InitTabbar()
                 scite.MenuCommand(IDM_CHANGETAB)
                 iup.RefreshChildren(iup.GetDialogChild(iup.GetLayout(), 'SourceSplitBtm'))
             end
-        elseif (button == iup.BUTTON1 and iup.isdouble(status) and not CORE.visibleWndDialog() ) or (button == iup.BUTTON2 and pressed == 0 ) then
+        elseif (button == iup.BUTTON1 and iup.isdouble(status) ) or (button == iup.BUTTON2 and pressed == 0 ) then
             local dblFlag = (tonumber(props['tabbar.tab.close.on.doubleclick']) or 0)
             if tab > - 1 and (((dblFlag & 1) == 1 and button == iup.BUTTON1) or ((dblFlag & 2) == 2 and button == iup.BUTTON2) ) then scite.MenuCommand(IDM_CLOSE)
             elseif tab == -1 then scite.MenuCommand(IDM_NEW) end
@@ -1175,7 +1186,8 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         if bLeftBar    then LefrBar_obj.handle.Attach() end
         if bconsoleBar then ConsoleBar.Attach() end
         if bFindResBar then FindResBar.Attach() end
-        if bFindRepl   then iup.GetDialogChild(hMainLayout, "FindReplDetach").Attach() end
+        if bFindRepl then iup.GetDialogChild(hMainLayout, "FindReplDetach").Attach() end
+        if iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").hidden == "YES" then CORE.BottomBarSwitch('YES') end
     end
 end)
 
