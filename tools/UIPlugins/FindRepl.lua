@@ -1242,7 +1242,13 @@ local function Init(h)
         end);
         Dlg_Show_Cb = function(h, state) scite.RunAsync(function() if(_G.g_session['LOADED'] and not bBlock4reload) then SetStaticControls() end end) end;
         focus_cb = function(h, f)
-            if not _Plugins.findrepl.Bar_obj and CORE.curTopSplitter ~= "BottomBar" then iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").hidden = 'NO'; CORE.curTopSplitter = "BottomBar" end
+            if not _Plugins.findrepl.Bar_obj and CORE.curTopSplitter ~= "BottomBar" and iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").barsize~="0" then
+                local s = iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit")
+                if s.popupside ~= 0 then s.hidden = 'NO'; CORE.curTopSplitter = "BottomBar"  end
+            elseif _Plugins.findrepl.Bar_obj and _Plugins.findrepl.Bar_obj.sciteid ~= CORE.curTopSplitter then
+                local s = iup.GetDialogChild(iup.GetLayout(), _Plugins.findrepl.Bar_obj.splitter)
+                if s.popupside ~= 0 then s.hidden = 'NO'; CORE.curTopSplitter = _Plugins.findrepl.Bar_obj.sciteid end
+            end
         end;
         }
     local hboxPane = iup.GetDialogChild(oDeattFnd, 'findrepl_title_hbox')

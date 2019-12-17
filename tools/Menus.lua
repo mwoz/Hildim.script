@@ -500,6 +500,8 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 				local dlg = iup.LayoutDialog(testHandle)
 				iup.Show(dlg)
 			end),},
+            {'Class &Info Dialog', action = function() iup.Show(iup.ClassInfoDialog()) end },
+            {'&Globals Dialog', action = function() iup.Show(iup.GlobalsDialog()) end },
 		},},
 		{'s2', separator = 1},
             {'&Output', {

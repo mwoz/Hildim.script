@@ -262,6 +262,7 @@ local function CreateBox()
         if not t then return end
         t.name = 'sidebartab_'..sciteid
         Bar_Obj.sciteid = sciteid
+        Bar_Obj.splitter = splitter
         local brObj = Bar_Obj
         t.map_cb = (function(h)
             h.size = "1x1"
@@ -293,7 +294,8 @@ local function CreateBox()
         t.bgcolor = iup.GetLayout().bgcolor
         t.tabsbackcolor = props["layout.splittercolor"]
         t.getfocus_cb = function(h)
-            if CORE.curTopSplitter ~= sciteid then iup.GetDialogChild(hMainLayout, splitter).hidden = 'NO'; CORE.curTopSplitter = sciteid end
+            local s = iup.GetDialogChild(hMainLayout, splitter)
+            if s.popupside ~= 0 then s.hidden = 'NO'; CORE.curTopSplitter = sciteid end
         end
 
         return iup.flattabs(t)
@@ -333,7 +335,7 @@ local function CreateBox()
                 end
             end);
             focus_cb = function(h, f)
-                if CORE.curTopSplitter ~= sSciteId then spl_h.hidden = 'NO'; CORE.curTopSplitter = sSciteId end
+                if CORE.curTopSplitter ~= sSciteId and spl_h.popupside ~= 0 then spl_h.hidden = 'NO'; CORE.curTopSplitter = sSciteId end
             end;
             k_any =(function(_, key)
                 if key == iup.K_ESC then iup.PassFocus() end
@@ -487,7 +489,8 @@ local function CreateBox()
     end)
     AddEventHandler("PaneOnUpdateUI", function(bModified, bSelection, flag, bSwitch)
         if (bSelection == 1 ) then
-            if CORE.curTopSplitter ~= "BottomBar" then iup.GetDialogChild(hMainLayout, "BottomBarSplit").hidden = 'NO'; CORE.curTopSplitter = "BottomBar" end
+            local s = iup.GetDialogChild(hMainLayout, "BottomBarSplit")
+            if CORE.curTopSplitter ~= "BottomBar" and s.popupside ~= 0 then s.hidden = 'NO'; CORE.curTopSplitter = "BottomBar" end
         end
     end)
 
