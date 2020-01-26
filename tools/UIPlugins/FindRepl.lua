@@ -1145,7 +1145,9 @@ local function create_dialog_FindReplace()
             name = "progress",
             expand = "HORIZONTAL",
             size = "x8",
-            fgcolor = props["layout.borderhlcolor"]
+            fgcolor = props["layout.borderhlcolor"],
+            backcolor = props["layout.bgcolor"],
+            flatcolor = props["layout.splittercolor"],
         },
     },
   }

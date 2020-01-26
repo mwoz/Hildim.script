@@ -652,6 +652,8 @@ local function Func_Init(h)
 
     local function OnDwell_local(pos, word, ctrl)
         if _G.iuprops["menus.not.ctrlclick"] then return end
+        if editor.Selections > 1 then return end
+        if pos ~= editor.SelectionStart and word == editor:GetSelText() and word ~= '' then return end
         if ctrl ~= 0 and word ~= '' and iup.GetGlobal("MODKEYSTATE") == ' C  ' then
             if linked_info then
                 local p = linked_info.word:find(word)

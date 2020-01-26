@@ -488,9 +488,10 @@ local function CreateBox()
         if (bSelection == 1 or bModified == 1) and bSwitch == 0 then HidePannels(); CORE.curTopSplitter = '' end
     end)
     AddEventHandler("PaneOnUpdateUI", function(bModified, bSelection, flag, bSwitch)
+        if (output.Focus and (_G.iuprops['concolebar.win'] or '0') == '1') or (findres.Focus and (_G.iuprops['findresbar.win'] or '0') == '1') then return end
         if (bSelection == 1 ) then
             local s = iup.GetDialogChild(hMainLayout, "BottomBarSplit")
-            if CORE.curTopSplitter ~= "BottomBar" and s.popupside ~= 0 then s.hidden = 'NO'; CORE.curTopSplitter = "BottomBar" end
+            if CORE.curTopSplitter ~= "BottomBar" and s.popupside ~= 0 then  s.hidden = 'NO'; CORE.curTopSplitter = "BottomBar" end
         end
     end)
 
@@ -1157,7 +1158,7 @@ AddEventHandler("OnLayOutNotify", function(cmd)
         if tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) > 990 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "667" end
     elseif cmd == "SHOW_OUTPUT" then
         if (_G.iuprops['concolebar.win'] or '0') == '1' or (_G.iuprops['concolebar.autoshow'] or 0) == 0 then return end
-        if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='0' and CORE.BottomBarHidden() then scite.MenuCommand(IDM_TOGGLEOUTPUT) return end
+        if (_G.iuprops['concolebar.win'] or '0') == '0' and CORE.BottomBarHidden() then CORE.BottomBarSwitch('YES') return end
         if _G.dialogs and (_G.iuprops['concolebar.win'] or '0')=='2' and _G.dialogs['concolebar'] then _G.dialogs['concolebar'].Switch(); return end
         if _G.dialogs and tonumber(iup.GetDialogChild(hMainLayout, "BottomSplit").value) < 10 then iup.GetDialogChild(hMainLayout, "BottomSplit").value = "333" end
     elseif cmd == "FULLSCREEN_ON" then

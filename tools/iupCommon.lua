@@ -267,6 +267,7 @@ function iup.SaveChProps(bReset)
 'caret.fore',
 'caret.line.back',
 'caret.line.back.alpha',
+'caret.overstrike.block',
 'caret.period',
 'caret.policy.lines',
 'caret.policy.width',

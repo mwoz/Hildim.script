@@ -9,7 +9,9 @@ return {
 ["Background"] = "Фон";
 ["Bar Background"] = "Панели";
 ["Bar Foreground"] = "Шрифт панелей";
+["Caret"] = "Курсор";
 ["Close with Mouse Click%l|None|Left DblClick|Middle Click|Both|"] = "Закрывать по клику мыши%l|Нет|Левый двойной|Средний|Оба|";
+["Color"] = "Цвет";
 ["Color Scheme"] = "Цветовая схема";
 ['Command line for "Open File Folder"'] = 'Командная строка для "Открыть папку с файлом"';
 ["Configuration"] = "Конфигурация";
@@ -44,6 +46,7 @@ return {
 ["Output - Line Containing Caret - Color"] = "Консоль - Строка под курсором - цвет";
 ["Page Below Last Line"] = "Запрещено end.at.last.line";
 ["Restart HildiM to apply the changes?"] = "Перезапустить программу для применения изменений?";
+["Rectangle for overtype mode"] = "Прямоугольник в режиме замены";
 ["Run As Administrator"] = "Запустить от имени администратора";
 ["Saturation:"] = "Освещенность:";
 ["Save Horizontal Position"] = "Сохранять позицию по горизонтали";
@@ -73,6 +76,7 @@ return {
 ["Vertical Autoscroll"] = "Автопрокрутка по высоте";
 ["Visual Flags-Draw:%l|No|At Begining|At End|At Beginning and End|In Line Number|Line Number and End|Line Number and Beginning|All|\n"] = "Символы переноса-отображать:%l|Нет|В конце|В начале|В конце и в начале|В нумерации|В нумерации и в конце|В нумерации и в начале|Все|\n";
 ["Visual Flags-In Line:%l|All Near Border|At End - Near Text|At Beginning - Near Text|All - Near Text|\n"] = "Символы переноса-в тексте:%l|По границам окна|В конце - по тексту|В начале - по тексту|Оба по тексту|\n";
+["Width"] = "Ширина";
 ["Wrap Line Settings"] = "Настройки переноса по словам";
 ["Wrap by:%l|Word Boundaries|Any Charactersу|Whitespaces|\n"] = "Переносить:%l|По границам слов|По любому символу|По пробелам|\n";
 ["Wrapped Line Indent:"] = "Величина отступа:";

@@ -41,8 +41,10 @@ function sett.ResetSelColors()
         end
         return '#'..string.format('%06X', rgb)
     end
+
     local ret, selection_back, selection_alpha, selection_additional_back, selection_additional_alpha, caret_line_back, caret_line_back_alpha,
-    output_caret_line_back, output_caret_line_back_alpha, findres_caret_line_back, findres_caret_line_back_alpha =
+    output_caret_line_back, output_caret_line_back_alpha, findres_caret_line_back, findres_caret_line_back_alpha,
+    caret_fore, caret_width, caret_overstrike =
     iup.GetParam(_T"Text Colors - Selection".."^TextColorsSelection",
         nil,
         _T'Selected Text - Color'..'%c\n'..
@@ -54,7 +56,12 @@ function sett.ResetSelColors()
         _T'Output - Line Containing Caret - Color'..'%c\n'..
         _T'- transparency'..'%i[0,255,1]\n'..
         _T'Search Results - Line Containing Caret - Color'..'%c\n'..
-        _T'- transparency'..'%i[0,255,1]\n'
+        _T'- transparency'..'%i[0,255,1]\n'..
+        _T'Caret'..'%t\n'..
+
+        _T'Color'..'%c\n'..
+        _T'Width'..'%i[1,3,1]\n'..
+        _T'Rectangle for overtype mode'..'%b\n'
         ,
         Rgb2Str(props['selection.back']),
         tonumber(props['selection.alpha']) or 30,
@@ -65,10 +72,13 @@ function sett.ResetSelColors()
         Rgb2Str(props['output.caret.line.back']),
         tonumber(props['output.caret.line.back']) or 20,
         Rgb2Str(props['findres.caret.line.back']),
-        tonumber(props['findres.caret.line.back.alpha']) or 20
+        tonumber(props['findres.caret.line.back.alpha']) or 20,
+        Rgb2Str(props['caret.fore']),
+        tonumber(props['caret.width']) or 1,
+        tonumber(props['caret.overstrike.block']) or 0
     )
-    if ret then
 
+    if ret then
         props['selection.back']                = Str2Rgb(selection_back)
         props['selection.alpha']               = selection_alpha
         props['selection.additional.back']     = Str2Rgb(selection_additional_back)
@@ -79,8 +89,11 @@ function sett.ResetSelColors()
         props['output.caret.line.back.alpha']  = output_caret_line_back_alpha
         props['findres.caret.line.back']       = Str2Rgb(findres_caret_line_back)
         props['findres.caret.line.back.alpha'] = findres_caret_line_back_alpha
-
-        scite.Perform("reloadproperties:")
+        props['caret.fore']                    = Str2Rgb(caret_fore)
+        props['caret.width']                   = caret_width
+        props['caret.overstrike.block']        = caret_overstrike
+        iup.SaveChProps(true)
+        scite.ReloadProperties()
     end
 end
 
