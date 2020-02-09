@@ -726,7 +726,7 @@ local function InitTabbar()
             h.cursor = 'ARROW'
             iup.Update(h)
             if (tabDrag > -1 and tab == -4) or (hNew and (hNew.name == 'TabCtrlRight' or hNew.name == 'TabCtrlLeft' )) then
-                scite.MenuCommand(IDM_CHANGETAB)
+                CORE.ChangeTab()
                 iup.RefreshChildren(iup.GetDialogChild(iup.GetLayout(), 'SourceSplitBtm'))
             end
         elseif (button == iup.BUTTON1 and iup.isdouble(status) ) or (button == iup.BUTTON2 and pressed == 0 ) then
@@ -817,7 +817,6 @@ function CORE.RemapTab(bIsH)
     if (bIsH and bIsHNow) or (not bIsH and not bIsHNow) then
         if bIsH then
             iup.Reparent(tab, splitT, nil)
-            scite.RunAsync(Splitter_CB)
             --iup.Reparent(tab, iup.GetDialogChild(hMainLayout, "RightTabExpander"), nil)
         else
             iup.Reparent(tab, iup.GetDialogChild(hMainLayout, "coeditor_vbox"), iup.GetDialogChild(hMainLayout, 'CoSource'))
@@ -828,7 +827,7 @@ function CORE.RemapTab(bIsH)
 end
 
 function CORE.RemapCoeditor()
-    local bIsH = (iup.GetChild(iup.GetDialogChild(iup.GetLayout(), 'CoSourceExpanderBtm'), 1) ~= nil)
+    local bIsH = (iup.GetChild(iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm'), 1) ~= nil)
     local hBx = iup.GetDialogChild(hMainLayout, 'SourceExDetach')
     local hPrOld = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitBtm", "SourceSplitMiddle"))
     local hPr = iup.GetDialogChild(hMainLayout, Iif(bIsH, "SourceSplitMiddle", "SourceSplitBtm"))
@@ -846,6 +845,15 @@ function CORE.RemapCoeditor()
 
     iup.RefreshChildren(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
     _G.iuprops['dialogs.coeditor.splithorizontal'] = Iif(bIsH, 0, 1)
+end
+
+function CORE.ChangeTab(cmd)
+    scite.MenuCommand(cmd or IDM_CHANGETAB)
+    if scite.buffers.SecondEditorActive() == 1 then
+        local cs = iup.GetDialogChild(hMainLayout, 'CoSource')
+        cs.visible = 'YES'
+        iup.RefreshChildren(iup.GetParent(cs))
+    end
 end
 
 local function InitToolBar()

@@ -695,7 +695,7 @@ local function FileManTab_Init(h)
                 {"Rename", action = FileMan_Rename},
                 {'s_OpenwithHildiM', separator = 1},
                 {"Open with HildiM", action = FileMan_OpenSelectedItems},
-                {"Open in another View", action = function() FileMan_OpenSelectedItems(); scite.MenuCommand(IDM_CHANGETAB) end},
+                {"Open in another View", action = function() FileMan_OpenSelectedItems(); CORE.ChangeTab() end},
                 {_TM"Open in New Instance", action = function() CORE.OpenNewInstance(current_path..FileMan_GetSelectedItem()) end},
                 {"Execute", action =(function() FileMan_FileExec(nil) end)},
                 {'s_ReadOnly', separator = 1},
@@ -772,6 +772,7 @@ local function FileManTab_Init(h)
         path_timer.run = 'YES'
     end)
     memo_path.getfocus_cb = (function(h)
+        if not list_dir.marked then return end
         local sel = list_dir.marked:find('1')
         if sel ~= nil then iup.SetAttribute(list_dir, 'MARK'..(sel - 1)..':0', 0) end
         sel = 1

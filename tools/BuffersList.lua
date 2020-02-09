@@ -6,6 +6,7 @@ local function InitWndDialog()
     local dlg
     local text = props['CurrentSelection']
     local active = -1
+    local OnSwitch_Local
 
     local sX, sY, bMoved, bRecurs
     local function button_cb(h, button, pressed, x, y, status)
@@ -104,6 +105,7 @@ local function InitWndDialog()
                 end
             end
         end
+        list_windows.redraw = 'ALL'
     end
 
     list_windows = iup.matrix{ name = 'list_buffers', fgcolor = props["tabctrl.forecolor"],
@@ -215,7 +217,7 @@ local function InitWndDialog()
             end
             for i = 1, #t do
                 scite.buffers.SetDocumentAt(t[i][2])
-                scite.MenuCommand(IDM_CHANGETAB)
+                CORE.ChangeTab()
             end
             fillWindow(curSide)
             list_windows.redraw = 'ALL'
@@ -264,7 +266,7 @@ local function InitWndDialog()
             btn_attach,
             iup.flatbutton{image = 'cross_button_µ', tip='Hide', canfocus='NO', flat_action = function() dlg:hide(); _G.iuprops['dialogs.bufferslist.state'] = 0 end},
         }, barsize = 0, state = 'CLOSE', name = 'bufferslist_expander'}
-        cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0',visibleitems=10, expand = 'NO', propagatefocus = 'YES', action = function() fillWindow(curSide) end, tip = _T'List Sorting'}
+        cmb_Sort = iup.list{name = 'cmb_Sort', dropdown = "YES", size = '70x0',visibleitems=10, expand = 'NO', propagatefocus = 'YES', action = OnSwitch_Local, tip = _T'List Sorting'}
         iup.SetAttribute(cmb_Sort, 1, _TH"No")
         iup.SetAttribute(cmb_Sort, 2, _T"Name")
         iup.SetAttribute(cmb_Sort, 3, _T"Extension")
@@ -321,8 +323,8 @@ local function InitWndDialog()
         return dlg
     end
 
-    local function OnSwitch_Local()
-        if dlg.visible == 'YES' then fillWindow(curSide) end
+    OnSwitch_Local = function()
+        if dlg.visible == 'YES' then fillWindow(curSide); end
     end
 
     AddEventHandler("OnOpen", OnSwitch_Local)

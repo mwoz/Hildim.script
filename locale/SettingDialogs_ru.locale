@@ -2,6 +2,7 @@ return {
 ["- transparency"] = "- прозрачность";
 ["<Home>,<End> up to Nearest Wrapped up Line"] = "<Home>,<End> до ближайшего переноса";
 ["Active Tab"] = "Активная вкладка";
+["Additional Blinks"] = "Мерцание дополнительных";
 ["Allow Autosave Configuration"] = "Разрешить автосохранение конфигурации";
 ["Asymmetric UZ"] = "Асимметричная НЗ";
 ["Autoscroll Preferences"] = "Настройки автопрокрутки";
@@ -9,6 +10,7 @@ return {
 ["Background"] = "Фон";
 ["Bar Background"] = "Панели";
 ["Bar Foreground"] = "Шрифт панелей";
+["Blink Period"] = "Период мерцания";
 ["Caret"] = "Курсор";
 ["Close with Mouse Click%l|None|Left DblClick|Middle Click|Both|"] = "Закрывать по клику мыши%l|Нет|Левый двойной|Средний|Оба|";
 ["Color"] = "Цвет";

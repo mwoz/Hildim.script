@@ -44,7 +44,7 @@ function sett.ResetSelColors()
 
     local ret, selection_back, selection_alpha, selection_additional_back, selection_additional_alpha, caret_line_back, caret_line_back_alpha,
     output_caret_line_back, output_caret_line_back_alpha, findres_caret_line_back, findres_caret_line_back_alpha,
-    caret_fore, caret_width, caret_overstrike =
+    caret_fore, caret_width, caret_overstrike, caret_period, caret_additional_blinks =
     iup.GetParam(_T"Text Colors - Selection".."^TextColorsSelection",
         nil,
         _T'Selected Text - Color'..'%c\n'..
@@ -61,7 +61,9 @@ function sett.ResetSelColors()
 
         _T'Color'..'%c\n'..
         _T'Width'..'%i[1,3,1]\n'..
-        _T'Rectangle for overtype mode'..'%b\n'
+        _T'Rectangle for overtype mode'..'%b\n'..
+        _T'Blink Period'..'%i[0,3000,50]\n'..
+        _T'Additional Blinks'..'%b\n'
         ,
         Rgb2Str(props['selection.back']),
         tonumber(props['selection.alpha']) or 30,
@@ -75,7 +77,9 @@ function sett.ResetSelColors()
         tonumber(props['findres.caret.line.back.alpha']) or 20,
         Rgb2Str(props['caret.fore']),
         tonumber(props['caret.width']) or 1,
-        tonumber(props['caret.overstrike.block']) or 0
+        tonumber(props['caret.overstrike.block']) or 0,
+        tonumber(props['caret.period']) or 0,
+        tonumber(props['caret.additional.blinks']) or 0
     )
 
     if ret then
@@ -92,6 +96,8 @@ function sett.ResetSelColors()
         props['caret.fore']                    = Str2Rgb(caret_fore)
         props['caret.width']                   = caret_width
         props['caret.overstrike.block']        = caret_overstrike
+        props['caret.additional.blinks']       = caret_additional_blinks
+        props['caret.period']                  = caret_period
         iup.SaveChProps(true)
         scite.ReloadProperties()
     end

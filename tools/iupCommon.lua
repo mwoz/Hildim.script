@@ -590,7 +590,7 @@ iup.RestoreFiles = function(bForce)
             _ENCODINGCOOKIE = nil
 
             if bRight ~= bRightPrev then
-                scite.MenuCommand(IDM_CHANGETAB)
+                CORE.ChangeTab()
             end
             if bCloned then scite.MenuCommand(IDM_CLONETAB) bRight = not bRight end
 

@@ -18,6 +18,7 @@ local function Init()
     local t = {}
     local pathXSLT, pathXSD, firstTag
     local oXSLProc, oXSD
+    local mBScipExt = false
     -- t.tag_start, t.tag_end, t.paired_start, t.paired_end  -- positions
     -- t.begin, t.finish  -- contents of tags (when copying)
     local old_current_pos
@@ -728,7 +729,9 @@ local function Init()
         return rez
     end
 
-    function XMLTOOLS.SetObjects(xsd, xsl)
+    function XMLTOOLS.SetObjects(xsd, xsl, bExt)
+        if bExt and mBScipExt then return end
+
         if xsd then
             oXSD = luacom.CreateObject("MSXML2.DOMDocument.6.0")
             if not oXSD:loadXml(xsd) then
@@ -807,6 +810,13 @@ local function Init()
             {'Test XSLT Template', action = Xslt, active = isXslt},
             {'Test XSD Scheme', action = Xsd, active = isXsd },
             {'XSD Scheme Validation', action = CheckCurrent, },
+            {'s1', separator = 1},
+            {'Use Local Schemes', check = function() return mBScipExt end, action = function()
+                oXSD = nil
+                oXSLProc = nil
+                mBScipExt = not mBScipExt
+                OnSwitchFile()
+            end, },
         }}, nil, _T
     )
 

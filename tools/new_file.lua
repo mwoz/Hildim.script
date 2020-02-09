@@ -51,7 +51,11 @@ local function CreateUntitledFile()
         fName1 = _TH"Untitled"
     elseif fName1:find('(.*)(%.[^.]*)$') then
         bPreset = true
-        _, _, fName1, file_ext = fName1:find('(.*)(%.[^.]*)$')
+        if not fName1:find('^%^') then
+            _, _, fName1, file_ext = fName1:find('(.*)(%.[^.]*)$')
+        else
+            file_ext = ""
+        end
     end
 
     local unNum = 0

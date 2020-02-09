@@ -389,7 +389,7 @@ local function Init_hidden()
 
         if bTmp then tmpFiles[props['FilePath']] = true end
 
-        scite.MenuCommand(IDM_CHANGETAB)
+        CORE.ChangeTab()
         scite.SetLexer(strExt)
 
         scite.Open(strCur)

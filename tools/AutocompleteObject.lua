@@ -462,7 +462,11 @@ local function GetObjectNames(tableObj)
     if tableObj[4] ~= nil then
         local obj_namesUp = GetObjectNames(tableObj[4])
         if obj_namesUp[1] ~= nil then
-            tableObj[1] = obj_namesUp[#obj_namesUp][1]..tableObj[1]
+            if type(obj_namesUp[#obj_namesUp][1]) == "function" then
+                tableObj[1] = obj_namesUp[#obj_namesUp][1]()..tableObj[1]
+            else
+                tableObj[1] = obj_namesUp[#obj_namesUp][1]..tableObj[1]
+            end
         end
     end
 
@@ -896,8 +900,12 @@ local function CreateMethodsTable(obj_names, ob_tbl, strMetBeg, inh_table)
         end
 	end
 
-    if obj_names[1] and m_tblFilters[obj_names[1][1]:upper()] then
-        m_tblFilters[obj_names[1][1]:upper()](retT)
+    if obj_names[1] then
+        if type(obj_names[1][1]) == 'function' then
+            if m_tblFilters[obj_names[1][1]():upper()] then m_tblFilters[obj_names[1][1]():upper()](retT) end
+        elseif m_tblFilters[obj_names[1][1]:upper()] then
+            m_tblFilters[obj_names[1][1]:upper()](retT)
+        end
     end
     return retT, last
 end
