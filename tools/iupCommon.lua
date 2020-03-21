@@ -773,14 +773,15 @@ function CORE.AskCreatePath(fname)
     end
 end
 
-function CORE.CloseListSet(sel, lst, column)
+function CORE.CloseListSet(sel, lst, column, capt, iCapt)
     for i = lst.numlin, 1,- 1 do
         if (iup.GetAttributeId2(lst, 'TOGGLEVALUE', i, column) or '0') == sel then
-            lst.dellin = i
+            lst.dellinhidden = i
         else
             iup.SetAttributeId2(lst, 'TOGGLEVALUE', i, column, '0')
         end
     end
+    if capt then lst:setcell(0, iCapt, capt.."("..lst.numlin..")") end
     lst.redraw = 'ALL'
 end
 
@@ -945,6 +946,8 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
                  if (e:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then e:MarkerAdd(i, MARKER_NOTSAVED) end
             end
         end
+    elseif type(_G.g_session['OPENING']) == 'number' and _G.g_session['OPENING'] > 1 then
+        _G.g_session['OPENING'] = _G.g_session['OPENING'] - 1
     else
         _G.g_session['OPENING'] = nil
     end

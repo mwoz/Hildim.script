@@ -3,13 +3,17 @@
 -- Здесь (с помощью dofile) грузятся только скрипты, обрабатывающие события редактора.
 
 ----[[ C O M M O N ]]-------------------------------------------------------
-
+local lib = props["SciteDefaultHome"].."\\tools\\LuaLib\\"
+package.path  = lib.."?.lua;"..lib.."?\\?.lua;"..lib.."?\\init.lua;"
+package.cpath = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.dll;"..package.cpath
 _G.g_session = {}
 local reloaded_config
 while props['hildim.command.line']:find('^ *[-/]%w+') do
     local _, l, s, cl = props['hildim.command.line']:find('^ *[-/](%w+)(.*)')
     if s == 'cmd' then
         break
+    elseif s == 'dbg' then
+        require("mobdebug").start()
     elseif s == 'nP' then
         _G.g_session['scip.plugins'] = true
     elseif s == 'h' then
@@ -37,17 +41,18 @@ if props['script.started'] ~= 'Y' then
 end
 
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
-
 --Расширения, загружаемые в любом случае
 require"lpeg"
 
 if not _G.g_session['scip.plugins'] then
+    --require("mobdebug").start()
     require "menuhandler"
     dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\defAutoformat.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\FindTextOnSel.lua")
+
 
     Splash_Screen()
     if reloaded_config then _G.iuprops['current.config.restore'] = reloaded_config end
@@ -141,6 +146,7 @@ scite.RunAsync(function()
             iup.GetDialogChild(hMainLayout, "TabBarSplit").value = '1000'
         end
     end
+
     if not dlg_SPLASH and props['hildim.command.line'] ~= '' then
         scite.RunAsync(function() OnCommandLine(props['hildim.command.line']); props['hildim.command.line'] = '' end)
     end

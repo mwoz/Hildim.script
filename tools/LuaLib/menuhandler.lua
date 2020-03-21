@@ -91,6 +91,10 @@ local function r_button_state()
     return rez
 end
 
+function s:CheckIUProps(p)
+    return tonumber(_G.iuprops[p]) == 1 or _G.iuprops[p] == true or _G.iuprops[p] == 'ON'
+end
+
 function s:PopMnu(smnu, x, y, bToolBar)
     bListenmouseHook = bToolBar
     local CreateMenu, CreateItems

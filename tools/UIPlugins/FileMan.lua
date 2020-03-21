@@ -73,7 +73,7 @@ FileMan_ListFILL = function(blockUpdate)
     memo_path.value = current_path
     if current_path == '' then return end
 
-    local table_dir = scite.findfiles(current_path..'*')
+    local table_dir = shell.findfiles(current_path..'*')
     if not table_dir then return end
     table.sort(table_dir, function(a, b)
         if a.isdirectory ~= b.isdirectory then return a.isdirectory end
