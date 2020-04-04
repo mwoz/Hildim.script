@@ -25,7 +25,7 @@ local function Run()
 
         function btn_tst:action()
             local s = 'local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt\n'
-            s = s..txt_exp.value
+            s = s..txt_exp.value:from_utf8()
             local patt = dostring(s)
             --print(editor:GetText())
             debug_prnArgs(patt:match(editor:GetText(), 1))

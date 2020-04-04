@@ -118,7 +118,7 @@ FileMan_ListFILL = function(blockUpdate)
         else
             if table_dir[i].name:lower():find(maskVal) and (table_dir[i].attributes & 2) ~= 2 then
                 list_dir:setcell(j, 1, GetExtImage(table_dir[i].name))
-                list_dir:setcell(j, 2, table_dir[i].name)
+                list_dir:setcell(j, 2, table_dir[i].name:to_utf8())
                 list_dir:setcell(j, 3, table_dir[i].attributes)
                 list_dir:setcell(j, 4, '')
                 if (table_dir[i].attributes & 1) == 1 then
@@ -145,7 +145,7 @@ end
 local function FileMan_ListFillDir(strPath)
     current_path = strPath:match('(.*\\)')
     if current_path == nil then current_path = '' end
-    local table_folders = scite.findfiles(strPath..'*')
+    local table_folders = shell.findfiles(strPath..'*')
     if not table_folders then
         iup.SetAttribute(list_dir, "DELLIN", "1-"..list_dir.numlin)
         return  strPath:len()-(strPath:find('[:%$]') or strPath:len())>0
@@ -162,7 +162,7 @@ local function FileMan_ListFillDir(strPath)
         local a = table_folders[i].attributes
         if table_folders[i].isdirectory and (a & 2) == 0 and (a & 4) == 0 and not table_folders[i].name:find('^%$') then
             list_dir:setcell(j, 1, 'IMAGE_Folder')
-            list_dir:setcell(j, 2, table_folders[i].name)
+            list_dir:setcell(j, 2, table_folders[i].name:to_utf8())
             list_dir:setcell(j, 3, a)
             list_dir:setcell(j, 4, 'd')
             j = j + 1
@@ -696,7 +696,7 @@ local function FileManTab_Init(h)
                 {'s_OpenwithHildiM', separator = 1},
                 {"Open with HildiM", action = FileMan_OpenSelectedItems},
                 {"Open in another View", action = function() FileMan_OpenSelectedItems(); CORE.ChangeTab() end},
-                {_TM"Open in New Instance", action = function() CORE.OpenNewInstance(current_path..FileMan_GetSelectedItem()) end},
+                {_TM"Open in New HildiM Instance", action = function() CORE.OpenNewInstance(current_path..FileMan_GetSelectedItem()) end},
                 {"Execute", action =(function() FileMan_FileExec(nil) end)},
                 {'s_ReadOnly', separator = 1},
                 {"Read Only", action = FileMan_ChangeReadOnly, check = GetReadOnly},

@@ -170,16 +170,16 @@ CORE.FindNextWrd = function(ud)
     return prevpos ~= pos and pos > -1
 end
 
-AddEventHandler("OnClick", function(shift, ctrl, alt)
-        if --[[editor.Focus and]] not shift and ctrl and alt then
-            if not shift then
+AddEventHandler("OnClick", function(shift, ctrl, alt, middle)
+        if not shift and ctrl and alt then
+            if middle and  scite.buffers.SecondEditorActive() == 1 and scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 0  then
+                CORE.FindCoSelToConcole()
+            else
                 local id = scite.buffers.GetCurrent()
                 if editor.Focus then FindSelToConcoleL(id, editor, editor)
                 elseif findres.Focus then FindSelToConcoleL(id, editor, findres)
                 elseif output.Focus then FindSelToConcoleL(id, editor, output)
                 end
-            elseif scite.buffers.SecondEditorActive() == 1 and scite.buffers.IsCloned(scite.buffers.GetCurrent()) == 0 then
-                CORE.FindCoSelToConcole()
             end
             CORE.ScipHidePannel()
         end

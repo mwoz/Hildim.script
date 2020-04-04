@@ -585,6 +585,7 @@ local function Init_hidden()
                 coeditor.SelectionStart = coP
                 coeditor.SelectionEnd = coP
                 coeditor.CurrentPos = coP
+                scite.buffers.SaveCoBuffPos()
             end
         end
     end

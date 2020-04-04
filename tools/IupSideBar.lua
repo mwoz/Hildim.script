@@ -121,7 +121,9 @@ local function  CreateToolBar()
                 if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                 iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
 
-                if i == 1 and pI.undermenu then
+                if i == 1 and (pI.undermenu or pI.overeditors) then
+                    local v = vbScite
+                    if pI.overeditors then v = iup.GetDialogChild(hMainLayout, "EditorsVB") end
                     local tTlb = {iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander_upper", iup.vbox{
                         iup.hbox{gap = "3", margin = "3x0", alignment = "ACENTER", ToolBar_obj.Tabs[pI.code].handle}
                     }}}
@@ -131,7 +133,7 @@ local function  CreateToolBar()
                     local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander_upper')
                     iup.Detach(hBx)
                     iup.Destroy(hTmp)
-                    local ttt = iup.Insert(vbScite, nil, hBx)
+                    iup.Insert(v, nil, hBx)
                     iup.Map(hBx)
                     isUpper = true
                 else
@@ -716,6 +718,7 @@ local function InitTabbar()
         if pressed == 1 and tab == tonumber(h.valuepos) then
             if ((h.name == 'TabCtrlLeft') and (scite.ActiveEditor() == 1)) or ((h.name == 'TabCtrlRight') and (scite.ActiveEditor() == 0)) then
                 coeditor.Focus = true
+                iup.RefreshChildren(vbScite)
             end
         end
         if button == iup.BUTTON1 and pressed == 0 then
@@ -843,7 +846,10 @@ function CORE.RemapCoeditor()
 
     if hPrOld.flat_button_cb then hPr.flat_button_cb = hPrOld.flat_button_cb end
 
-    iup.RefreshChildren(iup.GetDialogChild(hMainLayout, "SourceSplitBtm"))
+    if bIsH then
+        iup.GetDialogChild(hMainLayout, "TabBarSplit").value = hPr.value
+    end
+    iup.RefreshChildren(vbScite)
     _G.iuprops['dialogs.coeditor.splithorizontal'] = Iif(bIsH, 0, 1)
 end
 
@@ -1096,10 +1102,10 @@ end
 bottomsplit.flat_button_cb = function(h, button, pressed, x, y, status)
     if button == iup.BUTTON3 and pressed == 1 then
         menuhandler:PopUp('MainWindowMenu|View|BottomBar')
-    elseif button == iup.BUTTON2 and pressed ~= 1  then
-        CORE.switch_bottombar()
-    elseif button == iup.BUTTON1 and iup.isdouble(status) then
+    elseif button == iup.BUTTON2 and pressed ~= 1 and iup.iscontrol(status)  then
         scite.MenuCommand(IDM_TOGGLEOUTPUT)
+    elseif button == iup.BUTTON1 and iup.isdouble(status) then
+        CORE.switch_bottombar()
     end
 end
 

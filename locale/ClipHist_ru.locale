@@ -14,4 +14,5 @@ return {
 ["Insert Upper List as Block"] = "Вставить верх списка как блок";
 ["Convert Format: Block < - > Text"] = "Конвертировать формат: Блок < - > Текст";
 ["Insert with Ctrl+0"] = "Вставлять по Ctrl+0";
+["Clipboard History: Alt+Shift+C for Show List\nCtrl+1, Ctrl+2, Ctrl+3... - for Paste text from History"] = "История буфера обмена: Alt+Shift+C - показать список\nCtrl+1, Ctrl+2, Ctrl+3... - вставить текст из истории";
 }

@@ -581,13 +581,49 @@ local function Func_Init(h)
             local key, val = linda:receive( 1.0, "Functions")    -- timeout in seconds
             tmr.run = 'NO'
             if val[2] and not layout then layout = val[2] end
+            local bOnce = (editor.LexerLanguage == 'formenjine')
+
+            if bOnce then
+                local tnames = {}
+                local function checkUnic(t)
+                    if t.leafname then
+                        local el = (t.leafname):upper()
+                        if tnames[el] then
+                            print("!Ambigous Function: ".. t.leafname)
+                        else
+                            tnames[el] = true
+                        end
+                    end
+                    for i = 1,  #t do
+                        if type(t[i]) == 'table' then
+                            local tprev  = tnames;
+                            tnames = {}
+                            checkUnic(t[i])
+                            tnames = tprev
+                        end
+                    end
+                end
+                checkUnic(val[1])
+            end
+
             if val[3].toutf8 then
+                local tnames
                 local function toutf8(t)
+                    if bOnce and t.leafname and tnames then
+                        if tnames[t.leafname] then
+                            print("Ambigous Sub Name: ".. t.leafname)
+                        else
+                            tnames[t.leafname] = true
+                        end
+                    end
                     if t.branchname then t.branchname = t.branchname:to_utf8() end
                     if t.leafname then t.leafname = t.leafname:to_utf8() end
                     for i = 1,  #t do
                         if type(t[i]) == 'table' then
+                            local tprev
+                            if bOnce then tprev = tnames; tnames = {} end
                             toutf8(t[i])
+                            if bOnce then tnames = tprev end
                         end
                     end
                 end
@@ -710,8 +746,12 @@ local function Func_Init(h)
         end
     }
 
-    AddEventHandler("OnClick", function(shift, ctrl, alt)
+    AddEventHandler("OnClick", function(shift, ctrl, alt, middle)
         if linked_info then
+            if not middle and _G.iuprops['sidebar.functions.middleonlylink'] == 1 then
+                releaseLink()
+                return
+            end
             --editor.MultipleSelection = false
             EditorClearMarks(mark)
             editor:CallTipCancel()
@@ -771,16 +811,19 @@ local function Func_Init(h)
         _G.iuprops['sidebar.functions.layout'] = prp
     end
 
-    local function SetMaxSize()
-        local ret, sz =
-        iup.GetParam("Max Size for Autoufill",
+    local function SetProperties()
+        local ret, sz, mol =
+        iup.GetParam(_T"Properties",
             nil,
-            _T'Characters'..' * 10 ^ %r[5,10,0.2]\n'
+            _T'Max Size for Autoufill (chars)'..' * 10 ^ %r[5,10,0.2]\n'..
+            _T'Go to Definition - Middle Click only'..'%b\n'
             ,
-            (_G.iuprops['sidebar.functions.maxsize'] or 7)
+            (_G.iuprops['sidebar.functions.maxsize'] or 7),
+            (_G.iuprops['sidebar.functions.middleonlylink'] or 0)
         )
         if ret then
             _G.iuprops['sidebar.functions.maxsize'] = sz
+            _G.iuprops['sidebar.functions.middleonlylink'] = mol
         end
     end
 
@@ -813,7 +856,7 @@ local function Func_Init(h)
             }},
             {"Show Parameters", check = function() return _show_params end, action = Functions_ToggleParams},
             {"Group By Type", check = function() return _group_by_flags end, action = Functions_ToggleGroup},
-            {"Max Size for Auto Show", action = SetMaxSize},
+            {"Properties", action = SetProperties},
             {"(Max size exceeded) Display", visible = function() return editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7) end, action = function() OnSwitch('Y') end},
             {'s1', separator=1},
             {"Copy Name to Clipboard", action = function()

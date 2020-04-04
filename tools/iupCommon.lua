@@ -1738,7 +1738,7 @@ local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
     if t.buttonImage then
         if not _tmpSidebarButtons then _tmpSidebarButtons = {} end
         statusBtn = iup.flatbutton{name = 'barBtn'..t.sciteid, image = t.buttonImage, visible = "NO", canfocus = "NO", flat_action = function()
-                if t.sciteid == 'findrepl' then CORE.ActivateFindDialog('', -1) else cmd_Switch() end
+                if t.sciteid == 'findrepl' then CORE.ActivateFindDialog('', -1) else cmd_PopUp() end
             end,
             tip = t.Dlg_Title,}
         function statusBtn:flat_button_cb(button, pressed, x, y, status)
@@ -1765,7 +1765,28 @@ local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
 
     if dtb.Split_h then
         dtb.Split_h().flat_button_cb = function(h, button, pressed, x, y, status)
-            if button == iup.BUTTON1 and iup.isdouble(status) then cmd_Switch()
+            if button == iup.BUTTON1 and iup.isdouble(status) then
+                if iup.GetDialogChild(iup.GetLayout(), 'sidebartab_'..dtb.sciteid) then
+                    cmd_AttachPane()
+                else
+                    CORE.BottomBarSwitch("YES")
+                    local v = tonumber(dtb.Split_h().value)
+                    if v > 495 and v < 505 then
+                        dtb.Split_h().value = dtb.Split_h().prev_value or '900'
+                    else
+                        dtb.Split_h().prev_value = dtb.Split_h().value
+                        dtb.Split_h().value = '500'
+                    end
+                    if dtb.Split_h().valuechanged_cb then dtb.Split_h().valuechanged_cb() end
+                end
+            elseif button == iup.BUTTON2 and pressed == 0 then
+                if h.name == "SourceSplitBtm" or h.name == "SourceSplitMiddle" then
+                    CORE.RemapCoeditor()
+                elseif iup.iscontrol(status) then
+                    cmd_Hide()
+                else
+                    cmd_PopUp()
+                end
             elseif button == iup.BUTTON3 then
                 menuhandler:PopUp('MainWindowMenu|View|'..t.sciteid)
             end

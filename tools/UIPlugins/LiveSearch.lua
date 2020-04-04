@@ -15,6 +15,10 @@ local btn_search
 local function sidebar_Find()
     iup.SetFocus(txt_search)
     txt_search.selection = '1:100'
+    if editor.SelectionStart ~= editor.SelectionEnd and editor:LineFromPosition(editor.SelectionStart) == editor:LineFromPosition(editor.SelectionEnd) then
+        txt_search.value = editor:GetSelText():to_utf8()
+        txt_search.valuechanged_cb()
+    end
 end
 local needCoding = false
 
@@ -40,7 +44,7 @@ end)
 local function Init(ToolBar_obj)
     local tm = iup.timer{time=300}
 
-    txt_search = iup.list{name='livesearch_bar', expand='YES', editbox = "YES", dropdown = "YES", tip=_T'"Live" Search(Alt+F)\nArrow Up/Down - movement through the results list\nEnter - Go to search result\nEsc - exit search'}
+    txt_search = iup.list{name='livesearch_bar', expand='YES', editbox = "YES", dropdown = "YES", tip=_T'"Live" Search(Alt+F3)\nArrow Up/Down - movement through the results list\nEnter - Go to search result\nEsc - exit search'}
     iup.SetAttribute(txt_search, 'HISTORIZED', "NO")
     local function Find_onTimer()
         tm.run="NO"

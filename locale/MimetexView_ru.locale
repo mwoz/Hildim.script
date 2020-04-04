@@ -1,0 +1,35 @@
+return {
+["Accents && Styles"] = "Над(/под)строчные && Стили";
+["All lines"] = "Все строки";
+["Array"] = "Массив";
+["Arrow:"] = "Стрелка:";
+["Arrows"] = "Стрелки";
+["Columns:"] = "Колонок:";
+["Fill Cells:"] = "";
+["Font size:"] = "Размер шрифта:";
+["Greek && Functions"] = "Греческие && Функции";
+["High brackets, parentheses, etc - around the selection"] = "Высокие скобки (разных видов) - вокруг выделения";
+["High brackets, parentheses, etc - increased to line height"] = "Высокие скобки (разных видов) - по высоте строки";
+["Hight Bracket - Inside the line"] = "Высокая скобка - по высоте строки";
+["Hight Brackets - Around the selection"] = "Высокие скобки - вокруг выделения";
+["Horizontal lines:"] = "Горизонтальные линии";
+["Left symbol:"] = "Правый символ:";
+["Left text:"] = "Текст слева:";
+["Length:"] = "Длина:";
+["Long Arrow"] = "Длинная стрелка";
+["Long Arrows - Dialog"] = "Длинная стрелка - диалог";
+["Lower text:"] = "Текст под:";
+["Math && Matrix"] = "Математика && Матрицы";
+["Matrix"] = "Матрица";
+["Only After Line:"] = "Только после строки";
+["Relations && Operations"] = "Отношения && Операторы";
+["Right symbol:"] = "Левый символ:";
+["Right text:"] = "Текст справа:";
+["Rows:"] = "Строк:";
+["Symbol:"] = "Символ:";
+["Symbols"] = "Символы";
+["Type:"] = "Тип:";
+["Upper text:"] = "Текст над:";
+["Vertical lines:"] = "Вертикальные линии";
+
+}

@@ -499,17 +499,20 @@ end
 
 local function Toolbar_Init(h)
     bToolBar = true
-    btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip='Clipboard History: Ctrl+1, Ctrl+2, Ctrl+3...'}
-    local box = iup.sc_sbox{iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize='100x22', bgcolor = iup.GetLayout().bgcolor}, maxsize = "900x22",shrink='YES'}
+    btn = iup.flatbutton{title = "      ", expand = 'HORIZONTAL', padding='5x', alignment = "ALEFT:ATOP", tip=_T'Clipboard History: Alt+Shift+C for Show List\nCtrl+1, Ctrl+2, Ctrl+3... - for Paste text from History'}
+    local scrollbx = iup.scrollbox{btn, scrollbar = 'NO', expand = 'HORIZONTAL', minsize = '100x22', bgcolor = iup.GetLayout().bgcolor}
+    local box = iup.sc_sbox{scrollbx, maxsize = "900x22", shrink = 'YES'}
     onDraw_cb = function(s)
         btn.title = s
         iup.Redraw(box, 1)
+        scrollbx.scrollto = 'TOP'
     end
 
     function btn:map_cb(h)
         local sb = iup.GetChild(box, 0)
         sb.cursor = "RESIZE_WE"
         box.value = _G.iuprops["cliphistory.bntwidth"] or "200"
+        scrollbx.scrollto = 'TOP'
     end
     function btn:unmap_cb(h)
         _G.iuprops["cliphistory.bntwidth"] = box.value

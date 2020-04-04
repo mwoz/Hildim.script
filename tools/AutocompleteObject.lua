@@ -1374,7 +1374,7 @@ local function OnChar_local(char)
     end
     if calltipinfo[1] and calltipinfo[1] ~= 0 then --будем считать,  что разделители параметров - только запятые
 
-        if (calltipinfo[#calltipinfo][3] or 0) > 0 and bResetCallTip then
+        if calltipinfo and (calltipinfo[#calltipinfo][3] or 0) > 0 and bResetCallTip then
             result = ((props['autocompleteword.automatic'] or '') ~= '1')
             ResetCallTipParams(not resut, char == ',')
         end
