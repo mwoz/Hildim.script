@@ -11,6 +11,9 @@ wholeWord = false
 }
 -----------------------------------
 local current_mark_number = CORE.InidcFactory('FindOnSel.mark', _T'Highlight the selected word throughout the text', INDIC_ROUNDBOX, 6750054, 30)
+findres:SetHotspotActiveFore(true, 0xff0000)
+findres.HotspotSingleLine = false
+
 
 local function SelectMethod(bModified, bSelection, flag)
 --подсветка слова, если оно выделено целиком
@@ -350,6 +353,10 @@ function CORE.FindResult(dl)
 end
 
 AddEventHandler("OnDoubleClick", function(shift, ctrl, alt)
+    if not findres.Focus then return end
+    CORE.FindresClickPos(findres.CurrentPos)
+end)
+AddEventHandler("OnHotSpotReleaseClick", function(modif)
     if not findres.Focus then return end
     CORE.FindresClickPos(findres.CurrentPos)
 end)

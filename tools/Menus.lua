@@ -281,6 +281,8 @@ _G.sys_Menus.EDITMARGIN = {title = _TM"Editor Margin Context Menu",
     {'Previous Boo&kmark', key = 'Shift+F2', action = IDM_BOOKMARK_PREV, image = 'bookmark__arrow_left_µ'},
     {'To&ggle Bookmark',  key = 'Ctrl+F2', action = IDM_BOOKMARK_TOGGLE, image = 'bookmark_µ'},
     {'Clear All Bookmark&s', action = IDM_BOOKMARK_CLEARALL},
+    {'s1', separator = 1},
+    {"String Numbers Font Size...", action = function() dofile(props['SciteDefaultHome']..'\\tools\\ColorSettings.lua').strnum() end, image = 'settings_µ'},
     {'slast', separator = 1},
 
 }
@@ -311,11 +313,13 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'Block Page Up', key = 'Alt+PageUp', action = function() editor:PageUpRectExtend() end},
 		{'Block Page Down', key = 'Alt+PageDown', action = function() editor:PageDownRectExtend() end},
 		{'EditVScroll', {
-            {link = 'Search|Search|Clear Live Search Markers'},
+            {link = 'Search|Search|Clear Live Search Markers\tScrollBar-MiddleClick'},
             {'Scroll Here', action = function() _SCROLLTO() end},
+            {'Scroll Size...', action = function() DoSett('ScrollSize', '') end, image = 'settings_µ',},
 		},},
 		{'AllScroll', {
             {'Scroll Here', action = function() _SCROLLTO() end},
+            {'Scroll Size...', action = function() DoSett('ScrollSize', '') end, image = 'settings_µ',},
 		},},
 	},},
 	{'&File', {
@@ -568,7 +572,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
         },},
 		{'Colo&r Selection && Caret', action = function() DoSett('ResetSelColors') end, image = 'color_µ'},
 		{'Autoscro&ll Settings', action = function() DoSett('AutoScrollingProps') end, image = 'settings_µ'},
-		{'Le&xer Colors and Fonts', action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\ColorSettings.lua')", active = RunSettings, image = 'settings_µ'},
+		{'Le&xer Colors and Fonts', action = function() dofile(props['SciteDefaultHome']..'\\tools\\ColorSettings.lua').all() end, active = RunSettings, image = 'settings_µ'},
 		{"&Lexer properties",  {
 			{'&Lexer properties', plane = 1 , tLangs},
 			{'s2', separator = 1},

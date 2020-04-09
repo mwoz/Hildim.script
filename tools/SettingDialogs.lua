@@ -297,6 +297,22 @@ function sett.CurrentTabSettings()
     end
 end
 
+function sett.ScrollSize()
+	local ret, size = iup.GetParam(_TM"Scroll Size...".."^InterfaceFontSize",
+        function(h, i) if i == -1 and tonumber(iup.GetParamParam(h, 0).value) < 11 then return 0 end return 1 end,
+        _TH'Size:'..'%i[11,21,1]\n',
+        tonumber(props['iup.scrollbarsize'])
+    )
+    if ret then
+
+        if 1 == iup.Alarm(_T'Autoscroll Preferences', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
+            props['iup.scrollbarsize'] = size
+            scite.SetRestart('')
+            scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+        end
+    end
+end
+
 function sett.AutoScrollingProps()
     local ret,
     caret_policy_xslop, caret_policy_width, caret_policy_xstrict, caret_policy_xeven, caret_policy_xjumps,

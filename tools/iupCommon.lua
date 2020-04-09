@@ -304,6 +304,7 @@ function iup.SaveChProps(bReset)
 'position.top',
 'position.width',
 'print.magnification',
+"right.magnification",
 'selection.additional.alpha',
 'selection.additional.back',
 'selection.alpha',
@@ -627,7 +628,7 @@ iup.RestoreFiles = function(bForce)
             _G.iuprops['coeditor.win'] = '2';
             if _G.g_session['coeditor'] then _G.g_session['coeditor'].HideDialog(); end
         else
-            coeditor.Zoom = editor.Zoom
+            --coeditor.Zoom = editor.Zoom
             editor:GrabFocus()
             editor.Focus = true
         end

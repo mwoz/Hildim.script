@@ -138,8 +138,10 @@ local function Init(h)
             h.tip = _T'Selected word repetition count'..Iif(editor.Lexer == SCLEX_FORMENJINE, '\n'.._T'Show color under the cursor', '')
         end);
         button_cb = (function(h, but, pressed, x, y, status)
-            if iup.isdouble(status) and iup.isbutton1(status) then
+            if iup.isdouble(status) and iup.isbutton2(status) and pressed then
                 ColorDlg()
+            elseif iup.isbutton1(status) and pressed then
+                if CORE.BottomBarHidden() then CORE.BottomBarSwitch('NO') end
             elseif iup.isbutton3(status) then
                 local mnu = iup.menu
                 {

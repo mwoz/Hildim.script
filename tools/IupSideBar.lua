@@ -999,7 +999,6 @@ local function edit_scroll_menu(h, btn, pos, scroll)
         if scroll == 'SB_VERT' then
             _SCROLLTO = function() h.posy = pos; end
            menuhandler:PopUp("MainWindowMenu|_HIDDEN_|EditVScroll")
-            -- menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
         else
             _SCROLLTO = function() h.posx = pos; end
            menuhandler:PopUp("MainWindowMenu|_HIDDEN_|AllScroll")

@@ -547,5 +547,65 @@ reloadLex = function()
     mLst.listaction_cb(mLst, 1, 1)
 end
 
-LexerColors()
-reloadLex()
+return {all = function()
+    LexerColors()
+    reloadLex()
+end,
+strnum = function()
+    local tblGlobal = tblFromFile(props["SciteUserHome"]..'\\SciTEGlobal.styles')
+    local t
+    for i = 1,  #tblGlobal do
+        if tblGlobal[i].name == 'style.*.33' then
+            t = tblGlobal[i]
+            break
+        end
+    end
+    if not t then
+        print('Error: style 33 is missing!')
+        return
+    end
+	local ret, size = iup.GetParam(_TM"String Numbers Font Size...".."^InterfaceFontSize",
+        function(h, i) if i == -1 and tonumber(iup.GetParamParam(h, 0).value) < 2 then return 0 end return 1 end,
+        _TH'Size:'..'%i[2,22,1]\n',
+        t.size or 6
+    )
+	if ret then
+		t.size = size
+        local tblOut ={}
+        local s
+        for i = 1,  #tblGlobal do
+            local t = tblGlobal[i]
+            s = ''
+
+            if t.refstyle then s = s..',$('..t.refstyle..')' end
+            if t.refcolour then s = s..',$('..t.refcolour..')' end
+            if t.reffont then s = s..',$('..t.reffont..')' end
+            if t.font then s = s..',font:'..t.font end
+            if t.size then s = s..',size:'..t.size end
+            if t.back then s = s..',back:'..t.back end
+            if t.fore then s = s..',fore:'..t.fore end
+            if t.changeable then s = s..','..t.changeable end
+            if t.eolfilled then s = s..','..t.eolfilled end
+            if t.bold then s = s..','..t.bold end
+            if t.hotspot then s = s..','..t.hotspot end
+            if t.visible then s = s..','..t.visible end
+            if t.underlined then s = s..','..t.underlined end
+            if t.italics then s = s..','..t.italics end
+            if t.case then s = s..',case:'.. t.case end
+            if #s > 0 then s = s:sub(2) end
+            s = t.name..'='..s
+            if t.comment then s = '#'..t.comment..'\n'..s end
+            table.insert(tblOut, s)
+        end
+        s = '#Autogenereted\n\n'..table.concat(tblOut, '\n\n')
+
+        local file = io.output(props["SciteUserHome"]..'\\SciTEGlobal.styles')
+        file:write(s)
+        file:close()
+
+        scite.ReloadProperties()
+	end
+end,
+}
+
+

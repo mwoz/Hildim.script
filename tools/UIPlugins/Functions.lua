@@ -707,11 +707,17 @@ local function Func_Init(h)
                 if func then
                     pos = p or pos; word = w or word
                     EditorMarkText(pos, #word, mark)
-                    local ct = _T"Click here for hide link\n(For Add Selection)"
-                    if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then ct = ct:from_utf8() end
-                    editor:CallTipShow(pos, ct)
-                    editor.CallTipForeHlt = 0xff0000
-                    editor:CallTipSetHlt(1, ct:find('\n'))
+                    if _G.iuprops['sidebar.functions.middleonlylink'] == 1 then
+                        local ct = _T"MIDDLE click to follow the link"
+                        if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then ct = ct:from_utf8() end
+                        editor:CallTipShow(pos, ct)
+                    else
+                        local ct = _T"Click here for hide link\n(For Add Selection)"
+                        if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then ct = ct:from_utf8() end
+                        editor:CallTipShow(pos, ct)
+                        editor.CallTipForeHlt = 0xff0000
+                        editor:CallTipSetHlt(1, ct:find('\n'))
+                    end
                     linked_info = {pos = pos, word = word, period = editor.MouseDwellTime, func = func}
                     editor.MouseDwellTime = linked_info.period / 10
                     editor.Cursor = 8
