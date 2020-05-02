@@ -25,7 +25,7 @@ local scipPannCounter = 0;
 
 CORE.curTopSplitter = ''
 
-local function HidePannels()
+function CORE.HidePannels()
     if scipPannCounter > 0 then
         scipPannCounter = scipPannCounter - 1
         return
@@ -53,7 +53,7 @@ iup.PassFocus =(function()
     else
         iup.SetFocus(iup.GetDialogChild(hMainLayout, "Source"))
     end
-    HidePannels()
+    CORE.HidePannels()
 end)
 
 function sidebar_Switch(n)
@@ -486,8 +486,17 @@ local function CreateBox()
         table.insert(tblMenus, t)
     end
 
+    AddEventHandler("OnChangeFocus", function(src, focus)
+        if focus == 1   and (src == IDM_COSRCWIN or src == IDM_SRCWIN) then
+            scite.RunAsync(function()
+                CORE.HidePannels();
+                CORE.curTopSplitter = ''
+            end)
+        end
+    end)
+
     AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag, bSwitch)
-        if (bSelection == 1 or bModified == 1) and bSwitch == 0 then HidePannels(); CORE.curTopSplitter = '' end
+        if (bSelection == 1 or bModified == 1) and bSwitch == 0 then CORE.HidePannels(); CORE.curTopSplitter = '' end
     end)
     AddEventHandler("PaneOnUpdateUI", function(bModified, bSelection, flag, bSwitch)
         if (output.Focus and (_G.iuprops['concolebar.win'] or '0') == '1') or (findres.Focus and (_G.iuprops['findresbar.win'] or '0') == '1') then return end
@@ -858,7 +867,11 @@ function CORE.ChangeTab(cmd)
     if scite.buffers.SecondEditorActive() == 1 then
         local cs = iup.GetDialogChild(hMainLayout, 'CoSource')
         cs.visible = 'YES'
-        iup.RefreshChildren(iup.GetParent(cs))
+        local bIsH = (iup.GetChild(iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm'), 1) ~= nil)
+        if bIsH then
+            iup.GetDialogChild(hMainLayout, "TabBarSplit").value = iup.GetDialogChild(hMainLayout, "SourceSplitBtm").value
+        end
+        iup.RefreshChildren(vbScite)
     end
 end
 
@@ -1213,9 +1226,12 @@ AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
         if output.Focus then
             if (_G.iuprops['concolebar.win'] or '0') == '1' then ConsoleBar.Switch() end
         elseif findres.Focus then
-            if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.Switch()
-            else iup.PassFocus() end
+            if (_G.iuprops['findresbar.win'] or '0') == '1' then FindResBar.Switch() end
+        else
+            CORE.HidePannels()
+            return
         end
+        iup.PassFocus()
     elseif key == iup.K_CR and findres.Focus then
         if findres:LineFromPosition(findres.SelectionStart) == findres:LineFromPosition(findres.SelectionEnd) then
             local curpos = findres:PositionFromLine(findres:LineFromPosition(findres.SelectionStart))

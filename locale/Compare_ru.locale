@@ -27,4 +27,5 @@ return {
 ["Recompare when moved to other line"] = "Сравнивать заново при изменении строки";
 ["Selecting a directory for comparison to same named"] = "Выбор директории для сравнения с одноименным";
 ["Use Icons"] = "&Использовать иконки";
+["Synchronous View Switching"] = "Синхронное &переключение окон";
 }

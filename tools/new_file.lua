@@ -102,7 +102,7 @@ function CORE.OpenAsNew(strName, strText, idm_encoding)
     if idm_encoding then scite.MenuCommand(idm_encoding) end
     CORE.SetText(strText)
     iup.PassFocus()
-    if not editor.Focus then iup.PassFocus() print(222) end
+    if not editor.Focus then iup.PassFocus() end
 end
 
 AddEventHandler("OnMenuCommand", function(msg, source)

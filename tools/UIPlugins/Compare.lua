@@ -110,7 +110,9 @@ local function Init_hidden()
         end
     end
 
-    local function ClearWindow(e)
+    local function ClearWindow(e, norest)
+        local l
+        if not norest then l = e:DocLineFromVisible(e.FirstVisibleLine) end
         e:AnnotationClearAll()
         for i = 0, 8 do
             e:MarkerDeleteAll(Compare.Markers['MARKER_MOVED_LINE'] + i)
@@ -120,6 +122,7 @@ local function Init_hidden()
         e:IndicatorClearRange(0, e.Length)
 
         e.IndicatorCurrent = curind
+        if not norest then e.FirstVisibleLine = editor:VisibleFromDocLine(l) end
     end
 
     local function Reset()
@@ -178,6 +181,30 @@ local function Init_hidden()
         if tCompare.right[fPath(tabR)] == "-" or tCompare.left[fPath(tabL)] == "-" then
             Reset()
             return
+        end
+        if _G.iuprops['compare.sync.viewswitch'] == 1 and iup.GetGlobal("SHIFTKEY") == 'OFF' then
+            local coPath, side
+            local buf = scite.buffers.GetCurrent()
+            if scite.buffers.GetBufferSide(buf) == 0 then --left
+                coPath = tCompare.left[fPath(tabL) or - 1]
+                if coPath == fPath(tabR) then coPath = nil end
+                side = 0
+            else
+                coPath = tCompare.right[fPath(tabR) or - 1]
+                if coPath == fPath(tabL) then coPath = nil end
+                side = 1
+            end
+            if coPath then
+                local coBuf = scite.buffers.BufferByName(coPath)
+                if scite.buffers.GetBufferSide(coBuf) ~= side then
+                    BlockEventHandler"OnSwitchFile"
+                    BlockEventHandler"OnNavigation"
+                    scite.buffers.SetDocumentAt(coBuf)
+                    scite.buffers.SetDocumentAt(buf)
+                    UnBlockEventHandler"OnSwitchFile"
+                    UnBlockEventHandler"OnNavigation"
+                end
+            end
         end
         bActive = 0
         if tCompare.left[fPath(tabL)] then bActive = bActive | 1 end
@@ -364,7 +391,7 @@ local function Init_hidden()
         end
         StartCompare(true)
         lastEditLine = editor.LineCount + 1
-        onUpdateUI_local(false, true, 0)
+        onUpdateUI_local(1, 1, SC_UPDATE_SELECTION)
     end
 
     local function CompareToFile(strName, bTmp)
@@ -560,20 +587,27 @@ local function Init_hidden()
     end)
 
     local bInvertCE = false
+
+    local function onTextChanged_local()
+        local fvl = editor.FirstVisibleLine
+        local dl = editor:DocLineFromVisible(fvl)
+        editor.VScrollBar = false
+        coeditor.VScrollBar = false
+        ClearWindow(editor, true)
+        ClearWindow(coeditor, true)
+        CompareSetInd()
+        if dl ~= editor:DocLineFromVisible(fvl) then fvl = editor:VisibleFromDocLine(dl) end
+        editor.FirstVisibleLine = fvl
+        editor.VScrollBar = true
+        coeditor.VScrollBar = true
+    end
+
     onUpdateUI_local = function(bModified, bSelection, flag)
         ScrollWindows(editor, coeditor, flag)
         if (bActive & 4) == 4 and tSet.Recompare then
             if coeditor.Zoom ~= editor.Zoom then coeditor.Zoom = editor.Zoom end
-            if bSelection == 1 and (lastEditLine and lastEditLine ~= editor:LineFromPosition(editor.CurrentPos)) then
-                local fvl = editor.FirstVisibleLine
-                editor.VScrollBar = false
-                coeditor.VScrollBar = false
-                ClearWindow(editor)
-                ClearWindow(coeditor)
-                CompareSetInd()
-                editor.FirstVisibleLine = fvl
-                editor.VScrollBar = true
-                coeditor.VScrollBar = true
+            if (bSelection == 1 and ((lastEditLine or bModified == 1) and lastEditLine ~= editor:LineFromPosition(editor.CurrentPos))) then
+                onTextChanged_local()
                 lastEditLine = nil
                 bInvertCE = true
             end
@@ -589,6 +623,9 @@ local function Init_hidden()
             end
         end
     end
+    AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
+        if (bActive & 4) == 4 and tSet.Recompare and (flag & (SC_PERFORMED_UNDO | SC_PERFORMED_REDO)) ~= 0 then onTextChanged_local() end
+    end)
     AddEventHandler("OnUpdateUI", onUpdateUI_local)
 
     AddEventHandler("CoOnUpdateUI", function(bModified, bSelection, flag)
@@ -666,6 +703,7 @@ local function Init_hidden()
 		{'&Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
 		{'&Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
 		{'&Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
+		{'&Synchronous View Switching', check_iuprops = 'compare.sync.viewswitch'},
 		{'Color Pre&ferences', action = ColorSettings, image='color_µ'},
     }}
     menuhandler:AddMenu(item, "hildim/ui/compare.html", _T)

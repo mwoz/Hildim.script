@@ -90,6 +90,9 @@ end
 local cv = (function(s) return iup.GetDialogChild(containers[2],s).value end)
 
 local function ReadSettings(bScipCheckRegEx)
+    if cv("cmbReplaceWhat"):find('[\r\n]') then
+        iup.GetDialogChild(containers[2], "cmbReplaceWhat").value = select(3, cv("cmbReplaceWhat"):find('^([^\r\n]*)'))
+    end
     findSettings:Reset{
         wholeWord = (cv("chkWholeWord") == "ON")
         ,matchCase = (cv("chkMatchCase") == "ON")
@@ -206,10 +209,10 @@ local function PostAction(bForce)
     end
 end
 
-local function PassFocus_local()
+local function PassFocus_local(scp)
     -- if Ctrl("chkPassFocus").value == 'ON' or (_G.dialogs['findrepl'] and Ctrl("zPin").valuepos == '1') then
     if Ctrl("chkPassFocus").value == 'ON' then
-        if _G.iuprops['findrepl.win'] == '0' then CORE.ScipHidePannel() end
+        if _G.iuprops['findrepl.win'] == '0' then CORE.ScipHidePannel(1 + (scp or 0)) end
         iup.PassFocus()
     end
 end
@@ -259,7 +262,7 @@ local function FindAll(h)
     local count = findSettings:FindAll(nil, false)
     SetInfo(_T'Found: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    PassFocus_local()
+    PassFocus_local(1)
     PostAction()
     CheckBottomBar()
 end

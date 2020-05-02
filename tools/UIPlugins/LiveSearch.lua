@@ -91,7 +91,7 @@ local function Init(ToolBar_obj)
             CORE.ClearLiveFindMrk()
         end
     end)
-    btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);CORE.ScipHidePannel();iup.PassFocus() end), tip=_T'Repeat search by selected word'}
+    btn_search = iup.flatbutton{image = 'IMAGE_search',active='NO', padding = '4x4', flat_action=(function() Find_onTimer(txt_search);Find_onFocus(false);CORE.ScipHidePannel(2);iup.PassFocus() end), tip=_T'Repeat search by selected word'}
 
     menuhandler:InsertItem('MainWindowMenu', 'Search|s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
     {'Live Search', key = 'Alt+F3', action = sidebar_Find, image = 'binocular__pencil_µ',}, "hildim/ui/livesearch.html", _T)

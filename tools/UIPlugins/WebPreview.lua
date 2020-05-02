@@ -77,7 +77,9 @@ local function init()
         local e = web.com.document.parentWindow.event
         if e.keyCode == 3 and not e.altKey and e.ctrlKey and not e.shiftKey then doCopy() end
     end
-
+    function body_events:onclick()
+        CORE.HidePannels()
+    end
     function body_events:ondblclick()
         OnNavigation("Html")
         if editor.LexerLanguage ~= "hypertext" then return end

@@ -34,7 +34,9 @@ local function Init(h)
         if not editor.Focus then return end
 
         txtCol.value = editor.Column[editor.CurrentPos] + editor.SelectionNAnchorVirtualSpace[0] + 1
-        txtSel.value = editor.SelectionEnd - editor.SelectionStart
+        local sel = editor:GetSelText()
+        if editor.CodePage ~= 0 then sel = sel:from_utf8() end
+        txtSel.value = #sel
         txtLine.value = editor:LineFromPosition(editor.CurrentPos) + 1
     end)
     local function button_cb(_, but, pressed, x, y, status)

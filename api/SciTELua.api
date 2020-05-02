@@ -538,6 +538,8 @@ editor:MarkerDeleteHandle(int handle)\n Delete a marker.
 editor:MarkerEnableHighlight(void, bool) = void
 editor:MarkerGet(int line) = int\n Get a bit mask of all the markers set on a line.
 editor:MarkerLineFromHandle(int handle) = int\n Retrieve the line number at which a particular marker is located.
+editor:MarkerNumberFromLine(line line, int which) = int\n If which is greater or equal to the number of markers on a line, this returns -1;
+editor:MarkerHandleFromLine(line line, int which) = int\n If which is greater or equal to the number of markers on a line, this returns -1;
 editor:MarkerNext(int lineStart, int markerMask) = int\n Find the next line after lineStart that includes a marker in mask.
 editor:MarkerPrevious(int lineStart, int markerMask) = int\n Find the previous line before lineStart that includes a marker in mask.
 editor:MarkerSymbolDefined(int, int) = void
