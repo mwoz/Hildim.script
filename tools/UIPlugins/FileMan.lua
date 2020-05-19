@@ -465,6 +465,7 @@ local function FileMan_Rename()
     local l = list_getvaluenum(list_dir)
 	if fname == '' or d == 'd' then return end
 
+    CORE.ScipHidePannel()
     list_dir.focus_cell = l..":2"
     iup.SetAttribute(list_dir, 'READONLY', 'NO')
     bIsRenamed = true
@@ -544,6 +545,21 @@ function FILEMAN.OpenFolder(fname)
     end
 end
 
+local function ensureVisible()
+    local sel = 1
+    if list_dir.marked then sel = list_dir.marked:find('1') end
+    sel = sel - 1
+    for i = 0, list_dir.count - 1 do
+        if list_dir:getcell(i, 2) ~= nil and list_dir:getcell(i, 2):upper() == props['FileNameExt']:upper() then
+            iup.SetAttributeId2(list_dir, 'MARK', sel, 0, 0)
+            iup.SetAttributeId2(list_dir, 'MARK', i, 0, 1)
+            list_dir.focus_cell = i..":1"
+            list_dir.redraw = "ALL"
+            iup.SetAttribute(list_dir, 'SHOW', i..":1")
+        end
+    end
+end
+
 local function OnSwitch(bForse, bRelist)
     if zPath.valuepos == '1' or bIsRenamed then return end
     if prev_filename:upper() == props['FilePath']:upper() then return end
@@ -558,18 +574,7 @@ local function OnSwitch(bForse, bRelist)
             -- if bClearMask then memo_mask:set_text = "" end
             --print(debug.traceback())
             if zPath.valuepos == '0' then FileMan_ListFILL(true) end
-            local sel = 1
-            if list_dir.marked then sel = list_dir.marked:find('1') end
-            sel = sel - 1
-            for i = 0, list_dir.count - 1 do
-                if list_dir:getcell(i, 2) ~= nil and list_dir:getcell(i, 2):upper() == props['FileNameExt']:upper() then
-                    iup.SetAttributeId2(list_dir, 'MARK', sel, 0, 0)
-                    iup.SetAttributeId2(list_dir, 'MARK', i, 0, 1)
-                    list_dir.focus_cell = i..":1"
-                    list_dir.redraw = "ALL"
-                    iup.SetAttribute(list_dir, 'SHOW', i..":1")
-                end
-            end
+            ensureVisible()
             list_dir.redraw = "ALL"
         end
     end
@@ -855,7 +860,7 @@ local function FileManTab_Init(h)
                 m_prevSel = _Plugins.fileman.Bar_obj.TabCtrl.valuepos
             end
         end;
-        tabs_OnSelect = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); --[[OnSwitch(false, true)]] end) end;
+        tabs_OnSelect = function(h) scite.RunAsync(function() iup.SetFocus(memo_mask); ensureVisible() end); --[[OnSwitch(false, true)]] end;
     }
     Favorites_OpenList()
     return res

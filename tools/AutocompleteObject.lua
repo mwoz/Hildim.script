@@ -59,6 +59,7 @@ local inheritors, inheritorsX = {}, {} --таблицы наследования объектов
 local objPatern
 local tipStartParam = 0
 local Ext2Ptrn = {}
+local bXmlAtrListNoReselect
 do
     local patterns = {
         [props['file.patterns.formenjine']]='$(file.patterns.formenjine)',
@@ -267,8 +268,9 @@ local function fPattern(str)
 	return str_out
 end
 
-local function ShowCallTip(pos, str, s, e, reshow)
+local function ShowCallTip(pos, str, s, e, reshow, chAfter)
     local s1, _, list = str:find('{{(.-)}}', s)
+    if list and chAfter and chAfter ~= 9 and chAfter ~= 13 and chAfter ~= 32 and chAfter ~= 41 then calltipinfo ={0}; return end
     local function ls(l, seps)
         if not l:find('|') then
             editor:ReplaceSel(l)
@@ -282,7 +284,6 @@ local function ShowCallTip(pos, str, s, e, reshow)
         l = table.concat(tl, '\t')
         editor.AutoCSeparator = string.byte('\t')
         pasteFromXml = false
-
         local wch = editor.WordChars
         editor.WordChars = wch..'.:'
         editor:SetSel(editor:WordEndPosition(editor.CurrentPos,true), editor:WordStartPosition(editor.CurrentPos,true))
@@ -307,7 +308,6 @@ local function ShowCallTip(pos, str, s, e, reshow)
         (not calltipinfo['attr'] or (calltipinfo['attr']['enter'] or s) ~= s or IsWordCharParam()) then
         local _, _, str2 = str:find'.-{{.+}}(.+)'
         local _, _, sub = list:find('^(#@[%u%d]+)$')
-
         if str2 or true then
             calltipinfo['attr'] = {}
             calltipinfo['attr']['pos'] = pos
@@ -316,7 +316,7 @@ local function ShowCallTip(pos, str, s, e, reshow)
             calltipinfo['attr']['e'] = e
         end
         if sub then list = m_tblSubstitution[sub]
-            if type(list) == 'function' then list = list(function(strList, seps) ls(strList, seps) end) end
+            if type(list) == 'function' then list, bXmlAtrListNoReselect = list(function(strList, seps) ls(strList, seps) end) end
         end
         if not list then return end
         local cp = editor.CurrentPos
@@ -333,10 +333,12 @@ local function ShowCallTip(pos, str, s, e, reshow)
             end
         elseif not CUR_POS.use then
             ulFromCT_data = list
-            local wch = editor.WordChars
-            editor.WordChars = wch..'.:'
-            editor:SetSel(editor:WordEndPosition(editor.CurrentPos, true), editor:WordStartPosition(editor.CurrentPos, true))
-            editor.WordChars = wch
+            if not bXmlAtrListNoReselect then
+                local wch = editor.WordChars
+                editor.WordChars = wch..'.:'
+                editor:SetSel(editor:WordEndPosition(editor.CurrentPos, true), editor:WordStartPosition(editor.CurrentPos, true))
+                editor.WordChars = wch
+            end
             scite.RunAsync(function()
                 if #ulFromCT_data > 0 and not CUR_POS.use then
                     local tl = {}
@@ -948,7 +950,7 @@ local function ShowUserList(nPos, iId, last)
 	end
 end
 
-local function TryTipFor(sObj, sMet, api_tb, pos)
+local function TryTipFor(sObj, sMet, api_tb, pos, chAfter)
     api_t = api_tb[string.upper(sObj)]
     if api_t == nil then return false end
     local lLen = #api_t
@@ -987,7 +989,7 @@ local function TryTipFor(sObj, sMet, api_tb, pos)
 
             table.insert(calltipinfo,{pos, str, nParams, 1, pozes})
             calltipinfo[1] = af_current_line
-            ShowCallTip(pos, str, sParam, eParam)
+            ShowCallTip(pos, str, sParam, eParam, nil, chAfter)
             return true
         end
     end
@@ -1020,18 +1022,31 @@ local function OnUserListSelection_local(tp, str)
             ShowCallTip(calltipinfo['attr']['pos'], calltipinfo['attr']['str'], calltipinfo['attr']['s'], calltipinfo['attr']['e'], true)
             calltipinfo['attr']['enter'] = calltipinfo['attr']['s']
         end
-        --calltipinfo ={0}
         s = str:gsub(' .*', ''):gsub('~', ' ')
         local sSt = editor.CurrentPos
         local isX = isXmlLine()
-        for i = editor.CurrentPos - 1, editor:PositionFromLine(editor:LineFromPosition(editor.CurrentPos)), -1 do
-            if editor.CharAt[i] == 34 or
-                (not isX and (editor.CharAt[i] == 40 or editor.CharAt[i] == 44)) then
-                sSt = i + 1
-                break -- ["]  =   34 [,]  =   44 [(]  =   40
+        if bXmlAtrListNoReselect then
+            for i = editor.SelectionEnd, editor:PositionFromLine(editor:LineFromPosition(editor.CurrentPos) + 1) do
+                if editor.CharAt[i] == 34 then
+                    sSt = i
+                    break -- ["]  =   34 [,]  =   44 [(]  =   40
+                end
             end
+            editor:SetSel(sSt, sSt)
+            if editor.CharAt[sSt - 1] ~= 34 and editor.CharAt[sSt - 1] ~= 59 then s = ';'..s end
+            s = s..'='
+            bXmlAtrListNoReselect = nil
+
+        else
+            for i = editor.CurrentPos - 1, editor:PositionFromLine(editor:LineFromPosition(editor.CurrentPos)), -1 do
+                if editor.CharAt[i] == 34 or
+                    (not isX and (editor.CharAt[i] == 40 or editor.CharAt[i] == 44)) then
+                    sSt = i + 1
+                    break -- ["]  =   34 [,]  =   44 [(]  =   40
+                end
+            end
+            editor:SetSel(sSt, editor.CurrentPos)
         end
-        editor:SetSel(sSt, editor.CurrentPos)
     elseif pasteFromXml then
         s = str..'=""'
     elseif editor_LexerLanguage() == 'xml' or editor_LexerLanguage() == 'hypertext' or fmDef == SCE_FM_X_DEFAULT or fmDef == SCE_FM_DEFAULT then
@@ -1173,7 +1188,7 @@ local function AutocompleteObject(char)
 	return RunAutocomplete(char,current_pos,'')
 end
 
-local function CallTip(char, pos)
+local function CallTip(char, pos, chAfter)
     if get_api == true then
         ReCreateStructures()
     end
@@ -1184,7 +1199,7 @@ local function CallTip(char, pos)
     --найдем, что у нас слева - метод или функция
     local _start, _end, sSep, sMetod = string.find(strLine, "("..autocom_chars.."?)([%w%_]+)$")
     if sSep == '' then
-        return TryTipFor(constObjGlobal, sMetod, objects_table, pos)
+        return TryTipFor(constObjGlobal, sMetod, objects_table, pos, chAfter)
     elseif sSep ~= nil then
         FindDeclaration()
 
@@ -1193,7 +1208,7 @@ local function CallTip(char, pos)
         obj_names = GetObjectNames(input_object)
         local tblobj = EnrichFromInheritors(obj_names, inheritors)
         for upObj, _ in pairs(tblobj) do
-            if TryTipFor(upObj, sMetod, objects_table, pos) then return true end
+            if TryTipFor(upObj, sMetod, objects_table, pos, chAfter) then return true end
         end
     end
     return false
@@ -1368,7 +1383,7 @@ local function OnChar_local(char)
             if r then bResetCallTip = false end
             return r or result
         elseif string.find(calltip_start_characters, char, 1, 1) ~= nil then
-            local r = CallTip(char, current_pos) --Показываем подсказку
+            local r = CallTip(char, current_pos, editor.CharAt[editor.CurrentPos]) --Показываем подсказку
             return r or result
         end
     end

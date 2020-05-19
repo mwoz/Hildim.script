@@ -805,6 +805,7 @@ local function Func_Init(h)
         end
     end)
 
+    AddEventHandler("OnSwitchFile", function() editor.Cursor = -1 end)
     AddEventHandler("OnDwellStart", OnDwell_local)
 
     local function SaveLayoutToProp()

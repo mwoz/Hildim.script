@@ -707,9 +707,10 @@ local function InitTabbar()
         end
         if (_G.iuprops['coeditor.win'] or '0') == '0' and Exp.state == 'OPEN' and ((_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0) then
             local vSSR = 999
-            if iup.GetAttribute(SSR, "POUPSIDE") == "0" then vSSR = tonumber(SSR.value) end
+            if SSR.popupside == "0" then vSSR = tonumber(SSR.value) end
+            --print(vSSR, SSR.popupside)
             local vSSL = 1
-            if iup.GetAttribute(SSL, "POUPSIDE") == "0" then vSSL = tonumber(SSL.value) end
+            if SSL.popupside == "0" then vSSL = tonumber(SSL.value) end
             TBS.value = ''..math.floor(vSSL + (tonumber(SSM.value) / 1000) * (vSSR / 1000) * (1000 - vSSL))
         end
     end
@@ -855,10 +856,10 @@ function CORE.RemapCoeditor()
 
     if hPrOld.flat_button_cb then hPr.flat_button_cb = hPrOld.flat_button_cb end
 
-    if bIsH then
-        iup.GetDialogChild(hMainLayout, "TabBarSplit").value = hPr.value
-    end
     iup.RefreshChildren(vbScite)
+    if bIsH then
+        scite.RunAsync(function() Splitter_CB(iup.GetDialogChild(hMainLayout, "TabBarSplit")) end)
+    end
     _G.iuprops['dialogs.coeditor.splithorizontal'] = Iif(bIsH, 0, 1)
 end
 

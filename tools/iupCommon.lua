@@ -1769,6 +1769,7 @@ local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
             if button == iup.BUTTON1 and iup.isdouble(status) then
                 if iup.GetDialogChild(iup.GetLayout(), 'sidebartab_'..dtb.sciteid) then
                     cmd_AttachPane()
+                    iup.GetDialogChild(iup.GetLayout(), "SourceSplitLeft").valuechanged_cb()
                 else
                     CORE.BottomBarSwitch("YES")
                     local v = tonumber(dtb.Split_h().value)
