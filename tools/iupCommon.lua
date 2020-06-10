@@ -995,6 +995,7 @@ local old_TreeSetNodeAttrib = iup.TreeSetNodeAttrib
 iup.TreeSetNodeAttrib = function (handle, tnode, id)
   old_TreeSetNodeAttrib(handle, tnode, id)
   if tnode.userdata then iup.SetAttributeId(handle, "USERDATA", id, tnode.userdata) end
+  if tnode.extratext then iup.SetAttributeId(handle, "EXTRATEXT", id, tnode.extratext) end
 end
 --Переопределяем iup сообщение об ошибке - чтобы не было их всплывающего окна, печатаем все к нам в output
 iup._ERRORMESSAGE = function(msg,traceback)
@@ -1058,6 +1059,26 @@ iup.hi_toggle = function(t)
     return iup.flatbutton(t)
 end
 
+local old_flattree = iup.flattree
+iup.flattree = function(t)
+    t.hlcolor = "128 128 128"
+    t.hlcoloralpha = "60"
+    t.bgcolor = iup.GetLayout().txtbgcolor
+    t.bordercolor = iup.GetLayout().txtbgcolor
+    t.borderwidth = 3
+    t.fgcolor = props['layout.txtfgcolor']
+    if not t.flatscrollbar then
+        t.flatscrollbar = "YES"
+        t.sb_forecolor = props['layout.scroll.forecolor'];
+        t.sb_highcolor = props['layout.scroll.highcolor'];
+        t.sb_presscolor = props['layout.scroll.presscolor'];
+        t.sb_backcolor = props['layout.scroll.backcolor']
+    end
+    local ftr = old_flattree(t)
+    iup.SetAttributeId(ftr, "ADDBRANCH", -1, "")
+    return ftr
+end
+iup.SetGlobal('TXTHLCOLOR', '128 128 128')
 local old_matrix = iup.matrix
 iup.matrix = function(t)
     t.hlcolor="255 255 255"
@@ -1112,7 +1133,7 @@ iup.matrix = function(t)
             iup.SetAttribute(h, 'MARK'..lin..':0', 1)
             h.redraw = lin..'*'
             if iup.isdouble(status) and iup.isbutton1(status) then
-                if act_act then act_act(lin) end
+                if act_act then act_act(lin, col) end
                 return -1
             elseif iup.isbutton3(status) then
                 h.focus_cell = lin..':'..col
@@ -1141,7 +1162,7 @@ iup.matrix = function(t)
             w = 0
             for i = 1, n do
                 if i > col then
-                    h["rasterwidth"..i] = math.floor(h["rasterwidth"..i] * l)
+                    if h["type*:"..i] ~= 'IMAGE' then h["rasterwidth"..i] = math.floor(h["rasterwidth"..i] * l) end
                     if tonumber(h["rasterwidth"..i]) < 2 then
                         h["rasterwidth"..i] = 5
                     elseif lMax < tonumber(h["rasterwidth"..i]) then
@@ -2302,4 +2323,5 @@ RestoreIup = function()
     iup.expander            = old_iup_expander
     iup.GetParam            = old_iup_GetParam
     iup.list                = old_iup_list
+    iup.flattree            = old_flattree
 end

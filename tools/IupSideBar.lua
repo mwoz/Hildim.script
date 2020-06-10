@@ -48,6 +48,7 @@ function CORE.BottomBarHidden()
 end
 
 iup.PassFocus =(function()
+    if iup.GetGlobal("SHIFTKEY") == 'ON' then return end
     if scite.buffers.GetCurrent() >= 0 then
         editor:GrabFocus()
     else
@@ -190,7 +191,7 @@ function iup.SaveNamedValues(h, root)
     repeat
         child = iup.GetNextChild(h, child)
         if child then
-            if (child.value or child.valuepos or child.focusitem or child.size) and child.name and (iup.GetAttribute(child, 'HISTORIZED') ~= 'NO') then
+            if (child.value or child.valuepos or child.focusitem or child.size or child.state) and child.name and (iup.GetAttribute(child, 'HISTORIZED') ~= 'NO') then
                 local _,_,cType = tostring(child):find('IUP%((%w+)')
                 local val = child.value
                 if cType == 'list' and (child.dropdown == "YES" or iup.GetAttribute(child, 'HISTORIZED') == 'YES') then
@@ -210,6 +211,8 @@ function iup.SaveNamedValues(h, root)
                     val = child.size
                 elseif cType == 'split' then
                     if "0" == child.barsize then val = nil end
+                elseif cType == 'expander' and iup.GetAttribute(child, 'HISTORIZED') == 'YES' then
+                    val = child.state
                 end
                 if val then _G.iuprops[root..'.'..child.name..'.value'] = val end
             end
@@ -297,7 +300,11 @@ local function CreateBox()
         t.tabsbackcolor = props["layout.splittercolor"]
         t.getfocus_cb = function(h)
             local s = iup.GetDialogChild(hMainLayout, splitter)
-            if s.popupside ~= 0 then s.hidden = 'NO'; CORE.curTopSplitter = sciteid end
+            if s.popupside ~= "0" then
+                s.hidden = 'NO'; CORE.curTopSplitter = sciteid
+            else
+                CORE.HidePannels()
+            end
         end
 
         return iup.flattabs(t)
@@ -337,7 +344,11 @@ local function CreateBox()
                 end
             end);
             focus_cb = function(h, f)
-                if CORE.curTopSplitter ~= sSciteId and spl_h.popupside ~= 0 then spl_h.hidden = 'NO'; CORE.curTopSplitter = sSciteId end
+                if CORE.curTopSplitter ~= sSciteId and spl_h.popupside ~= "0" then
+                    spl_h.hidden = 'NO'; CORE.curTopSplitter = sSciteId
+                elseif spl_h.popupside == "0" then
+                    CORE.HidePannels()
+                end
             end;
             k_any =(function(_, key)
                 if key == iup.K_ESC then iup.PassFocus() end
@@ -537,6 +548,9 @@ local function RestoreNamedValues(h, root)
                         child["show"] = val..":*"
                         child.redraw = 1
                     end
+                elseif cType == 'expander' and val and child.historized == 'YES' then
+                    if val then child.state = val end
+
                 elseif val then
                     if cType == 'split' and child.barsize == '0' and child.value ~= '0' and child.value ~= '1000' then child.barsize = '5' end
                     child.value = val

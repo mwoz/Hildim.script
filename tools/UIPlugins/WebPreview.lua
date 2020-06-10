@@ -407,7 +407,7 @@ return {
     sidebar = Sidebar_Init,
     toolbar = Toolbar_Init,
     tabhotkey = "Alt+Shift+H",
-    undermenu = true,
+    overeditors = true,
     destroy = function() WEBPREVIEW = nil end,
     description = [[Предпросмотр HTML кода по мере набора
 Дополнительные инструменты по работе с HTML]]

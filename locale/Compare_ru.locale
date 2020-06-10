@@ -12,8 +12,8 @@ return {
 ["Compare to Vss"] = "Сравнить с Vss";
 ["Compare to same named from this folder"] = "Сравнить с одноименным из этой директории";
 ["Comparison Color Preferences"] = "Настройки цветов сравнения";
-["Copy Left"] = "Скопировать вправо";
-["Copy Right"] = "Скопировать влево";
+["Copy Left"] = "Скопировать влево";
+["Copy Right"] = "Скопировать вправо";
 ["Deleted"] = "Удаленные";
 ["File Comparison"] = "Сравнение файлов";
 ["Files are identical"] = "Файлы идентичны";

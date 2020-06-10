@@ -199,8 +199,8 @@ local function Init_hidden()
                 if scite.buffers.GetBufferSide(coBuf) ~= side then
                     BlockEventHandler"OnSwitchFile"
                     BlockEventHandler"OnNavigation"
-                    scite.buffers.SetDocumentAt(coBuf)
-                    scite.buffers.SetDocumentAt(buf)
+                    scite.buffers.SetDocumentAt(coBuf, false)
+                    scite.buffers.SetDocumentAt(buf, false)
                     UnBlockEventHandler"OnSwitchFile"
                     UnBlockEventHandler"OnNavigation"
                 end

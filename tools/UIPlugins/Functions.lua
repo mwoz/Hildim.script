@@ -251,7 +251,7 @@ local function Func_Init(h)
                             end
                         end
                     end
-    --debug_prnArgs(tOut)
+    -- debug_prnArgs(tOut)
                     table.sort(tOut, function(a, b)
                         if (a._order or 0) ~= (b._order or 0) then
                             return (a._order or 0) < (b._order or 0)
@@ -401,7 +401,7 @@ local function Func_Init(h)
             tblOut.userid.start = 0
             countTree(tblOut)
 
-            --debug_prnArgs(lOut)
+            -- debug_prnArgs(tblOut)
             linda:send("Functions", {tblOut, lOut, out.options or {}})
             textAll = nil
             tblOut = nil
@@ -430,7 +430,6 @@ local function Func_Init(h)
         tree_func.autoredraw = 'NO'
         tree_func.delnode0 = "CHILDREN"
         iup.TreeAddNodes(tree_func, table_functions)
-        tree_func.resetscroll = 1
         tree_func.autoredraw = 'YES'
     end
 
@@ -566,7 +565,13 @@ local function Func_Init(h)
                     if currFuncId > - 1 then
                         iup.SetAttributeId(tree_func, "COLOR", currFuncId, "0 0 0")
                     end
-                    tree_func.flat_topitem = idPrev
+                    local id = iup.GetAttributeId(tree_func, 'PARENT', idPrev)
+                    repeat
+                        if not id then break end
+                        if iup.GetAttributeId(tree_func, 'STATE', id) == "COLLAPSED" then iup.SetAttributeId(tree_func, 'STATE', id, "EXPANDED") end
+                        id = iup.GetAttributeId(tree_func, 'PARENT', id)
+                    until id == '0'
+                    tree_func.value = idPrev
                     iup.SetAttributeId(tree_func, "MARKED", idPrev, "YES")
                     iup.SetAttributeId(tree_func, "COLOR", idPrev, "0 0 255")
                     currFuncId = idPrev
@@ -839,7 +844,8 @@ local function Func_Init(h)
     _Plugins = h
 
     local line = nil --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_func = iup.sc_tree{expand = 'YES', fgcolor = props['layout.txtfgcolor']}
+    --tree_func = iup.sc_tree{expand = 'YES', fgcolor = props['layout.txtfgcolor']}
+    tree_func = iup.flattree{expand = 'YES', fgcolor = props['layout.txtfgcolor'],}
     --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
     tree_func.size = nil
 
@@ -849,7 +855,7 @@ local function Func_Init(h)
         iup.SetAttributeId(tree_func, "MARKED", id, "YES")
     end
 
-    tree_func.button_cb = function(_, but, pressed, x, y, status)
+    tree_func.flat_button_cb = function(_, but, pressed, x, y, status)
         if pressed == 0 and line ~= nil then
             iup.PassFocus()
             line = nil
@@ -883,7 +889,7 @@ local function Func_Init(h)
             if expd.state == 'CLOSE' then
                 expd.state = 'OPEN'
                 iup.SetFocus(txt_live)
-                tree_func.flat_topitem = tree_func.value
+                tree_func.topitem = tree_func.value
                 iup.SetGlobal('KEY', number)
                 iup.RefreshChildren(iup.GetParent(expd))
             end
@@ -897,7 +903,7 @@ local function Func_Init(h)
         scite.RunAsync(iup.PassFocus)
     end
 
-    tree_func.flat_selection_cb = function(h, i, state)
+    tree_func.selection_cb = function(h, i, state)
         if prevval then
             iup.SetAttributeId(tree_func, "MARKED", prevval, "YES")
             prevval = nil
@@ -920,11 +926,11 @@ local function Func_Init(h)
 
         l[1] = state
     end
-    tree_func.flat_branchopen_cb = function(h, number)
+    tree_func.branchopen_cb = function(h, number)
         StoreState('EXPANDED', number)
         SaveLayoutToProp()
     end
-    tree_func.flat_branchclose_cb = function(h, number)
+    tree_func.branchclose_cb = function(h, number)
         if number == 0 then
             editor:GotoLine(0)
             return iup.IGNORE
@@ -951,7 +957,7 @@ local function Func_Init(h)
         repeat
             if not block1st and tUid._name and tUid._name:upper():find('^'..newvalue:upper()) then
                 iup.SetAttributeId(tree_func, "MARKED", curv, "YES")
-                tree_func.flat_topitem = curv
+                -- tree_func.topitem = curv
                 return
             end
             block1st = nil

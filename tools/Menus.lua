@@ -488,20 +488,20 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'s1', separator = 1},
 		{'&Utils', {
 			{'LayOut &Dialog', action =(function()
-				local f = iup.filedlg{}
-				iup.SetNativeparent(f, "SCITE")
-				f:popup()
-				local path = f.value
-				f:destroy()
-				testHandle = nil
-				if path ~= nil then
-					local l = io.open(path)
-					local strLua = l:read('*a')
-					l:close()
-					local _, _, fName = strLua:find("function (create_dialog_[_%w]+)")
-					strLua = strLua..'\n testHandle = '..fName..'()'
-					dostring(strLua)
-				end
+                local f = iup.filedlg{}
+                iup.SetNativeparent(f, "SCITE")
+                f:popup()
+                local path = f.value
+                f:destroy()
+                testHandle = nil
+                if path ~= nil then
+                    local l = io.open(path)
+                    local strLua = l:read('*a')
+                    l:close()
+                    local _, _, fName = strLua:find("function (create_dialog_[_%w]+)")
+                    strLua = strLua..'\n testHandle = '..fName..'()'
+                    dostring(strLua)
+                end
 				local dlg = iup.LayoutDialog(testHandle)
 				iup.Show(dlg)
 			end),},

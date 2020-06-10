@@ -191,11 +191,16 @@ local function Initialize()
     local function enrich(t)
         for i = 1,  #t do
             if t[i].branchname then
-                if not bSetActive and t[i].active == 'YES' then t[i].color = CLR_ACTIVE; bSetActive = true end
+                if not bSetActive and t[i].active == 'YES' then
+                    t[i].color = CLR_ACTIVE; bSetActive = true
+                else
+                    t[i].color = "0 0 0"
+                end
                 enrich(t[i])
                 --str = str..', '
             elseif t[i].leafname then
                 t[i].image = GetExtImage(t[i].userid)
+                t[i].color = "0 0 0"
             end
         end
         --str = str..'}'
@@ -259,12 +264,12 @@ local function Solution_Init(h)
     --    layout[w] = 'COLLAPSED'
     --end
     local line = nil --RGB(73, 163, 83)  RGB(30,180,30)
-    tree_sol = iup.sc_tree{minsize = '0x5', size = _G.iuprops["sidebar.functions.tree_sol.size"],
+    tree_sol = iup.flattree{minsize = '0x5', size = _G.iuprops["sidebar.functions.tree_sol.size"],
     showdragdrop = 'YES', showrename = 'YES', dropfilestarget = 'YES',}
     --Обработку нажатий клавиш производим тут, чтобы вернуть фокус редактору
     tree_sol.size = nil
 
-    tree_sol.button_cb = (function(h, but, pressed, x, y, status)
+    tree_sol.flat_button_cb = (function(h, but, pressed, x, y, status)
 
         if but == 51 and pressed == 0 then --right
             h.value = iup.ConvertXYToPos(h, x, y)
@@ -347,7 +352,6 @@ local function Solution_Init(h)
     , "sysm/ui/solution.html", _T)
 
     local function AddTbl(tbl)
-        debug_prnArgs(tbl)
         local maxN = scite.buffers.GetCount() - 1
         for i = 0, maxN do
             if tbl[i] then

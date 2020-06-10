@@ -358,7 +358,7 @@ local function FindInFiles()
     Ctrl("cmbFilter"):SaveHist()
     Ctrl("btnFindInFiles").image = "cross_script_µ"
     iup.Update(Ctrl("btnFindInFiles"))
-    PassFocus_local()
+    PassFocus_local(1)
     PostAction()
     if Ctrl("chkFindProgress").value == 'ON' then
         Ctrl("progress").max = 100
