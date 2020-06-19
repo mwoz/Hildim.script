@@ -1,6 +1,7 @@
 local tSet, onDestroy
 local function Init_hidden()
-    require 'Compare'
+    local Compare = require'Compare'
+    --if not Compare then Compare = require'Compare' end
     require 'luacom'
     COMPARE = {}
     local bActive = 0

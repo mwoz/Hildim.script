@@ -10,7 +10,7 @@ Version: 1.1.1
     dofile (props["SciteDefaultHome"].."\\tools\\ROWrite.lua")
 --]]--------------------------------------------------
 
-require 'shell'
+if not shell then shell = require"shell" end
 
 local function iif (expresion, onTrue, onFalse)
 	if (expresion) then return onTrue; else return onFalse; end

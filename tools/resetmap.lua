@@ -1,4 +1,4 @@
-require "mblua"
+if not mblua then mblua = require"mblua" end
 require "shell"
 local msg_SqlObjectMap = nil
 

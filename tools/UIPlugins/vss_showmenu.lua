@@ -1,6 +1,6 @@
-require 'shell'
+if not shell then shell = require"shell" end
 require "luacom"
-require "lpeg"
+if not lpeg then lpeg = require"lpeg" end
 --SSDIR \\SOURCESAFE\SourceSafe\Main\
 -- *.sln, *.vbproj, *.xml, *.cform, *.vcproj, *.dsp, *.mdp, *.mak, *.wiki, *.vdp, *.vdproj, *.dbp, *.vsmproj, *.vsmacros, *.hwproj, *.etp, *.cform, *.rform, *.wform, *.mdmp, *.dsw, *.vjsproj, *.csdproj, *.inc, *.m, *.sql, *.incl, *.xml, *.form
 local function Init()
@@ -225,6 +225,7 @@ local function Init()
     end
 
     local function getStatAsync(d, f, dbg, dutf, vssDir)
+        shell = require"shell"
         __DEBUG = dbg
 
         local ierr, strerr

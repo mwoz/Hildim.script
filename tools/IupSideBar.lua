@@ -1,4 +1,4 @@
-require 'shell'
+if not shell then shell = require"shell" end
 SideBar_obj = {}
 LeftBar_obj = {}
 SideBar_Plugins = {}
@@ -175,7 +175,12 @@ local function CreateStatusBar()
         table.insert(tblH, StatusBar_obj.Tabs[pI.code].handle)
         ::continue::
     end
-    table.insert(tblH, iup.fill{})
+    table.insert(tblH, iup.label{expand = 'HORIZONTAL', button_cb=function(_, but, pressed, x, y, status)
+        if but == iup.BUTTON1 and pressed == 1 then
+            CORE.BottomBarSwitch(Iif(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").hidden == "YES", 'NO', "YES"))
+        end
+    end})
+    -- table.insert(tblH, iup.fill{})
     if _tmpSidebarButtons then
         for i = 1,  #_tmpSidebarButtons do
             table.insert(tblH, _tmpSidebarButtons[i])

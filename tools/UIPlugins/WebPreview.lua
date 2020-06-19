@@ -9,7 +9,7 @@ local function init()
 </html>]]
     local events_obj
     require "seacher"
-    require "lpeg"
+    if not lpeg then lpeg = require"lpeg" end
     local findSettings = seacher{
     wholeWord = false
     ,matchCase = false

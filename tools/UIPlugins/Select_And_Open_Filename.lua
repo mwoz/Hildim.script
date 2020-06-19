@@ -18,7 +18,7 @@ version 1.4.4
 
 !!!TODO!!! Сделать диалог настроек
 --]]----------------------------------------------------------------------------
-require 'shell'
+if not shell then shell = require"shell" end
 local function init()
     local function isFilenameChar(ch)
         if

@@ -26,7 +26,7 @@ Set in a file .properties:
   file.make.as.utf8=htm,html
 
 --]]----------------------------------------------------
-require 'shell'
+if not shell then shell = require"shell" end
 
 local unsaved_files = {}
 

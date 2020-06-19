@@ -1,5 +1,5 @@
 --Constants
-require 'shell'
+if not shell then shell = require"shell" end
 local RestoreIup
 local old_iup_ShowXY = iup.ShowXY
 CORE.old_iup_ShowXY = old_iup_ShowXY
@@ -10,6 +10,7 @@ end
 local linda = lanes.linda()
 
 local function runAsync(cmd, key, dir)
+    shell = require"shell"
     local ierr, strerr
     local proc, err, errdesc = shell.startProc(cmd, dir)
     if proc then

@@ -42,7 +42,7 @@ end
 
 dofile (props["SciteDefaultHome"].."\\tools\\COMMON.lua")
 --Расширения, загружаемые в любом случае
-require"lpeg"
+lpeg = require"lpeg"
 
 if not _G.g_session['scip.plugins'] then
     --require("mobdebug").start()

@@ -24,7 +24,7 @@ e.g.
   backup.path=$(TEMP)\SciTE
 --]]--------------------------------------------------
 
-require 'shell'
+if not shell then shell = require"shell" end
 
 local function GetPath()
 	local path = (props['backup.path']):from_utf8()

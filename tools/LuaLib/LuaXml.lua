@@ -1,15 +1,15 @@
-require("LuaXML_lib")
 
-local base = _G
-local xml = xml
+xml = require("LuaXML_lib")
+--local base = _G
+--local xml = xml
 local isz = 4
-module("xml")
+--module("xml")
 
 -- symbolic name for tag index, this allows accessing the tag by var[xml.TAG]
 TAG = 0
 
 -- sets or returns tag of a LuaXML object
-function tag(var,tag)
+function xml.tag(var, tag)
   if base.type(var)~="table" then return end
   if base.type(tag)=="nil" then
     return var[TAG]
@@ -18,7 +18,7 @@ function tag(var,tag)
 end
 
 -- creates a new LuaXML object either by setting the metatable of an existing Lua table or by setting its tag
-function new(arg)
+function xml.new(arg)
   if base.type(arg)=="table" then
     base.setmetatable(arg,{__index=xml, __tostring=xml.str})
 	return arg
@@ -30,16 +30,16 @@ function new(arg)
 end
 
 -- appends a new subordinate LuaXML object to an existing one, optionally sets tag
-function append(var,tag)
+function xml.append(var,tag)
   if base.type(var)~="table" then return end
   local newVar = new(tag)
   var[#var+1] = newVar
   return newVar
 end
 
-function setIndent(i) isz = i end
+function xml.setIndent(i) isz = i end
 -- converts any Lua var into an XML string
-function str(var,indent,tagValue)
+function xml.str(var,indent,tagValue)
   if base.type(var)=="nil" then return end
   local indent = indent or 0
   local indentStr=""
@@ -85,7 +85,7 @@ end
 
 
 -- saves a Lua var as xml file
-function save(var,filename)
+function xml.save(var,filename)
   if not var then return end
   if not filename or #filename==0 then return end
   local file = base.io.open(filename,"w")
@@ -96,7 +96,7 @@ end
 
 
 -- recursively parses a Lua table for a substatement fitting to the provided tag and attribute
-function find(var, tag, attributeKey,attributeValue)
+function xml.find(var, tag, attributeKey,attributeValue)
   -- check input:
   if base.type(var)~="table" then return end
   if base.type(tag)=="string" and #tag==0 then tag=nil end

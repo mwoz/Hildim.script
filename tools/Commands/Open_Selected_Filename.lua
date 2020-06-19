@@ -15,7 +15,7 @@ Connection:
 In file SciTEStartup.lua add a line:
 dofile (props["SciteDefaultHome"].."\\tools\\Open_Selected_Filename.lua")
 --]]--------------------------------------------------
-require 'shell'
+if not shell then shell = require"shell" end
 ------------------------------------------------------
 local function OpenSelectedFilename()
     local function GetOpenFilePath(text)

@@ -33,7 +33,7 @@ HighlightLinks v1.5.3
   highlight.links.mask=https*://[\w_&%?.\-@$+=*~/]+
 --]]----------------------------------------------------------------------------
 
-require "shell"
+if not shell then shell = require"shell" end
 
 local mark_number = CORE.InidcFactory('highlight.links', 'Подсветка ссылок', INDIC_PLAIN, 16711680, 0)
 local default_link_mask = "https*://[^ \t\r\n\"\']+"

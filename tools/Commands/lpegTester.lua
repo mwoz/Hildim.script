@@ -1,5 +1,5 @@
 local function Run()
-    require"lpeg"
+    if not lpeg then lpeg = require"lpeg" end
 
     local function Show()
 

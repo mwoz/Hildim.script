@@ -2,7 +2,7 @@
 local onDestroy
 local function Latex_Init(h)
     LATEX = {}
-    require"lpeg"
+    if not lpeg then lpeg = require"lpeg" end
     if not lanes then
         lanes = require("lanes").configure()
     end
@@ -11,6 +11,8 @@ local function Latex_Init(h)
     local bFillCells = 1
     -- local function runAsync(cmd, key, dir)
     local function MimeLoop(mimePath)
+        shell = require"shell"
+        lpeg = require"lpeg"
         local patt, patCyr
         do
             local tCyr = {[("À"):byte()] = "A", [("à"):byte()] = "a", [("Á"):byte()] = "B", [("á"):byte()] = "b", [("Â"):byte()] = "V", [("â"):byte()] = "v",

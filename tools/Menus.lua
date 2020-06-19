@@ -24,7 +24,7 @@
 	- action_lua
 	- action_cmd
 ]]
-require 'shell'
+if not shell then shell = require"shell" end
 function CORE.windowsList(side)
 	local t = {}
 	local maxN = scite.buffers.GetCount() - 1

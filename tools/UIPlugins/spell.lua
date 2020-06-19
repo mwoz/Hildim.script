@@ -1,8 +1,8 @@
 local sRu, sEn, mark, linda
 
 local function Init()
-    require "luahunspell"
-    require "shell"
+    if not luahunspell then luahunspell = require"luahunspell" end
+    if not shell then shell = require"shell" end
     if not lanes then
         lanes = require("lanes").configure()
     end
@@ -118,6 +118,9 @@ local function Init()
     end
 
     local function SpellLoop(defHome)
+        shell = require"shell"
+        luahunspell = require"luahunspell"
+
         local sRu, sEn
         sRu = luahunspell.Create(defHome..'\\dics\\ru_RU.aff', defHome..'\\dics\\ru_RU.dic')
         sEn = luahunspell.Create(defHome..'\\dics\\en_US.aff', defHome..'\\dics\\en_US.dic')

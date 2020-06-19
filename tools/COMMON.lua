@@ -30,7 +30,7 @@ CORE.onDestroy_event = {}
 -- package.path  = lib.."?.lua;"..lib.."?\\?.lua;"..lib.."?\\init.lua;"
 -- package.cpath = props["SciteDefaultHome"].."\\tools\\LuaLib\\?.dll;"..package.cpath
 
-require 'shell'
+if not shell then shell = require"shell" end
 --------------------------------------------------------
 -- Подключение пользовательского обработчика к событию SciTE
 dofile(props["SciteDefaultHome"]..'\\tools\\eventmanager.lua')

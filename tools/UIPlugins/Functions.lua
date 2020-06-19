@@ -1,7 +1,7 @@
 
 local onDestroy
 local function Func_Init(h)
-    require "lpeg"
+    if not lpeg then lpeg = require"lpeg" end
 
     local _isXform = false
     local _show_flags = tonumber(_G.iuprops['sidebar.functions.flags']) == 1
@@ -52,7 +52,7 @@ local function Func_Init(h)
     end
 
     local function LanesLoop()
-
+        lpeg = require"lpeg"
         -- local function debug_prnTb(tb, n)
         --     local s = string.rep('    ', n)
         --     for k, v in pairs(tb) do

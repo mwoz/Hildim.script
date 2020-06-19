@@ -9,7 +9,7 @@ Add next line to lua startup file (SciTEStartup.lua):
 	dofile ("svn_menu.lua")
 ]]
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-require 'shell'
+if not shell then shell = require"shell" end
 
 -- SVN menu
 local SVNContectMenu =
@@ -94,7 +94,7 @@ local function update_svn_menu()
 			menu = menu.."||SVN||"
 		end
 		props["user.tabcontext.menu.*"] =
-			string.gsub(menu, "||SVN|.*", 
+			string.gsub(menu, "||SVN|.*",
 			string.gsub(string.gsub(string.gsub(SVNContectMenu,
 			"$%(FileMenuCommands%)", filemenu),
 			"$%(BranchMenuCommands%)", branchmenu),
