@@ -1,16 +1,10 @@
 
 local s = {}
 
-require "luacom"
-
 function s.CheckScript(strScript, bVbs)
-    local oScr = luacom.CreateObject('MSScriptControl.ScriptControl')
-    oScr.Language = Iif(bVbs, 'VBScript', 'JScript')
-    oScr.AllowUI = true
-    luacom.TryCatch(oScr)
-    oScr:AddCode(strScript)
-    if oScr.Error.Number == 0 then return end
-    return oScr.Error.Line , oScr.Error.Column , oScr.Error.Description
+    local reason, desc, line, pos = mblua.CheckVbScript(strScript)
+    if not reason then return end
+    return line or 0 , pos or 0 , reason..': '..(desc or '')
 end
 
 function s.CheckXml(strXml)
@@ -20,6 +14,26 @@ function s.CheckXml(strXml)
     if not xml:loadXml(strXml) then
         local xmlErr = xml.parseError
         return xmlErr.line, xmlErr.linepos, xmlErr.reason
+    end
+end
+
+function s.GetNodeText(strXml, strPath)
+    local xml = luacom.CreateObject("MSXML.DOMDocument")
+    if not strXml then strXml = editor:GetText() end
+    strXml = strXml:to_utf8()
+    if not xml:loadXml(strXml) then
+        local xmlErr = xml.parseError
+        return xmlErr.line, xmlErr.linepos, xmlErr.reason
+    end
+    local bOk, msg = pcall(function() return xml:selectSingleNode(txt_search.value) end)
+    if not bOk then
+        print(msg)
+        return
+    end
+    if msg == nil then
+        print('Not Found')
+    else
+        return msg.text
     end
 end
 

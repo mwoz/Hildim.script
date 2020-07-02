@@ -46,8 +46,10 @@ local function Init(h)
     end
 
     txtCol = iup.text{size = '25x'; mask = '[0-9]*', tip = _T'Press Enter to go to position...', killfocus_cb = GoToPos,
+    bgcolor = props['layout.splittercolor'], fgcolor = props['layout.fgcolor'], bordercolor = props['layout.splittercolor'];
     k_any =(function(_, c) if c == iup.K_CR then GoToPos() elseif c == iup.K_ESC then iup.PassFocus() end end)}
     txtLine = iup.text{size = '25x'; mask = '[0-9]*', tip = _T'(Ctrl+G) Press Enter to go to line...', killfocus_cb = GoToPos,
+    bgcolor = props['layout.splittercolor'], fgcolor = props['layout.fgcolor'], bordercolor = props['layout.splittercolor'];
     k_any =(function(_, c) if c == iup.K_CR then iup.PassFocus() end end)}
     txtSel = iup.text{size = '25x'; readonly = 'YES', bgcolor = iup.GetLayout().bgcolor, canfocus = "NO", border = "NO", button_cb = button_cb}
 

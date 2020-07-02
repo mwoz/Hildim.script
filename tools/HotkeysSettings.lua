@@ -220,10 +220,12 @@ local function Show()
 
     btn_default = iup.button  {title=_T"Default"}
     btn_default.action = function()
+        local h = edit_hk
         if tonumber(tree_hk.value) > 0 then
             local id = tonumber(tree_hk.value)
             if iup.GetAttributeId(tree_hk, 'KIND', id) == 'BRANCH' then return end
             local tuid = tree_hk:GetUserId(id)
+            print(tuid.default)
             local t = tuid.title
             if tuid.default and h.value ~= '' then
                 for i = 1, iup.GetAttribute(tree_hk, "TOTALCHILDCOUNT0") do
@@ -231,28 +233,29 @@ local function Show()
                     local tui2 = tree_hk:GetUserId(i)
 
                     if tui2 and ((tui2.user and tui2.user == h.value) or (not tui2.user and tui2.default and tui2.default == h.value)) then
-                        if tree_hk.value == i..'' then return end
+                        if tree_hk.value ~= i..'' then
 
-                        result = iup.Alarm(_FMT(_T'"%1" uses hotkey %2' , title ,tuid.default),
-                            _FMT(_T'Go to"%1"?\n', title:gsub('‹.*', ''))..
-                            _FMT(_T'Restore %1, for "%2" remove hotkey?\n', tuid.default, title:gsub('‹.*', ''))..
-                            _T'Cancel Operation?',
-                            _T'Go',
-                            _T'Restore',
-                        _TH'Cancel')
-                        if result == 1 then
-                            tree_hk.value = i
-                            tree_hk.selection_cb(tree_hk, i, 1)
-                            return
-                        elseif result == 2 then
-                            local tuid2 = tree_hk:GetUserId(i)
-                            tuid2.user = nil
-                            iup.SetAttributeId(tree_hk, 'TITLE', i, tuid2.title)
-                            iup.SetAttributeId(tree_hk, 'COLOR', i, Iif(tuid2.default, '92 92 255', '0 0 0'))
+                            result = iup.Alarm(_FMT(_T'"%1" uses hotkey %2' , title , tuid.default),
+                                _FMT(_T'Go to"%1"?\n', title:gsub('‹.*', ''))..
+                                _FMT(_T'Restore %1, for "%2" remove hotkey?\n', tuid.default, title:gsub('‹.*', ''))..
+                                _T'Cancel Operation?',
+                                _T'Go',
+                                _T'Restore',
+                            _TH'Cancel')
+                            if result == 1 then
+                                tree_hk.value = i
+                                tree_hk.selection_cb(tree_hk, i, 1)
+                                return
+                            elseif result == 2 then
+                                local tuid2 = tree_hk:GetUserId(i)
+                                tuid2.user = nil
+                                iup.SetAttributeId(tree_hk, 'TITLE', i, tuid2.title)
+                                iup.SetAttributeId(tree_hk, 'COLOR', i, Iif(tuid2.default, '92 92 255', '0 0 0'))
 
-                            resetVal()
-                        else
-                            return
+                                resetVal()
+                            else
+                                break
+                            end
                         end
                     end
                 end

@@ -42,9 +42,19 @@ AddEventHandler("OnSwitchFile", function()
 end)
 
 local function Init(ToolBar_obj)
-    local tm = iup.timer{time=300}
+    local function GetHotKey()
+        local strKey = menuhandler:GetHotKey('MainWindowMenu|Search|Live Search')
+        if strKey ~= '' then strKey = ' ('..strKey..')' end
+        return strKey
+    end
+    local tm = iup.timer{time = 300}
+    local noVal = true
 
-    txt_search = iup.list{name='livesearch_bar', expand='YES', editbox = "YES", dropdown = "YES", tip=_T'"Live" Search(Alt+F3)\nArrow Up/Down - movement through the results list\nEnter - Go to search result\nEsc - exit search'}
+    txt_search = iup.list{name = 'livesearch_bar', expand = 'YES', editbox = "YES", dropdown = "YES",
+        bgcolor = props['layout.splittercolor'], bordercolor = props['layout.splittercolor'], fgcolor = props['layout.txtinactivcolor'],
+        txtbgcolor = props['layout.splittercolor'], txtfgcolor = props['layout.fgcolor'],
+        bgcolorlist = props['layout.txtbgcolor'], fgcolorlist = props['layout.txtfgcolor'], emptylisttext = _T'Live Search',
+    }
     iup.SetAttribute(txt_search, 'HISTORIZED', "NO")
     local function Find_onTimer()
         tm.run="NO"
@@ -63,17 +73,31 @@ local function Init(ToolBar_obj)
     local function Find_onChange()
         btn_search.active = Iif(#txt_search.value == 0, 'NO', 'YES')
         tm.run="NO"
-        tm.run="YES"
+        tm.run = "YES"
+        noVal = false
     end
 
     txt_search.valuechanged_cb = (Find_onChange)
-    txt_search.getfocus_cb = (function(h) CORE.ClearLiveFindMrk() end)
+    txt_search.getfocus_cb = function(h)
+        CORE.ClearLiveFindMrk()
+        if noVal then
+            txt_search.value = ''
+            txt_search.fgcolor = props['layout.fgcolor']
+        end
+    end
     txt_search.killfocus_cb = (function(h)
         local a = findres:findtext('^</\\', SCFIND_REGEXP, 0)
         if a then
             findres.TargetStart = a
             findres.TargetEnd = a+3
             findres:ReplaceTarget('<')
+        end
+
+        if txt_search.value == '' then
+            txt_search.fgcolor = props['layout.txtinactivcolor']
+            txt_search.value = _T'Live Search'..GetHotKey()
+            noVal = true
+        else
             txt_search:SaveHist()
         end
     end)
@@ -95,7 +119,8 @@ local function Init(ToolBar_obj)
 
     menuhandler:InsertItem('MainWindowMenu', 'Search|s0',   --TODO переместить в SideBar\FindRepl.lua вместе с функциями
     {'Live Search', key = 'Alt+F3', action = sidebar_Find, image = 'binocular__pencil_µ',}, "hildim/ui/livesearch.html", _T)
-
+    txt_search.value = _T'Live Search'..GetHotKey()
+    txt_search.tip = _FMT(_T'"Live" Search%1\nArrow Up/Down - movement through the results list\nEnter - Go to search result\nEsc - exit search', GetHotKey())
     return {
         handle = iup.hbox{
                 btn_search,

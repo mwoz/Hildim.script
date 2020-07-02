@@ -1308,11 +1308,10 @@ CORE.paneldraw_cb = function(h)
     h.drawlinewidth = w
     w = w / 2
     iup.DrawRectangle(h, w, w, xD - w, yD - w)
-    if h.drawactive == '1' then
+    if h.drawactive == '1' or iup.GetAttribute(h, "ALLWAYS_CUSTOMDRAW") == 'Y' then
         h.drawcolor = props['layout.bordercolor']
         h.drawlinewidth = 2
         iup.DrawRectangle(h, 1, 1, xD - 1, yD - 1)
-
     end
     iup.DrawEnd(h)
 end

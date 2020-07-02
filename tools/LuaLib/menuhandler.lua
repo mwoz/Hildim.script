@@ -408,6 +408,38 @@ function s:RegistryHotKeys()
    scite.RegistryHotKeys(tKeys)
 end
 
+local function GetHotKey(mnu, path, realPath)
+    local _, _, sItm = path:find('^([^|]+)|')
+    if sItm then
+        for i = 1, #mnu do
+            if mnu[i][1] and mnu[i][1]:gsub('&([^& ])', '%1') == sItm then
+                if mnu[i][2] then
+                    return GetHotKey(mnu[i][2], path:gsub('^[^|]+|', ''), realPath..'|'..mnu[i][1])
+                end
+            end
+        end
+    else
+        for i = 1, #mnu do
+            if mnu[i][1] and mnu[i][1]:gsub('&([^& ])', '%1') == path then
+                local defpathUsr, tblUsers = props["scite.userhome"].."\\userHotKeys.lua"
+                if shell.fileexists(defpathUsr) then tblUsers = assert(loadfile(defpathUsr))() end
+                if tblUsers and tblUsers[realPath..'|'..mnu[i][1]] then
+                    return tblUsers[realPath..'|'..mnu[i][1]]
+                end
+                return mnu[i].key
+            end
+        end
+    end
+end
+
+function s:GetHotKey(path)
+    local _, _, sItm = path:find('^([^|]+)|')
+    if sItm then
+        return GetHotKey(sys_Menus[sItm], path:gsub('^[^|]+|', ''), sItm) or ''
+    end
+    return ''
+end
+
 function s:OnHotKey(cmd)
     GetAction(FindMenuItem(sys_KeysToMenus[cmd]), nil, true)()
 end
@@ -438,7 +470,7 @@ function s:AddMenu(item, helpPath, tf)
     if helpPath or tf then prepareItems(item, helpPath, tf) end
     local hMainLayout = iup.GetLayout()
     local hMainMenu = iup.GetDialogChild(hMainLayout, "Hildim_MenuBar")
-    local hWinMenu = iup.GetDialogChild(hMainMenu, "menu_fill")
+    local hWinMenu = iup.GetDialogChild(hMainMenu, "menu_find")
     local l = iup.canvas{ maxsize = 'x18', rastersize = '1x', bgcolor = props['layout.bordercolor'], expand = 'NO', border = 'NO'}
     iup.Insert(hMainMenu, hWinMenu, l)
     iup.Map(l)
@@ -513,5 +545,5 @@ end
 function s:GetAction(mnu)
     return GetAction(mnu, true)
 end
-_G.menuhandler = s
-
+-- _G.menuhandler = s
+return s

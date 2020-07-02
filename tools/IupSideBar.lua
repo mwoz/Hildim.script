@@ -982,21 +982,296 @@ local function InitStatusBar()
     iup.PassFocus()
 end
 
+function CORE.convertLayout(txtIn, bUnic)
+    local tEnRu = {['`'] = '¸',['1'] = '1',['2'] = '2',['3'] = '3',['4'] = '4',['5'] = '5',['6'] = '6',['7'] = '7',['8'] = '8',['9'] = '9',['0'] = '0',['-'] = '-',['='] = '=',['q'] = 'é',['w'] = 'ö',['e'] = 'ó',['r'] = 'ê',['t'] = 'å',['y'] = 'í',['u'] = 'ã',['i'] = 'ø',['o'] = 'ù',['p'] = 'ç',['['] = 'õ',[']'] = 'ú',['a'] = 'ô',['s'] = 'û',['d'] = 'â',['f'] = 'à',['g'] = 'ï',['h'] = 'ð',['j'] = 'î',['k'] = 'ë',['l'] = 'ä',[';'] = 'æ',["'"] = 'ý',['z'] = 'ÿ',['x'] = '÷',['c'] = 'ñ',['v'] = 'ì',['b'] = 'è',['n'] = 'ò',['m'] = 'ü',[','] = 'á',['.'] = 'þ',['/'] = '.',['~'] = '¨',['!'] = '!',['@'] = '"',['#'] = '¹',['$'] = ';',['%'] = '%',['^'] = ':',['&'] = '?',['*'] = '*',['('] = '(',[')'] = ')',['_'] = '_',['+'] = '+',['Q'] = 'É',['W'] = 'Ö',['E'] = 'Ó',['R'] = 'Ê',['T'] = 'Å',['Y'] = 'Í',['U'] = 'Ã',['I'] = 'Ø',['O'] = 'Ù',['P'] = 'Ç',['{'] = 'Õ',['}'] = 'Ú',['A'] = 'Ô',['S'] = 'Û',['D'] = 'Â',['F'] = 'À',['G'] = 'Ï',['H'] = 'Ð',['J'] = 'Î',['K'] = 'Ë',['L'] = 'Ä',[':'] = 'Æ',['"'] = 'Ý',['Z']='ß',['X']='×',['C']='Ñ',['V']='Ì',['B']='È',['N']='Ò',['M']='Ü',['<']='Á',['>']='Þ',['?']=',',}
+    local tRuEn = {['¸'] = '`',['1'] = '1',['2'] = '2',['3'] = '3',['4'] = '4',['5'] = '5',['6'] = '6',['7'] = '7',['8'] = '8',['9'] = '9',['0'] = '0',['-'] = '-',['='] = '=',['é'] = 'q',['ö'] = 'w',['ó'] = 'e',['ê'] = 'r',['å'] = 't',['í'] = 'y',['ã'] = 'u',['ø'] = 'i',['ù'] = 'o',['ç'] = 'p',['õ'] = '[',['ú'] = ']',['ô'] = 'a',['û'] = 's',['â'] = 'd',['à'] = 'f',['ï'] = 'g',['ð'] = 'h',['î'] = 'j',['ë'] = 'k',['ä'] = 'l',['æ'] = ';',['ý'] = "'",['ÿ'] = 'z',['÷'] = 'x',['ñ'] = 'c',['ì'] = 'v',['è'] = 'b',['ò'] = 'n',['ü'] = 'm',['á'] = ',',['þ'] = '.',['.'] = '/',['¨'] = '~',['!'] = '!',['"'] = '@',['¹'] = '#',[';'] = '$',['%'] = '%',[':'] = '^',['?'] = '&',['*'] = '*',['('] = '(',[')'] = ')',['_'] = '_',['+'] = '+',['É'] = 'Q',['Ö'] = 'W',['Ó'] = 'E',['Ê'] = 'R',['Å'] = 'T',['Í'] = 'Y',['Ã'] = 'U',['Ø'] = 'I',['Ù'] = 'O',['Ç'] = 'P',['Õ'] = '{',['Ú'] = '}',['Ô'] = 'A',['Û'] = 'S',['Â'] = 'D',['À'] = 'F',['Ï'] = 'G',['Ð'] = 'H',['Î'] = 'J',['Ë'] = 'K',['Ä'] = 'L',['Æ'] = ':',['Ý'] = '"',['ß']='Z',['×']='X',['Ñ']='C',['Ì']='V',['È']='B',['Ò']='N',['Ü']='M',['Á']='<',['Þ']='>',[',']='?',}
+
+
+    if txtIn == '' then return '' end
+    local txt = txtIn
+    if bUnic then txt = txt:from_utf8() end
+
+    local iE, iR = 0, 0
+    local s
+    for i = 1,  #(txt or '') do
+        s = txt:sub(i, i)
+        if tEnRu[s] then iE = iE + 1 end
+        if tRuEn[s] then iR = iR + 1 end
+    end
+    --print(iE, iR)
+    local tTarget = Iif(iE > iR, tEnRu, tRuEn)
+    local res = {}
+    for i = 1,  #txt do
+        s = txt:sub(i, i)
+        table.insert(res, (tTarget[s] or s))
+    end
+    if bUnic then return table.concat(res):to_utf8() end
+    return table.concat(res)
+end
+
 require "menuhandler"
 local function InitMenuBar()
+    local dlg, mnufind, tree_mnu
+    local checkfocus = true
+
+    local tmrFocus = iup.timer{time = 1, action_cb = function(h)
+        h.run = 'NO'
+        if checkfocus then
+            dlg.visible = 'NO'
+            tree_mnu.delnode0 = "CHILDREN"
+            mnufind.fgcolor = props['layout.txtinactivcolor']
+            local hk = menuhandler:GetHotKey('MainWindowMenu|Search|Find in Menu')
+            if hk ~= '' then hk = ' ('..hk..')' end
+            mnufind.value = _TH'Find...'..hk
+            iup.PassFocus()
+        end
+    end}
+
+    local function setnextLeaf(d)
+        local v = tonumber(tree_mnu.value)
+        if v == 0 then v = 1 end
+        while v > 0 and v < tonumber(tree_mnu.count) do
+            v = v + d
+            if iup.GetAttributeId(tree_mnu, "KIND", v) == "LEAF" then
+                tree_mnu.value = v
+                return
+            end
+        end
+    end
+
+    mnufind = iup.text{ size = "80", name = 'menu_find', bgcolor = props['layout.splittercolor'], bordercolor = props['layout.splittercolor'],
+        fgcolor = props['layout.txtinactivcolor'], padding = '3x',
+        getfocus_cb = function()
+            tmrFocus.run = 'NO'
+            if dlg.visible == 'NO' then mnufind.value = '';mnufind.fgcolor = props['layout.fgcolor'] end
+        end,
+        killfocus_cb = function(h)
+            tmrFocus.run = 'YES'
+        end,
+        k_any = function(h, k)
+            if k == iup.K_ESC then
+                tmrFocus.run = 'YES'
+            elseif k == iup.K_DOWN then
+                setnextLeaf(1)
+            elseif k == iup.K_UP then
+                setnextLeaf(-1)
+            elseif k == iup.K_CR then
+                if iup.GetAttributeId(tree_mnu, 'KIND', tree_mnu.value) == 'LEAF' then
+                    tree_mnu.executeleaf_cb(tree_mnu, tree_mnu.value)
+                end
+            end
+    end}
+    iup.SetAttribute(mnufind, 'HISTORIZED', 'NO')
+    tree_mnu = iup.flattree{expand = 'YES', fgcolor = props['layout.txtfgcolor'], hidebuttons = 'YES',
+        getfocus_cb = function() tmrFocus.run = 'NO' end, killfocus_cb = function(h)
+        tmrFocus.run = 'YES'
+    end}
+
+    tree_mnu.executeleaf_cb = function(h, id)
+        local tUid = iup.TreeGetUserId(tree_mnu, id)
+        if type(tUid) == 'function' then tUid() end
+        tmrFocus.run = 'YES'
+    end
+
+    dlg = iup.scitedialog{iup.vbox{tree_mnu},
+        sciteparent = "SCITE", sciteid = 'menufind', dropdown = true, shrink = "YES", --resize = 'NO',   maxsize = '800x250',
+        maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '250x250', bgcolor = '255 255 255',
+        customframedraw = 'YES' , customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(nil),
+
+    }
+
+    local function processCondition(cond)
+        local f
+        if type(cond) == "function" then
+            f = cond
+        elseif type(cond) == "string" then
+            f = assert(load('return '..cond))
+        end
+        if f then return f() end
+    end
+
+    local function findCap(t, v, v2)
+        local val = v:lower()
+        if v2 then v2 = v2:lower() end
+        local s = (t[1] or ''):gsub("&", ''):lower()
+        if s:find(val) then return true end
+        if v2 and s:find(v2) then return true end
+        s = (t.cpt or _TM(t[1] or '') or ''):gsub("&", ''):lower()
+        if s:find(val) then return true end
+        if v2 and s:find(v2) then return true end
+    end
+    local function findMenuRecr(t, v, v2)
+        local tOut, plane, tRez
+        if t.title then
+            for i = 1,  #t do
+                tRez, plane = findMenuRecr(t[i], v, v2)
+                if tRez then
+                    if not tOut then
+                        tOut = {_TM(t.title), {}}
+                    end
+                    if plane then
+                        for i = 1,  #tRez[2] do
+                            table.insert(tOut[2], tRez[2][i])
+                        end
+                    else
+                        table.insert(tOut[2], tRez)
+                    end
+                end
+            end
+        elseif not t[2] then
+
+            if not t.separator and not t.link and findCap(t, v, v2) then
+                if t.active then
+                    if not processCondition(t.active) then goto e end
+                end
+                if t.visible then
+                    if not processCondition(t.visible) then goto e end
+                elseif t.visible_ext then
+                    if not string.find(','..t.visible_ext..',', ','..props["FileExt"]..',')  then goto e end
+                end
+                local act
+                local suff = ''
+                if t.action then
+                    local tp = type(t.action)
+                    if tp == 'number' then act = function() scite.MenuCommand(t.action) end end
+                    if tp == 'string' then act = assert(load('return '..t.action)) end
+                    if tp == 'function' then act = t.action end
+                end
+                if t.check_idm then
+                elseif t.check_prop then
+                    act = assert(load("CheckChange('"..t.check_prop.."', true)"))
+                    suff = Iif(props[t.check_prop] == '1', '[x]', '[ ]')
+                elseif t.check_iuprops then
+                    local rez
+                    if act then rez = act end
+                    local rez2 = assert(load("_G.iuprops['"..t.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[t.check_iuprops]) == 1 or _G.iuprops[t.check_iuprops] == true or _G.iuprops[t.check_iuprops] == 'ON' , 0, 1)))
+                    if rez then
+                        act = function() rez2(); rez() end
+                    else
+                        act = rez2
+                    end
+                    suff = Iif(tonumber(_G.iuprops[t.check_iuprops]) == 1 or _G.iuprops[t.check_iuprops] == true or _G.iuprops[t.check_iuprops] == 'ON' , '[x]', '[ ]')
+                elseif t.check_boolean then
+                    act = assert(load("_G.iuprops['"..t.check_boolean.."'] = not _G.iuprops['"..t.check_boolean.."']"))
+                    suff = Iif(_G.iuprops[t.check_boolean], '[x]', '[ ]')
+                elseif t.check then
+                    local f
+                    if type(t.check) == "function" then
+                        f = t.check
+                    elseif type(t.check) == "string" then
+                        f = assert(load('return '..t.check))
+                    end
+                    if f then suff = Iif(f(), '[x]', '[ ]') end
+                end
+                if not act then
+                    act = function() debug_prnArgs('Error in menu format!!', t) end
+                end
+                if t.key then
+                    suff = suff..' - '..t.key
+                end
+
+                tOut = {(t.cpt or _TM(t[1]) or t[1])..suff, action = act, image = t.image}
+            end
+        elseif (type(t[2]) == 'table' or type(t[2]) == 'function') and not t.scipfind then
+            if t.visible then
+                if not processCondition(t.visible) then goto e end
+            elseif t.visible_ext then
+                if not string.find(','..t.visible_ext..',', ','..props["FileExt"]..',')  then goto e end
+            end
+            local tX = t[2]
+            if type(t[2]) == 'function' then
+                local sucs
+                sucs, tX = pcall(t[2])
+                if not sucs then return end
+            end
+            for i = 1,  #tX do
+                tRez, plane = findMenuRecr(tX[i], v, v2)
+                if tRez then
+                    if not tOut then
+                        tOut = {t.cpt or _TM(t[1] or t[1]), {}}
+                    end
+                    if plane then
+                        for i = 1,  #tRez[2] do
+                            table.insert(tOut[2], tRez[2][i])
+                        end
+                    else
+                        table.insert(tOut[2], tRez)
+                    end
+                end
+            end
+        end
+::e::
+        return tOut, t.plane
+    end
+    local function mnu2tree(t, tOut)
+        if not t then return end
+        local tNew = {}
+        table.insert(tOut, tNew)
+        if type(t[2]) == 'table' then
+             tNew.branchname = t[1]
+            for i = 1, #t[2] do
+                mnu2tree(t[2][i], tNew)
+            end
+        else
+            tNew.leafname = t[1]
+            tNew.userid = t.action
+            tNew.image = t.image
+        end
+    end
+
+    local tmrFind = iup.timer{time = 300, action_cb = function(h)
+        h.run = 'NO'
+        local v, v1 = mnufind.value:gsub('%[', '%%['):gsub('%]', '%%]'), CORE.convertLayout(mnufind.value, true):gsub('%[', '%%['):gsub('%]', '%%]')
+        local t = {}
+
+        for s, tl in pairs(sys_Menus) do
+            local tl2 = findMenuRecr(tl, v, v1)
+            if tl2 and #tl2 > 0 then table.insert(t, tl2) end
+        end
+        local tMnu = {}
+        tMnu.branchname = ''
+        mnu2tree({_TH'All Menus', t}, tMnu)
+        checkfocus = false
+        iup.ShowXY(dlg, mnufind.x, mnufind.y + 20)
+        tree_mnu.autoredraw = 'NO'
+        tree_mnu.delnode0 = "CHILDREN"
+        iup.TreeAddNodes(tree_mnu, tMnu[1])
+        tree_mnu.autoredraw = 'YES'
+        iup.SetFocus(mnufind)
+        checkfocus = true
+        tree_mnu.value = 0
+        setnextLeaf(1)
+    end}
+    table.insert(CORE.onDestroy_event, function() checkfocus = false end)
+
+    CORE.StartMenuFind = function()
+        iup.SetFocus(mnufind)
+        mnufind.value = ''
+        mnufind.fgcolor = props['layout.fgcolor']
+    end
+
     menuhandler:Init()
     if not _G.sys_Menus then return end
     local vbScite = iup.GetDialogChild(hMainLayout, "SciteVB")
     MenuBar_obj = {}
     MenuBar_obj.Tabs = {}
-
     local mnu = sys_Menus.MainWindowMenu
+    function mnufind:valuechanged_cb()
+        tmrFind.run = 'NO'
+        if #mnufind.value:from_utf8() > 1 then
+            tmrFind.run = 'YES'
+        else
+            dlg.visible = 'NO'
+        end
+    end
 
     local hb = { alignment = 'ACENTER', expand = 'HORIZONTAL', name = 'Hildim_MenuBar'}
     for i = 1, #mnu do
         if mnu[i][1] ~='_HIDDEN_' then
             table.insert(hb, menuhandler:CreateMenuLabel(mnu[i]))
-            if i == #mnu - 1 then table.insert(hb,iup.fill{name = 'menu_fill'})
+            if i == #mnu - 1 then
+                table.insert(hb, mnufind)
+                table.insert(hb, iup.fill{})
             elseif i < #mnu - 1 then table.insert(hb, iup.canvas{ maxsize = 'x18', rastersize = '1x', bgcolor = props['layout.bordercolor'], expand = 'NO', border = 'NO'}) end
             -- elseif i < #mnu - 1 then table.insert(hb, iup.label{separator = "VERTICAL",maxsize='x18'}) end
         end

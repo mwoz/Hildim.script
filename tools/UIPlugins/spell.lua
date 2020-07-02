@@ -210,6 +210,7 @@ local function Init()
         end
 
         local function fillVariantsMenu(word)
+            if word == '' then return end
             local s
             if word:byte() >= 192 then --eror
                 s = sRu
@@ -557,7 +558,7 @@ local function Init()
         end
 
         menuhandler:InsertItem('EDITOR', 's0',
-            {'Spelling Variants', plane = 1,
+            {'Spelling Variants', plane = 1, scipfind = 1,
                 visible = function() return editor:IndicatorValueAt(mark, editor.CurrentPos) == 1 end,
                 bottom ={"Context Menu", }, {
                     {'list', plane = 1, FillVariantsMenu},

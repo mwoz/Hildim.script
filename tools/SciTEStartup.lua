@@ -46,7 +46,8 @@ lpeg = require"lpeg"
 
 if not _G.g_session['scip.plugins'] then
     --require("mobdebug").start()
-    require "menuhandler"
+    --menuhandler = require"menuhandler"
+    menuhandler = dofile (props["SciteDefaultHome"].."\\tools\\LuaLib\\menuhandler.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\xComment.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\new_file.lua")
     dofile (props["SciteDefaultHome"].."\\tools\\AutocompleteObject.lua")

@@ -63,7 +63,82 @@ local function init()
         end
     end
 
-    local function loc_GoToObjectDefenition(word, true, pos)
+    local function loc_GoToObjectDefenition(filename, bInfo, pos)
+
+        if filename == editor:GetSelText() then
+            local pattern_full = '^[A-Za-z]:'
+            foropen = filename
+            if not string.find(filename, pattern_full) then
+                foropen = props['FileDir']..'\\'..filename
+            end
+            isFile = shell.fileexists(foropen)
+        else
+            loadIncludes(props['select.and.open.include'])
+
+            -- try to select file name near current position  m4.lua
+            local s = pos
+            local e = pos + #filename
+            while isFilenameChar(editor.CharAt[s - 1]) do -- find start
+                s = s - 1
+            end
+            while isFilenameChar(editor.CharAt[e]) do -- find end
+                e = e + 1
+            end
+
+            if s ~= e then
+                -- set selection and try to find file
+                filename = editor:textrange(s, e)
+                pos = s
+                local dir = props["FileDir"].."\\"
+                filename = string.gsub(filename, '\\\\', '\\')
+                foropen = dir..filename
+                isFile = shell.fileexists(foropen)
+
+                -- look at includes
+                if not isFile then
+                    for _, path in ipairs(includes) do
+                        foropen = path..filename
+                        isFile = shell.fileexists(foropen)
+                        if isFile then
+                            break
+                        end
+                    end
+                end
+
+                while not isFile do
+                    ch = editor.CharAt[s - 1]
+                    if ch == 92 or ch == 47 then -- \ /
+                        -- expand selection start
+                        s = s - 1
+                        while isFilenameChar(editor.CharAt[s - 1]) do
+                            s = s - 1
+                        end
+                        editor:SetSel(s, e)
+                        filename = string.gsub(editor:GetSelText(), '\\\\', '\\')
+                        foropen = dir..filename
+                    elseif string.len(dir) > 3 then
+                        -- up to parent dir
+                        dir = string.gsub(dir, "(.*)\\([^\\]+)\\", "%1\\")
+                        foropen = dir..filename
+                    else
+                        break
+                    end
+                    isFile = shell.fileexists(foropen)
+                end
+            end
+            local function fRet()
+                scite.Open(filename)
+            end
+            --print(isFile, filename, pos)
+            return isFile, fRet , pos, filename
+        end
+        -- if isFile then
+        --     for_open = foropen
+        --     if immediately then
+        --         launch_open()
+        --     end
+        --     return true
+        -- end
     end
 
 
