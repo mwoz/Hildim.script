@@ -86,7 +86,21 @@ function sidebar_Switch(n)
     end
 end
 
-local function  CreateToolBar()
+local function CreateToolBar()
+
+    local v = iup.GetDialogChild(hMainLayout, "OverEditorExpander")
+    local s = iup.GetParent(v)
+    s.valuechanged_cb = function(h) _G.iuprops["contrpls.OverEditorExpander.val"] = h.value end
+    local p = iup.GetChild(v , 1)
+    if p then
+        iup.Detach(p)
+        iup.Destroy(p)
+        v.state = "CLOSE"
+        s.barsize = 0
+        s.value = 0
+    end
+
+
     local str = _G.iuprops["settings.toolbars.layout"] or ''
     local tblVb = {gap = "1", name="ToolBar"}
     local tblHb
@@ -122,21 +136,31 @@ local function  CreateToolBar()
                 if pI.hlpdevice then id = pI.hlpdevice..'::'..id end
                 iup.SetAttribute(ToolBar_obj.Tabs[pI.code].handle, "HELPID", id)
 
-                if i == 1 and (pI.undermenu or pI.overeditors) then
-                    local v = vbScite
-                    if pI.overeditors then v = iup.GetDialogChild(hMainLayout, "EditorsVB") end
-                    local tTlb = {iup.expander{barsize = 0, state = "OPEN", name = "toolbar_expander_upper", iup.vbox{
-                        iup.hbox{gap = "3", margin = "3x0", alignment = "ACENTER", ToolBar_obj.Tabs[pI.code].handle}
-                    }}}
+                if i == 1 and pI.overeditors then
+                    local v = iup.GetDialogChild(hMainLayout, "OverEditorExpander")
 
-                    local hTmp = iup.dialog(tTlb)
+                    v.ShowPlugin = function(b)
+                        local s = iup.GetParent(v)
+                        if b then
+                            v.state = "OPEN"
+                            s.barsize = 5
+                            s.value = _G.iuprops["contrpls.OverEditorExpander.val"] or 500
+                        else
+                            v.state = "CLOSE"
+                            s.barsize = 0
+                            s.value = 0
+                        end
+                    end
+                    local hb = iup.hbox{ ToolBar_obj.Tabs[pI.code].handle, name = "hb", }
 
-                    local hBx = iup.GetDialogChild(hTmp, 'toolbar_expander_upper')
-                    iup.Detach(hBx)
+                    local hTmp = iup.dialog{hb}
+                    local p = iup.GetChild(iup.GetDialogChild(hTmp, 'hb'),0)
+                    iup.Detach(p)
                     iup.Destroy(hTmp)
-                    iup.Insert(v, nil, hBx)
-                    iup.Map(hBx)
+                    iup.Insert(v, nil, p)
+                    iup.Map(p)
                     isUpper = true
+
                 else
                     table.insert(tblHb, ToolBar_obj.Tabs[pI.code].handle)
                 end
@@ -1012,19 +1036,22 @@ end
 require "menuhandler"
 local function InitMenuBar()
     local dlg, mnufind, tree_mnu
-    local checkfocus = true
+
+    local function GetCaption()
+        local hk = menuhandler:GetHotKey('MainWindowMenu|Search|Find in Menu')
+        if hk ~= '' then hk = ' ('..hk..')' end
+        return _TH'Find...'..hk
+    end
 
     local tmrFocus = iup.timer{time = 1, action_cb = function(h)
         h.run = 'NO'
-        if checkfocus then
+        if dlg.activewindow == 'NO' and dlg.visible == 'YES' then
             dlg.visible = 'NO'
             tree_mnu.delnode0 = "CHILDREN"
-            mnufind.fgcolor = props['layout.txtinactivcolor']
-            local hk = menuhandler:GetHotKey('MainWindowMenu|Search|Find in Menu')
-            if hk ~= '' then hk = ' ('..hk..')' end
-            mnufind.value = _TH'Find...'..hk
             iup.PassFocus()
         end
+        mnufind.fgcolor = props['layout.txtinactivcolor']
+        mnufind.value = GetCaption()
     end}
 
     local function setnextLeaf(d)
@@ -1040,7 +1067,7 @@ local function InitMenuBar()
     end
 
     mnufind = iup.text{ size = "80", name = 'menu_find', bgcolor = props['layout.splittercolor'], bordercolor = props['layout.splittercolor'],
-        fgcolor = props['layout.txtinactivcolor'], padding = '3x',
+        fgcolor = props['layout.txtinactivcolor'], padding = '3x', value = GetCaption(),
         getfocus_cb = function()
             tmrFocus.run = 'NO'
             if dlg.visible == 'NO' then mnufind.value = '';mnufind.fgcolor = props['layout.fgcolor'] end
@@ -1063,6 +1090,7 @@ local function InitMenuBar()
     end}
     iup.SetAttribute(mnufind, 'HISTORIZED', 'NO')
     tree_mnu = iup.flattree{expand = 'YES', fgcolor = props['layout.txtfgcolor'], hidebuttons = 'YES',
+        imagebranchexpanded = '_', imagebranchcollapsed = '_',
         getfocus_cb = function() tmrFocus.run = 'NO' end, killfocus_cb = function(h)
         tmrFocus.run = 'YES'
     end}
@@ -1071,13 +1099,17 @@ local function InitMenuBar()
         local tUid = iup.TreeGetUserId(tree_mnu, id)
         if type(tUid) == 'function' then tUid() end
         tmrFocus.run = 'YES'
+        iup.PassFocus()
     end
 
     dlg = iup.scitedialog{iup.vbox{tree_mnu},
         sciteparent = "SCITE", sciteid = 'menufind', dropdown = true, shrink = "YES", --resize = 'NO',   maxsize = '800x250',
-        maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '250x250', bgcolor = '255 255 255',
-        customframedraw = 'YES' , customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb = CORE.panelactivate_cb(nil),
-
+        maxbox = 'NO', minbox = 'NO', menubox = 'NO', minsize = '250x250', bgcolor = '255 255 255', shownoactivate = 'YES', shownofocus = 'YES',
+        customframedraw = 'YES' , customframecaptionheight = -1, customframedraw_cb = CORE.paneldraw_cb, customframeactivate_cb =
+        function(h, active)
+            if active == 0 then tmrFocus.run = 'YES' end
+            CORE.panelactivate_cb(nil)(h, active)
+        end,
     }
 
     local function processCondition(cond)
@@ -1208,14 +1240,14 @@ local function InitMenuBar()
         local tNew = {}
         table.insert(tOut, tNew)
         if type(t[2]) == 'table' then
-             tNew.branchname = t[1]
+            tNew.branchname = t[1]
             for i = 1, #t[2] do
                 mnu2tree(t[2][i], tNew)
             end
         else
             tNew.leafname = t[1]
             tNew.userid = t.action
-            tNew.image = t.image
+            tNew.image = t.image or "_"
         end
     end
 
@@ -1231,18 +1263,14 @@ local function InitMenuBar()
         local tMnu = {}
         tMnu.branchname = ''
         mnu2tree({_TH'All Menus', t}, tMnu)
-        checkfocus = false
-        iup.ShowXY(dlg, mnufind.x, mnufind.y + 20)
+        iup.ShowXY(dlg, mnufind.x, mnufind.y + tonumber(mnufind.rastersize:gsub("[^x]*x(.*)", "%1"), 10))
         tree_mnu.autoredraw = 'NO'
         tree_mnu.delnode0 = "CHILDREN"
         iup.TreeAddNodes(tree_mnu, tMnu[1])
         tree_mnu.autoredraw = 'YES'
-        iup.SetFocus(mnufind)
-        checkfocus = true
         tree_mnu.value = 0
         setnextLeaf(1)
     end}
-    table.insert(CORE.onDestroy_event, function() checkfocus = false end)
 
     CORE.StartMenuFind = function()
         iup.SetFocus(mnufind)

@@ -147,11 +147,11 @@ local function init()
     local str = (editor:textrange(startBodyClose + 1, editor.SelectionStart) or '')..Iif(editor.StyleAt[editor.SelectionStart] == 0 or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
         if not pBody then
             web.html = pt_all:match(editor:textrange(0, startBodyClose + 1)..editor:textrange(endBodyOpen, editor.Length), 1)
-            pBody = web.com.document.body
-            events_obj = luacom.Connect(web.com.document, body_events)
+            --pBody = web.com.document.body
+            --events_obj = luacom.Connect(web.com.document, body_events)
             iup.PassFocus()
+            return
         end
-        --print(pt_all:match(string.to_utf8(str, 1251), 1))
         pBody.innerHtml = pt_all:match(string.to_utf8(str, 1251), 1)
 
         local cur = web.com.document:getElementById('cursor___')
@@ -167,17 +167,8 @@ local function init()
         pBody = nil
         if editor.LexerLanguage ~= "hypertext" then
             web.html = strEmpty
-
-            luacom.Connect(web.com.document, body_events)
         else
-            web.html = pt_all:match(editor:GetText(), 1):to_utf8()
-            pBody = web.com.document.body
-            events_obj = luacom.Connect(pBody, body_events)
-            -- events_obj = luacom.Connect(web.com.document, body_events)
-
---[[        elseif scite.buffers.SavedAt(scite.buffers.GetCurrent()) then
-            web.value = props['FilePath']
-            pBody = web.com.document.body]]
+            web.html = editor:GetText()
         end
     end
 
@@ -191,12 +182,22 @@ local function init()
     end
 
 
-    web = iup.webbrowser{help_cb = function() print(444) end}
+    web = iup.webbrowser{help_cb = function()  end}
 
     CreateLuaCOM(web)
 
+    web.completed_cb = function(url)
+        if editor.LexerLanguage == "hypertext" then
+            pBody = web.com.document.body
+            events_obj = luacom.Connect(web.com.document, body_events)
+            OnUpdateUI_local(1, 1, 0)
+        else
+            pBody = nil
+            events_obj = nil
+        end
+    end
+
     iup.SetAttribute(web, "TOPMARGIN", 50)
-    --iup.SetAttribute(web, "INVOKEFLAG", 268435456)
     iup.SetAttribute(web, "INVOKEFLAG", 400)
 
     function web:navigate_cb(url)
@@ -379,25 +380,11 @@ end
 
 local function Toolbar_Init(h)
     init()
-    local box = iup.sc_sbox{ web, maxsize = "x590", shrink = 'YES', direction = 'SOUTH', color=props['layout.scroll.forecolor']}
-    local expan = iup.expander{box, barsize = 0}
-
-    function web:map_cb()
-        local bar = iup.GetParent(box)
-        bar.maxsize = 'x600'
-        local sb = iup.GetChild(box, 0)
-        sb.cursor = "RESIZE_NS"
-        box.value = _G.iuprops["htmlpreview.webwidth"] or "200"
-    end
-    function web:unmap_cb(h)
-        _G.iuprops["htmlpreview.webwidth"] = box.value
-    end
     onSwitchBar = function()
-        expan.state = Iif(editor_LexerLanguage() == 'hypertext', 'OPEN', 'CLOSE')
+        iup.GetParent(web).ShowPlugin(editor_LexerLanguage() == 'hypertext')
     end
-
-    return  {
-        handle = expan
+    return {
+        handle = web
     }
 end
 

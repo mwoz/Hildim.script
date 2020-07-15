@@ -1800,7 +1800,7 @@ local hbTitle = iup.GetDialogChild(iup.GetLayout(), dtb.sciteid..'_expander')
                         dtb.Split_h().prev_value = dtb.Split_h().value
                         dtb.Split_h().value = '500'
                     end
-                    if dtb.Split_h().valuechanged_cb then dtb.Split_h().valuechanged_cb() end
+                    if dtb.Split_h().valuechanged_cb then dtb.Split_h().valuechanged_cb(dtb.Split_h()) end
                 end
             elseif button == iup.BUTTON2 and pressed == 0 then
                 if h.name == "SourceSplitBtm" or h.name == "SourceSplitMiddle" then
@@ -1902,7 +1902,7 @@ iup.scitedialog = function(t)
     t.icon = 'SCITE'
     if dlg == nil then
         dlg = iup.dialog(t)
-        iup.SetNativeparent(dlg, t.sciteparent)
+        assert(dlg)
         _G.dialogs[t.sciteid] = dlg
         if dlg.resize == 'YES' then dlg.rastersize = _G.iuprops['dialogs.'..t.sciteid..'.rastersize'] end
         if t.sciteparent == "IUPTOOLBAR" then

@@ -445,7 +445,7 @@ function s:OnHotKey(cmd)
 end
 
 function s:CreateMenuLabel(item, ind)
-    local l = iup.label{title = menuhandler:get_title(item, false, true), padding = '11x3', font = fnt, fgcolor = clr_normal, button_cb =
+    local l = iup.flatlabel{title = menuhandler:get_title(item, false, true), padding = '11x3', font = fnt, fgcolor = clr_normal, button_cb =
             function(h,but, pressed, x, y, status)
                 if but == 49 and pressed == 0 then
                     activeLabel = h

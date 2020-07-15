@@ -116,7 +116,7 @@ body, html {
         end
     end
     templ = templ:gsub('{PLUGINS}', strPlug)
-    web.html = templ
+    web.html = templ:from_utf8()
 
 end
 

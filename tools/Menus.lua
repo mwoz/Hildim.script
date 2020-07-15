@@ -491,7 +491,6 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'&Utils', {
 			{'LayOut &Dialog', action =(function()
                 local f = iup.filedlg{}
-                iup.SetNativeparent(f, "SCITE")
                 f:popup()
                 local path = f.value
                 f:destroy()
