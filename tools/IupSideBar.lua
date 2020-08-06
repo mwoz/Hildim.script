@@ -90,15 +90,16 @@ local function CreateToolBar()
 
     local v = iup.GetDialogChild(hMainLayout, "OverEditorExpander")
     local s = iup.GetParent(v)
+    iup.SetAttribute(s, "HISTORIZED", "NO")
     s.valuechanged_cb = function(h) _G.iuprops["contrpls.OverEditorExpander.val"] = h.value end
     local p = iup.GetChild(v , 1)
     if p then
         iup.Detach(p)
         iup.Destroy(p)
-        v.state = "CLOSE"
-        s.barsize = 0
-        s.value = 0
     end
+    v.state = "CLOSE"
+    s.barsize = 0
+    s.value = 0
 
 
     local str = _G.iuprops["settings.toolbars.layout"] or ''

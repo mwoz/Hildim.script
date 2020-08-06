@@ -510,6 +510,11 @@ function CORE.fixMarks(bReset)
     end
 end
 
+function CORE.IsMarkSaved()
+    if (_G.iuprops['changes.mark.line'] or 0) == 0 then return false end
+    return editor:MarkerNext(-1, 1 << MARKER_NOTSAVED) < 0
+end
+
 local function onOpen_local(source)
     if source:find('^%^') then return end
     if not source:find('^\\\\') then

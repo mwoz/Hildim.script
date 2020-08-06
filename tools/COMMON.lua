@@ -101,7 +101,7 @@ end
 function CORE.Str2Rgb(s, def)
     local _, _, r, g, b = s:find('(%d+) (%d+) (%d+)')
     if r then
-        return (b << 16)|(g << 8)|r
+        return (tonumber(b) << 16)|(tonumber(g) << 8)|tonumber(r)
     end
     return def
 end

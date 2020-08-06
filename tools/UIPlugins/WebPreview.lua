@@ -83,10 +83,6 @@ local function init()
     function body_events:ondblclick()
         OnNavigation("Html")
         if editor.LexerLanguage ~= "hypertext" then return end
-        -- local _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%d+)x(%d+)')
-        -- local _, _, xP, yP = web.screenposition:find('(%d+),(%d+)')
-        -- local z = 100.0 / tonumber(web.zoom)
-        -- local el = web.com.document:elementFromPoint((tonumber(xC) - tonumber(xP)) * z, (tonumber(yC) - tonumber(yP)) * z)
 
         local e = web.com.document.parentWindow.event
         local el = e.srcElement
@@ -132,25 +128,30 @@ local function init()
         iup.PassFocus()
         return true
     end
+ local bRefresh
+    OnUpdateUI_local = function(bModified, bSelection, flag)
+        --if flag == 14 then return end
 
-    local function OnUpdateUI_local(bModified, bSelection, flag)
         if editor.LexerLanguage ~= "hypertext" or (bModified == 0 and bSelection == 0) then return end
         local startBodyOpen = editor:findtext('<body[ /]', SCFIND_REGEXP, 0 , editor.Length)
-        if not startBodyOpen then pBody = nil; return end
+        if not startBodyOpen then bRefresh = true; return end
         local startBodyClose = editor:findtext('>', 0, startBodyOpen, editor.Length)
-        if not startBodyClose then pBody = nil; return end
+        if not startBodyClose then bRefresh = true; return end
         local endBodyOpen = editor:findtext('</body>', 0, startBodyClose, editor.Length)
-        if not endBodyOpen then pBody = nil; return end
+        if not endBodyOpen then bRefresh = true; return end
         local cp = editor.SelectionStart
-        if cp < startBodyClose or cp > endBodyOpen then pBody = nil; return end
+        if cp < startBodyClose or cp > endBodyOpen then bRefresh = true; return end
 
-    local str = (editor:textrange(startBodyClose + 1, editor.SelectionStart) or '')..Iif(editor.StyleAt[editor.SelectionStart] == 0 or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
-        if not pBody then
+        local str = (editor:textrange(startBodyClose + 1, editor.SelectionStart) or '')..Iif(editor.StyleAt[editor.SelectionStart] == 0 or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
+        if bRefresh then
             web.html = pt_all:match(editor:textrange(0, startBodyClose + 1)..editor:textrange(endBodyOpen, editor.Length), 1)
-            --pBody = web.com.document.body
-            --events_obj = luacom.Connect(web.com.document, body_events)
-            iup.PassFocus()
-            return
+            web.new = 'Y'
+            web.editable = 'NO'
+            web.com.document:write(editor:GetText():to_utf8())
+            docum = web.com.document
+            pBody = web.com.document.body
+            events_obj = luacom.Connect(pBody, body_events)
+            bRefresh = nil
         end
         pBody.innerHtml = pt_all:match(string.to_utf8(str, 1251), 1)
 
@@ -164,38 +165,28 @@ local function init()
 
     local function onSwitchLocal()
         if onSwitchBar then onSwitchBar() end
-        pBody = nil
         if editor.LexerLanguage ~= "hypertext" then
-            web.html = strEmpty
+            web.new = 'Y'
+            web.editable = 'NO'
+            web.com.document:write(strEmpty)
+            luacom.Connect(web.com.document, body_events)
+            pBody = nil
         else
-            web.html = editor:GetText()
+            --web.html = editor:GetText()
+            web.com.document:write(editor:GetText():to_utf8())
+            pBody = web.com.document.body
+            events_obj = luacom.Connect(pBody, body_events)
         end
     end
 
-    local function onOpenLocal()
-        if onSwitchBar then onSwitchBar() end
-        pBody = nil
-        if editor.LexerLanguage ~= "hypertext" then
-            web.html = strEmpty
-            luacom.Connect(web.com.document, body_events)
-        end
-    end
 
 
     web = iup.webbrowser{help_cb = function()  end}
 
     CreateLuaCOM(web)
 
-    web.completed_cb = function(url)
-        if editor.LexerLanguage == "hypertext" then
-            pBody = web.com.document.body
-            events_obj = luacom.Connect(web.com.document, body_events)
-            OnUpdateUI_local(1, 1, 0)
-        else
-            pBody = nil
-            events_obj = nil
-        end
-    end
+    web.new = 'Y'
+    web.editable = 'NO'
 
     iup.SetAttribute(web, "TOPMARGIN", 50)
     iup.SetAttribute(web, "INVOKEFLAG", 400)
