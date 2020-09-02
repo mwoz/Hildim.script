@@ -217,22 +217,24 @@ end
 -- Очистка текста от маркерного выделения заданного стиля
 --   если параметры отсутствуют - очищаются все стили во всем тексте
 --   если не указана позиция и длина - очищается весь текст
-function EditorClearMarks(indic_number, start, length)
-	local _first_indic, _end_indic
-	local current_indic_number = editor.IndicatorCurrent
+function EditorClearMarks(indic_number, start, length, bCo)
+    local e
+    if bCo then e = coeditor;  else e = editor end
+    local _first_indic, _end_indic
+	local current_indic_number = e.IndicatorCurrent
 	if indic_number == nil then
 		_first_indic, _end_indic = 0, 31
 	else
 		_first_indic, _end_indic = indic_number, indic_number
 	end
 	if start == nil then
-		start, length = 0, editor.Length
+		start, length = 0, e.Length
 	end
 	for indic = _first_indic, _end_indic do
-		editor.IndicatorCurrent = indic
-		editor:IndicatorClearRange(start, length)
+        e.IndicatorCurrent = indic
+		e:IndicatorClearRange(start, length)
 	end
-	editor.IndicatorCurrent = current_indic_number
+	e.IndicatorCurrent = current_indic_number
 end
 
 ----------------------------------------------------------------------------

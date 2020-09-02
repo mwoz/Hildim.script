@@ -763,7 +763,7 @@ local function FileManTab_Init(h)
 
 
 
-    split_s = iup.split{iup.backgroundbox{list_dir, bgcolor = iup.GetLayout().txtbgcolor}, iup.backgroundbox{list_favorites, bgcolor = iup.GetLayout().txtbgcolor}, orientation = "HORIZONTAL", name = 'splitFileMan', layoutdrag = 'NO', color = props['layout.splittercolor'], showgrip = 'LINES'}
+    split_s = iup.split{iup.backgroundbox{list_dir, bgcolor = iup.GetLayout().txtbgcolor}, iup.backgroundbox{list_favorites, bgcolor = iup.GetLayout().txtbgcolor}, orientation = "HORIZONTAL", name = 'splitFileMan', color = props['layout.splittercolor'], showgrip = 'LINES'}
     memo_path = iup.text{expand = 'YES', tip = _T'Arrow Up/Down, Ctrl+Home/End - movement through the file list'}
     local path_timer = iup.timer{time = 300; action_cb = function(h)
         h.run = 'NO'

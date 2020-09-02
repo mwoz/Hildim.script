@@ -346,9 +346,22 @@ local function Init_hidden()
 
     end
 
+    local function copyAllToSide(side)
+        if scite.buffers.GetBufferSide(scite.buffers.GetCurrent()) ~= side then
+            coeditor.TargetStart = 0
+            coeditor.TargetEnd = coeditor.Length
+            coeditor:ReplaceTarget(editor:GetText())
+        else
+            editor.TargetStart = 0
+            editor.TargetEnd = editor.Length
+            editor:ReplaceTarget(coeditor:GetText())
+
+        end
+    end
+
     local function copyToSide(side)
         local function MoveEnd(e, p)
-            while e.CharAt[p] ~= 10 and e.CharAt[p] ~= 13 do
+            while e.CharAt[p] ~= 10 and e.CharAt[p] ~= 13 and p < editor.Length and p > 0 do
                 p = p + 1
             end
             return p
@@ -358,20 +371,19 @@ local function Init_hidden()
         local lEnd = editor:LineFromPosition(editor.SelectionEnd)
         local lCoStart = coeditor:DocLineFromVisible(editor:VisibleFromDocLine(lStart))
         local lCoEnd = coeditor:DocLineFromVisible(editor:VisibleFromDocLine(lEnd))
+        if editor.SelectionEnd == editor.Length then lCoEnd = coeditor:DocLineFromVisible(editor:VisibleFromDocLine(lEnd) + 1) end
 
         local pStart = editor.SelectionStart
-        local pCoStart
+        local pCoStart  = coeditor:PositionFromLine(lCoStart)
 
         pStart = editor:PositionFromLine(lStart)
-        if editor.CharAt[pStart] ~= 10 and editor.CharAt[pStart] ~= 13 then
+        if editor.CharAt[pStart] ~= 10 and editor.CharAt[pStart] ~= 13 and pStart ~= 0 then
             pCoStart = coeditor:PositionFromLine(lCoStart)
-
             if Marker(editor, lStart) & maskLinesADM > 0 then
                 pStart = pStart - 2 -- Marker(editor, editor:PositionFromLine(lStart - 1))
                 pCoStart = MoveEnd(coeditor, pCoStart)
             end
         else
-            pCoStart = coeditor:PositionFromLine(lCoStart)
             if Marker(editor, lStart) & maskLinesADM == 0 then pCoStart = MoveEnd(coeditor, pCoStart) end
         end
 
@@ -389,6 +401,7 @@ local function Init_hidden()
             editor.TargetStart = pStart
             editor.TargetEnd = pEnd
             editor:ReplaceTarget(coeditor:textrange(pCoStart, pCoEnd))
+
         end
         StartCompare(true)
         lastEditLine = editor.LineCount + 1
@@ -698,10 +711,12 @@ local function Init_hidden()
 		{'&Previous Difference', key = 'Alt+Up', action = prevDif, active = function() return bActive == 7 end, image = 'IMAGE_ArrowUp'},
 		{'Copy &Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
 		{'Copy &Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
+		{'Copy All L&eft', key = 'Alt+Shift+Left', action = function() copyAllToSide(0) end, active = bCanCpyLeft},
+		{'Copy All R&ight', key = 'Alt+Shift+Right', action = function() copyAllToSide(1) end, active = bCanCpyRight},
         {'s3', separator = 1},
 		{'&Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare; _G.iuprops['compare_settings'] = tSet end},
 		{'Ignore &Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{}; _G.iuprops['compare_settings'] = tSet end},
-		{'&Identify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
+		{'I&dentify moved lines', check = function() return tSet.DetectMove end, action = function() tSet.DetectMove = not tSet.DetectMove; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
 		{'&Add Blank Lines', check = function() return tSet.AddLine end, action = function() tSet.AddLine = not tSet.AddLine; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
 		{'&Use Icons', check = function() return tSet.UseSymbols end, action = function() tSet.UseSymbols = not tSet.UseSymbols; ApplySettings(); _G.iuprops['compare_settings'] = tSet end},
 		{'&Synchronous View Switching', check_iuprops = 'compare.sync.viewswitch'},

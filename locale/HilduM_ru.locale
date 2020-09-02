@@ -177,6 +177,7 @@ __LOCALE ={
         ["Show Menu Icons"] = "Отображать иконки в мен&ю",
         ["Show error traceback"] = "Показать &стек вызовов при ошибке",
         ["SideBars Settings"] = "Настройка &боковых панелей...",
+        ["Splitters: Layout Drag"] = "Сплиттеры: Перемещать содержимое окна",
         ["Status Bar Plugins"] = "Настройка &строки состояния...",
         ["Status Bar"] = "Строка с&остояния",
         ["Stop Executing"] = "Остановит&ь выполнение",

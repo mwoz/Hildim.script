@@ -154,9 +154,9 @@ local tm = iup.timer{time = 300, run = 'NO', action_cb = Find_onTimer}
 
 local tmr
 
-function CORE.ClearLiveFindMrk()
-    EditorClearMarks(tMarks[6])
-    editor:MarkerDeleteAll(10);
+function CORE.ClearLiveFindMrk(bCo)
+    EditorClearMarks(tMarks[6], nil, nil, bCo)
+    if bCo then coeditor:MarkerDeleteAll(10); else editor:MarkerDeleteAll(10);end
 end
 
 function CORE.FindMarkAll(fnd, maxlines, bLive, bMark)

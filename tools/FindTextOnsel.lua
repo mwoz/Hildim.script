@@ -73,6 +73,7 @@ CORE.FindSelToConcole = function()
 end
 
 CORE.FindCoSelToConcole = function()
+    CORE.ClearLiveFindMrk(true)
     FindSelToConcoleL(scite.buffers.BufferByName(scite.buffers.CoName()), coeditor)
 end
 

@@ -164,15 +164,11 @@ function CORE.switch_bottombar()
     if bsplit.popupside == "0" then
         _G.iuprops['settings.bottombar.autohide'] = 1
         bsplit.popupside = "2"
-        iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "YES"
-        iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "YES"
         CORE.BottomBarSwitch("NO")
     else
         _G.iuprops['settings.bottombar.autohide'] = 0
         CORE.BottomBarSwitch("NO")
         bsplit.popupside = "0"
-        iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "NO"
-        iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "NO"
     end
 end
 
@@ -474,6 +470,8 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
         {'slast', separator = 1},
 		{'Show &Menu Icons', check_iuprops = 'menus.show.icons'},
         {'Mark Chan&ged Lines', check_iuprops = "changes.mark.line"},
+        {'S&plitters: Layout Drag', check = "props['layout.drag']=='YES'", action = CORE.ResetLayoutDrag},
+        {'s4', separator = 1},
 		{'&Word Wrap', action = IDM_WRAP, check = "props['wrap']=='1'"},
 		{'Wr&ap settings', action = function() DoSett('ResetWrapProps') end, image = 'settings_µ'},
 

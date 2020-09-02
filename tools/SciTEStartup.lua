@@ -135,12 +135,15 @@ scite.RunAsync(function()
         props['session.started'] = '1'
 
         if (_G.iuprops['dialogs.coeditor.splithorizontal'] or 0) == 0 then
+
             iup.GetDialogChild(hMainLayout, "SourceSplitBtm").value = '1000'
             if iup.GetDialogChild(hMainLayout, 'CoSourceExpanderBtm').state == 'OPEN' and props["tab.oldstile"] == '' then
 
                 iup.GetDialogChild(hMainLayout, "TabBarSplit").value = Iif((_G.iuprops['coeditor.win'] or '0') == '0', '500', '1000')
                 iup.GetDialogChild(hMainLayout, 'RightTabExpander').state = 'OPEN'
-                iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").barsize = Iif((_G.iuprops['coeditor.win'] or '0') == '0', '5', '0')
+                local SSM = iup.GetDialogChild(hMainLayout, "SourceSplitMiddle")
+                SSM.barsize = Iif((_G.iuprops['coeditor.win'] or '0') == '0', '5', '0')
+                if (_G.iuprops['coeditor.win'] or '0') == '0' and SSM.value == '1000' then SSM.value = (_G.iuprops["sidebarctrl.SourceSplitMiddle.value"] or '500') end
             end
         else
             iup.GetDialogChild(hMainLayout, "SourceSplitMiddle").value = '1000'
@@ -155,8 +158,6 @@ scite.RunAsync(function()
         scite.EnsureVisible()
         if (_G.iuprops['settings.bottombar.autohide'] or 0) == 1 then
             iup.SetAttribute(iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit"), "POPUPSIDE", "2")
-            iup.GetDialogChild(iup.GetLayout(), "BottomSplit").layoutdrag = "YES"
-            iup.GetDialogChild(iup.GetLayout(), "BottomSplit2").layoutdrag = "YES"
             scite.RunAsync(function() CORE.BottomBarSwitch("YES") end)
         end
         scite.RunAsync(function() iup.Refresh(iup.GetLayout()) end)

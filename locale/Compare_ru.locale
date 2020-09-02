@@ -14,6 +14,8 @@ return {
 ["Comparison Color Preferences"] = "Настройки цветов сравнения";
 ["Copy Left"] = "Скопировать влево";
 ["Copy Right"] = "Скопировать вправо";
+["Copy All Left"] = "Скопировать все влево";
+["Copy All Right"] = "Скопировать все вправо";
 ["Deleted"] = "Удаленные";
 ["File Comparison"] = "Сравнение файлов";
 ["Files are identical"] = "Файлы идентичны";

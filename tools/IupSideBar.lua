@@ -273,7 +273,6 @@ local function CreateBox()
         if t.type == "VBOX" then
             l = iup.vbox(t)
         elseif t.type == "SPLIT" then
-            t.layoutdrag = 'NO'
             t.color = props['layout.splittercolor']
             t.showgrip = 'LINES'
             l = iup.split(t)
@@ -764,8 +763,7 @@ local function InitTabbar()
 
     SSL.valuechanged_cb = function(h) Splitter_CB(h) if vc_SSL then vc_SSL(h) end end
     SSR.valuechanged_cb = function(h) Splitter_CB(h) if vc_SSR then vc_SSR(h) end end
-    SSM.valuechanged_cb = function(h) Splitter_CB(h) if vc_SSM then vc_SSM(h) end end
-
+    SSM.valuechanged_cb = function(h) Splitter_CB(h);_G.iuprops["sidebarctrl.SourceSplitMiddle.value"]=SSR.value if vc_SSM then vc_SSM(h) end end
 
     local function onButton(h, hNew, button, pressed, x, y, tab, tabDrag, status)
         local ts = false

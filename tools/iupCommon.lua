@@ -333,6 +333,7 @@ function iup.SaveChProps(bReset)
 'wrap.visual.flags',
 'wrap.visual.flags.location',
 'wrap.visual.startindent',
+'layout.drag',
 'layout.hlcolor',
 'layout.borderhlcolor',
 'layout.bordercolor',
@@ -364,6 +365,7 @@ function iup.SaveChProps(bReset)
 end
 
 local function SaveIup()
+
     if not _G.g_session['LOADED'] then return end
     if not _G.g_session['scip.save.settings'] then
         local file = props["scite.userhome"]..'\\settings.lua'
@@ -484,9 +486,7 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
             if cmd ~= 0 then scite.Close() end
         end
     end)
-    --debug_prnArgs(tblBuff)
-    --print(debug.traceback())
-    --iup.Alarm("345", "qwe", "ddd")
+
     scite.BlockUpdate(UPDATE_FORCE)
     if OnCloseFileset then OnCloseFileset(cloused) end
     if scite.buffers.SecondEditorActive() == 0 then iup.GetDialogChild(iup.GetLayout(), 'barBtncoeditor').visible = 'NO' end
@@ -1084,6 +1084,27 @@ iup.flattree = function(t)
     iup.SetAttributeId(ftr, "ADDBRANCH", -1, "")
     return ftr
 end
+
+local tblSplitters = {"TabBarSplit", "LeftBarExpander", "SourceSplitBtm", "SourceSplitMiddle", "SourceSplitRight", "SourceSplitLeft", "BottomSplit", "BottomSplit2", "BottomBarSplit",}
+
+CORE.ResetLayoutDrag = function()
+    props['layout.drag'] = Iif(props['layout.drag'] == 'YES', 'NO', 'YES')
+    for i = 1,  #tblSplitters do
+        local s = iup.GetDialogChild(iup.GetLayout(), tblSplitters[i])
+        if s then s.layoutdrag = props['layout.drag'] end
+    end
+end
+
+local old_split = iup.split
+
+iup.split = function(t)
+    if not t.layoutdrag then
+        t.layoutdrag = props['layout.drag']
+        if t.name then table.insert(tblSplitters, t.name) end
+    end
+    return old_split(t)
+end
+
 iup.SetGlobal('TXTHLCOLOR', '128 128 128')
 local old_matrix = iup.matrix
 iup.matrix = function(t)
@@ -2291,8 +2312,7 @@ function Splash_Screen()
     dlg_SPLASH:showxy(tonumber(x2)/2 - 100,tonumber(y2)/2 - 100)
 end
 function CORE.WinFromId(wid)
-    if wid == IDM_SRCWIN then return editor
-    elseif wid == IDM_COSRCWIN then return coeditor
+    if wid == IDM_SRCWIN or wid == IDM_COSRCWIN then return editor
     elseif wid == IDM_RUNWIN then return output
     elseif wid == IDM_FINDRESWIN then return findres end
     print("CORE.WinFromId: '"..wid.."' not found")
