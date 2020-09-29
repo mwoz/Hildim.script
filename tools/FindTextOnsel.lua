@@ -189,6 +189,43 @@ AddEventHandler("OnClick", function(shift, ctrl, alt, middle)
         end
 end)
 
+CORE.PrintVariantsVisible = function()
+    if findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
+        local ls = findres:PositionFromLine(findres:LineFromPosition(findres.CurrentPos))
+        return findres:textrange(ls + 8, ls + 10) == 'RE'
+    end
+end
+
+CORE.PrintFoundVariants = function()
+    if findres.StyleAt[findres.CurrentPos] == SCE_SEARCHRESULT_SEARCH_HEADER then
+        local lStart = findres:LineFromPosition(findres.CurrentPos) + 1
+        local lEnd = 0
+        for i = lStart, findres.LineCount - 1 do
+            if findres.StyleAt[findres:PositionFromLine(i)] == SCE_SEARCHRESULT_SEARCH_HEADER then break end
+            lEnd = i
+        end
+        if lStart < lEnd then
+            local lS = findres:IndicatorEnd(31, findres:PositionFromLine(lStart))
+            local lE
+            local tRes = {}
+            while lS < findres.Length and findres:LineFromPosition(lS) <= lEnd do
+                lE = findres:IndicatorEnd(31, lS)
+                tRes[findres:textrange(lS, lE)] = true
+                lS = findres:IndicatorEnd(31, lE)
+            end
+            local ts = {}
+            for s, _ in pairs(tRes) do
+                table.insert(ts, s)
+            end
+            table.sort(ts)
+            for _, s in ipairs(ts) do
+                print(s)
+            end
+        end
+
+    end
+end
+
 CORE.OpenFoundFiles = function(msg)
     local function fndFiles()
         local t = {}
@@ -199,7 +236,7 @@ CORE.OpenFoundFiles = function(msg)
                 if style == SCE_SEARCHRESULT_SEARCH_HEADER then break
                 elseif style == SCE_SEARCHRESULT_FILE_HEADER then
                     local s = findres:line(lineNum):gsub('^ ', '')
-                    table.insert(t,s)
+                    table.insert(t, s)
                 end
                 lineNum = lineNum + 1
             end
@@ -227,7 +264,7 @@ CORE.OpenFoundFiles = function(msg)
             BlockEventHandler"OnSwitchFile"
             BlockEventHandler"OnNavigation"
             BlockEventHandler"OnUpdateUI"
-
+            editor.VScrollBar = false
             local lineNum = findres:LineFromPosition(findres.CurrentPos) + 1
             while true do
                 local style = findres.StyleAt[findres:PositionFromLine(lineNum) + 1]
@@ -237,6 +274,7 @@ CORE.OpenFoundFiles = function(msg)
                 end
                 lineNum = lineNum + 1
             end
+            editor.VScrollBar = true
             UnBlockEventHandler"OnUpdateUI"
             UnBlockEventHandler"OnNavigation"
             UnBlockEventHandler"OnSwitchFile"

@@ -47,16 +47,20 @@ local function GetAction(mnu, bForse, bHotKey)
             end
             if mnu.check_idm then
             elseif mnu.check_prop then
-                return assert(load("CheckChange('"..mnu.check_prop.."', true)"))
+                rez = assert(load("CheckChange('"..mnu.check_prop.."', true)"))
             elseif mnu.check_iuprops then
                 local rez2 = assert(load("_G.iuprops['"..mnu.check_iuprops.."'] = "..Iif(tonumber(_G.iuprops[mnu.check_iuprops]) == 1 or _G.iuprops[mnu.check_iuprops] == true or _G.iuprops[mnu.check_iuprops] == 'ON' , 0, 1)))
-                if rez then return function() rez2(); rez() end end
-                return rez2
+                if rez then rez = function() rez2(); rez() end
+                else rez = rez2
+                end
             elseif mnu.check_boolean then
-                return assert(load("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
+                rez = assert(load("_G.iuprops['"..mnu.check_boolean.."'] = not _G.iuprops['"..mnu.check_boolean.."']"))
+            elseif mnu.check_not_boolean then
+                rez = assert(load("_G.iuprops['"..mnu.check_not_boolean.."'] = not _G.iuprops['"..mnu.check_not_boolean.."']"))
             elseif not rez then
-                return function() debug_prnArgs('Error in menu format!!', mnu) end
+                rez = function() debug_prnArgs('Error in menu format!!', mnu) end
             end
+            if mnu.preAct then return function() mnu.preAct(); rez() end end
             return rez
         else
             return function() end
@@ -160,6 +164,8 @@ function s:PopMnu(smnu, x, y, bToolBar)
                         if tonumber(_G.iuprops[itm.check_iuprops]) == 1 or _G.iuprops[itm.check_iuprops] == true or _G.iuprops[itm.check_iuprops] == 'ON' then titem.value = 'ON' end
                     elseif itm.check_boolean then
                         if _G.iuprops[itm.check_boolean] then titem.value = 'ON' end
+                    elseif itm.check_not_boolean then
+                        if not _G.iuprops[itm.check_not_boolean] then titem.value = 'ON' end
                     elseif itm.check_prop then
                         if props[itm.check_prop] == '1' then titem.value = 'ON' end
                     elseif m.check_idm then
@@ -327,22 +333,25 @@ local function InsertItem(mnu, path, t)
     end
 end
 
-local function prepareItems(t, helpPath, tf)
+local function prepareItems(t, helpPath, tf, preAct)
     t.hlp = helpPath
     if tf then t.cpt = tf(t[1]:gsub('&([^& ])', '%1')) end
     if type(t[2]) == 'table' then
         if tf then t[2].cpt = tf(t[2][1]) end
         for i = 1,  #(t[2]) do
-            if type(t[2][i]) == 'table' then prepareItems(t[2][i], helpPath, tf) end
+            if type(t[2][i]) == 'table' then prepareItems(t[2][i], helpPath, tf, preAct)
+            else t[2][i].preAct = preAct
+            end
         end
+    elseif preAct and not t.separator then
+        t.preAct = preAct
     end
 end
 
-function s:InsertItem(id, path, t, helpPath, tf)
+function s:InsertItem(id, path, t, helpPath, tf, preAct)
 
     if sys_Menus then
-        if helpPath or tf then prepareItems(t, helpPath, tf) end
-
+        if helpPath or tf or preAct then prepareItems(t, helpPath, tf, preAct) end
         if id == 'MainWindowMenu' then
             InsertItem(sys_Menus[id], path, t)
         else
@@ -352,13 +361,13 @@ function s:InsertItem(id, path, t, helpPath, tf)
     end
 end
 
-function s:PostponeInsert(id, path, t, helpPath, tf)
-    table.insert(tPostponed, {id, path, t, helpPath, tf})
+function s:PostponeInsert(id, path, t, helpPath, tf, preAct)
+    table.insert(tPostponed, {id, path, t, helpPath, tf, preAct})
 end
 
 function s:DoPostponedInsert(id, path, t)
     for _, t in ipairs(tPostponed) do
-        if t[4] or t[5] then prepareItems(t[3], t[4], t[5]) end
+        if t[4] or t[5] or t[6] then prepareItems(t[3], t[4], t[5], t[6]) end
         s:InsertItem(t[1], t[2], t[3])
     end
 end

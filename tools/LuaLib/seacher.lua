@@ -1,6 +1,24 @@
 
 local s = class()
 
+function s:resetSt()
+    if self.style then
+        if self.style then self.style = tostring(self.style)  end
+        if self.style == '' then
+            self.style = nil
+        else
+            self.st_exclude = (self.style:find('^%-'))
+            self.st_vals = {}
+            for s in self.style:gmatch('%d+') do
+                table.insert(self.st_vals, tonumber(s))
+            end
+        end
+    else
+        self.st_vals = nil
+        self.st_exclude = nil
+        self.style = nil
+    end
+end
 
 function s:init(t)
     self.wholeWord   = t.wholeWord
@@ -8,13 +26,14 @@ function s:init(t)
     self.wrapFind    = t.wrapFind
     self.backslash   = t.backslash
     self.regExp      = t.regExp
-    self.style       = t.style
+    self.style       = tostring(t.style or '')
     self.searchUp    = t.searchUp
     self.findWhat    = t.findWhat
     self.replaceWhat = t.replaceWhat
     self.e = t.e or editor
     self.unicMode = t.unicMode
     self.path = t.path
+    self:resetSt()
 end
 
 function s:GetUnicMod()
@@ -64,6 +83,7 @@ function s:Reset(t)
     else
         self.e = editor
     end
+    self:resetSt()
 end
 
 function s:EditorMarkText(start, length, indic_number)
@@ -95,11 +115,29 @@ function s:EditorClearMarks(indic_number, start, length)
 	self.e.IndicatorCurrent = current_indic_number
 end
 
+function s:CheckStyle(posFind)
+    for i = 1, #(self.st_vals) do
+       -- if self.st_exclude then
+            if self.st_vals[i] == self.e.StyleAt[posFind] then return self.st_exclude end
+       -- else
+       --     if self.st_vals[i] == self.e.StyleAt[posFind] then return false end
+       -- end
+    end
+    return not self.st_exclude
+end
+
 function s:FindInTarget(findWhat, lenFind, startPosition, endPosition)
     self.e.TargetStart = startPosition
     self.e.TargetEnd = endPosition
     local posFind = self.e:SearchInTarget(findWhat)
-	while (self.style ~= nil and posFind ~= -1 and self.style ~= self.e.StyleAt[posFind]) do
+
+    if self.style and not self.st_set and self.e == editor then
+        self.st_set = true
+        local l = self.e.FirstVisibleLine
+        self.e.FirstVisibleLine = self.e:VisibleFromDocLine(self.e.LineCount)
+        self.e.FirstVisibleLine = l
+    end
+	while (self.style ~= nil and posFind ~= -1 and self:CheckStyle(posFind)) do
 		if startPosition < endPosition then
 			self.e.TargetStart = posFind + 1
 			self.e.TargetEnd = endPosition
@@ -109,6 +147,7 @@ function s:FindInTarget(findWhat, lenFind, startPosition, endPosition)
 		end
 		posFind = self.e:SearchInTarget(findWhat)
 	end
+    if posFind == -1 then self.st_set = nil end
 	return posFind;
 end
 
@@ -251,6 +290,17 @@ function s:CollapseFindRez()
     end
 end
 
+function s:FindOptStr()
+    local v = '>Search'
+    if self.regExp then v = v..' RE' end
+    if self.wholeWord then v = v..' WW' end
+    if self.matchCase then v = v..' MC' end
+    if self.backslash then v = v..' BS' end
+    if self.style then v = v..' S'..self.style end
+    v = v..' for:"'
+    return v
+end
+
 function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker, iIndic)
     if bColapsPrev and bSearchCapt then self:CollapseFindRez() end
     local strLive = Iif(bLive, "/\\", "")
@@ -303,7 +353,7 @@ function s:onFindAll(maxlines, bLive, bColapsPrev, strIn, bSearchCapt, iMarker, 
             local strCapt = ''
             local strSrch = self.findWhat
             if self:GetUnicMod() ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8() end
-            if bSearchCapt then strCapt = strCapt..'>Search for "'..strSrch..'" in "'..self:GetPath(true)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
+            if bSearchCapt then strCapt = strCapt..self:FindOptStr()..strSrch..'" in "'..self:GetPath(true)..'" ('..strIn..')  Occurrences: '..wCount..' in '..lCount..' lines\n' end
 
             if _G.iuprops['findres.groupbyfile'] then strCapt = strCapt..' '..self:GetPath()..'\n' end
             if bSearchCapt or wCount > 0 then  findres:ReplaceSel( strCapt) end
@@ -435,7 +485,8 @@ function s:MarkResult()
     local origStyle = self.style
     local origFind = self.findWhat
     if self:GetUnicMod() ~= IDM_ENCODING_DEFAULT then self.findWhat = self.findWhat:from_utf8() end
-    self.style = SCE_SEARCHRESULT_CURRENT_LINE
+    self.style = ''..SCE_SEARCHRESULT_CURRENT_LINE
+    self:resetSt()
     local p
     for i = 1, findres.LineCount - 1 do
         p = findres:PositionFromLine(i)
@@ -453,6 +504,7 @@ function s:MarkResult()
     self.style = origStyle
     self.findWhat = origFind
     self.e = editor
+    self:resetSt()
 end
 
 function s:FindAll(maxlines, bLive, bSel, iMarker, iIndic)
@@ -480,9 +532,10 @@ function s:FindInBufer()
             findres:SetSel(0, 0)
             local strSrch = self.findWhat
             if self:GetUnicMod() ~= IDM_ENCODING_DEFAULT then strSrch = self.findWhat:from_utf8() end
-            findres:ReplaceSel('>Search for "'..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
+            findres:ReplaceSel(self:FindOptStr()..strSrch..'" in buffers  Occurrences: '..cnt..' in '..lin..' lines in '..fil..' files\n')
             return cnt
         end
+        self:MarkResult()
     end)
 end
 function s:ReplaceInBufer()

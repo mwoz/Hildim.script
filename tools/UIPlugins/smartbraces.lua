@@ -246,7 +246,7 @@ local function Init()
                         and
                     ( nextIsEOL( editor.CurrentPos ) or --nextIs( editor.CurrentPos, braceClose ) or
                       nextIs( editor.CurrentPos, prevBrClose ) or nextIs( editor.CurrentPos, ' ' ) or
-                      nextIs( editor.CurrentPos, '\t' ) or (string.find('}])', nextsymbol, 1, true) and editor:BraceMatch(editor.CurrentPos) > 0))
+                      nextIs( editor.CurrentPos, '\t' ) or (string.find('}])', nextsymbol, 1, true) and editor.CurrentPos and editor:BraceMatch(editor.CurrentPos) > 0))
                     then
                         local virtSpace = editor.SelectionNAnchorVirtualSpace[0]
                         local isUndo = false

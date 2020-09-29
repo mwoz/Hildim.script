@@ -76,7 +76,7 @@ body, html {
 
     local function createDlg()
         local dlg
-        web = iup.webbrowser{expand = 'YES'}
+        web = iup.webbrowser{expand = 'YES', visible = 'NO'}
         local fclose = iup.flatbutton{image = 'CLOSE_µ', name = 'Close', bgcolor = props['layout.bgcolor']; flat_action = function(h) dlg:postdestroy() end; k_any = function(h) dlg:postdestroy() end}
 
         dlg = iup.scitedialog{iup.backgroundbox{iup.hbox{iup.vbox{
@@ -96,28 +96,32 @@ body, html {
     local dlg = createDlg()
     iup.ShowXY(dlg, iup.CENTERPARENT, iup.CENTERPARENT, true)
     iup.SetFocus(iup.GetDialogChild(dlg, "Close"))
+    local tmr
+    tmr = iup.timer{time = 1, action_cb = function()
+        tmr.run = 'NO'
+        local t = scite.FileVersionInfo(props['SciteDefaultHome']..'/HildiM.exe')
 
-    local t = scite.FileVersionInfo(props['SciteDefaultHome']..'/HildiM.exe')
+        templ = templ:gsub('{HildiMVer}', t.FileVersion):gsub('{IUPVer}', t.IUPVersion):gsub('{Version}', _T'Version'):gsub('{Based}', _T'Based')
+        templ = templ:gsub('{background_color}', Color2Html(props['layout.bgcolor'])):gsub('{color}', Color2Html(props['layout.fgcolor'])):gsub('{hlcolor}', Color2Html(props['layout.txthlcolor']))
+        t = shell.getfiletime(props['SciteDefaultHome']..'/HildiM.exe')
+        local dt = string.format('%02d.%02d.%4d %02d:%02d', t.Day, t.Month, t.Year, t.Hour, t.Minute)
+        t = scite.FileVersionInfo(props['SciteDefaultHome']..'/SciLexer.dll')
+        templ = templ:gsub('{ScintillaVer}', t.FileVersion):gsub('{HildiMDate}', dt):gsub('{Lua}', _VERSION..'.'.._VERSION_RELEASE)
 
-    templ = templ:gsub('{HildiMVer}', t.FileVersion):gsub('{IUPVer}', t.IUPVersion):gsub('{Version}', _T'Version'):gsub('{Based}', _T'Based')
-    templ = templ:gsub('{background_color}', Color2Html(props['layout.bgcolor'])):gsub('{color}', Color2Html(props['layout.fgcolor'])):gsub('{hlcolor}', Color2Html(props['layout.txthlcolor']))
-    t = shell.getfiletime(props['SciteDefaultHome']..'/HildiM.exe')
-    local dt = string.format('%02d.%02d.%4d %02d:%02d', t.Day, t.Month, t.Year, t.Hour, t.Minute)
-    t = scite.FileVersionInfo(props['SciteDefaultHome']..'/SciLexer.dll')
-    templ = templ:gsub('{ScintillaVer}', t.FileVersion):gsub('{HildiMDate}', dt):gsub('{Lua}', _VERSION..'.'.._VERSION_RELEASE)
+        local tdll = scite.findfiles(props['SciteDefaultHome']..'/tools/lualib/*.dll')
 
-    local tdll = scite.findfiles(props['SciteDefaultHome']..'/tools/lualib/*.dll')
-
-    local strPlug = ''
-    for i = 1,  #tdll do
-        t = scite.FileVersionInfo(props['SciteDefaultHome']..'/tools/lualib/'..tdll[i].name)
-        if t then
-            strPlug = strPlug..tempdll:gsub('{OriginalFilename}', t.OriginalFilename or tdll[i].name):gsub('{FileVersion}', t.FileVersion or '1?'):gsub('{FileDescription}', t.FileDescription or '')
+        local strPlug = ''
+        for i = 1,  #tdll do
+            t = scite.FileVersionInfo(props['SciteDefaultHome']..'/tools/lualib/'..tdll[i].name)
+            if t then
+                strPlug = strPlug..tempdll:gsub('{OriginalFilename}', t.OriginalFilename or tdll[i].name):gsub('{FileVersion}', t.FileVersion or '1?'):gsub('{FileDescription}', t.FileDescription or '')
+            end
         end
-    end
-    templ = templ:gsub('{PLUGINS}', strPlug)
-    web.html = templ:from_utf8()
-
+        templ = templ:gsub('{PLUGINS}', strPlug)
+        web.html = templ:from_utf8()
+        web.visible = 'YES'
+    end}
+    tmr.run = 'YES'
 end
 
 InitWndDialog()

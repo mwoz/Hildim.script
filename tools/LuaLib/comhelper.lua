@@ -25,7 +25,7 @@ function s.GetNodeText(strXml, strPath)
         local xmlErr = xml.parseError
         return xmlErr.line, xmlErr.linepos, xmlErr.reason
     end
-    local bOk, msg = pcall(function() return xml:selectSingleNode(txt_search.value) end)
+    local bOk, msg = pcall(function() return xml:selectSingleNode(strPath) end)
     if not bOk then
         print(msg)
         return

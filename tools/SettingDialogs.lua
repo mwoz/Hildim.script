@@ -131,7 +131,7 @@ function sett.ResetTabbarProps()
         if c == '' then c = def end
         return c
     end
-
+    local prevBuff = (tonumber(props['buffers']) or 100)
     local ret, ondbl, buff, zord, newpos, setbegin, coloriz, illum, satur, cEx, cPref,
     tabctrl_forecolor, ROColor, tabctrl_active_bakcolor, tabctrl_active_forecolor, tabctrl_active_readonly_forecolor, tabctrl_moved_color, opencmd
     = iup.GetParam(_T"Tabbar Preferences".."^TabbarProperties",
@@ -209,6 +209,12 @@ function sett.ResetTabbarProps()
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlRight'), 1)
         iup.Redraw(iup.GetDialogChild(iup.GetLayout(), 'TabCtrlLeft'), 1)
         scite.BlockUpdate(UPDATE_FORCE)
+        if prevBuff ~= tonumber(props['buffers']) then
+            if 1 == iup.Alarm(_T"Tabbar Preferences", _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
+                scite.SetRestart('')
+                scite.RunAsync(function() scite.MenuCommand(IDM_QUIT) end)
+            end
+        end
     end
 end
 

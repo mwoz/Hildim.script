@@ -261,17 +261,41 @@ _G.sys_Menus.FINDRES = {title = _TM"Find Results Context Menu",
 		{'Open Files',  action = function() CORE.OpenFoundFiles(1) end, },
 		{'Close Files',  action = function() CORE.OpenFoundFiles(2) end, },
 		{'Close If Not Found',  action = function() CORE.OpenFoundFiles(3) end, },
+		{'Unique Results List', visible = CORE.PrintVariantsVisible, action = CORE.PrintFoundVariants, },
 	}},
 	{'slast', separator = 1},
 
+}
+
+_G.sys_Menus.AUTOCLIST = {title = _TM"AutoCList Context Menu",
+    {'Copy', action = function() iup.clipboard{}.text = editor.AutoCCurrentText end},
+    {"Autocomplete: Keys...", {
+        {'Tab', check_not_boolean = 'autoclist.scip.tab'},
+        {'Enter', check_not_boolean = 'autoclist.scip.newline'},
+    }},
+    {'Show after entering, characters...', { radio = 1,
+        {'1', action = function() props['autocompleteword.startcount'] = 1 end, check = "(tonumber(props['autocompleteword.startcount']) or 1)==1"},
+        {'2', action = function() props['autocompleteword.startcount'] = 2 end, check = "(tonumber(props['autocompleteword.startcount']) or 1)==2"},
+        {'3', action = function() props['autocompleteword.startcount'] = 3 end, check = "(tonumber(props['autocompleteword.startcount']) or 1)==3"},
+        {'4', action = function() props['autocompleteword.startcount'] = 4 end, check = "(tonumber(props['autocompleteword.startcount']) or 1)==4"},
+        {'5', action = function() props['autocompleteword.startcount'] = 5 end, check = "(tonumber(props['autocompleteword.startcount']) or 1)==5"},
+
+    },},
+}
+_G.sys_Menus.USERLIST = {title = _TM"UserList Context Menu",
+    {'Copy', action = function() iup.clipboard{}.text = editor.AutoCCurrentText end},
+    {"User List: Keys...", {
+        {'Tab', check_not_boolean = 'userlist.scip.tab'},
+        {'Enter', check_not_boolean = 'userlist.scip.newline'},
+    }},
 }
 
 _G.sys_Menus.EDITMARGIN = {title = _TM"Editor Margin Context Menu",
     {'Toggle &all folds', action = "CORE.ToggleSubfolders(nil, -1, editor)"},
     {'Toggle &current fold', action = IDM_EXPAND, active = CanToggle},
     {'Toggle &Recursively current fold', action = function() local l = editor:LineFromPosition(editor.SelectionStart); editor:ToggleFold(l); CORE.ToggleSubfolders(nil, l, editor, 100, Iif( editor.FoldExpanded[l], 1, 0)) end, active = CanToggle},
-    {'&Collapse Subfolders', key = 'Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false, nil, editor)"},
-    {'&Expand Subfolders', key = 'Ctrl+Shift++', action = "CORE.ToggleSubfolders(true, nil, editor)"},
+    {'&Collapse Subfolders(Shift+Click)', key = 'Ctrl+Shift+-', action = "CORE.ToggleSubfolders(false, nil, editor)"},
+    {'&Expand Subfolders(Shift+Click)', key = 'Ctrl+Shift++', action = "CORE.ToggleSubfolders(true, nil, editor)"},
     {'s1', separator = 1},
     {'Next &Bookmark', key = 'F2', action = IDM_BOOKMARK_NEXT, image = 'bookmark__arrow_µ'},
     {'Previous Boo&kmark', key = 'Shift+F2', action = IDM_BOOKMARK_PREV, image = 'bookmark__arrow_left_µ'},
@@ -280,7 +304,12 @@ _G.sys_Menus.EDITMARGIN = {title = _TM"Editor Margin Context Menu",
     {'s1', separator = 1},
     {"String Numbers Font Size...", action = function() dofile(props['SciteDefaultHome']..'\\tools\\ColorSettings.lua').strnum() end, image = 'settings_µ'},
     {'slast', separator = 1},
+}
 
+_G.sys_Menus.FINDRESMARGIN = {title = _TM"FindRes Margin Context Menu",
+    {'Toggle &all folds', action = "CORE.ToggleSubfolders(nil, -1, findres)"},
+    {'&Collapse Subfolders(Shift+Click)', action = "CORE.ToggleSubfolders(false, nil, findres)"},
+    {'&Expand Subfolders(Shift+Click)', action = "CORE.ToggleSubfolders(true, nil, findres)"},
 }
 
 _G.sys_Menus.EDITOR = {title = _TM"Editor Context Menu",

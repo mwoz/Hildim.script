@@ -78,11 +78,21 @@ local function PrepareFindText(s)
     end
 end
 
+local clrErr, clrInf
+do
+    local _, _ r, g, b = props['layout.fgcolor']:find('(%d*) (%d*) (%d*)')
+    if (tonumber(r) + tonumber(g) + tonumber(b)) / 3 > 60 then
+        clrErr, clrInf = "255 200 200" , "200 200 255"
+    else
+        clrErr, clrInf = "255 0 0", "0 0 255"
+    end
+end
+
 local function SetInfo(msg, chColor)
     local strColor
-    if chColor == 'E' then strColor = "255 0 0"
-    elseif chColor == 'W' then strColor = "255 0 0"
-    else strColor = "0 0 255" end
+    if chColor == 'E' then strColor = clrErr
+    elseif chColor == 'W' then strColor = clrErr
+    else strColor = clrInf end
     Ctrl('lblInfo').title = msg
     Ctrl('lblInfo').fgcolor = strColor
 end
@@ -99,7 +109,7 @@ local function ReadSettings(bScipCheckRegEx)
         ,wrapFind = (cv("chkWrapFind") == "ON")
         ,backslash = (cv("chkBackslash") == "ON")
         ,regExp = (cv("chkRegExp") == "ON")
-        ,style = Iif(cv("chkInStyle") == "ON",math.tointeger(cv("numStyle")),nil)
+        ,style = Iif(cv("chkInStyle") == "ON", cv("numStyle"),nil)
         ,searchUp = (containers["zUpDown"].valuepos == "0")
         ,findWhat = self:encode(cv("cmbFindWhat"))
         ,replaceWhat = self:encode(cv("cmbReplaceWhat"))
@@ -385,9 +395,9 @@ local function FindInBuffers()
     local count = DoForBuffers_Stack(findSettings:FindInBufer(), 100)
     SetInfo(_T'Found: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    PassFocus_local()
+    PassFocus_local(1)
     PostAction()
-    CheckBottomBar()
+    scite.RunAsync(CheckBottomBar)
 end
 
 local function GoToMarkDown()
@@ -1113,17 +1123,17 @@ local function create_dialog_FindReplace()
 
   containers[28] = iup.hbox{
     iup.hi_toggle{
-      title = _T"This Style Only:",
+      title = _T"Styles:",
       name = "chkInStyle",
       flat_action = SetStaticControls,
     },
     iup.text{
-      mask = "[0-9]+",
+      mask = "^-?[0-9,]+",
       name = "numStyle",
-      size = "22x10",
+      size = "66x10",
       font = "Segoe UI, 8",
     },
-    margin = "0x00",
+    margin = "0x00",alignment='ACENTER'
   }
 
   containers[27] = iup.vbox{

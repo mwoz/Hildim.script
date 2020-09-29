@@ -29,7 +29,7 @@ _G.g_session['custom.autoformat.lexers'] = {}
 
 local function FormatString(line)
     if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) - 1]] then return end
-
+    editor:BeginUndoAction()
     local lStart = editor:PositionFromLine(line)
     local lEnd = lStart + (editor:GetLine(line) or ''):len()
     local lS = lStart
@@ -102,7 +102,7 @@ local function FormatString(line)
             editor:ReplaceTarget" "
         end
     end
-
+    editor:EndUndoAction()
 
 end
 

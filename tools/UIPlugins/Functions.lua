@@ -19,6 +19,7 @@ local function Func_Init(h)
     local currFuncId = -1
 
     local currentItem = 0
+    local canEditOrder
 
     local _backjumppos -- store position if jumping
     local line_count = 0
@@ -88,8 +89,8 @@ local function Func_Init(h)
             lpExt._isXform = false
             lpExt.print = print
             lpExt._group_by_flags = false
-            local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
-            lpExt.P, lpExt.V, lpExt.Cg, lpExt.Ct, lpExt.Cc, lpExt.S, lpExt.R, lpExt.C, lpExt.Carg, lpExt.Cf, lpExt.Cb, lpExt.Cp, lpExt.Cmt = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt
+            local P, V, Cg, Ct, Cc, S, R, C, Carg, Cf, Cb, Cp, Cmt, B = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt, lpeg.B
+            lpExt.P, lpExt.V, lpExt.Cg, lpExt.Ct, lpExt.Cc, lpExt.S, lpExt.R, lpExt.C, lpExt.Carg, lpExt.Cf, lpExt.Cb, lpExt.Cp, lpExt.Cmt, lpExt.B = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Carg, lpeg.Cf, lpeg.Cb, lpeg.Cp, lpeg.Cmt, lpeg.B
             function lpExt.AnyCase(str)
                 local res = P'' --empty pattern to start with
                 local ch, CH
@@ -214,6 +215,7 @@ local function Func_Init(h)
 
             local tblAllUI ={}
             local function prepareTree(tOut, tIn, lay, lMask)
+                local enableDrag
                 local isBranch = type(tIn[#tIn]) == 'table'
                 if not isBranch and tIn._uiId then
                     tOut.userid = tblAllUI[tIn._uiId]
@@ -223,6 +225,9 @@ local function Func_Init(h)
 
                 local imgId, flag = GetFlags(tIn)
                 if type(tIn[2]) == 'number' then tOut.userid.start = tIn[2] end
+
+                tOut.userid._end = tIn._end
+                if not enableDrag and tIn._end then enableDrag = true end
 
                 if isBranch then
                     local tOutNew
@@ -244,7 +249,9 @@ local function Func_Init(h)
                                 layNew = lay[tIn[i][1]]
                             end
                             table.insert(tOut, tOutNew)
-                            layNew = prepareTree(tOutNew, tIn[i], layNew, lMask)
+                            local ed
+                            layNew, ed = prepareTree(tOutNew, tIn[i], layNew, lMask)
+                            if ed then enableDrag = true end
                             if lMask and layNew then
                                 if not lay then lay = {} end
                                 lay[tIn[i][1]] = layNew
@@ -268,7 +275,7 @@ local function Func_Init(h)
                         tt.leafname = '^'..tIn[1]..flag
                         tt.image = "IMAGE_"..imgId
                         if tPar.shp and type(tIn[3]) == 'string' then
-                            tt.leafname = tt.leafname..' '..tIn[3]
+                            tt.leafname = tt.leafname..' '..tIn[3]:gsub('[\r\n]', ' ')
                         end
                         if tIn._uiId then
                             tt.userid = tblAllUI[tIn._uiId]
@@ -299,7 +306,7 @@ local function Func_Init(h)
                     end
                 end
                 if type(tIn[1]) == 'string' then tOut.userid._name = tIn[1] or '' end
-                return lay
+                return lay, enableDrag
             end
 
             local function countFunctions(tblLevel)
@@ -395,14 +402,14 @@ local function Func_Init(h)
             end
             --debug_prnArgs(tPar.layout)
 
-            prepareTree(tblOut, table_functions, lOut, lMask)
+            local _, enableDrag = prepareTree(tblOut, table_functions, lOut, lMask)
             tblOut.userid.Next = tblAllUI[1]
             tblOut.userid.Id = 0
             tblOut.userid.start = 0
             countTree(tblOut)
 
-            -- debug_prnArgs(tblOut)
-            linda:send("Functions", {tblOut, lOut, out.options or {}})
+            --debug_prnArgs(tblOut)
+            linda:send("Functions", {tblOut, lOut, out.options or {}, enableDrag})
             textAll = nil
             tblOut = nil
             collectgarbage("collect")
@@ -503,7 +510,7 @@ local function Func_Init(h)
         end
     end
 
-    local function OnSwitch(bForce, bSaveLay)
+    local function OnSwitch(bForce, bSaveLay, notProhibitDD)
         if (bForce ~= 'Y') and (editor.Length > 10^(_G.iuprops['sidebar.functions.maxsize'] or 7)) then
             tree_func.delnode0 = "CHILDREN"
             tree_func.title0 = props['FileName']..' (Autoufill disabled by size)'
@@ -513,6 +520,7 @@ local function Func_Init(h)
         Functions_GetNames()
         line_count = editor.LineCount
         curSelect = -1
+        tree_func.showdragdrop = 'NO'
     end
 
     local curSelect
@@ -634,6 +642,7 @@ local function Func_Init(h)
                 end
                 toutf8(val[1])
             end
+            canEditOrder = val[4]
 
             Functions_ListFILL(val[1])
             currentLine = -1
@@ -857,10 +866,64 @@ local function Func_Init(h)
 
     tree_func.flat_button_cb = function(_, but, pressed, x, y, status)
         if pressed == 0 and line ~= nil then
-            iup.PassFocus()
+            iup.PassFocus()  ;print(861)
             line = nil
         end
     end
+
+    tree_func.dragdrop_cb = function(h, drag_id, drop_id, isshift, iscontrol)
+        if iup.GetAttributeId(tree_func, 'PARENT', drag_id) ~= iup.GetAttributeId(tree_func, 'PARENT', drop_id) then
+            print("Can't move an item to another branch")
+            return iup.IGNORE
+        end
+        local tDrag = iup.TreeGetUserId(tree_func, drag_id)
+        local tDrop = iup.TreeGetUserId(tree_func, drop_id)
+
+        local lDragNext
+        if tDrag._end then
+            lDragNext = tDrag._end + 1
+            if editor:line(lDragNext) == '' then lDragNext = lDragNext + 1 end
+        end
+
+        local lDropNext
+        if tDrop._end then
+            lDropNext = tDrop._end + 1
+            if editor:line(lDropNext) == '' then lDropNext = lDropNext + 1 end
+        end
+
+        if not lDragNext then
+            print(iup.GetAttributeId(tree_func, 'TITLE', lDragNext).." end position not defined")
+            return iup.IGNORE
+        end
+        if not lDropNext then
+            print(iup.GetAttributeId(tree_func, 'TITLE', lDropNext).." end position not defined")
+            return iup.IGNORE
+        end
+
+        local pDragStart = editor:PositionFromLine(tDrag.start)
+        local pDragEnd = editor:PositionFromLine(lDragNext)
+
+        local lDrop = lDropNext
+        if tDrag.start < tDrop.start then lDrop = lDrop - (lDragNext - tDrag.start) end
+
+        local strFun = editor:textrange(pDragStart, pDragEnd)
+        editor.TargetStart = pDragStart
+        editor.TargetEnd = pDragEnd
+        editor:BeginUndoAction()
+        editor:ReplaceTarget('')
+        local pDrop = editor:PositionFromLine(lDrop)
+        editor.TargetStart = pDrop
+        editor.TargetEnd = pDrop
+        editor:ReplaceTarget(strFun)
+        editor:EndUndoAction()
+        CORE.ScipHidePannel()
+        Functions_GetNames()
+    end
+
+    tree_func.killfocus_cb = function()
+        tree_func.showdragdrop = 'NO'
+    end
+
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',
         {'Functions_sidebar', plane = 1,{
             {"Sort By", {radio = 1;
@@ -878,7 +941,16 @@ local function Func_Init(h)
                 cpb.text = iup.TreeGetUserId(tree_func, id)._name or tree_func.title
                 iup.Destroy(cpb)
             end},
-    }}, "hildim/ui/functions.html", _T)
+            {"Edit function order", action = function()
+                tree_func.showdragdrop = Iif(tree_func.showdragdrop == 'NO', 'YES', "NO")
+                if tree_func.showdragdrop == 'YES' then
+                    if _G.iuprops['sidebar.functions.sort'] ~= 'order' then Functions_SortByOrder()
+                    else Functions_GetNames() end
+                end
+            end, check = function() return tree_func.showdragdrop == 'YES' end,
+            visible = function() return canEditOrder == true end
+            },
+    }}, "hildim/ui/functions.html", _T, function() CORE.ScipHidePannel(); scite.RunAsync(function() iup.SetFocus(tree_func) end) end)
 
     local prevval
     tree_func.k_any = function(_, number)
@@ -900,7 +972,7 @@ local function Func_Init(h)
     tree_func.executeleaf_cb = function(h, id)
         Functions_GotoLine()
         if iup.GetGlobal("SHIFTKEY") == "ON" then CORE.ScipHidePannel(2) end
-        scite.RunAsync(iup.PassFocus)
+        scite.RunAsync(iup.PassFocus)   ;print(940)
     end
 
     tree_func.selection_cb = function(h, i, state)

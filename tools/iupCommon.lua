@@ -260,6 +260,7 @@ function iup.SaveChProps(bReset)
     if _G.g_session['scip.save.session'] then return end
     local t = {
 'autocompleteword.automatic',
+'autocompleteword.startcount',
 'ext.lua.debug.traceback',
 'buffers',
 'buffers.new.position',

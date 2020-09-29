@@ -41,10 +41,10 @@ local apiX_table = {}
 local pasteFromXml=false
 local calltipinfo = {{-1}} -- в первом поле - строка, в которой открывали толтип - дальше - паровоз из активных толтипов - в структурах:
                         --{позици€,текст,всего_параметров,текущий_параметр{start1,start2,...end}}
-local constObjGlobal = '___G___'
-local constListId = 7
-local constListIdXml = 8
-local constListIdXmlPar = 88
+local constObjGlobal <const> = '___G___'
+local constListId <const> = 7
+local constListIdXml <const> = 8
+local constListIdXmlPar <const> = 88
 local maxListsItems = 16
 
 local AutocomplAutomatic
@@ -1334,7 +1334,6 @@ end
 
 -- ќ—Ќќ¬Ќјя ѕ–ќ÷≈ƒ”–ј (обрабатываем нажати€ на клавиши)
 local function OnChar_local(char)
-
     if bIsListVisible and not pasteFromXml and fillup_chars_cur ~= '' and string.find(char, fillup_chars_cur) then
         --обеспечиваем вставку выбранного в листе значени€ вводе одного из завершающих символов(fillup_chars - типа (,. ...)
         --делать это через  SCI_AUTOCSETFILLUPS неудобно - не поддерживаетс€ пробел, и  start_chars==fillup_chars - лист сразу же закрываетс€,
@@ -1565,6 +1564,24 @@ local function OnDwellStart_local(pos, word)
         CUR_POS.dwell = false
     end
 end
+
+function CORE.AutoCMethodFilter(list, method)
+    if method == SC_AC_NEWLINE and ((_G.iuprops[list..'.scip.newline'] and iup.GetGlobal('SHIFTKEY') == 'OFF') or (not _G.iuprops[list..'.scip.newline'] and iup.GetGlobal('SHIFTKEY') == 'ON')) then
+        editor:AutoCCancel()
+        editor:NewLine()
+    elseif method == SC_AC_TAB and _G.iuprops[list..'.scip.tab'] then
+
+        editor:AutoCCancel()
+        if iup.GetGlobal('SHIFTKEY') == 'ON' then
+            editor:BackTab()
+        else
+            editor:Tab()
+        end
+    else
+        return true
+    end
+end
+
 ------------------------------------------------------
 AddEventHandler("OnChar", function(char)
     if not useAutocomp() then return end
@@ -1572,17 +1589,17 @@ AddEventHandler("OnChar", function(char)
 	return result
 end)
 local bRun = true
-AddEventHandler("OnUserListSelection", function(tp, sel_value)
+AddEventHandler("OnUserListSelection", function(tp, sel_value, id, method)
     if not useAutocomp() then return end
+    if not CORE.AutoCMethodFilter('userlist', method) then return end
 	if bRun and(tp == constListIdXml or tp == constListId or tp == constListIdXmlPar) then
 		if OnUserListSelection_local(tp, sel_value) then return true end
 	end
     editor.AutoCHooseSingle = true
 end)
 AddEventHandler("OnAutocSelection", function(method, pos)
-    if method == 4 and props['autocompleteword.automatic'] == '1' and props['autocomleted.from.menu'] ~= '1' then
-        editor:AutoCCancel()
-        editor:NewLine()
+    if props['autocompleteword.automatic'] == '1' and props['autocomleted.from.menu'] ~= '1' then
+        CORE.AutoCMethodFilter('autoclist', method)
     end
 end)
 local function OnSwitchLocal()
