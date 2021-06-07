@@ -304,7 +304,7 @@ function sett.CurrentTabSettings()
 end
 
 function sett.ScrollSize()
-	local ret, size = iup.GetParam(_TM"Scroll Size...".."^InterfaceFontSize",
+	local ret, size = iup.GetParam(_TM"Scroll Size...".."^ScrollSize",
         function(h, i) if i == -1 and tonumber(iup.GetParamParam(h, 0).value) < 11 then return 0 end return 1 end,
         _TH'Size:'..'%i[11,21,1]\n',
         tonumber(props['iup.scrollbarsize'])

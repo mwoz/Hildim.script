@@ -110,7 +110,7 @@ FileMan_ListFILL = function(blockUpdate)
             local n, a = table_dir[i].name, table_dir[i].attributes
             if file_mask == '' and n ~= "." and n ~= ".." and not n:find('^%$') and (a & 2) == 0 and (a & 4) == 0 then
                 list_dir:setcell(j, 1, 'IMAGE_Folder')
-                list_dir:setcell(j, 2, n)
+                list_dir:setcell(j, 2, n:to_utf8())
                 list_dir:setcell(j, 3, a)
                 list_dir:setcell(j, 4, 'd')
                 j = j + 1
@@ -465,7 +465,7 @@ local function FileMan_Rename()
     local l = list_getvaluenum(list_dir)
 	if fname == '' or d == 'd' then return end
 
-    CORE.ScipHidePannel()
+    -- CORE.ScipHidePannel()
     list_dir.focus_cell = l..":2"
     iup.SetAttribute(list_dir, 'READONLY', 'NO')
     bIsRenamed = true
@@ -684,7 +684,6 @@ local function FileManTab_Init(h)
             end
             return - 1
         elseif iup.isbutton3(status) then
-            CORE.ScipHidePannel()
             h.focus_cell = lin..':'..col
             menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Fileman_sidebar')
         end
@@ -712,7 +711,7 @@ local function FileManTab_Init(h)
                 }},
             }},
             {"Insert Relative Path", action = function() editor:ReplaceSel(FILEMAN.RelativePath()); iup.PassFocus() end},
-    }}, "hildim/ui/fileman.html", _T)
+    }}, "hildim/ui/fileman.html", _T, function() CORE.ScipHidePannel(); end)
 
     list_dir.action_cb = (function(h, key, lin, col, edition, value) memoNav(h, key) end)
     list_dir.value_edit_cb = FileMan_DoRename
@@ -747,7 +746,6 @@ local function FileManTab_Init(h)
         if iup.isdouble(status) and iup.isbutton1(status) then
             Favorites_OpenFile()
         elseif iup.isbutton3(status) then
-            CORE.ScipHidePannel()
             h.focus_cell = lin..':'..col
             iup.SetAttribute(list_dir, 'MARK'..col..':0', 1)
             menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Favorites_sidebar')
@@ -759,7 +757,7 @@ local function FileManTab_Init(h)
             {"Add Current File", action = Favorites_AddCurrentBuffer},
             {"Delete from Favorites", action = Favorites_DeleteItem},
             {"Rename", action = Favorites_Rename},
-    }}, "hildim/ui/fileman.html", _T)
+    }}, "hildim/ui/fileman.html", _T, function() CORE.ScipHidePannel(); end)
 
 
 

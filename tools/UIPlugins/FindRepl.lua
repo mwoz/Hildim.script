@@ -3,6 +3,7 @@ local containers
 local oDeattFnd
 local firstMark = tonumber(props["findtext.first.mark"])
 local popUpFind
+local useFunc
 --local _Plugins
 
 local function fb_find(t)
@@ -42,13 +43,13 @@ function CORE.SetFindMarkers()
         e.MarkerBack[10] = CORE.Str2Rgb('255 127 0')
     end
     local function addSBColors(sb, side)
-        iup.SetAttributeId2(sb, "COLORID", 2, -1, "")
-        iup.SetAttributeId2(sb, "COLORID", 2, 5, CORE.Rgb2Str(16711884))
-        iup.SetAttributeId2(sb, "COLORID", 2, 6, CORE.Rgb2Str(16711680))
-        iup.SetAttributeId2(sb, "COLORID", 2, 7, CORE.Rgb2Str(65280))
-        iup.SetAttributeId2(sb, "COLORID", 2, 8, CORE.Rgb2Str(65535))
-        iup.SetAttributeId2(sb, "COLORID", 2, 9, CORE.Rgb2Str(16768273))
-        iup.SetAttributeId2(sb, "COLORID", 2, 10, CORE.Rgb2Str(494591))
+        iup.SetAttributeId2(sb, "COLORID", 3, -1, "")
+        iup.SetAttributeId2(sb, "COLORID", 3, 5, CORE.Rgb2Str(16711884))
+        iup.SetAttributeId2(sb, "COLORID", 3, 6, CORE.Rgb2Str(16711680))
+        iup.SetAttributeId2(sb, "COLORID", 3, 7, CORE.Rgb2Str(65280))
+        iup.SetAttributeId2(sb, "COLORID", 3, 8, CORE.Rgb2Str(65535))
+        iup.SetAttributeId2(sb, "COLORID", 3, 9, CORE.Rgb2Str(16768273))
+        iup.SetAttributeId2(sb, "COLORID", 3, 10, CORE.Rgb2Str(494591))
 
     end
 
@@ -254,6 +255,16 @@ local function ReplaceSel(h)
     PostAction()
 end
 
+local function ReplaceFunc(h)
+    local s, e = editor.SelectionStart, editor.SelectionEnd
+    local ls, le = FUNCTIONS.CurrentFuncLines()
+    editor.SelectionStart = editor:PositionFromLine(ls)
+    editor.SelectionEnd = editor:PositionFromLine(le)
+    ReplaceSel(h)
+    editor.SelectionStart = s
+    editor.SelectionEnd = e
+end
+
 local function FindSel(h)
     if ReadSettings() then return end
     local count = findSettings:FindAll(nil, false, true)
@@ -279,10 +290,25 @@ end
 
 local function GetCount(h)
     if ReadSettings() then return end
-    local count = findSettings:Count()
+    local count
+    if useFunc then
+        local s, e = editor.SelectionStart, editor.SelectionEnd
+        local ls, le = FUNCTIONS.CurrentFuncLines()
+        editor.SelectionStart = editor:PositionFromLine(ls)
+        editor.SelectionEnd = editor:PositionFromLine(le)
+        count = findSettings:FindAll(nil, false, true)
+        editor.SelectionStart = s
+        editor.SelectionEnd = e
+    else
+        count = findSettings:Count()
+    end
     SetInfo(_T'Found: '..count, Iif(count == 0, 'E', ''))
     Ctrl("cmbFindWhat"):SaveHist()
-    PassFocus_local()
+    PassFocus_local(Iif(useFunc, 2, nil))
+    if useFunc then
+        PostAction()
+        CheckBottomBar()
+    end
 end
 
 local function FindNext(h)
@@ -728,7 +754,20 @@ local function create_dialog_FindReplace()
       },
       fb_find{
         padding = "3x",
-        title = _T"Count",
+        title = Iif((function()
+            useFunc = false
+            local t = _G.iuprops["settings.user.rightbar"]
+            for i = 1, 2 do
+                for j = 1,  #t do
+                    local tt = t[j]
+                    for k = 1,  #tt do
+                        if tt[k] == 'FindRepl.lua' then useFunc = true; return true end
+                    end
+                end
+                t = _G.iuprops["settings.user.leftbar"]
+            end
+            return false
+        end)(), _T"In Function", _T"Count"),
         flat_action = GetCount,
       },
       --normalizesize = "HORIZONTAL",
@@ -770,7 +809,7 @@ local function create_dialog_FindReplace()
   containers[15] = iup.hbox{
     fb_find{
       padding = "3x",
-      title = _T"Replace All",
+      title = _T"All",
       flat_action = ReplaceAll,
     },
     fb_find{
@@ -778,6 +817,11 @@ local function create_dialog_FindReplace()
       title = _T"In Selection",
       flat_action = ReplaceSel,
     },
+    Iif(useFunc, fb_find{
+      padding = "3x",
+      title = _T"In Function",
+      flat_action = ReplaceFunc,
+    }, null),
     fb_find{
       padding = "3x",
       title = _T"In Open Files",

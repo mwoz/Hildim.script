@@ -42,7 +42,8 @@ body, html {
         {Based} SciTE 2.24  Neil Hodgson. <br>
         December 1998-December 2010.
       </div>
-        <span class="hl">Scintilla {ScintillaVer}</span> code editing component, Neil Hodgson <br>
+        <span class="hl">Scintilla {ScintillaVer}</span> code editing component <br>
+        <span class="hl">Lexilla {LexillaVer}</span> lexical analysis Component <br>
         <a target="_blank" href="http://www.scintilla.org">http://www.scintilla.org</a>
       </div>
       <div>
@@ -107,6 +108,8 @@ body, html {
         local dt = string.format('%02d.%02d.%4d %02d:%02d', t.Day, t.Month, t.Year, t.Hour, t.Minute)
         t = scite.FileVersionInfo(props['SciteDefaultHome']..'/SciLexer.dll')
         templ = templ:gsub('{ScintillaVer}', t.FileVersion):gsub('{HildiMDate}', dt):gsub('{Lua}', _VERSION..'.'.._VERSION_RELEASE)
+        t = scite.FileVersionInfo(props['SciteDefaultHome']..'/Lexilla.dll')
+        templ = templ:gsub('{LexillaVer}', t.FileVersion)
 
         local tdll = scite.findfiles(props['SciteDefaultHome']..'/tools/lualib/*.dll')
 

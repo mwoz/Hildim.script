@@ -172,7 +172,7 @@ function rfl:GetMenu()
     end
     table.insert(t,{'s0', separator = 1})
     table.insert(t,{_TH'List Settings', action = function()
-        local res, loc, len, pathAfter, bClear = iup.GetParam(_TH'Recent List Settings',
+        local res, loc, len, pathAfter, bClear = iup.GetParam(_TH'Recent List Settings'..'^RecentListSettings',
             nil,
             _TH"Location in File menu: %o|Submenu|Bottom|\n"..
             _TH"Length: %i[5,30,1]".."\n"..
@@ -361,7 +361,7 @@ function iup.SaveChProps(bReset)
  	if pcall(io.output, file) then
 		io.write(table.concat(t,'\n'))
  	end
-	io.close()
+	pcall(io.close)
     if bReset then scite.RunAsync(function() scite.ReloadProperties() end) end
 end
 
@@ -429,7 +429,10 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
         msg = msg.._TH'Save all?'
         result = tonumber(iup.Alarm(_TH'Some files are not saved:', msg, _TH'Yes', _TH'No', _TH'Cancel'))
         --result = shell.msgbox(msg, "Close", 3) --YESNOCANCEL Yes - 6, NO - 7 CANCEL - 2
-        if result == 3 then return true end
+        if result == 3 then
+            scite.buffers.SetDocumentAt(notSaved[1])
+            return true
+        end
         if result == 1 then
             for _,j in ipairs(notSaved) do
                 scite.buffers.SetDocumentAt(j)
@@ -822,7 +825,7 @@ AddEventHandler("OnLindaNotify", function(key)
 end)
 
 AddEventHandler("OnMenuCommand", function(cmd, source)
-    if cmd == 9132 or cmd == 9134 or cmd == IDM_CLOSEALL or (cmd == IDM_QUIT and not _G.g_session['scip.plugins']) then
+    if cmd == IDM_CLOSEALLBUTCURRENT or cmd == IDM_CLOSEALLTEMPORALLY or cmd == IDM_CLOSEALL or (cmd == IDM_QUIT and not _G.g_session['scip.plugins']) then
         if cmd == IDM_QUIT then
             if MACRO and MACRO.Record then MACRO.StopRecord() return true end
             scite.SavePosition()

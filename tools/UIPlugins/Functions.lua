@@ -1,8 +1,9 @@
 
 local onDestroy
+
 local function Func_Init(h)
     if not lpeg then lpeg = require"lpeg" end
-
+    FUNCTIONS = {}
     local _isXform = false
     local _show_flags = tonumber(_G.iuprops['sidebar.functions.flags']) == 1
     local _show_params = tonumber(_G.iuprops['sidebar.functions.params']) == 1
@@ -54,31 +55,31 @@ local function Func_Init(h)
 
     local function LanesLoop()
         lpeg = require"lpeg"
-        -- local function debug_prnTb(tb, n)
-        --     local s = string.rep('    ', n)
-        --     for k, v in pairs(tb) do
-        --         if type(v) == 'table' then
-        --             print(s..k..'->  Table')
-        --             --debug_prnTb(v, n + 1)
-        --             if k ~= 'Next' then debug_prnTb(v, n + 1) else print(s..'NextId->'..(v.Id or '')) end
-        --         else
-        --             print(s..k..'->  ', v)
-        --         end
-        --     end
-        -- end
+        local function debug_prnTb(tb, n)
+            local s = string.rep('    ', n)
+            for k, v in pairs(tb) do
+                if type(v) == 'table' then
+                    print(s..k..'->  Table')
+                    --debug_prnTb(v, n + 1)
+                    if k ~= 'Next' then debug_prnTb(v, n + 1) else print(s..'NextId->'..(v.Id or '')) end
+                else
+                    print(s..k..'->  ', v)
+                end
+            end
+        end
 
-        -- local function debug_prnArgs(...)
-        --     print('-------------')
-        --     local arg = table.pack(...)
-        --     for i = 1, #arg do
-        --         if type(arg[i]) == 'table' then
-        --             print(i..'->  Table')
-        --             debug_prnTb(arg[i], 1)
-        --         else
-        --             print(i..'->  ', arg[i])
-        --         end
-        --     end
-        -- end
+        local function debug_prnArgs(...)
+            print('-------------')
+            local arg = table.pack(...)
+            for i = 1, #arg do
+                if type(arg[i]) == 'table' then
+                    print(i..'->  Table')
+                    debug_prnTb(arg[i], 1)
+                else
+                    print(i..'->  ', arg[i])
+                end
+            end
+        end
 
         local lpExt = {}
         local Lang2lpeg = {}
@@ -441,6 +442,7 @@ local function Func_Init(h)
     end
 
     local function Functions_SortByOrder()
+
         _sort = 'order'
         _G.iuprops['sidebar.functions.sort'] = _sort
         Functions_GetNames()
@@ -526,9 +528,9 @@ local function Func_Init(h)
     local curSelect
     curSelect = -1
 
-    local function _OnUpdateUI()
-        if _Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.functions.id then
-            if editor.Focus then
+    local function _OnUpdateUI(bForse)
+        if (_Plugins.functions.Bar_obj.TabCtrl.value_handle.tabtitle == _Plugins.functions.id) or bForse then
+            if editor.Focus or bForse then
                 local line_count_new = editor.LineCount
                 local def_line_count = line_count_new - line_count
                 if def_line_count ~= 0 then --С прошлого раза увеличилось количество строк в файле
@@ -587,6 +589,12 @@ local function Func_Init(h)
                 return
             end
         end
+    end
+
+    function FUNCTIONS.CurrentFuncLines()
+        _OnUpdateUI(true)
+        local t = iup.TreeGetUserId(tree_func, currFuncId)
+        return t.start or 0, t._end or editor.LineCount - 1
     end
 
     AddEventHandler("OnLindaNotify", function(key)
@@ -859,14 +867,13 @@ local function Func_Init(h)
     tree_func.size = nil
 
     tree_func.rightclick_cb = function(_, id)
-        CORE.ScipHidePannel()
         menuhandler:PopUp('MainWindowMenu|_HIDDEN_|Functions_sidebar')
         iup.SetAttributeId(tree_func, "MARKED", id, "YES")
     end
 
     tree_func.flat_button_cb = function(_, but, pressed, x, y, status)
         if pressed == 0 and line ~= nil then
-            iup.PassFocus()  ;print(861)
+            iup.PassFocus()
             line = nil
         end
     end
@@ -972,7 +979,7 @@ local function Func_Init(h)
     tree_func.executeleaf_cb = function(h, id)
         Functions_GotoLine()
         if iup.GetGlobal("SHIFTKEY") == "ON" then CORE.ScipHidePannel(2) end
-        scite.RunAsync(iup.PassFocus)   ;print(940)
+        scite.RunAsync(iup.PassFocus)
     end
 
     tree_func.selection_cb = function(h, i, state)
@@ -1029,7 +1036,7 @@ local function Func_Init(h)
         repeat
             if not block1st and tUid._name and tUid._name:upper():find('^'..newvalue:upper()) then
                 iup.SetAttributeId(tree_func, "MARKED", curv, "YES")
-                -- tree_func.topitem = curv
+                tree_func.topitem = curv
                 return
             end
             block1st = nil

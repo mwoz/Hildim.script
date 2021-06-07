@@ -143,7 +143,8 @@ local function Init_hidden()
         editor.CaretLineVisibleAlways = false
         coeditor.CaretLineVisibleAlways = false
 
-        CORE.SetFindMarkers()
+        iup.SetAttributeId2(iup.GetDialogChild(iup.GetLayout(), 'Source'), "COLORID", 2, -1, "")
+        iup.SetAttributeId2(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), "COLORID", 2, -1, "")
     end
 
     local function StartCompare(bScipReset)
@@ -219,8 +220,10 @@ local function Init_hidden()
 
             addSBColors(iup.GetDialogChild(iup.GetLayout(), 'Source'), 1)
             addSBColors(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), 2)
+
         else
-            CORE.SetFindMarkers()
+            iup.SetAttributeId2(iup.GetDialogChild(iup.GetLayout(), 'Source'), "COLORID", 2, -1, "")
+            iup.SetAttributeId2(iup.GetDialogChild(iup.GetLayout(), 'CoSource'), "COLORID", 2, -1, "")
         end
 
     end
@@ -711,8 +714,8 @@ local function Init_hidden()
 		{'&Previous Difference', key = 'Alt+Up', action = prevDif, active = function() return bActive == 7 end, image = 'IMAGE_ArrowUp'},
 		{'Copy &Left', key = 'Alt+Left', action = function() copyToSide(0) end, active = bCanCpyLeft, image = 'control_double_180_µ'},
 		{'Copy &Right', key = 'Alt+Right', action = function() copyToSide(1) end, active = bCanCpyRight, image = 'control_double_µ'},
-		{'Copy All L&eft', key = 'Alt+Shift+Left', action = function() copyAllToSide(0) end, active = bCanCpyLeft},
-		{'Copy All R&ight', key = 'Alt+Shift+Right', action = function() copyAllToSide(1) end, active = bCanCpyRight},
+		{'Copy All L&eft', key = 'Alt+Shift+<', action = function() copyAllToSide(0) end, active = bCanCpyLeft},
+		{'Copy All R&ight', key = 'Alt+Shift+>', action = function() copyAllToSide(1) end, active = bCanCpyRight},
         {'s3', separator = 1},
 		{'&Recompare when moved to other line', check = function() return tSet.Recompare end, action = function() tSet.Recompare = not tSet.Recompare; _G.iuprops['compare_settings'] = tSet end},
 		{'Ignore &Spaces', check = function() return tSet.IncludeSpace end, action = function() tSet.IncludeSpace = not tSet.IncludeSpace;  ApplySettings{}; _G.iuprops['compare_settings'] = tSet end},

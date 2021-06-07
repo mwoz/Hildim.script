@@ -282,7 +282,7 @@ function s:CollapseFindRez()
 
     for line = 0, findres.LineCount do
         local level = findres.FoldLevel[line]
-        if ((level & SC_FOLDLEVELHEADERFLAG)~=0 and SC_FOLDLEVELBASE + 1 == (level & SC_FOLDLEVELNUMBERMASK))then
+        if ((level & SC_FOLDLEVELHEADERFLAG)~= 0 and SC_FOLDLEVELBASE + 1 == (level & SC_FOLDLEVELNUMBERMASK)) then
             findres.FoldExpanded[line] = nil
             local lineMaxSubord = findres:GetLastChild(line,-1)
             if line < lineMaxSubord then findres:HideLines(line + 1, lineMaxSubord) end

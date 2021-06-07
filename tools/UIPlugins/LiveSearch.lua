@@ -52,7 +52,7 @@ local function Init(ToolBar_obj)
 
     txt_search = iup.list{name = 'livesearch_bar', expand = 'YES', editbox = "YES", dropdown = "YES",
         bgcolor = props['layout.splittercolor'], bordercolor = props['layout.splittercolor'], fgcolor = props['layout.txtinactivcolor'],
-        txtbgcolor = props['layout.splittercolor'], txtfgcolor = props['layout.fgcolor'],
+        txtbgcolor = props['layout.splittercolor'], txtfgcolor = props['layout.fgcolor'], visibleitems = '15',
         bgcolorlist = props['layout.txtbgcolor'], fgcolorlist = props['layout.txtfgcolor'], emptylisttext = _T'Live Search',
     }
     iup.SetAttribute(txt_search, 'HISTORIZED', "NO")

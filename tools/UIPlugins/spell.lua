@@ -98,9 +98,10 @@ local function Init()
             if val.cmd == 'SPELL_ERR_WIN' then
                 EditorMarkText(val[1], val[2], mark)
             elseif val.cmd == 'SPELL_ERR_UTF' then
-                local sb = editor:WordStartPosition(val[1], val[2], true)
-                local se = editor:WordEndPosition(val[1], val[2], true) - sb
-                EditorMarkText(sb, se, mark)
+                -- local sb = editor:WordStartPosition(val[1], val[2], true)
+                --local se = editor:WordEndPosition(val[1], val[2], true) - sb
+                -- EditorMarkText(sb, se, mark)
+                EditorMarkText(val[1], val[2], mark)
             end
         end
     end)
@@ -301,7 +302,6 @@ local function Init()
             print('SpellLexer error:', posStart, posEnd)
             return
         end
-        --print(posS tart, posend)
         EditorClearMarks(mark, posStart, posEnd - posStart)
         local iStyle
         local bNedSpell, iSpellingStyle, posStartSpell = cHeck,- 1, posEnd
@@ -405,6 +405,7 @@ local function Init()
     end --корова
 
     local spellStart, spellEnd
+    local spellStartMin, spellEndMax
     local function OnColorise_local(s, e)
         local bEd, bLen = pcall(function() return not(editor.Length > 10 ^(_G.iuprops['spell.maxsize'] or 7)) end)
         if not bEd or not bLen then return end
@@ -415,6 +416,7 @@ local function Init()
             else spellStart, spellEnd = s, e end
         end
     end
+    AddEventHandler("OnUpdateUI", function(bChange) if bChange ~= 0 then spellStartMin, spellEndMax = nil, nil end end)
 
     function spell_ErrorList()
         local prLine = editor:LineFromPosition(editor.CurrentPos)
@@ -476,15 +478,22 @@ local function Init()
 
     local function OnIdle_local()
         if spellEnd then
-            local dP = editor:PositionFromLine(editor:LineFromPosition(spellStart) + 500)
-            if dP < 0 or dP >= spellEnd then dP = nil end
+            local mL = math.min(editor:LineFromPosition(spellStart) + 500, editor.LineCount - 1)
+
+            local dP = editor:PositionFromLine(mL)
+
+            if dP < 0 or dP >= spellEnd then dP = spellEnd end
+            if (spellStartMin or spellStart + 1) <= spellStart and (spellEndMax or dP - 1) >= dP then return end
             if not bReset then
                 if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then SpellRange = SpellRange1251 else SpellRange = SpellRangeUTF8 end
                 bReset = true
             end
-            SpellLexer(spellStart, dP or spellEnd)
-            if dP then spellStart = dP
-            else spellStart, spellEnd = nil, nil end
+            dP = dP or spellEnd
+            spellStartMin = math.min(spellStartMin or 0, spellStart)
+            spellEndMax = math.max(spellEndMax or dP, dP)
+            SpellLexer(spellStart, dP)
+            spellStart = dP
+            if editor.Length - 1 <= spellEnd then spelEnd = nil end
         end
         if bNeedList then bNeedList = false; ListErrors() end
     end

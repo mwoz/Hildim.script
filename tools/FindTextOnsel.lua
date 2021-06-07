@@ -77,6 +77,33 @@ CORE.FindCoSelToConcole = function()
     FindSelToConcoleL(scite.buffers.BufferByName(scite.buffers.CoName()), coeditor)
 end
 
+CORE.SelectFold = function(e)
+    CORE.GotoFold(true, e, true)
+    local ss = e.SelectionStart
+    CORE.GotoFold(false, e, true)
+    editor:LineEnd()
+    local se = e.SelectionEnd
+    e:SetSel(ss, se)
+end
+
+CORE.GotoFold = function(bStart, e, bScipNav)
+    if e == editor and not bScipNav then OnNavigation("Fold") end
+    local lStart = e:LineFromPosition(e.SelectionStart)
+    local baseLevel = (e.FoldLevel[lStart] & SC_FOLDLEVELNUMBERMASK)
+    if (e.FoldLevel[lStart] & SC_FOLDLEVELHEADERFLAG) ~= 0 then baseLevel = baseLevel + 1 end
+    local lm = e.LineCount
+    local stp = Iif(bStart, -1, 1)
+    local l = lStart
+    while l > - 1 and l < lm do
+        l = l + stp
+        if (e.FoldLevel[l] & SC_FOLDLEVELNUMBERMASK) < baseLevel then break end
+    end
+    if not bStart then l = l - 1 end
+    local p = e:PositionFromLine(l)
+    e:SetSel(p, p)
+    if e == editor and not bScipNav then OnNavigation("Fold-") end
+end
+
 CORE.ToggleSubfolders = function(bShow, line, e, maxlevel, action, noParent)
     if not e then
         if output.Focus then e = output

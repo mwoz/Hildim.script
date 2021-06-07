@@ -564,7 +564,7 @@ strnum = function()
         print('Error: style 33 is missing!')
         return
     end
-	local ret, size = iup.GetParam(_TM"String Numbers Font Size...".."^InterfaceFontSize",
+	local ret, size = iup.GetParam(_TM"String Numbers Font Size...".."^StringNumbersFontSize",
         function(h, i) if i == -1 and tonumber(iup.GetParamParam(h, 0).value) < 2 then return 0 end return 1 end,
         _TH'Size:'..'%i[2,22,1]\n',
         t.size or 6

@@ -73,7 +73,11 @@ local function Init()
         for i = 1,  #tRep do
             list_vss:setcell(i, 0, i..'')
             for j = 1, 7 do
-                list_vss:setcell(i, j, (tRep[i][j] or ''):to_utf8())
+                list_vss:setcell(i, j, (tRep[i][j] or ''):to_utf8():gsub('\r\n', ' '))
+            end
+            if tRep[i][1] == '1' then
+                iup.SetAttribute(list_vss, "DELLIN", (i+1).."-"..#tRep)
+                break
             end
         end
         list_vss.redraw = 'ALL'

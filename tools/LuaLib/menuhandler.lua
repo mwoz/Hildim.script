@@ -20,8 +20,14 @@ function s:Init()
     reselectedItem = nil
 end
 
-function s:get_title(t, bShort, bStayAmp)
-    local c = t.cpt or _TM(t[1])
+function s:get_title(t, bShort, bStayAmp, calcCapt)
+    local c
+    if type(calcCapt) == 'string' then
+        local f = load(calcCapt)
+        if f then c = f() end
+    end
+    if not c then c = t.cpt or _TM(t[1]) end
+
     if not bShort and (t.user_hk or t.key) then c = c..'\t'..(t.user_hk or t.key) end
     if bStayAmp then return c end
     return c:gsub('&([^& ])', '%1')
@@ -72,6 +78,7 @@ local function GetAction(mnu, bForse, bHotKey)
 end
 
 local function FindMenuItem(path)
+    if DEBUG then print(path) end
     local strFld
     local function DropDown(path, mnu)
         _,_, strFld = path:find('^([^|]+)|')
@@ -85,7 +92,7 @@ local function FindMenuItem(path)
             end
         end
     end
-    _,_, strFld = path:find('^([^|]+)|')
+    _, _, strFld = path:find('^([^|]+)|')
     return DropDown(path:gsub('^[^|]+|', ''), sys_Menus[strFld])
 end
 
@@ -104,6 +111,7 @@ function s:PopMnu(smnu, x, y, bToolBar)
     local CreateMenu, CreateItems
     local bPrevSepar = false
     local bShoIcons = (_G.iuprops['menus.show.icons'] == 1)
+    if smnu.usepreact then CORE.ScipHidePannel() end
     CreateItems = function(m, t, bPl)
         if not m then return end
         for i = 1, #m do
@@ -111,7 +119,10 @@ function s:PopMnu(smnu, x, y, bToolBar)
             if m[i].link then itm = FindMenuItem('MainWindowMenu|'..m[i].link)
             else itm = m[i] end
 
-            if itm and getParam(itm.visible,true) and
+            local capt
+            if itm then capt = getParam(itm.visible, true) end
+
+            if capt and
               (not itm.visible_ext or string.find(','..itm.visible_ext..',', ','..props["FileExt"]..',')) and
               not (bPrevSepar and itm.separator) then
                 if bPrevSepar then
@@ -124,14 +135,14 @@ function s:PopMnu(smnu, x, y, bToolBar)
                         if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
                             CreateItems(itm[2],t)
                         else
-                            table.insert(t, iup.submenu{title = s:get_title(itm, false, true), image = itm.image, CreateMenu(itm[2], itm.radio)})
+                            table.insert(t, iup.submenu{title = s:get_title(itm, false, true, capt), image = itm.image, CreateMenu(itm[2], itm.radio)})
                         end
                     elseif type(itm[2]) == 'function' then
                         if itm.plane and (not m[i].plane or m[i].plane ~= 0) then
                             CreateItems(itm[2](), t, true)
                         else
                             local t2 = itm[2]()
-                            table.insert(t, iup.submenu{title = s:get_title(itm, false, true), image = itm.image, CreateMenu(t2)})
+                            table.insert(t, iup.submenu{title = s:get_title(itm, false, true, capt), image = itm.image, CreateMenu(t2)})
                             if #t2 == 0 then t[#t].active = 'NO' end
                         end
                     end
@@ -141,14 +152,13 @@ function s:PopMnu(smnu, x, y, bToolBar)
                             table.insert(tBtm[2], m[j])
                         end
 
-                        table.insert(t, iup.submenu{title = s:get_title(tBtm, false, true), image = itm.image, CreateMenu(tBtm[2])})
+                        table.insert(t, iup.submenu{title = s:get_title(tBtm, false, true, capt), image = itm.image, CreateMenu(tBtm[2])})
                         break
                     end
                 elseif itm.separator then
                     if bPl or i > 1 then bPrevSepar = true end
                 else --вставка пункта меню - только видимые
-
-                    local titem = {title = s:get_title(itm, false, true)} --заголовок
+                    local titem = {title = s:get_title(itm, false, true, capt)} --заголовок
                     if bShoIcons and itm.image then
                         -- if itm.check_iuprops or itm.check_boolean or itm.check_prop or itm.check_idm or itm.check then
                             -- titem.titleimage = itm.image
@@ -351,6 +361,7 @@ end
 function s:InsertItem(id, path, t, helpPath, tf, preAct)
 
     if sys_Menus then
+        if preAct and type(t[2]) == 'table' then t[2].usepreact = true end
         if helpPath or tf or preAct then prepareItems(t, helpPath, tf, preAct) end
         if id == 'MainWindowMenu' then
             InsertItem(sys_Menus[id], path, t)
@@ -413,7 +424,7 @@ function s:RegistryHotKeys()
     for ups, submnu in pairs(sys_Menus) do
         DropDown(ups,submnu)
     end
--- debug_prnArgs(tKeys)
+ --debug_prnArgs(tKeys)
    scite.RegistryHotKeys(tKeys)
 end
 
@@ -491,6 +502,7 @@ function s:AddMenu(item, helpPath, tf)
 end
 
 function event_MenuHotKey(cmd)
+    if DEBUG then print(cmd) end
     menuhandler:OnHotKey(cmd)
 end
 

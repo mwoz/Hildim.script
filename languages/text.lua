@@ -3,9 +3,9 @@ Script Text Lexer
 Authors: Tymur Gubayev
 Version: 1.1.0
 ------------------------------------------------------
-Description:	text-"lexer": colors latin chars, 
+Description:	text-"lexer": colors latin chars,
 	national chars and highlights links. There's
-	also possibility to 
+	also possibility to
 --]]--------------------------------------------------
 
 local function TextLexer(styler)
@@ -77,7 +77,7 @@ AddEventHandler("OnStyle", function(styler)
 end)
 
 AddEventHandler("OnHotSpotReleaseClick", function(ctrl)
-	if --editor.Lexer == 0 and 
+	if --editor.Lexer == 0 and
 	props['Language'] == "script_text" then
 		local URL = GetCurrentHotspot()
 		-- check if URL is like "a@b.c"

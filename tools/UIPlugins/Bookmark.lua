@@ -232,7 +232,7 @@ local function createDlg()
             list_bookmarks.fittosize = 'COLUMNS'
         end
     end
-    menuhandler:InsertItem('EDITMARGIN', 'slast',
+    menuhandler:InsertItem('EDITMARGIN', 's0',
         {'Bookmarks List', action = function() Bookmarks_RefreshTable(); iup.ShowInMouse(dlg); end, key = 'Alt+Shift+F2'}
     , nil, _T)
     return dlg

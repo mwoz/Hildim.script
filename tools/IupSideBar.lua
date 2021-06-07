@@ -1450,7 +1450,8 @@ try{
     }
 }
 
-menuhandler:DoPostponedInsert()
+--menuhandler:DoPostponedInsert()
+scite.RunAsync(function() menuhandler:DoPostponedInsert() end)
 
 local bMenu,bToolBar,bStatusBar
 local bSideBar, bLeftBar, bconsoleBar, bFindResBar, bFindRepl
@@ -1475,6 +1476,7 @@ AddEventHandler("OnSwitchFile", function(file)
         if (_G.iuprops['coeditor.win'] or '0') == '2' and scite.buffers.SecondEditorActive() == 1 then CoEditor.Switch();
         elseif (_G.iuprops['coeditor.win'] or '0') == '1' then  local b = iup.GetDialogChild(CoEditor, "Title"); b.title = props['FileNameExt']; iup.Redraw(b, 1) end
     end
+    scite.RunAsync(function() editor.VScrollBar = true end)
 end)
 
 AddEventHandler("OnRightEditorVisibility", function(show)
