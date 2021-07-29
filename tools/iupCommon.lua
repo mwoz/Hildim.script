@@ -261,6 +261,7 @@ function iup.SaveChProps(bReset)
     local t = {
 'autocompleteword.automatic',
 'autocompleteword.startcount',
+'autocompleteword.useabrev',
 'ext.lua.debug.traceback',
 'buffers',
 'buffers.new.position',

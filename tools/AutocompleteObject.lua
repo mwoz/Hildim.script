@@ -346,8 +346,9 @@ local function ShowCallTip(pos, str, s, e, reshow, chAfter)
                         table.insert(tl, w)
                     end
                     tl = TableSort(tl)
-                    ulFromCT_data = table.concat(tl, '\t')
-                    editor.AutoCSeparator = string.byte('\t')
+                    local sep = Iif(_G.iuprops['userlist.not.useabrev'], '\n', '\t')
+                    ulFromCT_data = table.concat(tl, sep)
+                    editor.AutoCSeparator = string.byte(sep)
                     current_poslst = current_pos
                     pasteFromXml = false
                     if tonumber(props["editor.unicode.mode"]) ~= IDM_ENCODING_DEFAULT then ulFromCT_data = ulFromCT_data:to_utf8() end
@@ -613,6 +614,7 @@ local function FindDeclaration()
 	local text_all = GetActualText()
 
     local pattern = props["autocomplete."..editor_LexerLanguage()..".setobj.pattern"]
+    if pattern == '.' then return end
 	if pattern == nil or pattern == '' then pattern = '([%w%.%_]+)%s*=%s*([^%c]+)' end
     FindDeclarationByPattern(text_all, pattern)
     pattern = props["autocomplete."..editor_LexerLanguage()..".setobj.pattern2"]
@@ -927,7 +929,7 @@ local function ShowUserList(nPos, iId, last)
                 end
             end
         end
-        local sep = '\t'--'“олько дл€ этого сепаратора будет производитс€ поиск по аббревиатуре!'
+        local sep = Iif(_G.iuprops['userlist.not.useabrev'], '\n', '\t') -- '\t'--'“олько дл€ этого сепаратора будет производитс€ поиск по аббревиатуре!'
 		local s = table.concat(methods_table, sep)
 		if s ~= '' then
             editor.AutoCSeparator = string.byte(sep)
@@ -1546,23 +1548,24 @@ function ShowListManualy()
 end
 
 local function OnDwellStart_local(pos, word)
-    if (_G.iuprops['menus.tooltip.show'] or 0) ~= 1 then return end
+       if (_G.iuprops['menus.tooltip.show'] or 0) ~= 1 then return end
+    -- print(pos, word)
     if pos == 0 then
         if CUR_POS.bymouse then
             HideCallTip()
             CUR_POS.bymouse = nil
         end
-    elseif iup.GetGlobal('CONTROLKEY') == 'OFF' then
-        CUR_POS:Use(pos + 1)
-        CUR_POS.dwell = true
-        local p = editor:WordEndPosition(pos) + 1
-        af_current_line = editor:LineFromPosition(pos)
-        local char = editor:textrange(p - 1, p)
-        CallTip(char, p)
-        tipStartParam = 0
-        CUR_POS:Use()
-        CUR_POS.dwell = false
-    end
+        elseif iup.GetGlobal('CONTROLKEY') == 'OFF' then
+            CUR_POS:Use(pos + 1)
+            CUR_POS.dwell = true
+            local p = editor:WordEndPosition(pos) + 1
+            af_current_line = editor:LineFromPosition(pos)
+            local char = editor:textrange(p - 1, p)
+            CallTip(char, p)
+            tipStartParam = 0
+            CUR_POS:Use()
+            CUR_POS.dwell = false
+        end
 end
 
 function CORE.AutoCMethodFilter(list, method)

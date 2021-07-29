@@ -281,6 +281,7 @@ _G.sys_Menus.AUTOCLIST = {title = _TM"AutoCList Context Menu",
         {'5', action = function() props['autocompleteword.startcount'] = 5 end, check = "(tonumber(props['autocompleteword.startcount']) or 1)==5"},
 
     },},
+    {'Use Abbreviation (only for 1 characters...)', check_prop = "autocompleteword.useabrev", active = function() return (tonumber(props['autocompleteword.startcount']) or 0) == 1 end},
 }
 _G.sys_Menus.USERLIST = {title = _TM"UserList Context Menu",
     {'Copy', action = function() iup.clipboard{}.text = editor.AutoCCurrentText end},
@@ -288,6 +289,7 @@ _G.sys_Menus.USERLIST = {title = _TM"UserList Context Menu",
         {'Tab', check_not_boolean = 'userlist.scip.tab'},
         {'Enter', check_not_boolean = 'userlist.scip.newline'},
     }},
+    {'Use Abbreviation', check_not_boolean = 'userlist.not.useabrev'},
 }
 
 _G.sys_Menus.EDITMARGIN = {title = _TM"Editor Margin Context Menu",

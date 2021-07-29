@@ -402,7 +402,6 @@ local function Init()
 
     local srcXsd, pathXsd = 0, ''
     local function Xsd()
-        print(999)
         local ret, src1, path1 = iup.GetParam("Test Xsd",
             function(h, id)
                 local bSE = scite.buffers.SecondEditorActive() == 1
@@ -487,12 +486,12 @@ local function Init()
             XMLTOOLS.SetObjects(txtXsd, nil)
         end
 
-        local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
-        if not xmlSrc:loadXml(txtXml) then
-            local xmlErr = xmlSrc.parseError
-            print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
-            return
-        end
+        -- local xmlSrc = luacom.CreateObject("MSXML.DOMDocument")
+        -- if not xmlSrc:loadXml(txtXml) then
+        --     local xmlErr = xmlSrc.parseError
+        --     print(xmlErr.line, xmlErr.linepos, xmlErr.reason)
+        --     return
+        -- end
 
         local xmldoc = luacom.CreateObject("Msxml2.FreeThreadedDOMDocument.6.0")
         local SchemaCache = luacom.CreateObject("Msxml2.XMLSchemaCache.6.0")
@@ -504,9 +503,34 @@ local function Init()
             return
         end
         xmldoc.schemas = SchemaCache;
-
         if not xmldoc:loadXml(txtXml) then
-            return GetLineMap(xmldoc.parseError.line - 1), xmldoc.parseError.linepos, xmldoc.parseError.reason;
+            local p = 0
+            for i = 1, xmldoc.parseError.line do
+                p = txtXml:find('\n', p + 1)
+            end
+            --p = p + xmldoc.parseError.linepos
+   -- print(txtXml:sub(1, p))
+            p = txtXml:sub(1, p):gsub('[^<]', ''):len()
+            local pf = 0
+            local i = 1
+
+            while true do
+                if i == p then break end
+                i = i + 1
+                _, pf = editor:findtext("<", 0, pf, editor.Length)
+                -- print(pf, editor:textrange(pf, pf + 7))
+                if pf == editor:findtext("![CDATA[", 0, pf, editor.Length) then
+                    i = i - 1
+                    _, pf = editor:findtext("]]>", 0, pf, editor.Length)
+                end
+            end
+
+            local errTxt = xmldoc.parseError.reason
+            if errTxt:find('"__ERROR_XSL"') then
+                _, _, errTxt = xmldoc.parseError.srcText:find('__ERROR_XSL="([^"]*)"')
+            end
+            -- return GetLineMap(xmldoc.parseError.line - 1), xmldoc.parseError.linepos, errTxt;
+            return editor:LineFromPosition(pf) + 1, xmldoc.parseError.linepos, errTxt;
         else
             return nil
         end
@@ -702,8 +726,9 @@ local function Init()
             end
 
             txtXml = processXslt(txtXml)
+            if not txtXml then return -2 end
         end
-        txtXml = (txtXml or ''):gsub('>%s+</Field_', '></Field_')
+        -- txtXml = (txtXml or ''):gsub('>%s+</Field_', '></Field_')
 
         return processXsd(txtXml, pathXSD)
     end
@@ -711,7 +736,7 @@ local function Init()
     local function CheckCurrent()
         local line, linepos, reason = CheckInternal()
         if line then
-            print(props['FilePath']..':'..line..':'..linepos, reason)
+            if line > 0 then print(props['FilePath']..':'..line..':'..linepos, reason) end
         else
             print(props['FilePath']..': OK')
         end
@@ -745,7 +770,7 @@ local function Init()
             oXSL.async = false
             if not oXSL:loadXml(xsl) then
                 local xmlErr = oXSL.parseError
-                print('Error when load xsd', xmlErr.line, xmlErr.linepos, xmlErr.reason)
+                print('Error when load xsl', xmlErr.line, xmlErr.linepos, xmlErr.reason)
                 return
             end
             local xsl = luacom.CreateObject("Msxml2.XSLTemplate")
