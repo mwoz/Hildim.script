@@ -7,9 +7,9 @@ local clr_hgl = props['layout.txthlcolor']
 local clr_select = props['layout.txtinactivcolor']
 local clr_normal = props['layout.fgcolor']
 local s = class()
-local r_button
 local bListenmouseHook = true
 local mnemoShow = false
+local MENUHANDLER_r_button
 
 function s:Init()
     sys_KeysToMenus = {}
@@ -18,6 +18,10 @@ function s:Init()
     waited_mnu, w_x, w_y = nil,nil, nil
     activeLabel = nil
     reselectedItem = nil
+end
+
+function s:SetBtnState(v)
+    MENUHANDLER_r_button = v
 end
 
 function s:get_title(t, bShort, bStayAmp, calcCapt)
@@ -97,8 +101,8 @@ local function FindMenuItem(path)
 end
 
 local function r_button_state()
-    local rez = r_button or 0
-    r_button = 0
+    local rez = MENUHANDLER_r_button or 0
+    MENUHANDLER_r_button = 0
     return rez
 end
 
@@ -507,9 +511,11 @@ function event_MenuHotKey(cmd)
 end
 
 function event_MenuMouseHook(x, y)
-    if x ==- 7000 and y ==- 7000 then
-        r_button = 1
-        scite.RunAsync(function() r_button = 0 end)
+    if x == -7000 and y == -7000 then
+        --MENUHANDLER_r_button = 1
+        menuhandler:SetBtnState(1)
+        -- scite.RunAsync(function() MENUHANDLER_r_button = 0 end)
+        scite.RunAsync(function() menuhandler:SetBtnState(0) end)
     else
 
         menuhandler:OnMouseHook(x, y)

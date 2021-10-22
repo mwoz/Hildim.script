@@ -35,6 +35,14 @@ local function Init()
         local cnt = 0
         s = s:gsub('¦', function(i) cnt = cnt + 1; return Iif(cnt == 1, '¦', '') end )
 
+        local cur, nCh = '¦', 1
+        if editor.CodePage ~= 0 then
+            --print(s , s:to_utf8())
+            s = s:to_utf8()
+            cur = cur:to_utf8()
+            nCh = 2
+        end
+
         editor:AutoCCancel()
         editor:BeginUndoAction()
         editor:SetSel(findSt, findEnd)
@@ -50,11 +58,11 @@ local function Init()
             findEnd = findEnd + dInd
         end
 
-        local pos = editor:findtext('¦', 0, findSt, findEnd)
+        local pos = editor:findtext(cur, 0, findSt, findEnd)
 
         if pos~= nil then
             editor:SetSel(findSt, findEnd)
-            editor:SetSel(pos, pos + 1)
+            editor:SetSel(pos, pos + nCh)
             editor:ReplaceSel('')
         end
         editor:EndUndoAction()

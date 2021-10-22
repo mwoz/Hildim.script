@@ -50,6 +50,7 @@ __LOCALE ={
         ["Convert Selection to lowercase"] = "Перевести в ни&жний регистр",
         ["Copy as RTF"] = "Копировать в формате &RTF",
         ["Copy to Clipboard"] = "Копировать в буфер",
+        ["Copy selected item"] = "Копировать выделенный пункт",
         ["Copy"] = "&Копировать",
         ["Cut"] = "В&ырезать",
         ["Dark Blue"] = "Темно-синяя",

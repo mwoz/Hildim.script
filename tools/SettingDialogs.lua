@@ -221,7 +221,7 @@ end
 function sett.ResetGlobalColors()
 
     local ret, bgcolor, txtbgcolor, fgcolor, txtfgcolor, txthlcolor, txtinactivcolor, hlcolor, borderhlcolor, bordercolor,
-    splittercolor, scroll_forecolor , scroll_presscolor, scroll_highcolor , scroll_backcolor, standard_decoration
+    splittercolor, scroll_forecolor , scroll_presscolor, scroll_highcolor , scroll_backcolor, tip_fgcolor, tip_bgcolor
     = iup.GetParam(_T"Main Window Colors".."^MainWindowColor",
         nil,
         _T'Bar Background'..'%c\n'..
@@ -238,8 +238,9 @@ function sett.ResetGlobalColors()
         _T'Scrollbar Slider - Pressed'..'%c\n'..
         _T'Scrollbar Slider - Highlighted'..'%c\n'..
         _T'Scrollbar Background'..'%c\n'..
-        '%t\n'..
-        _T'Standard Windows Decoration'..'%b\n'
+        _T'Tooltip Foreground'..'%c\n'..
+        _T'Tooltip Background'..'%c\n'..
+        ''
         ,
         props['layout.bgcolor']          ,
         props['layout.txtbgcolor']       ,
@@ -255,7 +256,8 @@ function sett.ResetGlobalColors()
         props['layout.scroll.presscolor'],
         props['layout.scroll.highcolor'] ,
         props['layout.scroll.backcolor'] ,
-        tonumber(props['layout.standard.decoration'])
+        props['layout.tip.forecolor']    ,
+        props['layout.tip.backcolor']
     )
     if ret then
 
@@ -273,7 +275,8 @@ function sett.ResetGlobalColors()
         props['layout.scroll.presscolor'] = scroll_presscolor
         props['layout.scroll.highcolor']  = scroll_highcolor
         props['layout.scroll.backcolor']  = scroll_backcolor
-        props['layout.standard.decoration'] = standard_decoration
+        props['layout.tip.forecolor']     = tip_fgcolor
+        props['layout.tip.backcolor']     = tip_bgcolor
 
         if 1 == iup.Alarm(_T'Interface Color', _T'Restart HildiM to apply the changes?', _TH"Yes", _TH"No") then
             scite.SetRestart('  -cmd scite.RunAsync(CORE.ResetGlobalColors)')

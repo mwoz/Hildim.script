@@ -181,7 +181,7 @@ local t = {}
 if _G.iuprops['settings.lexers'] then
     local t = _G.iuprops['settings.lexers']
     for i = 1, #t do
-        table.insert(tHilight,{t[i].view, action = function() scite.SetLexer(t[i].ext) end, check = function() return editor_LexerLanguage() == t[i].name end})
+        table.insert(tHilight,{t[i].view, action = function() scite.SetLexer(t[i].ext) end, check = function() return editor_LexerLanguage(true) == t[i].name end})
         table.insert(tLangs, {"Open "..t[i].file, action = function() scite.Open(props["SciteDefaultHome"].."\\languages\\"..t[i].file) end})
     end
 end
@@ -284,7 +284,7 @@ _G.sys_Menus.AUTOCLIST = {title = _TM"AutoCList Context Menu",
     {'Use Abbreviation (only for 1 characters...)', check_prop = "autocompleteword.useabrev", active = function() return (tonumber(props['autocompleteword.startcount']) or 0) == 1 end},
 }
 _G.sys_Menus.USERLIST = {title = _TM"UserList Context Menu",
-    {'Copy', action = function() iup.clipboard{}.text = editor.AutoCCurrentText end},
+    {'Copy selected item', action = function() iup.clipboard{}.text = editor.AutoCCurrentText end},
     {"User List: Keys...", {
         {'Tab', check_not_boolean = 'userlist.scip.tab'},
         {'Enter', check_not_boolean = 'userlist.scip.newline'},

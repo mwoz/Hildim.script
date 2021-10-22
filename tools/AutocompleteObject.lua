@@ -268,7 +268,7 @@ local function fPattern(str)
 	return str_out
 end
 
-local function ShowCallTip(pos, str, s, e, reshow, chAfter)
+local function ShowCallTip(pos, str, s, e, reshow, chAfter, bSuncListVars)
     local s1, _, list = str:find('{{(.-)}}', s)
     if list and chAfter and chAfter ~= 9 and chAfter ~= 13 and chAfter ~= 32 and chAfter ~= 41 then calltipinfo ={0}; return end
     local function ls(l, seps)
@@ -339,7 +339,7 @@ local function ShowCallTip(pos, str, s, e, reshow, chAfter)
                 editor:SetSel(editor:WordEndPosition(editor.CurrentPos, true), editor:WordStartPosition(editor.CurrentPos, true))
                 editor.WordChars = wch
             end
-            scite.RunAsync(function()
+            local fShowVars = (function()
                 if #ulFromCT_data > 0 and not CUR_POS.use then
                     local tl = {}
                     for w in ulFromCT_data:gmatch('[^|]+') do
@@ -357,6 +357,11 @@ local function ShowCallTip(pos, str, s, e, reshow, chAfter)
                     SetListVisibility(true)
                 end
             end)
+            if bSuncListVars then
+                fShowVars()
+            else
+                scite.RunAsync(fShowVars)
+            end
             return
         end
     end
@@ -367,7 +372,7 @@ local function ShowCallTip(pos, str, s, e, reshow, chAfter)
     if str == '' then return end
     CUR_POS:OnShow()
     if s and s > 0 and not CUR_POS.use then str = str:gsub('%)', ')'..string.char(2), 1) end
-    -- if CUR_POS.dwell then pos = CUR_POS.use end
+
     if not editor:CallTipActive() then editor:CallTipShow(pos, str) end --:gsub('[{}#@]', '_'))
 
     if s == nil or CUR_POS.use then return end
@@ -447,6 +452,7 @@ local function GetInputObject(line)
         line = string.sub(line, 1, lineLen)
     end
     if bracketsCounter ~= 0 or lineLen <= 0 then return {"","","", nil} end --в строке неправильно расставлены скобки, либо выражение продолжено из другой строки - вылетаем, нам тут не светит
+
     local _start, _end, sVar = string.find(line, objPatern, 1)
 
     if sVar ~= nil then inputObject[1] = sVar end
@@ -474,6 +480,7 @@ local function GetObjectNames(tableObj)
     end
 
 	obj_names = {}
+
     if tableObj[2]=='' and tableObj[3]=='' then
         -- Поиск по таблице имен "объектов"
         if objects_table[string.upper(tableObj[1])] ~=nil then
@@ -605,6 +612,7 @@ local function FindDeclarationByPattern(text_all, pattern)
 		end
 		_start = _end + 1
 	end
+
 end
 
 -- Поиск деклараций присвоения пользовательской переменной реального объекта
@@ -692,6 +700,7 @@ local function CreateTablesForFile(o_tbl, al_tbl, strApis, needKwd, inh_table)
     end
 --debug_prnArgs(o_tbl)
     if strLua then
+
         local tFn = assert(load(strLua))()
         if tFn and type(tFn) == 'table' then
             for n, f in pairs(tFn) do
@@ -952,7 +961,7 @@ local function ShowUserList(nPos, iId, last)
 	end
 end
 
-local function TryTipFor(sObj, sMet, api_tb, pos, chAfter)
+local function TryTipFor(sObj, sMet, api_tb, pos, chAfter, bSuncListVars)
     api_t = api_tb[string.upper(sObj)]
     if api_t == nil then return false end
     local lLen = #api_t
@@ -988,10 +997,9 @@ local function TryTipFor(sObj, sMet, api_tb, pos, chAfter)
             local brk = ''
             if p ~= '' and d ~= '' then brk = '\n' elseif p == '' and d == '' then return false end
             local str = line..l..p..brk..string.gsub(d, "\\n", "\n")
-
             table.insert(calltipinfo,{pos, str, nParams, 1, pozes})
             calltipinfo[1] = af_current_line
-            ShowCallTip(pos, str, sParam, eParam, nil, chAfter)
+            ShowCallTip(pos, str, sParam, eParam, nil, chAfter, bSuncListVars)
             return true
         end
     end
@@ -1216,16 +1224,16 @@ local function CallTip(char, pos, chAfter)
     return false
 end
 
-local function TipXml()
-    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), current_pos - 1)
-    --найдем, что у нас слева - метод или функция
+local function TipXml(posAtr)
+    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), current_pos - 2)
+   --найдем, что у нас слева - метод или функция
     local _start, _end, sMetod = string.find(strLine, "([%w]+)$")
     if _start ~= nil then
-        object_names = GetObjectNamesXml()
+        local object_names = GetObjectNamesXml()
         if object_names[1] ~= nil then
-            local tblobj = EnrichFromInheritors(obj_names, inheritorsX)
+            local tblobj = EnrichFromInheritors(object_names, inheritorsX)
             for upObj, _ in pairs(tblobj) do
-                if TryTipFor(upObj, sMetod, apiX_table, current_pos) then break end
+                if TryTipFor(upObj, sMetod, objectsX_table, posAtr or current_pos, nil, true) then break end
             end
         end
     end
@@ -1360,27 +1368,67 @@ local function OnChar_local(char)
 	local autocomplete_start_characters = props["autocomplete."..editor_LexerLanguage()..".start.characters"]
     if cmpobj_GetFMDefault() == SCE_FM_X_DEFAULT then autocomplete_start_characters = autocomplete_start_characters..'<' end
 	local calltip_start_characters = props["calltipex."..editor_LexerLanguage()..".parameters.start"]
-	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим
+	-- Если введенного символа нет в параметре autocomplete.lexer.start.characters, то выходим and ( char == ' ' or char == '=' )
 	if not (autocomplete_start_characters == '' and calltip_start_characters == '') then
-        if objectsX_table._fill ~= nil and ( char == ' ' or char == '=' ) then
+        if objectsX_table._fill ~= nil  then
             if isXmlLine() then
-                if char == ' ' then
+                local bCurPos = (char == ' ' or char == '"')
+                local chPrev
+                if not bCurPos then chPrev = editor:textrange(editor.CurrentPos - 2, editor.CurrentPos - 1) end
+
+                if char == ' ' or (not editor:AutoCActive() and chPrev == ' ') then
                     if editor.CharAt[editor.SelectionStart] ~= 60 then
+                        if not bCurPos then
+                            current_pos = current_pos - 1
+                            editor.SelectionStart = current_pos
+                            editor.SelectionEnd = current_pos
+                        end
                         local r = ListXml()
+                        if not bCurPos then
+                            editor.SelectionStart = editor.CurrentPos + 1
+                            editor.SelectionEnd = editor.SelectionStart
+                        end
                         return r or result
                     end
-                else
+                elseif char == '"' or (not editor:AutoCActive() and chPrev == '"' and editor:textrange(editor.CurrentPos - 3, editor.CurrentPos - 2) == '=') then
+                    SetListVisibility(false)
+                    if not bCurPos then
+                        current_pos = current_pos - 1
+                        editor.SelectionStart = current_pos
+                        editor.SelectionEnd = current_pos
+                    end
+                    calltipinfo = {0}
                     local r = TipXml()
+                    if not bCurPos then
+                        editor.SelectionStart = editor.CurrentPos + 1
+                        editor.SelectionEnd = editor.SelectionStart
+                    end
                     return r or result
                 end
             else
                 pasteFromXml = false
             end
         end
-        if string.find(autocomplete_start_characters, char, 1, 1) ~= nil then
+
+        local bCurPos = (string.find(autocomplete_start_characters, char, 1, 1) ~= nil)
+        local chPrev
+        if not bCurPos then chPrev = editor:textrange(editor.CurrentPos - 2, editor.CurrentPos - 1) end
+
+        if bCurPos or (not editor:AutoCActive() and string.find(autocomplete_start_characters, chPrev, 1, 1) ~= nil) then
+
+            SetListVisibility(false)
             pasteFromXml = false
             if calltipinfo[1] ~= 0 then editor:CallTipCancel() end
-            local r = AutocompleteObject(char) --Показываем список методов
+            if not bCurPos then
+                current_pos = current_pos - 1
+                editor.SelectionStart = current_pos
+                editor.SelectionEnd = current_pos
+            end
+            local r = AutocompleteObject(chPrev or char) --Показываем список методов
+            if not bCurPos then
+                editor.SelectionStart = editor.CurrentPos + 1
+                editor.SelectionEnd = editor.SelectionStart
+            end
             if r then bResetCallTip = false end
             return r or result
         elseif string.find(calltip_start_characters, char, 1, 1) ~= nil then
@@ -1548,24 +1596,36 @@ function ShowListManualy()
 end
 
 local function OnDwellStart_local(pos, word)
-       if (_G.iuprops['menus.tooltip.show'] or 0) ~= 1 then return end
-    -- print(pos, word)
+    if (_G.iuprops['menus.tooltip.show'] or 0) ~= 1 then return end
     if pos == 0 then
         if CUR_POS.bymouse then
             HideCallTip()
             CUR_POS.bymouse = nil
         end
-        elseif iup.GetGlobal('CONTROLKEY') == 'OFF' then
+    elseif iup.GetGlobal('CONTROLKEY') == 'OFF' then
+        af_current_line = editor:LineFromPosition(pos)
+        if isXmlLine(pos) then
+            local p
+            if editor.CharAt[pos - 1] == 32 then
+                current_pos = pos + word:len() + 2
+                p = pos
+            else
+                current_pos = pos
+            end
+
+            CUR_POS:Use(pos)
+            TipXml(p)
+            CUR_POS:Use()
+        else
+            current_pos = pos
             CUR_POS:Use(pos + 1)
-            CUR_POS.dwell = true
             local p = editor:WordEndPosition(pos) + 1
-            af_current_line = editor:LineFromPosition(pos)
             local char = editor:textrange(p - 1, p)
             CallTip(char, p)
             tipStartParam = 0
             CUR_POS:Use()
-            CUR_POS.dwell = false
         end
+    end
 end
 
 function CORE.AutoCMethodFilter(list, method)

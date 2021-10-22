@@ -210,3 +210,7 @@ err.Number
 err.Source
 err.Raise(number, source, description, helpfile, helpcontext)
 err.Clear()
+
+# Расширения ситематика
+Iif(condition, vTrue, vFalse) если condition = True возвращает vTrue иначе vFalse
+Nvl(val, valDef) Если val не Null и не Empty, возвращает его, иначе - valDef

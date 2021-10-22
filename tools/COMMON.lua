@@ -47,7 +47,8 @@ function GetCurrentWord(ed, p)
 							ed:WordEndPosition(current_pos, true))
 end
 function OnNavigation() end
-function editor_LexerLanguage()
+function editor_LexerLanguage(bMenu)
+    if not bMenu and editor.Lexer == 147 then return 'script_wiki' end
     return editor.LexerLanguage or 'script_'..props['FileExt']
 end
 --------------------------------------------------------
