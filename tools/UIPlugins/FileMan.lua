@@ -10,7 +10,6 @@ local memo_path
 local list_dir
 local split_s
 local bymemokey=0
-local sort_by_tyme = _G.iuprops['sidebar.fileman.timesort']
 local chkByTime
 local bListOpened = false
 local m_prevSel = 0
@@ -77,7 +76,7 @@ FileMan_ListFILL = function(blockUpdate)
     if not table_dir then return end
     table.sort(table_dir, function(a, b)
         if a.isdirectory ~= b.isdirectory then return a.isdirectory end
-        if a.isdirectory or not sort_by_tyme then
+        if a.isdirectory or not _G.iuprops['sidebar.fileman.timesort'] then
             return a.name:lower() < b.name:lower()
         else
             return a.writetime > b.writetime
@@ -137,8 +136,7 @@ FileMan_ListFILL = function(blockUpdate)
 end
 
 local function FileMan_ToggleSort()
-    sort_by_tyme = not sort_by_tyme
-    _G.iuprops['sidebar.fileman.timesort'] = sort_by_tyme
+    _G.iuprops['sidebar.fileman.timesort'] = not _G.iuprops['sidebar.fileman.timesort']
     FileMan_ListFILL()
 end
 
@@ -800,10 +798,11 @@ local function FileManTab_Init(h)
     memo_mask.k_any =(function(h, k)
         return memoNav(h, k)
     end)
-    chkByTime = iup.hi_toggle{title = _T"Time Sort", value = Iif(sort_by_tyme, "ON", "OFF"), canfocus = "NO", flat_action = FileMan_ToggleSort}
+    chkByTime = iup.hi_toggle{title = _T"Time Sort", canfocus = "NO", flat_action = FileMan_ToggleSort}
     -- memo_mask.killfocus_cb = (function(h)
     -- FileMan_ListFILLByMask(memo_mask.value)
     -- end)
+    AddEventHandler("OnInitHildiM", function() chkByTime.value = Iif(_G.iuprops['sidebar.fileman.timesort'], "ON", "OFF") end, true)
     AddEventHandler("OnResizeSideBar", function(sciteid)
         if h.fileman.Bar_obj.sciteid == sciteid then
             list_dir.rasterwidth2 = nil

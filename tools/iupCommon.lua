@@ -291,6 +291,7 @@ function iup.SaveChProps(bReset)
 'findres.magnification',
 'findres.width',
 'findres.wrap',
+'fold.flags',
 'iup.defaultfontsize',
 'iuptoolbar.visible',
 'line.margin.visible',
@@ -943,7 +944,12 @@ function CORE.CoToChange(dif)
     print(Iif(dif > 0, 'Next', 'Previous')..' change not found')
 end
 
-AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
+AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg, text)
+
+    if (flag & (SC_PERFORMED_USER | SC_MOD_INSERTTEXT)) == (SC_PERFORMED_USER | SC_MOD_INSERTTEXT) and CORE._PasteParams then
+       CORE._PasteParams.position = position
+       CORE._PasteParams.linesAdded = linesAdded
+    end
     if (_G.iuprops['changes.mark.line'] or 0) == 1 and not _G.g_session['OPENING'] then
         local e = Iif(leg == scite.buffers.GetBufferSide(scite.buffers.GetCurrent()), editor, coeditor)
         if (flag & (SC_PERFORMED_UNDO | SC_PERFORMED_REDO)) ~= 0 then
@@ -966,9 +972,9 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg)
 end)
 
 AddEventHandler("OnSave", function(cmd, source)
-    CORE.fixMarks(true)
+        CORE.fixMarks(true)
 
-    while editor:EndUndoAction() > 0 do
+    while editor:EndUndoAction() > 0 and props['warning.undoaction'] ~= '1' do
         print'!!!Warning!!! EndUndoAction from OnSave'
     end
     if editor.Lexer == SCLEX_LUA then

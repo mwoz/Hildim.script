@@ -864,8 +864,8 @@ AddEventHandler("OnIdle", function()
                 editor.KeyWords[3] = str_xmlkwrd:gsub('<<[^ ]->>', '')
             end
             local kw = string.lower(table.concat(tbl_fList, ' '))
-            props['keywords16.$('..props['pattern.name$']..')'] = kw
-            editor.KeyWords[15] = kw
+            props['keywords8.$('..props['pattern.name$']..')'] = kw
+            editor.KeyWords[7] = kw
             editor:Colourise(0, editor:PositionFromLine(editor.FirstVisibleLine + editor.LinesOnScreen + 2))
         else
             --RecrReCreateStructures(editor:GetText():gsub('\r\n', '\n'),{})
@@ -1225,7 +1225,7 @@ local function CallTip(char, pos, chAfter)
 end
 
 local function TipXml(posAtr)
-    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), current_pos - 2)
+    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), current_pos - 2) or ''
    --найдем, что у нас слева - метод или функция
     local _start, _end, sMetod = string.find(strLine, "([%w]+)$")
     if _start ~= nil then

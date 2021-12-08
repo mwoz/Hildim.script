@@ -130,6 +130,15 @@ local function checkEncoding(e, cp)
     end
 end
 
+local function SetLN(bVis, foldFlags)
+    return function()
+        props['line.margin.visible'] = ''..bVis
+        props['fold.flags'] = ''..foldFlags
+        editor.FoldFlags = foldFlags
+        scite.MenuCommand(IDM_LINENUMBERMARGIN)
+    end
+end
+
 local function SetCP(u, cp)
     return function() CORE.SetCP(u, cp) end
 end
@@ -416,7 +425,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 			{'Format Xml',  action = "dofile(props['SciteDefaultHome']..'\\\\tools\\\\FormatXml.lua')", image = 'broom_code_µ',},
 		}},
 		{'s1', separator = 1},
-		{'Auto&format',  {
+		{'Auto&format', visible="_AUTOFORMAT_STYLES.current and not _AUTOFORMAT_STYLES.current.empty",  {
 			{'Format &Block',  action = function() if Format_Block then Format_Block() end end, key = 'Ctrl+]'},
 			{'Format &Line',  action = function() if Format_String then Format_String() end end, key = 'Ctrl+['},
 			{'Auto &Indent',  check_iuprops = 'autoformat.indent', key = 'Ctrl+Shift+]'},
@@ -498,8 +507,13 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'&White Space and TAB', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},
 		{'En&d of Line', key = 'Ctrl+Shift+9', action = IDM_VIEWEOL, check = "editor.ViewEOL"},
 		{'Indentation G&uides', action = IDM_VIEWGUIDES, check = "props['view.indentation.guides']=='1'"},
-		{'L&ine Numbers', action = IDM_LINENUMBERMARGIN, check = "props['line.margin.visible']=='1'"},
-		{'Mar&gin', action = IDM_SELMARGIN, check = "editor.MarginWidthN[1]>0"},
+		{'L&ine Numbers', { radio = 1,
+			{'Hide', action = SetLN(0, 16), check = "editor.MarginWidthN[0]==0"},
+			{'Show', action = SetLN(1, 16), check = "editor.MarginWidthN[0]~=0 and props['fold.flags']=='16'"},
+			{'Show Fold Level (For Debug)', action = SetLN(1, 80), check = "editor.MarginWidthN[0]~=0 and props['fold.flags']=='80'"},
+			{'Show Line State (For Debug)', action = SetLN(1, 144), check = "editor.MarginWidthN[0]~=0 and props['fold.flags']=='144'"},
+		},},
+        {'Mar&gin', action = IDM_SELMARGIN, check = "editor.MarginWidthN[1]>0"},
 		{'Fo&ld Margin',  action = IDM_FOLDMARGIN, check = "editor.MarginWidthN[2]>0"},
         {'s3', separator = 1},
         {'slast', separator = 1},

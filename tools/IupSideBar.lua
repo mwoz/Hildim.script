@@ -1545,8 +1545,32 @@ AddEventHandler("OnLayOutNotify", function(cmd)
     end
 end)
 
+function CORE.OnPasteCommand()
+    if not Format_Lines then return end
+    CORE._PasteParams = {}
+    local tmr = iup.timer{time = 1; run = 'NO';action_cb = (function(h)
+        h.run = 'NO'
+        if CORE._PasteParams and CORE._PasteParams.position then
+            local l = editor:LineFromPosition(CORE._PasteParams.position)
+            if editor:textrange(editor:PositionFromLine(l), CORE._PasteParams.position):find('%S') then
+                if CORE._PasteParams.linesAdded > 0 then Format_Lines(l + 1, l + CORE._PasteParams.linesAdded) end
+            else
+                Format_Lines(l , l + CORE._PasteParams.linesAdded)
+            end
+        end
+        CORE._PasteParams = nil
+    end)}
+    tmr.run = 'YES'
+end
+
+AddEventHandler("OnSendEditor", function(id_msg, wp, lp)
+    if id_msg == SCI_PASTE then CORE.OnPasteCommand() end
+end)
+
 AddEventHandler("OnKey", function(key, shift, ctrl, alt, char)
-    if key ==  27 and not shift and not ctrl and not alt then
+    if key == iup.K_V and not shift and ctrl and not alt then
+        CORE.OnPasteCommand()
+    elseif key == 27 and not shift and not ctrl and not alt then
         if output.Focus then
             if (_G.iuprops['concolebar.win'] or '0') == '1' then ConsoleBar.Switch() end
         elseif findres.Focus then
