@@ -327,6 +327,8 @@ function iup.SaveChProps(bReset)
 'tabctrl.moved.color',
 'tabctrl.readonly.color',
 'view.eol',
+'view.history.indicators',
+'view.history.markers',
 'view.indentation.guides',
 'view.whitespace',
 'wrap',
@@ -507,27 +509,12 @@ iup.CloseFilesSet = function(cmd, tForClose, bAddToRecent)
     else return true end
 end
 
-function CORE.fixMarks(bReset)
-    local mrk = editor:MarkerNext(-1, 1 << MARKER_NOTSAVED)
-    while mrk > -1 do
-        editor:MarkerDelete(mrk, MARKER_NOTSAVED)
-        if bReset then editor:MarkerAdd(mrk, MARKER_SAVED) end
-        mrk = editor:MarkerNext(mrk, 1 << MARKER_NOTSAVED)
-    end
-end
-
-function CORE.IsMarkSaved()
-    if (_G.iuprops['changes.mark.line'] or 0) == 0 then return false end
-    return editor:MarkerNext(-1, 1 << MARKER_NOTSAVED) < 0
-end
-
 local function onOpen_local(source)
     if source:find('^%^') then return end
     if not source:find('^\\\\') then
         if not shell.fileexists(source:from_utf8()) then return end
     end
     iuprops['resent.files.list']:check(source:from_utf8())
-    CORE.fixMarks(false)
 end
 
 local function onNavigate_local(item)
@@ -916,6 +903,35 @@ AddEventHandler("OnMenuCommand", function(cmd, source)
     end
 end)
 
+local chMarkAll<const>  = (1 << SC_MARKNUM_HISTORY_REVERTED_TO_MODIFIED) |
+                          (1 << SC_MARKNUM_HISTORY_REVERTED_TO_ORIGIN) |
+                          (1 << SC_MARKNUM_HISTORY_SAVED) |
+                          (1 << SC_MARKNUM_HISTORY_MODIFIED)
+local chMarkMod<const>  = (1 << SC_MARKNUM_HISTORY_REVERTED_TO_MODIFIED) |
+                          (1 << SC_MARKNUM_HISTORY_MODIFIED)
+local chMarkRM<const>   = (1 << SC_MARKNUM_HISTORY_REVERTED_TO_MODIFIED)
+local chMarkRO<const>   = (1 << SC_MARKNUM_HISTORY_REVERTED_TO_ORIGIN)
+local chMarkS<const>    = (1 << SC_MARKNUM_HISTORY_SAVED)
+local chMarkM<const>    = (1 << SC_MARKNUM_HISTORY_MODIFIED)
+
+local function getChangedLine(line, dif, ch)
+    local e
+    if dif > 0 then
+        e = editor.LineCount - 1
+    else
+        e = 0
+    end
+    for i = line, e, dif do
+        if editor:MarkerGet(i) & ch ~= 0 then return i end
+    end
+    return -1
+end
+
+function CORE.IsMarkSaved()
+    if (_G.iuprops['changes.mark.line'] or 0) == 0 then return false end
+    return getChangedLinet(0, 1, chMarkMod) < 0
+end
+
 function CORE.CoToChange(dif)
     local f = Iif(dif > 0, editor.MarkerNext, editor.MarkerPrevious)
     local l = editor:LineFromPosition(editor.CurrentPos)
@@ -924,7 +940,7 @@ function CORE.CoToChange(dif)
     local rotate = true
 ::rotated::
     repeat
-        l = f(editor, l + dif, (1 << MARKER_NOTSAVED) | (1 << MARKER_SAVED))
+        l = getChangedLine(l + dif, dif, chMarkAll)
         if lP + dif ~= l and l > 0 then
             editor.SelectionStart = editor:PositionFromLine(l)
             editor.SelectionEnd = editor.SelectionStart
@@ -950,21 +966,7 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg, text)
        CORE._PasteParams.position = position
        CORE._PasteParams.linesAdded = linesAdded
     end
-    if (_G.iuprops['changes.mark.line'] or 0) == 1 and not _G.g_session['OPENING'] then
-        local e = Iif(leg == scite.buffers.GetBufferSide(scite.buffers.GetCurrent()), editor, coeditor)
-        if (flag & (SC_PERFORMED_UNDO | SC_PERFORMED_REDO)) ~= 0 then
-            scite.RunAsync(function()
-                if scite.buffers.SavedAt(scite.buffers.GetCurrent()) then CORE.fixMarks(); return end
-            end)
-        end
-        local bOk, lstart = pcall(function() return e:LineFromPosition(position) end)
-        if not bOk then return end
-        if lstart ~= 0 or linesAdded ~= e:LineFromPosition(e.Length) then
-            for i = lstart, lstart + Iif(linesAdded > 0, linesAdded, 0) do
-                 if (e:MarkerGet(i) & (1 << MARKER_NOTSAVED)) == 0 then e:MarkerAdd(i, MARKER_NOTSAVED) end
-            end
-        end
-    elseif type(_G.g_session['OPENING']) == 'number' and _G.g_session['OPENING'] > 1 then
+    if type(_G.g_session['OPENING']) == 'number' and _G.g_session['OPENING'] > 1 then
         _G.g_session['OPENING'] = _G.g_session['OPENING'] - 1
     else
         _G.g_session['OPENING'] = nil
@@ -972,7 +974,6 @@ AddEventHandler("OnTextChanged", function(position, flag, linesAdded, leg, text)
 end)
 
 AddEventHandler("OnSave", function(cmd, source)
-        CORE.fixMarks(true)
 
     while editor:EndUndoAction() > 0 and props['warning.undoaction'] ~= '1' do
         print'!!!Warning!!! EndUndoAction from OnSave'
@@ -1898,7 +1899,7 @@ iup.ShowInMouse = function(dlg, bIupCtrl)
         editor:LineFromPosition(cPos) <= editor.FirstVisibleLine + editor.LinesOnScreen then
         dY = editor:TextHeight(editor:LineFromPosition(cPos))
         _, _, xC, yC = iup.GetDialogChild(iup.GetLayout(), "Source").Screenposition:find('(%-?%d+),(%-?%d+)')
-        xC = tonumber(xC) + editor:PointXFromPosition(cPos) + editor:TextWidth(editor.StyleAt[cPos], ' ') * editor.SelectionNCaretVirtualSpace[0]
+        xC = tonumber(xC) + editor:PointXFromPosition(cPos) + editor:TextWidth(editor:ustyle(cPos), ' ') * editor.SelectionNCaretVirtualSpace[0]
         yC = tonumber(yC) + editor:PointYFromPosition(cPos) + dY
     else
         _, _, xC, yC = iup.GetGlobal('CURSORPOS'):find('(%-?%d+)x(%-?%d+)')

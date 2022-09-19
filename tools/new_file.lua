@@ -100,7 +100,11 @@ function CORE.OpenAsNew(strName, strText, idm_encoding)
     if iup.GetGlobal("SHIFTKEY") == "ON" then CORE.ScipHidePannel() end
     scite.MenuCommand(IDM_NEW)
     if idm_encoding then scite.MenuCommand(idm_encoding) end
-    CORE.SetText(strText)
+    local chh = editor.ChangeHistory
+    editor.ChangeHistory = 0
+    CORE.SetText(strText or '')
+    editor:EmptyUndoBuffer()
+    editor.ChangeHistory = chh
     iup.PassFocus()
     if not editor.Focus then iup.PassFocus() end
 end

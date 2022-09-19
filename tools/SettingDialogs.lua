@@ -37,7 +37,7 @@ function sett.ResetSelColors()
         local _, _, r, g, b = s:find('(%d+) (%d+) (%d+)')
         local rgb = 0
         if r then
-            rgb = (r << 16)|(g << 8)|b
+            rgb = (tonumber(r) << 16)|(tonumber(g) << 8)|tonumber(b)
         end
         return '#'..string.format('%06X', rgb)
     end
@@ -60,7 +60,7 @@ function sett.ResetSelColors()
         _T'Caret'..'%t\n'..
 
         _T'Color'..'%c\n'..
-        _T'Width'..'%i[1,3,1]\n'..
+        _T'Width'..'%i[0,4,1]\n'..
         _T'Rectangle for overtype mode'..'%b\n'..
         _T'Blink Period'..'%i[0,3000,50]\n'..
         _T'Additional Blinks'..'%b\n'

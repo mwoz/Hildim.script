@@ -1325,8 +1325,10 @@ local function resetSBColors(sb)
     iup.SetAttributeId2(sb, "COLORID", 1, -1, "")
     iup.SetAttributeId2(sb, "COLORID", 2, -1, "")
     iup.SetAttributeId2(sb, "COLORID", 1, MARKER_BOOKMARK, Iif(props["bookmark.fore"]~= '', CORE.Rgb2Str(props["bookmark.fore"]), '0 0 255', 0))
-    iup.SetAttributeId2(sb, "COLORID", 1, MARKER_NOTSAVED, Iif(props["marker.notsaved.back"]~= '', CORE.Rgb2Str(props["marker.notsaved.back"]), '255 112 112', 0))
-    iup.SetAttributeId2(sb, "COLORID", 1, MARKER_SAVED, Iif(props["marker.saved.back"]~= '', CORE.Rgb2Str(props["marker.saved.back"]), '112 255 112', 0))
+    iup.SetAttributeId2(sb, "COLORID", 1, SC_MARKNUM_HISTORY_MODIFIED, '255 128 0')
+    iup.SetAttributeId2(sb, "COLORID", 1, SC_MARKNUM_HISTORY_REVERTED_TO_MODIFIED, '64 164 191')
+    iup.SetAttributeId2(sb, "COLORID", 1, SC_MARKNUM_HISTORY_REVERTED_TO_ORIGIN, '160 192 0')
+    iup.SetAttributeId2(sb, "COLORID", 1, SC_MARKNUM_HISTORY_SAVED, '0 160 0')
 end
 
 local function edit_scroll_menu(h, btn, pos, scroll)

@@ -247,6 +247,7 @@ end
     end
 
     local function InsertAbbreviation(expan, dInd, curSel)
+        if not curSel then return end
         local findSt = editor.SelectionStart
         if MACRO and expan:find('^MACRO:') then
             if findSt ~= editor.SelectionEnd then

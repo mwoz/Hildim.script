@@ -142,7 +142,7 @@ local function init()
         local cp = editor.SelectionStart
         if cp < startBodyClose or cp > endBodyOpen then bRefresh = true; return end
 
-        local str = (editor:textrange(startBodyClose + 1, editor.SelectionStart) or '')..Iif(editor.StyleAt[editor.SelectionStart] == 0 or (editor.StyleAt[editor.SelectionStart] == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
+        local str = (editor:textrange(startBodyClose + 1, editor.SelectionStart) or '')..Iif(editor:ustyle(editor.SelectionStart) == 0 or (editor:ustyle(editor.SelectionStart) == 1 and editor.CharAt[editor.SelectionStart] == 60), '<span style="background-color:black" id="cursor___">|</span>', '')..editor:textrange(editor.SelectionStart, endBodyOpen)
         if bRefresh then
             web.html = pt_all:match(editor:textrange(0, startBodyClose + 1)..editor:textrange(endBodyOpen, editor.Length), 1)
             web.new = 'Y'

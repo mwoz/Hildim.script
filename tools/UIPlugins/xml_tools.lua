@@ -110,12 +110,12 @@ local function Init()
         local delta = 0
         for i = 0, editor.Length - 1 do
             if isTag then
-                if editor.CharAt[i] == 62 and (editor.StyleAt[i] == 1 or editor.StyleAt[i] == 11) then -->
+                if editor.CharAt[i] == 62 and (editor:ustyle(i) == 1 or editor:ustyle(i) == 11) then -->
                     delta = delta + (editor:LineFromPosition(i) - tagStart)
                     isTag = false
                 end
             else
-                if editor.CharAt[i] == 60 and editor.StyleAt[i] == 1 then --<
+                if editor.CharAt[i] == 60 and editor:ustyle(i) == 1 then --<
                     tagStart = editor:LineFromPosition(i)
                     isTag = true
                 elseif editor:LineFromPosition(i) + delta >= ltst then
@@ -185,7 +185,7 @@ local function Init()
         if tag_start == nil
             or editor.CharAt[tag_start] ~= 60 -- [<]
             or editor.CharAt[tag_start + 1] == 63 --[?]
-            or (editor.StyleAt[tag_start] ~= styleBracket and editor.StyleAt[tag_start] ~= styleBracket )
+            or (editor:ustyle(tag_start) ~= styleBracket and editor:ustyle(tag_start) ~= styleBracket )
             then
             t.tag_start = nil
             t.tag_end = nil
@@ -236,7 +236,7 @@ local function Init()
         if p == tPos.TagStart then return end
         --tPos.T = editor:textrange(tPos.TagStart, p)  --for debug
         tPos.nameEnd = p
-        while (editor.CharAt[p] ~= 62 or (editor.StyleAt[p] ~= styleBracket and editor.StyleAt[p] ~= styleBracketClose)) --[[and p <= editor.Length]]  do p = p + 1 end -- [>]
+        while (editor.CharAt[p] ~= 62 or (editor:ustyle(p) ~= styleBracket and editor:ustyle(p) ~= styleBracketClose)) --[[and p <= editor.Length]]  do p = p + 1 end -- [>]
 
         if editor.CharAt[p - 1] == 47 then -- [/]
             tPos.TagEnd = p + 1
@@ -244,7 +244,7 @@ local function Init()
         end
 
         while p and p <= editor.Length do
-            while (editor.CharAt[p] ~= 60 or editor.StyleAt[p] ~= styleBracket or  -- [<]
+            while (editor.CharAt[p] ~= 60 or editor:ustyle(p) ~= styleBracket or  -- [<]
                 editor.CharAt[p + 1] == 63) and p <= editor.Length do p = p + 1 end --[?]
             if editor.CharAt[p + 1] == 47 then -- [/]
                 while (editor.CharAt[p] ~= 62) and p <= editor.Length do p = p + 1 end -- [>]
@@ -268,7 +268,7 @@ local function Init()
         editor.SelectionStart, editor.SelectionEnd, editor.FirstVisibleLine = ss, se, fl
         local tPos = {}
         local p = 0
-        while (editor.CharAt[p] ~= 60 or editor.StyleAt[p] ~= styleBracket or
+        while (editor.CharAt[p] ~= 60 or editor:ustyle(p) ~= styleBracket or
             editor.CharAt[p + 1] == 63) and p <= editor.Length do p = p + 1 end
         tPos.TagStart = p
         fillPositionTree(tPos)
@@ -627,8 +627,8 @@ local function Init()
 
     local function CloseTag(nUnbodyScipped, bFromGlobal)
         local pos = editor.CurrentPos
-        if (editor.StyleAt[pos] == styleSpace or editor.StyleAt[pos - 1] == styleSpace) or bFromGlobal or
-            (editor.StyleAt[pos] == styleBracket and editor.CharAt[pos - 1] == 62 and editor.CharAt[pos] == 60)
+        if (editor:ustyle(pos) == styleSpace or editor:ustyle(pos - 1) == styleSpace) or bFromGlobal or
+            (editor:ustyle(pos) == styleBracket and editor.CharAt[pos - 1] == 62 and editor.CharAt[pos] == 60)
             then
             local tg_end, find_start = nil, pos
             repeat

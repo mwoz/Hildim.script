@@ -204,12 +204,12 @@ local stringsStyless = {
 
 local function isString(pos)
     if stringsStyless[editor.Lexer] == nil then return false end
-    return stringsStyless[editor.Lexer][editor.StyleAt[pos]] == true
+    return stringsStyless[editor.Lexer][editor:ustyle(pos)] == true
 end
 ------------------------------------------------------
 function cmpobj_GetFMDefault()
     if(editor.Lexer  ~= SCLEX_FORMENJINE) then return -1 end
-    local style = editor.StyleAt[editor.SelectionStart]
+    local style = editor:ustyle(editor.SelectionStart)
     if(style>=SCE_FM_SQL_DEFAULT) then return SCE_FM_SQL_DEFAULT end
     if(style>=SCE_FM_X_DEFAULT) then return SCE_FM_X_DEFAULT end
     if(style>=SCE_FM_VB_DEFAULT) then return SCE_FM_VB_DEFAULT end
@@ -255,7 +255,7 @@ local function isXmlLine(cp)
 --определяем, является ли текущая строка тэгом xml
     cp = cp or CUR_POS:Get('SelectionStart')
     if editor:PositionFromLine(af_current_line) > current_pos - 1 then return false end
-    return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..editor.StyleAt[cp]..',') or (editor.StyleAt[CUR_POS:Get('SelectionStart')] == 1 and editor.CharAt[CUR_POS:Get('SelectionStart')] == 62)
+    return string.find(','..props["autocomplete."..editor_LexerLanguage()..".nodebody.stile"]..',', ','..editor:ustyle(cp)..',') or (editor:ustyle(CUR_POS:Get('SelectionStart')) == 1 and editor.CharAt[CUR_POS:Get('SelectionStart')] == 62)
 end
 
 -- Преобразовывает стринг в паттерн для поиска
@@ -429,7 +429,7 @@ local function GetInputObject(line)
     end
     local lineLen = string.len(line:to_utf8())
     local inputObject = {"","","",nil}
-    if props["autocomplete."..editor_LexerLanguage()..".nodestart.stile"] == ''..editor.StyleAt[editor.SelectionStart] or editor.CharAt[editor.SelectionStart] == 60 then
+    if props["autocomplete."..editor_LexerLanguage()..".nodestart.stile"] == ''..editor:ustyle(editor.SelectionStart) or editor.CharAt[editor.SelectionStart] == 60 then
         inputObject = {"noobj", "", "", nil}
         return inputObject
     end
@@ -1225,15 +1225,17 @@ local function CallTip(char, pos, chAfter)
 end
 
 local function TipXml(posAtr)
-    local strLine = editor:textrange(editor:PositionFromLine(af_current_line), current_pos - 2) or ''
-   --найдем, что у нас слева - метод или функция
-    local _start, _end, sMetod = string.find(strLine, "([%w]+)$")
-    if _start ~= nil then
-        local object_names = GetObjectNamesXml()
-        if object_names[1] ~= nil then
-            local tblobj = EnrichFromInheritors(object_names, inheritorsX)
-            for upObj, _ in pairs(tblobj) do
-                if TryTipFor(upObj, sMetod, objectsX_table, posAtr or current_pos, nil, true) then break end
+    if current_pos and current_pos > 1 then
+        local strLine = editor:textrange(editor:PositionFromLine(af_current_line), current_pos - 2) or ''
+       --найдем, что у нас слева - метод или функция
+        local _start, _end, sMetod = string.find(strLine, "([%w]+)$")
+        if _start ~= nil then
+            local object_names = GetObjectNamesXml()
+            if object_names[1] ~= nil then
+                local tblobj = EnrichFromInheritors(object_names, inheritorsX)
+                for upObj, _ in pairs(tblobj) do
+                    if TryTipFor(upObj, sMetod, objectsX_table, posAtr or current_pos, nil, true) then break end
+                end
             end
         end
     end

@@ -135,14 +135,14 @@ for str in string.gmatch(text, "([^\n]*)\n") do
     str = string.sub(str,1,len)
     fin = "\r"
   end
-  local style = LEXSTYLES[editor.StyleAt[pos]]
+  local style = LEXSTYLES[editor:ustyle(pos)]
   local i0,i = 1,1
   while i <= len do
     local nstyle
     repeat
       pos = pos + 1
       i = i + 1
-      nstyle = LEXSTYLES[editor.StyleAt[pos]]
+      nstyle = LEXSTYLES[editor:ustyle(pos)]
     until nstyle ~= style or i > len
     local txt = string.sub(str,i0,i-1)
     i0 = i

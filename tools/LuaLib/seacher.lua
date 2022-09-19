@@ -118,7 +118,7 @@ end
 function s:CheckStyle(posFind)
     for i = 1, #(self.st_vals) do
        -- if self.st_exclude then
-            if self.st_vals[i] == self.e.StyleAt[posFind] then return self.st_exclude end
+            if self.st_vals[i] == self.e:ustyle(posFind) then return self.st_exclude end
        -- else
        --     if self.st_vals[i] == self.e.StyleAt[posFind] then return false end
        -- end

@@ -569,7 +569,7 @@ local function ActivateFind_l(nTab, s)
         scite.MenuCommand(IDM_TOGGLEOUTPUT)
     end
 
-    if nTab ~= 2 then Ctrl("numStyle").value = wnd.StyleAt[wnd.SelectionStart];  end
+    if nTab ~= 2 then Ctrl("numStyle").value = wnd:ustyle(wnd.SelectionStart);  end
 
     if s ~= '' and nTab == 1 then iup.SetFocus(Ctrl('cmbReplaceWhat'))
     else iup.SetFocus(Ctrl('cmbFindWhat')) end

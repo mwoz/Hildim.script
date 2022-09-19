@@ -135,6 +135,7 @@ local function SetLN(bVis, foldFlags)
         props['line.margin.visible'] = ''..bVis
         props['fold.flags'] = ''..foldFlags
         editor.FoldFlags = foldFlags
+        coeditor.FoldFlags = foldFlags
         scite.MenuCommand(IDM_LINENUMBERMARGIN)
     end
 end
@@ -221,7 +222,10 @@ _G.sys_Menus.TABBAR = { title = _TM"Tabbar Context Menu",
 	{link = 'Options|Read-Only'},
     {'Open File Folder', action = function()
         shell.exec(Iif(not _G.iuprops['settings.tabmenu.opencmd'], 'explorer "'..props['FileDir']..'"', (_G.iuprops['settings.tabmenu.opencmd'] or ''):gsub('%%P', props['FileDir'])))  end},
-
+	{'All Buffers...', {
+        {'Format Block', action = function() if Format_Buffers then Format_Buffers() end end,  },
+        {'slast', separator = 1},
+	}},
 	{'slast', separator=1},
 }
 
@@ -431,6 +435,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 			{'Auto &Indent',  check_iuprops = 'autoformat.indent', key = 'Ctrl+Shift+]'},
 			{'&Autoformat Lines',  check_iuprops = 'autoformat.line', key = 'Ctrl+Shift+['},
  			{'Autoformat &Whole Block',  check_iuprops = 'autoformat.indent.force', active = function() return (_G.iuprops['autoformat.indent'] or 1) == 1 end},
+ 			{'Autoformat Upon &Inserting', check_iuprops = 'autoformat.on.insert', active = function() return (_G.iuprops['autoformat.indent'] or 1) == 1 end},
         }},
 		{'Matc&h Brace',  key = 'Ctrl+E', action = IDM_MATCHBRACE},
 		{'Select to &Brace',  key = 'Ctrl+Shift+E', action = IDM_SELECTTOBRACE},
@@ -504,7 +509,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
             {'Bottom Bar A&utohide', key = 'Ctrl+F10', action = CORE.switch_bottombar, check = function() return iup.GetDialogChild(iup.GetLayout(), "BottomBarSplit").popupside ~= '0' end},
 		}},
         {'s2', separator = 1},
-		{'&White Space and TAB', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},
+		{'White Space and TAB', key = 'Ctrl+Shift+8', action = IDM_VIEWSPACE, check = "props['view.whitespace']=='1'"},
 		{'En&d of Line', key = 'Ctrl+Shift+9', action = IDM_VIEWEOL, check = "editor.ViewEOL"},
 		{'Indentation G&uides', action = IDM_VIEWGUIDES, check = "props['view.indentation.guides']=='1'"},
 		{'L&ine Numbers', { radio = 1,
@@ -518,7 +523,8 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
         {'s3', separator = 1},
         {'slast', separator = 1},
 		{'Show &Menu Icons', check_iuprops = 'menus.show.icons'},
-        {'Mark Chan&ged Lines', check_iuprops = "changes.mark.line"},
+        {'Mark Changed Lines', action = IDM_VIEWHISTORYMARKERS, check = "props['view.history.markers']~='0'"},
+        {'Underline Changes Within Lines', action = IDM_VIEWHISTORYINDICATORS, check = "props['view.history.indicators']=='1'"},
         {'S&plitters: Layout Drag', check = "props['layout.drag']=='YES'", action = CORE.ResetLayoutDrag},
         {'s4', separator = 1},
 		{'&Word Wrap', action = IDM_WRAP, check = "props['wrap']=='1'"},
@@ -639,7 +645,7 @@ _G.sys_Menus.MainWindowMenu = {title = _TM"Main Window Menu",
 		{'Move Tab &Right', action = IDM_MOVETABRIGHT},
         {'&Tabbar Settings', action = function() DoSett('ResetTabbarProps') end, image = 'ui_tab__pencil_µ'},
 		{'&Close All', action = IDM_CLOSEALL, image = 'cross_script_µ'},
-		{'&Save All', key = 'Ctrl+Alt+S', action = function() props['save.scip.alert'] = 1; DoForBuffers_Stack(function() scite.MenuCommand(IDM_SAVE); CORE.fixMarks(true) end); props['save.scip.alert'] = 0 end, image = 'disks_µ'},
+		{'&Save All', key = 'Ctrl+Alt+S', action = function() props['save.scip.alert'] = 1; DoForBuffers_Stack(function() scite.MenuCommand(IDM_SAVE)  end); props['save.scip.alert'] = 0 end, image = 'disks_µ'},
 		{'Save All with &Event Processing', action = IDM_SAVEALL, image = 'disks_µ'},
 		{'s2', separator = 1},
 		{'l1', CORE.windowsList, plane = 1},

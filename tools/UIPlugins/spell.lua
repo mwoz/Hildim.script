@@ -306,7 +306,7 @@ local function Init()
         local iStyle
         local bNedSpell, iSpellingStyle, posStartSpell = cHeck,- 1, posEnd
         for i = posStart, posEnd do
-            iStyle = editor.StyleAt[i]
+            iStyle = editor:ustyle(i)
             if bNedSpell == cSpell and (iStyle ~= iSpellingStyle or i == posEnd) then
                 SpellRange(posStartSpell, i)
                 bNedSpell, iSpellingStyle, posStartSpell = cHeck,- 1, posEnd

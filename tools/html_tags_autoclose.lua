@@ -25,7 +25,7 @@ function XMLTagsAutoClose (c)
     if pEnd < 1 then return end
     local ch = editor.CharAt[pEnd]
     if ch == 62 then -- ">"
-        local nStyle = editor.StyleAt[pEnd - 1]
+        local nStyle = editor:ustyle(pEnd - 1)
         if nStyle > 8 then return end
         local nLastChar = editor.CharAt[pEnd - 1]
         if nStyle == 6 and nLastChar ~= 34 then return end
@@ -49,7 +49,7 @@ function XMLTagsAutoClose (c)
 
     -- attribute quotes
     if ch == 61 then -- "="
-        local nStyle = editor.StyleAt[editor.CurrentPos - 2]
+        local nStyle = editor:ustyle(editor.CurrentPos - 2)
         if nStyle == 3 or nStyle == 4 then
             editor:BeginUndoAction()
             editor:InsertText(editor.CurrentPos, "\"\"")

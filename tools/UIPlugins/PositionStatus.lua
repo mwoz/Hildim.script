@@ -34,7 +34,7 @@ local function Init(h)
         if not editor.Focus then return end
 
         txtCol.value = editor.Column[editor.CurrentPos] + editor.SelectionNAnchorVirtualSpace[0] + 1
-        local sel = editor:GetSelText()
+        local sel = editor:GetSelText() or ''
         if editor.CodePage ~= 0 then sel = sel:from_utf8() end
         txtSel.value = #sel
         txtLine.value = editor:LineFromPosition(editor.CurrentPos) + 1

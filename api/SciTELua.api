@@ -632,6 +632,7 @@ editor:Undo()\n Undo one action in the undo history.
 editor:UpperCase()\n Transform the selection to upper case.
 editor:UsePopUp(bool allowPopUp)\n Set whether a pop up menu is displayed automatically when the user presses the wrong mouse button.
 editor:UserListShow(int listType, string itemList)\n Display a list of strings and send notification when user chooses one.
+editor:ustyle(int position)\n StyleAt но возвращающий unsigned char
 editor:VCHome()\n Move caret to before first visible character on line. If already there move to first character on line.
 editor:VCHomeDisplay(void, void) = void
 editor:VCHomeDisplayExtend(void, void) = void

@@ -333,19 +333,23 @@ local function Init()
         end
     end
 
-    local function vss_checkout()
+    local function vss_checkout(bLog)
         if vss_SetCurrentProject() then
             BlockEventHandler"OnSwitchFile"
             local ierr, strerr = shell.exec(p_vsspath..' Diff '..props['FileNameExt']:from_utf8(), nil, true, true)
             local stropt = ""
             if ierr == 1 then
-                local rez = iup.Alarm(_T'Check Out', _T"File differs from Source Safe\nReplace an existing file?", _TH"OK", _TH"No", _TH"Cancel")
-                if rez == 3 then return end
-                ierr = 0
-                if rez == 1 then
-
+                if bLog then
+                    print(props['FileNameExt']..' '..'File differs from Source Safe')
                 else
-                    stropt = " -G-"
+                    local rez = iup.Alarm(_T'Check Out', _T"File differs from Source Safe\nReplace an existing file?", _TH"OK", _TH"No", _TH"Cancel")
+                    if rez == 3 then return end
+                    ierr = 0
+                    if rez == 1 then
+
+                    else
+                        stropt = " -G-"
+                    end
                 end
             end
             if ierr == 0 then
@@ -353,11 +357,14 @@ local function Init()
                 if (attr & 1) ~= 1 then
                     shell.setfileattr(props['FilePath'], attr + 1)
                 end
-                reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']:from_utf8()..stropt, nil, true, true))
+                if reset_err(shell.exec(p_vsspath..' Checkout '..props['FileNameExt']:from_utf8()..stropt, nil, true, true)) then
+                    print(props['FileNameExt']..' - Check In')
+                end
             elseif ierr ~= 1 then
-                print(strerr)
+                print(props['FileNameExt']..' '..strerr)
             end
             UnBlockEventHandler"OnSwitchFile"
+            OnSwitchFile()
         end
     end
 
@@ -408,19 +415,22 @@ local function Init()
         end
     end
 
-    local function vss_checkin()
+    local function vss_checkin(bLog, cmnt)
         if vss_SetCurrentProject() then
-            BlockEventHandler"OnSwitchFile"
-            local cmnt = GetComment()
+            if not bLog then cmnt = GetComment() end
             if not cmnt then return end
+            BlockEventHandler"OnSwitchFile"
             if shell.set_curent_dir(props['FileDir']:from_utf8()) == props['FileDir']:from_utf8() then
-                if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt, nil, false, true)) and On_vss_CheckIn then
-                    On_vss_CheckIn(curProj)
+                if reset_err(shell.exec(p_vsspath..' Checkin '..props['FileNameExt']:from_utf8()..' -C'..cmnt, nil, false, true)) then
+                    if bLog then print(props['FileNameExt']..' - Check In') end
+                    if On_vss_CheckIn then On_vss_CheckIn(curProj) end
                 end
             else
-                print("Error: Can't set current dir")
+                print(props['FileNameExt'].." Error: Can't set current dir")
             end
             UnBlockEventHandler"OnSwitchFile"
+        elseif bLog then
+            print(props['FileNameExt']..' - '..props['FileDir']..' - not VSS dir')
         end
     end
 
@@ -516,6 +526,19 @@ local function Init()
             {'Show Comment', action = function() CommentVer() end, },
         }}, nil, _T
     )
+    menuhandler:InsertItem('TABBAR', 'All Buffers...|slast',{'VSS_TABALL', plane = 1,{
+            {'Check In', action = function()
+                if CORE.Alarm4All(_T'Check In') then return end
+                local cmnt = GetComment()
+                DoForBuffers_Stack(function(i) if i then vss_checkin(true, cmnt) end end)
+            end, },
+            {'Check Out', action = function()
+                if CORE.Alarm4All(_T'Check Out') then return end
+                DoForBuffers_Stack(function(i) if i then vss_checkout(true) end end)
+            end },
+        }}, nil, _T
+    )
+
     menuhandler:InsertItem('MainWindowMenu', '_HIDDEN_|s1',{'VSS_TAB', plane = 1,{
             {'Add to Project', action = vss_add ,},
             {'Check In', action = vss_checkin, image = 'arrow_curve_090_µ' , },

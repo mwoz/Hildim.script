@@ -58,8 +58,8 @@ function GetCurrentHotspot ()
 	local e = s+1
 	local l = editor.Length
 	s = s-1 -- we know we're at hotspot
-	while editor.StyleHotSpot[editor.StyleAt[s]] and s>=0 do s = s-1 end
-	while editor.StyleHotSpot[editor.StyleAt[e]] and e<=l do e = e+1 end
+	while editor.StyleHotSpot[editor:ustyle(s)] and s>=0 do s = s-1 end
+	while editor.StyleHotSpot[editor:ustyle(e)] and e<=l do e = e+1 end
 	return editor:textrange(s+1,e)
 end
 
@@ -134,7 +134,7 @@ end
 --------------------------------------------------------
 -- Определение соответствует ли стиль символа стилю комментария
 function IsComment(pos)
-	local style = editor.StyleAt[pos]
+	local style = editor:ustyle(pos)
     local fmSektor = cmpobj_GetFMDefault()
     if fmSektor >= 0 then
         if fmSektor == SCE_FM_DEFAULT then return false end
@@ -463,6 +463,14 @@ function DoForBuffers(func, ...)
 end
 function DoForBuffers_Stack(func, ...)
     return DoForBuffers_local(func, false, UPDATE_FORCE, ...)
+end
+
+function CORE.Alarm4All(msg)
+    local b1, b2, s
+    b1 = _TH"OK"
+    b2 = _TH"Cancel"
+    s = _FMT(_TH('Run "%1" for all buffers'), msg)
+    return iup.Alarm('HildiM', s, b1, b2) ~= 1
 end
 
 function CORE.tbl2Out(tIn, sSep, byIpairs, brashes, upLvl)

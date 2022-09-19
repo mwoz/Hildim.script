@@ -51,7 +51,7 @@ end
 local function FoldParentLevel(line, lvl)
     local lvl2, l2
     l2 = line
-    if lvl > 0 then
+    if lvl >= 0 then
         repeat
             l2 = editor.FoldParent[l2]
             lvl2 = editor.FoldLevel[l2] & SC_FOLDLEVELNUMBERMASK - SC_FOLDLEVELBASE
@@ -91,7 +91,7 @@ _AUTOFORMAT_STYLES = {none = {
     operStyle = {[SCE_FM_VB_OPERATOR] = true},
     ignoredStyle = {[8] = true, [6] = true, [3] = true},
     stickyStyle = {[SCE_FM_VB_STRINGCONT] = S_LINEHDR, [SCE_FM_VB_COMMENT] = S_WRD, [SCE_FM_X_TAG] = S_LINE, [SCE_FM_X_COMMENT] = S_WRD, [SCE_FM_SQL_COMMENT] = S_WRD, [SCE_FM_SQL_LINE_COMMENT] = S_WRD, },
-    fixedStyle = {[SCE_FM_X_STRING] = S_LINE, [SCE_FM_PLAINCDATA] = S_LINE, [SCE_FM_SQL_STRING] = S_LINE, [SCE_FM_X_COMMENT] = S_LINE, [SCE_FM_SQL_COMMENT] = S_LINE, [SCE_FM_PREPROCESSOR] = S_WRD,},
+    fixedStyle = {[SCE_FM_X_STRING] = S_LINE, [SCE_FM_PLAINCDATA] = S_LINE, [SCE_FM_SQL_STRING] = S_LINE, [SCE_FM_X_COMMENT] = S_LINE, [SCE_FM_SQL_COMMENT] = S_LINE, [SCE_FM_PREPROCESSOR] = S_WRD,[SCE_FM_SQL_FMPARAMETR] = S_WRD,},
     wordsCaseStyles = {[SCE_FM_VB_FUNCTIONS] = true, [SCE_FM_VB_KEYWORD] = true},
     wordsCase = {"ByRef", "ByVal", "ElseIf", "ExecuteGlobal", "ReDim",
         "TypeName", "TimeSHerial", "IsObject", "IsNumeric", "IsNull", "IsEmpty", "IsDate", "IsArray", "InStrRev",
@@ -134,7 +134,7 @@ _AUTOFORMAT_STYLES = {none = {
                 local prevP = editor.LineEndPosition[l - 1] - 1
                 while editor.CharAt[prevP] == 32 and prevP > 0 do prevP = prevP - 1 end
                 local c = editor.CharAt[prevP] -- =-+/*<>
-                if editor.StyleAt[prevP] == SCE_FM_SQL_OPERATOR and (c == 61 or c == 45 or c == 43 or c == 47 or c == 42 or c == 60 or c == 62) then --'='
+                if editor:ustyle(prevP) == SCE_FM_SQL_OPERATOR and (c == 61 or c == 45 or c == 43 or c == 47 or c == 42 or c == 60 or c == 62) then --'='
                     return true
                 end
             end
@@ -142,34 +142,47 @@ _AUTOFORMAT_STYLES = {none = {
         local lState = editor.LineState[line]
         local sector = lState & 0xF
         local newIS, calcDelta
-        if lState & 0x1000 ~= 0 then
-            delta = -editor.LineIndentation[line - 1]
-            calcDelta = true
-        end
         if lState & 0x800 ~= 0 then
             delta = editor.LineIndentation[editor.FoldParent[line]]  --лучше циклом пробежать вверх до 0x400!
             return delta, 0, IS_ABS
         end
+        local style = editor:ustyle(editor.LineIndentPosition[line])
 
-        if sector == 2 then
+        if (style == SCE_FM_X_TAG) then
+            if sector ~= 2 then deltaNext = -editor.Indent end
             local f = editor.FoldLevel[line]
-            if (f & SC_FOLDLEVELHEADERFLAG ~= 0) and (f & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE == 1 then
-                return 0, deltaNext
+            if (f & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE == 1 then
+                return 0, deltaNext, IS_ABS
             end
-        elseif sector == 3 then
-            local style = editor.StyleAt[editor.LineIndentPosition[line]]
-            if editor.StyleAt[editor.LineIndentPosition[line]] == SCE_FM_SQL_STATEMENT then
+            if (f & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE == 2 then
+                local s = editor.LineIndentPosition[line] + 1
+                local e = editor:WordEndPosition(s, true)
+                local w = editor:textrange(s, e)
+                if w == 'String' or w == 'string' or w == 'script' then
+                    return 0, deltaNext, IS_ABS
+                elseif w == 'option' then
+                    return editor.Indent * 2, -editor.Indent, IS_ABS
+                end
+            end
+        elseif sector == 1 then --vb
+            local lvl, dLvl = IndLevel(line)
+            if dLvl == -2 and lState & 0x2000 ~= 0 and deltaNext == 0 then
+                -- local s = editor:line(line):lower()
+                -- if s:find('^%s*select') or s:find('then%s*$') then
+                deltaNext = -editor.Indent
+            --end
+            end
+        elseif sector == 3 then --sql
+            if editor:ustyle(editor.LineIndentPosition[line]) == SCE_FM_SQL_STATEMENT then
                 local indentFlag = (lState >> 20) & 0xF
                 if indentFlag > 0 then
                     local b1st = 0;
                     if indentFlag == 3 then b1st = 1 end
-
                     newIS = IS_ABS
                     local d = Iif(indentFlag == 4, editor.Indent, 0)
                     local p1 = editor.FoldParent[line] or -1
-                    local p1Ind = Iif(editor.LineState[p1] & 0x400 == 0, editor.LineIndentation[p1], - editor.Indent)
-
-                    --print(b1st, bUp, bSecond)
+                    local p1Ind = Iif(editor.LineState[p1] & 0x400 == 0, editor.LineIndentation[p1], 0)
+                    -- print(line, p1Ind, p1, calcDelta)
                     if indentFlag ~= 3 then
                         if not calcDelta then
                             if p1 >= 0 then
@@ -177,6 +190,8 @@ _AUTOFORMAT_STYLES = {none = {
                             else
                                 delta = d
                             end
+                        else
+                            delta = editor.Indent
                         end
                         deltaNext = editor.Indent        -----
                     else
@@ -200,12 +215,12 @@ _AUTOFORMAT_STYLES = {none = {
                 -- уменьшение отступа для открывающей скобки - первой в строке
                 for i = line - 1, 0, -1 do
                     local lip = editor.LineIndentPosition[i]
-                    if lip < editor.LineEndPosition[i] and not CurMap.fixedStyle[editor.StyleAt[lip]]
-                        and not CurMap.fixedStyle[editor.StyleAt[lip]]
-                        and not CurMap.stickyStyle[editor.StyleAt[lip]] then
+                    if lip < editor.LineEndPosition[i] and not CurMap.fixedStyle[editor:ustyle(lip)]
+                        and not CurMap.fixedStyle[editor:ustyle(lip)]
+                        and not CurMap.stickyStyle[editor:ustyle(lip)] then
                         if (editor.LineState[i] >> 20) & 0xF ~= 0 then
                             delta = delta - editor.Indent
-                        elseif editor.StyleAt[editor.LineEndPosition[i] - 1] == SCE_FM_SQL_FUNCTION then
+                        elseif editor:ustyle(editor.LineEndPosition[i] - 1) == SCE_FM_SQL_FUNCTION then
                             newIS = IS_ABS
                             delta = editor.LineIndentation[i]
                         end
@@ -237,7 +252,7 @@ _AUTOFORMAT_STYLES = {none = {
     keywordStyle = {},
     operStyle = {},
     ignoredStyle = {},
-    zeroStyle = {[SCE_MSSQL_LINE_COMMENT_EX] = S_WRD},
+    zeroStyle = {[SCE_MSSQL_LINE_COMMENT_EX] = S_WRD,[SCE_MSSQL_M4KEYS] = S_WRD},
     stickyStyle = { },
     fixedStyle = {[SCE_MSSQL_STRING] = S_LINE, [SCE_MSSQL_COMMENT] = S_WRD, [SCE_MSSQL_LINE_COMMENT] = S_WRD,},
     check1stWrdStyle = {
@@ -252,7 +267,7 @@ _AUTOFORMAT_STYLES = {none = {
                 local prevP = editor.LineEndPosition[l - 1] - 1
                 while editor.CharAt[prevP] == 32 and prevP > 0 do prevP = prevP - 1 end
                 local c = editor.CharAt[prevP] -- =-+/*<>
-                if editor.StyleAt[prevP] == SCE_MSSQL_OPERATOR and (c == 61 or c == 45 or c == 43 or c == 47 or c == 42 or c == 60 or c == 62) then --'='
+                if editor:ustyle(prevP) == SCE_MSSQL_OPERATOR and (c == 61 or c == 45 or c == 43 or c == 47 or c == 42 or c == 60 or c == 62) then --'='
                     return true
                 end
             end
@@ -273,11 +288,11 @@ _AUTOFORMAT_STYLES = {none = {
             return delta, 0, IS_ABS
         end
 
-        local style = editor.StyleAt[editor.LineIndentPosition[line]]
+        local style = editor:ustyle(editor.LineIndentPosition[line])
         if style == SCE_MSSQL_STATEMENT then
 
             local indentFlag = (lState >> 20) & 0xF
-            if indentFlag > 0 then
+            if indentFlag > 0 and indentFlag ~= 5 then
                 local b1st = 0;
                 if indentFlag == 3 then b1st = 1 end
 
@@ -286,9 +301,9 @@ _AUTOFORMAT_STYLES = {none = {
                 local p1 = editor.FoldParent[line] or -1
                 local p1Ind = Iif(editor.LineState[p1] & 0x400 == 0, editor.LineIndentation[p1], - editor.Indent)
 
-                --print(b1st, bUp, bSecond)
                 if indentFlag ~= 3 then
-                    local notFoldHead = editor.FoldLevel[line] & SC_FOLDLEVELHEADERFLAG == 0
+                    -- local notFoldHead = editor.FoldLevel[line] & SC_FOLDLEVELHEADERFLAG == 0  ;
+                    notFoldHead = true
                     if not calcDelta then
                         if p1 >= 0 and notFoldHead then
                             delta = p1Ind + editor.Indent + d
@@ -313,16 +328,18 @@ _AUTOFORMAT_STYLES = {none = {
                 end
                 return delta, deltaNext, newIS
             end
-        elseif (style == SCE_MSSQL_OPERATOR and editor.FoldLevel[line] & SC_FOLDLEVELHEADERFLAG ~= 0) then
-            -- уменьшение отступа для открывающей скобки - первой в строке
+        elseif (style == SCE_MSSQL_OPERATOR and editor.CharAt[editor.LineIndentPosition[line]] == 40) or (style == SCE_MSSQL_M4KBRASHES and editor.CharAt[editor.LineIndentPosition[line]] == 123) then
+            -- уменьшение отступа для открывающей скобки ({ - первой в строке
             for i = line - 1, 0, -1 do
                 local lip = editor.LineIndentPosition[i]
-                if lip < editor.LineEndPosition[i] and not CurMap.fixedStyle[editor.StyleAt[lip]]
-                    and not CurMap.fixedStyle[editor.StyleAt[lip]]
-                    and not CurMap.zeroStyle[editor.StyleAt[lip]] then
+                if lip < editor.LineEndPosition[i] and not CurMap.fixedStyle[editor:ustyle(lip)]
+                    and not CurMap.fixedStyle[editor:ustyle(lip)]
+                    and not CurMap.zeroStyle[editor:ustyle(lip)] then
                     if (editor.LineState[i] >> 20) & 0xF ~= 0 then
-                        delta = delta - editor.Indent
-                    elseif editor.StyleAt[editor.LineEndPosition[i] - 1] == SCE_MSSQL_FUNCTION then
+                    -- if editor:ustyle(lip) == SCE_MSSQL_STATEMENT then
+                        if (editor.LineState[i] >> 20) & 0xF ~= 5 then delta = delta - editor.Indent end
+                        if (editor.FoldLevel[i] & SC_FOLDLEVELHEADERFLAG) ~= 0 then delta = delta - editor.Indent end
+                    elseif editor:ustyle(editor.LineEndPosition[i] - 1) == SCE_MSSQL_FUNCTION or editor.StyleAt[editor.LineIndentPosition[i]] == SCE_MSSQL_SYSMCONSTANTS then
                         newIS = IS_ABS
                         delta = editor.LineIndentation[i]
                     end
@@ -331,15 +348,12 @@ _AUTOFORMAT_STYLES = {none = {
             end
         elseif style == SCE_MSSQL_SYSMCONSTANTS then
             local lP = FoldParentLevel(line, IndLevel(line))
-            if lP == line then
+            if lP == line or (editor.FoldLevel[line] & SC_FOLDLEVELNUMBERMASK) == SC_FOLDLEVELBASE then
                 return 0, 0, IS_ABS
             else
                 return editor.LineIndentation[FoldParentLevel(line, IndLevel(line))] + editor.Indent, 0, IS_ABS
             end
-        elseif style == SCE_MSSQL_M4KEYS and editor.FoldLevel[line] & SC_FOLDLEVELHEADERFLAG ~= 0 then
-            return 0, -editor.Indent, IS_ZEROINDENT
         end
-
         local lvl, dLvl = IndLevel(line)
 
         if dLvl > 0 then
@@ -347,21 +361,12 @@ _AUTOFORMAT_STYLES = {none = {
             local dP = editor.LineIndentation[lP]
             local dN = 0
             if dP > 0 and checkPrevEq(lP) then dN = -editor.Indent end
-
             return editor.LineIndentation[FoldParentLevel(line, lvl) or 0], dN, IS_ABS
         end
 
         if checkPrevEq(line) then
             delta, deltaNext = delta + editor.Indent, deltaNext - editor.Indent
         end
-
-        --if line > 0 then
-        -- local prevP = editor.LineEndPosition[line] - 1
-        -- while editor.CharAt[prevP] == 32 and prevP > 0 do prevP = prevP - 1 end
-        -- if editor.CharAt[prevP] == 61 and editor.StyleAt[prevP] == SCE_MSSQL_OPERATOR then --'='
-        --     deltaNext = deltaNext + editor.Indent
-        -- end
-        --end
         return delta, deltaNext, newIS
     end
 
@@ -378,7 +383,7 @@ local function FormatString(line)
     local strunMin = '[,=(\\w] \\- [\\d\\w_(]'
     local strunMin2 = '(\\- [\\d\\w_(]'
 
-    if CurMap.ignoredStyle[editor.StyleAt[editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) - 1]] then return end
+    if CurMap.ignoredStyle[editor:ustyle(editor:PositionFromLine(editor:LineFromPosition(editor.SelectionStart)) - 1)] then return end
     editor:BeginUndoAction()
     local lStart = editor:PositionFromLine(line)
     local lEnd = lStart + (editor:GetLine(line) or ''):len()
@@ -387,7 +392,7 @@ local function FormatString(line)
 
     while lS and lS < lEnd do
         l, lS = editor:findtext(chLeftSide, SCFIND_REGEXP, lS, lEnd)
-        if lS and lS - l ~= 3 and editor.StyleAt[l] == operStyle then
+        if lS and lS - l ~= 3 and editor:ustyle(l) == operStyle then
             -- print("ls", l, lS, editor:textrange(l, lS))
             editor.TargetStart = l + 1
             editor.TargetEnd = lS - 1
@@ -399,7 +404,7 @@ local function FormatString(line)
 
     while lS and lS < lEnd do
         l, lS = editor:findtext(chRightSide, SCFIND_REGEXP, lS, lEnd)
-        if lS and lS - l ~= 3 and editor.StyleAt[lS - 1] == operStyle then
+        if lS and lS - l ~= 3 and editor:ustyle(lS - 1) == operStyle then
             -- print("rs", l, lS, editor:textrange(l, lS))
             editor.TargetStart = l + 1
             editor.TargetEnd = lS - 1
@@ -412,7 +417,7 @@ local function FormatString(line)
 
     while lS and lS < lEnd do
         l, lS = editor:findtext(strunMin, SCFIND_REGEXP, lS, lEnd)
-        if l and (editor.StyleAt[l] == operStyle or editor.StyleAt[l] == keywordStyle) then
+        if l and (editor:ustyle(l) == operStyle or editor:ustyle(l) == keywordStyle) then
             editor.TargetStart = l + 3
             editor.TargetEnd = l + 4
             editor:ReplaceTarget""
@@ -424,7 +429,7 @@ local function FormatString(line)
 
     while lS and lS < lEnd do
         l, lS = editor:findtext(strunMin2, SCFIND_REGEXP, lS, lEnd)
-        if l and editor.StyleAt[l + 1] == operStyle then
+        if l and editor:ustyle(l + 1) == operStyle then
             editor.TargetStart = l + 2
             editor.TargetEnd = l + 3
             editor:ReplaceTarget""
@@ -436,7 +441,7 @@ local function FormatString(line)
 
     while lS and lS < lEnd do
         l, lS = editor:findtext('\\w  +[^ ]', SCFIND_REGEXP, lS, lEnd)
-        if lS and editor.StyleAt[l] == keywordStyle then
+        if lS and editor:ustyle(l) == keywordStyle then
             editor.TargetStart = l + 1
             editor.TargetEnd = lS - 1
             editor:ReplaceTarget" "
@@ -448,7 +453,7 @@ local function FormatString(line)
 
     while lS and lS < lEnd do
         l, lS = editor:findtext('[^ ]  +\\w', SCFIND_REGEXP, lS, lEnd)
-        if lS and lS - l ~= 3 and editor.StyleAt[lS - 1] == keywordStyle then
+        if lS and lS - l ~= 3 and editor:ustyle(lS - 1) == keywordStyle then
             editor.TargetStart = l + 1
             editor.TargetEnd = lS - 1
             editor:ReplaceTarget" "
@@ -474,7 +479,7 @@ local function OnSwitchFile_local()
     if editor.Length == 0 then
         CurMap = nil
     elseif (editor.FoldLevel[0] >> 16) & SC_FOLDLEVELNUMBERMASK == 0 then
-        CurMap = _AUTOFORMAT_STYLES.none
+        CurMap = nil
     else
         CurMap = _AUTOFORMAT_STYLES[editor_LexerLanguage()] or _AUTOFORMAT_STYLES.default
     end
@@ -492,13 +497,14 @@ local function OnSwitchFile_local()
         end
     end
 end
+
 AddEventHandler("OnSave", OnSwitchFile_local)
 AddEventHandler("OnSwitchFile", OnSwitchFile_local)
 AddEventHandler("OnOpen", OnSwitchFile_local)
 
 AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
     if not CurMap and editor.Length > 0 then
-        if (editor.FoldLevel[0] >> 16) & SC_FOLDLEVELNUMBERMASK ~= 0 then
+        if ((editor.FoldLevel[0] >> 16) & SC_FOLDLEVELNUMBERMASK) ~= 0 then
             CurMap = _AUTOFORMAT_STYLES[editor_LexerLanguage()] or _AUTOFORMAT_STYLES.default
         elseif editor.LineCount > 1 then
             CurMap = _AUTOFORMAT_STYLES.none
@@ -524,14 +530,15 @@ AddEventHandler("Format_String", function()
 end)
 
 local function FormatLinesDEF(lineStart, lineEnd, bFormatEmpty)
+    -- print(lineStart, lineEnd, bFormatEmpty)
     local EOL_LENGTH <const> = Iif(editor.EOLMode == SC_EOL_CRLF, 2, 1)
     local function Delta4LineDEF(line, lvlPr)
         local bIsHeader = ((editor.FoldLevel[line] & SC_FOLDLEVELHEADERFLAG) ~= 0)
         local delta, deltaNext = 0, 0
-        local indentStyle = Iif(not bFormatEmpty and editor:LineLength(line) - EOL_LENGTH == editor.LineIndentation[line], IS_ZEROINDENT, IS_NORMAL)
+        local indentStyle = Iif(not bFormatEmpty and editor:LineLength(line) - Iif(editor.LineCount == line + 1, 0, EOL_LENGTH) == editor.LineIndentation[line], IS_ZEROINDENT, IS_NORMAL)
         local lvl, deltaFold = IndLevel(line)
-        local styleBefore = editor.StyleAt[editor:PositionFromLine(line) - 1]
-        local styleStart = editor.StyleAt[editor.LineIndentPosition[line]]
+        local styleBefore = editor:ustyle(editor:PositionFromLine(line) - 1)
+        local styleStart = editor:ustyle(editor.LineIndentPosition[line])
 
         if CurMap.zeroStyle and (CurMap.zeroStyle[styleBefore] == S_LINE or CurMap.zeroStyle[styleStart] == S_WRD) then
             return delta, deltaNext, IS_ZEROINDENT, lvlPr
@@ -565,13 +572,11 @@ local function FormatLinesDEF(lineStart, lineEnd, bFormatEmpty)
         end
 
         if not isCalc then delta = (lvl - lvlPr) * editor.Indent end
-
         if CurMap.correctDelta  then  --[[and indentStyle == IS_NORMAL]]
             local is
             delta, deltaNext, is = CurMap.correctDelta(line, delta, deltaNext)
             indentStyle = is or indentStyle
         end
-
         return delta, deltaNext, indentStyle, lvl
     end
 
@@ -586,15 +591,17 @@ local function FormatLinesDEF(lineStart, lineEnd, bFormatEmpty)
         else
             prevFold = 0
         end
-        delta, deltaNext, indentStyle, prevFold = Delta4LineDEF(line, prevFold)
-        if indentStyle == IS_STICKYHDR then
-            deltaNext0 = deltaNext
-        elseif indentStyle == IS_NORMAL or indentStyle == IS_ABS then
-            prevInd = editor.LineIndentation[line] + (deltaNext0 or deltaNext)
-            break
+        if editor.LineIndentation[line] < editor:LineLength(line) - EOL_LENGTH then
+            delta, deltaNext, indentStyle, prevFold = Delta4LineDEF(line, prevFold)
+            if indentStyle == IS_STICKYHDR then
+                deltaNext0 = deltaNext
+            elseif indentStyle == IS_NORMAL or indentStyle == IS_ABS then
+                prevInd = editor.LineIndentation[line] + (deltaNext0 or deltaNext)
+                break
+            end
         end
     end
-    --print(prevInd, deltaNext, indentStyle)
+--print(lineStart, delta, deltaNext, indentStyle, prevFold, prevInd)
 
     editor:BeginUndoAction()
     for line = lineStart, lineEnd do
@@ -611,7 +618,7 @@ local function FormatLinesDEF(lineStart, lineEnd, bFormatEmpty)
         if indentStyle == IS_ABS then indentStyle = IS_NORMAL; prevInd = 0 end
 
         local curInd = prevInd + delta
-
+     --print(line, delta, deltaNext, indentStyle, prevFold, prevInd, delta)
         if indentStyle == IS_NORMAL then
             prevDelta = curInd - editor.LineIndentation[line]
             editor.LineIndentation[line] = curInd
@@ -628,12 +635,11 @@ end
 
 local function Style1stWordEvent(pos)
     if CurMap.check1stWrdStyle and CurMap.check1stWrdStyle.check() then
-        local s1 = editor.StyleAt[pos - 2] --editor.StyleAt[editor.LineIndentPosition[curLine]]
+        local s1 = editor:ustyle(pos - 2) --editor.StyleAt[editor.LineIndentPosition[curLine]]
         local tmr = iup.timer{time = 1, action_cb = (function(h)
             local pos = editor.SelectionStart
             h.run = 'NO'
-            local s2 = editor.StyleAt[pos - 2] --editor.StyleAt[editor.LineIndentPosition[curLine]]
-
+            local s2 = editor:ustyle(pos - 1) --editor.StyleAt[editor.LineIndentPosition[curLine]]
             if s1 ~= s2 and (s1 == CurMap.check1stWrdStyle.style or s2 == CurMap.check1stWrdStyle.style) then
                 local _, delta = IndLevel(curLine)
                 if delta <= 0 then FormatLinesDEF(curLine, curLine) end
@@ -697,7 +703,7 @@ end)
 
 AddEventHandler("Format_Lines", function(s, e)
     if not CurMap or CurMap.empty then return end
-    if (_G.iuprops['autoformat.indent.force'] or 1) ~= 1 or (_G.iuprops['autoformat.indent'] or 0) ~= 1  then return end
+    if (_G.iuprops['autoformat.indent'] or 0) ~= 1 or (_G.iuprops['autoformat.on.insert'] or 0) ~= 1  then return end
 
     local l = editor.FirstVisibleLine
     editor.FirstVisibleLine = e
@@ -706,7 +712,7 @@ AddEventHandler("Format_Lines", function(s, e)
 end)
 
 local function IndentBlockUp()
-    if (_G.iuprops['autoformat.indent.force'] or 1) ~= 1 or (_G.iuprops['autoformat.indent'] or 0) ~= 1  then return end
+    if (_G.iuprops['autoformat.indent'] or 0) ~= 1  then return end
     local current_pos = editor.CurrentPos
     local cur_line = editor:LineFromPosition(current_pos)
     local curFoldLevel = editor.FoldLevel[cur_line]
@@ -724,6 +730,7 @@ local function IndentBlockUp()
 end
 
 AddEventHandler("OnCurrentLineFold", function(line, foldLevelPrev, foldLevelNow)
+    if (_G.iuprops['autoformat.indent.force'] or 1) ~= 1 or (_G.iuprops['autoformat.indent'] or 0) ~= 1 then return end
     if not CurMap or CurMap.empty then return end
     if line == editor:LineFromPosition(editor.SelectionStart) and editor.LineEndPosition[line] > editor.LineIndentPosition[line] then
         if (foldLevelPrev & SC_FOLDLEVELHEADERFLAG == 0 and foldLevelNow & SC_FOLDLEVELHEADERFLAG == 0 and
@@ -751,4 +758,17 @@ AddEventHandler("Format_Block", function()
         editor.FirstVisibleLine = l
     end
     FormatLinesDEF(math.min(ls, le), math.max(ls, le))
+end)
+AddEventHandler("Format_Buffers", function()
+    if CORE.Alarm4All(_TM'Format_Buffers') then return end
+    DoForBuffers_Stack(function()
+        OnSwitchFile_local()
+        print(props['FileNameExt'])
+        if not CurMap or CurMap.empty then return end
+        print(props['FileNameExt'])
+        local l = editor.FirstVisibleLine
+        editor.FirstVisibleLine = editor.LineCount
+        editor.FirstVisibleLine = l
+        FormatLinesDEF(1, editor.LineCount)
+    end)
 end)

@@ -175,13 +175,13 @@ local function Latex_Init(h)
     AddEventHandler("OnUpdateUI", function(bModified, bSelection, flag)
         if editor_LexerLanguage() == 'script_wiki' then
             if bSelection then
-                if editor.StyleAt[editor.CurrentPos] == 22 then
+                if editor:ustyle(editor.CurrentPos) == 22 then
                     local s = editor.CurrentPos
                     local e = s
-                    while s > 0 and editor.StyleAt[s - 1] == 22 do s = s - 1 end
+                    while s > 0 and editor:ustyle(s - 1) == 22 do s = s - 1 end
                     if s == fstart and bModified == 0 then return end
                     fstart = s
-                    while e <= editor.Length and editor.StyleAt[e + 1] == 22 do e = e + 1 end
+                    while e <= editor.Length and editor:ustyle(e + 1) == 22 do e = e + 1 end
                     fend = e
                     LATEX.ShowFormula(editor:textrange(s, e))
                 else

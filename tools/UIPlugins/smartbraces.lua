@@ -224,10 +224,19 @@ local function Init()
             -- находим парный символ
             local braceOpen, braceClose = GetBraces(char)
             if ( braceOpen ~= '' and braceClose ~= '' ) then
+                BlockEventHandler"OnCurrentLineFold"
+                editor:BeginUndoAction()
+                local tmr = iup.timer{time = 1, run = 'NO', action_cb = function(h)
+                    h.run = 'NO'
+                    UnBlockEventHandler"OnCurrentLineFold"
+                    editor:EndUndoAction()
+                end}
+                tmr.run = 'YES'
                 -- проверяем выделен ли у нас какой либо текст
                 if ( isSelection == true ) then
                     -- делаем обработку по автозакрытию текста скобками
-                    return BlockBraces( braceOpen, braceClose )
+                    BlockBraces( braceOpen, braceClose )
+                    return true
                 else
                     -- если следующий символ закрывающаяся скобка
                     -- и мы ее вводим, то ввод проглатываем

@@ -38,6 +38,7 @@ local function Func_Init(h)
         lane_h = nil
     end}
     local mark = CORE.InidcFactory('Function.GoToDef', _T'Link for Go To Definition', INDIC_COMPOSITIONTHICK, 255<<16, 0)
+    local mark2 = CORE.InidcFactory('Function.GoToDef2', _T'Link for Go To Definition 2', INDIC_TEXTFORE, 255 << 16, 0)
 
     local function Functions_GetNames()
         if not lane_h then return end
@@ -701,6 +702,7 @@ local function Func_Init(h)
 
     local function releaseLink()
         EditorClearMarks(mark)
+        EditorClearMarks(mark2)
         editor:CallTipCancel()
         editor.MouseDwellTime = linked_info.period
         linked_info = nil
@@ -729,6 +731,7 @@ local function Func_Init(h)
                 if func then
                     pos = p or pos; word = w or word
                     EditorMarkText(pos, #word, mark)
+                    EditorMarkText(pos, #word, mark2)
                     if _G.iuprops['sidebar.functions.middleonlylink'] == 1 then
                         local ct = _T"MIDDLE click to follow the link"
                         if tonumber(props["editor.unicode.mode"]) == IDM_ENCODING_DEFAULT then ct = ct:from_utf8() end
@@ -782,6 +785,7 @@ local function Func_Init(h)
             end
             --editor.MultipleSelection = false
             EditorClearMarks(mark)
+            EditorClearMarks(mark2)
             editor:CallTipCancel()
             if not linked_info.scip then
                 linked_info.func()
@@ -793,6 +797,7 @@ local function Func_Init(h)
     AddEventHandler("OnCallTipClick", function(pos)
         if linked_info then
             EditorClearMarks(mark)
+            EditorClearMarks(mark2)
             editor:CallTipCancel()
             editor.Cursor = -1
             -- editor.MultipleSelection = true
@@ -1060,7 +1065,7 @@ local function Func_Init(h)
     return {   -- iup.vbox{   };
 
         handle = bgbox;
-        OnSwitchFile = function() EditorClearMarks(mark)  OnSwitch() end;
+        OnSwitchFile = function() EditorClearMarks(mark) EditorClearMarks(mark2) OnSwitch() end;
         OnSave = OnMySave;
         OnOpen = OnSwitch;
         OnUpdateUI = _OnUpdateUI;
